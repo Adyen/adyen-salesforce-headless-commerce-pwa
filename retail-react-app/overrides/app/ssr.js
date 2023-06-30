@@ -12,6 +12,9 @@ const {getRuntime} = require('@salesforce/pwa-kit-runtime/ssr/server/express')
 const {isRemote} = require('@salesforce/pwa-kit-runtime/utils/ssr-server')
 const {getConfig} = require('@salesforce/pwa-kit-runtime/utils/ssr-config')
 const helmet = require('helmet')
+const express = require('express');
+const bodyParser = require('body-parser');
+const {Client, Config, CheckoutAPI} = require('@adyen/api-library');
 
 const options = {
     // The build directory (an absolute path)
@@ -34,6 +37,35 @@ const options = {
 const runtime = getRuntime()
 
 const {handler} = runtime.createHandler(options, (app) => {
+    app.use(bodyParser.json());
+
+    const config = new Config();
+    config.apiKey = //REPLACE With YOUR API KEY
+    const client = new Client({ config });
+    client.setEnvironment("TEST");
+    const checkout = new CheckoutAPI(client);
+
+    app.post("/sessions", async (req, res) => {
+      try {
+        const orderRef = 'ref1'; //todo: Replace with a proper value
+        const amount = req.body?.amount;
+
+        const response = await checkout.sessions({
+          countryCode: "NL",
+          amount: amount,
+          reference: orderRef,
+          merchantAccount: //todo: REPLACE With YOUR MERCHANT ACCOUNT
+          returnUrl: //todo: REPLACE with a proper value  // required for 3ds2 redirect flow
+        });
+        console.log(JSON.stringify(response));
+
+        res.json([response, orderRef]); // sending a tuple with orderRef as well to inform about the unique order reference
+      } catch (err) {
+        console.error(`Error: ${err.message}, error code: ${err.errorCode}`);
+        res.status(err.statusCode).json(err.message);
+      }
+    });
+
     // Set HTTP security headers
     app.use(
         helmet({
@@ -57,10 +89,12 @@ const {handler} = runtime.createHandler(options, (app) => {
         res.send()
     })
     app.get('/robots.txt', runtime.serveStaticFile('static/robots.txt'))
+
     app.get('/favicon.ico', runtime.serveStaticFile('static/ico/favicon.ico'))
 
     app.get('/worker.js(.map)?', runtime.serveServiceWorker)
     app.get('*', runtime.render)
+
 })
 // SSR requires that we export a single handler function called 'get', that
 // supports AWS use of the server that we created above.

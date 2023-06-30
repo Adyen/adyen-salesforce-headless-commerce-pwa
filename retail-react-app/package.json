@@ -48,5 +48,9 @@
     "iOS >= 9.0",
     "Android >= 4.4.4",
     "last 4 ChromeAndroid versions"
-  ]
+  ],
+  "dependencies": {
+    "@adyen/adyen-web": "^5.46.0",
+    "@adyen/api-library": "^13.1.3"
+  }
 }
