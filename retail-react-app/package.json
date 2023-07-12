@@ -48,5 +48,8 @@
     "iOS >= 9.0",
     "Android >= 4.4.4",
     "last 4 ChromeAndroid versions"
-  ]
+  ],
+  "dependencies": {
+    "dotenv": "^16.3.1"
+  }
 }
