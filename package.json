@@ -11,7 +11,10 @@
     "overridesDir": "overrides"
   },
   "devDependencies": {
-    "@salesforce/retail-react-app": "1.0.0"
+    "@salesforce/retail-react-app": "1.0.0",
+    "css-loader": "^6.8.1",
+    "dotenv": "^16.3.1",
+    "style-loader": "^3.3.3"
   },
   "scripts": {
     "analyze-build": "cross-env MOBIFY_ANALYZE=true npm run build",

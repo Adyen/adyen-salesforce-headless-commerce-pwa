@@ -6,6 +6,7 @@
  */
 /* eslint-disable @typescript-eslint/no-var-requires */
 const sites = require('./sites.js')
+require('dotenv').config()
 module.exports = {
     app: {
         // Customize how your 'site' and 'locale' are displayed in the url.
@@ -18,7 +19,7 @@ module.exports = {
             // showDefaults: true
         },
         // The default site for your app. This value will be used when a siteRef could not be determined from the url
-        defaultSite: 'RefArch',
+        defaultSite: process.env.COMMERCE_API_DEFAULT_SITE,
         // Provide aliases for your sites. These will be used in place of your site id when generating paths throughout the application.
         // siteAliases: {
         //     RefArch: 'us'
@@ -29,10 +30,10 @@ module.exports = {
         commerceAPI: {
             proxyPath: '/mobify/proxy/api',
             parameters: {
-                clientId: '9883c616-95d7-4d64-85b9-d0b47ab147aa',
-                organizationId: 'f_ecom_zzft_004',
-                shortCode: 'kv7kzm78',
-                siteId: 'RefArch'
+                clientId: process.env.COMMERCE_API_CLIENT_ID,
+                organizationId: process.env.COMMERCE_API_ORG_ID,
+                shortCode: process.env.COMMERCE_API_SHORT_CODE,
+                siteId: process.env.COMMERCE_API_SITE_ID
             }
         },
         // Einstein api config
@@ -69,11 +70,11 @@ module.exports = {
         ssrFunctionNodeVersion: '16.x',
         proxyConfigs: [
             {
-                host: 'kv7kzm78.api.commercecloud.salesforce.com',
+                host: process.env.SCAPI_URL,
                 path: 'api'
             },
             {
-                host: 'zzft-004.sandbox.us03.dx.commercecloud.salesforce.com',
+                host: process.env.OCAPI_URL,
                 path: 'ocapi'
             }
         ]

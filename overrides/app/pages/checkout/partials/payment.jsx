@@ -28,12 +28,11 @@ import AddressDisplay from '@salesforce/retail-react-app/app/components/address-
 import {PromoCode, usePromoCode} from '@salesforce/retail-react-app/app/components/promo-code'
 import {API_ERROR_MESSAGE} from '@salesforce/retail-react-app/app/constants'
 import AdyenCheckout from "@adyen/adyen-web";
-
+import '@adyen/adyen-web/dist/adyen.css';
 
 const Payment = () => {
     const [payment, setPayment] = useState({});
     const [orderRef, setOrderRef] = useState("");
-    const [clientKey, setClientKey] = useState("test_4DNK7M2W2NCKDAUZZBPMEXRX6IM6FU34");
     const paymentContainer = useRef(null);
 
     const {formatMessage} = useIntl()
@@ -148,6 +147,9 @@ const Payment = () => {
       }
 
         useEffect(() => {
+            if (step !== STEPS.PAYMENT) {
+                return;
+              }
               const basketAmount = {value: basket?.orderTotal, currency: basket?.currency};
               fetch(`/sessions`, {
                 method: "POST",
@@ -167,7 +169,7 @@ const Payment = () => {
                   })
                 }
               })
-              }, [basket])
+              }, [step, basket])
 
            useEffect(() => {
               if (payment?.error) {
@@ -182,8 +184,8 @@ const Payment = () => {
               }
               const createCheckout = async () => {
                 const checkout = await AdyenCheckout({
-                  environment: 'test',
-                  clientKey: //todo: replace with your client key
+                  environment: payment.ADYEN_ENVIRONMENT,
+                  clientKey: payment.ADYEN_CLIENT_KEY,
                   showPayButton: true,
                   session: {
                     id: payment.id,
@@ -221,7 +223,8 @@ const Payment = () => {
             editing={step === STEPS.PAYMENT}
             isLoading={
                 paymentMethodForm.formState.isSubmitting ||
-                billingAddressForm.formState.isSubmitting
+                billingAddressForm.formState.isSubmitting ||
+                !payment.sessionData
             }
             disabled={appliedPayment == null}
             onEdit={() => goToStep(STEPS.PAYMENT)}
@@ -233,7 +236,7 @@ const Payment = () => {
 
                 <Stack spacing={6}>
                 <div ref={paymentContainer} className="payment"></div>
-                    {!appliedPayment?.paymentCard ? (
+                    {/* {!appliedPayment?.paymentCard ? (
                         <PaymentForm form={paymentMethodForm} onSubmit={onPaymentSubmit} />
                     ) : (
                         <Stack spacing={3}>
@@ -258,7 +261,7 @@ const Payment = () => {
                                 </Button>
                             </Stack>
                         </Stack>
-                    )}
+                    )} */}
 
                     <Divider borderColor="gray.100" />
 
