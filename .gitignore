@@ -9,5 +9,4 @@ screenshots/
 playwright-report/
 Vagrantfile
 .env
-.env.*
 /build/
