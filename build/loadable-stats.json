@@ -1,18 +1,14 @@
 {
   "name": "client",
-  "hash": "5cb5fa24e2c9c246aecd",
+  "hash": "5cb5cff720c5ae7ea4d4",
   "publicPath": "/mobify/bundle/development/",
   "outputPath": "/Users/shani/Developer/adyen-salesforce-headless-commerce-pwa/build",
   "assetsByChunkName": {
     "main": [
-      "main.js",
-      "main.406d665cd9cd8bff383a.hot-update.js"
+      "main.js"
     ],
     "pages-home": [
       "pages-home.js"
-    ],
-    "pages-my-new-route": [
-      "pages-my-new-route.js"
     ],
     "pages-login": [
       "pages-login.js"
@@ -30,8 +26,7 @@
       "pages-cart.js"
     ],
     "pages-checkout": [
-      "pages-checkout.js",
-      "pages-checkout.406d665cd9cd8bff383a.hot-update.js"
+      "pages-checkout.js"
     ],
     "pages-checkout-confirmation": [
       "pages-checkout-confirmation.js"
@@ -86,7 +81,7 @@
     {
       "type": "asset",
       "name": "main.js",
-      "size": 842094,
+      "size": 840852,
       "emitted": false,
       "comparedForEmit": false,
       "cached": true,
@@ -346,7 +341,7 @@
     {
       "type": "asset",
       "name": "pages-checkout.js",
-      "size": 44727,
+      "size": 44513,
       "emitted": false,
       "comparedForEmit": false,
       "cached": true,
@@ -467,33 +462,6 @@
       "filteredRelated": 1,
       "chunks": [
         "pages-product-detail"
-      ],
-      "auxiliaryChunks": []
-    },
-    {
-      "type": "asset",
-      "name": "pages-checkout.406d665cd9cd8bff383a.hot-update.js",
-      "size": 25131,
-      "emitted": false,
-      "comparedForEmit": false,
-      "cached": true,
-      "info": {
-        "hotModuleReplacement": true,
-        "immutable": true,
-        "fullhash": "406d665cd9cd8bff383a",
-        "related": {
-          "sourceMap": "pages-checkout.406d665cd9cd8bff383a.hot-update.js.map"
-        }
-      },
-      "chunkNames": [
-        "pages-checkout"
-      ],
-      "chunkIdHints": [],
-      "auxiliaryChunkNames": [],
-      "auxiliaryChunkIdHints": [],
-      "filteredRelated": 1,
-      "chunks": [
-        "pages-checkout"
       ],
       "auxiliaryChunks": []
     },
@@ -624,31 +592,6 @@
     },
     {
       "type": "asset",
-      "name": "pages-my-new-route.js",
-      "size": 2742,
-      "emitted": false,
-      "comparedForEmit": false,
-      "cached": true,
-      "info": {
-        "javascriptModule": false,
-        "related": {
-          "sourceMap": "pages-my-new-route.js.map"
-        }
-      },
-      "chunkNames": [
-        "pages-my-new-route"
-      ],
-      "chunkIdHints": [],
-      "auxiliaryChunkNames": [],
-      "auxiliaryChunkIdHints": [],
-      "filteredRelated": 1,
-      "chunks": [
-        "pages-my-new-route"
-      ],
-      "auxiliaryChunks": []
-    },
-    {
-      "type": "asset",
       "name": "pages-login-redirect.js",
       "size": 2018,
       "emitted": false,
@@ -674,33 +617,6 @@
     },
     {
       "type": "asset",
-      "name": "main.406d665cd9cd8bff383a.hot-update.js",
-      "size": 357,
-      "emitted": false,
-      "comparedForEmit": false,
-      "cached": true,
-      "info": {
-        "hotModuleReplacement": true,
-        "immutable": true,
-        "fullhash": "406d665cd9cd8bff383a",
-        "related": {
-          "sourceMap": "main.406d665cd9cd8bff383a.hot-update.js.map"
-        }
-      },
-      "chunkNames": [
-        "main"
-      ],
-      "chunkIdHints": [],
-      "auxiliaryChunkNames": [],
-      "auxiliaryChunkIdHints": [],
-      "filteredRelated": 1,
-      "chunks": [
-        "main"
-      ],
-      "auxiliaryChunks": []
-    },
-    {
-      "type": "asset",
       "name": "_1242.js",
       "size": 284,
       "emitted": false,
@@ -721,25 +637,6 @@
         "_1242"
       ],
       "auxiliaryChunks": []
-    },
-    {
-      "type": "asset",
-      "name": "main.406d665cd9cd8bff383a.hot-update.json",
-      "size": 45,
-      "emitted": false,
-      "comparedForEmit": false,
-      "cached": true,
-      "info": {
-        "hotModuleReplacement": true,
-        "immutable": true,
-        "fullhash": "406d665cd9cd8bff383a"
-      },
-      "chunkNames": [],
-      "chunkIdHints": [],
-      "auxiliaryChunkNames": [],
-      "auxiliaryChunkIdHints": [],
-      "chunks": [],
-      "auxiliaryChunks": []
     }
   ],
   "namedChunkGroups": {
@@ -755,14 +652,11 @@
         },
         {
           "name": "main.js"
-        },
-        {
-          "name": "main.406d665cd9cd8bff383a.hot-update.js"
         }
       ],
       "filteredAssets": 0,
       "assetsSize": null,
-      "filteredAuxiliaryAssets": 3,
+      "filteredAuxiliaryAssets": 2,
       "auxiliaryAssetsSize": null,
       "children": {},
       "childAssets": {}
@@ -788,23 +682,6 @@
       "filteredAssets": 0,
       "assetsSize": null,
       "filteredAuxiliaryAssets": 3,
-      "auxiliaryAssetsSize": null,
-      "children": {},
-      "childAssets": {}
-    },
-    "pages-my-new-route": {
-      "name": "pages-my-new-route",
-      "chunks": [
-        "pages-my-new-route"
-      ],
-      "assets": [
-        {
-          "name": "pages-my-new-route.js"
-        }
-      ],
-      "filteredAssets": 0,
-      "assetsSize": null,
-      "filteredAuxiliaryAssets": 1,
       "auxiliaryAssetsSize": null,
       "children": {},
       "childAssets": {}
@@ -970,14 +847,11 @@
         },
         {
           "name": "pages-checkout.js"
-        },
-        {
-          "name": "pages-checkout.406d665cd9cd8bff383a.hot-update.js"
         }
       ],
       "filteredAssets": 0,
       "assetsSize": null,
-      "filteredAuxiliaryAssets": 7,
+      "filteredAuxiliaryAssets": 6,
       "auxiliaryAssetsSize": null,
       "children": {},
       "childAssets": {}
@@ -1126,8 +1000,7 @@
     {
       "id": "main",
       "files": [
-        "main.js",
-        "main.406d665cd9cd8bff383a.hot-update.js"
+        "main.js"
       ]
     },
     {
@@ -1140,12 +1013,6 @@
       "id": "pages-home",
       "files": [
         "pages-home.js"
-      ]
-    },
-    {
-      "id": "pages-my-new-route",
-      "files": [
-        "pages-my-new-route.js"
       ]
     },
     {
@@ -1181,8 +1048,7 @@
     {
       "id": "pages-checkout",
       "files": [
-        "pages-checkout.js",
-        "pages-checkout.406d665cd9cd8bff383a.hot-update.js"
+        "pages-checkout.js"
       ]
     },
     {

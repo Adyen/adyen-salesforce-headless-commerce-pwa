@@ -11,6 +11,7 @@ const path = require('path')
 const {getRuntime} = require('@salesforce/pwa-kit-runtime/ssr/server/express')
 const {isRemote} = require('@salesforce/pwa-kit-runtime/utils/ssr-server')
 const {getConfig} = require('@salesforce/pwa-kit-runtime/utils/ssr-config')
+const {ShopperCustomers} = require('commerce-sdk-isomorphic')
 const helmet = require('helmet')
 const express = require('express')
 const bodyParser = require('body-parser')
@@ -48,13 +49,25 @@ const {handler} = runtime.createHandler(options, (app) => {
 
     app.post('/sessions', async (req, res) => {
         try {
-            const orderRef = 'ref1' //todo: Replace with a proper value
-            const amount = req.body?.amount
+            const {app: appConfig} = getConfig()
+            const shopperCustomers = new ShopperCustomers({
+                ...appConfig.commerceAPI,
+                headers: {authorization: req.headers.authorization}
+            })
+
+            const {baskets} = await shopperCustomers.getCustomerBaskets({
+                parameters: {
+                    customerId: req.headers.customerid
+                }
+            })
 
             const response = await checkout.sessions({
                 countryCode: 'US',
-                amount: amount,
-                reference: orderRef,
+                amount: {
+                    value: baskets[0].orderTotal,
+                    currency: baskets[0].currency
+                },
+                reference: baskets[0].basketId, // todo: check if its valid to pass basketID
                 merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT, //todo: REPLACE With YOUR MERCHANT ACCOUNT
                 returnUrl: process.env.HOST_URL //todo: REPLACE with a proper value  // required for 3ds2 redirect flow
             })
@@ -64,8 +77,7 @@ const {handler} = runtime.createHandler(options, (app) => {
                     ...response,
                     ADYEN_CLIENT_KEY: process.env.ADYEN_CLIENT_KEY,
                     ADYEN_ENVIRONMENT: process.env.ADYEN_ENVIRONMENT
-                },
-                orderRef
+                }
             ]) // sending a tuple with orderRef as well to inform about the unique order reference
         } catch (err) {
             res.status(err.statusCode).json(err.message)

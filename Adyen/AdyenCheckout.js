@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react'
-import {useAccessToken} from '@salesforce/commerce-sdk-react'
+import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 import {useCurrentCustomer} from '@salesforce/retail-react-app/app/hooks/use-current-customer'
 import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 import {useCheckout} from '@salesforce/retail-react-app/app/pages/checkout/util/checkout-context'
@@ -10,30 +10,26 @@ const AdyenCheckoutComponent = () => {
     const {data: basket} = useCurrentBasket()
     const {step, STEPS} = useCheckout()
     const {getTokenWhenReady} = useAccessToken()
+    const customerId = useCustomerId()
     const [payment, setPayment] = useState({})
-    const [orderRef, setOrderRef] = useState('')
     const paymentContainer = useRef(null)
     useEffect(() => {
         const fetchSession = async () => {
             if (step === STEPS.PAYMENT) {
                 const token = await getTokenWhenReady()
-                const basketAmount = {value: basket?.orderTotal, currency: basket?.currency}
                 fetch(`/sessions`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        authorization: `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        amount: basketAmount
-                    })
+                        authorization: `Bearer ${token}`,
+                        customerid: customerId
+                    }
                 }).then((res) => {
                     if (res.status >= 300) {
                         setPayment({error: res})
                     } else {
                         res.json().then((data) => {
                             setPayment(data[0])
-                            setOrderRef(data[1])
                             createCheckout(data[0])
                         })
                     }
