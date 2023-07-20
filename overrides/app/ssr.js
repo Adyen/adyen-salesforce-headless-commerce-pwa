@@ -58,7 +58,6 @@ const {handler} = runtime.createHandler(options, (app) => {
                 merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT, //todo: REPLACE With YOUR MERCHANT ACCOUNT
                 returnUrl: process.env.HOST_URL //todo: REPLACE with a proper value  // required for 3ds2 redirect flow
             })
-            console.log(JSON.stringify(response))
 
             res.json([
                 {
@@ -69,7 +68,6 @@ const {handler} = runtime.createHandler(options, (app) => {
                 orderRef
             ]) // sending a tuple with orderRef as well to inform about the unique order reference
         } catch (err) {
-            console.error(`Error: ${err.message}, error code: ${err.errorCode}`)
             res.status(err.statusCode).json(err.message)
         }
     })
