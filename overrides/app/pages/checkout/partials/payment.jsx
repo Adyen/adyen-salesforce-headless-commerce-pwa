@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import React, {useState, useEffect, useRef} from 'react'
+import React, {useState} from 'react'
 import PropTypes from 'prop-types'
 import {FormattedMessage, useIntl} from 'react-intl'
 import {Box, Button, Checkbox, Container, Heading, Stack, Text, Divider} from '@chakra-ui/react'
@@ -22,19 +22,14 @@ import {
     ToggleCardEdit,
     ToggleCardSummary
 } from '@salesforce/retail-react-app/app/components/toggle-card'
-import PaymentForm from '@salesforce/retail-react-app/app/pages/checkout/partials/payment-form'
+// import PaymentForm from '@salesforce/retail-react-app/app/pages/checkout/partials/payment-form'
 import ShippingAddressSelection from '@salesforce/retail-react-app/app/pages/checkout/partials/shipping-address-selection'
 import AddressDisplay from '@salesforce/retail-react-app/app/components/address-display'
 import {PromoCode, usePromoCode} from '@salesforce/retail-react-app/app/components/promo-code'
 import {API_ERROR_MESSAGE} from '@salesforce/retail-react-app/app/constants'
-import AdyenCheckout from "@adyen/adyen-web";
-import '@adyen/adyen-web/dist/adyen.css';
+import AdyenCheckout from '../../../../../Adyen/AdyenCheckout'
 
 const Payment = () => {
-    const [payment, setPayment] = useState({});
-    const [orderRef, setOrderRef] = useState("");
-    const paymentContainer = useRef(null);
-
     const {formatMessage} = useIntl()
     const {data: basket} = useCurrentBasket()
     const selectedShippingAddress = basket?.shipments && basket?.shipments[0]?.shippingAddress
@@ -131,91 +126,6 @@ const Payment = () => {
         goToNextStep()
     })
 
-
-    const getRedirectUrl = (resultCode) => {
-        switch (resultCode) {
-          case "Authorised":
-            return "/status/success";
-          case "Pending":
-          case "Received":
-            return "/status/pending";
-          case "Refused":
-            return "/status/failed";
-          default:
-            return "/status/error";
-        }
-      }
-
-        useEffect(() => {
-            if (step !== STEPS.PAYMENT) {
-                return;
-              }
-              const basketAmount = {value: basket?.orderTotal, currency: basket?.currency};
-              fetch(`/sessions`, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                  body: JSON.stringify({
-                    amount: basketAmount,
-                  }),
-              }).then(res => {
-                if (res.status >= 300) {
-                  setPayment({error: res});
-                } else {
-                  res.json().then(data => {
-                    setPayment(data[0]);
-                    setOrderRef(data[1]);
-                  })
-                }
-              })
-              }, [step, basket])
-
-           useEffect(() => {
-              if (payment?.error) {
-                // navigate(`/status/error?reason=${error}`, { replace: true });
-                console.log(payment?.error)
-              }
-            }, [payment])
-
-            useEffect(() => {
-              if (!payment.sessionData || !orderRef || !paymentContainer.current) {
-                return;
-              }
-              const createCheckout = async () => {
-                const checkout = await AdyenCheckout({
-                  environment: payment.ADYEN_ENVIRONMENT,
-                  clientKey: payment.ADYEN_CLIENT_KEY,
-                  showPayButton: true,
-                  session: {
-                    id: payment.id,
-                    sessionData: payment.sessionData
-                  },
-                  paymentMethodsConfiguration: {
-                    card: {
-                      hasHolderName: true,
-                      holderNameRequired: true,
-                      billingAddressRequired: true
-                    }
-                  },
-                  onPaymentCompleted: (response, _component) =>
-                    // navigate(getRedirectUrl(response.resultCode), { replace: true }),
-                    console.log(response.resultCode),
-                  onError: (error, _component) => {
-                    //navigate(`/status/error?reason=${error.message}`, { replace: true });
-                    console.log(error);
-                  },
-                });
-                
-
-                if (paymentContainer.current) {
-                  checkout.create('dropin').mount(paymentContainer.current);
-                }
-              }
-
-              createCheckout();
-            }, [payment, orderRef])
-
     return (
         <ToggleCard
             id="step-3"
@@ -223,8 +133,7 @@ const Payment = () => {
             editing={step === STEPS.PAYMENT}
             isLoading={
                 paymentMethodForm.formState.isSubmitting ||
-                billingAddressForm.formState.isSubmitting ||
-                !payment.sessionData
+                billingAddressForm.formState.isSubmitting
             }
             disabled={appliedPayment == null}
             onEdit={() => goToStep(STEPS.PAYMENT)}
@@ -235,7 +144,7 @@ const Payment = () => {
                 </Box>
 
                 <Stack spacing={6}>
-                <div ref={paymentContainer} className="payment"></div>
+                    <AdyenCheckout></AdyenCheckout>
                     {/* {!appliedPayment?.paymentCard ? (
                         <PaymentForm form={paymentMethodForm} onSubmit={onPaymentSubmit} />
                     ) : (

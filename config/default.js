@@ -34,7 +34,7 @@ module.exports = {
                 clientId: process.env.COMMERCE_API_CLIENT_ID,
                 organizationId: process.env.COMMERCE_API_ORG_ID,
                 shortCode: process.env.COMMERCE_API_SHORT_CODE,
-                siteId: process.env.COMMERCE_API_SITE_ID,
+                siteId: process.env.COMMERCE_API_SITE_ID
             }
         },
         // Einstein api config
