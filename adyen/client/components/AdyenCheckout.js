@@ -17,7 +17,7 @@ const AdyenCheckoutComponent = () => {
         const fetchSession = async () => {
             if (step === STEPS.PAYMENT) {
                 const token = await getTokenWhenReady()
-                fetch(`/sessions`, {
+                fetch(`/api/adyen/sessions`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -50,7 +50,7 @@ const AdyenCheckoutComponent = () => {
         const checkout = await AdyenCheckout({
             environment: payment.ADYEN_ENVIRONMENT,
             clientKey: payment.ADYEN_CLIENT_KEY,
-            showPayButton: true,
+            showPayButton: false,
             session: {
                 id: payment.id,
                 sessionData: payment.sessionData
