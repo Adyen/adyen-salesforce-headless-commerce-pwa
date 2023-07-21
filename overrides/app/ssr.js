@@ -13,7 +13,7 @@ const {isRemote} = require('@salesforce/pwa-kit-runtime/utils/ssr-server')
 const {getConfig} = require('@salesforce/pwa-kit-runtime/utils/ssr-config')
 const helmet = require('helmet')
 const bodyParser = require('body-parser')
-const SessionsController = require('../../adyen/controllers/sessions.controller')
+const SessionsController = require('../../adyen/controllers/sessions')
 require('dotenv').config()
 
 const options = {

@@ -5,7 +5,9 @@ import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-curre
 import {useCheckout} from '@salesforce/retail-react-app/app/pages/checkout/util/checkout-context'
 import AdyenCheckout from '@adyen/adyen-web'
 import '@adyen/adyen-web/dist/adyen.css'
-const AdyenCheckoutComponent = () => {
+import PropTypes from 'prop-types'
+
+const AdyenCheckoutComponent = ({onChange}) => {
     const {data: customer} = useCurrentCustomer()
     const {data: basket} = useCurrentBasket()
     const {step, STEPS} = useCheckout()
@@ -13,6 +15,7 @@ const AdyenCheckoutComponent = () => {
     const customerId = useCustomerId()
     const [payment, setPayment] = useState({})
     const paymentContainer = useRef(null)
+
     useEffect(() => {
         const fetchSession = async () => {
             if (step === STEPS.PAYMENT) {
@@ -59,7 +62,12 @@ const AdyenCheckoutComponent = () => {
                 card: {
                     hasHolderName: true,
                     holderNameRequired: true,
-                    billingAddressRequired: true
+                    billingAddressRequired: false
+                }
+            },
+            onChange: (state) => {
+                if (state.isValid) {
+                    onChange(state.data)
                 }
             },
             onPaymentCompleted: (response, _component) =>
@@ -78,5 +86,7 @@ const AdyenCheckoutComponent = () => {
 
     return <div ref={paymentContainer} className="payment"></div>
 }
+
+AdyenCheckoutComponent.propTypes = {onChange: PropTypes.func}
 
 export default AdyenCheckoutComponent
