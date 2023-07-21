@@ -27,7 +27,7 @@ import ShippingAddressSelection from '@salesforce/retail-react-app/app/pages/che
 import AddressDisplay from '@salesforce/retail-react-app/app/components/address-display'
 import {PromoCode, usePromoCode} from '@salesforce/retail-react-app/app/components/promo-code'
 import {API_ERROR_MESSAGE} from '@salesforce/retail-react-app/app/constants'
-import AdyenCheckout from '../../../../../Adyen/AdyenCheckout'
+import AdyenCheckout from '../../../../../adyen/client/components/AdyenCheckout'
 
 const Payment = () => {
     const {formatMessage} = useIntl()
@@ -144,33 +144,7 @@ const Payment = () => {
                 </Box>
 
                 <Stack spacing={6}>
-                    <AdyenCheckout></AdyenCheckout>
-                    {/* {!appliedPayment?.paymentCard ? (
-                        <PaymentForm form={paymentMethodForm} onSubmit={onPaymentSubmit} />
-                    ) : (
-                        <Stack spacing={3}>
-                            <Heading as="h3" fontSize="md">
-                                <FormattedMessage
-                                    defaultMessage="Credit Card"
-                                    id="checkout_payment.heading.credit_card"
-                                />
-                            </Heading>
-                            <Stack direction="row" spacing={4}>
-                                <PaymentCardSummary payment={appliedPayment} />
-                                <Button
-                                    variant="link"
-                                    size="sm"
-                                    colorScheme="red"
-                                    onClick={onPaymentRemoval}
-                                >
-                                    <FormattedMessage
-                                        defaultMessage="Remove"
-                                        id="checkout_payment.action.remove"
-                                    />
-                                </Button>
-                            </Stack>
-                        </Stack>
-                    )} */}
+                    <AdyenCheckout />
 
                     <Divider borderColor="gray.100" />
 
