@@ -28,6 +28,7 @@ import AddressDisplay from '@salesforce/retail-react-app/app/components/address-
 import {PromoCode, usePromoCode} from '@salesforce/retail-react-app/app/components/promo-code'
 import {API_ERROR_MESSAGE} from '@salesforce/retail-react-app/app/constants'
 import AdyenCheckout from '../../../../../adyen/client/components/AdyenCheckout'
+import paymentMethods from '../../../../../adyen/utils/paymentMethods';
 
 const Payment = () => {
     const [adyenStateData, setAdyenStateData] = useState(null)
@@ -68,7 +69,7 @@ const Payment = () => {
 
     const onPaymentSubmit = async () => {
         const paymentInstrument = {
-            paymentMethodId: 'AdyenComponent',
+            paymentMethodId: paymentMethods.ADYEN_COMPONENT,
             paymentCard: {
                 cardType: adyenStateData.paymentMethod.type
             }
