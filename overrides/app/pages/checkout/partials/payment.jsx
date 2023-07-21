@@ -68,7 +68,10 @@ const Payment = () => {
 
     const onPaymentSubmit = async () => {
         const paymentInstrument = {
-            paymentMethodId: 'CREDIT_CARD'
+            paymentMethodId: 'AdyenComponent',
+            paymentCard: {
+                cardType: adyenStateData.paymentMethod.type
+            }
         }
 
         return await addPaymentInstrumentToBasket({
