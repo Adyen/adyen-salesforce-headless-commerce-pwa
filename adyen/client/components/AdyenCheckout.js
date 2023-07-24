@@ -21,11 +21,7 @@ const AdyenCheckoutComponent = ({onChange}) => {
                 const token = await getTokenWhenReady()
                 const sessionsService = new SessionsService(token)
                 try {
-                    const data = await sessionsService.createSession({
-                        headers: {
-                            customerid: customerId
-                        }
-                    })
+                    const data = await sessionsService.createSession(customerId)
                     setPayment(data[0])
                     createCheckout(data[0])
                 } catch (error) {
