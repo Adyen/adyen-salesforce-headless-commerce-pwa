@@ -5,9 +5,7 @@ import {useCheckout} from '@salesforce/retail-react-app/app/pages/checkout/util/
 import AdyenCheckout from '@adyen/adyen-web'
 import '@adyen/adyen-web/dist/adyen.css'
 import PropTypes from 'prop-types'
-import {ApiClient} from '../services/api'
-import API_URLS from '../../utils/apiUrls'
-import { SessionsService } from "../services/sessions";
+import {SessionsService} from '../services/sessions'
 
 const AdyenCheckoutComponent = ({onChange}) => {
     const {data: basket} = useCurrentBasket()
