@@ -28,8 +28,10 @@ import AddressDisplay from '@salesforce/retail-react-app/app/components/address-
 import {PromoCode, usePromoCode} from '@salesforce/retail-react-app/app/components/promo-code'
 import {API_ERROR_MESSAGE} from '@salesforce/retail-react-app/app/constants'
 import AdyenCheckout from '../../../../../adyen/client/components/AdyenCheckout'
+import paymentMethods from '../../../../../adyen/utils/paymentMethods';
 
 const Payment = () => {
+    const [adyenStateData, setAdyenStateData] = useState(null)
     const {formatMessage} = useIntl()
     const {data: basket} = useCurrentBasket()
     const selectedShippingAddress = basket?.shipments && basket?.shipments[0]?.shippingAddress
@@ -65,29 +67,20 @@ const Payment = () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {removePromoCode, ...promoCodeProps} = usePromoCode()
 
-    const paymentMethodForm = useForm()
-
-    const onPaymentSubmit = async (formValue) => {
-        // The form gives us the expiration date as `MM/YY` - so we need to split it into
-        // month and year to submit them as individual fields.
-        const [expirationMonth, expirationYear] = formValue.expiry.split('/')
-
+    const onPaymentSubmit = async () => {
         const paymentInstrument = {
-            paymentMethodId: 'CREDIT_CARD',
+            paymentMethodId: paymentMethods.ADYEN_COMPONENT,
             paymentCard: {
-                holder: formValue.holder,
-                issueNumber: formValue.number.replace(/ /g, ''),
-                cardType: getPaymentInstrumentCardType(formValue.cardType),
-                expirationMonth: parseInt(expirationMonth),
-                expirationYear: parseInt(`20${expirationYear}`)
+                cardType: adyenStateData.paymentMethod.type
             }
         }
 
-        return addPaymentInstrumentToBasket({
+        return await addPaymentInstrumentToBasket({
             parameters: {basketId: basket?.basketId},
             body: paymentInstrument
         })
     }
+
     const onBillingSubmit = async () => {
         const isFormValid = await billingAddressForm.trigger()
 
@@ -105,6 +98,7 @@ const Payment = () => {
             parameters: {basketId: basket.basketId, shipmentId: 'me'}
         })
     }
+
     const onPaymentRemoval = async () => {
         try {
             await removePaymentInstrumentFromBasket({
@@ -118,23 +112,20 @@ const Payment = () => {
         }
     }
 
-    const onSubmit = paymentMethodForm.handleSubmit(async (paymentFormValues) => {
+    const onSubmit = async () => {
         if (!appliedPayment) {
-            await onPaymentSubmit(paymentFormValues)
+            await onPaymentSubmit()
         }
         await onBillingSubmit()
         goToNextStep()
-    })
+    }
 
     return (
         <ToggleCard
             id="step-3"
             title={formatMessage({defaultMessage: 'Payment', id: 'checkout_payment.title.payment'})}
             editing={step === STEPS.PAYMENT}
-            isLoading={
-                paymentMethodForm.formState.isSubmitting ||
-                billingAddressForm.formState.isSubmitting
-            }
+            isLoading={billingAddressForm.formState.isSubmitting}
             disabled={appliedPayment == null}
             onEdit={() => goToStep(STEPS.PAYMENT)}
         >
@@ -144,7 +135,7 @@ const Payment = () => {
                 </Box>
 
                 <Stack spacing={6}>
-                    <AdyenCheckout />
+                    <AdyenCheckout onChange={setAdyenStateData} />
 
                     <Divider borderColor="gray.100" />
 
@@ -186,7 +177,7 @@ const Payment = () => {
 
                     <Box pt={3}>
                         <Container variant="form">
-                            <Button w="full" onClick={onSubmit}>
+                            <Button w="full" onClick={onSubmit} isDisabled={!adyenStateData}>
                                 <FormattedMessage
                                     defaultMessage="Review Order"
                                     id="checkout_payment.button.review_order"
