@@ -1,14 +1,14 @@
 import React, {useEffect, useRef, useState} from 'react'
 import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
-import {useCurrentCustomer} from '@salesforce/retail-react-app/app/hooks/use-current-customer'
 import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 import {useCheckout} from '@salesforce/retail-react-app/app/pages/checkout/util/checkout-context'
 import AdyenCheckout from '@adyen/adyen-web'
 import '@adyen/adyen-web/dist/adyen.css'
 import PropTypes from 'prop-types'
+import {ApiClient} from '../services/api'
+import API_URLS from '../../utils/apiUrls'
 
 const AdyenCheckoutComponent = ({onChange}) => {
-    const {data: customer} = useCurrentCustomer()
     const {data: basket} = useCurrentBasket()
     const {step, STEPS} = useCheckout()
     const {getTokenWhenReady} = useAccessToken()
@@ -20,23 +20,18 @@ const AdyenCheckoutComponent = ({onChange}) => {
         const fetchSession = async () => {
             if (step === STEPS.PAYMENT) {
                 const token = await getTokenWhenReady()
-                fetch(`/api/adyen/sessions`, {
-                    method: 'POST',
+                const res = await ApiClient.post(API_URLS.SESSIONS, token, {
                     headers: {
-                        'Content-Type': 'application/json',
-                        authorization: `Bearer ${token}`,
                         customerid: customerId
                     }
-                }).then((res) => {
-                    if (res.status >= 300) {
-                        setPayment({error: res})
-                    } else {
-                        res.json().then((data) => {
-                            setPayment(data[0])
-                            createCheckout(data[0])
-                        })
-                    }
                 })
+                if (res.status >= 300) {
+                    setPayment({error: res})
+                } else {
+                    const data = await res.json()
+                    setPayment(data[0])
+                    createCheckout(data[0])
+                }
             }
         }
         fetchSession()
