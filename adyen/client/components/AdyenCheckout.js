@@ -7,6 +7,7 @@ import '@adyen/adyen-web/dist/adyen.css'
 import PropTypes from 'prop-types'
 import {ApiClient} from '../services/api'
 import API_URLS from '../../utils/apiUrls'
+import { SessionsService } from "../services/sessions";
 
 const AdyenCheckoutComponent = ({onChange}) => {
     const {data: basket} = useCurrentBasket()
@@ -20,17 +21,17 @@ const AdyenCheckoutComponent = ({onChange}) => {
         const fetchSession = async () => {
             if (step === STEPS.PAYMENT) {
                 const token = await getTokenWhenReady()
-                const res = await ApiClient.post(API_URLS.SESSIONS, token, {
-                    headers: {
-                        customerid: customerId
-                    }
-                })
-                if (res.status >= 300) {
-                    setPayment({error: res})
-                } else {
-                    const data = await res.json()
+                const sessionsService = new SessionsService(token)
+                try {
+                    const data = await sessionsService.createSession({
+                        headers: {
+                            customerid: customerId
+                        }
+                    })
                     setPayment(data[0])
                     createCheckout(data[0])
+                } catch (error) {
+                    setPayment({error})
                 }
             }
         }

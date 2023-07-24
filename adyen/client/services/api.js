@@ -1,20 +1,28 @@
 export class ApiClient {
-    static base(method, url, token, options) {
-        return fetch(url, {
+    url = null
+    token = null
+
+    constructor(url, token) {
+        this.url = url
+        this.token = token
+    }
+
+    base(method, options) {
+        return fetch(this.url, {
             method: method,
             headers: {
                 'Content-Type': 'application/json',
-                authorization: `Bearer ${token}`,
+                authorization: `Bearer ${this.token}`,
                 ...options.headers
             }
         })
     }
 
-    static get(url, token, options) {
-        return this.base('get', url, token, options)
+    get(options) {
+        return this.base('get', options)
     }
 
-    static post(url, token, options) {
-        return this.base('post', url, token, options)
+    post(options) {
+        return this.base('post', options)
     }
 }
