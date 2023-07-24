@@ -1,11 +1,11 @@
-import API_URLS from '../../utils/apiUrls'
 import {ApiClient} from './api'
 
 export class SessionsService {
+    baseUrl = '/api/adyen/sessions'
     apiClient = null
 
     constructor(token) {
-        this.apiClient = new ApiClient(API_URLS.SESSIONS, token)
+        this.apiClient = new ApiClient(this.baseUrl, token)
     }
 
     async createSession(options) {
