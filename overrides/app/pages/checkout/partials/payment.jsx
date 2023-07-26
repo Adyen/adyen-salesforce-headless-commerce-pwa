@@ -12,26 +12,22 @@ import {useForm} from 'react-hook-form'
 import {useToast} from '@salesforce/retail-react-app/app/hooks/use-toast'
 import {useShopperBasketsMutation} from '@salesforce/commerce-sdk-react'
 import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
-import {useCheckout} from '@salesforce/retail-react-app/app/pages/checkout/util/checkout-context'
-import {
-    getPaymentInstrumentCardType,
-    getCreditCardIcon
-} from '@salesforce/retail-react-app/app/utils/cc-utils'
+import {getCreditCardIcon} from '@salesforce/retail-react-app/app/utils/cc-utils'
 import {
     ToggleCard,
     ToggleCardEdit,
     ToggleCardSummary
 } from '@salesforce/retail-react-app/app/components/toggle-card'
-// import PaymentForm from '@salesforce/retail-react-app/app/pages/checkout/partials/payment-form'
 import ShippingAddressSelection from '@salesforce/retail-react-app/app/pages/checkout/partials/shipping-address-selection'
 import AddressDisplay from '@salesforce/retail-react-app/app/components/address-display'
 import {PromoCode, usePromoCode} from '@salesforce/retail-react-app/app/components/promo-code'
 import {API_ERROR_MESSAGE} from '@salesforce/retail-react-app/app/constants'
+import {useCheckout} from '@salesforce/retail-react-app/app/pages/checkout/util/checkout-context'
 import AdyenCheckout from '../../../../../adyen/client/components/AdyenCheckout'
-import paymentMethods from '../../../../../adyen/utils/paymentMethods';
+import paymentMethods from '../../../../../adyen/utils/paymentMethods'
+import {useAdyenCheckout} from '../../../../../adyen/client/context/adyen-checkout-context'
 
 const Payment = () => {
-    const [adyenStateData, setAdyenStateData] = useState(null)
     const {formatMessage} = useIntl()
     const {data: basket} = useCurrentBasket()
     const selectedShippingAddress = basket?.shipments && basket?.shipments[0]?.shippingAddress
@@ -56,6 +52,7 @@ const Payment = () => {
     }
 
     const {step, STEPS, goToStep, goToNextStep} = useCheckout()
+    const {adyenSession, adyenStateData} = useAdyenCheckout()
 
     const billingAddressForm = useForm({
         mode: 'onChange',
@@ -71,7 +68,7 @@ const Payment = () => {
         const paymentInstrument = {
             paymentMethodId: paymentMethods.ADYEN_COMPONENT,
             paymentCard: {
-                cardType: adyenStateData.paymentMethod.type
+                cardType: adyenStateData?.paymentMethod?.type
             }
         }
 
@@ -125,7 +122,7 @@ const Payment = () => {
             id="step-3"
             title={formatMessage({defaultMessage: 'Payment', id: 'checkout_payment.title.payment'})}
             editing={step === STEPS.PAYMENT}
-            isLoading={billingAddressForm.formState.isSubmitting}
+            isLoading={!adyenSession || billingAddressForm.formState.isSubmitting}
             disabled={appliedPayment == null}
             onEdit={() => goToStep(STEPS.PAYMENT)}
         >
@@ -135,7 +132,7 @@ const Payment = () => {
                 </Box>
 
                 <Stack spacing={6}>
-                    <AdyenCheckout onChange={setAdyenStateData} />
+                    {adyenSession && <AdyenCheckout />}
 
                     <Divider borderColor="gray.100" />
 
