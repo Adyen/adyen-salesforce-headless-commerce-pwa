@@ -56,10 +56,6 @@ const Checkout = () => {
                 body: {basketId: basket.basketId}
             })
             const checkout = await AdyenCheckout({
-                amount: {
-                    value: order.orderTotal * 100,
-                    currency: order.currency
-                },
                 environment: adyenSession.ADYEN_ENVIRONMENT,
                 clientKey: adyenSession.ADYEN_CLIENT_KEY,
                 session: {
@@ -67,7 +63,14 @@ const Checkout = () => {
                     sessionData: adyenSession.sessionData
                 }
             })
-            const paymentResponse = await checkout.session.submitPayment(adyenStateData)
+            const paymentResponse = await checkout.session.submitPayment({
+                ...adyenStateData,
+                reference: order.orderNo,
+                amount: {
+                    value: order.orderTotal * 100,
+                    currency: order.currency
+                }
+            })
             if (paymentResponse.resultCode === 'Authorised') {
                 navigate(`/checkout/confirmation/${order.orderNo}`)
             }
