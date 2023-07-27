@@ -26,4 +26,9 @@ export const CUSTOM_HOME_TITLE = '🎉 Hello Extensible React Template!'
 
 export {DEFAULT_LIMIT_VALUES, DEFAULT_SEARCH_PARAMS}
 
+export const PAYMENT_METHODS = {
+    ADYEN_COMPONENT: 'AdyenComponent',
+    CREDIT_CARD: 'CREDIT_CARD'
+}
+
 export * from '@salesforce/retail-react-app/app/constants'

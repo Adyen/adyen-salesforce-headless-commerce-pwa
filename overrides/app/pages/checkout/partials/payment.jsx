@@ -24,8 +24,8 @@ import {PromoCode, usePromoCode} from '@salesforce/retail-react-app/app/componen
 import {API_ERROR_MESSAGE} from '@salesforce/retail-react-app/app/constants'
 import {useCheckout} from '@salesforce/retail-react-app/app/pages/checkout/util/checkout-context'
 import AdyenCheckout from '../../../../../adyen/client/components/AdyenCheckout'
-import paymentMethods from '../../../../../adyen/utils/paymentMethods'
 import {useAdyenCheckout} from '../../../../../adyen/client/context/adyen-checkout-context'
+import {PAYMENT_METHODS} from '../../../constants'
 
 const Payment = () => {
     const {formatMessage} = useIntl()
@@ -67,7 +67,7 @@ const Payment = () => {
 
     const onPaymentSubmit = async () => {
         const paymentInstrument = {
-            paymentMethodId: paymentMethods.ADYEN_COMPONENT,
+            paymentMethodId: PAYMENT_METHODS.ADYEN_COMPONENT,
             paymentCard: {
                 cardType: adyenStateData?.paymentMethod?.type
             }
