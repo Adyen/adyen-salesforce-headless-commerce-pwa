@@ -7,11 +7,13 @@
 import React, {useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
-import {AdyenSessionsService} from "../services/sessions";
+import {AdyenSessionsService} from '../services/sessions'
+import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 
 const AdyenCheckoutContext = React.createContext()
 
 export const AdyenCheckoutProvider = ({children}) => {
+    const {data: basket} = useCurrentBasket()
     const {getTokenWhenReady} = useAccessToken()
     const customerId = useCustomerId()
 
@@ -29,8 +31,11 @@ export const AdyenCheckoutProvider = ({children}) => {
                 setAdyenSession({error})
             }
         }
-        fetchSession()
-    }, [])
+
+        if (!adyenSession && basket?.shipments?.length && basket?.shipments[0].shippingAddress) {
+            fetchSession()
+        }
+    }, [basket])
 
     const value = {
         adyenSession,
