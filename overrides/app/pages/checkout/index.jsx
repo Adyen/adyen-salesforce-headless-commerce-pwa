@@ -24,8 +24,8 @@ import Payment from './partials/payment'
 import {
     AdyenCheckoutProvider,
     useAdyenCheckout
-} from '../../../../adyen/client/context/adyen-checkout-context'
-import AdyenCheckout from '@adyen/adyen-web'
+} from '../../../../adyen/context/adyen-checkout-context'
+import {AdyenPaymentsService} from '../../../../adyen/services/payments'
 
 const Checkout = () => {
     const {formatMessage} = useIntl()
@@ -55,22 +55,12 @@ const Checkout = () => {
                 headers: {_sfdc_customer_id: usid},
                 body: {basketId: basket.basketId}
             })
-            const checkout = await AdyenCheckout({
-                environment: adyenSession.ADYEN_ENVIRONMENT,
-                clientKey: adyenSession.ADYEN_CLIENT_KEY,
-                session: {
-                    id: adyenSession.id,
-                    sessionData: adyenSession.sessionData
-                }
-            })
-            const paymentResponse = await checkout.session.submitPayment({
-                ...adyenStateData,
-                reference: order.orderNo,
-                amount: {
-                    value: order.orderTotal * 100,
-                    currency: order.currency
-                }
-            })
+            const adyenPaymentsService = new AdyenPaymentsService(
+                order,
+                adyenSession,
+                adyenStateData
+            )
+            const paymentResponse = await adyenPaymentsService.submitPayment()
             if (paymentResponse.resultCode === 'Authorised') {
                 navigate(`/checkout/confirmation/${order.orderNo}`)
             }

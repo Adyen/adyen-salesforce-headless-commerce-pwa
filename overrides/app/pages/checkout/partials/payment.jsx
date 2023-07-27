@@ -23,9 +23,9 @@ import AddressDisplay from '@salesforce/retail-react-app/app/components/address-
 import {PromoCode, usePromoCode} from '@salesforce/retail-react-app/app/components/promo-code'
 import {API_ERROR_MESSAGE} from '@salesforce/retail-react-app/app/constants'
 import {useCheckout} from '@salesforce/retail-react-app/app/pages/checkout/util/checkout-context'
-import AdyenCheckout from '../../../../../adyen/client/components/AdyenCheckout'
-import {useAdyenCheckout} from '../../../../../adyen/client/context/adyen-checkout-context'
-import {PAYMENT_METHODS} from '../../../constants'
+import AdyenCheckout from '../../../../../adyen/components/AdyenCheckout'
+import {useAdyenCheckout} from '../../../../../adyen/context/adyen-checkout-context'
+import PAYMENT_METHODS from '../../../../../adyen/utils/paymentMethods'
 
 const Payment = () => {
     const {formatMessage} = useIntl()
@@ -125,7 +125,9 @@ const Payment = () => {
             id="step-3"
             title={formatMessage({defaultMessage: 'Payment', id: 'checkout_payment.title.payment'})}
             editing={step === STEPS.PAYMENT}
-            isLoading={!adyenSession || billingAddressForm.formState.isSubmitting}
+            isLoading={
+                !adyenSession || billingAddressForm.formState.isSubmitting || isSubmittingPayment
+            }
             disabled={appliedPayment == null}
             onEdit={() => goToStep(STEPS.PAYMENT)}
         >
@@ -181,7 +183,6 @@ const Payment = () => {
                                 w="full"
                                 onClick={onSubmit}
                                 isDisabled={!adyenStateData || isSubmittingPayment}
-                                isLoading={isSubmittingPayment}
                             >
                                 <FormattedMessage
                                     defaultMessage="Review Order"

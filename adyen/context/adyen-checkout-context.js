@@ -7,7 +7,7 @@
 import React, {useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
-import {SessionsService} from '../services/sessions'
+import {AdyenSessionsService} from "../services/sessions";
 
 const AdyenCheckoutContext = React.createContext()
 
@@ -21,9 +21,9 @@ export const AdyenCheckoutProvider = ({children}) => {
     useEffect(() => {
         const fetchSession = async () => {
             const token = await getTokenWhenReady()
-            const sessionsService = new SessionsService(token)
+            const adyenSessionsService = new AdyenSessionsService(token)
             try {
-                const data = await sessionsService.createSession(customerId)
+                const data = await adyenSessionsService.createSession(customerId)
                 setAdyenSession(data?.length ? data[0] : {error: true})
             } catch (error) {
                 setAdyenSession({error})
