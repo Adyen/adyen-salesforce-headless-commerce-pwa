@@ -53,6 +53,7 @@ const Payment = () => {
 
     const {step, STEPS, goToStep, goToNextStep} = useCheckout()
     const {adyenSession, adyenStateData} = useAdyenCheckout()
+    const [isSubmittingPayment, setIsSubmittingPayment] = useState(false)
 
     const billingAddressForm = useForm({
         mode: 'onChange',
@@ -110,10 +111,12 @@ const Payment = () => {
     }
 
     const onSubmit = async () => {
+        setIsSubmittingPayment(true)
         if (!appliedPayment) {
             await onPaymentSubmit()
         }
         await onBillingSubmit()
+        setIsSubmittingPayment(false)
         goToNextStep()
     }
 
@@ -174,7 +177,12 @@ const Payment = () => {
 
                     <Box pt={3}>
                         <Container variant="form">
-                            <Button w="full" onClick={onSubmit} isDisabled={!adyenStateData}>
+                            <Button
+                                w="full"
+                                onClick={onSubmit}
+                                isDisabled={!adyenStateData || isSubmittingPayment}
+                                isLoading={isSubmittingPayment}
+                            >
                                 <FormattedMessage
                                     defaultMessage="Review Order"
                                     id="checkout_payment.button.review_order"
