@@ -12,26 +12,22 @@ import {useForm} from 'react-hook-form'
 import {useToast} from '@salesforce/retail-react-app/app/hooks/use-toast'
 import {useShopperBasketsMutation} from '@salesforce/commerce-sdk-react'
 import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
-import {useCheckout} from '@salesforce/retail-react-app/app/pages/checkout/util/checkout-context'
-import {
-    getPaymentInstrumentCardType,
-    getCreditCardIcon
-} from '@salesforce/retail-react-app/app/utils/cc-utils'
+import {getCreditCardIcon} from '@salesforce/retail-react-app/app/utils/cc-utils'
 import {
     ToggleCard,
     ToggleCardEdit,
     ToggleCardSummary
 } from '@salesforce/retail-react-app/app/components/toggle-card'
-// import PaymentForm from '@salesforce/retail-react-app/app/pages/checkout/partials/payment-form'
 import ShippingAddressSelection from '@salesforce/retail-react-app/app/pages/checkout/partials/shipping-address-selection'
 import AddressDisplay from '@salesforce/retail-react-app/app/components/address-display'
 import {PromoCode, usePromoCode} from '@salesforce/retail-react-app/app/components/promo-code'
 import {API_ERROR_MESSAGE} from '@salesforce/retail-react-app/app/constants'
-import AdyenCheckout from '../../../../../adyen/client/components/AdyenCheckout'
-import paymentMethods from '../../../../../adyen/utils/paymentMethods';
+import {useCheckout} from '@salesforce/retail-react-app/app/pages/checkout/util/checkout-context'
+import AdyenCheckout from '../../../../../adyen/components/AdyenCheckout'
+import {useAdyenCheckout} from '../../../../../adyen/context/adyen-checkout-context'
+import PAYMENT_METHODS from '../../../../../adyen/utils/paymentMethods'
 
 const Payment = () => {
-    const [adyenStateData, setAdyenStateData] = useState(null)
     const {formatMessage} = useIntl()
     const {data: basket} = useCurrentBasket()
     const selectedShippingAddress = basket?.shipments && basket?.shipments[0]?.shippingAddress
@@ -56,6 +52,8 @@ const Payment = () => {
     }
 
     const {step, STEPS, goToStep, goToNextStep} = useCheckout()
+    const {adyenSession, adyenStateData} = useAdyenCheckout()
+    const [isSubmittingPayment, setIsSubmittingPayment] = useState(false)
 
     const billingAddressForm = useForm({
         mode: 'onChange',
@@ -69,9 +67,9 @@ const Payment = () => {
 
     const onPaymentSubmit = async () => {
         const paymentInstrument = {
-            paymentMethodId: paymentMethods.ADYEN_COMPONENT,
+            paymentMethodId: PAYMENT_METHODS.ADYEN_COMPONENT,
             paymentCard: {
-                cardType: adyenStateData.paymentMethod.type
+                cardType: adyenStateData?.paymentMethod?.type
             }
         }
 
@@ -113,10 +111,12 @@ const Payment = () => {
     }
 
     const onSubmit = async () => {
+        setIsSubmittingPayment(true)
         if (!appliedPayment) {
             await onPaymentSubmit()
         }
         await onBillingSubmit()
+        setIsSubmittingPayment(false)
         goToNextStep()
     }
 
@@ -125,7 +125,9 @@ const Payment = () => {
             id="step-3"
             title={formatMessage({defaultMessage: 'Payment', id: 'checkout_payment.title.payment'})}
             editing={step === STEPS.PAYMENT}
-            isLoading={billingAddressForm.formState.isSubmitting}
+            isLoading={
+                !adyenSession || billingAddressForm.formState.isSubmitting || isSubmittingPayment
+            }
             disabled={appliedPayment == null}
             onEdit={() => goToStep(STEPS.PAYMENT)}
         >
@@ -135,7 +137,7 @@ const Payment = () => {
                 </Box>
 
                 <Stack spacing={6}>
-                    <AdyenCheckout onChange={setAdyenStateData} />
+                    {adyenSession && <AdyenCheckout />}
 
                     <Divider borderColor="gray.100" />
 
@@ -177,7 +179,11 @@ const Payment = () => {
 
                     <Box pt={3}>
                         <Container variant="form">
-                            <Button w="full" onClick={onSubmit} isDisabled={!adyenStateData}>
+                            <Button
+                                w="full"
+                                onClick={onSubmit}
+                                isDisabled={!adyenStateData || isSubmittingPayment}
+                            >
                                 <FormattedMessage
                                     defaultMessage="Review Order"
                                     id="checkout_payment.button.review_order"

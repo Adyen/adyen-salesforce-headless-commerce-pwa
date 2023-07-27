@@ -1,6 +1,6 @@
 import {ApiClient} from './api'
 
-export class SessionsService {
+export class AdyenSessionsService {
     baseUrl = '/api/adyen/sessions'
     apiClient = null
 
