@@ -3,6 +3,12 @@
 
 const {hmacValidator} = require('@adyen/api-library')
 
+const messages = {
+    AUTH_ERROR: 'Access Denied!',
+    AUTH_SUCCESS: '[accepted]',
+    DEFAULT_ERROR: 'Technical error!'
+}
+
 async function handleWebhook(req, res, next) {
     try {
         // handle webhook notification here and update order status using ORDER API from commerce SDK.
@@ -10,25 +16,36 @@ async function handleWebhook(req, res, next) {
         // return `webhookSuccess(res)` if notification is successfully handled.
         return webhookSuccess(res)
     } catch (err) {
-        return next(webhookError(err.message, err.statusCode))
+        return next(err)
     }
 }
 
-function authentication(req, res, next) {
-    const authHeader = req.headers.authorization
+function authenticate(req, res, next) {
+    try {
+        const authHeader = req.headers.authorization
+        if (!authHeader) {
+            throw new Error(messages.AUTH_ERROR)
+        }
+        const credentialSeparator = ':'
+        const authHeaderSeparator = ' '
+        const encoding = 'base64'
+        const encodedCredentials = authHeader.split(authHeaderSeparator)[1]
+        const auth = new Buffer.from(encodedCredentials, encoding)
+            .toString()
+            .split(credentialSeparator)
+        const user = auth[0]
+        const pass = auth[1]
 
-    if (!authHeader) {
-        return next(webhookError())
-    }
-
-    const auth = new Buffer.from(authHeader.split(' ')[1], 'base64').toString().split(':')
-    const user = auth[0]
-    const pass = auth[1]
-
-    if (user === process.env.ADYEN_WEBHOOK_USER && pass === process.env.ADYEN_WEBHOOK_PASSWORD) {
-        next()
-    } else {
-        return next(webhookError())
+        if (
+            user === process.env.ADYEN_WEBHOOK_USER &&
+            pass === process.env.ADYEN_WEBHOOK_PASSWORD
+        ) {
+            next()
+        } else {
+            throw new Error(messages.AUTH_ERROR)
+        }
+    } catch (err) {
+        return next(err)
     }
 }
 
@@ -42,25 +59,19 @@ function validateHmac(req, res, next) {
         if (HmacValidator.validateHMAC(NotificationRequestItem, ADYEN_HMAC_KEY)) {
             return next()
         } else {
-            throw Error(`Invalid Hmac Signature`)
+            throw new Error(messages.AUTH_ERROR)
         }
     } catch (err) {
-        return next(webhookError(err.message))
+        return next(err)
     }
 }
 
 function webhookSuccess(res) {
-    return res.status(200).json('[accepted]')
-}
-
-function webhookError(message = 'Access Denied!', status = 401) {
-    let err = new Error(message)
-    err.statusCode = status
-    return err
+    return res.status(200).json(messages.AUTH_SUCCESS)
 }
 
 const errorHandler = (err, req, res, next) => {
-    res.status(err.statusCode).json(err.message)
+    res.status(err.statusCode || 500).json(err.message || messages.DEFAULT_ERROR)
 }
 
-module.exports = {authentication, validateHmac, handleWebhook, errorHandler}
+module.exports = {authenticate, validateHmac, handleWebhook, errorHandler}

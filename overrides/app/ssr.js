@@ -14,7 +14,7 @@ const {getConfig} = require('@salesforce/pwa-kit-runtime/utils/ssr-config')
 const helmet = require('helmet')
 const bodyParser = require('body-parser')
 const SessionsController = require('../../adyen/controllers/sessions')
-const Webhook = require('../../adyen/controllers/webhook')
+const WebhookController = require('../../adyen/controllers/webhook')
 require('dotenv').config()
 
 const options = {
@@ -74,10 +74,10 @@ const {handler} = runtime.createHandler(options, (app) => {
     app.post('/api/adyen/sessions', SessionsController.create)
     app.post(
         '/api/adyen/webhook',
-        Webhook.authentication,
-        Webhook.validateHmac,
-        Webhook.handleWebhook,
-        Webhook.errorHandler
+        WebhookController.authenticate,
+        WebhookController.validateHmac,
+        WebhookController.handleWebhook,
+        WebhookController.errorHandler
     )
 })
 // SSR requires that we export a single handler function called 'get', that
