@@ -15,6 +15,7 @@ const helmet = require('helmet')
 const bodyParser = require('body-parser')
 const SessionsController = require('../../adyen/controllers/sessions.controller')
 const Webhook = require('../../adyen/controllers/webhook')
+const SessionsController = require('../../adyen/controllers/sessions')
 require('dotenv').config()
 
 const options = {
