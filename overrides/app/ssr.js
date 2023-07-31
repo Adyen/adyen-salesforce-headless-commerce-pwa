@@ -13,9 +13,8 @@ const {isRemote} = require('@salesforce/pwa-kit-runtime/utils/ssr-server')
 const {getConfig} = require('@salesforce/pwa-kit-runtime/utils/ssr-config')
 const helmet = require('helmet')
 const bodyParser = require('body-parser')
-const SessionsController = require('../../adyen/controllers/sessions.controller')
-const Webhook = require('../../adyen/controllers/webhook')
 const SessionsController = require('../../adyen/controllers/sessions')
+const Webhook = require('../../adyen/controllers/webhook')
 require('dotenv').config()
 
 const options = {
@@ -73,7 +72,13 @@ const {handler} = runtime.createHandler(options, (app) => {
 
     // Routes
     app.post('/api/adyen/sessions', SessionsController.create)
-    app.post('/api/adyen/webhook', Webhook.authentication, Webhook.validateHmac, Webhook.handleWebhook)
+    app.post(
+        '/api/adyen/webhook',
+        Webhook.authentication,
+        Webhook.validateHmac,
+        Webhook.handleWebhook,
+        Webhook.errorHandler
+    )
 })
 // SSR requires that we export a single handler function called 'get', that
 // supports AWS use of the server that we created above.

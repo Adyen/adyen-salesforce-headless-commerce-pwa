@@ -3,23 +3,22 @@
 
 const {hmacValidator} = require('@adyen/api-library')
 
-async function handleWebhook(req, res) {
+async function handleWebhook(req, res, next) {
     try {
         // handle webhook notification here and update order status using ORDER API from commerce SDK.
         // check eventCode structure and types here: https://docs.adyen.com/development-resources/webhooks/webhook-types/
         // return `webhookSuccess(res)` if notification is successfully handled.
         return webhookSuccess(res)
     } catch (err) {
-        res.status(err.statusCode).json(err.message)
+        return next(webhookError(err.message, err.statusCode))
     }
-    return res
 }
 
 function authentication(req, res, next) {
     const authHeader = req.headers.authorization
 
     if (!authHeader) {
-        return next(webhookAuthError())
+        return next(webhookError())
     }
 
     const auth = new Buffer.from(authHeader.split(' ')[1], 'base64').toString().split(':')
@@ -29,7 +28,7 @@ function authentication(req, res, next) {
     if (user === process.env.ADYEN_WEBHOOK_USER && pass === process.env.ADYEN_WEBHOOK_PASSWORD) {
         next()
     } else {
-        return next(webhookAuthError())
+        return next(webhookError())
     }
 }
 
@@ -38,21 +37,30 @@ function validateHmac(req, res, next) {
     if (!ADYEN_HMAC_KEY) return next()
     const {notificationItems} = req.body
     const {NotificationRequestItem} = notificationItems[0]
-    const HmacValidator = new hmacValidator()
-    if (HmacValidator.validateHMAC(NotificationRequestItem, ADYEN_HMAC_KEY)) {
-        return next()
+    try {
+        const HmacValidator = new hmacValidator()
+        if (HmacValidator.validateHMAC(NotificationRequestItem, ADYEN_HMAC_KEY)) {
+            return next()
+        } else {
+            throw Error(`Invalid Hmac Signature`)
+        }
+    } catch (err) {
+        return next(webhookError(err.message))
     }
-    return next(webhookAuthError)
 }
 
 function webhookSuccess(res) {
     return res.status(200).json('[accepted]')
 }
 
-function webhookAuthError() {
-    let err = new Error('Access Denied!')
-    err.status = 401
+function webhookError(message = 'Access Denied!', status = 401) {
+    let err = new Error(message)
+    err.statusCode = status
     return err
 }
 
-module.exports = {authentication, validateHmac, handleWebhook}
+const errorHandler = (err, req, res, next) => {
+    res.status(err.statusCode).json(err.message)
+}
+
+module.exports = {authentication, validateHmac, handleWebhook, errorHandler}
