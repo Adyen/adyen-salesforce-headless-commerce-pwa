@@ -4,6 +4,7 @@
 const {CheckoutAPI, Client, Config} = require('@adyen/api-library')
 const {ShopperCustomers} = require('commerce-sdk-isomorphic')
 const {getConfig} = require('@salesforce/pwa-kit-runtime/utils/ssr-config')
+const {getCurrencyValueForApi} = require('../utils/parsers')
 
 async function create(req, res) {
     const config = new Config()
@@ -19,19 +20,40 @@ async function create(req, res) {
             headers: {authorization: req.headers.authorization}
         })
 
-        const {baskets} = await shopperCustomers.getCustomerBaskets({
+        const {
+            baskets: [
+                {
+                    basketId,
+                    orderTotal,
+                    currency,
+                    shipments: [
+                        {
+                            shippingAddress: {countryCode}
+                        }
+                    ]
+                }
+            ] = [
+                {
+                    shipments: [
+                        {
+                            shippingAddress: {}
+                        }
+                    ]
+                }
+            ]
+        } = await shopperCustomers.getCustomerBaskets({
             parameters: {
                 customerId: req.headers.customerid
             }
         })
 
         const response = await checkout.sessions({
-            countryCode: 'US',
+            countryCode: countryCode,
             amount: {
-                value: baskets[0].orderTotal,
-                currency: baskets[0].currency
+                value: getCurrencyValueForApi(orderTotal, currency),
+                currency: currency
             },
-            reference: baskets[0].basketId, // todo: check if its valid to pass basketID
+            reference: basketId, // todo: check if its valid to pass basketID
             merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT, //todo: REPLACE With YOUR MERCHANT ACCOUNT
             returnUrl: process.env.HOST_URL //todo: REPLACE with a proper value  // required for 3ds2 redirect flow
         })
@@ -44,7 +66,7 @@ async function create(req, res) {
             }
         ]) // sending a tuple with orderRef as well to inform about the unique order reference
     } catch (err) {
-        res.status(err.statusCode).json(err.message)
+        res.status(err.statusCode || 500).json(err.message)
     }
 }
 
