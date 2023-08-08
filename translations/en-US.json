@@ -162,6 +162,9 @@
   "auth_modal.password_reset_success.title.password_reset": {
     "defaultMessage": "Password Reset"
   },
+  "cart.info.removed_from_cart": {
+    "defaultMessage": "Item removed from cart"
+  },
   "cart.recommended_products.title.may_also_like": {
     "defaultMessage": "You May Also Like"
   },
@@ -294,6 +297,9 @@
   },
   "checkout_header.link.cart": {
     "defaultMessage": "Back to cart"
+  },
+  "checkout_payment.action.remove": {
+    "defaultMessage": "Remove"
   },
   "checkout_payment.button.review_order": {
     "defaultMessage": "Review Order"
@@ -525,6 +531,18 @@
   "global.account.link.wishlist": {
     "defaultMessage": "Wishlist"
   },
+  "global.error.something_went_wrong": {
+    "defaultMessage": "Something went wrong. Try again!"
+  },
+  "global.info.added_to_wishlist": {
+    "defaultMessage": "{quantity} {quantity, plural, one {item} other {items}} added to wishlist"
+  },
+  "global.info.removed_from_wishlist": {
+    "defaultMessage": "Item removed from wishlist"
+  },
+  "global.link.added_to_wishlist.view_wishlist": {
+    "defaultMessage": "View"
+  },
   "header.button.assistive_msg.logo": {
     "defaultMessage": "Logo"
   },
@@ -548,6 +566,15 @@
   },
   "header.popover.title.my_account": {
     "defaultMessage": "My Account"
+  },
+  "home.description.features": {
+    "defaultMessage": "Out-of-the-box features so that you focus only on adding enhancements."
+  },
+  "home.description.here_to_help": {
+    "defaultMessage": "Contact our support staff."
+  },
+  "home.description.here_to_help_line_2": {
+    "defaultMessage": "They will get you to the right place."
   },
   "home.description.shop_products": {
     "defaultMessage": "This section contains content from the catalog. {docLink} on how to replace it.",
@@ -589,6 +616,12 @@
   "home.features.heading.wishlist": {
     "defaultMessage": "Wishlist"
   },
+  "home.heading.features": {
+    "defaultMessage": "Features"
+  },
+  "home.heading.here_to_help": {
+    "defaultMessage": "We're here to help"
+  },
   "home.heading.shop_products": {
     "defaultMessage": "Shop Products"
   },
@@ -601,11 +634,17 @@
   "home.hero_features.link.on_managed_runtime": {
     "defaultMessage": "Deploy on Managed Runtime"
   },
+  "home.link.contact_us": {
+    "defaultMessage": "Contact Us"
+  },
   "home.link.get_started": {
     "defaultMessage": "Get started"
   },
   "home.link.read_docs": {
     "defaultMessage": "Read docs"
+  },
+  "home.title.react_starter_store": {
+    "defaultMessage": "The React PWA Starter Store for Retail"
   },
   "item_attributes.label.promotions": {
     "defaultMessage": "Promotions"
