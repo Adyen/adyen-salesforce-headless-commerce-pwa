@@ -1,4 +1,6 @@
 import AdyenCheckout from '@adyen/adyen-web'
+import { formatAddressInAdyenFormat } from "../utils/formatAddress";
+import { getCurrencyValueForApi } from "../utils/parsers";
 
 export class AdyenPaymentsService {
     order = null
@@ -12,6 +14,7 @@ export class AdyenPaymentsService {
     }
 
     async submitPayment() {
+        const {orderTotal, currency} = this.order
         const checkout = await AdyenCheckout({
             environment: this.adyenSession.ADYEN_ENVIRONMENT,
             clientKey: this.adyenSession.ADYEN_CLIENT_KEY,
@@ -22,10 +25,12 @@ export class AdyenPaymentsService {
         })
         return await checkout.session.submitPayment({
             ...this.adyenStateData,
+            billingAddress: formatAddressInAdyenFormat(this.order.billingAddress),
+            deliveryAddress: formatAddressInAdyenFormat(this.order.shipments[0].shippingAddress),
             reference: this.order.orderNo,
             amount: {
-                value: this.order.orderTotal * 100,
-                currency: this.order.currency
+                value: getCurrencyValueForApi(orderTotal, currency),
+                currency
             }
         })
     }
