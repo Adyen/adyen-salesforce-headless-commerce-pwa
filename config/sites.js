@@ -17,23 +17,19 @@ module.exports = [
             supportedLocales: [
                 {
                     id: 'en-US',
-                    preferredCurrency: 'USD',
-                    locale: 'en_US'
+                    preferredCurrency: 'USD'
                 },
                 {
                     id: 'fr-FR',
-                    preferredCurrency: 'EUR',
-                    locale: 'fr_FR'
+                    preferredCurrency: 'EUR'
                 },
                 {
                     id: 'pt-BR',
-                    preferredCurrency: 'BRL',
-                    locale: 'pt-BR'
+                    preferredCurrency: 'BRL'
                 },
                 {
                     id: 'ja-JP',
-                    preferredCurrency: 'JPY',
-                    locale: 'ja_JP'
+                    preferredCurrency: 'JPY'
                 }
             ]
         }
