@@ -10,6 +10,7 @@ export class ApiClient {
     base(method, options) {
         return fetch(this.url, {
             method: method,
+            body: options?.body || null,
             headers: {
                 'Content-Type': 'application/json',
                 authorization: `Bearer ${this.token}`,
