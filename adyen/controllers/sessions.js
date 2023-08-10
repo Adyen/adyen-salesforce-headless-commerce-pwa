@@ -47,9 +47,8 @@ async function create(req, res) {
             }
         })
 
-        const localeId = req.body?.locale?.id.split('-');
         const response = await checkout.sessions({
-            shopperLocale: `${localeId[0]}-${localeId[1]}`,
+            shopperLocale: req.body?.locale?.id,
             countryCode: countryCode,
             amount: {
                 value: getCurrencyValueForApi(orderTotal, currency),
