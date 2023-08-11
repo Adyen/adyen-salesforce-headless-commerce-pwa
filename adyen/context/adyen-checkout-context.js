@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 import {AdyenSessionsService} from '../services/sessions'
 import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
+import { resolveLocaleFromUrl } from "@salesforce/retail-react-app/app/utils/site-utils";
 
 const AdyenCheckoutContext = React.createContext()
 
@@ -10,6 +11,7 @@ export const AdyenCheckoutProvider = ({children}) => {
     const {data: basket} = useCurrentBasket()
     const {getTokenWhenReady} = useAccessToken()
     const customerId = useCustomerId()
+    const locale = resolveLocaleFromUrl(`${window.location.pathname}${window.location.search}`)
 
     const [adyenSession, setAdyenSession] = useState()
     const [adyenStateData, setAdyenStateData] = useState()
@@ -19,7 +21,7 @@ export const AdyenCheckoutProvider = ({children}) => {
             const token = await getTokenWhenReady()
             const adyenSessionsService = new AdyenSessionsService(token)
             try {
-                const data = await adyenSessionsService.createSession(customerId)
+                const data = await adyenSessionsService.createSession(customerId, locale)
                 setAdyenSession(data?.length ? data[0] : {error: true})
             } catch (error) {
                 setAdyenSession({error})
