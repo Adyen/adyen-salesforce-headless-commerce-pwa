@@ -4,19 +4,16 @@ import '@adyen/adyen-web/dist/adyen.css'
 import {useAdyenCheckout} from '../context/adyen-checkout-context'
 
 const AdyenCheckoutComponent = () => {
-    const {adyenSession, setAdyenStateData} = useAdyenCheckout()
+    const {adyenPaymentMethods, setAdyenStateData} = useAdyenCheckout()
     const paymentContainer = useRef(null)
 
     useEffect(() => {
         const createCheckout = async () => {
             const checkout = await AdyenCheckout({
-                environment: adyenSession.ADYEN_ENVIRONMENT,
-                clientKey: adyenSession.ADYEN_CLIENT_KEY,
+                environment: adyenPaymentMethods.ADYEN_ENVIRONMENT,
+                clientKey: adyenPaymentMethods.ADYEN_CLIENT_KEY,
                 showPayButton: false,
-                session: {
-                    id: adyenSession.id,
-                    sessionData: adyenSession.sessionData
-                },
+                paymentMethodsResponse: adyenPaymentMethods,
                 paymentMethodsConfiguration: {
                     card: {
                         hasHolderName: true,
@@ -40,12 +37,12 @@ const AdyenCheckoutComponent = () => {
                 }
             })
 
-            if (paymentContainer.current) {
-                checkout.create('dropin').mount(paymentContainer.current)
-            }
+            checkout.create('dropin').mount(paymentContainer.current)
         }
-        createCheckout()
-    })
+        if (adyenPaymentMethods && paymentContainer.current) {
+            createCheckout()
+        }
+    }, [adyenPaymentMethods])
 
     return <div ref={paymentContainer} className="payment"></div>
 }

@@ -52,7 +52,7 @@ const Payment = () => {
     }
 
     const {step, STEPS, goToStep, goToNextStep} = useCheckout()
-    const {adyenSession, adyenStateData} = useAdyenCheckout()
+    const {adyenPaymentMethods, adyenStateData} = useAdyenCheckout()
     const [isSubmittingPayment, setIsSubmittingPayment] = useState(false)
 
     const billingAddressForm = useForm({
@@ -126,7 +126,9 @@ const Payment = () => {
             title={formatMessage({defaultMessage: 'Payment', id: 'checkout_payment.title.payment'})}
             editing={step === STEPS.PAYMENT}
             isLoading={
-                !adyenSession || billingAddressForm.formState.isSubmitting || isSubmittingPayment
+                !adyenPaymentMethods ||
+                billingAddressForm.formState.isSubmitting ||
+                isSubmittingPayment
             }
             disabled={appliedPayment == null}
             onEdit={() => goToStep(STEPS.PAYMENT)}
@@ -137,7 +139,7 @@ const Payment = () => {
                 </Box>
 
                 <Stack spacing={6}>
-                    {adyenSession && <AdyenCheckout />}
+                    <AdyenCheckout />
 
                     <Divider borderColor="gray.100" />
 

@@ -1,14 +1,14 @@
 import {ApiClient} from './api'
 
-export class AdyenSessionsService {
-    baseUrl = '/api/adyen/sessions'
+export class AdyenPaymentMethodsService {
+    baseUrl = '/api/adyen/payment-methods'
     apiClient = null
 
     constructor(token) {
         this.apiClient = new ApiClient(this.baseUrl, token)
     }
 
-    async createSession(customerId, locale) {
+    async fetchPaymentMethods(customerId, locale) {
         const res = await this.apiClient.post({
             body: JSON.stringify({
                 locale
