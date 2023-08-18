@@ -1,13 +1,10 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-'use strict'
+import {CheckoutAPI, Client, Config} from '@adyen/api-library'
+import {ShopperCustomers} from 'commerce-sdk-isomorphic'
+import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
+import {getCurrencyValueForApi} from '../utils/parsers'
+import {BLOCKED_PAYMENT_METHODS} from '../utils/constants'
 
-const {CheckoutAPI, Client, Config} = require('@adyen/api-library')
-const {ShopperCustomers} = require('commerce-sdk-isomorphic')
-const {getConfig} = require('@salesforce/pwa-kit-runtime/utils/ssr-config')
-const {getCurrencyValueForApi} = require('../utils/parsers')
-const {BLOCKED_PAYMENT_METHODS} = require('../../overrides/app/constants')
-
-async function fetch(req, res) {
+export async function fetch(req, res) {
     const config = new Config()
     config.apiKey = process.env.ADYEN_API_KEY //REPLACE With YOUR API KEY
     const client = new Client({config})
@@ -67,5 +64,3 @@ async function fetch(req, res) {
         res.status(err.statusCode || 500).json(err.message)
     }
 }
-
-module.exports = {fetch}

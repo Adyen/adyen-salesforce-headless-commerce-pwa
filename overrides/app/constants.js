@@ -26,10 +26,4 @@ export const CUSTOM_HOME_TITLE = '🎉 Hello Extensible React Template!'
 
 export {DEFAULT_LIMIT_VALUES, DEFAULT_SEARCH_PARAMS}
 
-export const PAYMENT_METHOD_TYPES = {
-    GIFTCARD: 'giftcard'
-}
-
-export const BLOCKED_PAYMENT_METHODS = [PAYMENT_METHOD_TYPES.GIFTCARD]
-
 export * from '@salesforce/retail-react-app/app/constants'
