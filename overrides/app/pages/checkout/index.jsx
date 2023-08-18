@@ -55,15 +55,7 @@ const Checkout = () => {
                 headers: {_sfdc_customer_id: usid},
                 body: {basketId: basket.basketId}
             })
-            // const adyenPaymentsService = new AdyenPaymentsService(
-            //     order,
-            //     adyenSession,
-            //     adyenStateData
-            // )
-            // const paymentResponse = await adyenPaymentsService.submitPayment()
-            // if (paymentResponse.resultCode === 'Authorised') {
-            //     navigate(`/checkout/confirmation/${order.orderNo}`)
-            // }
+            // TODO: Make the payment
         } catch (error) {
             const message = formatMessage({
                 id: 'checkout.message.generic_error',
