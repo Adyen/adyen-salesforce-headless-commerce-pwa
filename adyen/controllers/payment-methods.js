@@ -19,25 +19,7 @@ export async function fetch(req, res) {
         })
 
         const {
-            baskets: [
-                {
-                    orderTotal,
-                    currency,
-                    shipments: [
-                        {
-                            shippingAddress: {countryCode}
-                        }
-                    ]
-                }
-            ] = [
-                {
-                    shipments: [
-                        {
-                            shippingAddress: {}
-                        }
-                    ]
-                }
-            ]
+            baskets: [{orderTotal, currency}]
         } = await shopperCustomers.getCustomerBaskets({
             parameters: {
                 customerId: req.headers.customerid
@@ -47,7 +29,7 @@ export async function fetch(req, res) {
         const response = await checkout.paymentMethods({
             blockedPaymentMethods: BLOCKED_PAYMENT_METHODS,
             shopperLocale: req.body?.locale?.id,
-            countryCode,
+            countryCode: req.body?.countryCode,
             amount: {
                 value: getCurrencyValueForApi(orderTotal, currency),
                 currency: currency

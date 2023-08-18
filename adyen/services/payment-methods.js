@@ -8,10 +8,11 @@ export class AdyenPaymentMethodsService {
         this.apiClient = new ApiClient(this.baseUrl, token)
     }
 
-    async fetchPaymentMethods(customerId, locale) {
+    async fetchPaymentMethods(customerId, locale, countryCode) {
         const res = await this.apiClient.post({
             body: JSON.stringify({
-                locale
+                locale,
+                countryCode
             }),
             headers: {
                 customerid: customerId
