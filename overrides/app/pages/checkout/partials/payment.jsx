@@ -31,7 +31,10 @@ const Payment = () => {
     const {formatMessage} = useIntl()
     const {data: basket} = useCurrentBasket()
     const selectedShippingAddress = basket?.shipments && basket?.shipments[0]?.shippingAddress
-    const selectedBillingAddress = basket?.billingAddress
+    const selectedBillingAddress = {
+        ...selectedShippingAddress,
+        ...basket?.billingAddress
+    }
     const appliedPayment = basket?.paymentInstruments && basket?.paymentInstruments[0]
     const [billingSameAsShipping, setBillingSameAsShipping] = useState(true) // By default, have billing addr to be the same as shipping
     const {mutateAsync: addPaymentInstrumentToBasket} = useShopperBasketsMutation(
@@ -81,7 +84,6 @@ const Payment = () => {
 
     const onBillingSubmit = async () => {
         const isFormValid = await billingAddressForm.trigger()
-
         if (!isFormValid) {
             return
         }
@@ -175,7 +177,6 @@ const Payment = () => {
                         <ShippingAddressSelection
                             form={billingAddressForm}
                             selectedAddress={selectedBillingAddress}
-                            hideSubmitButton
                         />
                     )}
 
