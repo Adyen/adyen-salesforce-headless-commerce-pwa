@@ -15,6 +15,7 @@ const helmet = require('helmet')
 const bodyParser = require('body-parser')
 const PaymentMethodsController = require('../../adyen/controllers/payment-methods')
 const WebhookController = require('../../adyen/controllers/webhook')
+const { getPaymentMethods } = require("../../adyen/controllers/payment-methods");
 require('dotenv').config()
 
 const options = {
@@ -71,7 +72,7 @@ const {handler} = runtime.createHandler(options, (app) => {
     app.get('*', runtime.render)
 
     // Routes
-    app.post('/api/adyen/payment-methods', PaymentMethodsController.fetch)
+    app.post('/api/adyen/payment-methods', PaymentMethodsController.getPaymentMethods)
     app.post(
         '/api/adyen/webhook',
         WebhookController.authenticate,

@@ -4,7 +4,7 @@ import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 import {getCurrencyValueForApi} from '../utils/parsers'
 import {BLOCKED_PAYMENT_METHODS} from '../utils/constants'
 
-export async function fetch(req, res) {
+export async function getPaymentMethods(req, res) {
     const config = new Config()
     config.apiKey = process.env.ADYEN_API_KEY //REPLACE With YOUR API KEY
     const client = new Client({config})
