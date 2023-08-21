@@ -20,14 +20,12 @@ export const AdyenCheckoutProvider = ({children}) => {
     useEffect(() => {
         const fetchPaymentMethods = async () => {
             setFetching(true)
-            const {countryCode} = basket.shipments[0].shippingAddress
             const token = await getTokenWhenReady()
             const adyenPaymentMethodsService = new AdyenPaymentMethodsService(token)
             try {
                 const data = await adyenPaymentMethodsService.fetchPaymentMethods(
                     customerId,
                     locale,
-                    countryCode
                 )
                 setAdyenPaymentMethods(data ? data : {error: true})
                 setFetching(false)
@@ -37,11 +35,7 @@ export const AdyenCheckoutProvider = ({children}) => {
             }
         }
 
-        if (
-            !adyenPaymentMethods &&
-            !fetching &&
-            basket.shipments?.length &&
-            basket.shipments[0].shippingAddress
+        if (!adyenPaymentMethods && !fetching
         ) {
             fetchPaymentMethods()
         }
