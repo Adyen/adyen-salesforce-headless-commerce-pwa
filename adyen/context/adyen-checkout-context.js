@@ -2,13 +2,11 @@ import React, {useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 import {AdyenPaymentMethodsService} from '../services/payment-methods'
-import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 import {resolveLocaleFromUrl} from '@salesforce/retail-react-app/app/utils/site-utils'
 
 const AdyenCheckoutContext = React.createContext()
 
 export const AdyenCheckoutProvider = ({children}) => {
-    const {data: basket} = useCurrentBasket()
     const {getTokenWhenReady} = useAccessToken()
     const customerId = useCustomerId()
     const locale = resolveLocaleFromUrl(`${window.location.pathname}${window.location.search}`)
@@ -35,11 +33,10 @@ export const AdyenCheckoutProvider = ({children}) => {
             }
         }
 
-        if (!adyenPaymentMethods && !fetching
-        ) {
+        if (!adyenPaymentMethods && !fetching) {
             fetchPaymentMethods()
         }
-    }, [basket])
+    })
 
     const value = {
         adyenPaymentMethods,

@@ -26,11 +26,12 @@ export async function getPaymentMethods(req, res) {
             }
         })
 
-        const { locale } = req.body;
-        const countryCode = locale?.id?.slice(-2)
+        const { locale: { id: shopperLocale } } = req.body;
+        const countryCode = shopperLocale.slice(-2)
+
         const response = await checkout.paymentMethods({
             blockedPaymentMethods: BLOCKED_PAYMENT_METHODS,
-            shopperLocale: locale.id,
+            shopperLocale,
             countryCode,
             amount: {
                 value: getCurrencyValueForApi(orderTotal, currency),
