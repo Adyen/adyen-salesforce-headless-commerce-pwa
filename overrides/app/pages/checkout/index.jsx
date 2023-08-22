@@ -36,7 +36,7 @@ const Checkout = () => {
     const {data: basket} = useCurrentBasket()
     const [isLoading, setIsLoading] = useState(false)
     const {mutateAsync: createOrder} = useShopperOrdersMutation('createOrder')
-    const {adyenSession, adyenStateData} = useAdyenCheckout()
+    const {adyenPaymentMethods, adyenStateData} = useAdyenCheckout()
 
     useEffect(() => {
         if (error || step === 4) {
@@ -55,15 +55,7 @@ const Checkout = () => {
                 headers: {_sfdc_customer_id: usid},
                 body: {basketId: basket.basketId}
             })
-            const adyenPaymentsService = new AdyenPaymentsService(
-                order,
-                adyenSession,
-                adyenStateData
-            )
-            const paymentResponse = await adyenPaymentsService.submitPayment()
-            if (paymentResponse.resultCode === 'Authorised') {
-                navigate(`/checkout/confirmation/${order.orderNo}`)
-            }
+            // TODO: Make the payment
         } catch (error) {
             const message = formatMessage({
                 id: 'checkout.message.generic_error',
