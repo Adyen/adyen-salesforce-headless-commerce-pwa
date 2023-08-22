@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
+'use strict'
 const {
     readCredentials,
     DEFAULT_CLOUD_ORIGIN,
@@ -24,7 +26,7 @@ const dotenv = require('dotenv')
         })
     )
     const credentials = await readCredentials(getCredentialsFile(DEFAULT_CLOUD_ORIGIN))
-    const opts = {credentials, projectID: env.projectID, environmentID: env.environmentID}
+    const opts = {credentials, projectID: env.PROJECT_ID, environmentID: env.ENVIRONMENT_ID}
     const client = new CloudAPIClientCustom(opts)
     const data = await client.pushEnv(envParsed)
     const warnings = data.warnings || []
