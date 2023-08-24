@@ -13,9 +13,8 @@ const {isRemote} = require('@salesforce/pwa-kit-runtime/utils/ssr-server')
 const {getConfig} = require('@salesforce/pwa-kit-runtime/utils/ssr-config')
 const helmet = require('helmet')
 const bodyParser = require('body-parser')
-const SessionsController = require('../../adyen/controllers/sessions')
+const PaymentMethodsController = require('../../adyen/controllers/payment-methods')
 const WebhookController = require('../../adyen/controllers/webhook')
-// require('dotenv').config()
 
 const options = {
     // The build directory (an absolute path)
@@ -71,7 +70,7 @@ const {handler} = runtime.createHandler(options, (app) => {
     app.get('*', runtime.render)
 
     // Routes
-    app.post('/api/adyen/sessions', SessionsController.create)
+    app.post('/api/adyen/payment-methods', PaymentMethodsController.getPaymentMethods)
     app.post(
         '/api/adyen/webhook',
         WebhookController.authenticate,

@@ -25,13 +25,16 @@ import {API_ERROR_MESSAGE} from '@salesforce/retail-react-app/app/constants'
 import {useCheckout} from '@salesforce/retail-react-app/app/pages/checkout/util/checkout-context'
 import AdyenCheckout from '../../../../../adyen/components/AdyenCheckout'
 import {useAdyenCheckout} from '../../../../../adyen/context/adyen-checkout-context'
-import PAYMENT_METHODS from '../../../../../adyen/utils/paymentMethods'
+import {PAYMENT_METHODS} from '../../../../../adyen/utils/constants'
 
 const Payment = () => {
     const {formatMessage} = useIntl()
     const {data: basket} = useCurrentBasket()
     const selectedShippingAddress = basket?.shipments && basket?.shipments[0]?.shippingAddress
-    const selectedBillingAddress = basket?.billingAddress
+    const selectedBillingAddress = {
+        ...selectedShippingAddress,
+        ...basket?.billingAddress
+    }
     const appliedPayment = basket?.paymentInstruments && basket?.paymentInstruments[0]
     const [billingSameAsShipping, setBillingSameAsShipping] = useState(true) // By default, have billing addr to be the same as shipping
     const {mutateAsync: addPaymentInstrumentToBasket} = useShopperBasketsMutation(
@@ -52,7 +55,7 @@ const Payment = () => {
     }
 
     const {step, STEPS, goToStep, goToNextStep} = useCheckout()
-    const {adyenSession, adyenStateData} = useAdyenCheckout()
+    const {adyenPaymentMethods, adyenStateData} = useAdyenCheckout()
     const [isSubmittingPayment, setIsSubmittingPayment] = useState(false)
 
     const billingAddressForm = useForm({
@@ -81,7 +84,6 @@ const Payment = () => {
 
     const onBillingSubmit = async () => {
         const isFormValid = await billingAddressForm.trigger()
-
         if (!isFormValid) {
             return
         }
@@ -126,7 +128,9 @@ const Payment = () => {
             title={formatMessage({defaultMessage: 'Payment', id: 'checkout_payment.title.payment'})}
             editing={step === STEPS.PAYMENT}
             isLoading={
-                !adyenSession || billingAddressForm.formState.isSubmitting || isSubmittingPayment
+                !adyenPaymentMethods ||
+                billingAddressForm.formState.isSubmitting ||
+                isSubmittingPayment
             }
             disabled={appliedPayment == null}
             onEdit={() => goToStep(STEPS.PAYMENT)}
@@ -137,7 +141,7 @@ const Payment = () => {
                 </Box>
 
                 <Stack spacing={6}>
-                    {adyenSession && <AdyenCheckout />}
+                    <AdyenCheckout />
 
                     <Divider borderColor="gray.100" />
 
@@ -173,7 +177,6 @@ const Payment = () => {
                         <ShippingAddressSelection
                             form={billingAddressForm}
                             selectedAddress={selectedBillingAddress}
-                            hideSubmitButton
                         />
                     )}
 

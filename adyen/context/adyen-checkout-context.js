@@ -1,40 +1,45 @@
 import React, {useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
-import {AdyenSessionsService} from '../services/sessions'
-import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
-import { resolveLocaleFromUrl } from "@salesforce/retail-react-app/app/utils/site-utils";
+import {AdyenPaymentMethodsService} from '../services/payment-methods'
+import {resolveLocaleFromUrl} from '@salesforce/retail-react-app/app/utils/site-utils'
 
 const AdyenCheckoutContext = React.createContext()
 
 export const AdyenCheckoutProvider = ({children}) => {
-    const {data: basket} = useCurrentBasket()
     const {getTokenWhenReady} = useAccessToken()
     const customerId = useCustomerId()
     const locale = resolveLocaleFromUrl(`${window.location.pathname}${window.location.search}`)
 
-    const [adyenSession, setAdyenSession] = useState()
+    const [fetching, setFetching] = useState(false)
+    const [adyenPaymentMethods, setAdyenPaymentMethods] = useState()
     const [adyenStateData, setAdyenStateData] = useState()
 
     useEffect(() => {
-        const fetchSession = async () => {
+        const fetchPaymentMethods = async () => {
+            setFetching(true)
             const token = await getTokenWhenReady()
-            const adyenSessionsService = new AdyenSessionsService(token)
+            const adyenPaymentMethodsService = new AdyenPaymentMethodsService(token)
             try {
-                const data = await adyenSessionsService.createSession(customerId, locale)
-                setAdyenSession(data?.length ? data[0] : {error: true})
+                const data = await adyenPaymentMethodsService.fetchPaymentMethods(
+                    customerId,
+                    locale,
+                )
+                setAdyenPaymentMethods(data ? data : {error: true})
+                setFetching(false)
             } catch (error) {
-                setAdyenSession({error})
+                setAdyenPaymentMethods({error})
+                setFetching(false)
             }
         }
 
-        if (!adyenSession && basket?.shipments?.length && basket?.shipments[0].shippingAddress) {
-            fetchSession()
+        if (!adyenPaymentMethods && !fetching) {
+            fetchPaymentMethods()
         }
-    }, [basket])
+    })
 
     const value = {
-        adyenSession,
+        adyenPaymentMethods,
         adyenStateData,
         setAdyenStateData: (data) => setAdyenStateData(data)
     }
