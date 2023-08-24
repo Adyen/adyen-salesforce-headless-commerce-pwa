@@ -15,7 +15,7 @@ const helmet = require('helmet')
 const bodyParser = require('body-parser')
 const SessionsController = require('../../adyen/controllers/sessions')
 const WebhookController = require('../../adyen/controllers/webhook')
-require('dotenv').config()
+// require('dotenv').config()
 
 const options = {
     // The build directory (an absolute path)
