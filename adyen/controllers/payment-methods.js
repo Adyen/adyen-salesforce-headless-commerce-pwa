@@ -52,4 +52,4 @@ async function getPaymentMethods(req, res) {
         res.status(err.statusCode || 500).json(err.message)
     }
 }
-module.exports = getPaymentMethods
+module.exports = {getPaymentMethods}
