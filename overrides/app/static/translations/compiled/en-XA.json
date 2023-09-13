@@ -845,20 +845,6 @@
       "value": "]"
     }
   ],
-  "cart.info.removed_from_cart": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Īŧḗḗḿ řḗḗḿǿǿṽḗḗḓ ƒřǿǿḿ ƈȧȧřŧ"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
   "cart.recommended_products.title.may_also_like": [
     {
       "type": 0,
@@ -1559,20 +1545,6 @@
     {
       "type": 0,
       "value": "Ɓȧȧƈķ ŧǿǿ ƈȧȧřŧ"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "checkout_payment.action.remove": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Řḗḗḿǿǿṽḗḗ"
     },
     {
       "type": 0,
@@ -2675,94 +2647,6 @@
       "value": "]"
     }
   ],
-  "global.error.something_went_wrong": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Şǿǿḿḗḗŧħīƞɠ ẇḗḗƞŧ ẇřǿǿƞɠ. Ŧřẏ ȧȧɠȧȧīƞ!"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "global.info.added_to_wishlist": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 1,
-      "value": "quantity"
-    },
-    {
-      "type": 0,
-      "value": " "
-    },
-    {
-      "offset": 0,
-      "options": {
-        "one": {
-          "value": [
-            {
-              "type": 0,
-              "value": "īŧḗḗḿ"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 0,
-              "value": "īŧḗḗḿş"
-            }
-          ]
-        }
-      },
-      "pluralType": "cardinal",
-      "type": 6,
-      "value": "quantity"
-    },
-    {
-      "type": 0,
-      "value": " ȧȧḓḓḗḗḓ ŧǿǿ ẇīşħŀīşŧ"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "global.info.removed_from_wishlist": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Īŧḗḗḿ řḗḗḿǿǿṽḗḗḓ ƒřǿǿḿ ẇīşħŀīşŧ"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "global.link.added_to_wishlist.view_wishlist": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ṽīḗḗẇ"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
   "header.button.assistive_msg.logo": [
     {
       "type": 0,
@@ -2869,48 +2753,6 @@
     {
       "type": 0,
       "value": "Ḿẏ Ȧƈƈǿǿŭŭƞŧ"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "home.description.features": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ǿŭŭŧ-ǿǿƒ-ŧħḗḗ-ƀǿǿẋ ƒḗḗȧȧŧŭŭřḗḗş şǿǿ ŧħȧȧŧ ẏǿǿŭŭ ƒǿǿƈŭŭş ǿǿƞŀẏ ǿǿƞ ȧȧḓḓīƞɠ ḗḗƞħȧȧƞƈḗḗḿḗḗƞŧş."
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "home.description.here_to_help": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ƈǿǿƞŧȧȧƈŧ ǿǿŭŭř şŭŭƥƥǿǿřŧ şŧȧȧƒƒ."
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "home.description.here_to_help_line_2": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ŧħḗḗẏ ẇīŀŀ ɠḗḗŧ ẏǿǿŭŭ ŧǿǿ ŧħḗḗ řīɠħŧ ƥŀȧȧƈḗḗ."
     },
     {
       "type": 0,
@@ -3107,34 +2949,6 @@
       "value": "]"
     }
   ],
-  "home.heading.features": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ƒḗḗȧȧŧŭŭřḗḗş"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "home.heading.here_to_help": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ẇḗḗ'řḗḗ ħḗḗřḗḗ ŧǿǿ ħḗḗŀƥ"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
   "home.heading.shop_products": [
     {
       "type": 0,
@@ -3191,20 +3005,6 @@
       "value": "]"
     }
   ],
-  "home.link.contact_us": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ƈǿǿƞŧȧȧƈŧ Ŭş"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
   "home.link.get_started": [
     {
       "type": 0,
@@ -3227,20 +3027,6 @@
     {
       "type": 0,
       "value": "Řḗḗȧȧḓ ḓǿǿƈş"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "home.title.react_starter_store": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ŧħḗḗ Řḗḗȧȧƈŧ ƤẆȦ Şŧȧȧřŧḗḗř Şŧǿǿřḗḗ ƒǿǿř Řḗḗŧȧȧīŀ"
     },
     {
       "type": 0,

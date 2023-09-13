@@ -1,10 +1,11 @@
-import {CheckoutAPI, Client, Config} from '@adyen/api-library'
-import {ShopperCustomers} from 'commerce-sdk-isomorphic'
-import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
-import {getCurrencyValueForApi} from '../utils/parsers'
-import {BLOCKED_PAYMENT_METHODS} from '../utils/constants'
-
-export async function getPaymentMethods(req, res) {
+/* eslint-disable @typescript-eslint/no-var-requires */
+'use strict'
+const {CheckoutAPI, Client, Config} = require('@adyen/api-library')
+const {ShopperCustomers} = require('commerce-sdk-isomorphic')
+const {getConfig} = require('@salesforce/pwa-kit-runtime/utils/ssr-config')
+const {BLOCKED_PAYMENT_METHODS} = import('../utils/constants.mjs')
+const {getCurrencyValueForApi} = import('../utils/parsers.mjs')
+async function getPaymentMethods(req, res) {
     const config = new Config()
     config.apiKey = process.env.ADYEN_API_KEY //REPLACE With YOUR API KEY
     const client = new Client({config})
@@ -26,7 +27,9 @@ export async function getPaymentMethods(req, res) {
             }
         })
 
-        const { locale: { id: shopperLocale } } = req.body;
+        const {
+            locale: {id: shopperLocale}
+        } = req.body
         const countryCode = shopperLocale?.slice(-2)
 
         const response = await checkout.paymentMethods({
@@ -49,3 +52,4 @@ export async function getPaymentMethods(req, res) {
         res.status(err.statusCode || 500).json(err.message)
     }
 }
+module.exports = {getPaymentMethods}

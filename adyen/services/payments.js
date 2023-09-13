@@ -1,6 +1,6 @@
 import AdyenCheckout from '@adyen/adyen-web'
-import { formatAddressInAdyenFormat } from "../utils/formatAddress";
-import { getCurrencyValueForApi } from "../utils/parsers";
+import {formatAddressInAdyenFormat} from '../utils/formatAddress.mjs'
+import {getCurrencyValueForApi} from '../utils/parsers.mjs'
 
 export class AdyenPaymentsService {
     order = null

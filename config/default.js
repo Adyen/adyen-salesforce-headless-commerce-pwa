@@ -6,7 +6,8 @@
  */
 /* eslint-disable @typescript-eslint/no-var-requires */
 const sites = require('./sites.js')
-require('dotenv').config()
+// FIXME:uncomment this when running on local
+// require('dotenv').config()
 
 module.exports = {
     app: {
@@ -68,7 +69,7 @@ module.exports = {
     ],
     // Additional parameters that configure Express app behavior.
     ssrParameters: {
-        ssrFunctionNodeVersion: '16.x',
+        ssrFunctionNodeVersion: '18.x',
         proxyConfigs: [
             {
                 host: process.env.SCAPI_URL,

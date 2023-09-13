@@ -1,4 +1,4 @@
-import currencyList from './currencyList.json'
+import currencyList from './currencyList.mjs'
 
 const INVALID_CURRENCY_ERROR = 'invalid currency!'
 // converts the currency value for the Adyen Checkout API
