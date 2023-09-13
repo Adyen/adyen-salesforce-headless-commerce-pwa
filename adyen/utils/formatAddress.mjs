@@ -1,4 +1,4 @@
-const formatAddressInAdyenFormat = (address) => {
+export const formatAddressInAdyenFormat = (address) => {
     return {
         city: address?.city || '',
         country: address?.countryCode || '',
@@ -9,4 +9,3 @@ const formatAddressInAdyenFormat = (address) => {
     }
 }
 
-module.exports = {formatAddressInAdyenFormat}

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 var config = require('@salesforce/pwa-kit-dev/configs/webpack/config')
 var configNames = require('@salesforce/pwa-kit-dev/configs/webpack/config-names')
 
