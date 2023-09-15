@@ -14,8 +14,8 @@
     "@salesforce/retail-react-app": "1.0.1",
     "css-loader": "^6.8.1",
     "dotenv": "^16.3.1",
-    "dotenv-webpack": "^8.0.1",
-    "style-loader": "^3.3.3"
+    "style-loader": "^3.3.3",
+    "yargs": "^17.7.2"
   },
   "scripts": {
     "analyze-build": "cross-env MOBIFY_ANALYZE=true npm run build",
@@ -38,7 +38,10 @@
     "test:lighthouse": "cross-env NODE_ENV=production lhci autorun --config=tests/lighthouserc.js",
     "test:max-file-size": "npm run build && bundlesize",
     "push-env": "node ./adyen/scripts/push-env.js",
-    "get-env": "node ./adyen/scripts/get-env.js"
+    "get-env": "node ./adyen/scripts/get-env.js",
+    "dot-env": "node ./adyen/scripts/dot-env.js",
+    "start:env": "npm run dot-env -- -p=npm run start",
+    "push:env": "npm run dot-env -- -p=npm run push"
   },
   "bundlesize": [
     {
