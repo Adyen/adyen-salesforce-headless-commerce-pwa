@@ -6,8 +6,6 @@
  */
 /* eslint-disable @typescript-eslint/no-var-requires */
 const sites = require('./sites.js')
-// FIXME:uncomment this when running on local
-// require('dotenv').config()
 
 module.exports = {
     app: {
