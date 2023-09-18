@@ -15,6 +15,7 @@ const helmet = require('helmet')
 const bodyParser = require('body-parser')
 const PaymentMethodsController = require('../../adyen/controllers/payment-methods')
 const PaymentsDetailsController = require('../../adyen/controllers/payments-details')
+const PaymentsController = require('../../adyen/controllers/payments')
 const WebhookController = require('../../adyen/controllers/webhook')
 
 const options = {
@@ -73,6 +74,7 @@ const {handler} = runtime.createHandler(options, (app) => {
     // Routes
     app.post('/api/adyen/payment-methods', PaymentMethodsController.getPaymentMethods)
     app.post('/api/adyen/payments-details', PaymentsDetailsController.sendPaymentDetails)
+    app.post('/api/adyen/payments', PaymentsController.sendPayments)
     app.post(
         '/api/adyen/webhook',
         WebhookController.authenticate,
