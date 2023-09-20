@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 'use strict'
+import { getCurrencyValueForApi } from "../utils/parsers.mjs";
+import { BLOCKED_PAYMENT_METHODS } from "../utils/constants.mjs";
+
 const {CheckoutAPI, Client, Config} = require('@adyen/api-library')
 const {ShopperCustomers} = require('commerce-sdk-isomorphic')
 const {getConfig} = require('@salesforce/pwa-kit-runtime/utils/ssr-config')
-const {BLOCKED_PAYMENT_METHODS} = import('../utils/constants.mjs')
-const {getCurrencyValueForApi} = import('../utils/parsers.mjs')
+
 async function getPaymentMethods(req, res) {
     const config = new Config()
     config.apiKey = process.env.ADYEN_API_KEY //REPLACE With YOUR API KEY
@@ -49,6 +51,7 @@ async function getPaymentMethods(req, res) {
             ADYEN_ENVIRONMENT: process.env.ADYEN_ENVIRONMENT
         })
     } catch (err) {
+        console.log(err);
         res.status(err.statusCode || 500).json(err.message)
     }
 }

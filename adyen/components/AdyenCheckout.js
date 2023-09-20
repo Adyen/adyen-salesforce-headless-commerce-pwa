@@ -23,17 +23,19 @@ const AdyenCheckoutComponent = () => {
                 },
                 onChange: (state) => {
                     if (state.isValid) {
-                        console.log(state)
                         setAdyenStateData(state.data)
                     }
                 },
                 onPaymentCompleted: (response, _component) => {
                     // navigate(getRedirectUrl(response.resultCode), { replace: true }),
-                    console.log(response)
+                    console.log('onPaymentCompleted', response)
                 },
                 onError: (error, _component) => {
                     //navigate(`/status/error?reason=${error.message}`, { replace: true });
-                    console.log(error)
+                    console.log('onError', error)
+                },
+                onAdditionalDetails(state, element) {
+                    console.log('onAdditionalDetails', state);
                 }
             })
 

@@ -1,37 +1,27 @@
-import AdyenCheckout from '@adyen/adyen-web'
-import {formatAddressInAdyenFormat} from '../utils/formatAddress.mjs'
-import {getCurrencyValueForApi} from '../utils/parsers.mjs'
+import {ApiClient} from './api'
 
 export class AdyenPaymentsService {
-    order = null
-    adyenSession = null
-    adyenStateData = null
+    baseUrl = '/api/adyen/payments'
+    apiClient = null
 
-    constructor(order, adyenSession, adyenStateData) {
-        this.order = order
-        this.adyenSession = adyenSession
-        this.adyenStateData = adyenStateData
+    constructor(token, order, adyenStateData) {
+        this.apiClient = new ApiClient(this.baseUrl, token)
     }
 
-    async submitPayment() {
-        const {orderTotal, currency} = this.order
-        const checkout = await AdyenCheckout({
-            environment: this.adyenSession.ADYEN_ENVIRONMENT,
-            clientKey: this.adyenSession.ADYEN_CLIENT_KEY,
-            session: {
-                id: this.adyenSession.id,
-                sessionData: this.adyenSession.sessionData
+    async submitPayment(order, adyenStateData, customerId) {
+        const res = await this.apiClient.post({
+            body: JSON.stringify({
+                data: adyenStateData
+            }),
+            headers: {
+                customerid: customerId,
+                orderNo: order.orderNo
             }
         })
-        return await checkout.session.submitPayment({
-            ...this.adyenStateData,
-            billingAddress: formatAddressInAdyenFormat(this.order.billingAddress),
-            deliveryAddress: formatAddressInAdyenFormat(this.order.shipments[0].shippingAddress),
-            reference: this.order.orderNo,
-            amount: {
-                value: getCurrencyValueForApi(orderTotal, currency),
-                currency
-            }
-        })
+        if (res.status >= 300) {
+            throw new Error(res)
+        } else {
+            return await res.json()
+        }
     }
 }

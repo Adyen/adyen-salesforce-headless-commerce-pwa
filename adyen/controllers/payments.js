@@ -1,16 +1,62 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 'use strict'
+import {formatAddressInAdyenFormat} from "../utils/formatAddress.mjs";
+import {getCurrencyValueForApi} from "../utils/parsers.mjs";
+import {APPLICATION_VERSION, RESULT_CODES} from "../utils/constants.mjs";
+
 const {CheckoutAPI, Client, Config} = require('@adyen/api-library')
 const {ShopperOrders} = require('commerce-sdk-isomorphic')
 const {getConfig} = require('@salesforce/pwa-kit-runtime/utils/ssr-config')
-const {formatAddressInAdyenFormat} = import('../utils/formatAddress.mjs')
-const {getCurrencyValueForApi} = import('../utils/parsers.mjs')
-const {APPLICATION_VERSION} = import('../utils/constants.mjs')
 
 const errorMessages = {
     AMOUNT_NOT_CORRECT: 'amount not correct',
     INVALID_ORDER: 'order is invalid'
 }
+
+function createCheckoutResponse(response) {
+    if (
+      [
+          RESULT_CODES.AUTHORISED,
+          RESULT_CODES.REFUSED,
+          RESULT_CODES.ERROR,
+          RESULT_CODES.CANCELLED,
+      ].includes(response.resultCode)
+    ) {
+        return {
+            isFinal: true,
+            isSuccessful:
+              response.resultCode === RESULT_CODES.AUTHORISED,
+            merchantReference: response.merchantReference,
+        };
+    }
+
+    if (
+      [
+          RESULT_CODES.REDIRECTSHOPPER,
+          RESULT_CODES.IDENTIFYSHOPPER,
+          RESULT_CODES.CHALLENGESHOPPER,
+          RESULT_CODES.PRESENTTOSHOPPER,
+          RESULT_CODES.PENDING,
+      ].includes(response.resultCode)
+    ) {
+        return {
+            isFinal: false,
+            action: response.action,
+        };
+    }
+
+    if (response.resultCode === RESULT_CODES.RECEIVED) {
+        return {
+            isFinal: false,
+        };
+    }
+
+    return {
+        isFinal: true,
+        isSuccessful: false,
+    };
+}
+
 async function sendPayments(req, res) {
     const config = new Config()
     config.apiKey = process.env.ADYEN_API_KEY
@@ -28,14 +74,13 @@ async function sendPayments(req, res) {
 
         const order = await shopperOrders.getOrder({
             parameters: {
-                orderNo: req.headers.orderNo
+                orderNo: req.headers.orderno
             }
         })
 
-        if (order.customerInfo?.customerId !== req.headers.customerId) {
+        if (order.customerInfo?.customerId !== req.headers.customerid) {
             throw new Error(errorMessages.INVALID_ORDER)
         }
-
 
         const {data} = req.body
         const response = await checkout.payments({
@@ -49,10 +94,10 @@ async function sendPayments(req, res) {
                 currency: order.currency
             },
             applicationInfo: getApplicationInfo(),
-            returnUrl: `${appConfig.baseUri}/checkout/confirmation/${order.orderNo}`
+            returnUrl: `http://localhost:3000/checkout/confirmation/${order.orderNo}`
         })
 
-        res.json(response)
+        res.json(createCheckoutResponse(response))
     } catch (err) {
         res.status(err.statusCode || 500).json(err.message)
     }
