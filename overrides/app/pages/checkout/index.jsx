@@ -19,6 +19,7 @@ import OrderSummary from '@salesforce/retail-react-app/app/components/order-summ
 import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 import {useShopperOrdersMutation} from '@salesforce/commerce-sdk-react'
+import {useSearchParams} from '@salesforce/retail-react-app/app/hooks/use-search-params'
 import Payment from './partials/payment'
 import {
     AdyenCheckoutProvider,
@@ -26,6 +27,9 @@ import {
 } from '../../../../adyen/context/adyen-checkout-context'
 import {AdyenPaymentsService} from '../../../../adyen/services/payments'
 import AdyenCheckout from "@adyen/adyen-web";
+import CheckoutSkeleton from "@salesforce/retail-react-app/app/pages/checkout/partials/checkout-skeleton";
+import {useCurrentCustomer} from '@salesforce/retail-react-app/app/hooks/use-current-customer'
+import { AdyenPaymentsDetailsService } from "../../../../adyen/services/payments-details";
 
 const Checkout = () => {
     const {formatMessage} = useIntl()
@@ -38,12 +42,25 @@ const Checkout = () => {
     const [isLoading, setIsLoading] = useState(false)
     const {mutateAsync: createOrder} = useShopperOrdersMutation('createOrder')
     const {adyenStateData, adyenPaymentMethods} = useAdyenCheckout()
+    const [searchParams] = useSearchParams()
 
     useEffect(() => {
         if (error || step === 4) {
             window.scrollTo({top: 0})
         }
     }, [error, step])
+
+    useEffect( () => {
+        const sendPaymentsDetails = async (redirectResult) => {
+            const token = await getTokenWhenReady()
+            const adyenPaymentsDetailsService = new AdyenPaymentsDetailsService(token)
+            const response = await adyenPaymentsDetailsService.submitPaymentsDetails(redirectResult, customerId)
+            console.log(response);
+        }
+        if (searchParams.redirectResult) {
+            sendPaymentsDetails(searchParams.redirectResult)
+        }
+    }, [searchParams])
 
     const handleAction = async (adyenAction) => {
         const checkout = await AdyenCheckout({
@@ -166,16 +183,23 @@ const Checkout = () => {
                     </Container>
                 </Box>
             )}
-            <div id="action-container"></div>
         </Box>
     )
 }
 
 const CheckoutContainer = () => {
+    const {data: customer} = useCurrentCustomer()
+    const {data: basket} = useCurrentBasket()
+
     return (
         <AdyenCheckoutProvider>
             <CheckoutProvider>
-                <Checkout />
+                {
+                  !customer || !customer.customerId || !basket || !basket.basketId
+                    ? <CheckoutSkeleton />
+                    : <Checkout />
+                }
+                <div id="action-container"></div>
             </CheckoutProvider>
         </AdyenCheckoutProvider>
     )

@@ -72,8 +72,8 @@ const {handler} = runtime.createHandler(options, (app) => {
     app.get('*', runtime.render)
 
     // Routes
-    app.post('/api/adyen/payment-methods', PaymentMethodsController.getPaymentMethods)
-    app.post('/api/adyen/payments-details', PaymentsDetailsController.sendPaymentDetails)
+    app.post('/api/adyen/paymentMethods', PaymentMethodsController.getPaymentMethods)
+    app.post('/api/adyen/payments/details', PaymentsDetailsController.sendPaymentDetails)
     app.post('/api/adyen/payments', PaymentsController.sendPayments)
     app.post(
         '/api/adyen/webhook',

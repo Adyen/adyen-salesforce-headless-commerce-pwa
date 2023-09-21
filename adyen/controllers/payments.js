@@ -94,7 +94,7 @@ async function sendPayments(req, res) {
                 currency: order.currency
             },
             applicationInfo: getApplicationInfo(),
-            returnUrl: `http://localhost:3000/checkout/confirmation/${order.orderNo}`
+            returnUrl: `http://localhost:3000/checkout`
         })
 
         res.json(createCheckoutResponse(response))
