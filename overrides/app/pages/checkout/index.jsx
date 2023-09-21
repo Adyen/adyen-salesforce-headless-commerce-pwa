@@ -7,7 +7,6 @@
 import React, { useEffect, useState } from "react";
 import {FormattedMessage, useIntl} from 'react-intl'
 import {Alert, AlertIcon, Box, Button, Container, Grid, GridItem, Stack} from '@chakra-ui/react'
-import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
 import {
     CheckoutProvider,
     useCheckout
@@ -17,32 +16,23 @@ import ShippingAddress from '@salesforce/retail-react-app/app/pages/checkout/par
 import ShippingOptions from '@salesforce/retail-react-app/app/pages/checkout/partials/shipping-options'
 import OrderSummary from '@salesforce/retail-react-app/app/components/order-summary'
 import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
-import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
+import {useCustomerId} from '@salesforce/commerce-sdk-react'
 import {useShopperOrdersMutation} from '@salesforce/commerce-sdk-react'
-import {useSearchParams} from '@salesforce/retail-react-app/app/hooks/use-search-params'
 import Payment from './partials/payment'
 import {
     AdyenCheckoutProvider,
     useAdyenCheckout
 } from '../../../../adyen/context/adyen-checkout-context'
-import {AdyenPaymentsService} from '../../../../adyen/services/payments'
-import AdyenCheckout from "@adyen/adyen-web";
-import CheckoutSkeleton from "@salesforce/retail-react-app/app/pages/checkout/partials/checkout-skeleton";
-import {useCurrentCustomer} from '@salesforce/retail-react-app/app/hooks/use-current-customer'
-import { AdyenPaymentsDetailsService } from "../../../../adyen/services/payments-details";
 
 const Checkout = () => {
     const {formatMessage} = useIntl()
-    const navigate = useNavigation()
-    const {getTokenWhenReady} = useAccessToken()
     const customerId = useCustomerId()
     const {step} = useCheckout()
     const [error, setError] = useState()
     const {data: basket} = useCurrentBasket()
     const [isLoading, setIsLoading] = useState(false)
     const {mutateAsync: createOrder} = useShopperOrdersMutation('createOrder')
-    const {adyenStateData, adyenPaymentMethods} = useAdyenCheckout()
-    const [searchParams] = useSearchParams()
+    const {adyenDropinInstance} = useAdyenCheckout()
 
     useEffect(() => {
         if (error || step === 4) {
@@ -50,43 +40,19 @@ const Checkout = () => {
         }
     }, [error, step])
 
-    useEffect( () => {
-        const sendPaymentsDetails = async (redirectResult) => {
-            const token = await getTokenWhenReady()
-            const adyenPaymentsDetailsService = new AdyenPaymentsDetailsService(token)
-            const response = await adyenPaymentsDetailsService.submitPaymentsDetails(redirectResult, customerId)
-            console.log(response);
-        }
-        if (searchParams.redirectResult) {
-            sendPaymentsDetails(searchParams.redirectResult)
-        }
-    }, [searchParams])
-
-    const handleAction = async (adyenAction) => {
-        const checkout = await AdyenCheckout({
-            environment: adyenPaymentMethods.ADYEN_ENVIRONMENT,
-            clientKey: adyenPaymentMethods.ADYEN_CLIENT_KEY,
-        })
-        checkout.createFromAction(adyenAction).mount("#action-container");
-    }
-
     const submitOrder = async () => {
         setIsLoading(true)
         try {
-            const order = await createOrder({
-                headers: {_sfdc_customer_id: customerId},
-                body: {basketId: basket.basketId}
-            })
-            const token = await getTokenWhenReady()
-            const adyenPaymentService = new AdyenPaymentsService(token)
-            const paymentsResponse = await adyenPaymentService.submitPayment(order, adyenStateData, customerId)
-            console.log(paymentsResponse)
-            if (paymentsResponse.isSuccessful) {
-                navigate(`/checkout/confirmation/${order.orderNo}`)
-            } else if (!paymentsResponse.isFinal && paymentsResponse.action) {
-                await handleAction(paymentsResponse.action);
+            if (basket) {
+                const order = await createOrder({
+                    headers: {_sfdc_customer_id: customerId},
+                    body: {basketId: basket.basketId}
+                })
+                localStorage.setItem('orderNumber', order.orderNo);
+                adyenDropinInstance.submit()
             }
         } catch (error) {
+            console.log(error)
             const message = formatMessage({
                 id: 'checkout.message.generic_error',
                 defaultMessage: 'An unexpected error occurred during checkout.'
@@ -188,18 +154,10 @@ const Checkout = () => {
 }
 
 const CheckoutContainer = () => {
-    const {data: customer} = useCurrentCustomer()
-    const {data: basket} = useCurrentBasket()
-
     return (
         <AdyenCheckoutProvider>
             <CheckoutProvider>
-                {
-                  !customer || !customer.customerId || !basket || !basket.basketId
-                    ? <CheckoutSkeleton />
-                    : <Checkout />
-                }
-                <div id="action-container"></div>
+                <Checkout />
             </CheckoutProvider>
         </AdyenCheckoutProvider>
     )

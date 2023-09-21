@@ -4,18 +4,18 @@ export class AdyenPaymentsService {
     baseUrl = '/api/adyen/payments'
     apiClient = null
 
-    constructor(token, order, adyenStateData) {
+    constructor(token) {
         this.apiClient = new ApiClient(this.baseUrl, token)
     }
 
-    async submitPayment(order, adyenStateData, customerId) {
+    async submitPayment(orderNumber, adyenStateData, customerId) {
         const res = await this.apiClient.post({
             body: JSON.stringify({
                 data: adyenStateData
             }),
             headers: {
                 customerid: customerId,
-                orderNo: order.orderNo
+                orderNo: orderNumber
             }
         })
         if (res.status >= 300) {

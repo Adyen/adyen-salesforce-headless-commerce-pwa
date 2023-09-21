@@ -8,10 +8,10 @@ export class AdyenPaymentsDetailsService {
     this.apiClient = new ApiClient(this.baseUrl, token)
   }
 
-  async submitPaymentsDetails(redirectResult, customerId) {
+  async submitPaymentsDetails(details, customerId) {
     const res = await this.apiClient.post({
       body: JSON.stringify({
-        details: redirectResult
+        details
       }),
       headers: {
         customerid: customerId,

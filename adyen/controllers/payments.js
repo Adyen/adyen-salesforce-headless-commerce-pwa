@@ -94,7 +94,13 @@ async function sendPayments(req, res) {
                 currency: order.currency
             },
             applicationInfo: getApplicationInfo(),
-            returnUrl: `http://localhost:3000/checkout`
+            authenticationData: {
+                threeDSRequestData: {
+                    nativeThreeDS: 'preferred',
+                }
+            },
+            channel: 'Web',
+            returnUrl: `${data.origin}/checkout`,
         })
 
         res.json(createCheckoutResponse(response))

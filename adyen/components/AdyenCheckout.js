@@ -1,11 +1,23 @@
 import React, {useRef, useEffect} from 'react'
 import AdyenCheckout from '@adyen/adyen-web'
 import '@adyen/adyen-web/dist/adyen.css'
+import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 import {useAdyenCheckout} from '../context/adyen-checkout-context'
+import { AdyenPaymentsDetailsService } from "../services/payments-details";
+import { AdyenPaymentsService } from "../services/payments";
 
 const AdyenCheckoutComponent = () => {
-    const {adyenPaymentMethods, setAdyenStateData} = useAdyenCheckout()
+    const {adyenPaymentMethods, setAdyenStateData, setAdyenDropinInstance} = useAdyenCheckout()
     const paymentContainer = useRef(null)
+    const {getTokenWhenReady} = useAccessToken()
+    const customerId = useCustomerId()
+
+    const sendPaymentsDetails = async (customerId, details) => {
+        const token = await getTokenWhenReady()
+        const adyenPaymentsDetailsService = new AdyenPaymentsDetailsService(token)
+        const response = await adyenPaymentsDetailsService.submitPaymentsDetails(details, customerId)
+        console.log(response);
+    }
 
     useEffect(() => {
         const createCheckout = async () => {
@@ -34,12 +46,31 @@ const AdyenCheckoutComponent = () => {
                     //navigate(`/status/error?reason=${error.message}`, { replace: true });
                     console.log('onError', error)
                 },
-                onAdditionalDetails(state, element) {
+                async onAdditionalDetails(state, element) {
                     console.log('onAdditionalDetails', state);
+                    const token = await getTokenWhenReady()
+                    const paymentsDetailsResponse = await sendPaymentsDetails(token, customerId, state.data.details)
+                    if (paymentsDetailsResponse.action) {
+                        element.handleAction(paymentsDetailsResponse.action)
+                    } else {
+
+                    }
+                },
+                async onSubmit(state, element) {
+                    const token = await getTokenWhenReady()
+                    const orderNumber = localStorage.getItem('orderNumber');
+                    const adyenPaymentService = new AdyenPaymentsService(token)
+                    const paymentsResponse = await adyenPaymentService.submitPayment(orderNumber, state.data, customerId)
+                    if (paymentsResponse.action) {
+                        element.handleAction(paymentsResponse.action)
+                    } else {
+
+                    }
                 }
             })
 
-            checkout.create('dropin').mount(paymentContainer.current)
+            const dropin = checkout.create('dropin').mount(paymentContainer.current)
+            setAdyenDropinInstance(dropin)
         }
         if (adyenPaymentMethods && paymentContainer.current) {
             createCheckout()
