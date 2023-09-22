@@ -12,7 +12,7 @@ const AdyenCheckoutComponent = () => {
     const {getTokenWhenReady} = useAccessToken()
     const customerId = useCustomerId()
 
-    const sendPaymentsDetails = async (customerId, details) => {
+    const sendPaymentsDetails = async (details) => {
         const token = await getTokenWhenReady()
         const adyenPaymentsDetailsService = new AdyenPaymentsDetailsService(token)
         const response = await adyenPaymentsDetailsService.submitPaymentsDetails(details, customerId)
@@ -48,8 +48,7 @@ const AdyenCheckoutComponent = () => {
                 },
                 async onAdditionalDetails(state, element) {
                     console.log('onAdditionalDetails', state);
-                    const token = await getTokenWhenReady()
-                    const paymentsDetailsResponse = await sendPaymentsDetails(token, customerId, state.data.details)
+                    const paymentsDetailsResponse = await sendPaymentsDetails(state.data.details)
                     if (paymentsDetailsResponse.action) {
                         element.handleAction(paymentsDetailsResponse.action)
                     } else {
