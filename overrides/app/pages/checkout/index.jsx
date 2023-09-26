@@ -20,19 +20,21 @@ import {useCustomerId} from '@salesforce/commerce-sdk-react'
 import {useShopperOrdersMutation} from '@salesforce/commerce-sdk-react'
 import Payment from './partials/payment'
 import {
-    AdyenCheckoutProvider,
-    useAdyenCheckout
-} from '../../../../adyen/context/adyen-checkout-context'
+    AdyenCheckoutProvider, useAdyenCheckout
+} from "../../../../adyen/context/adyen-checkout-context";
+import { useCurrentCustomer } from "@salesforce/retail-react-app/app/hooks/use-current-customer";
+import AdyenPayment from "../../../../adyen/components/AdyenPayment";
+import AdyenCheckout from "../../../../adyen/components/AdyenCheckout";
 
 const Checkout = () => {
     const {formatMessage} = useIntl()
     const customerId = useCustomerId()
     const {step} = useCheckout()
+    const {setOrderNumber, setAdyenDropinInstance} = useAdyenCheckout()
     const [error, setError] = useState()
     const {data: basket} = useCurrentBasket()
     const [isLoading, setIsLoading] = useState(false)
     const {mutateAsync: createOrder} = useShopperOrdersMutation('createOrder')
-    const {adyenDropinInstance} = useAdyenCheckout()
 
     useEffect(() => {
         if (error || step === 4) {
@@ -48,8 +50,8 @@ const Checkout = () => {
                     headers: {_sfdc_customer_id: customerId},
                     body: {basketId: basket.basketId}
                 })
-                localStorage.setItem('orderNumber', order.orderNo);
-                adyenDropinInstance.submit()
+                sessionStorage.setItem('orderNumber', order.orderNo)
+                setOrderNumber(order.orderNo)
             }
         } catch (error) {
             console.log(error)
@@ -153,11 +155,20 @@ const Checkout = () => {
     )
 }
 
+const CheckoutChildren = () => {
+    const {orderNumber} = useAdyenCheckout()
+    return (
+      orderNumber
+        ? <AdyenPayment />
+        : <Checkout />
+    )
+}
+
 const CheckoutContainer = () => {
     return (
         <AdyenCheckoutProvider>
             <CheckoutProvider>
-                <Checkout />
+                <CheckoutChildren />
             </CheckoutProvider>
         </AdyenCheckoutProvider>
     )

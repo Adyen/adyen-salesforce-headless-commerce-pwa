@@ -7,7 +7,7 @@ import { AdyenPaymentsDetailsService } from "../services/payments-details";
 import { AdyenPaymentsService } from "../services/payments";
 
 const AdyenCheckoutComponent = () => {
-    const {adyenPaymentMethods, setAdyenStateData, setAdyenDropinInstance} = useAdyenCheckout()
+    const {adyenPaymentMethods, setAdyenStateData, setAdyenCheckoutInstance} = useAdyenCheckout()
     const paymentContainer = useRef(null)
     const {getTokenWhenReady} = useAccessToken()
     const customerId = useCustomerId()
@@ -49,7 +49,7 @@ const AdyenCheckoutComponent = () => {
                 async onAdditionalDetails(state, element) {
                     console.log('onAdditionalDetails', state);
                     const paymentsDetailsResponse = await sendPaymentsDetails(state.data.details)
-                    if (paymentsDetailsResponse.action) {
+                    if (paymentsDetailsResponse?.action) {
                         element.handleAction(paymentsDetailsResponse.action)
                     } else {
 
@@ -57,10 +57,10 @@ const AdyenCheckoutComponent = () => {
                 },
                 async onSubmit(state, element) {
                     const token = await getTokenWhenReady()
-                    const orderNumber = localStorage.getItem('orderNumber');
+                    const orderNumber = sessionStorage.getItem('orderNumber')
                     const adyenPaymentService = new AdyenPaymentsService(token)
                     const paymentsResponse = await adyenPaymentService.submitPayment(orderNumber, state.data, customerId)
-                    if (paymentsResponse.action) {
+                    if (paymentsResponse?.action) {
                         element.handleAction(paymentsResponse.action)
                     } else {
 
@@ -68,8 +68,8 @@ const AdyenCheckoutComponent = () => {
                 }
             })
 
-            const dropin = checkout.create('dropin').mount(paymentContainer.current)
-            setAdyenDropinInstance(dropin)
+            checkout.create('dropin').mount(paymentContainer.current)
+            setAdyenCheckoutInstance(checkout)
         }
         if (adyenPaymentMethods && paymentContainer.current) {
             createCheckout()
