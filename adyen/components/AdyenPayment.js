@@ -29,11 +29,13 @@ const AdyenPayment = () => {
     const token = await getTokenWhenReady()
     const adyenPaymentsDetailsService = new AdyenPaymentsDetailsService(token)
     const paymentsDetailsResponse = await adyenPaymentsDetailsService.submitPaymentsDetails(details, customerId)
-    if (paymentsDetailsResponse?.action) {
-      await handleAction(paymentsDetailsResponse.action)
-    } else {
+    if (paymentsDetailsResponse?.isSuccessful) {
       sessionStorage.removeItem('orderNumber')
       navigate(`/checkout/confirmation/${paymentsDetailsResponse.merchantReference}`)
+    } else if (paymentsDetailsResponse?.action) {
+      await handleAction(paymentsDetailsResponse.action)
+    } else {
+      // error page
     }
   }
 
@@ -42,11 +44,13 @@ const AdyenPayment = () => {
     const orderNumber = sessionStorage.getItem('orderNumber')
     const adyenPaymentService = new AdyenPaymentsService(token)
     const paymentsResponse = await adyenPaymentService.submitPayment(orderNumber, adyenStateData, customerId)
-    if (paymentsResponse?.action) {
-      await handleAction(paymentsResponse.action)
-    } else {
+    if (paymentsResponse?.isSuccessful) {
       sessionStorage.removeItem('orderNumber')
       navigate(`/checkout/confirmation/${paymentsResponse.merchantReference}`)
+    } else if (paymentsResponse?.action) {
+      await handleAction(paymentsResponse.action)
+    } else {
+      // error page
     }
   }
 
