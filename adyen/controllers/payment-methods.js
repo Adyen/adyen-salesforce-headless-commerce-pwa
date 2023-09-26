@@ -51,7 +51,6 @@ async function getPaymentMethods(req, res) {
             ADYEN_ENVIRONMENT: process.env.ADYEN_ENVIRONMENT
         })
     } catch (err) {
-        console.log(err);
         res.status(err.statusCode || 500).json(err.message)
     }
 }
