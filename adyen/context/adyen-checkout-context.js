@@ -14,7 +14,6 @@ export const AdyenCheckoutProvider = ({children}) => {
     const [fetching, setFetching] = useState(false)
     const [adyenPaymentMethods, setAdyenPaymentMethods] = useState()
     const [adyenStateData, setAdyenStateData] = useState()
-    const [adyenCheckoutInstance, setAdyenCheckoutInstance] = useState()
     const [orderNumber, setOrderNumber] = useState()
 
     useEffect(() => {
@@ -43,10 +42,8 @@ export const AdyenCheckoutProvider = ({children}) => {
     const value = {
         adyenPaymentMethods,
         adyenStateData,
-        adyenCheckoutInstance,
         orderNumber,
         setAdyenStateData: (data) => setAdyenStateData(data),
-        setAdyenCheckoutInstance: (data) => setAdyenCheckoutInstance(data),
         setOrderNumber: (data) => setOrderNumber(data)
     }
 
