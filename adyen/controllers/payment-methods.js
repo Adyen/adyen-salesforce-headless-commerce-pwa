@@ -32,7 +32,7 @@ async function getPaymentMethods(req, res) {
         const {
             locale: {id: shopperLocale}
         } = req.body
-        const countryCode = shopperLocale?.slice(-2)
+        const countryCode = shopperLocale?.substr(0, 2)
 
         const response = await checkout.paymentMethods({
             blockedPaymentMethods: BLOCKED_PAYMENT_METHODS,
