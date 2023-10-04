@@ -4,10 +4,9 @@
  * SPDX-License-Identifier: BSD-3-Clause
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import React, {useEffect, useState} from 'react'
+import React, { useEffect, useState } from "react";
 import {FormattedMessage, useIntl} from 'react-intl'
 import {Alert, AlertIcon, Box, Button, Container, Grid, GridItem, Stack} from '@chakra-ui/react'
-import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
 import {
     CheckoutProvider,
     useCheckout
@@ -16,27 +15,26 @@ import ContactInfo from '@salesforce/retail-react-app/app/pages/checkout/partial
 import ShippingAddress from '@salesforce/retail-react-app/app/pages/checkout/partials/shipping-address'
 import ShippingOptions from '@salesforce/retail-react-app/app/pages/checkout/partials/shipping-options'
 import OrderSummary from '@salesforce/retail-react-app/app/components/order-summary'
-import {useCurrentCustomer} from '@salesforce/retail-react-app/app/hooks/use-current-customer'
 import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
-import CheckoutSkeleton from '@salesforce/retail-react-app/app/pages/checkout/partials/checkout-skeleton'
-import {useUsid, useShopperOrdersMutation} from '@salesforce/commerce-sdk-react'
+import {useCustomerId} from '@salesforce/commerce-sdk-react'
+import {useShopperOrdersMutation} from '@salesforce/commerce-sdk-react'
 import Payment from './partials/payment'
 import {
-    AdyenCheckoutProvider,
-    useAdyenCheckout
-} from '../../../../adyen/context/adyen-checkout-context'
-import {AdyenPaymentsService} from '../../../../adyen/services/payments'
+    AdyenCheckoutProvider, useAdyenCheckout
+} from "../../../../adyen/context/adyen-checkout-context";
+import { useCurrentCustomer } from "@salesforce/retail-react-app/app/hooks/use-current-customer";
+import AdyenPayment from "../../../../adyen/components/AdyenPayment";
+import AdyenCheckout from "../../../../adyen/components/AdyenCheckout";
 
 const Checkout = () => {
     const {formatMessage} = useIntl()
-    const navigate = useNavigation()
-    const {usid} = useUsid()
+    const customerId = useCustomerId()
     const {step} = useCheckout()
+    const {setOrderNumber, setAdyenDropinInstance} = useAdyenCheckout()
     const [error, setError] = useState()
     const {data: basket} = useCurrentBasket()
     const [isLoading, setIsLoading] = useState(false)
     const {mutateAsync: createOrder} = useShopperOrdersMutation('createOrder')
-    const {adyenPaymentMethods, adyenStateData} = useAdyenCheckout()
 
     useEffect(() => {
         if (error || step === 4) {
@@ -47,16 +45,16 @@ const Checkout = () => {
     const submitOrder = async () => {
         setIsLoading(true)
         try {
-            const order = await createOrder({
-                // We send the SLAS usid via this header. This is required by ECOM to map
-                // Einstein events sent via the API with the finishOrder event fired by ECOM
-                // when an Order transitions from Created to New status.
-                // Without this, various order conversion metrics will not appear on reports and dashboards
-                headers: {_sfdc_customer_id: usid},
-                body: {basketId: basket.basketId}
-            })
-            // TODO: Make the payment
+            if (basket) {
+                const order = await createOrder({
+                    headers: {_sfdc_customer_id: customerId},
+                    body: {basketId: basket.basketId}
+                })
+                sessionStorage.setItem('orderNumber', order.orderNo)
+                setOrderNumber(order.orderNo)
+            }
         } catch (error) {
+            console.log(error)
             const message = formatMessage({
                 id: 'checkout.message.generic_error',
                 defaultMessage: 'An unexpected error occurred during checkout.'
@@ -157,18 +155,20 @@ const Checkout = () => {
     )
 }
 
+const CheckoutChildren = () => {
+    const {orderNumber} = useAdyenCheckout()
+    return (
+      orderNumber
+        ? <AdyenPayment />
+        : <Checkout />
+    )
+}
+
 const CheckoutContainer = () => {
-    const {data: customer} = useCurrentCustomer()
-    const {data: basket} = useCurrentBasket()
-
-    if (!customer || !customer.customerId || !basket || !basket.basketId) {
-        return <CheckoutSkeleton />
-    }
-
     return (
         <AdyenCheckoutProvider>
             <CheckoutProvider>
-                <Checkout />
+                <CheckoutChildren />
             </CheckoutProvider>
         </AdyenCheckoutProvider>
     )

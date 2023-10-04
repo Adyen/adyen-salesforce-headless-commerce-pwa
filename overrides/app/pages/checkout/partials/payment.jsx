@@ -185,7 +185,7 @@ const Payment = () => {
                             <Button
                                 w="full"
                                 onClick={onSubmit}
-                                isDisabled={!adyenStateData || isSubmittingPayment}
+                                isDisabled={isSubmittingPayment}
                             >
                                 <FormattedMessage
                                     defaultMessage="Review Order"
@@ -231,6 +231,9 @@ const Payment = () => {
 }
 
 const PaymentCardSummary = ({payment}) => {
+    if (!payment?.paymentCard) {
+        return null;
+    }
     const CardIcon = getCreditCardIcon(payment?.paymentCard?.cardType)
     return (
         <Stack direction="row" alignItems="center" spacing={3}>

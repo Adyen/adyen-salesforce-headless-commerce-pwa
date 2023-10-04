@@ -1,7 +1,7 @@
 import {ApiClient} from './api'
 
 export class AdyenPaymentMethodsService {
-    baseUrl = '/api/adyen/payment-methods'
+    baseUrl = '/api/adyen/paymentMethods'
     apiClient = null
 
     constructor(token) {

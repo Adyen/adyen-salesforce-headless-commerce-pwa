@@ -1,16 +1,19 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 'use strict'
+import {formatAddressInAdyenFormat} from "../utils/formatAddress.mjs";
+import {getCurrencyValueForApi} from "../utils/parsers.mjs";
+import {APPLICATION_VERSION} from "../utils/constants.mjs";
+import {createCheckoutResponse} from "../utils/createCheckoutResponse.mjs"
+
 const {CheckoutAPI, Client, Config} = require('@adyen/api-library')
 const {ShopperOrders} = require('commerce-sdk-isomorphic')
 const {getConfig} = require('@salesforce/pwa-kit-runtime/utils/ssr-config')
-const {formatAddressInAdyenFormat} = import('../utils/formatAddress.mjs')
-const {getCurrencyValueForApi} = import('../utils/parsers.mjs')
-const {APPLICATION_VERSION} = import('../utils/constants.mjs')
 
 const errorMessages = {
     AMOUNT_NOT_CORRECT: 'amount not correct',
     INVALID_ORDER: 'order is invalid'
 }
+
 async function sendPayments(req, res) {
     const config = new Config()
     config.apiKey = process.env.ADYEN_API_KEY
@@ -28,14 +31,13 @@ async function sendPayments(req, res) {
 
         const order = await shopperOrders.getOrder({
             parameters: {
-                orderNo: req.headers.orderNo
+                orderNo: req.headers.orderno
             }
         })
 
-        if (order.customerInfo?.customerId !== req.headers.customerId) {
+        if (order?.customerInfo?.customerId !== req.headers.customerid) {
             throw new Error(errorMessages.INVALID_ORDER)
         }
-
 
         const {data} = req.body
         const response = await checkout.payments({
@@ -49,10 +51,16 @@ async function sendPayments(req, res) {
                 currency: order.currency
             },
             applicationInfo: getApplicationInfo(),
-            returnUrl: `${appConfig.baseUri}/checkout/confirmation/${order.orderNo}`
+            authenticationData: {
+                threeDSRequestData: {
+                    nativeThreeDS: 'preferred',
+                }
+            },
+            channel: 'Web',
+            returnUrl: `${data.origin}/checkout`,
         })
 
-        res.json(response)
+        res.json(createCheckoutResponse(response))
     } catch (err) {
         res.status(err.statusCode || 500).json(err.message)
     }
