@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 'use strict'
-import { getCurrencyValueForApi } from "../utils/parsers.mjs";
-import { BLOCKED_PAYMENT_METHODS } from "../utils/constants.mjs";
+import {getCurrencyValueForApi} from '../utils/parsers.mjs'
+import {BLOCKED_PAYMENT_METHODS} from '../utils/constants.mjs'
 
 const {CheckoutAPI, Client, Config} = require('@adyen/api-library')
 const {ShopperCustomers} = require('commerce-sdk-isomorphic')
@@ -32,7 +32,7 @@ async function getPaymentMethods(req, res) {
         const {
             locale: {id: shopperLocale}
         } = req.body
-        const countryCode = shopperLocale?.substr(0, 2)
+        const countryCode = shopperLocale?.slice(-2)
 
         const response = await checkout.paymentMethods({
             blockedPaymentMethods: BLOCKED_PAYMENT_METHODS,
@@ -54,4 +54,5 @@ async function getPaymentMethods(req, res) {
         res.status(err.statusCode || 500).json(err.message)
     }
 }
-module.exports = {getPaymentMethods}
+
+export default getPaymentMethods

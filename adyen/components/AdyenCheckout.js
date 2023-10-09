@@ -18,7 +18,13 @@ const AdyenCheckoutComponent = () => {
                     card: {
                         hasHolderName: true,
                         holderNameRequired: true,
-                        billingAddressRequired: false
+                        billingAddressRequired: false,
+                        onBinValue: (event) => {
+                            console.log(event)
+                        },
+                        onBinLookup: (event) => {
+                            console.log(event)
+                        }
                     }
                 },
                 onChange: (state) => {
@@ -35,9 +41,7 @@ const AdyenCheckoutComponent = () => {
         }
     }, [adyenPaymentMethods])
 
-    return (
-      <div ref={paymentContainer}></div>
-    )
+    return <div ref={paymentContainer}></div>
 }
 
 export default AdyenCheckoutComponent

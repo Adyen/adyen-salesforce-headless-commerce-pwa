@@ -1,13 +1,11 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 'use strict'
 import {formatAddressInAdyenFormat} from '../utils/formatAddress.mjs'
 import {getCurrencyValueForApi} from '../utils/parsers.mjs'
 import {APPLICATION_VERSION} from '../utils/constants.mjs'
 import {createCheckoutResponse} from '../utils/createCheckoutResponse.mjs'
-
-const {CheckoutAPI, Client, Config} = require('@adyen/api-library')
-const {ShopperOrders} = require('commerce-sdk-isomorphic')
-const {getConfig} = require('@salesforce/pwa-kit-runtime/utils/ssr-config')
+import {CheckoutAPI, Client, Config} from '@adyen/api-library'
+import {ShopperOrders} from 'commerce-sdk-isomorphic'
+import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 
 const errorMessages = {
     AMOUNT_NOT_CORRECT: 'amount not correct',
@@ -59,11 +57,12 @@ async function sendPayments(req, res) {
             channel: 'Web',
             returnUrl: `${data.origin}/checkout`
         }
+
         if (isOpenInvoiceMethod(data?.paymentMethod?.type)) {
             paymentRequest.lineItems = getLineItems(order)
         }
-        const response = await checkout.payments(paymentRequest)
 
+        const response = await checkout.payments(paymentRequest)
         res.json(createCheckoutResponse(response))
     } catch (err) {
         res.status(err.statusCode || 500).json(err.message)
@@ -132,4 +131,5 @@ function getLineItems(order) {
     })
     return [...productLineItems, ...shippingLineItems, ...priceAdjustmentLineItems]
 }
-module.exports = {sendPayments}
+
+export default sendPayments

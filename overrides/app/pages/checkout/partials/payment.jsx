@@ -122,6 +122,11 @@ const Payment = () => {
         goToNextStep()
     }
 
+    const onEdit = async () => {
+        await onPaymentRemoval()
+        goToStep(STEPS.PAYMENT)
+    }
+
     return (
         <ToggleCard
             id="step-3"
@@ -133,7 +138,7 @@ const Payment = () => {
                 isSubmittingPayment
             }
             disabled={appliedPayment == null}
-            onEdit={() => goToStep(STEPS.PAYMENT)}
+            onEdit={onEdit}
         >
             <ToggleCardEdit>
                 <Box mt={-2} mb={4}>
@@ -182,11 +187,7 @@ const Payment = () => {
 
                     <Box pt={3}>
                         <Container variant="form">
-                            <Button
-                                w="full"
-                                onClick={onSubmit}
-                                isDisabled={isSubmittingPayment}
-                            >
+                            <Button w="full" onClick={onSubmit} isDisabled={isSubmittingPayment}>
                                 <FormattedMessage
                                     defaultMessage="Review Order"
                                     id="checkout_payment.button.review_order"
@@ -232,7 +233,7 @@ const Payment = () => {
 
 const PaymentCardSummary = ({payment}) => {
     if (!payment?.paymentCard) {
-        return null;
+        return null
     }
     const CardIcon = getCreditCardIcon(payment?.paymentCard?.cardType)
     return (
