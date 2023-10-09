@@ -45,6 +45,7 @@ const Checkout = () => {
         setIsLoading(true)
         try {
             if (basket) {
+                console.log(basket.basketId)
                 const order = await createOrder({
                     headers: {_sfdc_customer_id: customerId},
                     body: {basketId: basket.basketId}

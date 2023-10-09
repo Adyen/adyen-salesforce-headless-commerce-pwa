@@ -122,6 +122,11 @@ const Payment = () => {
         goToNextStep()
     }
 
+    const onEdit = async () => {
+        await onPaymentRemoval()
+        goToStep(STEPS.PAYMENT)
+    }
+
     return (
         <ToggleCard
             id="step-3"
@@ -133,7 +138,7 @@ const Payment = () => {
                 isSubmittingPayment
             }
             disabled={appliedPayment == null}
-            onEdit={() => goToStep(STEPS.PAYMENT)}
+            onEdit={onEdit}
         >
             <ToggleCardEdit>
                 <Box mt={-2} mb={4}>
