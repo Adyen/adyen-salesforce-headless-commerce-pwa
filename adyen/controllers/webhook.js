@@ -74,4 +74,4 @@ const errorHandler = (err, req, res, next) => {
     res.status(err.statusCode || 500).json(err.message || messages.DEFAULT_ERROR)
 }
 
-module.exports = {authenticate, validateHmac, handleWebhook, errorHandler}
+export {authenticate, validateHmac, handleWebhook, errorHandler}

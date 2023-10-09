@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 'use strict'
-import {formatAddressInAdyenFormat} from "../utils/formatAddress.mjs";
-import {getCurrencyValueForApi} from "../utils/parsers.mjs";
-import {APPLICATION_VERSION} from "../utils/constants.mjs";
-import {createCheckoutResponse} from "../utils/createCheckoutResponse.mjs"
+import {formatAddressInAdyenFormat} from '../utils/formatAddress.mjs'
+import {getCurrencyValueForApi} from '../utils/parsers.mjs'
+import {APPLICATION_VERSION} from '../utils/constants.mjs'
+import {createCheckoutResponse} from '../utils/createCheckoutResponse.mjs'
 
 const {CheckoutAPI, Client, Config} = require('@adyen/api-library')
 const {ShopperOrders} = require('commerce-sdk-isomorphic')
@@ -53,11 +53,11 @@ async function sendPayments(req, res) {
             applicationInfo: getApplicationInfo(),
             authenticationData: {
                 threeDSRequestData: {
-                    nativeThreeDS: 'preferred',
+                    nativeThreeDS: 'preferred'
                 }
             },
             channel: 'Web',
-            returnUrl: `${data.origin}/checkout`,
+            returnUrl: `${data.origin}/checkout`
         })
 
         res.json(createCheckoutResponse(response))
@@ -79,4 +79,5 @@ function getApplicationInfo() {
         }
     }
 }
-module.exports = {sendPayments}
+
+export default sendPayments

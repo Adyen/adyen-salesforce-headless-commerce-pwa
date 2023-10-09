@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from 'react'
 import {FormattedMessage, useIntl} from 'react-intl'
 import {Alert, AlertIcon, Box, Button, Container, Grid, GridItem, Stack} from '@chakra-ui/react'
 import {
@@ -20,17 +20,16 @@ import {useCustomerId} from '@salesforce/commerce-sdk-react'
 import {useShopperOrdersMutation} from '@salesforce/commerce-sdk-react'
 import Payment from './partials/payment'
 import {
-    AdyenCheckoutProvider, useAdyenCheckout
-} from "../../../../adyen/context/adyen-checkout-context";
-import { useCurrentCustomer } from "@salesforce/retail-react-app/app/hooks/use-current-customer";
-import AdyenPayment from "../../../../adyen/components/AdyenPayment";
-import AdyenCheckout from "../../../../adyen/components/AdyenCheckout";
+    AdyenCheckoutProvider,
+    useAdyenCheckout
+} from '../../../../adyen/context/adyen-checkout-context'
+import AdyenPayment from '../../../../adyen/components/AdyenPayment'
 
 const Checkout = () => {
     const {formatMessage} = useIntl()
     const customerId = useCustomerId()
     const {step} = useCheckout()
-    const {setOrderNumber, setAdyenDropinInstance} = useAdyenCheckout()
+    const {setOrderNumber} = useAdyenCheckout()
     const [error, setError] = useState()
     const {data: basket} = useCurrentBasket()
     const [isLoading, setIsLoading] = useState(false)
@@ -157,11 +156,7 @@ const Checkout = () => {
 
 const CheckoutChildren = () => {
     const {orderNumber} = useAdyenCheckout()
-    return (
-      orderNumber
-        ? <AdyenPayment />
-        : <Checkout />
-    )
+    return orderNumber ? <AdyenPayment /> : <Checkout />
 }
 
 const CheckoutContainer = () => {

@@ -182,11 +182,7 @@ const Payment = () => {
 
                     <Box pt={3}>
                         <Container variant="form">
-                            <Button
-                                w="full"
-                                onClick={onSubmit}
-                                isDisabled={isSubmittingPayment}
-                            >
+                            <Button w="full" onClick={onSubmit} isDisabled={isSubmittingPayment}>
                                 <FormattedMessage
                                     defaultMessage="Review Order"
                                     id="checkout_payment.button.review_order"
@@ -232,7 +228,7 @@ const Payment = () => {
 
 const PaymentCardSummary = ({payment}) => {
     if (!payment?.paymentCard) {
-        return null;
+        return null
     }
     const CardIcon = getCreditCardIcon(payment?.paymentCard?.cardType)
     return (

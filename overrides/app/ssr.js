@@ -4,19 +4,22 @@
  * SPDX-License-Identifier: BSD-3-Clause
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-/* eslint-disable @typescript-eslint/no-var-requires */
-'use strict'
 
-const path = require('path')
-const {getRuntime} = require('@salesforce/pwa-kit-runtime/ssr/server/express')
-const {isRemote} = require('@salesforce/pwa-kit-runtime/utils/ssr-server')
-const {getConfig} = require('@salesforce/pwa-kit-runtime/utils/ssr-config')
-const helmet = require('helmet')
-const bodyParser = require('body-parser')
-const PaymentMethodsController = require('../../adyen/controllers/payment-methods')
-const PaymentsDetailsController = require('../../adyen/controllers/payments-details')
-const PaymentsController = require('../../adyen/controllers/payments')
-const WebhookController = require('../../adyen/controllers/webhook')
+import path from 'path'
+import {getRuntime} from '@salesforce/pwa-kit-runtime/ssr/server/express'
+import {isRemote} from '@salesforce/pwa-kit-runtime/utils/ssr-server'
+import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
+import helmet from 'helmet'
+import bodyParser from 'body-parser'
+import PaymentMethodsController from '../../adyen/controllers/payment-methods'
+import PaymentsDetailsController from '../../adyen/controllers/payments-details'
+import PaymentsController from '../../adyen/controllers/payments'
+import {
+    authenticate,
+    validateHmac,
+    errorHandler,
+    handleWebhook
+} from '../../adyen/controllers/webhook'
 
 const options = {
     // The build directory (an absolute path)
@@ -72,16 +75,10 @@ const {handler} = runtime.createHandler(options, (app) => {
     app.get('*', runtime.render)
 
     // Routes
-    app.post('/api/adyen/paymentMethods', PaymentMethodsController.getPaymentMethods)
-    app.post('/api/adyen/payments/details', PaymentsDetailsController.sendPaymentDetails)
-    app.post('/api/adyen/payments', PaymentsController.sendPayments)
-    app.post(
-        '/api/adyen/webhook',
-        WebhookController.authenticate,
-        WebhookController.validateHmac,
-        WebhookController.handleWebhook,
-        WebhookController.errorHandler
-    )
+    app.post('/api/adyen/paymentMethods', PaymentMethodsController)
+    app.post('/api/adyen/payments/details', PaymentsDetailsController)
+    app.post('/api/adyen/payments', PaymentsController)
+    app.post('/api/adyen/webhook', authenticate, validateHmac, handleWebhook, errorHandler)
 })
 // SSR requires that we export a single handler function called 'get', that
 // supports AWS use of the server that we created above.

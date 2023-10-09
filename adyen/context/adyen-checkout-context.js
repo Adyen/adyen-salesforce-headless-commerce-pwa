@@ -24,7 +24,7 @@ export const AdyenCheckoutProvider = ({children}) => {
             try {
                 const data = await adyenPaymentMethodsService.fetchPaymentMethods(
                     customerId,
-                    locale,
+                    locale
                 )
                 setAdyenPaymentMethods(data ? data : {error: true})
                 setFetching(false)
