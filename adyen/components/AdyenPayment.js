@@ -18,7 +18,7 @@ const AdyenPayment = () => {
         const checkout = await AdyenCheckout({
             environment: adyenPaymentMethods.ADYEN_ENVIRONMENT,
             clientKey: adyenPaymentMethods.ADYEN_CLIENT_KEY,
-            onAdditionalDetails(state, element) {
+            onAdditionalDetails(state) {
                 sendPaymentsDetails(state.data.details)
             }
         })
@@ -33,7 +33,7 @@ const AdyenPayment = () => {
             customerId
         )
         if (paymentsDetailsResponse?.isSuccessful) {
-            sessionStorage.removeItem('orderNumber')
+            sessionStorage.removeItem('basketId')
             navigate(`/checkout/confirmation/${paymentsDetailsResponse.merchantReference}`)
         } else if (paymentsDetailsResponse?.action) {
             await handleAction(paymentsDetailsResponse.action)
@@ -44,15 +44,15 @@ const AdyenPayment = () => {
 
     const sendPayment = async () => {
         const token = await getTokenWhenReady()
-        const orderNumber = sessionStorage.getItem('orderNumber')
+        const basketId = sessionStorage.getItem('basketId')
         const adyenPaymentService = new AdyenPaymentsService(token)
         const paymentsResponse = await adyenPaymentService.submitPayment(
-            orderNumber,
             adyenStateData,
+            basketId,
             customerId
         )
         if (paymentsResponse?.isSuccessful) {
-            sessionStorage.removeItem('orderNumber')
+            sessionStorage.removeItem('basketId')
             navigate(`/checkout/confirmation/${paymentsResponse.merchantReference}`)
         } else if (paymentsResponse?.action) {
             await handleAction(paymentsResponse.action)

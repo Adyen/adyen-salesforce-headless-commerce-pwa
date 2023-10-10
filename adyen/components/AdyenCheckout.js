@@ -25,6 +25,36 @@ const AdyenCheckoutComponent = () => {
                         onBinLookup: (event) => {
                             console.log(event)
                         }
+                    },
+                    klarna: {
+                        showPayButton: true,
+                        useKlarnaWidget: true,
+                        onSubmit: (state, component) => {
+                            console.log(state)
+                            if (state.isValid) {
+                                setAdyenStateData(state.data)
+                            }
+                        }
+                    },
+                    klarna_account: {
+                        showPayButton: true,
+                        useKlarnaWidget: true,
+                        onSubmit: (state, component) => {
+                            console.log(state)
+                            if (state.isValid) {
+                                setAdyenStateData(state.data)
+                            }
+                        }
+                    },
+                    klarna_paynow: {
+                        showPayButton: true,
+                        useKlarnaWidget: true,
+                        onSubmit: (state, component) => {
+                            console.log(state)
+                            if (state.isValid) {
+                                setAdyenStateData(state.data)
+                            }
+                        }
                     }
                 },
                 onChange: (state) => {

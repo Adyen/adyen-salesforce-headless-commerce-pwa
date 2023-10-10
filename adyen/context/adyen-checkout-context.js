@@ -14,7 +14,7 @@ export const AdyenCheckoutProvider = ({children}) => {
     const [fetching, setFetching] = useState(false)
     const [adyenPaymentMethods, setAdyenPaymentMethods] = useState()
     const [adyenStateData, setAdyenStateData] = useState()
-    const [orderNumber, setOrderNumber] = useState()
+    const [paymentConfig, setPaymentConfig] = useState()
 
     useEffect(() => {
         const fetchPaymentMethods = async () => {
@@ -42,9 +42,9 @@ export const AdyenCheckoutProvider = ({children}) => {
     const value = {
         adyenPaymentMethods,
         adyenStateData,
-        orderNumber,
+        paymentConfig,
         setAdyenStateData: (data) => setAdyenStateData(data),
-        setOrderNumber: (data) => setOrderNumber(data)
+        setPaymentConfig: (data) => setPaymentConfig(data)
     }
 
     return <AdyenCheckoutContext.Provider value={value}>{children}</AdyenCheckoutContext.Provider>

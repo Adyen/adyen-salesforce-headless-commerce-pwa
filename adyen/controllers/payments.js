@@ -9,10 +9,24 @@ import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 
 const errorMessages = {
     AMOUNT_NOT_CORRECT: 'amount not correct',
-    INVALID_ORDER: 'order is invalid'
+    INVALID_ORDER: 'order is invalid',
+    INVALID_PARAMS: 'invalid request params'
+}
+
+const validateRequestParams = (req) => {
+    return !(
+        !req.body.data ||
+        !req.headers.authorization ||
+        !req.headers.basketid ||
+        !req.headers.customerid
+    )
 }
 
 async function sendPayments(req, res) {
+    if (!validateRequestParams(req)) {
+        throw new Error(errorMessages.INVALID_PARAMS)
+    }
+
     const config = new Config()
     config.apiKey = process.env.ADYEN_API_KEY
     const client = new Client({config})
@@ -27,9 +41,9 @@ async function sendPayments(req, res) {
             headers: {authorization: req.headers.authorization}
         })
 
-        const order = await shopperOrders.getOrder({
-            parameters: {
-                orderNo: req.headers.orderno
+        const order = await shopperOrders.createOrder({
+            body: {
+                basketId: req.headers.basketid
             }
         })
 
@@ -96,39 +110,51 @@ function isOpenInvoiceMethod(paymentMethod) {
 }
 
 function getLineItems(order) {
-    const productLineItems = order?.productItems.map((productItem) => {
-        return {
-            id: productItem.itemId,
-            quantity: productItem.quantity,
-            description: productItem.itemText,
-            amountExcludingTax: getCurrencyValueForApi(productItem.basePrice, order.currency),
-            taxAmount: getCurrencyValueForApi(productItem.tax, order.currency),
-            taxCategory: productItem.taxClassId,
-            taxPercentage: productItem.taxRate
-        }
-    })
-    const shippingLineItems = order?.shippingItems.map((shippingItem) => {
-        return {
-            id: shippingItem.itemId,
-            quantity: 1,
-            description: shippingItem.itemText,
-            amountExcludingTax: getCurrencyValueForApi(shippingItem.basePrice, order.currency),
-            taxAmount: getCurrencyValueForApi(shippingItem.tax, order.currency),
-            taxCategory: shippingItem.taxClassId,
-            taxPercentage: shippingItem.taxRate
-        }
-    })
-    const priceAdjustmentLineItems = order?.priceAdjustments.map((priceAdjustment) => {
-        return {
-            id: priceAdjustment.priceAdjustmentId,
-            quantity: priceAdjustment.quantity,
-            description: priceAdjustment.itemText,
-            amountExcludingTax: getCurrencyValueForApi(priceAdjustment.basePrice, order.currency),
-            taxAmount: getCurrencyValueForApi(priceAdjustment.tax, order.currency),
-            taxCategory: priceAdjustment.taxClassId || 'None',
-            taxPercentage: priceAdjustment.taxRate
-        }
-    })
+    const productLineItems = order?.productItems?.length
+        ? order?.productItems?.map((productItem) => {
+              return {
+                  id: productItem.itemId,
+                  quantity: productItem.quantity,
+                  description: productItem.itemText,
+                  amountExcludingTax: getCurrencyValueForApi(productItem.basePrice, order.currency),
+                  taxAmount: getCurrencyValueForApi(productItem.tax, order.currency),
+                  taxCategory: 'None',
+                  taxPercentage: productItem.taxRate
+              }
+          })
+        : []
+    const shippingLineItems = order?.shippingItems?.length
+        ? order?.shippingItems?.map((shippingItem) => {
+              return {
+                  id: shippingItem.itemId,
+                  quantity: 1,
+                  description: shippingItem.itemText,
+                  amountExcludingTax: getCurrencyValueForApi(
+                      shippingItem.basePrice,
+                      order.currency
+                  ),
+                  taxAmount: getCurrencyValueForApi(shippingItem.tax, order.currency),
+                  taxCategory: 'None',
+                  taxPercentage: shippingItem.taxRate
+              }
+          })
+        : []
+    const priceAdjustmentLineItems = order?.priceAdjustments?.length
+        ? order.priceAdjustments.map((priceAdjustment) => {
+              return {
+                  id: priceAdjustment.priceAdjustmentId,
+                  quantity: priceAdjustment.quantity,
+                  description: priceAdjustment.itemText,
+                  amountExcludingTax: getCurrencyValueForApi(
+                      priceAdjustment.basePrice,
+                      order.currency
+                  ),
+                  taxAmount: getCurrencyValueForApi(priceAdjustment.tax, order.currency),
+                  taxCategory: 'None',
+                  taxPercentage: priceAdjustment.taxRate
+              }
+          })
+        : []
     return [...productLineItems, ...shippingLineItems, ...priceAdjustmentLineItems]
 }
 

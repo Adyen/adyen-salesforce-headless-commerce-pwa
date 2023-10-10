@@ -8,14 +8,14 @@ export class AdyenPaymentsService {
         this.apiClient = new ApiClient(this.baseUrl, token)
     }
 
-    async submitPayment(orderNumber, adyenStateData, customerId) {
+    async submitPayment(adyenStateData, basketId, customerId) {
         const res = await this.apiClient.post({
             body: JSON.stringify({
                 data: adyenStateData
             }),
             headers: {
                 customerid: customerId,
-                orderNo: orderNumber
+                basketid: basketId
             }
         })
         if (res.status >= 300) {
