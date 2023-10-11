@@ -19,17 +19,18 @@ const AdyenPayment = () => {
             environment: adyenPaymentMethods.ADYEN_ENVIRONMENT,
             clientKey: adyenPaymentMethods.ADYEN_CLIENT_KEY,
             onAdditionalDetails(state) {
-                sendPaymentsDetails(state.data.details)
+                console.log('onAdditionalDetails', state)
+                sendPaymentsDetails(state.data)
             }
         })
         checkout.createFromAction(action).mount(paymentContainer.current)
     }
 
-    const sendPaymentsDetails = async (details) => {
+    const sendPaymentsDetails = async (data) => {
         const token = await getTokenWhenReady()
         const adyenPaymentsDetailsService = new AdyenPaymentsDetailsService(token)
         const paymentsDetailsResponse = await adyenPaymentsDetailsService.submitPaymentsDetails(
-            details,
+            data,
             customerId
         )
         if (paymentsDetailsResponse?.isSuccessful) {

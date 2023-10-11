@@ -50,10 +50,22 @@ const {handler} = runtime.createHandler(options, (app) => {
             contentSecurityPolicy: {
                 useDefaults: true,
                 directives: {
-                    'img-src': ["'self'", '*.commercecloud.salesforce.com', 'data:', '*.adyen.com'],
-                    'script-src': ["'self'", "'unsafe-eval'", 'storage.googleapis.com'],
+                    'img-src': [
+                        "'self'",
+                        '*.commercecloud.salesforce.com',
+                        'data:',
+                        '*.adyen.com',
+                        '*.paypal.com'
+                    ],
+                    'script-src': [
+                        "'self'",
+                        "'unsafe-eval'",
+                        'storage.googleapis.com',
+                        '*.paypal.com',
+                        'https://x.klarnacdn.net/kp/lib/v1/api.js'
+                    ],
                     'connect-src': ["'self'", 'api.cquotient.com', '*.adyen.com'],
-                    'frame-src': ["'self'", '*.adyen.com'],
+                    'frame-src': ["'self'", '*.adyen.com', '*.paypal.com'],
 
                     // Do not upgrade insecure requests for local development
                     'upgrade-insecure-requests': isRemote() ? [] : null

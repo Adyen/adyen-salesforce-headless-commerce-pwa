@@ -3,7 +3,8 @@ import {formatAddressInAdyenFormat} from '../utils/formatAddress.mjs'
 import {getCurrencyValueForApi} from '../utils/parsers.mjs'
 import {APPLICATION_VERSION} from '../utils/constants.mjs'
 import {createCheckoutResponse} from '../utils/createCheckoutResponse.mjs'
-import {CheckoutAPI, Client, Config} from '@adyen/api-library'
+import {PaymentsApi} from '@adyen/api-library/lib/src/services/checkout/paymentsApi'
+import {Client, Config} from '@adyen/api-library'
 import {ShopperOrders} from 'commerce-sdk-isomorphic'
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 
@@ -31,7 +32,7 @@ async function sendPayments(req, res) {
     config.apiKey = process.env.ADYEN_API_KEY
     const client = new Client({config})
     client.setEnvironment(process.env.ADYEN_ENVIRONMENT)
-    const checkout = new CheckoutAPI(client)
+    const checkout = new PaymentsApi(client)
 
     try {
         const {app: appConfig} = getConfig()
@@ -69,14 +70,18 @@ async function sendPayments(req, res) {
                 }
             },
             channel: 'Web',
-            returnUrl: `${data.origin}/checkout`
+            returnUrl: `${data.origin}/checkout`,
+            shopperReference: order?.customerInfo?.customerId,
+            shopperEmail: order?.customerInfo?.email
         }
 
         if (isOpenInvoiceMethod(data?.paymentMethod?.type)) {
             paymentRequest.lineItems = getLineItems(order)
+            paymentRequest.countryCode = paymentRequest.billingAddress.country
         }
 
         const response = await checkout.payments(paymentRequest)
+        console.log(response)
         res.json(createCheckoutResponse(response))
     } catch (err) {
         res.status(err.statusCode || 500).json(err.message)

@@ -1,7 +1,4 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-'use strict'
-
-const {hmacValidator} = require('@adyen/api-library')
+import {hmacValidator} from '@adyen/api-library'
 
 const messages = {
     AUTH_ERROR: 'Access Denied!',

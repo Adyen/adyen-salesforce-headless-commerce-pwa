@@ -26,9 +26,17 @@ const AdyenCheckoutComponent = () => {
                             console.log(event)
                         }
                     },
+                    paypal: {
+                        showPayButton: true,
+                        onSubmit: (state, component) => {
+                            console.log(state)
+                            if (state.isValid) {
+                                setAdyenStateData(state.data)
+                            }
+                        }
+                    },
                     klarna: {
                         showPayButton: true,
-                        useKlarnaWidget: true,
                         onSubmit: (state, component) => {
                             console.log(state)
                             if (state.isValid) {
@@ -38,7 +46,6 @@ const AdyenCheckoutComponent = () => {
                     },
                     klarna_account: {
                         showPayButton: true,
-                        useKlarnaWidget: true,
                         onSubmit: (state, component) => {
                             console.log(state)
                             if (state.isValid) {
@@ -48,7 +55,6 @@ const AdyenCheckoutComponent = () => {
                     },
                     klarna_paynow: {
                         showPayButton: true,
-                        useKlarnaWidget: true,
                         onSubmit: (state, component) => {
                             console.log(state)
                             if (state.isValid) {
