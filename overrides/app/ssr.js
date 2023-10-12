@@ -62,7 +62,8 @@ const {handler} = runtime.createHandler(options, (app) => {
                         "'unsafe-eval'",
                         'storage.googleapis.com',
                         '*.paypal.com',
-                        'https://x.klarnacdn.net/kp/lib/v1/api.js'
+                        'https://x.klarnacdn.net/kp/lib/v1/api.js',
+                        'https://static-eu.payments-amazon.com/checkout.js'
                     ],
                     'connect-src': ["'self'", 'api.cquotient.com', '*.adyen.com'],
                     'frame-src': ["'self'", '*.adyen.com', '*.paypal.com'],

@@ -12,10 +12,10 @@ const AdyenCheckoutComponent = () => {
             const checkout = await AdyenCheckout({
                 environment: adyenPaymentMethods.ADYEN_ENVIRONMENT,
                 clientKey: adyenPaymentMethods.ADYEN_CLIENT_KEY,
-                showPayButton: false,
                 paymentMethodsResponse: adyenPaymentMethods,
                 paymentMethodsConfiguration: {
                     card: {
+                        showPayButton: false,
                         hasHolderName: true,
                         holderNameRequired: true,
                         billingAddressRequired: false,
@@ -37,6 +37,7 @@ const AdyenCheckoutComponent = () => {
                     },
                     klarna: {
                         showPayButton: true,
+                        useKlarnaWidget: true,
                         onSubmit: (state, component) => {
                             console.log(state)
                             if (state.isValid) {
@@ -46,6 +47,7 @@ const AdyenCheckoutComponent = () => {
                     },
                     klarna_account: {
                         showPayButton: true,
+                        useKlarnaWidget: true,
                         onSubmit: (state, component) => {
                             console.log(state)
                             if (state.isValid) {
@@ -55,6 +57,7 @@ const AdyenCheckoutComponent = () => {
                     },
                     klarna_paynow: {
                         showPayButton: true,
+                        useKlarnaWidget: true,
                         onSubmit: (state, component) => {
                             console.log(state)
                             if (state.isValid) {
@@ -67,9 +70,16 @@ const AdyenCheckoutComponent = () => {
                     if (state.isValid) {
                         setAdyenStateData(state.data)
                     }
+                },
+                onSubmit: (state, component) => {
+                    console.log(state)
+                    if (state.isValid) {
+                        setAdyenStateData(state.data)
+                    }
                 }
             })
 
+            console.log('mount')
             checkout.create('dropin').mount(paymentContainer.current)
         }
         if (adyenPaymentMethods && paymentContainer.current) {

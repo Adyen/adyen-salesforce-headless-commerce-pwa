@@ -84,6 +84,7 @@ async function sendPayments(req, res) {
         console.log(response)
         res.json(createCheckoutResponse(response))
     } catch (err) {
+        console.log(err)
         res.status(err.statusCode || 500).json(err.message)
     }
 }

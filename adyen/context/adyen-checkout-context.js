@@ -3,13 +3,15 @@ import PropTypes from 'prop-types'
 import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 import {AdyenPaymentMethodsService} from '../services/payment-methods'
 import {resolveLocaleFromUrl} from '@salesforce/retail-react-app/app/utils/site-utils'
+import {useLocation} from 'react-router-dom';
 
 const AdyenCheckoutContext = React.createContext()
 
 export const AdyenCheckoutProvider = ({children}) => {
     const {getTokenWhenReady} = useAccessToken()
     const customerId = useCustomerId()
-    const locale = resolveLocaleFromUrl(`${window.location.pathname}${window.location.search}`)
+    const location = useLocation()
+    const locale = resolveLocaleFromUrl(`${location.pathname}${location.search}`)
 
     const [fetching, setFetching] = useState(false)
     const [adyenPaymentMethods, setAdyenPaymentMethods] = useState()
