@@ -10,12 +10,12 @@ const AdyenCheckoutComponent = () => {
     useEffect(() => {
         const createCheckout = async () => {
             const checkout = await AdyenCheckout({
+                showPayButton: false,
                 environment: adyenPaymentMethods.ADYEN_ENVIRONMENT,
                 clientKey: adyenPaymentMethods.ADYEN_CLIENT_KEY,
                 paymentMethodsResponse: adyenPaymentMethods,
                 paymentMethodsConfiguration: {
                     card: {
-                        showPayButton: false,
                         hasHolderName: true,
                         holderNameRequired: true,
                         billingAddressRequired: false,
@@ -70,16 +70,9 @@ const AdyenCheckoutComponent = () => {
                     if (state.isValid) {
                         setAdyenStateData(state.data)
                     }
-                },
-                onSubmit: (state, component) => {
-                    console.log(state)
-                    if (state.isValid) {
-                        setAdyenStateData(state.data)
-                    }
                 }
             })
 
-            console.log('mount')
             checkout.create('dropin').mount(paymentContainer.current)
         }
         if (adyenPaymentMethods && paymentContainer.current) {

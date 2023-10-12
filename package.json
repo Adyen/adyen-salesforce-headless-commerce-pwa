@@ -37,7 +37,7 @@
     "test": "pwa-kit-dev test",
     "test:lighthouse": "cross-env NODE_ENV=production lhci autorun --config=tests/lighthouserc.js",
     "test:max-file-size": "npm run build && bundlesize",
-    "push-env": "node ./adyen/scripts/push-env.js",
+    "upload-env": "node ./adyen/scripts/push-env.js",
     "get-env": "node ./adyen/scripts/get-env.js",
     "dot-env": "node ./adyen/scripts/dot-env.js",
     "start:env": "npm run dot-env -- -p=npm run start",
