@@ -3,18 +3,20 @@ import PropTypes from 'prop-types'
 import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 import {AdyenPaymentMethodsService} from '../services/payment-methods'
 import {resolveLocaleFromUrl} from '@salesforce/retail-react-app/app/utils/site-utils'
+import {useLocation} from 'react-router-dom';
 
 const AdyenCheckoutContext = React.createContext()
 
 export const AdyenCheckoutProvider = ({children}) => {
     const {getTokenWhenReady} = useAccessToken()
     const customerId = useCustomerId()
-    const locale = resolveLocaleFromUrl(`${window.location.pathname}${window.location.search}`)
+    const location = useLocation()
+    const locale = resolveLocaleFromUrl(`${location.pathname}${location.search}`)
 
     const [fetching, setFetching] = useState(false)
     const [adyenPaymentMethods, setAdyenPaymentMethods] = useState()
     const [adyenStateData, setAdyenStateData] = useState()
-    const [orderNumber, setOrderNumber] = useState()
+    const [paymentConfig, setPaymentConfig] = useState()
 
     useEffect(() => {
         const fetchPaymentMethods = async () => {
@@ -42,9 +44,9 @@ export const AdyenCheckoutProvider = ({children}) => {
     const value = {
         adyenPaymentMethods,
         adyenStateData,
-        orderNumber,
+        paymentConfig,
         setAdyenStateData: (data) => setAdyenStateData(data),
-        setOrderNumber: (data) => setOrderNumber(data)
+        setPaymentConfig: (data) => setPaymentConfig(data)
     }
 
     return <AdyenCheckoutContext.Provider value={value}>{children}</AdyenCheckoutContext.Provider>

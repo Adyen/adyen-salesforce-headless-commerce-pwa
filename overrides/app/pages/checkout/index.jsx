@@ -29,7 +29,7 @@ const Checkout = () => {
     const {formatMessage} = useIntl()
     const customerId = useCustomerId()
     const {step} = useCheckout()
-    const {setOrderNumber} = useAdyenCheckout()
+    const {setPaymentConfig} = useAdyenCheckout()
     const [error, setError] = useState()
     const {data: basket} = useCurrentBasket()
     const [isLoading, setIsLoading] = useState(false)
@@ -45,16 +45,14 @@ const Checkout = () => {
         setIsLoading(true)
         try {
             if (basket) {
-                console.log(basket.basketId)
-                const order = await createOrder({
-                    headers: {_sfdc_customer_id: customerId},
-                    body: {basketId: basket.basketId}
+                const {basketId} = basket
+                sessionStorage.setItem('basketId', basketId)
+                setPaymentConfig({
+                    customerId,
+                    basketId
                 })
-                sessionStorage.setItem('orderNumber', order.orderNo)
-                setOrderNumber(order.orderNo)
             }
         } catch (error) {
-            console.log(error)
             const message = formatMessage({
                 id: 'checkout.message.generic_error',
                 defaultMessage: 'An unexpected error occurred during checkout.'
@@ -156,8 +154,8 @@ const Checkout = () => {
 }
 
 const CheckoutChildren = () => {
-    const {orderNumber} = useAdyenCheckout()
-    return orderNumber ? <AdyenPayment /> : <Checkout />
+    const {paymentConfig} = useAdyenCheckout()
+    return paymentConfig ? <AdyenPayment /> : <Checkout />
 }
 
 const CheckoutContainer = () => {

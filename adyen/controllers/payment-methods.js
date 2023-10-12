@@ -2,8 +2,9 @@
 'use strict'
 import {getCurrencyValueForApi} from '../utils/parsers.mjs'
 import {BLOCKED_PAYMENT_METHODS} from '../utils/constants.mjs'
+import {PaymentsApi} from '@adyen/api-library/lib/src/services/checkout/paymentsApi'
 
-const {CheckoutAPI, Client, Config} = require('@adyen/api-library')
+const {Client, Config} = require('@adyen/api-library')
 const {ShopperCustomers} = require('commerce-sdk-isomorphic')
 const {getConfig} = require('@salesforce/pwa-kit-runtime/utils/ssr-config')
 
@@ -12,7 +13,7 @@ async function getPaymentMethods(req, res) {
     config.apiKey = process.env.ADYEN_API_KEY //REPLACE With YOUR API KEY
     const client = new Client({config})
     client.setEnvironment(process.env.ADYEN_ENVIRONMENT)
-    const checkout = new CheckoutAPI(client)
+    const checkout = new PaymentsApi(client)
 
     try {
         const {app: appConfig} = getConfig()

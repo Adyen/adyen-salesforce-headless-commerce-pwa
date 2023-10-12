@@ -10,9 +10,9 @@ const AdyenCheckoutComponent = () => {
     useEffect(() => {
         const createCheckout = async () => {
             const checkout = await AdyenCheckout({
+                showPayButton: false,
                 environment: adyenPaymentMethods.ADYEN_ENVIRONMENT,
                 clientKey: adyenPaymentMethods.ADYEN_CLIENT_KEY,
-                showPayButton: false,
                 paymentMethodsResponse: adyenPaymentMethods,
                 paymentMethodsConfiguration: {
                     card: {
@@ -24,6 +24,45 @@ const AdyenCheckoutComponent = () => {
                         },
                         onBinLookup: (event) => {
                             console.log(event)
+                        }
+                    },
+                    paypal: {
+                        showPayButton: true,
+                        onSubmit: (state, component) => {
+                            console.log(state)
+                            if (state.isValid) {
+                                setAdyenStateData(state.data)
+                            }
+                        }
+                    },
+                    klarna: {
+                        showPayButton: true,
+                        useKlarnaWidget: true,
+                        onSubmit: (state, component) => {
+                            console.log(state)
+                            if (state.isValid) {
+                                setAdyenStateData(state.data)
+                            }
+                        }
+                    },
+                    klarna_account: {
+                        showPayButton: true,
+                        useKlarnaWidget: true,
+                        onSubmit: (state, component) => {
+                            console.log(state)
+                            if (state.isValid) {
+                                setAdyenStateData(state.data)
+                            }
+                        }
+                    },
+                    klarna_paynow: {
+                        showPayButton: true,
+                        useKlarnaWidget: true,
+                        onSubmit: (state, component) => {
+                            console.log(state)
+                            if (state.isValid) {
+                                setAdyenStateData(state.data)
+                            }
                         }
                     }
                 },
