@@ -2,10 +2,12 @@ import React, {useRef, useEffect} from 'react'
 import AdyenCheckout from '@adyen/adyen-web'
 import '@adyen/adyen-web/dist/adyen.css'
 import {useAdyenCheckout} from '../context/adyen-checkout-context'
+import {useCustomerType} from '@salesforce/commerce-sdk-react'
 
 const AdyenCheckoutComponent = () => {
     const {adyenPaymentMethods, setAdyenStateData} = useAdyenCheckout()
     const paymentContainer = useRef(null)
+    const customerType = useCustomerType()
 
     useEffect(() => {
         const createCheckout = async () => {
@@ -16,6 +18,7 @@ const AdyenCheckoutComponent = () => {
                 paymentMethodsResponse: adyenPaymentMethods,
                 paymentMethodsConfiguration: {
                     card: {
+                        enableStoreDetails: customerType.isRegistered,
                         hasHolderName: true,
                         holderNameRequired: true,
                         billingAddressRequired: false,

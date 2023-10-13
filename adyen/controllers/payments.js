@@ -1,7 +1,10 @@
-'use strict'
 import {formatAddressInAdyenFormat} from '../utils/formatAddress.mjs'
 import {getCurrencyValueForApi} from '../utils/parsers.mjs'
-import {APPLICATION_VERSION} from '../utils/constants.mjs'
+import {
+    APPLICATION_VERSION,
+    SHOPPER_INTERACTIONS,
+    RECURRING_PROCESSING_MODEL
+} from '../utils/constants.mjs'
 import {createCheckoutResponse} from '../utils/createCheckoutResponse.mjs'
 import {PaymentsApi} from '@adyen/api-library/lib/src/services/checkout/paymentsApi'
 import {Client, Config} from '@adyen/api-library'
@@ -80,8 +83,14 @@ async function sendPayments(req, res) {
             paymentRequest.countryCode = paymentRequest.billingAddress.country
         }
 
+        if (data.storePaymentMethod || data.paymentMethod?.storedPaymentMethodId) {
+            paymentRequest.recurringProcessingModel = RECURRING_PROCESSING_MODEL.CARD_ON_FILE
+            paymentRequest.shopperInteraction = data.paymentMethod?.storedPaymentMethodId
+                ? SHOPPER_INTERACTIONS.CONT_AUTH
+                : SHOPPER_INTERACTIONS.ECOMMERCE
+        }
+
         const response = await checkout.payments(paymentRequest)
-        console.log(response)
         res.json(createCheckoutResponse(response))
     } catch (err) {
         console.log(err)
