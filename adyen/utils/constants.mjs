@@ -22,4 +22,13 @@ export const RESULT_CODES = {
 
 export const BLOCKED_PAYMENT_METHODS = [PAYMENT_METHOD_TYPES.GIFT_CARD]
 
+export const SHOPPER_INTERACTIONS = {
+    CONT_AUTH : 'ContAuth',
+    ECOMMERCE : 'Ecommerce',
+};
+
+export const RECURRING_PROCESSING_MODEL = {
+    CARD_ON_FILE : 'CardOnFile',
+};
+
 export const APPLICATION_VERSION = '1.0.0'
