@@ -5,11 +5,12 @@ import {useAdyenCheckout} from '../context/adyen-checkout-context'
 import {useCustomerType} from '@salesforce/commerce-sdk-react'
 
 const AdyenCheckoutComponent = () => {
-    const {adyenPaymentMethods, setAdyenStateData} = useAdyenCheckout()
+    const {adyenPaymentMethods, setAdyenStateData, adyenPaymentMethodsConfig} = useAdyenCheckout()
     const paymentContainer = useRef(null)
     const customerType = useCustomerType()
 
     useEffect(() => {
+        console.log(adyenPaymentMethodsConfig)
         const createCheckout = async () => {
             const checkout = await AdyenCheckout({
                 showPayButton: false,
