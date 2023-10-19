@@ -4,36 +4,36 @@ export const baseConfig = (props) => {
     const onSubmit = async (state, component) => {
         try {
             if (!state.isValid) throw new Error('invalid state')
-            const adyenPaymentService = new AdyenPaymentsService(props.token)
+            const adyenPaymentService = new AdyenPaymentsService(props?.token)
             const paymentsResponse = await adyenPaymentService.submitPayment(
                 state.data,
                 props.basketId,
-                props.customerId
+                props?.customerId
             )
             if (paymentsResponse?.isSuccessful) {
-                props.successHandler(paymentsResponse.merchantReference)
+                props?.successHandler(paymentsResponse.merchantReference)
             } else if (paymentsResponse?.action) {
                 await component.handleAction(paymentsResponse.action)
             }
         } catch (error) {
-            props.errorHandler(error)
+            props?.errorHandler(error)
         }
     }
     const onAdditionalDetails = async (state, component) => {
         try {
             if (!state.isValid) throw new Error('invalid state')
-            const adyenPaymentsDetailsService = new AdyenPaymentsDetailsService(props.token)
+            const adyenPaymentsDetailsService = new AdyenPaymentsDetailsService(props?.token)
             const paymentsDetailsResponse = await adyenPaymentsDetailsService.submitPaymentsDetails(
                 state.data,
-                props.customerId
+                props?.customerId
             )
             if (paymentsDetailsResponse?.isSuccessful) {
-                props.successHandler(paymentsDetailsResponse.merchantReference)
+                props?.successHandler(paymentsDetailsResponse.merchantReference)
             } else if (paymentsDetailsResponse?.action) {
                 await component.handleAction(paymentsDetailsResponse.action)
             }
         } catch (error) {
-            props.errorHandler(error)
+            props?.errorHandler(error)
         }
     }
 

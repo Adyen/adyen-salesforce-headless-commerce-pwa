@@ -2,74 +2,18 @@ import React, {useRef, useEffect} from 'react'
 import AdyenCheckout from '@adyen/adyen-web'
 import '@adyen/adyen-web/dist/adyen.css'
 import {useAdyenCheckout} from '../context/adyen-checkout-context'
-import {useCustomerType} from '@salesforce/commerce-sdk-react'
 
 const AdyenCheckoutComponent = () => {
     const {adyenPaymentMethods, setAdyenStateData, adyenPaymentMethodsConfig} = useAdyenCheckout()
     const paymentContainer = useRef(null)
-    const customerType = useCustomerType()
 
     useEffect(() => {
-        console.log(adyenPaymentMethodsConfig)
         const createCheckout = async () => {
             const checkout = await AdyenCheckout({
-                showPayButton: false,
                 environment: adyenPaymentMethods.ADYEN_ENVIRONMENT,
                 clientKey: adyenPaymentMethods.ADYEN_CLIENT_KEY,
                 paymentMethodsResponse: adyenPaymentMethods,
-                paymentMethodsConfiguration: {
-                    card: {
-                        enableStoreDetails: customerType.isRegistered,
-                        hasHolderName: true,
-                        holderNameRequired: true,
-                        billingAddressRequired: false,
-                        onBinValue: (event) => {
-                            console.log(event)
-                        },
-                        onBinLookup: (event) => {
-                            console.log(event)
-                        }
-                    },
-                    paypal: {
-                        showPayButton: true,
-                        onSubmit: (state, component) => {
-                            console.log(state)
-                            if (state.isValid) {
-                                setAdyenStateData(state.data)
-                            }
-                        }
-                    },
-                    klarna: {
-                        showPayButton: true,
-                        useKlarnaWidget: true,
-                        onSubmit: (state, component) => {
-                            console.log(state)
-                            if (state.isValid) {
-                                setAdyenStateData(state.data)
-                            }
-                        }
-                    },
-                    klarna_account: {
-                        showPayButton: true,
-                        useKlarnaWidget: true,
-                        onSubmit: (state, component) => {
-                            console.log(state)
-                            if (state.isValid) {
-                                setAdyenStateData(state.data)
-                            }
-                        }
-                    },
-                    klarna_paynow: {
-                        showPayButton: true,
-                        useKlarnaWidget: true,
-                        onSubmit: (state, component) => {
-                            console.log(state)
-                            if (state.isValid) {
-                                setAdyenStateData(state.data)
-                            }
-                        }
-                    }
-                },
+                paymentMethodsConfiguration: adyenPaymentMethodsConfig,
                 onChange: (state) => {
                     if (state.isValid) {
                         setAdyenStateData(state.data)

@@ -5,6 +5,7 @@ import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 import {resolveLocaleFromUrl} from '@salesforce/retail-react-app/app/utils/site-utils'
 import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
+import {useCustomerType} from '@salesforce/commerce-sdk-react'
 import {AdyenPaymentMethodsService} from '../services/payment-methods'
 import {paymentMethodsConfiguration} from '../components/paymentMethodsConfiguration'
 
@@ -13,6 +14,7 @@ const AdyenCheckoutContext = React.createContext()
 export const AdyenCheckoutProvider = ({children}) => {
     const {getTokenWhenReady} = useAccessToken()
     const customerId = useCustomerId()
+    const customerType = useCustomerType()
     const {data: basket} = useCurrentBasket()
     const location = useLocation()
     const locale = resolveLocaleFromUrl(`${location.pathname}${location.search}`)
@@ -36,15 +38,16 @@ export const AdyenCheckoutProvider = ({children}) => {
                 )
                 setAdyenPaymentMethods(data ? data : {error: true})
                 setAdyenPaymentMethodsConfig(
-                    paymentMethodsConfiguration(
-                        data.paymentMethods,
+                    paymentMethodsConfiguration({
+                        paymentMethods: data.paymentMethods,
+                        customerType,
                         token,
-                        basket.basketId,
+                        basketId: basket.basketId,
                         customerId,
-                        (successResponse) =>
+                        successHandler: (successResponse) =>
                             navigate(`/checkout/confirmation/${successResponse.merchantReference}`),
-                        (error) => console.log(error)
-                    )
+                        errorHandler: (error) => console.log(error)
+                    })
                 )
                 setFetching(false)
             } catch (error) {
