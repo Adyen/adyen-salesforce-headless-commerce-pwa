@@ -9,6 +9,7 @@ import {
 import {createCheckoutResponse} from '../utils/createCheckoutResponse.mjs'
 import {PaymentsApi} from '@adyen/api-library/lib/src/services/checkout/paymentsApi'
 import {Client, Config} from '@adyen/api-library'
+import {Checkout} from 'commerce-sdk'
 import {ShopperOrders, ShopperBaskets} from 'commerce-sdk-isomorphic'
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 
@@ -81,6 +82,21 @@ async function sendPayments(req, res) {
             headers: {authorization: req.headers.authorization}
         })
 
+        // const credentials = `${process.env.COMMERCE_API_CLIENT_ID_PRIVATE}:${process.env.COMMERCE_API_CLIENT_SECRET}`
+        // const base64data = btoa(credentials)
+        // const headers = {
+        //     'content-type': 'application/json',
+        //     authorization: `Basic ${base64data}`
+        // }
+
+        const ordersApi = new Checkout.Orders({
+            parameters: {
+                ...appConfig.commerceAPI.parameters,
+                clientId: process.env.COMMERCE_API_CLIENT_ID_PRIVATE
+            },
+            headers: {authorization: req.headers.authorization}
+        })
+
         const order = await shopperOrders.createOrder({
             body: {
                 basketId: req.headers.basketid
@@ -127,21 +143,15 @@ async function sendPayments(req, res) {
 
         const response = await checkout.payments(paymentRequest)
 
-        const checkoutResponse = createCheckoutResponse(response)
-        if (checkoutResponse.isFinal) {
-            await shopperOrders.updatePaymentInstrumentForOrder({
-                body: {
-                    amount: basket.orderTotal,
-                    paymentMethodId: PAYMENT_METHODS.ADYEN_COMPONENT,
-                    paymentCard: {
-                        cardType: data?.paymentMethod?.type
-                    }
-                },
-                parameters: {
-                    basketId: req.headers.basketid
-                }
-            })
-        }
+        await ordersApi.updateOrderPaymentTransaction({
+            body: {
+                c_externalReferenceCode: response.pspReference
+            },
+            parameters: {
+                orderNo: order.orderNo,
+                paymentInstrumentId: order.paymentInstruments[0].paymentInstrumentId
+            }
+        })
 
         res.json(createCheckoutResponse(response))
     } catch (err) {
