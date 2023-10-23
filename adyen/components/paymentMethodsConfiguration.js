@@ -2,6 +2,7 @@ import {baseConfig} from './helpers/baseConfig'
 import {klarnaConfig} from './klarna/config'
 import {cardConfig} from './card/config'
 import {paypalConfig} from './paypal/config'
+import {applePayConfig} from './applepay/config'
 
 export const paymentMethodsConfiguration = ({paymentMethods, ...props}) => {
     const defaultConfig = baseConfig(props)
@@ -10,7 +11,8 @@ export const paymentMethodsConfiguration = ({paymentMethods, ...props}) => {
         klarna: klarnaConfig(props),
         klarna_account: klarnaConfig(props),
         klarna_paynow: klarnaConfig(props),
-        paypal: paypalConfig(props)
+        paypal: paypalConfig(props),
+        applepay: applePayConfig(props)
     }
 
     return Object.fromEntries(

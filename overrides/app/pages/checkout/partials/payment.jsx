@@ -184,17 +184,6 @@ const Payment = () => {
                             selectedAddress={selectedBillingAddress}
                         />
                     )}
-
-                    <Box pt={3}>
-                        <Container variant="form">
-                            <Button w="full" onClick={onSubmit} isDisabled={isSubmittingPayment}>
-                                <FormattedMessage
-                                    defaultMessage="Review Order"
-                                    id="checkout_payment.button.review_order"
-                                />
-                            </Button>
-                        </Container>
-                    </Box>
                 </Stack>
             </ToggleCardEdit>
 

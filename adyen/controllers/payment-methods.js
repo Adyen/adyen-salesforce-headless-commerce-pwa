@@ -7,7 +7,7 @@ import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 
 async function getPaymentMethods(req, res) {
     const config = new Config()
-    config.apiKey = process.env.ADYEN_API_KEY //REPLACE With YOUR API KEY
+    config.apiKey = process.env.ADYEN_API_KEY
     const client = new Client({config})
     client.setEnvironment(process.env.ADYEN_ENVIRONMENT)
     const checkout = new PaymentsApi(client)
