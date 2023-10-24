@@ -6,6 +6,7 @@ module.exports = config.map((configItem) => {
     if (configItem.name === configNames.CLIENT || configItem.name === configNames.SERVER) {
         return {
             ...configItem,
+            devtool: 'source-map',
             module: {
                 ...configItem.module,
                 rules: [

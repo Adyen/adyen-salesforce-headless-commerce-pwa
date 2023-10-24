@@ -7,11 +7,10 @@ import {
     PAYMENT_METHODS
 } from '../utils/constants.mjs'
 import {createCheckoutResponse} from '../utils/createCheckoutResponse.mjs'
-import {PaymentsApi} from '@adyen/api-library/lib/src/services/checkout/paymentsApi'
-import {Client, Config} from '@adyen/api-library'
 import {Checkout} from 'commerce-sdk'
 import {ShopperOrders, ShopperBaskets} from 'commerce-sdk-isomorphic'
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
+import AdyenCheckoutConfig from '../services/checkout-config';
 
 const errorMessages = {
     AMOUNT_NOT_CORRECT: 'amount not correct',
@@ -33,12 +32,7 @@ async function sendPayments(req, res) {
         throw new Error(errorMessages.INVALID_PARAMS)
     }
 
-    const config = new Config()
-    config.apiKey = process.env.ADYEN_API_KEY
-    const client = new Client({config})
-    client.setEnvironment(process.env.ADYEN_ENVIRONMENT)
-    const checkout = new PaymentsApi(client)
-
+    const checkout = AdyenCheckoutConfig.getInstance()
     try {
         const {app: appConfig} = getConfig()
         const {data} = req.body
@@ -141,7 +135,7 @@ async function sendPayments(req, res) {
                 : SHOPPER_INTERACTIONS.ECOMMERCE
         }
 
-        const response = await checkout.payments(paymentRequest)
+        const response = await checkout.instance.payments(paymentRequest)
 
         // await ordersApi.updateOrderPaymentTransaction({
         //     body: {

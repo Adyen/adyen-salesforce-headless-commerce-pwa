@@ -1,16 +1,11 @@
 import {getCurrencyValueForApi} from '../utils/parsers.mjs'
 import {BLOCKED_PAYMENT_METHODS} from '../utils/constants.mjs'
-import {PaymentsApi} from '@adyen/api-library/lib/src/services/checkout/paymentsApi'
-import {Client, Config} from '@adyen/api-library'
 import {ShopperCustomers} from 'commerce-sdk-isomorphic'
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
+import AdyenCheckoutConfig from '../services/checkout-config'
 
 async function getPaymentMethods(req, res) {
-    const config = new Config()
-    config.apiKey = process.env.ADYEN_API_KEY
-    const client = new Client({config})
-    client.setEnvironment(process.env.ADYEN_ENVIRONMENT)
-    const checkout = new PaymentsApi(client)
+    const checkout = AdyenCheckoutConfig.getInstance()
 
     try {
         const {app: appConfig} = getConfig()
@@ -32,7 +27,7 @@ async function getPaymentMethods(req, res) {
         } = req.body
         const countryCode = shopperLocale?.slice(-2)
 
-        const response = await checkout.paymentMethods({
+        const response = await checkout.instance.paymentMethods({
             blockedPaymentMethods: BLOCKED_PAYMENT_METHODS,
             shopperLocale,
             countryCode,
