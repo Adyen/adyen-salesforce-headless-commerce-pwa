@@ -4,7 +4,7 @@ import '@adyen/adyen-web/dist/adyen.css'
 import {useAdyenCheckout} from '../context/adyen-checkout-context'
 
 const AdyenCheckoutComponent = () => {
-    const {adyenPaymentMethods, setAdyenStateData, adyenPaymentMethodsConfig} = useAdyenCheckout()
+    const {adyenPaymentMethods, adyenPaymentMethodsConfig, setAdyenStateData} = useAdyenCheckout()
     const paymentContainer = useRef(null)
 
     useEffect(() => {
@@ -14,6 +14,9 @@ const AdyenCheckoutComponent = () => {
                 clientKey: adyenPaymentMethods.ADYEN_CLIENT_KEY,
                 paymentMethodsResponse: adyenPaymentMethods,
                 paymentMethodsConfiguration: adyenPaymentMethodsConfig,
+                onAdditionalDetails(state, element) {
+                    adyenPaymentMethodsConfig.card.onAdditionalDetails(state, element)
+                },
                 onChange: (state) => {
                     if (state.isValid) {
                         setAdyenStateData(state.data)
@@ -24,6 +27,7 @@ const AdyenCheckoutComponent = () => {
             checkout.create('dropin').mount(paymentContainer.current)
         }
         if (adyenPaymentMethods && paymentContainer.current) {
+            window.paypal = undefined
             createCheckout()
         }
     }, [adyenPaymentMethods])

@@ -60,6 +60,7 @@
   ],
   "dependencies": {
     "@adyen/adyen-web": "^5.51.0",
-    "@adyen/api-library": "^14.3.0"
+    "@adyen/api-library": "^14.3.0",
+    "commerce-sdk": "^2.11.2"
   }
 }

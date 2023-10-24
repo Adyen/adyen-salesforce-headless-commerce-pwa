@@ -3,12 +3,14 @@ import {getCurrencyValueForApi} from '../utils/parsers.mjs'
 import {
     APPLICATION_VERSION,
     SHOPPER_INTERACTIONS,
-    RECURRING_PROCESSING_MODEL
+    RECURRING_PROCESSING_MODEL,
+    PAYMENT_METHODS
 } from '../utils/constants.mjs'
 import {createCheckoutResponse} from '../utils/createCheckoutResponse.mjs'
 import {PaymentsApi} from '@adyen/api-library/lib/src/services/checkout/paymentsApi'
 import {Client, Config} from '@adyen/api-library'
-import {ShopperOrders} from 'commerce-sdk-isomorphic'
+import {Checkout} from 'commerce-sdk'
+import {ShopperOrders, ShopperBaskets} from 'commerce-sdk-isomorphic'
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 
 const errorMessages = {
@@ -39,11 +41,61 @@ async function sendPayments(req, res) {
 
     try {
         const {app: appConfig} = getConfig()
+        const {data} = req.body
+        const shopperBaskets = new ShopperBaskets({
+            ...appConfig.commerceAPI,
+            headers: {authorization: req.headers.authorization}
+        })
+
+        const basket = await shopperBaskets.getBasket({
+            parameters: {
+                basketId: req.headers.basketid
+            }
+        })
+
+        if (!basket?.paymentInstruments || !basket?.paymentInstruments?.length) {
+            await shopperBaskets.addPaymentInstrumentToBasket({
+                body: {
+                    amount: basket.orderTotal,
+                    paymentMethodId: PAYMENT_METHODS.ADYEN_COMPONENT,
+                    paymentCard: {
+                        cardType: data?.paymentMethod?.type
+                    }
+                },
+                parameters: {
+                    basketId: req.headers.basketid
+                }
+            })
+        }
+
+        if (!basket.billingAddress) {
+            await shopperBaskets.updateBillingAddressForBasket({
+                body: basket.shipments[0].shippingAddress,
+                parameters: {
+                    basketId: req.headers.basketid
+                }
+            })
+        }
 
         const shopperOrders = new ShopperOrders({
             ...appConfig.commerceAPI,
             headers: {authorization: req.headers.authorization}
         })
+
+        // const credentials = `${process.env.COMMERCE_API_CLIENT_ID_PRIVATE}:${process.env.COMMERCE_API_CLIENT_SECRET}`
+        // const base64data = btoa(credentials)
+        // const headers = {
+        //     'content-type': 'application/json',
+        //     authorization: `Basic ${base64data}`
+        // }
+
+        // const ordersApi = new Checkout.Orders({
+        //     parameters: {
+        //         ...appConfig.commerceAPI.parameters,
+        //         clientId: process.env.COMMERCE_API_CLIENT_ID_PRIVATE
+        //     },
+        //     headers
+        // })
 
         const order = await shopperOrders.createOrder({
             body: {
@@ -55,7 +107,6 @@ async function sendPayments(req, res) {
             throw new Error(errorMessages.INVALID_ORDER)
         }
 
-        const {data} = req.body
         const paymentRequest = {
             ...data,
             billingAddress: formatAddressInAdyenFormat(order.billingAddress),
@@ -91,9 +142,19 @@ async function sendPayments(req, res) {
         }
 
         const response = await checkout.payments(paymentRequest)
+
+        // await ordersApi.updateOrderPaymentTransaction({
+        //     body: {
+        //         c_externalReferenceCode: response.pspReference
+        //     },
+        //     parameters: {
+        //         orderNo: order.orderNo,
+        //         paymentInstrumentId: order.paymentInstruments[0].paymentInstrumentId
+        //     }
+        // })
+
         res.json(createCheckoutResponse(response))
     } catch (err) {
-        console.log(err)
         res.status(err.statusCode || 500).json(err.message)
     }
 }

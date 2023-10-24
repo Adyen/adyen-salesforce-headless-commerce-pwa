@@ -3,7 +3,9 @@ import {AdyenPaymentsDetailsService} from '../../services/payments-details'
 export const baseConfig = (props) => {
     const onSubmit = async (state, component) => {
         try {
-            if (!state.isValid) throw new Error('invalid state')
+            if (!state.isValid) {
+                throw new Error('invalid state')
+            }
             const adyenPaymentService = new AdyenPaymentsService(props?.token)
             const paymentsResponse = await adyenPaymentService.submitPayment(
                 state.data,
@@ -14,14 +16,16 @@ export const baseConfig = (props) => {
                 props?.successHandler(paymentsResponse.merchantReference)
             } else if (paymentsResponse?.action) {
                 await component.handleAction(paymentsResponse.action)
+            } else {
+                // handle error
             }
         } catch (error) {
             props?.errorHandler(error)
         }
     }
+
     const onAdditionalDetails = async (state, component) => {
         try {
-            if (!state.isValid) throw new Error('invalid state')
             const adyenPaymentsDetailsService = new AdyenPaymentsDetailsService(props?.token)
             const paymentsDetailsResponse = await adyenPaymentsDetailsService.submitPaymentsDetails(
                 state.data,
@@ -31,6 +35,8 @@ export const baseConfig = (props) => {
                 props?.successHandler(paymentsDetailsResponse.merchantReference)
             } else if (paymentsDetailsResponse?.action) {
                 await component.handleAction(paymentsDetailsResponse.action)
+            } else {
+                // handle error
             }
         } catch (error) {
             props?.errorHandler(error)

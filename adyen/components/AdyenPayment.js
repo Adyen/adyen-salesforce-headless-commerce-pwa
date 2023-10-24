@@ -21,7 +21,6 @@ const AdyenPayment = () => {
             environment: adyenPaymentMethods.ADYEN_ENVIRONMENT,
             clientKey: adyenPaymentMethods.ADYEN_CLIENT_KEY,
             onAdditionalDetails(state) {
-                console.log('onAdditionalDetails', state)
                 sendPaymentsDetails(state.data)
             }
         })

@@ -44,8 +44,8 @@ export const AdyenCheckoutProvider = ({children}) => {
                         token,
                         basketId: basket.basketId,
                         customerId,
-                        successHandler: (successResponse) =>
-                            navigate(`/checkout/confirmation/${successResponse.merchantReference}`),
+                        successHandler: (merchantReference) =>
+                            navigate(`/checkout/confirmation/${merchantReference}`),
                         errorHandler: (error) => console.log(error)
                     })
                 )
