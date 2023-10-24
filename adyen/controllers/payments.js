@@ -89,13 +89,13 @@ async function sendPayments(req, res) {
         //     authorization: `Basic ${base64data}`
         // }
 
-        const ordersApi = new Checkout.Orders({
-            parameters: {
-                ...appConfig.commerceAPI.parameters,
-                clientId: process.env.COMMERCE_API_CLIENT_ID_PRIVATE
-            },
-            headers: {authorization: req.headers.authorization}
-        })
+        // const ordersApi = new Checkout.Orders({
+        //     parameters: {
+        //         ...appConfig.commerceAPI.parameters,
+        //         clientId: process.env.COMMERCE_API_CLIENT_ID_PRIVATE
+        //     },
+        //     headers
+        // })
 
         const order = await shopperOrders.createOrder({
             body: {
@@ -143,15 +143,15 @@ async function sendPayments(req, res) {
 
         const response = await checkout.payments(paymentRequest)
 
-        await ordersApi.updateOrderPaymentTransaction({
-            body: {
-                c_externalReferenceCode: response.pspReference
-            },
-            parameters: {
-                orderNo: order.orderNo,
-                paymentInstrumentId: order.paymentInstruments[0].paymentInstrumentId
-            }
-        })
+        // await ordersApi.updateOrderPaymentTransaction({
+        //     body: {
+        //         c_externalReferenceCode: response.pspReference
+        //     },
+        //     parameters: {
+        //         orderNo: order.orderNo,
+        //         paymentInstrumentId: order.paymentInstruments[0].paymentInstrumentId
+        //     }
+        // })
 
         res.json(createCheckoutResponse(response))
     } catch (err) {
