@@ -1,5 +1,5 @@
 import {createCheckoutResponse} from '../utils/createCheckoutResponse.mjs'
-import AdyenCheckoutConfig from '../services/checkout-config'
+import AdyenCheckoutConfig from './checkout-config'
 
 async function sendPaymentDetails(req, res) {
     const checkout = AdyenCheckoutConfig.getInstance()

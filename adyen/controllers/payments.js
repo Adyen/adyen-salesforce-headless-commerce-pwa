@@ -10,7 +10,7 @@ import {createCheckoutResponse} from '../utils/createCheckoutResponse.mjs'
 import {Checkout} from 'commerce-sdk'
 import {ShopperOrders, ShopperBaskets} from 'commerce-sdk-isomorphic'
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
-import AdyenCheckoutConfig from '../services/checkout-config';
+import AdyenCheckoutConfig from './checkout-config';
 
 const errorMessages = {
     AMOUNT_NOT_CORRECT: 'amount not correct',

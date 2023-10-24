@@ -2,7 +2,7 @@ import {getCurrencyValueForApi} from '../utils/parsers.mjs'
 import {BLOCKED_PAYMENT_METHODS} from '../utils/constants.mjs'
 import {ShopperCustomers} from 'commerce-sdk-isomorphic'
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
-import AdyenCheckoutConfig from '../services/checkout-config'
+import AdyenCheckoutConfig from './checkout-config'
 
 async function getPaymentMethods(req, res) {
     const checkout = AdyenCheckoutConfig.getInstance()
