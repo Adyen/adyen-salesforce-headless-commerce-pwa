@@ -1,17 +1,11 @@
-import {PaymentsApi} from '@adyen/api-library/lib/src/services/checkout/paymentsApi'
-import {Client, Config} from '@adyen/api-library'
 import {createCheckoutResponse} from '../utils/createCheckoutResponse.mjs'
+import AdyenCheckoutConfig from './checkout-config'
 
 async function sendPaymentDetails(req, res) {
-    const config = new Config()
-    config.apiKey = process.env.ADYEN_API_KEY
-    const client = new Client({config})
-    client.setEnvironment(process.env.ADYEN_ENVIRONMENT)
-    const checkout = new PaymentsApi(client)
-
+    const checkout = AdyenCheckoutConfig.getInstance()
     try {
         const {data} = req.body
-        const response = await checkout.paymentsDetails(data)
+        const response = await checkout.instance.paymentsDetails(data)
         res.json(createCheckoutResponse(response))
     } catch (err) {
         res.status(err.statusCode || 500).json(err.message)
