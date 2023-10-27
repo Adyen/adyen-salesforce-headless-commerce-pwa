@@ -1,50 +1,54 @@
 import {AdyenPaymentsService} from '../../services/payments'
 import {AdyenPaymentsDetailsService} from '../../services/payments-details'
-export const baseConfig = (props) => {
-    const onSubmit = async (state, component) => {
-        try {
-            if (!state.isValid) {
-                throw new Error('invalid state')
-            }
-            const adyenPaymentService = new AdyenPaymentsService(props?.token)
-            const paymentsResponse = await adyenPaymentService.submitPayment(
-                state.data,
-                props.basketId,
-                props?.customerId
-            )
-            if (paymentsResponse?.isSuccessful) {
-                props?.successHandler(paymentsResponse.merchantReference)
-            } else if (paymentsResponse?.action) {
-                await component.handleAction(paymentsResponse.action)
-            } else {
-                // handle error
-            }
-        } catch (error) {
-            props?.errorHandler(error)
-        }
-    }
+import {executeCallbacks} from '../../utils/executeCallbacks'
 
-    const onAdditionalDetails = async (state, component) => {
-        try {
-            const adyenPaymentsDetailsService = new AdyenPaymentsDetailsService(props?.token)
-            const paymentsDetailsResponse = await adyenPaymentsDetailsService.submitPaymentsDetails(
-                state.data,
-                props?.customerId
-            )
-            if (paymentsDetailsResponse?.isSuccessful) {
-                props?.successHandler(paymentsDetailsResponse.merchantReference)
-            } else if (paymentsDetailsResponse?.action) {
-                await component.handleAction(paymentsDetailsResponse.action)
-            } else {
-                // handle error
-            }
-        } catch (error) {
-            props?.errorHandler(error)
-        }
-    }
-
+export const baseConfig = ({
+    beforeSubmit = [],
+    afterSubmit = [],
+    beforeAdditionalDetails = [],
+    afterAdditionalDetails = [],
+    onError = (error) => {
+        console.log(JSON.stringify(error))
+    },
+    ...props
+}) => {
     return {
-        onSubmit: onSubmit,
-        onAdditionalDetails: onAdditionalDetails
+        onSubmit: executeCallbacks([...beforeSubmit, onSubmit, ...afterSubmit], props, onError),
+        onAdditionalDetails: executeCallbacks(
+            [...beforeAdditionalDetails, onAdditionalDetails, ...afterAdditionalDetails],
+            props,
+            onError
+        )
+    }
+}
+
+export const onSubmit = async (state, component, props) => {
+    try {
+        if (!state.isValid) {
+            throw new Error('invalid state')
+        }
+        // await props.submitBilling()
+        const adyenPaymentService = new AdyenPaymentsService(props?.token)
+        const paymentsResponse = await adyenPaymentService.submitPayment(
+            state.data,
+            props.basketId,
+            props?.customerId
+        )
+        return {paymentsResponse: paymentsResponse}
+    } catch (error) {
+        return new Error(error)
+    }
+}
+
+export const onAdditionalDetails = async (state, component, props) => {
+    try {
+        const adyenPaymentsDetailsService = new AdyenPaymentsDetailsService(props?.token)
+        const paymentsDetailsResponse = await adyenPaymentsDetailsService.submitPaymentsDetails(
+            state.data,
+            props?.customerId
+        )
+        return {paymentsDetailsResponse: paymentsDetailsResponse}
+    } catch (error) {
+        return new Error(error)
     }
 }

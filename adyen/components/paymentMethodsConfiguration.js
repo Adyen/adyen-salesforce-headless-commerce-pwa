@@ -4,7 +4,7 @@ import {cardConfig} from './card/config'
 import {paypalConfig} from './paypal/config'
 import {applePayConfig} from './applepay/config'
 
-export const paymentMethodsConfiguration = ({paymentMethods, ...props}) => {
+export const paymentMethodsConfiguration = ({paymentMethods = [], ...props}) => {
     const defaultConfig = baseConfig(props)
     const paymentMethodsConfig = {
         card: cardConfig(props),
