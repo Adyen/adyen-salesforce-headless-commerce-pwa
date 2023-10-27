@@ -7,7 +7,7 @@
 import React, {useState} from 'react'
 import PropTypes from 'prop-types'
 import {FormattedMessage, useIntl} from 'react-intl'
-import {Box, Button, Checkbox, Container, Heading, Stack, Text, Divider} from '@chakra-ui/react'
+import {Box, Checkbox, Divider, Heading, Stack, Text} from '@chakra-ui/react'
 import {useForm} from 'react-hook-form'
 import {useToast} from '@salesforce/retail-react-app/app/hooks/use-toast'
 import {useShopperBasketsMutation} from '@salesforce/commerce-sdk-react'
@@ -93,7 +93,7 @@ const Payment = () => {
         // Using destructuring to remove properties from the object...
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const {addressId, creationDate, lastModified, preferred, ...address} = billingAddress
-        return updateBillingAddressForBasket({
+        return await updateBillingAddressForBasket({
             body: address,
             parameters: {basketId: basket.basketId, shipmentId: 'me'}
         })
@@ -146,7 +146,7 @@ const Payment = () => {
                 </Box>
 
                 <Stack spacing={6}>
-                    <AdyenCheckout />
+                    <AdyenCheckout beforeSubmit={[onBillingSubmit]} />
 
                     <Divider borderColor="gray.100" />
 

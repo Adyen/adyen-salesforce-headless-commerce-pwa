@@ -2,15 +2,14 @@ import {formatAddressInAdyenFormat} from '../utils/formatAddress.mjs'
 import {getCurrencyValueForApi} from '../utils/parsers.mjs'
 import {
     APPLICATION_VERSION,
-    SHOPPER_INTERACTIONS,
+    PAYMENT_METHODS,
     RECURRING_PROCESSING_MODEL,
-    PAYMENT_METHODS
+    SHOPPER_INTERACTIONS
 } from '../utils/constants.mjs'
 import {createCheckoutResponse} from '../utils/createCheckoutResponse.mjs'
-import {Checkout} from 'commerce-sdk'
-import {ShopperOrders, ShopperBaskets} from 'commerce-sdk-isomorphic'
+import {ShopperBaskets, ShopperOrders} from 'commerce-sdk-isomorphic'
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
-import AdyenCheckoutConfig from './checkout-config';
+import AdyenCheckoutConfig from './checkout-config'
 
 const errorMessages = {
     AMOUNT_NOT_CORRECT: 'amount not correct',
@@ -56,15 +55,6 @@ async function sendPayments(req, res) {
                         cardType: data?.paymentMethod?.type
                     }
                 },
-                parameters: {
-                    basketId: req.headers.basketid
-                }
-            })
-        }
-
-        if (!basket.billingAddress) {
-            await shopperBaskets.updateBillingAddressForBasket({
-                body: basket.shipments[0].shippingAddress,
                 parameters: {
                     basketId: req.headers.basketid
                 }

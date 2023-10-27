@@ -533,18 +533,6 @@
       "value": "Add New Card"
     }
   ],
-  "checkout.button.place_order": [
-    {
-      "type": 0,
-      "value": "Place Order"
-    }
-  ],
-  "checkout.message.generic_error": [
-    {
-      "type": 0,
-      "value": "An unexpected error occurred during checkout."
-    }
-  ],
   "checkout_confirmation.button.create_account": [
     {
       "type": 0,
@@ -765,12 +753,6 @@
     {
       "type": 0,
       "value": "Back to cart"
-    }
-  ],
-  "checkout_payment.button.review_order": [
-    {
-      "type": 0,
-      "value": "Review Order"
     }
   ],
   "checkout_payment.heading.billing_address": [
