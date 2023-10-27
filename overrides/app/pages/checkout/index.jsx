@@ -5,6 +5,7 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import React, {useEffect, useState} from 'react'
+import {useLocation} from 'react-router-dom'
 import {Alert, AlertIcon, Box, Container, Grid, GridItem, Stack} from '@chakra-ui/react'
 import {
     CheckoutProvider,
@@ -16,17 +17,12 @@ import ShippingOptions from '@salesforce/retail-react-app/app/pages/checkout/par
 import OrderSummary from '@salesforce/retail-react-app/app/components/order-summary'
 import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 import Payment from './partials/payment'
-import {
-    AdyenCheckoutProvider,
-    useAdyenCheckout
-} from '../../../../adyen/context/adyen-checkout-context'
-import AdyenPayment from '../../../../adyen/components/AdyenPayment'
-import {useCurrentCustomer} from '@salesforce/retail-react-app/app/hooks/use-current-customer'
-import CheckoutSkeleton from '@salesforce/retail-react-app/app/pages/checkout/partials/checkout-skeleton'
+import {AdyenCheckoutProvider} from '../../../../adyen/context/adyen-checkout-context'
+import AdyenRedirect from '../../../../adyen/components/AdyenRedirect'
 
 const Checkout = () => {
     const {step} = useCheckout()
-    const [error, setError] = useState()
+    const [error] = useState()
     const {data: basket} = useCurrentBasket()
 
     useEffect(() => {
@@ -74,22 +70,15 @@ const Checkout = () => {
 }
 
 const CheckoutChildren = () => {
-    const {paymentConfig} = useAdyenCheckout()
-    return paymentConfig ? <AdyenPayment /> : <Checkout />
+    const location = useLocation()
+    return location?.search?.includes('redirectResult') ? <AdyenRedirect /> : <Checkout />
 }
 
 const CheckoutContainer = () => {
-    const {data: customer} = useCurrentCustomer()
-    const {data: basket} = useCurrentBasket()
-
-    if (!customer || !customer.customerId || !basket || !basket.basketId) {
-        return <CheckoutSkeleton />
-    }
-
     return (
         <AdyenCheckoutProvider>
             <CheckoutProvider>
-                <Checkout />
+                <CheckoutChildren />
             </CheckoutProvider>
         </AdyenCheckoutProvider>
     )

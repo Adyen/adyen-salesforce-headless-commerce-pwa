@@ -16,7 +16,8 @@ import Logger from './logger'
 const errorMessages = {
     AMOUNT_NOT_CORRECT: 'amount not correct',
     INVALID_ORDER: 'order is invalid',
-    INVALID_PARAMS: 'invalid request params'
+    INVALID_PARAMS: 'invalid request params',
+    INVALID_BASKET: 'invalid basket'
 }
 
 const validateRequestParams = (req) => {
@@ -48,6 +49,10 @@ async function sendPayments(req, res) {
                 basketId: req.headers.basketid
             }
         })
+
+        if (!basket) {
+            throw new Error(errorMessages.INVALID_BASKET)
+        }
 
         if (!basket?.paymentInstruments || !basket?.paymentInstruments?.length) {
             Logger.info('sendPayments', 'addPaymentInstrumentToBasket')
@@ -122,7 +127,7 @@ async function sendPayments(req, res) {
                 }
             },
             channel: 'Web',
-            returnUrl: `${data.origin}/checkout`,
+            returnUrl: `http://localhost:3000/checkout`,
             shopperReference: order?.customerInfo?.customerId,
             shopperEmail: order?.customerInfo?.email
         }

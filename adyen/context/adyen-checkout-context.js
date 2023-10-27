@@ -36,13 +36,14 @@ export const AdyenCheckoutProvider = ({children}) => {
                     customerId,
                     locale
                 )
+                console.log('setAdyenPaymentMethods', data)
                 setAdyenPaymentMethods(data ? data : {error: true})
                 setAdyenPaymentMethodsConfig(
                     paymentMethodsConfiguration({
                         paymentMethods: data.paymentMethods,
                         customerType,
                         token,
-                        basketId: basket.basketId,
+                        basketId: basket?.basketId,
                         customerId,
                         successHandler: (merchantReference) =>
                             navigate(`/checkout/confirmation/${merchantReference}`),
