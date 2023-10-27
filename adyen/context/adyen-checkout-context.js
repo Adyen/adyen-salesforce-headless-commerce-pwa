@@ -36,7 +36,6 @@ export const AdyenCheckoutProvider = ({children}) => {
                     customerId,
                     locale
                 )
-                console.log('setAdyenPaymentMethods', data)
                 setAdyenPaymentMethods(data ? data : {error: true})
                 setAdyenPaymentMethodsConfig(
                     paymentMethodsConfiguration({
