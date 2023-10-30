@@ -3,8 +3,10 @@ import {BLOCKED_PAYMENT_METHODS} from '../utils/constants.mjs'
 import {ShopperCustomers} from 'commerce-sdk-isomorphic'
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 import AdyenCheckoutConfig from './checkout-config'
+import Logger from './logger'
 
 async function getPaymentMethods(req, res) {
+    Logger.info('getPaymentMethods', 'start')
     const checkout = AdyenCheckoutConfig.getInstance()
 
     try {
@@ -39,12 +41,14 @@ async function getPaymentMethods(req, res) {
             shopperReference: req.headers.customerid
         })
 
+        Logger.info('getPaymentMethods', 'success')
         res.json({
             ...response,
             ADYEN_CLIENT_KEY: process.env.ADYEN_CLIENT_KEY,
             ADYEN_ENVIRONMENT: process.env.ADYEN_ENVIRONMENT
         })
     } catch (err) {
+        Logger.error('getPaymentMethods', err.message)
         res.status(err.statusCode || 500).json(err.message)
     }
 }

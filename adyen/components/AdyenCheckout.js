@@ -15,6 +15,9 @@ const AdyenCheckoutComponent = (props) => {
                 environment: adyenPaymentMethods.ADYEN_ENVIRONMENT,
                 clientKey: adyenPaymentMethods.ADYEN_CLIENT_KEY,
                 paymentMethodsResponse: adyenPaymentMethods,
+                onSubmit(state, element) {
+                    paymentMethodsConfiguration.card.onSubmit(state, element)
+                },
                 paymentMethodsConfiguration: paymentMethodsConfiguration,
                 onAdditionalDetails(state, element) {
                     paymentMethodsConfiguration.card.onAdditionalDetails(state, element)

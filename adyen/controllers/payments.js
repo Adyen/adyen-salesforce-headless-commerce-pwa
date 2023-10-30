@@ -10,6 +10,7 @@ import {createCheckoutResponse} from '../utils/createCheckoutResponse.mjs'
 import {ShopperBaskets, ShopperOrders} from 'commerce-sdk-isomorphic'
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 import AdyenCheckoutConfig from './checkout-config'
+import Logger from './logger'
 
 const errorMessages = {
     AMOUNT_NOT_CORRECT: 'amount not correct',
@@ -27,6 +28,7 @@ const validateRequestParams = (req) => {
 }
 
 async function sendPayments(req, res) {
+    Logger.info('sendPayments', 'start')
     if (!validateRequestParams(req)) {
         throw new Error(errorMessages.INVALID_PARAMS)
     }
@@ -47,6 +49,7 @@ async function sendPayments(req, res) {
         })
 
         if (!basket?.paymentInstruments || !basket?.paymentInstruments?.length) {
+            Logger.info('sendPayments', 'addPaymentInstrumentToBasket')
             await shopperBaskets.addPaymentInstrumentToBasket({
                 body: {
                     amount: basket.orderTotal,
@@ -86,6 +89,7 @@ async function sendPayments(req, res) {
                 basketId: req.headers.basketid
             }
         })
+        Logger.info('sendPayments', `orderCreated ${order.orderNo}`)
 
         if (order?.customerInfo?.customerId !== req.headers.customerid) {
             throw new Error(errorMessages.INVALID_ORDER)
@@ -126,6 +130,7 @@ async function sendPayments(req, res) {
         }
 
         const response = await checkout.instance.payments(paymentRequest)
+        Logger.info('sendPayments', `resultCode ${response.resultCode}`)
 
         // await ordersApi.updateOrderPaymentTransaction({
         //     body: {
@@ -139,6 +144,7 @@ async function sendPayments(req, res) {
 
         res.json(createCheckoutResponse(response))
     } catch (err) {
+        Logger.error('sendPayments', err.message)
         res.status(err.statusCode || 500).json(err.message)
     }
 }

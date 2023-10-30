@@ -1,4 +1,5 @@
 import {hmacValidator} from '@adyen/api-library'
+import Logger from './logger'
 
 const messages = {
     AUTH_ERROR: 'Access Denied!',
@@ -42,6 +43,7 @@ function authenticate(req, res, next) {
             throw new Error(messages.AUTH_ERROR)
         }
     } catch (err) {
+        Logger.error('authenticate', err.message)
         return next(err)
     }
 }
@@ -59,15 +61,18 @@ function validateHmac(req, res, next) {
             throw new Error(messages.AUTH_ERROR)
         }
     } catch (err) {
+        Logger.error('validateHmac', err.message)
         return next(err)
     }
 }
 
 function webhookSuccess(res) {
+    Logger.info('webhookSuccess', res.toString())
     return res.status(200).json(messages.AUTH_SUCCESS)
 }
 
 const errorHandler = (err, req, res, next) => {
+    Logger.error('errorHandler', err.message)
     res.status(err.statusCode || 500).json(err.message || messages.DEFAULT_ERROR)
 }
 
