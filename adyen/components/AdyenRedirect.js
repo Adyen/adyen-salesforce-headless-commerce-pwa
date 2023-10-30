@@ -30,10 +30,7 @@ const AdyenRedirect = () => {
                 async onAdditionalDetails(state, component) {
                     const adyenPaymentsDetailsService = new AdyenPaymentsDetailsService(token)
                     const paymentsDetailsResponse =
-                        await adyenPaymentsDetailsService.submitPaymentsDetails(
-                            state,
-                            customerId
-                        )
+                        await adyenPaymentsDetailsService.submitPaymentsDetails(state, customerId)
                     if (paymentsDetailsResponse?.isSuccessful) {
                         navigate(
                             `/checkout/confirmation/${paymentsDetailsResponse.merchantReference}`

@@ -9,7 +9,6 @@ export class AdyenPaymentsDetailsService {
     }
 
     async submitPaymentsDetails(data, customerId) {
-        console.log('submitPaymentsDetails', data)
         const res = await this.apiClient.post({
             body: JSON.stringify({
                 data
