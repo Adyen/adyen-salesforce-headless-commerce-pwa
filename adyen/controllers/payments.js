@@ -117,7 +117,7 @@ async function sendPayments(req, res) {
                 }
             },
             channel: 'Web',
-            returnUrl: `http://localhost:3000/checkout`,
+            returnUrl: `${data.origin}/checkout`,
             shopperReference: order?.customerInfo?.customerId,
             shopperEmail: order?.customerInfo?.email
         }
