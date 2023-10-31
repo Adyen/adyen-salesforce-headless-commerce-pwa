@@ -16,9 +16,9 @@ import PaymentsDetailsController from '../../adyen/controllers/payments-details'
 import PaymentsController from '../../adyen/controllers/payments'
 import {
     authenticate,
-    validateHmac,
     errorHandler,
-    handleWebhook
+    handleWebhook,
+    validateHmac
 } from '../../adyen/controllers/webhook'
 
 const options = {
@@ -45,45 +45,45 @@ const {handler} = runtime.createHandler(options, (app) => {
     app.use(bodyParser.json())
 
     // Set HTTP security headers
-    // app.use(
-    //     helmet({
-    //         contentSecurityPolicy: {
-    //             useDefaults: true,
-    //             directives: {
-    //                 'img-src': [
-    //                     "'self'",
-    //                     '*.commercecloud.salesforce.com',
-    //                     'data:',
-    //                     '*.adyen.com',
-    //                     '*.paypal.com',
-    //                     'https://www.paypalobjects.com/js-sdk-logos/2.2.7/paypal-blue.svg'
-    //                 ],
-    //                 'script-src': [
-    //                     "'self'",
-    //                     "'unsafe-eval'",
-    //                     'storage.googleapis.com',
-    //                     '*.paypal.com',
-    //                     'https://x.klarnacdn.net/kp/lib/v1/api.js',
-    //                     'https://static-eu.payments-amazon.com/checkout.js',
-    //                     'https://sandbox.src.mastercard.com/sdk/srcsdk.mastercard.js',
-    //                     'https://sandbox-assets.secure.checkout.visa.com/checkout-widget/resources/js/src-i-adapter/visa-sdk.js?v2',
-    //                     'https://pay.google.com/gp/p/js/pay.js'
-    //                 ],
-    //                 'connect-src': [
-    //                     "'self'",
-    //                     'api.cquotient.com',
-    //                     '*.adyen.com',
-    //                     'https://www.sandbox.paypal.com/xoplatform/logger/api/logger?disableSetCookie=true'
-    //                 ],
-    //                 'frame-src': ["'self'", '*.adyen.com', '*.paypal.com'],
-    //
-    //                 // Do not upgrade insecure requests for local development
-    //                 'upgrade-insecure-requests': isRemote() ? [] : null
-    //             }
-    //         },
-    //         hsts: isRemote()
-    //     })
-    // )
+    app.use(
+        helmet({
+            contentSecurityPolicy: {
+                useDefaults: true,
+                directives: {
+                    'img-src': [
+                        "'self'",
+                        '*.commercecloud.salesforce.com',
+                        'data:',
+                        '*.adyen.com',
+                        '*.paypal.com',
+                        'https://www.paypalobjects.com/js-sdk-logos/2.2.7/paypal-blue.svg'
+                    ],
+                    'script-src': [
+                        "'self'",
+                        "'unsafe-eval'",
+                        'storage.googleapis.com',
+                        '*.paypal.com',
+                        'https://x.klarnacdn.net/kp/lib/v1/api.js',
+                        'https://static-eu.payments-amazon.com/checkout.js',
+                        'https://sandbox.src.mastercard.com/sdk/srcsdk.mastercard.js',
+                        'https://sandbox-assets.secure.checkout.visa.com/checkout-widget/resources/js/src-i-adapter/visa-sdk.js?v2',
+                        'https://pay.google.com/gp/p/js/pay.js'
+                    ],
+                    'connect-src': [
+                        "'self'",
+                        'api.cquotient.com',
+                        '*.adyen.com',
+                        'https://www.sandbox.paypal.com/xoplatform/logger/api/logger?disableSetCookie=true'
+                    ],
+                    'frame-src': ["'self'", '*.adyen.com', '*.paypal.com'],
+
+                    // Do not upgrade insecure requests for local development
+                    'upgrade-insecure-requests': isRemote() ? [] : null
+                }
+            },
+            hsts: isRemote()
+        })
+    )
 
     // Handle the redirect from SLAS as to avoid error
     app.get('/callback?*', (req, res) => {
