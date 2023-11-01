@@ -102,8 +102,10 @@ async function sendPayments(req, res) {
 
         const paymentRequest = {
             ...data,
-            billingAddress: formatAddressInAdyenFormat(order.billingAddress),
-            deliveryAddress: formatAddressInAdyenFormat(order.shipments[0].shippingAddress),
+            billingAddress: data.billingAddress || formatAddressInAdyenFormat(order.billingAddress),
+            deliveryAddress:
+                data.deliveryAddress ||
+                formatAddressInAdyenFormat(order.shipments[0].shippingAddress),
             reference: order.orderNo,
             merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT,
             amount: {
