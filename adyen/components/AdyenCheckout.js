@@ -9,6 +9,8 @@ const AdyenCheckoutComponent = (props) => {
     const paymentContainer = useRef(null)
 
     useEffect(() => {
+        const urlParams = new URLSearchParams(location.search)
+        const redirectResult = urlParams.get('redirectResult')
         const createCheckout = async () => {
             const paymentMethodsConfiguration = await getPaymentMethodsConfiguration(props)
             const checkout = await AdyenCheckout({
@@ -29,7 +31,11 @@ const AdyenCheckoutComponent = (props) => {
                 }
             })
 
-            checkout.create('dropin').mount(paymentContainer.current)
+            if (redirectResult) {
+                checkout.submitDetails({data: {details: {redirectResult}}})
+            } else {
+                checkout.create('dropin').mount(paymentContainer.current)
+            }
         }
         if (adyenPaymentMethods && paymentContainer.current) {
             window.paypal = undefined

@@ -58,7 +58,7 @@ export const AdyenCheckoutProvider = ({children}) => {
             paymentMethods: adyenPaymentMethods?.paymentMethods,
             customerType,
             token,
-            basketId: basket.basketId,
+            basketId: basket?.basketId,
             customerId,
             onError: onError,
             afterSubmit: [...afterSubmit, onPaymentsSuccess],

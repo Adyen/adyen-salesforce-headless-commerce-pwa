@@ -18,7 +18,7 @@ import OrderSummary from '@salesforce/retail-react-app/app/components/order-summ
 import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 import Payment from './partials/payment'
 import {AdyenCheckoutProvider} from '../../../../adyen/context/adyen-checkout-context'
-import AdyenRedirect from '../../../../adyen/components/AdyenRedirect'
+import AdyenCheckout from '../../../../adyen/components/AdyenCheckout'
 
 const Checkout = () => {
     const {step} = useCheckout()
@@ -71,7 +71,7 @@ const Checkout = () => {
 
 const CheckoutChildren = () => {
     const location = useLocation()
-    return location?.search?.includes('redirectResult') ? <AdyenRedirect /> : <Checkout />
+    return location?.search?.includes('redirectResult') ? <AdyenCheckout /> : <Checkout />
 }
 
 const CheckoutContainer = () => {
