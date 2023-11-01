@@ -25,33 +25,25 @@ export const baseConfig = ({
 }
 
 export const onSubmit = async (state, component, props) => {
-    try {
-        if (!state.isValid) {
-            throw new Error('invalid state')
-        }
-        const adyenPaymentService = new AdyenPaymentsService(props?.token)
-        const paymentsResponse = await adyenPaymentService.submitPayment(
-            {...state.data, origin: `${window.location.protocol}//${window.location.host}`},
-            props.basketId,
-            props?.customerId
-        )
-        return {paymentsResponse: paymentsResponse}
-    } catch (error) {
-        return new Error(error)
+    if (!state.isValid) {
+        throw new Error('invalid state')
     }
+    const adyenPaymentService = new AdyenPaymentsService(props?.token)
+    const paymentsResponse = await adyenPaymentService.submitPayment(
+        {...state.data, origin: `${window.location.protocol}//${window.location.host}`},
+        props.basket?.basketId,
+        props?.customerId
+    )
+    return {paymentsResponse: paymentsResponse}
 }
 
 export const onAdditionalDetails = async (state, component, props) => {
-    try {
-        const adyenPaymentsDetailsService = new AdyenPaymentsDetailsService(props?.token)
-        const paymentsDetailsResponse = await adyenPaymentsDetailsService.submitPaymentsDetails(
-            state.data,
-            props?.customerId
-        )
-        return {paymentsDetailsResponse: paymentsDetailsResponse}
-    } catch (error) {
-        return new Error(error)
-    }
+    const adyenPaymentsDetailsService = new AdyenPaymentsDetailsService(props?.token)
+    const paymentsDetailsResponse = await adyenPaymentsDetailsService.submitPaymentsDetails(
+        state.data,
+        props?.customerId
+    )
+    return {paymentsDetailsResponse: paymentsDetailsResponse}
 }
 
 export const getAmount = ({basket}) => {
