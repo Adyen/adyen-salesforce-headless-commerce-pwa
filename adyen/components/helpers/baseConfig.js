@@ -1,6 +1,7 @@
 import {AdyenPaymentsService} from '../../services/payments'
 import {AdyenPaymentsDetailsService} from '../../services/payments-details'
 import {executeCallbacks} from '../../utils/executeCallbacks'
+import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 
 export const baseConfig = ({
     beforeSubmit = [],
@@ -13,6 +14,7 @@ export const baseConfig = ({
     ...props
 }) => {
     return {
+        amount: getAmount(props),
         onSubmit: executeCallbacks([...beforeSubmit, onSubmit, ...afterSubmit], props, onError),
         onAdditionalDetails: executeCallbacks(
             [...beforeAdditionalDetails, onAdditionalDetails, ...afterAdditionalDetails],
@@ -49,5 +51,13 @@ export const onAdditionalDetails = async (state, component, props) => {
         return {paymentsDetailsResponse: paymentsDetailsResponse}
     } catch (error) {
         return new Error(error)
+    }
+}
+
+export const getAmount = ({basket}) => {
+    if (!basket) return null
+    return {
+        value: getCurrencyValueForApi(basket.orderTotal, basket.currency),
+        currency: basket.currency
     }
 }
