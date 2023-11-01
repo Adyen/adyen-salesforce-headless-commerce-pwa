@@ -16,9 +16,7 @@ async function getPaymentMethods(req, res) {
             headers: {authorization: req.headers.authorization}
         })
 
-        const {
-            baskets: [{orderTotal, currency}]
-        } = await shopperCustomers.getCustomerBaskets({
+        const {baskets} = await shopperCustomers.getCustomerBaskets({
             parameters: {
                 customerId: req.headers.customerid
             }
@@ -29,17 +27,23 @@ async function getPaymentMethods(req, res) {
         } = req.body
         const countryCode = shopperLocale?.slice(-2)
 
-        const response = await checkout.instance.paymentMethods({
+        const paymentMethodsRequest = {
             blockedPaymentMethods: BLOCKED_PAYMENT_METHODS,
             shopperLocale,
             countryCode,
-            amount: {
-                value: getCurrencyValueForApi(orderTotal, currency),
-                currency: currency
-            },
             merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT,
             shopperReference: req.headers.customerid
-        })
+        }
+
+        if (baskets?.length) {
+            const [{orderTotal, currency}] = baskets
+            paymentMethodsRequest.amount = {
+                value: getCurrencyValueForApi(orderTotal, currency),
+                currency: currency
+            }
+        }
+
+        const response = await checkout.instance.paymentMethods(paymentMethodsRequest)
 
         Logger.info('getPaymentMethods', 'success')
         res.json({

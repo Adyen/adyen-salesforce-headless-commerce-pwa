@@ -29,7 +29,7 @@ export const onSubmit = async (state, component, props) => {
         }
         const adyenPaymentService = new AdyenPaymentsService(props?.token)
         const paymentsResponse = await adyenPaymentService.submitPayment(
-            state.data,
+            {...state.data, origin: `${window.location.protocol}//${window.location.host}`},
             props.basketId,
             props?.customerId
         )

@@ -22,7 +22,6 @@ export const AdyenCheckoutProvider = ({children}) => {
     const [fetching, setFetching] = useState(false)
     const [adyenPaymentMethods, setAdyenPaymentMethods] = useState()
     const [adyenStateData, setAdyenStateData] = useState()
-    const [paymentConfig, setPaymentConfig] = useState()
 
     useEffect(() => {
         const fetchPaymentMethods = async () => {
@@ -59,7 +58,7 @@ export const AdyenCheckoutProvider = ({children}) => {
             paymentMethods: adyenPaymentMethods?.paymentMethods,
             customerType,
             token,
-            basketId: basket.basketId,
+            basketId: basket?.basketId,
             customerId,
             onError: onError,
             afterSubmit: [...afterSubmit, onPaymentsSuccess],
@@ -94,7 +93,6 @@ export const AdyenCheckoutProvider = ({children}) => {
     const value = {
         adyenPaymentMethods,
         adyenStateData,
-        paymentConfig,
         setAdyenStateData: (data) => setAdyenStateData(data),
         getPaymentMethodsConfiguration
     }
