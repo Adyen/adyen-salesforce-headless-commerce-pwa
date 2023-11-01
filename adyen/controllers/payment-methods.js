@@ -21,7 +21,6 @@ async function getPaymentMethods(req, res) {
                 customerId: req.headers.customerid
             }
         })
-        const [{orderTotal, currency}] = baskets
 
         const {
             locale: {id: shopperLocale}
@@ -37,6 +36,7 @@ async function getPaymentMethods(req, res) {
         }
 
         if (baskets?.length) {
+            const [{orderTotal, currency}] = baskets
             paymentMethodsRequest.amount = {
                 value: getCurrencyValueForApi(orderTotal, currency),
                 currency: currency
