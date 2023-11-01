@@ -1285,24 +1285,6 @@
       "value": "My Account"
     }
   ],
-  "home.description.features": [
-    {
-      "type": 0,
-      "value": "Out-of-the-box features so that you focus only on adding enhancements."
-    }
-  ],
-  "home.description.here_to_help": [
-    {
-      "type": 0,
-      "value": "Contact our support staff."
-    }
-  ],
-  "home.description.here_to_help_line_2": [
-    {
-      "type": 0,
-      "value": "They will get you to the right place."
-    }
-  ],
   "home.description.shop_products": [
     {
       "type": 0,
@@ -1389,18 +1371,6 @@
       "value": "Wishlist"
     }
   ],
-  "home.heading.features": [
-    {
-      "type": 0,
-      "value": "Features"
-    }
-  ],
-  "home.heading.here_to_help": [
-    {
-      "type": 0,
-      "value": "We're here to help"
-    }
-  ],
   "home.heading.shop_products": [
     {
       "type": 0,
@@ -1425,12 +1395,6 @@
       "value": "Deploy on Managed Runtime"
     }
   ],
-  "home.link.contact_us": [
-    {
-      "type": 0,
-      "value": "Contact Us"
-    }
-  ],
   "home.link.get_started": [
     {
       "type": 0,
@@ -1441,12 +1405,6 @@
     {
       "type": 0,
       "value": "Read docs"
-    }
-  ],
-  "home.title.react_starter_store": [
-    {
-      "type": 0,
-      "value": "The React PWA Starter Store for Retail"
     }
   ],
   "item_attributes.label.promotions": [

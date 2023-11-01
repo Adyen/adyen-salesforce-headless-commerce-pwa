@@ -540,15 +540,6 @@
   "header.popover.title.my_account": {
     "defaultMessage": "My Account"
   },
-  "home.description.features": {
-    "defaultMessage": "Out-of-the-box features so that you focus only on adding enhancements."
-  },
-  "home.description.here_to_help": {
-    "defaultMessage": "Contact our support staff."
-  },
-  "home.description.here_to_help_line_2": {
-    "defaultMessage": "They will get you to the right place."
-  },
   "home.description.shop_products": {
     "defaultMessage": "This section contains content from the catalog. {docLink} on how to replace it.",
     "description": "{docLink} is a html button that links the user to https://sfdc.co/business-manager-manage-catalogs"
@@ -589,12 +580,6 @@
   "home.features.heading.wishlist": {
     "defaultMessage": "Wishlist"
   },
-  "home.heading.features": {
-    "defaultMessage": "Features"
-  },
-  "home.heading.here_to_help": {
-    "defaultMessage": "We're here to help"
-  },
   "home.heading.shop_products": {
     "defaultMessage": "Shop Products"
   },
@@ -607,17 +592,11 @@
   "home.hero_features.link.on_managed_runtime": {
     "defaultMessage": "Deploy on Managed Runtime"
   },
-  "home.link.contact_us": {
-    "defaultMessage": "Contact Us"
-  },
   "home.link.get_started": {
     "defaultMessage": "Get started"
   },
   "home.link.read_docs": {
     "defaultMessage": "Read docs"
-  },
-  "home.title.react_starter_store": {
-    "defaultMessage": "The React PWA Starter Store for Retail"
   },
   "item_attributes.label.promotions": {
     "defaultMessage": "Promotions"
