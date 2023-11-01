@@ -29,10 +29,6 @@ async function getPaymentMethods(req, res) {
         const countryCode = shopperLocale?.slice(-2)
 
         const paymentMethodsRequest = {
-            amount: {
-                currency,
-                value: orderTotal
-            },
             blockedPaymentMethods: BLOCKED_PAYMENT_METHODS,
             shopperLocale,
             countryCode,
