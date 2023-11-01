@@ -146,7 +146,7 @@ const Payment = () => {
                 </Box>
 
                 <Stack spacing={6}>
-                    <AdyenCheckout beforeSubmit={[onBillingSubmit]} />
+                    <AdyenCheckout beforeSubmit={[onBillingSubmit]} onError={showError} />
 
                     <Divider borderColor="gray.100" />
 
@@ -182,6 +182,7 @@ const Payment = () => {
                         <ShippingAddressSelection
                             form={billingAddressForm}
                             selectedAddress={selectedBillingAddress}
+                            hideSubmitButton
                         />
                     )}
                 </Stack>

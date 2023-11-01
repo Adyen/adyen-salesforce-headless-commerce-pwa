@@ -27,7 +27,6 @@ export const onSubmit = async (state, component, props) => {
         if (!state.isValid) {
             throw new Error('invalid state')
         }
-        // await props.submitBilling()
         const adyenPaymentService = new AdyenPaymentsService(props?.token)
         const paymentsResponse = await adyenPaymentService.submitPayment(
             state.data,
