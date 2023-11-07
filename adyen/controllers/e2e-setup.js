@@ -1,10 +1,7 @@
 import {ShopperLogin, ShopperBaskets} from 'commerce-sdk-isomorphic'
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
-import AdyenCheckoutConfig from './checkout-config'
 
 async function setupE2E(req, res) {
-    const checkout = AdyenCheckoutConfig.getInstance()
-
     try {
         const {app: appConfig} = getConfig()
         const shopperBaskets = new ShopperBaskets({
