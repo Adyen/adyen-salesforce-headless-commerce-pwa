@@ -55,7 +55,7 @@ const Payment = () => {
     }
 
     const {step, STEPS, goToStep, goToNextStep} = useCheckout()
-    const {adyenPaymentMethods, adyenStateData} = useAdyenCheckout()
+    const {adyenPaymentMethods, adyenStateData, adyenPaymentInProgress} = useAdyenCheckout()
     const [isSubmittingPayment, setIsSubmittingPayment] = useState(false)
 
     const billingAddressForm = useForm({
@@ -134,6 +134,7 @@ const Payment = () => {
             editing={step === STEPS.PAYMENT}
             isLoading={
                 !adyenPaymentMethods ||
+                adyenPaymentInProgress ||
                 billingAddressForm.formState.isSubmitting ||
                 isSubmittingPayment
             }

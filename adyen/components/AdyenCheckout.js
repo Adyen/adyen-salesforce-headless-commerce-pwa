@@ -4,8 +4,12 @@ import '@adyen/adyen-web/dist/adyen.css'
 import {useAdyenCheckout} from '../context/adyen-checkout-context'
 
 const AdyenCheckoutComponent = (props) => {
-    const {adyenPaymentMethods, getPaymentMethodsConfiguration, setAdyenStateData} =
-        useAdyenCheckout()
+    const {
+        adyenPaymentMethods,
+        getPaymentMethodsConfiguration,
+        setAdyenStateData,
+        setAdyenPaymentInProgress
+    } = useAdyenCheckout()
     const paymentContainer = useRef(null)
 
     useEffect(() => {
@@ -37,6 +41,7 @@ const AdyenCheckoutComponent = (props) => {
             if (redirectResult) {
                 checkout.submitDetails({data: {details: {redirectResult}}})
             } else if (amazonCheckoutSessionId) {
+                setAdyenPaymentInProgress(true)
                 const amazonPay = checkout
                     .create('amazonpay', {
                         amazonCheckoutSessionId,
