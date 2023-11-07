@@ -25,7 +25,6 @@ const AdyenCheckoutComponent = (props) => {
                 paymentMethodsResponse: adyenPaymentMethods,
                 paymentMethodsConfiguration: paymentMethodsConfiguration,
                 onSubmit(state, element) {
-                    console.log('onsubmit', state)
                     paymentMethodsConfiguration.card.onSubmit(state, element)
                 },
                 onAdditionalDetails(state, element) {
