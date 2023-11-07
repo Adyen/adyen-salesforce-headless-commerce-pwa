@@ -12,7 +12,6 @@ const AdyenCheckoutComponent = (props) => {
         const urlParams = new URLSearchParams(location.search)
         const redirectResult = urlParams.get('redirectResult')
         const amazonCheckoutSessionId = urlParams.get('amazonCheckoutSessionId')
-        console.log(amazonCheckoutSessionId)
 
         const createCheckout = async () => {
             const paymentMethodsConfiguration = await getPaymentMethodsConfiguration(props)
