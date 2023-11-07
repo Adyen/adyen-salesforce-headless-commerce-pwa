@@ -11,6 +11,9 @@ const AdyenCheckoutComponent = (props) => {
     useEffect(() => {
         const urlParams = new URLSearchParams(location.search)
         const redirectResult = urlParams.get('redirectResult')
+        const amazonCheckoutSessionId = urlParams.get('amazonCheckoutSessionId')
+        console.log(amazonCheckoutSessionId)
+
         const createCheckout = async () => {
             const paymentMethodsConfiguration = await getPaymentMethodsConfiguration(props)
             const checkout = await AdyenCheckout({
@@ -19,6 +22,7 @@ const AdyenCheckoutComponent = (props) => {
                 paymentMethodsResponse: adyenPaymentMethods,
                 paymentMethodsConfiguration: paymentMethodsConfiguration,
                 onSubmit(state, element) {
+                    console.log('onsubmit', state)
                     paymentMethodsConfiguration.card.onSubmit(state, element)
                 },
                 onAdditionalDetails(state, element) {
@@ -33,6 +37,14 @@ const AdyenCheckoutComponent = (props) => {
 
             if (redirectResult) {
                 checkout.submitDetails({data: {details: {redirectResult}}})
+            } else if (amazonCheckoutSessionId) {
+                const amazonPay = checkout
+                    .create('amazonpay', {
+                        amazonCheckoutSessionId,
+                        showOrderButton: false
+                    })
+                    .mount('body')
+                amazonPay.submit()
             } else {
                 checkout.create('dropin').mount(paymentContainer.current)
             }
