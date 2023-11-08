@@ -146,7 +146,7 @@ const Payment = () => {
                 </Box>
 
                 <Stack spacing={6}>
-                    <AdyenCheckout beforeSubmit={[onBillingSubmit]} onError={showError} />
+                    <AdyenCheckout beforeSubmit={[onBillingSubmit]} />
 
                     <Divider borderColor="gray.100" />
 

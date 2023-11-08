@@ -11,6 +11,7 @@ import {ShopperBaskets, ShopperOrders} from 'commerce-sdk-isomorphic'
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 import AdyenCheckoutConfig from './checkout-config'
 import Logger from './logger'
+import {createErrorResponse} from '../utils/createErrorResponse.mjs'
 
 const errorMessages = {
     AMOUNT_NOT_CORRECT: 'amount not correct',
@@ -152,7 +153,9 @@ async function sendPayments(req, res) {
         res.json(createCheckoutResponse(response))
     } catch (err) {
         Logger.error('sendPayments', err.message)
-        res.status(err.statusCode || 500).json(err.message)
+        res.status(err.statusCode || 500).json(
+            createErrorResponse(err.statusCode || 500, err.message)
+        )
     }
 }
 

@@ -61,6 +61,7 @@ export const AdyenCheckoutProvider = ({children}) => {
             basket: basket,
             customerId,
             onError: onError,
+            onNavigate: navigate,
             afterSubmit: [...afterSubmit, onPaymentsSuccess],
             beforeSubmit: beforeSubmit,
             afterAdditionalDetails: [...afterAdditionalDetails, onPaymentsDetailsSuccess],

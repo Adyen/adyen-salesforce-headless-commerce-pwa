@@ -19,12 +19,17 @@ const fallback = <Skeleton height="75vh" width="100%" />
 // Create your pages here and add them to the routes array
 // Use loadable to split code into smaller js chunks
 const Checkout = loadable(() => import('./pages/checkout'), {fallback})
+const CheckoutConfirmation = loadable(() => import('./pages/checkout/confirmation'), {fallback})
 
 const routes = [
     {
         path: '/checkout',
         component: Checkout,
         exact: true
+    },
+    {
+        path: '/checkout/confirmation/:orderNo',
+        component: CheckoutConfirmation
     },
     ..._routes
 ]
