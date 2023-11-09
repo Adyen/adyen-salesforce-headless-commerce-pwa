@@ -41,12 +41,13 @@ const AdyenCheckoutComponent = (props) => {
                 checkout.submitDetails({data: {details: {redirectResult}}})
             } else if (amazonCheckoutSessionId) {
                 setAdyenPaymentInProgress(true)
+                const amazonPayContainer = document.createElement('div')
                 const amazonPay = checkout
                     .create('amazonpay', {
                         amazonCheckoutSessionId,
                         showOrderButton: false
                     })
-                    .mount('body')
+                    .mount(amazonPayContainer)
                 amazonPay.submit()
             } else {
                 checkout.create('dropin').mount(paymentContainer.current)
