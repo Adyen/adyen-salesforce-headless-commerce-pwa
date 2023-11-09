@@ -1069,34 +1069,6 @@
       "value": "]"
     }
   ],
-  "checkout.button.place_order": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ƥŀȧȧƈḗḗ Ǿřḓḗḗř"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "checkout.message.generic_error": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ȧƞ ŭŭƞḗḗẋƥḗḗƈŧḗḗḓ ḗḗřřǿǿř ǿǿƈƈŭŭřřḗḗḓ ḓŭŭřīƞɠ ƈħḗḗƈķǿǿŭŭŧ."
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
   "checkout_confirmation.button.create_account": [
     {
       "type": 0,
@@ -1545,20 +1517,6 @@
     {
       "type": 0,
       "value": "Ɓȧȧƈķ ŧǿǿ ƈȧȧřŧ"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "checkout_payment.button.review_order": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Řḗḗṽīḗḗẇ Ǿřḓḗḗř"
     },
     {
       "type": 0,

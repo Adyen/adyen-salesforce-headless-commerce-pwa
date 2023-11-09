@@ -67,8 +67,12 @@ const CheckoutConfirmation = () => {
         })
     }, [order])
 
-    if (!order || !order.orderNo) {
+    if (orderNo === 'error') {
         return <AdyenCheckoutError />
+    }
+
+    if (!order || !order.orderNo) {
+        return null
     }
 
     const CardIcon = getCreditCardIcon(order.paymentInstruments[0].paymentCard?.cardType)
