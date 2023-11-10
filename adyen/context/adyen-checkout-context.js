@@ -19,13 +19,14 @@ export const AdyenCheckoutProvider = ({children}) => {
     const locale = resolveLocaleFromUrl(`${location.pathname}${location.search}`)
     const navigate = useNavigation()
 
-    const [fetching, setFetching] = useState(false)
+    const [fetchingPaymentMethods, setFetchingPaymentMethods] = useState(false)
     const [adyenPaymentMethods, setAdyenPaymentMethods] = useState()
     const [adyenStateData, setAdyenStateData] = useState()
+    const [adyenPaymentInProgress, setAdyenPaymentInProgress] = useState()
 
     useEffect(() => {
         const fetchPaymentMethods = async () => {
-            setFetching(true)
+            setFetchingPaymentMethods(true)
             const token = await getTokenWhenReady()
             const adyenPaymentMethodsService = new AdyenPaymentMethodsService(token)
             try {
@@ -34,14 +35,14 @@ export const AdyenCheckoutProvider = ({children}) => {
                     locale
                 )
                 setAdyenPaymentMethods(data ? data : {error: true})
-                setFetching(false)
+                setFetchingPaymentMethods(false)
             } catch (error) {
                 setAdyenPaymentMethods({error})
-                setFetching(false)
+                setFetchingPaymentMethods(false)
             }
         }
 
-        if (!adyenPaymentMethods && !fetching && basket?.orderTotal) {
+        if (!adyenPaymentMethods && !fetchingPaymentMethods && basket?.orderTotal) {
             fetchPaymentMethods()
         }
     }, [basket?.basketId, basket?.orderTotal])
@@ -94,6 +95,8 @@ export const AdyenCheckoutProvider = ({children}) => {
     const value = {
         adyenPaymentMethods,
         adyenStateData,
+        adyenPaymentInProgress,
+        setAdyenPaymentInProgress: (data) => setAdyenPaymentInProgress(data),
         setAdyenStateData: (data) => setAdyenStateData(data),
         getPaymentMethodsConfiguration
     }
