@@ -8,7 +8,8 @@ export class LocaleData {
             productColor: 'Gray',
             addToCartButtonCaption: 'Add to Cart',
             proceedToCheckoutButtonCaption: 'Proceed to Checkout'
-        }
+        },
+        successfulOrderMessage: 'Thank you for your order!'
     }
     FR = {
         lang: 'fr-FR',
@@ -19,6 +20,7 @@ export class LocaleData {
             productColor: 'Gris',
             addToCartButtonCaption: 'Ajouter au panier',
             proceedToCheckoutButtonCaption: 'Passer au checkout'
-        }
+        },
+        successfulOrderMessage: 'Thank you for your order!'
     }
 }
