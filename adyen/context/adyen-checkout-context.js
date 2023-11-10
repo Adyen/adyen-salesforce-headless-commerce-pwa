@@ -41,10 +41,10 @@ export const AdyenCheckoutProvider = ({children}) => {
             }
         }
 
-        if (!adyenPaymentMethods && !fetching) {
+        if (!adyenPaymentMethods && !fetching && basket?.orderTotal) {
             fetchPaymentMethods()
         }
-    }, [basket?.basketId])
+    }, [basket?.basketId, basket?.orderTotal])
 
     const getPaymentMethodsConfiguration = async ({
         beforeSubmit = [],
