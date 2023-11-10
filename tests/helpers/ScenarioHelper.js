@@ -1,3 +1,4 @@
+import {expect} from '@playwright/test'
 import {LocaleData} from '../data/localeData'
 
 export class ScenarioHelper {
@@ -105,5 +106,15 @@ export class ScenarioHelper {
 
     async proceedToPayment() {
         await this.continueToPaymentButton.click()
+    }
+
+    async verifySuccessfulOrder() {
+        await this.page.waitForNavigation({
+            url: / *\/checkout\/confirmation/,
+            timeout: 15000
+        })
+        await expect(
+            this.page.getByRole('heading', {name: `${this.locale.successfulOrderMessage}`})
+        ).toBeVisible({timeout: 5000})
     }
 }
