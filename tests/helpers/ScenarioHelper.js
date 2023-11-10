@@ -1,5 +1,7 @@
+import {LocaleData} from '../data/localeData'
+
 export class ScenarioHelper {
-    constructor(page, locale) {
+    constructor(page, locale = new LocaleData().EN) {
         this.page = page
         this.locale = locale
 
@@ -42,10 +44,14 @@ export class ScenarioHelper {
         this.zipCodeField = this.shippingAddressSection.locator('#postalCode')
         this.continueToShippingMethodButton = this.shippingAddressSection.locator("[type='submit']")
 
-        this.shippingMethodSection = this.page.locator("[data-testid='sf-toggle-card-step-2']")
+        this.shippingMethodSection = this.page.locator(
+            "[data-testid='sf-toggle-card-step-2-content']"
+        )
         this.shippingRadioButtonsSection = this.shippingMethodSection.locator("[role='radiogroup']")
-        this.standardShippingRadioButton = this.shippingRadioButtonsSection.locator("[value='001']")
-        this.continueToPaymentButton = this.shippingRadioButtonsSection.locator("[type='submit']")
+        this.standardShippingRadioButton = this.shippingRadioButtonsSection
+            .locator('.chakra-radio')
+            .first()
+        this.continueToPaymentButton = this.shippingMethodSection.locator("[type='submit']")
     }
 
     async visitStore() {
