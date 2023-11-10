@@ -17,7 +17,8 @@ const errorMessages = {
     AMOUNT_NOT_CORRECT: 'amount not correct',
     INVALID_ORDER: 'order is invalid',
     INVALID_PARAMS: 'invalid request params',
-    INVALID_BASKET: 'invalid basket'
+    INVALID_BASKET: 'invalid basket',
+    PAYMENT_NOT_SUCCESSFUL: 'payment not successful'
 }
 
 const validateRequestParams = (req) => {
@@ -150,7 +151,12 @@ async function sendPayments(req, res) {
         //     }
         // })
 
-        res.json(createCheckoutResponse(response))
+        const checkoutResponse = createCheckoutResponse(response)
+        if (checkoutResponse.isFinal && !checkoutResponse.isSuccessful) {
+            throw new Error(errorMessages.PAYMENT_NOT_SUCCESSFUL)
+        }
+
+        res.json(checkoutResponse)
     } catch (err) {
         Logger.error('sendPayments', err.message)
         res.status(err.statusCode || 500).json(
