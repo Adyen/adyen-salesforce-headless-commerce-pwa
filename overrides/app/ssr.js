@@ -56,6 +56,8 @@ const {handler} = runtime.createHandler(options, (app) => {
                         'data:',
                         '*.adyen.com',
                         '*.paypal.com',
+                        '*.media-amazon.com',
+                        '*.payments-amazon.com',
                         'https://www.paypalobjects.com/js-sdk-logos/2.2.7/paypal-blue.svg'
                     ],
                     'script-src': [
@@ -63,6 +65,7 @@ const {handler} = runtime.createHandler(options, (app) => {
                         "'unsafe-eval'",
                         'storage.googleapis.com',
                         '*.paypal.com',
+                        '*.payments-amazon.com',
                         'https://x.klarnacdn.net/kp/lib/v1/api.js',
                         'https://static-eu.payments-amazon.com/checkout.js',
                         'https://sandbox.src.mastercard.com/sdk/srcsdk.mastercard.js',
@@ -73,6 +76,7 @@ const {handler} = runtime.createHandler(options, (app) => {
                         "'self'",
                         'api.cquotient.com',
                         '*.adyen.com',
+                        '*.amazon.com',
                         'https://www.sandbox.paypal.com/xoplatform/logger/api/logger?disableSetCookie=true'
                     ],
                     'frame-src': ["'self'", '*.adyen.com', '*.paypal.com'],
