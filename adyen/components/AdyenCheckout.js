@@ -26,10 +26,16 @@ const AdyenCheckoutComponent = (props) => {
                 paymentMethodsResponse: adyenPaymentMethods,
                 paymentMethodsConfiguration: paymentMethodsConfiguration,
                 onSubmit(state, element) {
-                    paymentMethodsConfiguration.onSubmit(state, element)
+                    const onSubmit =
+                        paymentMethodsConfiguration.onSubmit ||
+                        paymentMethodsConfiguration.card.onSubmit
+                    onSubmit(state, element)
                 },
                 onAdditionalDetails(state, element) {
-                    paymentMethodsConfiguration.onAdditionalDetails(state, element)
+                    const onAdditionalDetails =
+                        paymentMethodsConfiguration.onAdditionalDetails ||
+                        paymentMethodsConfiguration.card.onAdditionalDetails
+                    onAdditionalDetails(state, element)
                 },
                 onChange: (state) => {
                     if (state.isValid) {
