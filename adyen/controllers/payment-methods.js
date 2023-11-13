@@ -37,9 +37,9 @@ async function getPaymentMethods(req, res) {
         }
 
         if (baskets?.length) {
-            const [{orderTotal, currency}] = baskets
+            const [{orderTotal, productTotal, currency}] = baskets
             paymentMethodsRequest.amount = {
-                value: getCurrencyValueForApi(orderTotal, currency),
+                value: getCurrencyValueForApi(orderTotal || productTotal, currency),
                 currency: currency
             }
         }

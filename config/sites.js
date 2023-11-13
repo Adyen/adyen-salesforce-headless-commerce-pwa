@@ -30,6 +30,10 @@ module.exports = [
                 {
                     id: 'ja-JP',
                     preferredCurrency: 'JPY'
+                },
+                {
+                    id: 'sv-SE',
+                    preferredCurrency: 'SEK'
                 }
             ]
         }
