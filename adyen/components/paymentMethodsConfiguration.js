@@ -7,6 +7,10 @@ import {amazonPayConfig} from './amazonpay/config'
 
 export const paymentMethodsConfiguration = ({paymentMethods = [], ...props}) => {
     const defaultConfig = baseConfig(props)
+    if (!paymentMethods || !paymentMethods.length) {
+        return defaultConfig
+    }
+
     const paymentMethodsConfig = {
         card: cardConfig(props),
         klarna: klarnaConfig(props),

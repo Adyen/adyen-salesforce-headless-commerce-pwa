@@ -147,7 +147,7 @@ const Payment = () => {
                 </Box>
 
                 <Stack spacing={6}>
-                    <AdyenCheckout beforeSubmit={[onBillingSubmit]} />
+                    {adyenPaymentMethods && <AdyenCheckout beforeSubmit={[onBillingSubmit]} />}
 
                     <Divider borderColor="gray.100" />
 

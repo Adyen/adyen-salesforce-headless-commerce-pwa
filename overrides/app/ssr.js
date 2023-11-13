@@ -11,6 +11,7 @@ import {isRemote} from '@salesforce/pwa-kit-runtime/utils/ssr-server'
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 import helmet from 'helmet'
 import bodyParser from 'body-parser'
+import EnvironmentController from '../../adyen/controllers/environment'
 import PaymentMethodsController from '../../adyen/controllers/payment-methods'
 import PaymentsDetailsController from '../../adyen/controllers/payments-details'
 import PaymentsController from '../../adyen/controllers/payments'
@@ -101,6 +102,7 @@ const {handler} = runtime.createHandler(options, (app) => {
     app.get('*', runtime.render)
 
     // Routes
+    app.post('/api/adyen/environment', EnvironmentController)
     app.post('/api/adyen/paymentMethods', PaymentMethodsController)
     app.post('/api/adyen/payments/details', PaymentsDetailsController)
     app.post('/api/adyen/payments', PaymentsController)

@@ -47,11 +47,7 @@ async function getPaymentMethods(req, res) {
         const response = await checkout.instance.paymentMethods(paymentMethodsRequest)
 
         Logger.info('getPaymentMethods', 'success')
-        res.json({
-            ...response,
-            ADYEN_CLIENT_KEY: process.env.ADYEN_CLIENT_KEY,
-            ADYEN_ENVIRONMENT: process.env.ADYEN_ENVIRONMENT
-        })
+        res.json(response)
     } catch (err) {
         Logger.error('getPaymentMethods', err.message)
         res.status(err.statusCode || 500).json(
