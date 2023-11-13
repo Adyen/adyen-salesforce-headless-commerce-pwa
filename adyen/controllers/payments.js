@@ -96,7 +96,7 @@ async function sendPayments(req, res) {
                 basketId: req.headers.basketid
             }
         })
-        Logger.info('sendPayments', `orderCreated ${order.orderNo}`)
+        Logger.info('sendPayments', `orderCreated ${order?.orderNo}`)
 
         if (order?.customerInfo?.customerId !== req.headers.customerid) {
             throw new Error(errorMessages.INVALID_ORDER)
@@ -123,7 +123,8 @@ async function sendPayments(req, res) {
             channel: 'Web',
             returnUrl: `${data.origin}/checkout`,
             shopperReference: order?.customerInfo?.customerId,
-            shopperEmail: order?.customerInfo?.email
+            shopperEmail: order?.customerInfo?.email,
+            shopperName: getShopperName(order)
         }
 
         if (isOpenInvoiceMethod(data?.paymentMethod?.type)) {
@@ -162,6 +163,14 @@ async function sendPayments(req, res) {
         res.status(err.statusCode || 500).json(
             createErrorResponse(err.statusCode || 500, err.message)
         )
+    }
+}
+
+function getShopperName(order) {
+    const [firstName, lastName] = order.customerName.split(' ')
+    return {
+        firstName,
+        lastName
     }
 }
 

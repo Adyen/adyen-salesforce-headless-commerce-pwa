@@ -112,16 +112,6 @@ const Payment = () => {
         }
     }
 
-    const onSubmit = async () => {
-        setIsSubmittingPayment(true)
-        if (!appliedPayment) {
-            await onPaymentSubmit()
-        }
-        await onBillingSubmit()
-        setIsSubmittingPayment(false)
-        goToNextStep()
-    }
-
     const onEdit = async () => {
         await onPaymentRemoval()
         goToStep(STEPS.PAYMENT)
