@@ -5,6 +5,7 @@ import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 import AdyenCheckoutConfig from './checkout-config'
 import Logger from './logger'
 import {createErrorResponse} from '../utils/createErrorResponse.mjs'
+import {v4 as uuidv4} from 'uuid'
 
 async function getPaymentMethods(req, res) {
     Logger.info('getPaymentMethods', 'start')
@@ -44,7 +45,9 @@ async function getPaymentMethods(req, res) {
             }
         }
 
-        const response = await checkout.instance.paymentMethods(paymentMethodsRequest)
+        const response = await checkout.instance.paymentMethods(paymentMethodsRequest, {
+            idempotencyKey: uuidv4()
+        })
 
         Logger.info('getPaymentMethods', 'success')
         res.json(response)
