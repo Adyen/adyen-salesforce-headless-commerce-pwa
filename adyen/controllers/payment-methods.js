@@ -4,6 +4,7 @@ import {ShopperCustomers} from 'commerce-sdk-isomorphic'
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 import AdyenCheckoutConfig from './checkout-config'
 import Logger from './logger'
+import {createErrorResponse} from '../utils/createErrorResponse.mjs'
 
 async function getPaymentMethods(req, res) {
     Logger.info('getPaymentMethods', 'start')
@@ -36,9 +37,9 @@ async function getPaymentMethods(req, res) {
         }
 
         if (baskets?.length) {
-            const [{orderTotal, currency}] = baskets
+            const [{orderTotal, productTotal, currency}] = baskets
             paymentMethodsRequest.amount = {
-                value: getCurrencyValueForApi(orderTotal, currency),
+                value: getCurrencyValueForApi(orderTotal || productTotal, currency),
                 currency: currency
             }
         }
@@ -46,14 +47,12 @@ async function getPaymentMethods(req, res) {
         const response = await checkout.instance.paymentMethods(paymentMethodsRequest)
 
         Logger.info('getPaymentMethods', 'success')
-        res.json({
-            ...response,
-            ADYEN_CLIENT_KEY: process.env.ADYEN_CLIENT_KEY,
-            ADYEN_ENVIRONMENT: process.env.ADYEN_ENVIRONMENT
-        })
+        res.json(response)
     } catch (err) {
         Logger.error('getPaymentMethods', err.message)
-        res.status(err.statusCode || 500).json(err.message)
+        res.status(err.statusCode || 500).json(
+            createErrorResponse(err.statusCode || 500, err.message)
+        )
     }
 }
 

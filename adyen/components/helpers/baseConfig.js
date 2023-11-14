@@ -8,8 +8,8 @@ export const baseConfig = ({
     afterSubmit = [],
     beforeAdditionalDetails = [],
     afterAdditionalDetails = [],
-    onError = (error) => {
-        console.log(JSON.stringify(error))
+    onError = () => {
+        props.onNavigate('/checkout/error')
     },
     ...props
 }) => {

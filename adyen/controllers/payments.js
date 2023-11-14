@@ -11,12 +11,14 @@ import {ShopperBaskets, ShopperOrders} from 'commerce-sdk-isomorphic'
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 import AdyenCheckoutConfig from './checkout-config'
 import Logger from './logger'
+import {createErrorResponse} from '../utils/createErrorResponse.mjs'
 
 const errorMessages = {
     AMOUNT_NOT_CORRECT: 'amount not correct',
     INVALID_ORDER: 'order is invalid',
     INVALID_PARAMS: 'invalid request params',
-    INVALID_BASKET: 'invalid basket'
+    INVALID_BASKET: 'invalid basket',
+    PAYMENT_NOT_SUCCESSFUL: 'payment not successful'
 }
 
 const validateRequestParams = (req) => {
@@ -94,7 +96,7 @@ async function sendPayments(req, res) {
                 basketId: req.headers.basketid
             }
         })
-        Logger.info('sendPayments', `orderCreated ${order.orderNo}`)
+        Logger.info('sendPayments', `orderCreated ${order?.orderNo}`)
 
         if (order?.customerInfo?.customerId !== req.headers.customerid) {
             throw new Error(errorMessages.INVALID_ORDER)
@@ -121,7 +123,8 @@ async function sendPayments(req, res) {
             channel: 'Web',
             returnUrl: `${data.origin}/checkout`,
             shopperReference: order?.customerInfo?.customerId,
-            shopperEmail: order?.customerInfo?.email
+            shopperEmail: order?.customerInfo?.email,
+            shopperName: getShopperName(order)
         }
 
         if (isOpenInvoiceMethod(data?.paymentMethod?.type)) {
@@ -149,10 +152,25 @@ async function sendPayments(req, res) {
         //     }
         // })
 
-        res.json(createCheckoutResponse(response))
+        const checkoutResponse = createCheckoutResponse(response)
+        if (checkoutResponse.isFinal && !checkoutResponse.isSuccessful) {
+            throw new Error(errorMessages.PAYMENT_NOT_SUCCESSFUL)
+        }
+
+        res.json(checkoutResponse)
     } catch (err) {
         Logger.error('sendPayments', err.message)
-        res.status(err.statusCode || 500).json(err.message)
+        res.status(err.statusCode || 500).json(
+            createErrorResponse(err.statusCode || 500, err.message)
+        )
+    }
+}
+
+function getShopperName(order) {
+    const [firstName, lastName] = order.customerName.split(' ')
+    return {
+        firstName,
+        lastName
     }
 }
 

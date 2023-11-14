@@ -112,16 +112,6 @@ const Payment = () => {
         }
     }
 
-    const onSubmit = async () => {
-        setIsSubmittingPayment(true)
-        if (!appliedPayment) {
-            await onPaymentSubmit()
-        }
-        await onBillingSubmit()
-        setIsSubmittingPayment(false)
-        goToNextStep()
-    }
-
     const onEdit = async () => {
         await onPaymentRemoval()
         goToStep(STEPS.PAYMENT)
@@ -147,7 +137,7 @@ const Payment = () => {
                 </Box>
 
                 <Stack spacing={6}>
-                    <AdyenCheckout beforeSubmit={[onBillingSubmit]} onError={showError} />
+                    {adyenPaymentMethods && <AdyenCheckout beforeSubmit={[onBillingSubmit]} />}
 
                     <Divider borderColor="gray.100" />
 
