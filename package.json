@@ -66,6 +66,7 @@
   "dependencies": {
     "@adyen/adyen-web": "^5.51.0",
     "@adyen/api-library": "^14.3.0",
-    "commerce-sdk": "^2.11.2"
+    "commerce-sdk": "^2.11.2",
+    "express-xss-sanitizer": "^1.1.6"
   }
 }
