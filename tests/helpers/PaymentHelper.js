@@ -4,6 +4,7 @@ export class PaymentHelper {
         this.paymentSection = this.page.locator('.sf-toggle-card-step-3-content')
 
         this.activePaymentType = this.page.locator('.adyen-checkout__payment-method--selected')
+        this.payButton = this.activePaymentType.locator('.adyen-checkout__button--pay')
 
         // CC Component Locators
         this.holderNameInput = this.activePaymentType.locator(
@@ -26,6 +27,12 @@ export class PaymentHelper {
                 `//*[contains(@class, 'adyen-checkout__payment-method__name') and contains(text(), '${paymentType}')]`
             )
             .click()
+    }
+
+    /* This is the generic method to click Pay button for majority of the drop-in payment methods
+    Some payment methods require a specific locator, so make sure to utilize the corresponding function */
+    async clickPay() {
+        await this.payButton.click()
     }
 
     async fillInput(inputField, value) {
