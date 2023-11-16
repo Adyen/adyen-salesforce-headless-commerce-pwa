@@ -9,12 +9,6 @@ export const cardConfig = (props) => {
         hasHolderName: true,
         holderNameRequired: true,
         billingAddressRequired: false,
-        enableStoreDetails: isRegistered,
-        onBinLookup: (event) => {
-            console.log(event)
-        },
-        onBinValue: (event) => {
-            console.log(event)
-        }
+        enableStoreDetails: isRegistered
     }
 }
