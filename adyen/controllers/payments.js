@@ -30,6 +30,35 @@ const validateRequestParams = (req) => {
     )
 }
 
+const filterStateData = (stateData) => {
+    const validFields = [
+        'paymentMethod',
+        'billingAddress',
+        'deliveryAddress',
+        'riskData',
+        'shopperName',
+        'dateOfBirth',
+        'telephoneNumber',
+        'shopperEmail',
+        'countryCode',
+        'socialSecurityNumber',
+        'browserInfo',
+        'installments',
+        'storePaymentMethod',
+        'conversionId'
+    ]
+    const filteredStateData = {}
+    const stateDataKeys = Object.keys(stateData)
+    for (let i = 0; i < stateDataKeys.length; i++) {
+        const keyName = stateDataKeys[i]
+        const isFieldValid = validFields.includes(keyName)
+        if (isFieldValid) {
+            filteredStateData[keyName] = stateData[keyName]
+        }
+    }
+    return filteredStateData
+}
+
 async function sendPayments(req, res) {
     Logger.info('sendPayments', 'start')
     if (!validateRequestParams(req)) {
@@ -103,7 +132,7 @@ async function sendPayments(req, res) {
         }
 
         const paymentRequest = {
-            ...data,
+            ...filterStateData(data),
             billingAddress: data.billingAddress || formatAddressInAdyenFormat(order.billingAddress),
             deliveryAddress:
                 data.deliveryAddress ||
