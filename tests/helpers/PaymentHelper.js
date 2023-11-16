@@ -19,6 +19,12 @@ export class PaymentHelper {
         this.cvcInput = this.activePaymentType
             .frameLocator('.adyen-checkout__card__cvc__input iframe')
             .locator('.input-field')
+
+        // 3Ds2 Component locators
+        this.threeDS2Iframe = this.page.frameLocator("iframe[name='threeDSIframe']")
+        this.threeDS2PasswordInput = this.threeDS2Iframe.locator("input[name='answer']")
+        this.threeDS2SubmitButton = this.threeDS2Iframe.locator("button[type='submit']")
+        this.threeDS2CancelButton = this.threeDS2Iframe.locator('#buttonCancel')
     }
 
     async selectPaymentType(paymentType) {
@@ -51,5 +57,22 @@ export class PaymentHelper {
             this.holderNameInput,
             cardHolderName.firstName + ' ' + cardHolderName.lastName
         )
+    }
+
+    // 3Ds2
+    async validate3DS2(answer) {
+        await this.fill3DS2PasswordAndSubmit(answer)
+    }
+
+    async fill3DS2PasswordAndSubmit(answer) {
+        await this.threeDS2PasswordInput.waitFor({state: 'visible', timeout: 10000})
+        await this.threeDS2PasswordInput.click()
+        await this.threeDS2PasswordInput.type(answer)
+        await this.threeDS2SubmitButton.click()
+    }
+
+    async cancel3DS2() {
+        await this.threeDS2CancelButton.waitFor({state: 'visible', timeout: 10000})
+        await this.threeDS2CancelButton.click()
     }
 }
