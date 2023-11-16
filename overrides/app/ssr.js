@@ -21,7 +21,7 @@ import {
     handleWebhook,
     validateHmac
 } from '../../adyen/controllers/webhook'
-import {query, param} from 'express-validator'
+import {query} from 'express-validator'
 
 const options = {
     // The build directory (an absolute path)
