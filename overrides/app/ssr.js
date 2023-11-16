@@ -21,7 +21,7 @@ import {
     handleWebhook,
     validateHmac
 } from '../../adyen/controllers/webhook'
-import {xss} from 'express-xss-sanitizer'
+import {query, param} from 'express-validator'
 
 const options = {
     // The build directory (an absolute path)
@@ -45,7 +45,7 @@ const runtime = getRuntime()
 
 const {handler} = runtime.createHandler(options, (app) => {
     app.use(bodyParser.json())
-    app.use(xss())
+
     // Set HTTP security headers
     app.use(
         helmet({
@@ -100,7 +100,12 @@ const {handler} = runtime.createHandler(options, (app) => {
     app.get('/favicon.ico', runtime.serveStaticFile('static/ico/favicon.ico'))
 
     app.get('/worker.js(.map)?', runtime.serveServiceWorker)
-    app.get('*/checkout', xss(), runtime.render)
+    app.get(
+        '*/checkout',
+        query('redirectResult').optional().escape(),
+        query('amazonCheckoutSessionId').optional().escape(),
+        runtime.render
+    )
     app.get('*', runtime.render)
 
     // Routes
