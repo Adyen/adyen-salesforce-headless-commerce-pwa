@@ -12,6 +12,7 @@ import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 import AdyenCheckoutConfig from './checkout-config'
 import Logger from './logger'
 import {createErrorResponse} from '../utils/createErrorResponse.mjs'
+import {v4 as uuidv4} from 'uuid'
 
 const errorMessages = {
     AMOUNT_NOT_CORRECT: 'amount not correct',
@@ -139,7 +140,9 @@ async function sendPayments(req, res) {
                 : SHOPPER_INTERACTIONS.ECOMMERCE
         }
 
-        const response = await checkout.instance.payments(paymentRequest)
+        const response = await checkout.instance.payments(paymentRequest, {
+            idempotencyKey: uuidv4()
+        })
         Logger.info('sendPayments', `resultCode ${response.resultCode}`)
 
         // await ordersApi.updateOrderPaymentTransaction({

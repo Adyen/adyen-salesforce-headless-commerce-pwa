@@ -66,6 +66,8 @@
   "dependencies": {
     "@adyen/adyen-web": "^5.51.0",
     "@adyen/api-library": "^14.3.0",
-    "commerce-sdk": "^2.11.2"
+    "commerce-sdk": "^2.11.2",
+    "express-validator": "^7.0.1",
+    "uuid": "^9.0.1"
   }
 }
