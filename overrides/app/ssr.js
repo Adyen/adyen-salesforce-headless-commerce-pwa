@@ -21,6 +21,7 @@ import {
     handleWebhook,
     validateHmac
 } from '../../adyen/controllers/webhook'
+import {query} from 'express-validator'
 
 const options = {
     // The build directory (an absolute path)
@@ -99,6 +100,12 @@ const {handler} = runtime.createHandler(options, (app) => {
     app.get('/favicon.ico', runtime.serveStaticFile('static/ico/favicon.ico'))
 
     app.get('/worker.js(.map)?', runtime.serveServiceWorker)
+    app.get(
+        '*/checkout',
+        query('redirectResult').optional().escape(),
+        query('amazonCheckoutSessionId').optional().escape(),
+        runtime.render
+    )
     app.get('*', runtime.render)
 
     // Routes
