@@ -4,25 +4,38 @@ import '@adyen/adyen-web/dist/adyen.css'
 import {useAdyenCheckout} from '../context/adyen-checkout-context'
 
 const AdyenCheckoutComponent = (props) => {
-    const {adyenPaymentMethods, getPaymentMethodsConfiguration, setAdyenStateData} =
-        useAdyenCheckout()
+    const {
+        adyenEnvironment,
+        adyenPaymentMethods,
+        getPaymentMethodsConfiguration,
+        setAdyenStateData,
+        setAdyenPaymentInProgress
+    } = useAdyenCheckout()
     const paymentContainer = useRef(null)
 
     useEffect(() => {
         const urlParams = new URLSearchParams(location.search)
         const redirectResult = urlParams.get('redirectResult')
+        const amazonCheckoutSessionId = urlParams.get('amazonCheckoutSessionId')
+
         const createCheckout = async () => {
             const paymentMethodsConfiguration = await getPaymentMethodsConfiguration(props)
             const checkout = await AdyenCheckout({
-                environment: adyenPaymentMethods.ADYEN_ENVIRONMENT,
-                clientKey: adyenPaymentMethods.ADYEN_CLIENT_KEY,
+                environment: adyenEnvironment.ADYEN_ENVIRONMENT,
+                clientKey: adyenEnvironment.ADYEN_CLIENT_KEY,
                 paymentMethodsResponse: adyenPaymentMethods,
                 paymentMethodsConfiguration: paymentMethodsConfiguration,
                 onSubmit(state, element) {
-                    paymentMethodsConfiguration.card.onSubmit(state, element)
+                    const onSubmit =
+                        paymentMethodsConfiguration.onSubmit ||
+                        paymentMethodsConfiguration.card.onSubmit
+                    onSubmit(state, element)
                 },
                 onAdditionalDetails(state, element) {
-                    paymentMethodsConfiguration.card.onAdditionalDetails(state, element)
+                    const onAdditionalDetails =
+                        paymentMethodsConfiguration.onAdditionalDetails ||
+                        paymentMethodsConfiguration.card.onAdditionalDetails
+                    onAdditionalDetails(state, element)
                 },
                 onChange: (state) => {
                     if (state.isValid) {
@@ -33,15 +46,25 @@ const AdyenCheckoutComponent = (props) => {
 
             if (redirectResult) {
                 checkout.submitDetails({data: {details: {redirectResult}}})
+            } else if (amazonCheckoutSessionId) {
+                setAdyenPaymentInProgress(true)
+                const amazonPayContainer = document.createElement('div')
+                const amazonPay = checkout
+                    .create('amazonpay', {
+                        amazonCheckoutSessionId,
+                        showOrderButton: false
+                    })
+                    .mount(amazonPayContainer)
+                amazonPay.submit()
             } else {
                 checkout.create('dropin').mount(paymentContainer.current)
             }
         }
-        if (adyenPaymentMethods && paymentContainer.current) {
+        if (adyenEnvironment && paymentContainer.current) {
             window.paypal = undefined
             createCheckout()
         }
-    }, [adyenPaymentMethods])
+    }, [adyenEnvironment, adyenPaymentMethods])
 
     return <div ref={paymentContainer}></div>
 }

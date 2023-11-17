@@ -11,9 +11,12 @@
     "overridesDir": "overrides"
   },
   "devDependencies": {
+    "@commitlint/cli": "^18.2.0",
+    "@commitlint/config-conventional": "^18.1.0",
     "@salesforce/retail-react-app": "2.0.0",
     "css-loader": "^6.8.1",
     "dotenv": "^16.3.1",
+    "husky": "^8.0.3",
     "style-loader": "^3.3.3",
     "yargs": "^17.7.2"
   },
@@ -37,6 +40,8 @@
     "test": "pwa-kit-dev test",
     "test:lighthouse": "cross-env NODE_ENV=production lhci autorun --config=tests/lighthouserc.js",
     "test:max-file-size": "npm run build && bundlesize",
+    "check-branch-name": "chmod 755 ./branching.sh && sh ./branching.sh",
+    "prepare": "husky install",
     "upload-env": "node ./adyen/scripts/push-env.js",
     "get-env": "node ./adyen/scripts/get-env.js",
     "dot-env": "node ./adyen/scripts/dot-env.js",
@@ -61,6 +66,8 @@
   "dependencies": {
     "@adyen/adyen-web": "^5.51.0",
     "@adyen/api-library": "^14.3.0",
-    "commerce-sdk": "^2.11.2"
+    "commerce-sdk": "^2.11.2",
+    "express-validator": "^7.0.1",
+    "uuid": "^9.0.1"
   }
 }

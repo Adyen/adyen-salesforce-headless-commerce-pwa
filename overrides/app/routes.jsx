@@ -13,6 +13,7 @@ import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 import {Skeleton} from '@chakra-ui/react'
 import {configureRoutes} from '@salesforce/retail-react-app/app/utils/routes-utils'
 import {routes as _routes} from '@salesforce/retail-react-app/app/routes'
+import AdyenCheckoutError from '../../adyen/components/AdyenCheckoutError'
 
 const fallback = <Skeleton height="75vh" width="100%" />
 
@@ -25,6 +26,10 @@ const routes = [
         path: '/checkout',
         component: Checkout,
         exact: true
+    },
+    {
+        path: '/checkout/error',
+        component: AdyenCheckoutError
     },
     ..._routes
 ]

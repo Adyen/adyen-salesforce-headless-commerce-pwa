@@ -7,6 +7,7 @@ import {resolveLocaleFromUrl} from '@salesforce/retail-react-app/app/utils/site-
 import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
 import {AdyenPaymentMethodsService} from '../services/payment-methods'
 import {paymentMethodsConfiguration} from '../components/paymentMethodsConfiguration'
+import {AdyenEnvironmentService} from '../services/environment'
 
 const AdyenCheckoutContext = React.createContext()
 
@@ -19,13 +20,29 @@ export const AdyenCheckoutProvider = ({children}) => {
     const locale = resolveLocaleFromUrl(`${location.pathname}${location.search}`)
     const navigate = useNavigation()
 
-    const [fetching, setFetching] = useState(false)
+    const [fetchingPaymentMethods, setFetchingPaymentMethods] = useState(false)
     const [adyenPaymentMethods, setAdyenPaymentMethods] = useState()
+    const [adyenEnvironment, setAdyenEnvironment] = useState()
     const [adyenStateData, setAdyenStateData] = useState()
+    const [adyenPaymentInProgress, setAdyenPaymentInProgress] = useState()
+
+    useEffect(() => {
+        const fetchEnvironment = async () => {
+            const token = await getTokenWhenReady()
+            const adyenEnvironmentService = new AdyenEnvironmentService(token)
+            try {
+                const data = await adyenEnvironmentService.fetchEnvironment()
+                setAdyenEnvironment(data ? data : {error: true})
+            } catch (error) {
+                setAdyenEnvironment({error})
+            }
+        }
+        fetchEnvironment()
+    }, [])
 
     useEffect(() => {
         const fetchPaymentMethods = async () => {
-            setFetching(true)
+            setFetchingPaymentMethods(true)
             const token = await getTokenWhenReady()
             const adyenPaymentMethodsService = new AdyenPaymentMethodsService(token)
             try {
@@ -34,14 +51,14 @@ export const AdyenCheckoutProvider = ({children}) => {
                     locale
                 )
                 setAdyenPaymentMethods(data ? data : {error: true})
-                setFetching(false)
+                setFetchingPaymentMethods(false)
             } catch (error) {
                 setAdyenPaymentMethods({error})
-                setFetching(false)
+                setFetchingPaymentMethods(false)
             }
         }
 
-        if (!adyenPaymentMethods && !fetching) {
+        if (!adyenPaymentMethods && !fetchingPaymentMethods) {
             fetchPaymentMethods()
         }
     }, [basket?.basketId])
@@ -58,9 +75,10 @@ export const AdyenCheckoutProvider = ({children}) => {
             paymentMethods: adyenPaymentMethods?.paymentMethods,
             customerType,
             token,
-            basketId: basket?.basketId,
+            basket: basket,
             customerId,
             onError: onError,
+            onNavigate: navigate,
             afterSubmit: [...afterSubmit, onPaymentsSuccess],
             beforeSubmit: beforeSubmit,
             afterAdditionalDetails: [...afterAdditionalDetails, onPaymentsDetailsSuccess],
@@ -91,8 +109,11 @@ export const AdyenCheckoutProvider = ({children}) => {
     }
 
     const value = {
+        adyenEnvironment,
         adyenPaymentMethods,
         adyenStateData,
+        adyenPaymentInProgress,
+        setAdyenPaymentInProgress: (data) => setAdyenPaymentInProgress(data),
         setAdyenStateData: (data) => setAdyenStateData(data),
         getPaymentMethodsConfiguration
     }

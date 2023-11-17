@@ -12,6 +12,7 @@ import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 import helmet from 'helmet'
 import bodyParser from 'body-parser'
 import EndToEndSetupController from '../../adyen/controllers/e2e-setup'
+import EnvironmentController from '../../adyen/controllers/environment'
 import PaymentMethodsController from '../../adyen/controllers/payment-methods'
 import PaymentsDetailsController from '../../adyen/controllers/payments-details'
 import PaymentsController from '../../adyen/controllers/payments'
@@ -21,6 +22,7 @@ import {
     handleWebhook,
     validateHmac
 } from '../../adyen/controllers/webhook'
+import {query} from 'express-validator'
 
 const options = {
     // The build directory (an absolute path)
@@ -57,6 +59,8 @@ const {handler} = runtime.createHandler(options, (app) => {
                         'data:',
                         '*.adyen.com',
                         '*.paypal.com',
+                        '*.media-amazon.com',
+                        '*.payments-amazon.com',
                         'https://www.paypalobjects.com/js-sdk-logos/2.2.7/paypal-blue.svg'
                     ],
                     'script-src': [
@@ -64,6 +68,7 @@ const {handler} = runtime.createHandler(options, (app) => {
                         "'unsafe-eval'",
                         'storage.googleapis.com',
                         '*.paypal.com',
+                        '*.payments-amazon.com',
                         'https://x.klarnacdn.net/kp/lib/v1/api.js',
                         'https://static-eu.payments-amazon.com/checkout.js',
                         'https://sandbox.src.mastercard.com/sdk/srcsdk.mastercard.js',
@@ -74,6 +79,7 @@ const {handler} = runtime.createHandler(options, (app) => {
                         "'self'",
                         'api.cquotient.com',
                         '*.adyen.com',
+                        '*.amazon.com',
                         'https://www.sandbox.paypal.com/xoplatform/logger/api/logger?disableSetCookie=true'
                     ],
                     'frame-src': ["'self'", '*.adyen.com', '*.paypal.com'],
@@ -95,10 +101,17 @@ const {handler} = runtime.createHandler(options, (app) => {
     app.get('/favicon.ico', runtime.serveStaticFile('static/ico/favicon.ico'))
 
     app.get('/worker.js(.map)?', runtime.serveServiceWorker)
+    app.get(
+        '*/checkout',
+        query('redirectResult').optional().escape(),
+        query('amazonCheckoutSessionId').optional().escape(),
+        runtime.render
+    )
     app.get('*', runtime.render)
 
     // Routes
     app.post('/api/adyen/e2e-setup', EndToEndSetupController)
+    app.post('/api/adyen/environment', EnvironmentController)
     app.post('/api/adyen/paymentMethods', PaymentMethodsController)
     app.post('/api/adyen/payments/details', PaymentsDetailsController)
     app.post('/api/adyen/payments', PaymentsController)

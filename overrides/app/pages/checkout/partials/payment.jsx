@@ -55,7 +55,7 @@ const Payment = () => {
     }
 
     const {step, STEPS, goToStep, goToNextStep} = useCheckout()
-    const {adyenPaymentMethods, adyenStateData} = useAdyenCheckout()
+    const {adyenPaymentMethods, adyenStateData, adyenPaymentInProgress} = useAdyenCheckout()
     const [isSubmittingPayment, setIsSubmittingPayment] = useState(false)
 
     const billingAddressForm = useForm({
@@ -112,16 +112,6 @@ const Payment = () => {
         }
     }
 
-    const onSubmit = async () => {
-        setIsSubmittingPayment(true)
-        if (!appliedPayment) {
-            await onPaymentSubmit()
-        }
-        await onBillingSubmit()
-        setIsSubmittingPayment(false)
-        goToNextStep()
-    }
-
     const onEdit = async () => {
         await onPaymentRemoval()
         goToStep(STEPS.PAYMENT)
@@ -134,6 +124,7 @@ const Payment = () => {
             editing={step === STEPS.PAYMENT}
             isLoading={
                 !adyenPaymentMethods ||
+                adyenPaymentInProgress ||
                 billingAddressForm.formState.isSubmitting ||
                 isSubmittingPayment
             }
@@ -146,7 +137,7 @@ const Payment = () => {
                 </Box>
 
                 <Stack spacing={6}>
-                    <AdyenCheckout beforeSubmit={[onBillingSubmit]} onError={showError} />
+                    {adyenPaymentMethods && <AdyenCheckout beforeSubmit={[onBillingSubmit]} />}
 
                     <Divider borderColor="gray.100" />
 
