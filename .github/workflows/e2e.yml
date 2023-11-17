@@ -3,20 +3,7 @@ on:
     pull_request:
         branches: [main, develop]
 jobs:
-    setup-project:
-        timeout-minutes: 5
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v3
-            - uses: actions/setup-node@v3
-              with:
-                  node-version: 18
-            - name: Install dependencies
-              run: npm ci
-            - name: Start Webserver
-              run: npm run start
-    e2e-test:
-        needs: setup-project
+    build-and-test:
         timeout-minutes: 5
         runs-on: ubuntu-latest
         steps:
@@ -28,6 +15,28 @@ jobs:
               run: npm ci
             - name: Start Webserver
               run: npm run start
+              env: 
+                ADYEN_API_KEY: ${{secrets.ADYEN_API_KEY}}
+                ADYEN_MERCHANT_ACCOUNT: ${{secrets.ADYEN_MERCHANT_ACCOUNT}}
+                ADYEN_CLIENT_KEY: ${{secrets.ADYEN_CLIENT_KEY}}
+                ADYEN_ENVIRONMENT: ${{secrets.ADYEN_ENVIRONMENT}}
+                SYSTEM_INTEGRATOR_NAME: ${{ secrets.SYSTEM_INTEGRATOR_NAME }}
+                HOST_URL: ${{ secrets.HOST_URL }}
+                COMMERCE_API_CLIENT_ID: ${{ secrets.COMMERCE_API_CLIENT_ID }}
+                COMMERCE_API_ORG_ID: ${{ secrets.COMMERCE_API_ORG_ID }}
+                COMMERCE_API_SHORT_CODE: ${{ secrets.COMMERCE_API_SHORT_CODE }}
+                COMMERCE_API_SITE_ID: ${{ secrets.COMMERCE_API_SITE_ID }}
+                COMMERCE_API_DEFAULT_SITE: ${{ secrets.COMMERCE_API_DEFAULT_SITE }}
+                SCAPI_URL: ${{ secrets.SCAPI_URL }}
+                OCAPI_URL: ${{ secrets.OCAPI_URL }}
+                ADYEN_WEBHOOK_USER: ${{ secrets.ADYEN_WEBHOOK_USER }}
+                ADYEN_WEBHOOK_PASSWORD: ${{ secrets.ADYEN_WEBHOOK_PASSWORD }}
+                ADYEN_HMAC_KEY: ${{ secrets.ADYEN_HMAC_KEY }}
+                ENVIRONMENT_ID: ${{ secrets.ENVIRONMENT_ID }}
+                PROJECT_ID: ${{ secrets.PROJECT_ID }}
+                COMMERCE_API_CLIENT_ID_PRIVATE: ${{ secrets.COMMERCE_API_CLIENT_ID_PRIVATE }}
+                COMMERCE_API_CLIENT_SECRET: ${{ secrets.COMMERCE_API_CLIENT_SECRET }}
+                NODE_ENV: ${{ secrets.NODE_ENV }}
             - name: Install Playwright dependencies
               working-directory: ./tests
               run: npm ci
