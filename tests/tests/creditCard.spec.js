@@ -18,7 +18,7 @@ test.describe('Payments through PWA UI', () => {
         const scenarios = new ScenarioHelper(page)
         await scenarios.arrangeShippingAndProceedToPayment(user_US)
         const paymentPage = new PaymentHelper(page)
-        await paymentPage.selectPaymentType('Credit Card')
+        await paymentPage.selectPaymentType('Card')
         await paymentPage.fillCreditCardInfo(
             user_US.shopperName,
             threeDs2.cardNumber,
