@@ -71,7 +71,7 @@ function webhookSuccess(res) {
     return res.status(200).json(messages.AUTH_SUCCESS)
 }
 
-const errorHandler = (err, req, res, next) => {
+const errorHandler = (err, req, res) => {
     Logger.error('errorHandler', err.message)
     res.status(err.statusCode || 500).json(err.message || messages.DEFAULT_ERROR)
 }

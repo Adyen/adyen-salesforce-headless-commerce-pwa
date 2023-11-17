@@ -7,12 +7,13 @@ export function createCheckoutResponse(response) {
       RESULT_CODES.REFUSED,
       RESULT_CODES.ERROR,
       RESULT_CODES.CANCELLED,
+      RESULT_CODES.RECEIVED,
     ].includes(response.resultCode)
   ) {
     return {
       isFinal: true,
       isSuccessful:
-        response.resultCode === RESULT_CODES.AUTHORISED,
+        response.resultCode === RESULT_CODES.AUTHORISED || response.resultCode === RESULT_CODES.RECEIVED,
       merchantReference: response.merchantReference,
     };
   }
@@ -29,12 +30,6 @@ export function createCheckoutResponse(response) {
     return {
       isFinal: false,
       action: response.action,
-    };
-  }
-
-  if (response.resultCode === RESULT_CODES.RECEIVED) {
-    return {
-      isFinal: false,
     };
   }
 
