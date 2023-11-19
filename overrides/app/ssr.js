@@ -18,10 +18,12 @@ import PaymentsController from '../../adyen/controllers/payments'
 import {
     authenticate,
     errorHandler,
-    handleWebhook,
-    validateHmac
+    parseNotification,
+    validateHmac,
+    webhookSuccess
 } from '../../adyen/controllers/webhook'
 import {query} from 'express-validator'
+import {authorizationWebhookHandler} from '../../adyen/controllers/authorization-webhook-handler'
 
 const options = {
     // The build directory (an absolute path)
@@ -113,7 +115,15 @@ const {handler} = runtime.createHandler(options, (app) => {
     app.post('/api/adyen/paymentMethods', PaymentMethodsController)
     app.post('/api/adyen/payments/details', PaymentsDetailsController)
     app.post('/api/adyen/payments', PaymentsController)
-    app.post('/api/adyen/webhook', authenticate, validateHmac, handleWebhook, errorHandler)
+    app.post(
+        '/api/adyen/webhook',
+        authenticate,
+        validateHmac,
+        parseNotification,
+        authorizationWebhookHandler,
+        webhookSuccess,
+        errorHandler
+    )
 })
 // SSR requires that we export a single handler function called 'get', that
 // supports AWS use of the server that we created above.
