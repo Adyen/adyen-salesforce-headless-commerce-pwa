@@ -1,4 +1,5 @@
 import {hmacValidator} from '@adyen/api-library'
+import NotificationRequest from '@adyen/api-library/lib/src/notification/notificationRequest'
 import Logger from './logger'
 
 const messages = {
@@ -11,8 +12,10 @@ async function handleWebhook(req, res, next) {
     try {
         // handle webhook notification here and update order status using ORDER API from commerce SDK.
         // check eventCode structure and types here: https://docs.adyen.com/development-resources/webhooks/webhook-types/
-        // return `webhookSuccess(res)` if notification is successfully handled.
-        return webhookSuccess(res)
+        // `return next()` if notification is successfully handled.
+        // webhookSuccess middleware return correct response for the webhook.
+        // throw relevant error if notification is not successfully handled.
+        // errorHandler middleware return error response and logs the error.
     } catch (err) {
         return next(err)
     }
@@ -38,7 +41,7 @@ function authenticate(req, res, next) {
             user === process.env.ADYEN_WEBHOOK_USER &&
             pass === process.env.ADYEN_WEBHOOK_PASSWORD
         ) {
-            next()
+            return next()
         } else {
             throw new Error(messages.AUTH_ERROR)
         }
@@ -66,14 +69,35 @@ function validateHmac(req, res, next) {
     }
 }
 
-function webhookSuccess(res) {
+function parseNotification(req, res, next) {
+    try {
+        const notificationRequest = new NotificationRequest(req.body)
+        const notificationRequestItem = (notificationRequest.notificationItems || []).filter(
+            (item) => !!item
+        )
+        if (!notificationRequestItem[0]) {
+            return next(
+                new Error(
+                    'Handling of Adyen notification has failed. No input parameters were provided.'
+                )
+            )
+        }
+        res.locals.notification = notificationRequestItem[0]
+        Logger.info('AdyenNotification', JSON.stringify(res.locals.notification))
+        return next()
+    } catch (err) {
+        return next(err)
+    }
+}
+
+function webhookSuccess(req, res) {
     Logger.info('webhookSuccess', res.toString())
     return res.status(200).json(messages.AUTH_SUCCESS)
 }
 
 const errorHandler = (err, req, res) => {
-    Logger.error('errorHandler', err.message)
+    Logger.error(err.message, err.cause)
     res.status(err.statusCode || 500).json(err.message || messages.DEFAULT_ERROR)
 }
 
-export {authenticate, validateHmac, handleWebhook, errorHandler}
+export {authenticate, validateHmac, handleWebhook, errorHandler, webhookSuccess, parseNotification}
