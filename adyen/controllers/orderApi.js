@@ -97,4 +97,23 @@ export class OrderApiClient {
         }
         return response
     }
+
+    async updateOrderPaymentTransaction(orderNo, paymentInstrumentId, pspReference) {
+        const response = await this.base(
+            'patch',
+            `${orderNo}/payment-instruments/${paymentInstrumentId}/transaction`,
+            {
+                body: JSON.stringify({
+                    c_externalReferenceCode: pspReference
+                })
+            }
+        )
+        if (!response.ok) {
+            const error = await response.text()
+            throw new Error(`${response.status} ${response.statusText}`, {
+                cause: error
+            })
+        }
+        return response
+    }
 }

@@ -13,6 +13,7 @@ import AdyenCheckoutConfig from './checkout-config'
 import Logger from './logger'
 import {createErrorResponse} from '../utils/createErrorResponse.mjs'
 import {v4 as uuidv4} from 'uuid'
+import {OrderApiClient} from './orderApi'
 
 const errorMessages = {
     AMOUNT_NOT_CORRECT: 'amount not correct',
@@ -67,6 +68,10 @@ async function sendPayments(req, res) {
     }
 
     const checkout = AdyenCheckoutConfig.getInstance()
+    let basket
+    let order
+    let paymentInstrument
+
     try {
         const {app: appConfig} = getConfig()
         const {data} = req.body
@@ -75,7 +80,7 @@ async function sendPayments(req, res) {
             headers: {authorization: req.headers.authorization}
         })
 
-        const basket = await shopperBaskets.getBasket({
+        basket = await shopperBaskets.getBasket({
             parameters: {
                 basketId: req.headers.basketid
             }
@@ -87,7 +92,7 @@ async function sendPayments(req, res) {
 
         if (!basket?.paymentInstruments || !basket?.paymentInstruments?.length) {
             Logger.info('sendPayments', 'addPaymentInstrumentToBasket')
-            await shopperBaskets.addPaymentInstrumentToBasket({
+            paymentInstrument = await shopperBaskets.addPaymentInstrumentToBasket({
                 body: {
                     amount: basket.orderTotal,
                     paymentMethodId: PAYMENT_METHODS.ADYEN_COMPONENT,
@@ -106,22 +111,7 @@ async function sendPayments(req, res) {
             headers: {authorization: req.headers.authorization}
         })
 
-        // const credentials = `${process.env.COMMERCE_API_CLIENT_ID_PRIVATE}:${process.env.COMMERCE_API_CLIENT_SECRET}`
-        // const base64data = btoa(credentials)
-        // const headers = {
-        //     'content-type': 'application/json',
-        //     authorization: `Basic ${base64data}`
-        // }
-
-        // const ordersApi = new Checkout.Orders({
-        //     parameters: {
-        //         ...appConfig.commerceAPI.parameters,
-        //         clientId: process.env.COMMERCE_API_CLIENT_ID_PRIVATE
-        //     },
-        //     headers
-        // })
-
-        const order = await shopperOrders.createOrder({
+        order = await shopperOrders.createOrder({
             body: {
                 basketId: req.headers.basketid
             }
@@ -174,15 +164,12 @@ async function sendPayments(req, res) {
         })
         Logger.info('sendPayments', `resultCode ${response.resultCode}`)
 
-        // await ordersApi.updateOrderPaymentTransaction({
-        //     body: {
-        //         c_externalReferenceCode: response.pspReference
-        //     },
-        //     parameters: {
-        //         orderNo: order.orderNo,
-        //         paymentInstrumentId: order.paymentInstruments[0].paymentInstrumentId
-        //     }
-        // })
+        // const orderApi = new OrderApiClient()
+        // await orderApi.updateOrderPaymentTransaction(
+        //     order.orderNo,
+        //     order.paymentInstruments[0].paymentInstrumentId,
+        //     response.pspReference
+        // )
 
         const checkoutResponse = createCheckoutResponse(response)
         if (checkoutResponse.isFinal && !checkoutResponse.isSuccessful) {
