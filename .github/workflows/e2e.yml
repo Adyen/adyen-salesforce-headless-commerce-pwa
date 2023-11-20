@@ -5,7 +5,9 @@ on:
 jobs:
     build-and-test:
         timeout-minutes: 10
-        runs-on: ubuntu-latest
+        runs-on:
+            group: larger-runners
+            labels: ubuntu-latest-8-cores
         steps:
             - uses: actions/checkout@v3
             - uses: actions/setup-node@v3
