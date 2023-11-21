@@ -2,6 +2,7 @@ import {formatAddressInAdyenFormat} from '../utils/formatAddress.mjs'
 import {getCurrencyValueForApi} from '../utils/parsers.mjs'
 import {
     APPLICATION_VERSION,
+    ORDER,
     PAYMENT_METHODS,
     RECURRING_PROCESSING_MODEL,
     SHOPPER_INTERACTIONS
@@ -59,130 +60,6 @@ const filterStateData = (stateData) => {
         }
     }
     return filteredStateData
-}
-
-async function sendPayments(req, res) {
-    Logger.info('sendPayments', 'start')
-    if (!validateRequestParams(req)) {
-        throw new Error(errorMessages.INVALID_PARAMS)
-    }
-
-    const checkout = AdyenCheckoutConfig.getInstance()
-    let basket
-    let order
-    let paymentInstrument
-
-    try {
-        const {app: appConfig} = getConfig()
-        const {data} = req.body
-        const shopperBaskets = new ShopperBaskets({
-            ...appConfig.commerceAPI,
-            headers: {authorization: req.headers.authorization}
-        })
-
-        basket = await shopperBaskets.getBasket({
-            parameters: {
-                basketId: req.headers.basketid
-            }
-        })
-
-        if (!basket) {
-            throw new Error(errorMessages.INVALID_BASKET)
-        }
-
-        if (!basket?.paymentInstruments || !basket?.paymentInstruments?.length) {
-            Logger.info('sendPayments', 'addPaymentInstrumentToBasket')
-            paymentInstrument = await shopperBaskets.addPaymentInstrumentToBasket({
-                body: {
-                    amount: basket.orderTotal,
-                    paymentMethodId: PAYMENT_METHODS.ADYEN_COMPONENT,
-                    paymentCard: {
-                        cardType: data?.paymentMethod?.type
-                    }
-                },
-                parameters: {
-                    basketId: req.headers.basketid
-                }
-            })
-        }
-
-        const shopperOrders = new ShopperOrders({
-            ...appConfig.commerceAPI,
-            headers: {authorization: req.headers.authorization}
-        })
-
-        order = await shopperOrders.createOrder({
-            body: {
-                basketId: req.headers.basketid
-            }
-        })
-        Logger.info('sendPayments', `orderCreated ${order?.orderNo}`)
-
-        if (order?.customerInfo?.customerId !== req.headers.customerid) {
-            throw new Error(errorMessages.INVALID_ORDER)
-        }
-
-        const paymentRequest = {
-            ...filterStateData(data),
-            billingAddress: data.billingAddress || formatAddressInAdyenFormat(order.billingAddress),
-            deliveryAddress:
-                data.deliveryAddress ||
-                formatAddressInAdyenFormat(order.shipments[0].shippingAddress),
-            reference: order.orderNo,
-            merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT,
-            amount: {
-                value: getCurrencyValueForApi(order.orderTotal, order.currency),
-                currency: order.currency
-            },
-            applicationInfo: getApplicationInfo(),
-            authenticationData: {
-                threeDSRequestData: {
-                    nativeThreeDS: 'preferred'
-                }
-            },
-            channel: 'Web',
-            returnUrl: `${data.origin}/checkout`,
-            shopperReference: order?.customerInfo?.customerId,
-            shopperEmail: order?.customerInfo?.email,
-            shopperName: getShopperName(order)
-        }
-
-        if (isOpenInvoiceMethod(data?.paymentMethod?.type)) {
-            paymentRequest.lineItems = getLineItems(order)
-            paymentRequest.countryCode = paymentRequest.billingAddress.country
-        }
-
-        if (data.storePaymentMethod || data.paymentMethod?.storedPaymentMethodId) {
-            paymentRequest.recurringProcessingModel = RECURRING_PROCESSING_MODEL.CARD_ON_FILE
-            paymentRequest.shopperInteraction = data.paymentMethod?.storedPaymentMethodId
-                ? SHOPPER_INTERACTIONS.CONT_AUTH
-                : SHOPPER_INTERACTIONS.ECOMMERCE
-        }
-
-        const response = await checkout.instance.payments(paymentRequest, {
-            idempotencyKey: uuidv4()
-        })
-        Logger.info('sendPayments', `resultCode ${response.resultCode}`)
-
-        // const orderApi = new OrderApiClient()
-        // await orderApi.updateOrderPaymentTransaction(
-        //     order.orderNo,
-        //     order.paymentInstruments[0].paymentInstrumentId,
-        //     response.pspReference
-        // )
-
-        const checkoutResponse = createCheckoutResponse(response)
-        if (checkoutResponse.isFinal && !checkoutResponse.isSuccessful) {
-            throw new Error(errorMessages.PAYMENT_NOT_SUCCESSFUL)
-        }
-
-        res.json(checkoutResponse)
-    } catch (err) {
-        Logger.error('sendPayments', err.message)
-        res.status(err.statusCode || 500).json(
-            createErrorResponse(err.statusCode || 500, err.message)
-        )
-    }
 }
 
 function getShopperName(order) {
@@ -266,6 +143,128 @@ function getLineItems(order) {
           })
         : []
     return [...productLineItems, ...shippingLineItems, ...priceAdjustmentLineItems]
+}
+
+async function sendPayments(req, res, next) {
+    Logger.info('sendPayments', 'start')
+    if (!validateRequestParams(req)) {
+        throw new Error(errorMessages.INVALID_PARAMS)
+    }
+
+    const checkout = AdyenCheckoutConfig.getInstance()
+
+    try {
+        const {app: appConfig} = getConfig()
+        const {data} = req.body
+        const shopperBaskets = new ShopperBaskets({
+            ...appConfig.commerceAPI,
+            headers: {authorization: req.headers.authorization}
+        })
+
+        const basket = await shopperBaskets.getBasket({
+            parameters: {
+                basketId: req.headers.basketid
+            }
+        })
+
+        if (!basket) {
+            throw new Error(errorMessages.INVALID_BASKET)
+        }
+
+        if (!basket?.paymentInstruments || !basket?.paymentInstruments?.length) {
+            Logger.info('sendPayments', 'addPaymentInstrumentToBasket')
+            await shopperBaskets.addPaymentInstrumentToBasket({
+                body: {
+                    amount: basket.orderTotal,
+                    paymentMethodId: PAYMENT_METHODS.ADYEN_COMPONENT,
+                    paymentCard: {
+                        cardType: data?.paymentMethod?.type
+                    }
+                },
+                parameters: {
+                    basketId: req.headers.basketid
+                }
+            })
+        }
+
+        const shopperOrders = new ShopperOrders({
+            ...appConfig.commerceAPI,
+            headers: {authorization: req.headers.authorization}
+        })
+
+        const order = await shopperOrders.createOrder({
+            body: {
+                basketId: req.headers.basketid
+            }
+        })
+        Logger.info('sendPayments', `orderCreated ${order?.orderNo}`)
+
+        if (order?.customerInfo?.customerId !== req.headers.customerid) {
+            throw new Error(errorMessages.INVALID_ORDER)
+        }
+
+        const paymentRequest = {
+            ...filterStateData(data),
+            billingAddress: data.billingAddress || formatAddressInAdyenFormat(order.billingAddress),
+            deliveryAddress:
+                data.deliveryAddress ||
+                formatAddressInAdyenFormat(order.shipments[0].shippingAddress),
+            reference: order.orderNo,
+            merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT,
+            amount: {
+                value: getCurrencyValueForApi(order.orderTotal, order.currency),
+                currency: order.currency
+            },
+            applicationInfo: getApplicationInfo(),
+            authenticationData: {
+                threeDSRequestData: {
+                    nativeThreeDS: 'preferred'
+                }
+            },
+            channel: 'Web',
+            returnUrl: `${data.origin}/checkout`,
+            shopperReference: order?.customerInfo?.customerId,
+            shopperEmail: order?.customerInfo?.email,
+            shopperName: getShopperName(order)
+        }
+
+        if (isOpenInvoiceMethod(data?.paymentMethod?.type)) {
+            paymentRequest.lineItems = getLineItems(order)
+            paymentRequest.countryCode = paymentRequest.billingAddress.country
+        }
+
+        if (data.storePaymentMethod || data.paymentMethod?.storedPaymentMethodId) {
+            paymentRequest.recurringProcessingModel = RECURRING_PROCESSING_MODEL.CARD_ON_FILE
+            paymentRequest.shopperInteraction = data.paymentMethod?.storedPaymentMethodId
+                ? SHOPPER_INTERACTIONS.CONT_AUTH
+                : SHOPPER_INTERACTIONS.ECOMMERCE
+        }
+
+        const response = await checkout.instance.payments(paymentRequest, {
+            idempotencyKey: uuidv4()
+        })
+        Logger.info('sendPayments', `resultCode ${response.resultCode}`)
+
+        const orderApi = new OrderApiClient()
+        await orderApi.updateOrderPaymentTransaction(
+            order.orderNo,
+            order.paymentInstruments[0].paymentInstrumentId,
+            response.pspReference
+        )
+
+        const checkoutResponse = createCheckoutResponse(response)
+        if (checkoutResponse.isFinal && !checkoutResponse.isSuccessful) {
+            throw new Error(errorMessages.PAYMENT_NOT_SUCCESSFUL)
+        }
+
+        res.json(checkoutResponse)
+        return next()
+    } catch (err) {
+        Logger.error('sendPayments', err.message)
+        res.status(err.statusCode || 500).json(
+            createErrorResponse(err.statusCode || 500, err.message)
+        )
+    }
 }
 
 export default sendPayments
