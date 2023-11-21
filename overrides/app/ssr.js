@@ -98,6 +98,15 @@ const {handler} = runtime.createHandler(options, (app) => {
      * - Payments
      * - Payments Details
      * - Webhooks
+     *
+     * @param app - express app used to register the routes
+     * @param runtime - express runtime used to render pages after sanitizing the query params
+     * @param overrides (optional) - an object that provides the option for using different endpoint handlers
+     *
+     * @example
+     * const overrides = {
+     *   payments: [PrePaymentsController, PaymentsController, PostPaymentsController]
+     * }
      */
     registerAdyenEndpoints(app, runtime)
 

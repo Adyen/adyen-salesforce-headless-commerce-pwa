@@ -12,24 +12,30 @@ import {
 } from '../controllers/webhook'
 import {authorizationWebhookHandler} from '../controllers/authorization-webhook-handler'
 
-export function registerAdyenEndpoints(app, runtime) {
+export function registerAdyenEndpoints(app, runtime, overrides) {
     app.get(
         '*/checkout',
         query('redirectResult').optional().escape(),
         query('amazonCheckoutSessionId').optional().escape(),
         runtime.render
     )
-    app.get('/api/adyen/environment', EnvironmentController)
-    app.get('/api/adyen/paymentMethods', PaymentMethodsController)
-    app.post('/api/adyen/payments/details', PaymentsDetailsController)
-    app.post('/api/adyen/payments', PaymentsController)
-    app.post(
-        '/api/adyen/webhook',
+
+    const environmentHandler = overrides?.environment || [EnvironmentController]
+    const paymentMethodsHandler = overrides?.paymentMethods || [PaymentMethodsController]
+    const paymentsDetailsHandler = overrides?.paymentsDetails || [PaymentsDetailsController]
+    const paymentsHandler = overrides?.payments || [PaymentsController]
+    const webhooksHandler = overrides?.webhook || [
         authenticate,
         validateHmac,
         parseNotification,
         authorizationWebhookHandler,
         webhookSuccess,
         errorHandler
-    )
+    ]
+
+    app.get('/api/adyen/environment', ...environmentHandler)
+    app.get('/api/adyen/paymentMethods', ...paymentMethodsHandler)
+    app.post('/api/adyen/payments/details', ...paymentsDetailsHandler)
+    app.post('/api/adyen/payments', ...paymentsHandler)
+    app.post('/api/adyen/webhook', ...webhooksHandler)
 }
