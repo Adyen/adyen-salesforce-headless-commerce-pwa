@@ -4,7 +4,7 @@ on:
         branches: [main, develop]
 jobs:
     build-and-test:
-        timeout-minutes: 10
+        timeout-minutes: 20
         runs-on:
             group: larger-runners
             labels: ubuntu-latest-8-cores
