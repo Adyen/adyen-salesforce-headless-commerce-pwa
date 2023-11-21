@@ -2,7 +2,6 @@ import {formatAddressInAdyenFormat} from '../../utils/formatAddress.mjs'
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 import {
     APPLICATION_VERSION,
-    ORDER,
     PAYMENT_METHODS,
     RECURRING_PROCESSING_MODEL,
     SHOPPER_INTERACTIONS
