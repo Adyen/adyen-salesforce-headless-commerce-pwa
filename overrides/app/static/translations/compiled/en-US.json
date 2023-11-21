@@ -551,12 +551,6 @@
       "value": "Create an account for faster checkout"
     }
   ],
-  "checkout_confirmation.heading.credit_card": [
-    {
-      "type": 0,
-      "value": "Credit Card"
-    }
-  ],
   "checkout_confirmation.heading.delivery_details": [
     {
       "type": 0,
@@ -573,6 +567,12 @@
     {
       "type": 0,
       "value": "Payment Details"
+    }
+  ],
+  "checkout_confirmation.heading.payment_method": [
+    {
+      "type": 0,
+      "value": "Payment Method"
     }
   ],
   "checkout_confirmation.heading.shipping_address": [

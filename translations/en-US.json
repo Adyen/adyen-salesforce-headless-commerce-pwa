@@ -210,12 +210,6 @@
   "checkout_confirmation.heading.create_account": {
     "defaultMessage": "Create an account for faster checkout"
   },
-  "checkout_confirmation.heading.credit_card": {
-    "defaultMessage": "Credit Card"
-  },
-  "checkout_confirmation.heading.payment_method": {
-    "defaultMessage": "Payment Method"
-  },
   "checkout_confirmation.heading.delivery_details": {
     "defaultMessage": "Delivery Details"
   },
@@ -224,6 +218,9 @@
   },
   "checkout_confirmation.heading.payment_details": {
     "defaultMessage": "Payment Details"
+  },
+  "checkout_confirmation.heading.payment_method": {
+    "defaultMessage": "Payment Method"
   },
   "checkout_confirmation.heading.shipping_address": {
     "defaultMessage": "Shipping Address"

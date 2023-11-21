@@ -39,7 +39,7 @@ export function registerAdyenEndpoints(app, runtime, overrides) {
         SuccessHandler,
         ErrorHandler
     ]
-    const webhooksHandler = overrides?.webhook || [
+    const webhookHandler = overrides?.webhook || [
         authenticate,
         validateHmac,
         parseNotification,
@@ -58,5 +58,5 @@ export function registerAdyenEndpoints(app, runtime, overrides) {
     app.get('/api/adyen/paymentMethods', ...paymentMethodsHandler)
     app.post('/api/adyen/payments/details', ...paymentsDetailsHandler)
     app.post('/api/adyen/payments', ...paymentsHandler)
-    app.post('/api/adyen/webhook', ...webhooksHandler)
+    app.post('/api/adyen/webhook', ...webhookHandler)
 }
