@@ -9,7 +9,7 @@ export class AdyenEnvironmentService {
     }
 
     async fetchEnvironment() {
-        const res = await this.apiClient.post()
+        const res = await this.apiClient.get()
         if (res.status >= 300) {
             throw new Error(res)
         } else {

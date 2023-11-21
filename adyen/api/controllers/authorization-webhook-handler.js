@@ -1,6 +1,6 @@
 import {OrderApiClient} from './orderApi'
 import {NotificationRequestItem} from '@adyen/api-library/lib/src/typings/notification/notificationRequestItem'
-import {ORDER} from '../utils/constants.mjs'
+import {ORDER} from '../../utils/constants.mjs'
 import Logger from './logger'
 
 async function authorizationWebhookHandler(req, res, next) {

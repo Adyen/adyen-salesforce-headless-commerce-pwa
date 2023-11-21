@@ -1,4 +1,4 @@
-import {APPLICATION_VERSION} from '../utils/constants.mjs'
+import {APPLICATION_VERSION} from '../../utils/constants.mjs'
 
 const ADYEN_PREFIX = 'ADYEN'
 
