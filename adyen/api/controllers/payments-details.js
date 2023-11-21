@@ -8,7 +8,7 @@ const errorMessages = {
     PAYMENTS_DETAILS_NOT_SUCCESSFUL: 'payments details call not successful'
 }
 
-async function sendPaymentDetails(req, res) {
+async function sendPaymentDetails(req, res, next) {
     Logger.info('sendPaymentDetails', 'start')
     const checkout = AdyenCheckoutConfig.getInstance()
     try {
@@ -21,7 +21,8 @@ async function sendPaymentDetails(req, res) {
         if (checkoutResponse.isFinal && !checkoutResponse.isSuccessful) {
             throw new Error(errorMessages.PAYMENTS_DETAILS_NOT_SUCCESSFUL)
         }
-        res.json(checkoutResponse)
+        res.locals.response = checkoutResponse
+        next()
     } catch (err) {
         Logger.error('sendPaymentDetails', err.message)
         res.status(err.statusCode || 500).json(

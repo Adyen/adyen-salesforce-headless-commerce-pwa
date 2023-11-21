@@ -256,8 +256,8 @@ async function sendPayments(req, res, next) {
             throw new Error(errorMessages.PAYMENT_NOT_SUCCESSFUL)
         }
 
-        res.json(checkoutResponse)
-        return next()
+        res.locals.response = checkoutResponse
+        next()
     } catch (err) {
         Logger.error('sendPayments', err.message)
         res.status(err.statusCode || 500).json(

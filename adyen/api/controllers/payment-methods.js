@@ -7,7 +7,7 @@ import Logger from './logger'
 import {createErrorResponse} from '../../utils/createErrorResponse.mjs'
 import {v4 as uuidv4} from 'uuid'
 
-async function getPaymentMethods(req, res) {
+async function getPaymentMethods(req, res, next) {
     Logger.info('getPaymentMethods', 'start')
     const checkout = AdyenCheckoutConfig.getInstance()
 
@@ -48,7 +48,8 @@ async function getPaymentMethods(req, res) {
         })
 
         Logger.info('getPaymentMethods', 'success')
-        res.json(response)
+        res.locals.response = response
+        next()
     } catch (err) {
         Logger.error('getPaymentMethods', err.message)
         res.status(err.statusCode || 500).json(

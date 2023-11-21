@@ -90,14 +90,4 @@ function parseNotification(req, res, next) {
     }
 }
 
-function webhookSuccess(req, res) {
-    Logger.info('webhookSuccess', res.toString())
-    return res.status(200).json(messages.AUTH_SUCCESS)
-}
-
-const errorHandler = (err, req, res) => {
-    Logger.error(err.message, err.cause)
-    res.status(err.statusCode || 500).json(err.message || messages.DEFAULT_ERROR)
-}
-
-export {authenticate, validateHmac, handleWebhook, errorHandler, webhookSuccess, parseNotification}
+export {authenticate, validateHmac, handleWebhook, parseNotification}
