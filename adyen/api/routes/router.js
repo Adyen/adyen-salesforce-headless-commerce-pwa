@@ -5,11 +5,8 @@ import PaymentsDetailsController from '../controllers/payments-details'
 import PaymentsController from '../controllers/payments'
 import {authenticate, validateHmac, parseNotification} from '../controllers/webhook'
 import {authorizationWebhookHandler} from '../controllers/authorization-webhook-handler'
+import {createErrorResponse} from '../../utils/createErrorResponse.mjs'
 import Logger from '../controllers/logger'
-
-const messages = {
-    DEFAULT_ERROR: 'Technical error!'
-}
 
 function SuccessHandler(req, res) {
     Logger.info('Success', res.toString())
@@ -18,7 +15,7 @@ function SuccessHandler(req, res) {
 
 function ErrorHandler(err, req, res) {
     Logger.error(err.message, err.cause)
-    res.status(err.statusCode || 500).json(err.message || messages.DEFAULT_ERROR)
+    res.status(err.statusCode || 500).json(createErrorResponse(err.message))
 }
 
 export function registerAdyenEndpoints(app, runtime, overrides) {

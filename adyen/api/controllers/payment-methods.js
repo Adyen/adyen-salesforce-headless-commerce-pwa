@@ -4,7 +4,6 @@ import {ShopperCustomers} from 'commerce-sdk-isomorphic'
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 import AdyenCheckoutConfig from './checkout-config'
 import Logger from './logger'
-import {createErrorResponse} from '../../utils/createErrorResponse.mjs'
 import {v4 as uuidv4} from 'uuid'
 
 async function getPaymentMethods(req, res, next) {
@@ -52,9 +51,7 @@ async function getPaymentMethods(req, res, next) {
         next()
     } catch (err) {
         Logger.error('getPaymentMethods', err.message)
-        res.status(err.statusCode || 500).json(
-            createErrorResponse(err.statusCode || 500, err.message)
-        )
+        next(err)
     }
 }
 

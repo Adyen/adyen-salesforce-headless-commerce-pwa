@@ -1,7 +1,6 @@
 import {createCheckoutResponse} from '../../utils/createCheckoutResponse.mjs'
 import AdyenCheckoutConfig from './checkout-config'
 import Logger from './logger'
-import {createErrorResponse} from '../../utils/createErrorResponse.mjs'
 import {v4 as uuidv4} from 'uuid'
 
 const errorMessages = {
@@ -25,9 +24,7 @@ async function sendPaymentDetails(req, res, next) {
         next()
     } catch (err) {
         Logger.error('sendPaymentDetails', err.message)
-        res.status(err.statusCode || 500).json(
-            createErrorResponse(err.statusCode || 500, err.message)
-        )
+        next(err)
     }
 }
 

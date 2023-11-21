@@ -1,7 +1,8 @@
-export function createErrorResponse(statusCode, errorMessage) {
+const DEFAULT_ERROR = 'Technical error!'
+
+export function createErrorResponse(errorMessage = DEFAULT_ERROR) {
   return {
     error: true,
     errorMessage,
-    statusCode,
   }
 }
