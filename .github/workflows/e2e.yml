@@ -15,8 +15,15 @@ jobs:
                   node-version: 18
             - name: Install project dependencies
               run: npm ci
-            - name: Start Webserver
-              run: npm run start
+            - name: Install Playwright dependencies
+              working-directory: ./tests
+              run: npm ci
+            - name: Install Playwright Browsers
+              working-directory: ./tests
+              run: npx playwright install --with-deps
+            - name: Start Webserver & Run Playwright tests
+              working-directory: ./tests
+              run: npm run test
               env: 
                 ADYEN_API_KEY: ${{secrets.ADYEN_API_KEY}}
                 ADYEN_MERCHANT_ACCOUNT: ${{secrets.ADYEN_MERCHANT_ACCOUNT}}
@@ -39,15 +46,6 @@ jobs:
                 COMMERCE_API_CLIENT_ID_PRIVATE: ${{ secrets.COMMERCE_API_CLIENT_ID_PRIVATE }}
                 COMMERCE_API_CLIENT_SECRET: ${{ secrets.COMMERCE_API_CLIENT_SECRET }}
                 NODE_ENV: ${{ secrets.NODE_ENV }}
-            - name: Install Playwright dependencies
-              working-directory: ./tests
-              run: npm ci
-            - name: Install Playwright Browsers
-              working-directory: ./tests
-              run: npx playwright install --with-deps
-            - name: Run Playwright tests
-              working-directory: ./tests
-              run: npx playwright test
             - uses: actions/upload-artifact@v3
               if: always()
               with:
