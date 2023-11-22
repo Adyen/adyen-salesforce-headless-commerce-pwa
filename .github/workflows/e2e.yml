@@ -14,10 +14,10 @@ jobs:
               with:
                   node-version: 18
             - name: Install project dependencies
-              run: npm ci
+              run: npm i
             - name: Install Playwright dependencies
               working-directory: ./tests
-              run: npm ci
+              run: npm i
             - name: Install Playwright Browsers
               working-directory: ./tests
               run: npx playwright install --with-deps
