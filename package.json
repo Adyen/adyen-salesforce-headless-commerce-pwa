@@ -1,6 +1,6 @@
 {
   "name": "adyen-salesforce-pwa",
-  "version": "1.0.0",
+  "version": "1.0.0-beta",
   "license": "See license in LICENSE",
   "engines": {
     "node": "^16.0.0 || ^18.0.0",
@@ -19,6 +19,12 @@
     "husky": "^8.0.3",
     "style-loader": "^3.3.3",
     "yargs": "^17.7.2"
+  },
+  "dependencies": {
+    "@adyen/adyen-web": "^5.51.0",
+    "@adyen/api-library": "^14.3.0",
+    "express-validator": "^7.0.1",
+    "uuid": "^9.0.1"
   },
   "scripts": {
     "analyze-build": "cross-env MOBIFY_ANALYZE=true npm run build",
@@ -62,11 +68,5 @@
     "iOS >= 9.0",
     "Android >= 4.4.4",
     "last 4 ChromeAndroid versions"
-  ],
-  "dependencies": {
-    "@adyen/adyen-web": "^5.51.0",
-    "@adyen/api-library": "^14.3.0",
-    "express-validator": "^7.0.1",
-    "uuid": "^9.0.1"
-  }
+  ]
 }
