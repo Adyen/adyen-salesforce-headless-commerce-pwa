@@ -143,6 +143,22 @@ function getLineItems(order) {
     return [...productLineItems, ...shippingLineItems, ...priceAdjustmentLineItems]
 }
 
+async function removeAllPaymentInstrumentsFromBasket(basket, shopperBaskets) {
+    const promises = []
+    if (basket?.paymentInstruments?.length) {
+        basket?.paymentInstruments.forEach((paymentInstrument) => {
+            const promise = shopperBaskets.removePaymentInstrumentFromBasket({
+                parameters: {
+                    basketId: basket.basketId,
+                    paymentInstrumentId: paymentInstrument.paymentInstrumentId
+                }
+            })
+            promises.push(promise)
+        })
+    }
+    return Promise.all(promises)
+}
+
 async function sendPayments(req, res, next) {
     Logger.info('sendPayments', 'start')
     if (!validateRequestParams(req)) {
@@ -152,8 +168,9 @@ async function sendPayments(req, res, next) {
     const checkout = AdyenCheckoutConfig.getInstance()
 
     try {
-        const {app: appConfig} = getConfig()
         const {data} = req.body
+
+        const {app: appConfig} = getConfig()
         const shopperBaskets = new ShopperBaskets({
             ...appConfig.commerceAPI,
             headers: {authorization: req.headers.authorization}
@@ -243,12 +260,14 @@ async function sendPayments(req, res, next) {
         })
         Logger.info('sendPayments', `resultCode ${response.resultCode}`)
 
-        const orderApi = new OrderApiClient()
-        await orderApi.updateOrderPaymentTransaction(
-            order.orderNo,
-            order.paymentInstruments[0].paymentInstrumentId,
-            response.pspReference
-        )
+        if (order?.paymentInstruments?.length) {
+            const orderApi = new OrderApiClient()
+            await orderApi.updateOrderPaymentTransaction(
+                order.orderNo,
+                order.paymentInstruments[0].paymentInstrumentId,
+                response.pspReference
+            )
+        }
 
         const checkoutResponse = createCheckoutResponse(response)
         if (checkoutResponse.isFinal && !checkoutResponse.isSuccessful) {
@@ -259,6 +278,19 @@ async function sendPayments(req, res, next) {
         next()
     } catch (err) {
         Logger.error('sendPayments', err.message)
+        const {app: appConfig} = getConfig()
+        const shopperBaskets = new ShopperBaskets({
+            ...appConfig.commerceAPI,
+            headers: {authorization: req.headers.authorization}
+        })
+        const basket = await shopperBaskets.getBasket({
+            parameters: {
+                basketId: req.headers.basketid
+            }
+        })
+        if (basket?.paymentInstruments?.length) {
+            await removeAllPaymentInstrumentsFromBasket(basket, shopperBaskets)
+        }
         next(err)
     }
 }
