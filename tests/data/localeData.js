@@ -5,7 +5,7 @@ export class LocaleData {
             heading: 'The React PWA Starter Store for Retail'
         },
         productDetailPage: {
-            productColor: 'Grey',
+            productColor: 'Gray',
             addToCartButtonCaption: 'Add to Cart',
             proceedToCheckoutButtonCaption: 'Proceed to Checkout'
         },
