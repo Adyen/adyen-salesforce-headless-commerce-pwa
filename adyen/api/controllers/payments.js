@@ -2,6 +2,7 @@ import {formatAddressInAdyenFormat} from '../../utils/formatAddress.mjs'
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 import {
     APPLICATION_VERSION,
+    ORDER,
     PAYMENT_METHODS,
     RECURRING_PROCESSING_MODEL,
     SHOPPER_INTERACTIONS
@@ -166,6 +167,7 @@ async function sendPayments(req, res, next) {
     }
 
     const checkout = AdyenCheckoutConfig.getInstance()
+    let order
 
     try {
         const {data} = req.body
@@ -207,7 +209,7 @@ async function sendPayments(req, res, next) {
             headers: {authorization: req.headers.authorization}
         })
 
-        const order = await shopperOrders.createOrder({
+        order = await shopperOrders.createOrder({
             body: {
                 basketId: req.headers.basketid
             }
@@ -290,6 +292,10 @@ async function sendPayments(req, res, next) {
         })
         if (basket?.paymentInstruments?.length) {
             await removeAllPaymentInstrumentsFromBasket(basket, shopperBaskets)
+        }
+        if (order?.orderNo) {
+            const orderApi = new OrderApiClient()
+            await orderApi.updateOrderStatus(order.orderNo, ORDER.ORDER_STATUS_FAILED)
         }
         next(err)
     }
