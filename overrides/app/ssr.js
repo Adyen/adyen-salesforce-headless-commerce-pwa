@@ -105,7 +105,8 @@ const {handler} = runtime.createHandler(options, (app) => {
      *
      * @example
      * const overrides = {
-     *   payments: [PrePaymentsController, PaymentsController, PostPaymentsController]
+     *   payments: [PrePaymentsController, PaymentsController, PostPaymentsController],
+     *   webhook: [authenticate, validateHmac, parseNotification, authorizationWebhookHandler, donationWebhookHandler, cancellationWebhookHandler]
      * }
      */
     registerAdyenEndpoints(app, runtime)
