@@ -25,7 +25,6 @@ import {API_ERROR_MESSAGE} from '@salesforce/retail-react-app/app/constants'
 import {useCheckout} from '@salesforce/retail-react-app/app/pages/checkout/util/checkout-context'
 import AdyenCheckout from '../../../../../adyen/components/AdyenCheckout'
 import {useAdyenCheckout} from '../../../../../adyen/context/adyen-checkout-context'
-import {PAYMENT_METHODS} from '../../../../../adyen/utils/constants.mjs'
 
 const Payment = () => {
     const {formatMessage} = useIntl()
@@ -36,10 +35,7 @@ const Payment = () => {
         ...basket?.billingAddress
     }
     const appliedPayment = basket?.paymentInstruments && basket?.paymentInstruments[0]
-    const [billingSameAsShipping, setBillingSameAsShipping] = useState(true) // By default, have billing addr to be the same as shipping
-    const {mutateAsync: addPaymentInstrumentToBasket} = useShopperBasketsMutation(
-        'addPaymentInstrumentToBasket'
-    )
+    const [billingSameAsShipping, setBillingSameAsShipping] = useState(true)
     const {mutateAsync: updateBillingAddressForBasket} = useShopperBasketsMutation(
         'updateBillingAddressForBasket'
     )
@@ -55,7 +51,7 @@ const Payment = () => {
     }
 
     const {step, STEPS, goToStep} = useCheckout()
-    const {adyenPaymentMethods, adyenStateData, adyenPaymentInProgress} = useAdyenCheckout()
+    const {adyenPaymentMethods, adyenPaymentInProgress} = useAdyenCheckout()
     const [isSubmittingPayment] = useState(false)
 
     const billingAddressForm = useForm({
