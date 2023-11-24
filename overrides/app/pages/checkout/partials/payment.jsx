@@ -54,9 +54,9 @@ const Payment = () => {
         })
     }
 
-    const {step, STEPS, goToStep, goToNextStep} = useCheckout()
+    const {step, STEPS, goToStep} = useCheckout()
     const {adyenPaymentMethods, adyenStateData, adyenPaymentInProgress} = useAdyenCheckout()
-    const [isSubmittingPayment, setIsSubmittingPayment] = useState(false)
+    const [isSubmittingPayment] = useState(false)
 
     const billingAddressForm = useForm({
         mode: 'onChange',
@@ -67,20 +67,6 @@ const Payment = () => {
     // Using destructuring to remove properties from the object...
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {removePromoCode, ...promoCodeProps} = usePromoCode()
-
-    const onPaymentSubmit = async () => {
-        const paymentInstrument = {
-            paymentMethodId: PAYMENT_METHODS.ADYEN_COMPONENT,
-            paymentCard: {
-                cardType: adyenStateData?.paymentMethod?.type
-            }
-        }
-
-        return await addPaymentInstrumentToBasket({
-            parameters: {basketId: basket?.basketId},
-            body: paymentInstrument
-        })
-    }
 
     const onBillingSubmit = async () => {
         const isFormValid = await billingAddressForm.trigger()
