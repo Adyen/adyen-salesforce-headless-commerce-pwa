@@ -11,19 +11,7 @@ import {isRemote} from '@salesforce/pwa-kit-runtime/utils/ssr-server'
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 import helmet from 'helmet'
 import bodyParser from 'body-parser'
-import EnvironmentController from '../../adyen/controllers/environment'
-import PaymentMethodsController from '../../adyen/controllers/payment-methods'
-import PaymentsDetailsController from '../../adyen/controllers/payments-details'
-import PaymentsController from '../../adyen/controllers/payments'
-import {
-    authenticate,
-    errorHandler,
-    parseNotification,
-    validateHmac,
-    webhookSuccess
-} from '../../adyen/controllers/webhook'
-import {query} from 'express-validator'
-import {authorizationWebhookHandler} from '../../adyen/controllers/authorization-webhook-handler'
+import {registerAdyenEndpoints} from '../../adyen/api/routes/router'
 
 const options = {
     // The build directory (an absolute path)
@@ -102,28 +90,34 @@ const {handler} = runtime.createHandler(options, (app) => {
     app.get('/favicon.ico', runtime.serveStaticFile('static/ico/favicon.ico'))
 
     app.get('/worker.js(.map)?', runtime.serveServiceWorker)
-    app.get(
-        '*/checkout',
-        query('redirectResult').optional().escape(),
-        query('amazonCheckoutSessionId').optional().escape(),
-        runtime.render
-    )
-    app.get('*', runtime.render)
 
-    // Routes
-    app.post('/api/adyen/environment', EnvironmentController)
-    app.post('/api/adyen/paymentMethods', PaymentMethodsController)
-    app.post('/api/adyen/payments/details', PaymentsDetailsController)
-    app.post('/api/adyen/payments', PaymentsController)
-    app.post(
-        '/api/adyen/webhook',
-        authenticate,
-        validateHmac,
-        parseNotification,
-        authorizationWebhookHandler,
-        webhookSuccess,
-        errorHandler
-    )
+    /**
+     * Adyen API Endpoints
+     * - Environment
+     * - Payment Methods
+     * - Payments
+     * - Payments Details
+     * - Webhooks
+     *
+     * @param app - express app used to register the routes
+     * @param runtime - express runtime used to render pages after sanitizing the query params
+     * @param overrides (optional) - an object that provides the option for using different endpoint handlers
+     *
+     * @example
+     * const overrides = {
+     *   payments: [PrePaymentsController, PaymentsController, PostPaymentsController],
+     *   webhook: [
+     *      authenticate,
+     *      validateHmac,
+     *      parseNotification,
+     *      authorizationWebhookHandler,
+     *      donationWebhookHandler
+     *  ]
+     * }
+     */
+    registerAdyenEndpoints(app, runtime)
+
+    app.get('*', runtime.render)
 })
 // SSR requires that we export a single handler function called 'get', that
 // supports AWS use of the server that we created above.

@@ -8,6 +8,9 @@ export class ApiClient {
     }
 
     base(method, options) {
+        if (options?.queryParams) {
+            this.url = `${this.url}?${new URLSearchParams(options.queryParams)}`
+        }
         return fetch(this.url, {
             method: method,
             body: options?.body || null,

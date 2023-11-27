@@ -1,7 +1,13 @@
 import {OrderApiClient} from './orderApi'
 import {NotificationRequestItem} from '@adyen/api-library/lib/src/typings/notification/notificationRequestItem'
-import {ORDER} from '../utils/constants.mjs'
+import {ORDER} from '../../utils/constants.mjs'
 import Logger from './logger'
+
+const messages = {
+    AUTH_ERROR: 'Access Denied!',
+    AUTH_SUCCESS: '[accepted]',
+    DEFAULT_ERROR: 'Technical error!'
+}
 
 async function authorizationWebhookHandler(req, res, next) {
     try {
@@ -38,6 +44,7 @@ async function authorizationWebhookHandler(req, res, next) {
             await orderApi.updateOrderStatus(orderNo, ORDER.ORDER_STATUS_FAILED)
         }
 
+        res.locals.response = messages.AUTH_SUCCESS
         return next()
     } catch (err) {
         return next(err)

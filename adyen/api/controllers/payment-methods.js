@@ -1,13 +1,12 @@
-import {getCurrencyValueForApi} from '../utils/parsers.mjs'
-import {BLOCKED_PAYMENT_METHODS} from '../utils/constants.mjs'
+import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
+import {BLOCKED_PAYMENT_METHODS} from '../../utils/constants.mjs'
 import {ShopperCustomers} from 'commerce-sdk-isomorphic'
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 import AdyenCheckoutConfig from './checkout-config'
 import Logger from './logger'
-import {createErrorResponse} from '../utils/createErrorResponse.mjs'
 import {v4 as uuidv4} from 'uuid'
 
-async function getPaymentMethods(req, res) {
+async function getPaymentMethods(req, res, next) {
     Logger.info('getPaymentMethods', 'start')
     const checkout = AdyenCheckoutConfig.getInstance()
 
@@ -24,9 +23,7 @@ async function getPaymentMethods(req, res) {
             }
         })
 
-        const {
-            locale: {id: shopperLocale}
-        } = req.body
+        const {locale: shopperLocale} = req.query
         const countryCode = shopperLocale?.slice(-2)
 
         const paymentMethodsRequest = {
@@ -50,12 +47,11 @@ async function getPaymentMethods(req, res) {
         })
 
         Logger.info('getPaymentMethods', 'success')
-        res.json(response)
+        res.locals.response = response
+        next()
     } catch (err) {
         Logger.error('getPaymentMethods', err.message)
-        res.status(err.statusCode || 500).json(
-            createErrorResponse(err.statusCode || 500, err.message)
-        )
+        next(err)
     }
 }
 

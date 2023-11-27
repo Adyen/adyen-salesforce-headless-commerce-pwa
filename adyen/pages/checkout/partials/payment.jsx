@@ -23,9 +23,8 @@ import AddressDisplay from '@salesforce/retail-react-app/app/components/address-
 import {PromoCode, usePromoCode} from '@salesforce/retail-react-app/app/components/promo-code'
 import {API_ERROR_MESSAGE} from '@salesforce/retail-react-app/app/constants'
 import {useCheckout} from '@salesforce/retail-react-app/app/pages/checkout/util/checkout-context'
-import AdyenCheckout from '../../../../../adyen/components/AdyenCheckout'
-import {useAdyenCheckout} from '../../../../../adyen/context/adyen-checkout-context'
-import {PAYMENT_METHODS} from '../../../../../adyen/utils/constants.mjs'
+import AdyenCheckout from '../../../components/AdyenCheckout'
+import {useAdyenCheckout} from '../../../context/adyen-checkout-context'
 
 const Payment = () => {
     const {formatMessage} = useIntl()
@@ -36,10 +35,7 @@ const Payment = () => {
         ...basket?.billingAddress
     }
     const appliedPayment = basket?.paymentInstruments && basket?.paymentInstruments[0]
-    const [billingSameAsShipping, setBillingSameAsShipping] = useState(true) // By default, have billing addr to be the same as shipping
-    const {mutateAsync: addPaymentInstrumentToBasket} = useShopperBasketsMutation(
-        'addPaymentInstrumentToBasket'
-    )
+    const [billingSameAsShipping, setBillingSameAsShipping] = useState(true)
     const {mutateAsync: updateBillingAddressForBasket} = useShopperBasketsMutation(
         'updateBillingAddressForBasket'
     )
@@ -54,9 +50,9 @@ const Payment = () => {
         })
     }
 
-    const {step, STEPS, goToStep, goToNextStep} = useCheckout()
-    const {adyenPaymentMethods, adyenStateData, adyenPaymentInProgress} = useAdyenCheckout()
-    const [isSubmittingPayment, setIsSubmittingPayment] = useState(false)
+    const {step, STEPS, goToStep} = useCheckout()
+    const {adyenPaymentMethods, adyenPaymentInProgress} = useAdyenCheckout()
+    const [isSubmittingPayment] = useState(false)
 
     const billingAddressForm = useForm({
         mode: 'onChange',
@@ -67,20 +63,6 @@ const Payment = () => {
     // Using destructuring to remove properties from the object...
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {removePromoCode, ...promoCodeProps} = usePromoCode()
-
-    const onPaymentSubmit = async () => {
-        const paymentInstrument = {
-            paymentMethodId: PAYMENT_METHODS.ADYEN_COMPONENT,
-            paymentCard: {
-                cardType: adyenStateData?.paymentMethod?.type
-            }
-        }
-
-        return await addPaymentInstrumentToBasket({
-            parameters: {basketId: basket?.basketId},
-            body: paymentInstrument
-        })
-    }
 
     const onBillingSubmit = async () => {
         const isFormValid = await billingAddressForm.trigger()

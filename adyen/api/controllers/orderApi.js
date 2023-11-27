@@ -1,3 +1,5 @@
+import Logger from './logger'
+
 export class OrderApiClient {
     tokenUrl =
         'https://account.demandware.com/dwsso/oauth2/access_token?grant_type=client_credentials'
@@ -36,7 +38,7 @@ export class OrderApiClient {
     }
 
     async getOrder(orderNo) {
-        const response = await this.base('get', orderNo)
+        const response = await this.base('GET', orderNo)
         if (!response.ok) {
             const error = await response.text()
             throw new Error(`${response.status} ${response.statusText}`, {
@@ -47,7 +49,7 @@ export class OrderApiClient {
     }
 
     async updateOrderStatus(orderNo, status) {
-        const response = await this.base('put', `${orderNo}/status`, {
+        const response = await this.base('PUT', `${orderNo}/status`, {
             body: JSON.stringify({status: status})
         })
         if (!response.ok) {
@@ -60,7 +62,7 @@ export class OrderApiClient {
     }
 
     async updateOrderPaymentStatus(orderNo, status) {
-        const response = await this.base('put', `${orderNo}/payment-status`, {
+        const response = await this.base('PUT', `${orderNo}/payment-status`, {
             body: JSON.stringify({status: status})
         })
         if (!response.ok) {
@@ -73,7 +75,7 @@ export class OrderApiClient {
     }
 
     async updateOrderExportStatus(orderNo, status) {
-        const response = await this.base('put', `${orderNo}/export-status`, {
+        const response = await this.base('PUT', `${orderNo}/export-status`, {
             body: JSON.stringify({status: status})
         })
         if (!response.ok) {
@@ -86,7 +88,7 @@ export class OrderApiClient {
     }
 
     async updateOrderConfirmationStatus(orderNo, status) {
-        const response = await this.base('put', `${orderNo}/confirmation-status`, {
+        const response = await this.base('PUT', `${orderNo}/confirmation-status`, {
             body: JSON.stringify({status: status})
         })
         if (!response.ok) {
@@ -94,6 +96,23 @@ export class OrderApiClient {
             throw new Error(`${response.status} ${response.statusText}`, {
                 cause: error
             })
+        }
+        return response
+    }
+
+    async updateOrderPaymentTransaction(orderNo, paymentInstrumentId, pspReference) {
+        const response = await this.base(
+            'PATCH',
+            `${orderNo}/payment-instruments/${paymentInstrumentId}/transaction`,
+            {
+                body: JSON.stringify({
+                    c_externalReferenceCode: pspReference
+                })
+            }
+        )
+        if (!response.ok) {
+            const error = await response.text()
+            Logger.error(`Payment transaction update failed ${JSON.stringify(error)}`)
         }
         return response
     }

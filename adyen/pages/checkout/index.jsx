@@ -17,8 +17,8 @@ import ShippingOptions from '@salesforce/retail-react-app/app/pages/checkout/par
 import OrderSummary from '@salesforce/retail-react-app/app/components/order-summary'
 import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 import Payment from './partials/payment'
-import {AdyenCheckoutProvider} from '../../../../adyen/context/adyen-checkout-context'
-import AdyenCheckout from '../../../../adyen/components/AdyenCheckout'
+import {AdyenCheckoutProvider} from '../../context/adyen-checkout-context'
+import AdyenCheckout from '../../components/AdyenCheckout'
 
 const Checkout = () => {
     const {step} = useCheckout()
