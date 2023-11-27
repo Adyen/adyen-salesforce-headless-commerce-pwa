@@ -23,8 +23,8 @@ import AddressDisplay from '@salesforce/retail-react-app/app/components/address-
 import {PromoCode, usePromoCode} from '@salesforce/retail-react-app/app/components/promo-code'
 import {API_ERROR_MESSAGE} from '@salesforce/retail-react-app/app/constants'
 import {useCheckout} from '@salesforce/retail-react-app/app/pages/checkout/util/checkout-context'
-import AdyenCheckout from '../../../../../adyen/components/AdyenCheckout'
-import {useAdyenCheckout} from '../../../../../adyen/context/adyen-checkout-context'
+import AdyenCheckout from '../../../components/AdyenCheckout'
+import {useAdyenCheckout} from '../../../context/adyen-checkout-context'
 
 const Payment = () => {
     const {formatMessage} = useIntl()

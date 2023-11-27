@@ -1,3 +1,5 @@
+import Logger from './logger'
+
 export class OrderApiClient {
     tokenUrl =
         'https://account.demandware.com/dwsso/oauth2/access_token?grant_type=client_credentials'
@@ -99,7 +101,7 @@ export class OrderApiClient {
     }
 
     async updateOrderPaymentTransaction(orderNo, paymentInstrumentId, pspReference) {
-        return await this.base(
+        const response = await this.base(
             'PATCH',
             `${orderNo}/payment-instruments/${paymentInstrumentId}/transaction`,
             {
@@ -108,5 +110,10 @@ export class OrderApiClient {
                 })
             }
         )
+        if (!response.ok) {
+            const error = await response.text()
+            Logger.error(`Payment transaction update failed ${JSON.stringify(error)}`)
+        }
+        return response
     }
 }
