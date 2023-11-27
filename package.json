@@ -6,10 +6,6 @@
     "node": "^16.0.0 || ^18.0.0",
     "npm": "^7.0.0 || ^8.0.0 || ^9.0.0"
   },
-  "ccExtensibility": {
-    "extends": "@salesforce/retail-react-app",
-    "overridesDir": "overrides"
-  },
   "devDependencies": {
     "@commitlint/cli": "^18.2.0",
     "@commitlint/config-conventional": "^18.1.0",

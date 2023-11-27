@@ -14,14 +14,10 @@
     "@adyen/adyen-salesforce-pwa": "^1.0.0-beta"
   },
   "devDependencies": {
-    "@commitlint/cli": "^18.2.0",
-    "@commitlint/config-conventional": "^18.1.0",
     "@salesforce/retail-react-app": "2.0.0",
     "css-loader": "^6.8.1",
     "dotenv": "^16.3.1",
-    "husky": "^8.0.3",
-    "style-loader": "^3.3.3",
-    "yargs": "^17.7.2"
+    "style-loader": "^3.3.3"
   },
   "scripts": {
     "analyze-build": "cross-env MOBIFY_ANALYZE=true npm run build",

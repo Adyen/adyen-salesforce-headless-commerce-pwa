@@ -10,6 +10,7 @@
     "components"
   ],
   "version": "0.0.1-beta",
+  "type": "module",
   "license": "MIT",
   "homepage": "https://docs.adyen.com/checkout",
   "repository": "github:Adyen/adyen-salesforce-headless-commerce-pwa",
@@ -21,6 +22,8 @@
     "@adyen/api-library": "^14.3.0",
     "express-validator": "^7.0.1",
     "@salesforce/commerce-sdk-react": "^1.0.2",
+    "@salesforce/pwa-kit-runtime": "^3.1.1",
+    "commerce-sdk-isomorphic": "^1.10.4",
     "uuid": "^9.0.1"
   }
 }
