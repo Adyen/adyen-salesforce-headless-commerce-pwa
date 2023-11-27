@@ -17,8 +17,7 @@ function ErrorHandler(err, req, res) {
     Logger.error(err.message, err.cause)
     res.status(err.statusCode || 500).json(createErrorResponse(err.message))
 }
-
-export function registerAdyenEndpoints(app, runtime, overrides) {
+function registerAdyenEndpoints(app, runtime, overrides) {
     const environmentHandler = overrides?.environment || [
         EnvironmentController,
         SuccessHandler,
@@ -60,3 +59,5 @@ export function registerAdyenEndpoints(app, runtime, overrides) {
     app.post('/api/adyen/payments', ...paymentsHandler)
     app.post('/api/adyen/webhook', ...webhookHandler)
 }
+
+export default registerAdyenEndpoints
