@@ -9,7 +9,7 @@
     "payments",
     "components"
   ],
-  "version": "1.0.0-beta",
+  "version": "0.0.1-beta",
   "license": "MIT",
   "homepage": "https://docs.adyen.com/checkout",
   "repository": "github:Adyen/adyen-salesforce-headless-commerce-pwa",

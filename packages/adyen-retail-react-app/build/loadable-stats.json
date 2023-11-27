@@ -1,6 +1,6 @@
 {
   "name": "client",
-  "hash": "b6c90cdace3f3b64e603",
+  "hash": "b3f7e9f1469dcb1697a2",
   "publicPath": "/mobify/bundle/development/",
   "outputPath": "/Users/aleksandarm/Repositories/adyen-salesforce-headless-commerce-pwa/packages/adyen-retail-react-app/build",
   "assetsByChunkName": {

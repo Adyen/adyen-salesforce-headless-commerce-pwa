@@ -10,6 +10,9 @@
     "extends": "@salesforce/retail-react-app",
     "overridesDir": "overrides"
   },
+  "dependencies": {
+    "@adyen/adyen-salesforce-pwa": "^1.0.0-beta"
+  },
   "devDependencies": {
     "@commitlint/cli": "^18.2.0",
     "@commitlint/config-conventional": "^18.1.0",
