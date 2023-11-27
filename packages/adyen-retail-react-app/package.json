@@ -1,5 +1,5 @@
 {
-  "name": "adyen-salesforce-pwa",
+  "name": "adyen-retail-react-app",
   "version": "1.0.0-beta",
   "license": "See license in LICENSE",
   "engines": {
@@ -10,6 +10,9 @@
     "extends": "@salesforce/retail-react-app",
     "overridesDir": "overrides"
   },
+  "dependencies": {
+    "@adyen/adyen-salesforce-pwa": "^1.0.0-beta"
+  },
   "devDependencies": {
     "@commitlint/cli": "^18.2.0",
     "@commitlint/config-conventional": "^18.1.0",
@@ -19,12 +22,6 @@
     "husky": "^8.0.3",
     "style-loader": "^3.3.3",
     "yargs": "^17.7.2"
-  },
-  "dependencies": {
-    "@adyen/adyen-web": "^5.51.0",
-    "@adyen/api-library": "^14.3.0",
-    "express-validator": "^7.0.1",
-    "uuid": "^9.0.1"
   },
   "scripts": {
     "analyze-build": "cross-env MOBIFY_ANALYZE=true npm run build",
@@ -46,11 +43,9 @@
     "test": "pwa-kit-dev test",
     "test:lighthouse": "cross-env NODE_ENV=production lhci autorun --config=tests/lighthouserc.js",
     "test:max-file-size": "npm run build && bundlesize",
-    "check-branch-name": "chmod 755 ./branching.sh && sh ./branching.sh",
-    "prepare": "husky install",
-    "upload-env": "node packages/adyen-salesforce-pwa/lib/scripts/push-env.js",
-    "get-env": "node packages/adyen-salesforce-pwa/lib/scripts/get-env.js",
-    "dot-env": "node packages/adyen-salesforce-pwa/lib/scripts/dot-env.js",
+    "upload-env": "node ./node_modules/@adyen/adyen-salesforce-pwa/lib/scripts/push-env.js",
+    "get-env": "node ./node_modules/@adyen/adyen-salesforce-pwa/lib/scripts/get-env.js",
+    "dot-env": "node ./node_modules/@adyen/adyen-salesforce-pwa/lib/scripts/dot-env.js",
     "start:env": "npm run dot-env -- -p=npm run start",
     "push:env": "npm run dot-env -- -p=npm run push"
   },
