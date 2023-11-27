@@ -48,9 +48,9 @@
     "test:max-file-size": "npm run build && bundlesize",
     "check-branch-name": "chmod 755 ./branching.sh && sh ./branching.sh",
     "prepare": "husky install",
-    "upload-env": "node ./adyen/scripts/push-env.js",
-    "get-env": "node ./adyen/scripts/get-env.js",
-    "dot-env": "node ./adyen/scripts/dot-env.js",
+    "upload-env": "node packages/adyen-salesforce-pwa/lib/scripts/push-env.js",
+    "get-env": "node packages/adyen-salesforce-pwa/lib/scripts/get-env.js",
+    "dot-env": "node packages/adyen-salesforce-pwa/lib/scripts/dot-env.js",
     "start:env": "npm run dot-env -- -p=npm run start",
     "push:env": "npm run dot-env -- -p=npm run push"
   },

@@ -9,7 +9,7 @@ import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 // Components
 import {configureRoutes} from '@salesforce/retail-react-app/app/utils/routes-utils'
 import {routes as _routes} from '@salesforce/retail-react-app/app/routes'
-import _adyenRoutes from '../../adyen/pages/routes'
+import _adyenRoutes from '../../packages/adyen-salesforce-pwa/lib/pages/routes'
 
 const routes = [..._adyenRoutes, ..._routes]
 
