@@ -7,8 +7,11 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 const serverConfig = {
     target: 'node',
+    resolve: {
+        extensions: ['.js', '.jsx', '.ts', '.tsx', '...']
+    },
     entry: {
-        router: './lib/api/routes/router.js'
+        router: './lib/api/routes/index.js'
     },
     output: {
         path: path.resolve(__dirname, 'dist/ssr'),
@@ -47,13 +50,11 @@ const webConfig = {
         }
     },
     externals: [
-        /^@salesforce\/.+$/i,
+        /^@salesforce\/retail-react-app\/.+$/i,
         /^@chakra-ui\/.+$/i,
         /^react.+$/i,
-        'commerce-sdk-isomorphic',
         'react',
-        'prop-types',
-        '@salesforce/commerce-sdk-react'
+        'prop-types'
     ],
     module: {
         rules: [
@@ -88,4 +89,4 @@ const webConfig = {
     plugins: [new CleanWebpackPlugin(), new MiniCssExtractPlugin()]
 }
 
-module.exports = [serverConfig, webConfig]
+module.exports = [serverConfig]
