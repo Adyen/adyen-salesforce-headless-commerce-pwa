@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from 'react'
 import {useLocation} from 'react-router-dom'
 import PropTypes from 'prop-types'
-import {useAccessToken, useCustomerId, useCustomerType} from '@salesforce/commerce-sdk-react'
 import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 import {resolveLocaleFromUrl} from '@salesforce/retail-react-app/app/utils/site-utils'
 import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
@@ -11,8 +10,8 @@ import {AdyenEnvironmentService} from '../services/environment'
 
 const AdyenCheckoutContext = React.createContext()
 
-export const AdyenCheckoutProvider = ({children}) => {
-    const {getTokenWhenReady} = useAccessToken()
+export const AdyenCheckoutProvider = ({children, useAccessToken, useCustomerId, useCustomerType}) => {
+    const {getTokenWhenReady, token} = useAccessToken()
     const customerId = useCustomerId()
     const customerType = useCustomerType()
     const {data: basket} = useCurrentBasket()
@@ -64,12 +63,12 @@ export const AdyenCheckoutProvider = ({children}) => {
     }, [basket?.basketId])
 
     const getPaymentMethodsConfiguration = async ({
-        beforeSubmit = [],
-        afterSubmit = [],
-        beforeAdditionalDetails = [],
-        afterAdditionalDetails = [],
-        onError
-    }) => {
+                                                      beforeSubmit = [],
+                                                      afterSubmit = [],
+                                                      beforeAdditionalDetails = [],
+                                                      afterAdditionalDetails = [],
+                                                      onError
+                                                  }) => {
         const token = await getTokenWhenReady()
         return paymentMethodsConfiguration({
             paymentMethods: adyenPaymentMethods?.paymentMethods,
@@ -122,7 +121,10 @@ export const AdyenCheckoutProvider = ({children}) => {
 }
 
 AdyenCheckoutProvider.propTypes = {
-    children: PropTypes.any
+    children: PropTypes.any,
+    useAccessToken: PropTypes.any,
+    useCustomerId: PropTypes.any,
+    useCustomerType: PropTypes.any,
 }
 
 /**

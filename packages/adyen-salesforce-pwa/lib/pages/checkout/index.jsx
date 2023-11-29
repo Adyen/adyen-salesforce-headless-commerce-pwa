@@ -7,10 +7,7 @@
 import React, {useEffect, useState} from 'react'
 import {useLocation} from 'react-router-dom'
 import {Alert, AlertIcon, Box, Container, Grid, GridItem, Stack} from '@chakra-ui/react'
-import {
-    CheckoutProvider,
-    useCheckout
-} from '@salesforce/retail-react-app/app/pages/checkout/util/checkout-context'
+import {CheckoutProvider, useCheckout} from '@salesforce/retail-react-app/app/pages/checkout/util/checkout-context'
 import ContactInfo from '@salesforce/retail-react-app/app/pages/checkout/partials/contact-info'
 import ShippingAddress from '@salesforce/retail-react-app/app/pages/checkout/partials/shipping-address'
 import ShippingOptions from '@salesforce/retail-react-app/app/pages/checkout/partials/shipping-options'
@@ -19,8 +16,9 @@ import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-curre
 import Payment from './partials/payment'
 import {AdyenCheckoutProvider} from '../../context/adyen-checkout-context'
 import AdyenCheckout from '../../components/AdyenCheckout'
+import PropTypes from 'prop-types'
 
-const Checkout = () => {
+const Checkout = (useShopperBasketsMutation) => {
     const {step} = useCheckout()
     const [error] = useState()
     const {data: basket} = useCurrentBasket()
@@ -32,10 +30,10 @@ const Checkout = () => {
     }, [error, step])
 
     return (
-        <Box background="gray.50" flex="1">
+        <Box background='gray.50' flex='1'>
             <Container
-                data-testid="sf-checkout-container"
-                maxWidth="container.xl"
+                data-testid='sf-checkout-container'
+                maxWidth='container.xl'
                 py={{base: 7, lg: 16}}
                 px={{base: 0, lg: 8}}
             >
@@ -43,7 +41,7 @@ const Checkout = () => {
                     <GridItem>
                         <Stack spacing={4}>
                             {error && (
-                                <Alert status="error" variant="left-accent">
+                                <Alert status='error' variant='left-accent'>
                                     <AlertIcon />
                                     {error}
                                 </Alert>
@@ -52,7 +50,7 @@ const Checkout = () => {
                             <ContactInfo />
                             <ShippingAddress />
                             <ShippingOptions />
-                            <Payment />
+                            <Payment useShopperBasketsMutation={useShopperBasketsMutation} />
                         </Stack>
                     </GridItem>
 
@@ -69,19 +67,32 @@ const Checkout = () => {
     )
 }
 
-const CheckoutChildren = () => {
+const CheckoutChildren = ({useShopperBasketsMutation}) => {
     const location = useLocation()
-    return location?.search?.includes('redirectResult') ? <AdyenCheckout /> : <Checkout />
+    return location?.search?.includes('redirectResult') ? <AdyenCheckout /> :
+        <Checkout useShopperBasketsMutation={useShopperBasketsMutation} />
 }
 
-const CheckoutContainer = () => {
+const CheckoutContainer = ({useAccessToken, useCustomerId, useCustomerType}) => {
     return (
-        <AdyenCheckoutProvider>
+        <AdyenCheckoutProvider
+            useAccessToken={useAccessToken}
+            useCustomerId={useCustomerId}
+            useCustomerType={useCustomerType}
+        >
             <CheckoutProvider>
                 <CheckoutChildren />
             </CheckoutProvider>
         </AdyenCheckoutProvider>
     )
+}
+
+CheckoutContainer.propTypes = {
+    children: PropTypes.any,
+    useAccessToken: PropTypes.any,
+    useCustomerId: PropTypes.any,
+    useCustomerType: PropTypes.any,
+    useShopperBasketsMutation: PropTypes.any
 }
 
 export default CheckoutContainer

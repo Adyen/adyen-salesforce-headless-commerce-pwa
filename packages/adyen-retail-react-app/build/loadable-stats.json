@@ -1,8 +1,8 @@
 {
   "name": "client",
-  "hash": "b3f7e9f1469dcb1697a2",
+  "hash": "2182c6a7cac75281cf0a",
   "publicPath": "/mobify/bundle/development/",
-  "outputPath": "/Users/aleksandarm/Repositories/adyen-salesforce-headless-commerce-pwa/packages/adyen-retail-react-app/build",
+  "outputPath": "/Users/shani/Developer/adyen-salesforce-headless-commerce-pwa/packages/adyen-retail-react-app/build",
   "assetsByChunkName": {
     "main": [
       "main.js"
@@ -46,15 +46,6 @@
     "pages-page-not-found": [
       "pages-page-not-found.js"
     ],
-    "checkout": [
-      "checkout.js"
-    ],
-    "checkout-confirmation": [
-      "checkout-confirmation.js"
-    ],
-    "checkout-error": [
-      "checkout-error.js"
-    ],
     "vendor": [
       "vendor.js"
     ]
@@ -63,7 +54,7 @@
     {
       "type": "asset",
       "name": "vendor.js",
-      "size": 9097527,
+      "size": 5366535,
       "emitted": false,
       "comparedForEmit": false,
       "cached": true,
@@ -90,7 +81,7 @@
     {
       "type": "asset",
       "name": "main.js",
-      "size": 999626,
+      "size": 980790,
       "emitted": false,
       "comparedForEmit": false,
       "cached": true,
@@ -109,6 +100,33 @@
       "filteredRelated": 1,
       "chunks": [
         "main"
+      ],
+      "auxiliaryChunks": []
+    },
+    {
+      "type": "asset",
+      "name": "pages-checkout.js",
+      "size": 160752,
+      "emitted": false,
+      "comparedForEmit": false,
+      "cached": true,
+      "info": {
+        "javascriptModule": false,
+        "related": {
+          "sourceMap": "pages-checkout.js.map"
+        }
+      },
+      "chunkNames": [
+        "pages-checkout"
+      ],
+      "chunkIdHints": [
+        "vendors"
+      ],
+      "auxiliaryChunkNames": [],
+      "auxiliaryChunkIdHints": [],
+      "filteredRelated": 1,
+      "chunks": [
+        "pages-checkout"
       ],
       "auxiliaryChunks": []
     },
@@ -141,31 +159,6 @@
     },
     {
       "type": "asset",
-      "name": "checkout.js",
-      "size": 130663,
-      "emitted": false,
-      "comparedForEmit": false,
-      "cached": true,
-      "info": {
-        "javascriptModule": false,
-        "related": {
-          "sourceMap": "checkout.js.map"
-        }
-      },
-      "chunkNames": [
-        "checkout"
-      ],
-      "chunkIdHints": [],
-      "auxiliaryChunkNames": [],
-      "auxiliaryChunkIdHints": [],
-      "filteredRelated": 1,
-      "chunks": [
-        "checkout"
-      ],
-      "auxiliaryChunks": []
-    },
-    {
-      "type": "asset",
       "name": "pages-product-list.js",
       "size": 112235,
       "emitted": false,
@@ -188,58 +181,6 @@
       "filteredRelated": 1,
       "chunks": [
         "pages-product-list"
-      ],
-      "auxiliaryChunks": []
-    },
-    {
-      "type": "asset",
-      "name": "vendors-node_modules_salesforce_retail-react-app_app_pages_checkout_partials_contact-info_jsx-c2f9c6.js",
-      "size": 85493,
-      "emitted": false,
-      "comparedForEmit": false,
-      "cached": true,
-      "info": {
-        "javascriptModule": false,
-        "related": {
-          "sourceMap": "vendors-node_modules_salesforce_retail-react-app_app_pages_checkout_partials_contact-info_jsx-c2f9c6.js.map"
-        }
-      },
-      "chunkNames": [],
-      "chunkIdHints": [
-        "vendors"
-      ],
-      "auxiliaryChunkNames": [],
-      "auxiliaryChunkIdHints": [],
-      "filteredRelated": 1,
-      "chunks": [
-        "vendors-node_modules_salesforce_retail-react-app_app_pages_checkout_partials_contact-info_jsx-c2f9c6"
-      ],
-      "auxiliaryChunks": []
-    },
-    {
-      "type": "asset",
-      "name": "pages-checkout.js",
-      "size": 75599,
-      "emitted": false,
-      "comparedForEmit": false,
-      "cached": true,
-      "info": {
-        "javascriptModule": false,
-        "related": {
-          "sourceMap": "pages-checkout.js.map"
-        }
-      },
-      "chunkNames": [
-        "pages-checkout"
-      ],
-      "chunkIdHints": [
-        "vendors"
-      ],
-      "auxiliaryChunkNames": [],
-      "auxiliaryChunkIdHints": [],
-      "filteredRelated": 1,
-      "chunks": [
-        "pages-checkout"
       ],
       "auxiliaryChunks": []
     },
@@ -292,31 +233,6 @@
       "filteredRelated": 1,
       "chunks": [
         "vendors-node_modules_salesforce_retail-react-app_app_components_product-view_index_jsx"
-      ],
-      "auxiliaryChunks": []
-    },
-    {
-      "type": "asset",
-      "name": "checkout-confirmation.js",
-      "size": 58246,
-      "emitted": false,
-      "comparedForEmit": false,
-      "cached": true,
-      "info": {
-        "javascriptModule": false,
-        "related": {
-          "sourceMap": "checkout-confirmation.js.map"
-        }
-      },
-      "chunkNames": [
-        "checkout-confirmation"
-      ],
-      "chunkIdHints": [],
-      "auxiliaryChunkNames": [],
-      "auxiliaryChunkIdHints": [],
-      "filteredRelated": 1,
-      "chunks": [
-        "checkout-confirmation"
       ],
       "auxiliaryChunks": []
     },
@@ -630,31 +546,6 @@
     },
     {
       "type": "asset",
-      "name": "checkout-error.js",
-      "size": 4555,
-      "emitted": false,
-      "comparedForEmit": false,
-      "cached": true,
-      "info": {
-        "javascriptModule": false,
-        "related": {
-          "sourceMap": "checkout-error.js.map"
-        }
-      },
-      "chunkNames": [
-        "checkout-error"
-      ],
-      "chunkIdHints": [],
-      "auxiliaryChunkNames": [],
-      "auxiliaryChunkIdHints": [],
-      "filteredRelated": 1,
-      "chunks": [
-        "checkout-error"
-      ],
-      "auxiliaryChunks": []
-    },
-    {
-      "type": "asset",
       "name": "pages-login-redirect.js",
       "size": 2018,
       "emitted": false,
@@ -675,29 +566,6 @@
       "filteredRelated": 1,
       "chunks": [
         "pages-login-redirect"
-      ],
-      "auxiliaryChunks": []
-    },
-    {
-      "type": "asset",
-      "name": "_0155.js",
-      "size": 284,
-      "emitted": false,
-      "comparedForEmit": false,
-      "cached": true,
-      "info": {
-        "javascriptModule": false,
-        "related": {
-          "sourceMap": "_0155.js.map"
-        }
-      },
-      "chunkNames": [],
-      "chunkIdHints": [],
-      "auxiliaryChunkNames": [],
-      "auxiliaryChunkIdHints": [],
-      "filteredRelated": 1,
-      "chunks": [
-        "_0155"
       ],
       "auxiliaryChunks": []
     },
@@ -743,6 +611,23 @@
       "filteredAssets": 0,
       "assetsSize": null,
       "filteredAuxiliaryAssets": 2,
+      "auxiliaryAssetsSize": null,
+      "children": {},
+      "childAssets": {}
+    },
+    "adyen-adyen-salesforce-pwa": {
+      "name": "adyen-adyen-salesforce-pwa",
+      "chunks": [
+        "vendor"
+      ],
+      "assets": [
+        {
+          "name": "vendor.js"
+        }
+      ],
+      "filteredAssets": 0,
+      "assetsSize": null,
+      "filteredAuxiliaryAssets": 1,
       "auxiliaryAssetsSize": null,
       "children": {},
       "childAssets": {}
@@ -821,8 +706,8 @@
         "vendors-node_modules_salesforce_retail-react-app_app_components_item-variant_item-attributes_-366c8a",
         "vendors-node_modules_salesforce_retail-react-app_app_components_product-view_index_jsx",
         "vendors-node_modules_salesforce_retail-react-app_app_components_order-summary_index_jsx",
-        "vendors-node_modules_salesforce_retail-react-app_app_components_action-card_index_jsx-node_mo-cf7e9f",
         "vendors-node_modules_salesforce_retail-react-app_app_components_confirmation-modal_index_jsx--6d0b56",
+        "vendors-node_modules_salesforce_retail-react-app_app_components_action-card_index_jsx-node_mo-cf7e9f",
         "pages-account-wishlist",
         "pages-account"
       ],
@@ -837,10 +722,10 @@
           "name": "vendors-node_modules_salesforce_retail-react-app_app_components_order-summary_index_jsx.js"
         },
         {
-          "name": "vendors-node_modules_salesforce_retail-react-app_app_components_action-card_index_jsx-node_mo-cf7e9f.js"
+          "name": "vendors-node_modules_salesforce_retail-react-app_app_components_confirmation-modal_index_jsx--6d0b56.js"
         },
         {
-          "name": "vendors-node_modules_salesforce_retail-react-app_app_components_confirmation-modal_index_jsx--6d0b56.js"
+          "name": "vendors-node_modules_salesforce_retail-react-app_app_components_action-card_index_jsx-node_mo-cf7e9f.js"
         },
         {
           "name": "pages-account-wishlist.js"
@@ -896,7 +781,6 @@
         "vendors-node_modules_salesforce_retail-react-app_app_components_item-variant_item-attributes_-366c8a",
         "vendors-node_modules_salesforce_retail-react-app_app_components_order-summary_index_jsx",
         "vendors-node_modules_salesforce_retail-react-app_app_components_action-card_index_jsx-node_mo-cf7e9f",
-        "vendors-node_modules_salesforce_retail-react-app_app_pages_checkout_partials_contact-info_jsx-c2f9c6",
         "pages-checkout"
       ],
       "assets": [
@@ -913,15 +797,12 @@
           "name": "vendors-node_modules_salesforce_retail-react-app_app_components_action-card_index_jsx-node_mo-cf7e9f.js"
         },
         {
-          "name": "vendors-node_modules_salesforce_retail-react-app_app_pages_checkout_partials_contact-info_jsx-c2f9c6.js"
-        },
-        {
           "name": "pages-checkout.js"
         }
       ],
       "filteredAssets": 0,
       "assetsSize": null,
-      "filteredAuxiliaryAssets": 6,
+      "filteredAuxiliaryAssets": 5,
       "auxiliaryAssetsSize": null,
       "children": {},
       "childAssets": {}
@@ -1047,85 +928,6 @@
       "auxiliaryAssetsSize": null,
       "children": {},
       "childAssets": {}
-    },
-    "checkout": {
-      "name": "checkout",
-      "chunks": [
-        "vendor",
-        "vendors-node_modules_salesforce_retail-react-app_app_components_item-variant_item-attributes_-366c8a",
-        "vendors-node_modules_salesforce_retail-react-app_app_components_order-summary_index_jsx",
-        "vendors-node_modules_salesforce_retail-react-app_app_components_action-card_index_jsx-node_mo-cf7e9f",
-        "vendors-node_modules_salesforce_retail-react-app_app_pages_checkout_partials_contact-info_jsx-c2f9c6",
-        "checkout"
-      ],
-      "assets": [
-        {
-          "name": "vendor.js"
-        },
-        {
-          "name": "vendors-node_modules_salesforce_retail-react-app_app_components_item-variant_item-attributes_-366c8a.js"
-        },
-        {
-          "name": "vendors-node_modules_salesforce_retail-react-app_app_components_order-summary_index_jsx.js"
-        },
-        {
-          "name": "vendors-node_modules_salesforce_retail-react-app_app_components_action-card_index_jsx-node_mo-cf7e9f.js"
-        },
-        {
-          "name": "vendors-node_modules_salesforce_retail-react-app_app_pages_checkout_partials_contact-info_jsx-c2f9c6.js"
-        },
-        {
-          "name": "checkout.js"
-        }
-      ],
-      "filteredAssets": 0,
-      "assetsSize": null,
-      "filteredAuxiliaryAssets": 6,
-      "auxiliaryAssetsSize": null,
-      "children": {},
-      "childAssets": {}
-    },
-    "checkout-confirmation": {
-      "name": "checkout-confirmation",
-      "chunks": [
-        "vendor",
-        "vendors-node_modules_salesforce_retail-react-app_app_components_item-variant_item-attributes_-366c8a",
-        "checkout-confirmation"
-      ],
-      "assets": [
-        {
-          "name": "vendor.js"
-        },
-        {
-          "name": "vendors-node_modules_salesforce_retail-react-app_app_components_item-variant_item-attributes_-366c8a.js"
-        },
-        {
-          "name": "checkout-confirmation.js"
-        }
-      ],
-      "filteredAssets": 0,
-      "assetsSize": null,
-      "filteredAuxiliaryAssets": 3,
-      "auxiliaryAssetsSize": null,
-      "children": {},
-      "childAssets": {}
-    },
-    "checkout-error": {
-      "name": "checkout-error",
-      "chunks": [
-        "checkout-error"
-      ],
-      "assets": [
-        {
-          "name": "checkout-error.js"
-        }
-      ],
-      "filteredAssets": 0,
-      "assetsSize": null,
-      "filteredAuxiliaryAssets": 1,
-      "auxiliaryAssetsSize": null,
-      "children": {},
-      "childAssets": {}
     }
   },
   "generator": "loadable-components",
@@ -1221,30 +1023,6 @@
       ]
     },
     {
-      "id": "checkout",
-      "files": [
-        "checkout.js"
-      ]
-    },
-    {
-      "id": "checkout-confirmation",
-      "files": [
-        "checkout-confirmation.js"
-      ]
-    },
-    {
-      "id": "checkout-error",
-      "files": [
-        "checkout-error.js"
-      ]
-    },
-    {
-      "id": "_0155",
-      "files": [
-        "_0155.js"
-      ]
-    },
-    {
       "id": "vendor",
       "files": [
         "vendor.js"
@@ -1269,21 +1047,15 @@
       ]
     },
     {
-      "id": "vendors-node_modules_salesforce_retail-react-app_app_components_action-card_index_jsx-node_mo-cf7e9f",
-      "files": [
-        "vendors-node_modules_salesforce_retail-react-app_app_components_action-card_index_jsx-node_mo-cf7e9f.js"
-      ]
-    },
-    {
       "id": "vendors-node_modules_salesforce_retail-react-app_app_components_confirmation-modal_index_jsx--6d0b56",
       "files": [
         "vendors-node_modules_salesforce_retail-react-app_app_components_confirmation-modal_index_jsx--6d0b56.js"
       ]
     },
     {
-      "id": "vendors-node_modules_salesforce_retail-react-app_app_pages_checkout_partials_contact-info_jsx-c2f9c6",
+      "id": "vendors-node_modules_salesforce_retail-react-app_app_components_action-card_index_jsx-node_mo-cf7e9f",
       "files": [
-        "vendors-node_modules_salesforce_retail-react-app_app_pages_checkout_partials_contact-info_jsx-c2f9c6.js"
+        "vendors-node_modules_salesforce_retail-react-app_app_components_action-card_index_jsx-node_mo-cf7e9f.js"
       ]
     }
   ]

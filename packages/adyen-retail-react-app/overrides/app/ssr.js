@@ -11,7 +11,7 @@ import {isRemote} from '@salesforce/pwa-kit-runtime/utils/ssr-server'
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 import helmet from 'helmet'
 import bodyParser from 'body-parser'
-// import registerAdyenEndpoints from '@adyen/adyen-salesforce-pwa/lib/api/routes/router'
+import registerAdyenEndpoints from '@adyen/adyen-salesforce-pwa/dist/ssr/routes'
 
 const options = {
     // The build directory (an absolute path)
@@ -115,7 +115,7 @@ const {handler} = runtime.createHandler(options, (app) => {
      *  ]
      * }
      */
-    // registerAdyenEndpoints(app, runtime)
+    registerAdyenEndpoints(app, runtime)
 
     app.get('*', runtime.render)
 })
