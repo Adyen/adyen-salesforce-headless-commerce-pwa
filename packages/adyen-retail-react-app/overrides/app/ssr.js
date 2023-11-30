@@ -11,7 +11,7 @@ import {isRemote} from '@salesforce/pwa-kit-runtime/utils/ssr-server'
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 import helmet from 'helmet'
 import bodyParser from 'body-parser'
-import registerAdyenEndpoints from '@adyen/adyen-salesforce-pwa/dist/ssr/routes'
+import {registerAdyenEndpoints} from '@adyen/adyen-salesforce-pwa/dist/ssr/index.js'
 
 const options = {
     // The build directory (an absolute path)

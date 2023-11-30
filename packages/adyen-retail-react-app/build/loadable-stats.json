@@ -1,11 +1,14 @@
 {
   "name": "client",
-  "hash": "2182c6a7cac75281cf0a",
+  "hash": "3a041eabeb95edd3a4c1",
   "publicPath": "/mobify/bundle/development/",
   "outputPath": "/Users/shani/Developer/adyen-salesforce-headless-commerce-pwa/packages/adyen-retail-react-app/build",
   "assetsByChunkName": {
     "main": [
       "main.js"
+    ],
+    "adyen-adyen-salesforce-pwa": [
+      "adyen-adyen-salesforce-pwa.js"
     ],
     "pages-home": [
       "pages-home.js"
@@ -54,7 +57,7 @@
     {
       "type": "asset",
       "name": "vendor.js",
-      "size": 5366535,
+      "size": 8652434,
       "emitted": false,
       "comparedForEmit": false,
       "cached": true,
@@ -81,7 +84,7 @@
     {
       "type": "asset",
       "name": "main.js",
-      "size": 980790,
+      "size": 1011858,
       "emitted": false,
       "comparedForEmit": false,
       "cached": true,
@@ -100,33 +103,6 @@
       "filteredRelated": 1,
       "chunks": [
         "main"
-      ],
-      "auxiliaryChunks": []
-    },
-    {
-      "type": "asset",
-      "name": "pages-checkout.js",
-      "size": 160752,
-      "emitted": false,
-      "comparedForEmit": false,
-      "cached": true,
-      "info": {
-        "javascriptModule": false,
-        "related": {
-          "sourceMap": "pages-checkout.js.map"
-        }
-      },
-      "chunkNames": [
-        "pages-checkout"
-      ],
-      "chunkIdHints": [
-        "vendors"
-      ],
-      "auxiliaryChunkNames": [],
-      "auxiliaryChunkIdHints": [],
-      "filteredRelated": 1,
-      "chunks": [
-        "pages-checkout"
       ],
       "auxiliaryChunks": []
     },
@@ -181,6 +157,58 @@
       "filteredRelated": 1,
       "chunks": [
         "pages-product-list"
+      ],
+      "auxiliaryChunks": []
+    },
+    {
+      "type": "asset",
+      "name": "vendors-node_modules_salesforce_retail-react-app_app_pages_checkout_partials_contact-info_jsx-c2f9c6.js",
+      "size": 85493,
+      "emitted": false,
+      "comparedForEmit": false,
+      "cached": true,
+      "info": {
+        "javascriptModule": false,
+        "related": {
+          "sourceMap": "vendors-node_modules_salesforce_retail-react-app_app_pages_checkout_partials_contact-info_jsx-c2f9c6.js.map"
+        }
+      },
+      "chunkNames": [],
+      "chunkIdHints": [
+        "vendors"
+      ],
+      "auxiliaryChunkNames": [],
+      "auxiliaryChunkIdHints": [],
+      "filteredRelated": 1,
+      "chunks": [
+        "vendors-node_modules_salesforce_retail-react-app_app_pages_checkout_partials_contact-info_jsx-c2f9c6"
+      ],
+      "auxiliaryChunks": []
+    },
+    {
+      "type": "asset",
+      "name": "pages-checkout.js",
+      "size": 75599,
+      "emitted": false,
+      "comparedForEmit": false,
+      "cached": true,
+      "info": {
+        "javascriptModule": false,
+        "related": {
+          "sourceMap": "pages-checkout.js.map"
+        }
+      },
+      "chunkNames": [
+        "pages-checkout"
+      ],
+      "chunkIdHints": [
+        "vendors"
+      ],
+      "auxiliaryChunkNames": [],
+      "auxiliaryChunkIdHints": [],
+      "filteredRelated": 1,
+      "chunks": [
+        "pages-checkout"
       ],
       "auxiliaryChunks": []
     },
@@ -546,6 +574,31 @@
     },
     {
       "type": "asset",
+      "name": "adyen-adyen-salesforce-pwa.js",
+      "size": 5910,
+      "emitted": false,
+      "comparedForEmit": false,
+      "cached": true,
+      "info": {
+        "javascriptModule": false,
+        "related": {
+          "sourceMap": "adyen-adyen-salesforce-pwa.js.map"
+        }
+      },
+      "chunkNames": [
+        "adyen-adyen-salesforce-pwa"
+      ],
+      "chunkIdHints": [],
+      "auxiliaryChunkNames": [],
+      "auxiliaryChunkIdHints": [],
+      "filteredRelated": 1,
+      "chunks": [
+        "adyen-adyen-salesforce-pwa"
+      ],
+      "auxiliaryChunks": []
+    },
+    {
+      "type": "asset",
       "name": "pages-login-redirect.js",
       "size": 2018,
       "emitted": false,
@@ -618,16 +671,36 @@
     "adyen-adyen-salesforce-pwa": {
       "name": "adyen-adyen-salesforce-pwa",
       "chunks": [
-        "vendor"
+        "vendor",
+        "vendors-node_modules_salesforce_retail-react-app_app_components_item-variant_item-attributes_-366c8a",
+        "vendors-node_modules_salesforce_retail-react-app_app_components_order-summary_index_jsx",
+        "vendors-node_modules_salesforce_retail-react-app_app_components_action-card_index_jsx-node_mo-cf7e9f",
+        "vendors-node_modules_salesforce_retail-react-app_app_pages_checkout_partials_contact-info_jsx-c2f9c6",
+        "adyen-adyen-salesforce-pwa"
       ],
       "assets": [
         {
           "name": "vendor.js"
+        },
+        {
+          "name": "vendors-node_modules_salesforce_retail-react-app_app_components_item-variant_item-attributes_-366c8a.js"
+        },
+        {
+          "name": "vendors-node_modules_salesforce_retail-react-app_app_components_order-summary_index_jsx.js"
+        },
+        {
+          "name": "vendors-node_modules_salesforce_retail-react-app_app_components_action-card_index_jsx-node_mo-cf7e9f.js"
+        },
+        {
+          "name": "vendors-node_modules_salesforce_retail-react-app_app_pages_checkout_partials_contact-info_jsx-c2f9c6.js"
+        },
+        {
+          "name": "adyen-adyen-salesforce-pwa.js"
         }
       ],
       "filteredAssets": 0,
       "assetsSize": null,
-      "filteredAuxiliaryAssets": 1,
+      "filteredAuxiliaryAssets": 6,
       "auxiliaryAssetsSize": null,
       "children": {},
       "childAssets": {}
@@ -706,8 +779,8 @@
         "vendors-node_modules_salesforce_retail-react-app_app_components_item-variant_item-attributes_-366c8a",
         "vendors-node_modules_salesforce_retail-react-app_app_components_product-view_index_jsx",
         "vendors-node_modules_salesforce_retail-react-app_app_components_order-summary_index_jsx",
-        "vendors-node_modules_salesforce_retail-react-app_app_components_confirmation-modal_index_jsx--6d0b56",
         "vendors-node_modules_salesforce_retail-react-app_app_components_action-card_index_jsx-node_mo-cf7e9f",
+        "vendors-node_modules_salesforce_retail-react-app_app_components_confirmation-modal_index_jsx--6d0b56",
         "pages-account-wishlist",
         "pages-account"
       ],
@@ -722,10 +795,10 @@
           "name": "vendors-node_modules_salesforce_retail-react-app_app_components_order-summary_index_jsx.js"
         },
         {
-          "name": "vendors-node_modules_salesforce_retail-react-app_app_components_confirmation-modal_index_jsx--6d0b56.js"
+          "name": "vendors-node_modules_salesforce_retail-react-app_app_components_action-card_index_jsx-node_mo-cf7e9f.js"
         },
         {
-          "name": "vendors-node_modules_salesforce_retail-react-app_app_components_action-card_index_jsx-node_mo-cf7e9f.js"
+          "name": "vendors-node_modules_salesforce_retail-react-app_app_components_confirmation-modal_index_jsx--6d0b56.js"
         },
         {
           "name": "pages-account-wishlist.js"
@@ -781,6 +854,7 @@
         "vendors-node_modules_salesforce_retail-react-app_app_components_item-variant_item-attributes_-366c8a",
         "vendors-node_modules_salesforce_retail-react-app_app_components_order-summary_index_jsx",
         "vendors-node_modules_salesforce_retail-react-app_app_components_action-card_index_jsx-node_mo-cf7e9f",
+        "vendors-node_modules_salesforce_retail-react-app_app_pages_checkout_partials_contact-info_jsx-c2f9c6",
         "pages-checkout"
       ],
       "assets": [
@@ -797,12 +871,15 @@
           "name": "vendors-node_modules_salesforce_retail-react-app_app_components_action-card_index_jsx-node_mo-cf7e9f.js"
         },
         {
+          "name": "vendors-node_modules_salesforce_retail-react-app_app_pages_checkout_partials_contact-info_jsx-c2f9c6.js"
+        },
+        {
           "name": "pages-checkout.js"
         }
       ],
       "filteredAssets": 0,
       "assetsSize": null,
-      "filteredAuxiliaryAssets": 5,
+      "filteredAuxiliaryAssets": 6,
       "auxiliaryAssetsSize": null,
       "children": {},
       "childAssets": {}
@@ -945,6 +1022,12 @@
       ]
     },
     {
+      "id": "adyen-adyen-salesforce-pwa",
+      "files": [
+        "adyen-adyen-salesforce-pwa.js"
+      ]
+    },
+    {
       "id": "pages-home",
       "files": [
         "pages-home.js"
@@ -1047,15 +1130,21 @@
       ]
     },
     {
+      "id": "vendors-node_modules_salesforce_retail-react-app_app_components_action-card_index_jsx-node_mo-cf7e9f",
+      "files": [
+        "vendors-node_modules_salesforce_retail-react-app_app_components_action-card_index_jsx-node_mo-cf7e9f.js"
+      ]
+    },
+    {
       "id": "vendors-node_modules_salesforce_retail-react-app_app_components_confirmation-modal_index_jsx--6d0b56",
       "files": [
         "vendors-node_modules_salesforce_retail-react-app_app_components_confirmation-modal_index_jsx--6d0b56.js"
       ]
     },
     {
-      "id": "vendors-node_modules_salesforce_retail-react-app_app_components_action-card_index_jsx-node_mo-cf7e9f",
+      "id": "vendors-node_modules_salesforce_retail-react-app_app_pages_checkout_partials_contact-info_jsx-c2f9c6",
       "files": [
-        "vendors-node_modules_salesforce_retail-react-app_app_components_action-card_index_jsx-node_mo-cf7e9f.js"
+        "vendors-node_modules_salesforce_retail-react-app_app_pages_checkout_partials_contact-info_jsx-c2f9c6.js"
       ]
     }
   ]

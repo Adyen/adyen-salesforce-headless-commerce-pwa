@@ -15,10 +15,10 @@ import OrderSummary from '@salesforce/retail-react-app/app/components/order-summ
 import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 import Payment from './partials/payment'
 import {AdyenCheckoutProvider} from '../../context/adyen-checkout-context'
-import AdyenCheckout from '../../components/AdyenCheckout'
+import AdyenCheckout from '../../components/adyenCheckout'
 import PropTypes from 'prop-types'
 
-const Checkout = (useShopperBasketsMutation) => {
+const Checkout = ({useShopperBasketsMutation}) => {
     const {step} = useCheckout()
     const [error] = useState()
     const {data: basket} = useCurrentBasket()
@@ -30,10 +30,10 @@ const Checkout = (useShopperBasketsMutation) => {
     }, [error, step])
 
     return (
-        <Box background='gray.50' flex='1'>
+        <Box background="gray.50" flex="1">
             <Container
-                data-testid='sf-checkout-container'
-                maxWidth='container.xl'
+                data-testid="sf-checkout-container"
+                maxWidth="container.xl"
                 py={{base: 7, lg: 16}}
                 px={{base: 0, lg: 8}}
             >
@@ -41,7 +41,7 @@ const Checkout = (useShopperBasketsMutation) => {
                     <GridItem>
                         <Stack spacing={4}>
                             {error && (
-                                <Alert status='error' variant='left-accent'>
+                                <Alert status="error" variant="left-accent">
                                     <AlertIcon />
                                     {error}
                                 </Alert>
@@ -69,11 +69,19 @@ const Checkout = (useShopperBasketsMutation) => {
 
 const CheckoutChildren = ({useShopperBasketsMutation}) => {
     const location = useLocation()
-    return location?.search?.includes('redirectResult') ? <AdyenCheckout /> :
+    return location?.search?.includes('redirectResult') ? (
+        <AdyenCheckout />
+    ) : (
         <Checkout useShopperBasketsMutation={useShopperBasketsMutation} />
+    )
 }
 
-const CheckoutContainer = ({useAccessToken, useCustomerId, useCustomerType}) => {
+const CheckoutContainer = ({
+    useAccessToken,
+    useCustomerId,
+    useCustomerType,
+    useShopperBasketsMutation
+}) => {
     return (
         <AdyenCheckoutProvider
             useAccessToken={useAccessToken}
@@ -81,7 +89,7 @@ const CheckoutContainer = ({useAccessToken, useCustomerId, useCustomerType}) => 
             useCustomerType={useCustomerType}
         >
             <CheckoutProvider>
-                <CheckoutChildren />
+                <CheckoutChildren useShopperBasketsMutation={useShopperBasketsMutation} />
             </CheckoutProvider>
         </AdyenCheckoutProvider>
     )

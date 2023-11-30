@@ -39,11 +39,10 @@
     "test": "pwa-kit-dev test",
     "test:lighthouse": "cross-env NODE_ENV=production lhci autorun --config=tests/lighthouserc.js",
     "test:max-file-size": "npm run build && bundlesize",
-    "upload-env": "node ./node_modules/@adyen/adyen-salesforce-pwa/lib/scripts/push-env.js",
-    "get-env": "node ./node_modules/@adyen/adyen-salesforce-pwa/lib/scripts/get-env.js",
-    "dot-env": "node ./node_modules/@adyen/adyen-salesforce-pwa/lib/scripts/dot-env.js",
-    "start:env": "npm run dot-env -- -p=npm run start",
-    "push:env": "npm run dot-env -- -p=npm run push"
+    "upload-env": "upload-env",
+    "get-env": "get-env",
+    "start:env": "include-env -p=npm run start",
+    "push:env": "include-env -p=npm run push"
   },
   "bundlesize": [
     {

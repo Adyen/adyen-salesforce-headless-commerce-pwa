@@ -5,14 +5,47 @@ const CopyPlugin = require('copy-webpack-plugin')
 const {CleanWebpackPlugin} = require('clean-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
+const scriptsConfig = {
+    target: 'node',
+    resolve: {
+        extensions: ['.js', '.jsx', '.ts', '.tsx', '.cjs', '.mjs', '...']
+    },
+    entry: {
+        'include-env': './lib/scripts/include-env.js',
+        'get-env': './lib/scripts/get-env.js',
+        'upload-env': './lib/scripts/upload-env.js'
+    },
+    output: {
+        path: path.resolve(__dirname, 'dist/scripts'),
+        filename: '[name].js',
+        publicPath: '/',
+        globalObject: 'this',
+        library: {
+            type: 'commonjs-static'
+        }
+    },
+    externals: [/^@salesforce\/pwa-kit-dev\/.+$/i],
+    module: {
+        rules: [
+            {
+                test: /\.(js|jsx)$/,
+                use: 'babel-loader',
+                exclude: /node_modules/
+            }
+        ]
+    },
+    plugins: [
+        new CleanWebpackPlugin(),
+        new webpack.BannerPlugin({banner: '#!/usr/bin/env node', raw: true})
+    ]
+}
+
 const serverConfig = {
     target: 'node',
     resolve: {
         extensions: ['.js', '.jsx', '.ts', '.tsx', '...']
     },
-    entry: {
-        router: './lib/api/routes/index.js'
-    },
+    entry: './lib/api/index.js',
     output: {
         path: path.resolve(__dirname, 'dist/ssr'),
         filename: 'index.js',
@@ -22,6 +55,7 @@ const serverConfig = {
             type: 'commonjs-static'
         }
     },
+    externals: [/^@salesforce\/pwa-kit-runtime\/.+$/i],
     module: {
         rules: [
             {
@@ -60,7 +94,7 @@ const webConfig = {
         rules: [
             {
                 test: /\.css$/i,
-                use: [MiniCssExtractPlugin.loader, 'style-loader', 'css-loader']
+                use: [MiniCssExtractPlugin.loader, 'css-loader']
             },
             {
                 test: /\.(js|jsx)$/,
@@ -86,7 +120,7 @@ const webConfig = {
             }
         ]
     },
-    plugins: [new CleanWebpackPlugin(), new MiniCssExtractPlugin()]
+    plugins: [new CleanWebpackPlugin(), new MiniCssExtractPlugin({filename: 'adyen.css'})]
 }
 
-module.exports = [serverConfig]
+module.exports = [scriptsConfig, serverConfig, webConfig]
