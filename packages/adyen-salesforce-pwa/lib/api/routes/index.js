@@ -3,7 +3,7 @@ import EnvironmentController from '../controllers/environment'
 import PaymentMethodsController from '../controllers/payment-methods'
 import PaymentsDetailsController from '../controllers/payments-details'
 import PaymentsController from '../controllers/payments'
-import {authenticate, validateHmac, parseNotification} from '../controllers/webhook'
+import {authenticate, parseNotification, validateHmac} from '../controllers/webhook'
 import {authorizationWebhookHandler} from '../controllers/authorization-webhook-handler'
 import {createErrorResponse} from '../../utils/createErrorResponse.mjs'
 import Logger from '../controllers/logger'
@@ -17,6 +17,7 @@ function ErrorHandler(err, req, res) {
     Logger.error(err.message, err.cause)
     res.status(err.statusCode || 500).json(createErrorResponse(err.message))
 }
+
 function registerAdyenEndpoints(app, runtime, overrides) {
     const environmentHandler = overrides?.environment || [
         EnvironmentController,
@@ -60,4 +61,4 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     app.post('/api/adyen/webhook', ...webhookHandler)
 }
 
-export default registerAdyenEndpoints
+export {registerAdyenEndpoints, SuccessHandler, ErrorHandler}

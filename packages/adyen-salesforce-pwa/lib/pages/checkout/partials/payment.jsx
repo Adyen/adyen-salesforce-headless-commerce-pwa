@@ -10,23 +10,19 @@ import {FormattedMessage, useIntl} from 'react-intl'
 import {Box, Checkbox, Divider, Heading, Stack, Text} from '@chakra-ui/react'
 import {useForm} from 'react-hook-form'
 import {useToast} from '@salesforce/retail-react-app/app/hooks/use-toast'
-import {useShopperBasketsMutation} from '@salesforce/commerce-sdk-react'
 import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 import {getCreditCardIcon} from '@salesforce/retail-react-app/app/utils/cc-utils'
-import {
-    ToggleCard,
-    ToggleCardEdit,
-    ToggleCardSummary
-} from '@salesforce/retail-react-app/app/components/toggle-card'
-import ShippingAddressSelection from '@salesforce/retail-react-app/app/pages/checkout/partials/shipping-address-selection'
+import {ToggleCard, ToggleCardEdit, ToggleCardSummary} from '@salesforce/retail-react-app/app/components/toggle-card'
+import ShippingAddressSelection
+    from '@salesforce/retail-react-app/app/pages/checkout/partials/shipping-address-selection'
 import AddressDisplay from '@salesforce/retail-react-app/app/components/address-display'
 import {PromoCode, usePromoCode} from '@salesforce/retail-react-app/app/components/promo-code'
 import {API_ERROR_MESSAGE} from '@salesforce/retail-react-app/app/constants'
 import {useCheckout} from '@salesforce/retail-react-app/app/pages/checkout/util/checkout-context'
-import AdyenCheckout from '../../../components/AdyenCheckout'
+import AdyenCheckout from '../../../components/adyenCheckout'
 import {useAdyenCheckout} from '../../../context/adyen-checkout-context'
 
-const Payment = () => {
+const Payment = ({useShopperBasketsMutation}) => {
     const {formatMessage} = useIntl()
     const {data: basket} = useCurrentBasket()
     const selectedShippingAddress = basket?.shipments && basket?.shipments[0]?.shippingAddress

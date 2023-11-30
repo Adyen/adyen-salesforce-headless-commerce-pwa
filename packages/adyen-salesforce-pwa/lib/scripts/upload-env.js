@@ -1,4 +1,7 @@
+#!/usr/bin/env node
 /* eslint-disable @typescript-eslint/no-var-requires */
+// this script uploads environment variables to mrt
+// before using it run 'save-credentials' in retail-react-app
 'use strict'
 const {
     readCredentials,

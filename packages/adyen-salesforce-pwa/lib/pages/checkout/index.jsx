@@ -7,10 +7,7 @@
 import React, {useEffect, useState} from 'react'
 import {useLocation} from 'react-router-dom'
 import {Alert, AlertIcon, Box, Container, Grid, GridItem, Stack} from '@chakra-ui/react'
-import {
-    CheckoutProvider,
-    useCheckout
-} from '@salesforce/retail-react-app/app/pages/checkout/util/checkout-context'
+import {CheckoutProvider, useCheckout} from '@salesforce/retail-react-app/app/pages/checkout/util/checkout-context'
 import ContactInfo from '@salesforce/retail-react-app/app/pages/checkout/partials/contact-info'
 import ShippingAddress from '@salesforce/retail-react-app/app/pages/checkout/partials/shipping-address'
 import ShippingOptions from '@salesforce/retail-react-app/app/pages/checkout/partials/shipping-options'
@@ -18,9 +15,10 @@ import OrderSummary from '@salesforce/retail-react-app/app/components/order-summ
 import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 import Payment from './partials/payment'
 import {AdyenCheckoutProvider} from '../../context/adyen-checkout-context'
-import AdyenCheckout from '../../components/AdyenCheckout'
+import AdyenCheckout from '../../components/adyenCheckout'
+import PropTypes from 'prop-types'
 
-const Checkout = () => {
+const Checkout = ({useShopperBasketsMutation}) => {
     const {step} = useCheckout()
     const [error] = useState()
     const {data: basket} = useCurrentBasket()
@@ -52,7 +50,7 @@ const Checkout = () => {
                             <ContactInfo />
                             <ShippingAddress />
                             <ShippingOptions />
-                            <Payment />
+                            <Payment useShopperBasketsMutation={useShopperBasketsMutation} />
                         </Stack>
                     </GridItem>
 
@@ -69,19 +67,40 @@ const Checkout = () => {
     )
 }
 
-const CheckoutChildren = () => {
+const CheckoutChildren = ({useShopperBasketsMutation}) => {
     const location = useLocation()
-    return location?.search?.includes('redirectResult') ? <AdyenCheckout /> : <Checkout />
+    return location?.search?.includes('redirectResult') ? (
+        <AdyenCheckout />
+    ) : (
+        <Checkout useShopperBasketsMutation={useShopperBasketsMutation} />
+    )
 }
 
-const CheckoutContainer = () => {
+const CheckoutContainer = ({
+    useAccessToken,
+    useCustomerId,
+    useCustomerType,
+    useShopperBasketsMutation
+}) => {
     return (
-        <AdyenCheckoutProvider>
+        <AdyenCheckoutProvider
+            useAccessToken={useAccessToken}
+            useCustomerId={useCustomerId}
+            useCustomerType={useCustomerType}
+        >
             <CheckoutProvider>
-                <CheckoutChildren />
+                <CheckoutChildren useShopperBasketsMutation={useShopperBasketsMutation} />
             </CheckoutProvider>
         </AdyenCheckoutProvider>
     )
+}
+
+CheckoutContainer.propTypes = {
+    children: PropTypes.any,
+    useAccessToken: PropTypes.any,
+    useCustomerId: PropTypes.any,
+    useCustomerType: PropTypes.any,
+    useShopperBasketsMutation: PropTypes.any
 }
 
 export default CheckoutContainer

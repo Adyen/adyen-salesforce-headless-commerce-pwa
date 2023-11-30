@@ -1,13 +1,11 @@
 #!/usr/bin/env node
 /* eslint-disable @typescript-eslint/no-var-requires */
+// this script helps load environment variables when running the retail-react-app on local
 'use strict'
 const {spawn} = require('node:child_process')
 const dotenv = require('dotenv')
-const yargs = require('yargs/yargs')
-const {hideBin} = require('yargs/helpers')
+var argv = require('minimist')(process.argv.slice(2))
 ;(async function () {
-    const argv = yargs(hideBin(process.argv)).argv
-
     // load the env variables. pass custom env file with -e flag. eg."npm run dot-env -- -e='.env.local'"
     const envPath = argv.e || '.env'
     const result = dotenv.config({path: envPath})

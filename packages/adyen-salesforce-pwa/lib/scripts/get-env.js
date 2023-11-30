@@ -1,5 +1,8 @@
+#!/usr/bin/env node
 /* eslint-disable @typescript-eslint/no-var-requires */
 'use strict'
+// this script fetches environment variables configured on mrt
+// before using it run 'save-credentials' in retail-react-app
 const {
     readCredentials,
     DEFAULT_CLOUD_ORIGIN,
