@@ -1,6 +1,6 @@
 {
   "name": "client",
-  "hash": "304d42ae9f793dab47e4",
+  "hash": "d15673a0fecf3af6e5b9",
   "publicPath": "/mobify/bundle/development/",
   "outputPath": "/Users/aleksandarm/Repositories/adyen-salesforce-headless-commerce-pwa/packages/adyen-retail-react-app/build",
   "assetsByChunkName": {
@@ -57,7 +57,7 @@
     {
       "type": "asset",
       "name": "vendor.js",
-      "size": 8655396,
+      "size": 8655387,
       "emitted": false,
       "comparedForEmit": false,
       "cached": true,
