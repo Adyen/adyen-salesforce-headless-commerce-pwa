@@ -17,7 +17,10 @@ function ErrorHandler(err, req, res) {
     Logger.error(err.message, err.cause)
     res.status(err.statusCode || 500).json(createErrorResponse(err.message))
 }
+<<<<<<<< HEAD:packages/adyen-salesforce-pwa/lib/api/routes/index.js
 
+========
+>>>>>>>> develop:packages/adyen-salesforce-pwa/lib/api/routes/router.js
 function registerAdyenEndpoints(app, runtime, overrides) {
     const environmentHandler = overrides?.environment || [
         EnvironmentController,
@@ -61,4 +64,8 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     app.post('/api/adyen/webhook', ...webhookHandler)
 }
 
+<<<<<<<< HEAD:packages/adyen-salesforce-pwa/lib/api/routes/index.js
 export {registerAdyenEndpoints, SuccessHandler, ErrorHandler}
+========
+export default registerAdyenEndpoints
+>>>>>>>> develop:packages/adyen-salesforce-pwa/lib/api/routes/router.js
