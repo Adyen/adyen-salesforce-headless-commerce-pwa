@@ -35,8 +35,7 @@
     "dotenv": "^16.3.1",
     "express-validator": "^7.0.1",
     "minimist": "^1.2.8",
-    "uuid": "^9.0.1",
-    "yargs": "^17.7.2"
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.23.3",
