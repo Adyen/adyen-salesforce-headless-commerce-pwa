@@ -63,7 +63,7 @@ const CheckoutConfirmation = loadable(() => import('@adyen/adyen-salesforce-pwa'
 const AdyenCheckoutError = loadable(() => import('@adyen/adyen-salesforce-pwa'), {
     fallback: fallback,
     resolveComponent: (components) => {
-        return components.AdyenCheckoutError
+        return () => <components.AdyenCheckoutError />
     }
 })
 
