@@ -1,6 +1,6 @@
 {
   "name": "client",
-  "hash": "72810d677ec0c5e4f1d0",
+  "hash": "949cfcd1dbfe85b30f24",
   "publicPath": "/mobify/bundle/development/",
   "outputPath": "/Users/aleksandarm/Repositories/adyen-salesforce-headless-commerce-pwa/packages/adyen-retail-react-app/build",
   "assetsByChunkName": {
@@ -96,7 +96,7 @@
     {
       "type": "asset",
       "name": "main.js",
-      "size": 996778,
+      "size": 996602,
       "emitted": false,
       "comparedForEmit": false,
       "cached": true,
@@ -121,7 +121,7 @@
     {
       "type": "asset",
       "name": "main.d15673a0fecf3af6e5b9.hot-update.js",
-      "size": 945108,
+      "size": 944932,
       "emitted": false,
       "comparedForEmit": false,
       "cached": true,
@@ -636,7 +636,7 @@
     {
       "type": "asset",
       "name": "pages-account-wishlist.js",
-      "size": 46929,
+      "size": 46872,
       "emitted": false,
       "comparedForEmit": false,
       "cached": true,
@@ -663,7 +663,7 @@
     {
       "type": "asset",
       "name": "pages-account-wishlist.d15673a0fecf3af6e5b9.hot-update.js",
-      "size": 46919,
+      "size": 46862,
       "emitted": false,
       "comparedForEmit": false,
       "cached": true,
