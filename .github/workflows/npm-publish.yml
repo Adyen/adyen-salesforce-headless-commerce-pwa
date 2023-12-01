@@ -1,0 +1,32 @@
+# This workflow will run tests using node and then publish a package when a release is created
+# For more information see: https://help.github.com/actions/language-and-framework-guides/publishing-nodejs-packages
+
+name: Publish Package
+
+on:
+  workflow_dispatch:
+
+jobs:
+  publish-npm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Setup .npmrc file to publish to npm
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18.15
+          registry-url: https://registry.npmjs.org/
+      - run: npm ci
+      # Copy LICENSE to adyen-salesforce-pwa package
+      - run: cp LICENSE packages/adyen-salesforce-pwa/
+      # Copy env example file to adyen-salesforce-pwa package
+      - run: cp packages/adyen-retail-react-app/.env.example packages/adyen-salesforce-pwa/
+      # Install the node modules
+      - run: cd packages/adyen-salesforce-pwa/ && npm ci
+      # Build
+      - run: cd packages/adyen-salesforce-pwa/ && npm run build-prod
+      # Publish the npm package
+      - run: cd packages/adyen-salesforce-pwa/ && npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+          CI: true
