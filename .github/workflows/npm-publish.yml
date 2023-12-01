@@ -26,7 +26,7 @@ jobs:
       # Build
       - run: cd packages/adyen-salesforce-pwa/ && npm run build-prod
       # Publish the npm package
-      - run: cd packages/adyen-salesforce-pwa/ && npm publish --dry-run
+      - run: cd packages/adyen-salesforce-pwa/ && npm publish -- access public
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
           CI: true
