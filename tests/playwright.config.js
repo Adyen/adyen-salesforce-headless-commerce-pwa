@@ -77,7 +77,7 @@ export default defineConfig({
 
     /* Run your local dev server before starting the tests */
     webServer: {
-      command: 'cd .. && npm run start',
+      command: 'cd ../packages/adyen-retail-react-app && npm run start',
       url: 'http://localhost:3000',
       reuseExistingServer: true,
     },
