@@ -9,7 +9,7 @@
     "payments",
     "components"
   ],
-  "version": "0.0.1-beta",
+  "version": "1.0.0-beta.0",
   "main": "dist/app/index.js",
   "bin": {
     "include-env": "dist/scripts/include-env.js",
@@ -58,5 +58,11 @@
     "url-loader": "^4.1.1",
     "webpack": "^5.89.0",
     "webpack-cli": "^5.1.4"
-  }
+  },
+  "files": [
+    "dist",
+    ".env.example",
+    "README.md",
+    "LICENSE"
+  ]
 }
