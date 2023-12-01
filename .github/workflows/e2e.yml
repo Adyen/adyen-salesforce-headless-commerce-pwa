@@ -21,12 +21,12 @@ jobs:
             - name: Install PWA package dependencies
               working-directory: ./packages/adyen-salesforce-pwa
               run: npm i
-            - name: Make PWA NPM Link
-              working-directory: ./packages/adyen-salesforce-pwa
-              run: npm link
             - name: Build PWA
               working-directory: ./packages/adyen-salesforce-pwa
               run: npm run build-dev
+            - name: Make PWA NPM Link
+              working-directory: ./packages/adyen-salesforce-pwa
+              run: npm link
             - name: Link PWA to Retail app
               working-directory: ./packages/adyen-retail-react-app
               run: npm link @adyen/adyen-salesforce-pwa
