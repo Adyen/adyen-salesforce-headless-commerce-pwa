@@ -21,14 +21,12 @@ jobs:
       - run: cp LICENSE packages/adyen-salesforce-pwa/
       # Copy env example file to adyen-salesforce-pwa package
       - run: cp packages/adyen-retail-react-app/.env.example packages/adyen-salesforce-pwa/
-      # Enter the package
-      - run: cd packages/adyen-salesforce-pwa/
       # Install the node modules
-      - run: npm ci
+      - run: cd packages/adyen-salesforce-pwa/ && npm ci
       # Build
-      - run: npm run build-prod
+      - run: cd packages/adyen-salesforce-pwa/ && npm run build-prod
       # Publish the npm package
-      - run: npm publish --dry-run
+      - run: cd packages/adyen-salesforce-pwa/ && npm publish --dry-run
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
           CI: true
