@@ -4,8 +4,8 @@
 This integration provides the opportunity to use Adyen as a payment service provider when building your Salesforce PWA application. 
 
 There are two packages:
-* Adyen retail react app: reference application how to integrate the solution into the PWA application
-* Adyen salesforce pwa: NPM package that can be installed and used within the retail react app.
+* `Adyen retail react app`: reference application how to integrate the solution into the PWA application
+* `Adyen salesforce pwa`: NPM package that can be installed and used within the retail react app.
 
 ## Prerequisites
 
