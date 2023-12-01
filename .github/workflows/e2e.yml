@@ -15,12 +15,21 @@ jobs:
                   node-version: 18
             - name: Install project dependencies
               run: npm i
-            - name: Install retail app package dependencies
+            - name: Install Retail app package dependencies
               working-directory: ./packages/adyen-retail-react-app
               run: npm i
             - name: Install PWA package dependencies
               working-directory: ./packages/adyen-salesforce-pwa
               run: npm i
+            - name: Make PWA NPM Link
+              working-directory: ./packages/adyen-salesforce-pwa
+              run: npm link
+            - name: Build PWA
+              working-directory: ./packages/adyen-salesforce-pwa
+              run: npm run build-dev
+            - name: Link PWA to Retail app
+              working-directory: ./packages/adyen-retail-react-app
+              run: npm link @adyen/adyen-salesforce-pwa
             - name: Install Playwright dependencies
               working-directory: ./tests
               run: npm i
