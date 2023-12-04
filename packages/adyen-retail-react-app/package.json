@@ -1,6 +1,6 @@
 {
   "name": "adyen-retail-react-app",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.2",
   "license": "See license in LICENSE",
   "engines": {
     "node": "^16.0.0 || ^18.0.0",
@@ -17,7 +17,7 @@
     "style-loader": "^3.3.3"
   },
   "dependencies": {
-    "@adyen/adyen-salesforce-pwa": "1.0.0-beta.1"
+    "@adyen/adyen-salesforce-pwa": "1.0.0-beta.2"
   },
   "scripts": {
     "analyze-build": "cross-env MOBIFY_ANALYZE=true npm run build",
