@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-var-requires, @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-var-requires */
 const webpack = require('webpack')
 const path = require('path')
-const CopyPlugin = require('copy-webpack-plugin')
 const {CleanWebpackPlugin} = require('clean-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
@@ -43,7 +42,7 @@ const scriptsConfig = {
 const serverConfig = {
     target: 'node',
     resolve: {
-        extensions: ['.js', '.jsx', '.ts', '.tsx', '...']
+        extensions: ['.js', '.jsx', '.ts', '.tsx', '.cjs', '.mjs', '...']
     },
     entry: './lib/api/index.js',
     output: {
@@ -72,7 +71,7 @@ const webConfig = {
     target: 'web',
     entry: './lib/index.js',
     resolve: {
-        extensions: ['.js', '.jsx', '.ts', '.tsx', '...']
+        extensions: ['.js', '.jsx', '.ts', '.tsx', '.cjs', '.mjs', '...']
     },
     output: {
         path: path.resolve(__dirname, 'dist/app'),
