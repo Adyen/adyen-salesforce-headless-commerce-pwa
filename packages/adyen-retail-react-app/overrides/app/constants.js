@@ -17,7 +17,7 @@ import {
     DEFAULT_LIMIT_VALUES,
     DEFAULT_SEARCH_PARAMS
 } from '@salesforce/retail-react-app/app/constants'
-import countryList from '@adyen/adyen-salesforce-pwa'
+import {countryList} from '@adyen/adyen-salesforce-pwa'
 
 // original value is 25
 DEFAULT_LIMIT_VALUES[0] = 3
