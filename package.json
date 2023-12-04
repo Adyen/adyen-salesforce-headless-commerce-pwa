@@ -1,13 +1,10 @@
 {
   "name": "adyen-salesforce-pwa",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.2",
   "license": "See license in LICENSE",
   "engines": {
     "node": "^16.0.0 || ^18.0.0",
     "npm": "^7.0.0 || ^8.0.0 || ^9.0.0"
-  },
-  "dependencies": {
-    "@adyen/adyen-salesforce-pwa": "1.0.0-beta.1"
   },
   "devDependencies": {
     "@commitlint/cli": "^18.2.0",
