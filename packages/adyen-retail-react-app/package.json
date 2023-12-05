@@ -1,6 +1,6 @@
 {
   "name": "adyen-retail-react-app",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.2",
   "license": "See license in LICENSE",
   "engines": {
     "node": "^16.0.0 || ^18.0.0",
@@ -17,7 +17,7 @@
     "style-loader": "^3.3.3"
   },
   "dependencies": {
-    "@adyen/adyen-salesforce-pwa": "1.0.0-beta.0"
+    "@adyen/adyen-salesforce-pwa": "1.0.0-beta.2"
   },
   "scripts": {
     "analyze-build": "cross-env MOBIFY_ANALYZE=true npm run build",
@@ -41,7 +41,8 @@
     "test:max-file-size": "npm run build && bundlesize",
     "upload-env": "upload-env",
     "get-env": "get-env",
-    "start:env": "include-env -p=npm run start",
+    "prepare:dev": "rm -f ./node_modules/.bin/include-env && rm -rf ./node_modules/@adyen/adyen-salesforce-pwa && cd ../adyen-salesforce-pwa && rm -rf dist && npm run build-dev",
+    "start:env": "npm run prepare:dev && npm link @adyen/adyen-salesforce-pwa && include-env -p=npm run start",
     "push:env": "include-env -p=npm run push"
   },
   "bundlesize": [

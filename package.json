@@ -1,6 +1,6 @@
 {
   "name": "adyen-salesforce-pwa",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.2",
   "license": "See license in LICENSE",
   "engines": {
     "node": "^16.0.0 || ^18.0.0",
