@@ -16,13 +16,13 @@ jobs:
         with:
           node-version: 18.15
           registry-url: https://registry.npmjs.org/
-      - run: npm ci
+      - run: npm install
       # Copy LICENSE to adyen-salesforce-pwa package
       - run: cp LICENSE packages/adyen-salesforce-pwa/
       # Copy env example file to adyen-salesforce-pwa package
       - run: cp packages/adyen-retail-react-app/.env.example packages/adyen-salesforce-pwa/
       # Install the node modules
-      - run: cd packages/adyen-salesforce-pwa/ && npm ci
+      - run: cd packages/adyen-salesforce-pwa/ && npm install
       # Build
       - run: cd packages/adyen-salesforce-pwa/ && npm run build-prod
       # Publish the npm package
