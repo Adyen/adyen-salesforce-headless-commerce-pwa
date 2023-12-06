@@ -8,7 +8,7 @@ import {AdyenPaymentMethodsService} from '../services/payment-methods'
 import {paymentMethodsConfiguration} from '../components/paymentMethodsConfiguration'
 import {AdyenEnvironmentService} from '../services/environment'
 
-const AdyenCheckoutContext = React.createContext()
+const AdyenCheckoutContext = React.createContext({})
 
 export const AdyenCheckoutProvider = ({
     children,
