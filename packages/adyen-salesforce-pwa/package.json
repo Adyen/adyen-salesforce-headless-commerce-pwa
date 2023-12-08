@@ -26,6 +26,7 @@
     "clean": "rm -rf dist",
     "build-dev": "webpack --mode development",
     "build-prod": "webpack --mode production",
+    "test:coverage": "jest --coverage",
     "test": "jest",
     "lint": "eslint",
     "lint:fix": "eslint -- --fix"
