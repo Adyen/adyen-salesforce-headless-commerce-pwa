@@ -13,7 +13,12 @@ module.exports = {
             statements: 80
         }
     },
-    collectCoverageFrom: ['lib/**/*.{js,jsx,mjs,cjs}', '!**/node_modules/**', '!**/dist/**'],
+    collectCoverageFrom: [
+        'lib/**/*.{js,jsx,mjs,cjs}',
+        '!**/node_modules/**',
+        '!**/dist/**',
+        '!**/mocks/**'
+    ],
     clearMocks: true,
     restoreMocks: true,
     setupFilesAfterEnv: ['jest-extended/all', './mocks/mockSetup.js'],
