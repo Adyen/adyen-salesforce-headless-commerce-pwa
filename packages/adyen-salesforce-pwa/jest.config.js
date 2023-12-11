@@ -15,5 +15,7 @@ module.exports = {
     },
     collectCoverageFrom: ['lib/**/*.{js,jsx,mjs,cjs}', '!**/node_modules/**', '!**/dist/**'],
     clearMocks: true,
-    restoreMocks: true
+    restoreMocks: true,
+    setupFilesAfterEnv: ['jest-extended/all', './mocks/mockSetup.js'],
+    setupFiles: ['dotenv/config']
 }
