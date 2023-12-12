@@ -55,16 +55,6 @@ const {handler} = runtime.createHandler(options, (app) => {
                         'https://*.cash.app',
                         'https://*.gstatic.com'
                     ],
-                    'style-src': [
-                        "'self'",
-                        '*.commercecloud.salesforce.com',
-                        'https://*.adyen.com',
-                        'https://*.cash.app',
-                        'https://*.media-amazon.com',
-                        'https://*.payments-amazon.com',
-                        'https://*.google.com',
-                        'https://*.paypal.com'
-                    ],
                     'script-src': [
                         "'self'",
                         "'unsafe-eval'",
