@@ -17,7 +17,11 @@ import {
     DEFAULT_LIMIT_VALUES,
     DEFAULT_SEARCH_PARAMS
 } from '@salesforce/retail-react-app/app/constants'
+/* -----------------Adyen Begin ------------------------ */
 import {countryList} from '@adyen/adyen-salesforce-pwa'
+
+export const SHIPPING_COUNTRY_CODES = countryList
+/* -----------------Adyen End ------------------------ */
 
 // original value is 25
 DEFAULT_LIMIT_VALUES[0] = 3
@@ -26,7 +30,4 @@ DEFAULT_SEARCH_PARAMS.limit = 3
 export const CUSTOM_HOME_TITLE = '🎉 Hello Extensible React Template!'
 
 export {DEFAULT_LIMIT_VALUES, DEFAULT_SEARCH_PARAMS}
-
-export const SHIPPING_COUNTRY_CODES = countryList
-
 export * from '@salesforce/retail-react-app/app/constants'
