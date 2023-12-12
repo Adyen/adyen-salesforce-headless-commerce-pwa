@@ -18,7 +18,11 @@
   },
   "license": "MIT",
   "homepage": "https://docs.adyen.com/plugins/salesforce-commerce-cloud/",
-  "repository": "github:Adyen/adyen-salesforce-headless-commerce-pwa",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Adyen/adyen-salesforce-headless-commerce-pwa.git",
+    "directory": "packages/adyen-salesforce-pwa"
+  },
   "bugs": {
     "url": "https://support.adyen.com/"
   },
