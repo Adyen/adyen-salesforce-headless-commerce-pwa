@@ -11,3 +11,4 @@ Vagrantfile
 .env
 /build/
 dist
+coverage
