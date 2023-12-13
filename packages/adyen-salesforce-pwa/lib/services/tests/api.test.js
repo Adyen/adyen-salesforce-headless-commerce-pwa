@@ -1,7 +1,5 @@
 import {ApiClient} from '../api'
-import {ADYEN_API_BASEPATH} from '../../../mocks/adyenApi/constants'
-
-const TOKEN_MOCK = 'mockToken'
+import {ADYEN_API_BASEPATH, TOKEN_MOCK} from '../../../mocks/adyenApi/constants'
 
 describe('ApiClient', () => {
     let apiClient
