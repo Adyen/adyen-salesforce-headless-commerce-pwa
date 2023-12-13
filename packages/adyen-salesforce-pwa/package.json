@@ -9,7 +9,7 @@
     "payments",
     "components"
   ],
-  "version": "1.0.0-beta.2",
+  "version": "1.0.0-beta.3",
   "main": "dist/app/index.js",
   "bin": {
     "include-env": "dist/scripts/include-env.js",
@@ -18,7 +18,11 @@
   },
   "license": "MIT",
   "homepage": "https://docs.adyen.com/plugins/salesforce-commerce-cloud/",
-  "repository": "github:Adyen/adyen-salesforce-headless-commerce-pwa",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Adyen/adyen-salesforce-headless-commerce-pwa.git",
+    "directory": "packages/adyen-salesforce-pwa"
+  },
   "bugs": {
     "url": "https://support.adyen.com/"
   },
@@ -26,6 +30,7 @@
     "clean": "rm -rf dist",
     "build-dev": "webpack --mode development",
     "build-prod": "webpack --mode production",
+    "test:coverage": "jest --coverage",
     "test": "jest",
     "lint": "eslint",
     "lint:fix": "eslint -- --fix"
@@ -52,7 +57,9 @@
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^5.5.3",
     "jest": "^29.7.0",
+    "jest-extended": "^4.0.2",
     "mini-css-extract-plugin": "^2.7.6",
+    "msw": "^2.0.10",
     "style-loader": "^3.3.3",
     "url-loader": "^4.1.1",
     "webpack": "^5.89.0",
