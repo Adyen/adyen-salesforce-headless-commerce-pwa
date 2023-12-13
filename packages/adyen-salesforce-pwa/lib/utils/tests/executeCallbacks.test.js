@@ -9,7 +9,7 @@ describe('executeCallbacks', () => {
         const onError = jest.fn()
 
         const execute = executeCallbacks(callbacks, props, onError)
-        const aggregatedData = await execute('param1', 'param2')
+        await execute('param1', 'param2')
 
         expect(callback1).toHaveBeenCalledWith('param1', 'param2', props, {})
         expect(onError).not.toHaveBeenCalled()
