@@ -36,6 +36,16 @@ jobs:
       - name: Autobuild
         uses: github/codeql-action/autobuild@v2
 
+      - name: filter-sarif
+        uses: advanced-security/filter-sarif@v1
+        with:
+          # filter out all test files unless they contain a sql-injection vulnerability
+          patterns: |
+            -**/*test*.js
+            +**/*test*.js:js/sql-injection
+          input: sarif-results/${{ matrix.language }}.sarif
+          output: sarif-results/${{ matrix.language }}.sarif
+
       # ℹ️ Command-line programs to run using the OS shell.
       # 📚 https://git.io/JvXDl
 
