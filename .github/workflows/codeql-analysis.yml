@@ -43,8 +43,6 @@ jobs:
           patterns: |
             -**/*test*.js
             +**/*test*.js:js/sql-injection
-          input: sarif-results/${{ matrix.language }}.sarif
-          output: sarif-results/${{ matrix.language }}.sarif
 
       # ℹ️ Command-line programs to run using the OS shell.
       # 📚 https://git.io/JvXDl
