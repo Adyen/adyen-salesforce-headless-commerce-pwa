@@ -15,9 +15,10 @@ module.exports = {
     },
     collectCoverageFrom: [
         'lib/**/*.{js,jsx,mjs,cjs}',
+        '!lib/scripts/**/*{js,jsx,mjs,cjs}',
         '!**/node_modules/**',
         '!**/dist/**',
-        '!**/mocks/**'
+        '!**/mocks/**',
     ],
     clearMocks: true,
     restoreMocks: true,
