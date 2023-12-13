@@ -1,8 +1,7 @@
 import {AdyenPaymentMethodsService} from '../payment-methods'
 import {ApiClient} from '../api'
-import {CUSTOMER_ID_MOCK, LOCALE_MOCK, TOKEN_MOCK } from "../../../mocks/adyenApi/constants";
+import {CUSTOMER_ID_MOCK, LOCALE_MOCK, TOKEN_MOCK} from '../../../mocks/adyenApi/constants'
 
-// Mocking the ApiClient class
 jest.mock('../api', () => {
     return {
         ApiClient: jest.fn().mockImplementation(() => ({
