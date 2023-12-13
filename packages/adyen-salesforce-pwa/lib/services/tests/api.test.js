@@ -1,11 +1,11 @@
 import {ApiClient} from '../api'
-import {ADYEN_API_BASEPATH, TOKEN_MOCK} from '../../../mocks/adyenApi/constants'
+import {ADYEN_API_BASEPATH} from '../../../mocks/adyenApi/constants'
 
 describe('ApiClient', () => {
     let apiClient
 
     beforeEach(() => {
-        apiClient = new ApiClient(ADYEN_API_BASEPATH, TOKEN_MOCK)
+        apiClient = new ApiClient(ADYEN_API_BASEPATH, 'mockToken')
     })
 
     afterEach(() => {
@@ -14,7 +14,7 @@ describe('ApiClient', () => {
 
     it('should construct ApiClient with url and token', () => {
         expect(apiClient.url).toBe(ADYEN_API_BASEPATH)
-        expect(apiClient.token).toBe(TOKEN_MOCK)
+        expect(apiClient.token).toBe('mockToken')
     })
 
     it('should call fetch with correct parameters for GET request', async () => {
@@ -41,7 +41,7 @@ describe('ApiClient', () => {
                 body: null,
                 headers: {
                     'Content-Type': 'application/json',
-                    authorization: `Bearer ${TOKEN_MOCK}`,
+                    authorization: `Bearer mockToken`,
                     customHeader: 'customValue'
                 }
             })
@@ -72,7 +72,7 @@ describe('ApiClient', () => {
                 body: JSON.stringify({key: 'value'}),
                 headers: {
                     'Content-Type': 'application/json',
-                    authorization: `Bearer ${TOKEN_MOCK}`,
+                    authorization: `Bearer mockToken`,
                     customHeader: 'customValue'
                 }
             })

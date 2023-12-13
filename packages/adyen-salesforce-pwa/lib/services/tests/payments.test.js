@@ -1,6 +1,6 @@
 import {AdyenPaymentsService} from '../payments'
 import {ApiClient} from '../api'
-import {CUSTOMER_ID_MOCK, TOKEN_MOCK} from "../../../mocks/adyenApi/constants";
+import {CUSTOMER_ID_MOCK} from '../../../mocks/adyenApi/constants'
 
 jest.mock('../api', () => {
     return {
@@ -12,7 +12,7 @@ jest.mock('../api', () => {
 
 describe('AdyenPaymentsService', () => {
     let paymentsService
-    let mockToken = TOKEN_MOCK
+    let mockToken = 'mockToken'
     let mockAdyenStateData = {someData: 'mockData'}
     let mockBasketId = 'mockBasketId'
     let mockCustomerId = CUSTOMER_ID_MOCK

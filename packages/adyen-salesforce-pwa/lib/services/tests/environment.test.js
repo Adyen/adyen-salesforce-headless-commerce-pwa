@@ -1,6 +1,5 @@
 import {AdyenEnvironmentService} from '../environment'
 import {ApiClient} from '../api'
-import {TOKEN_MOCK} from '../../../mocks/adyenApi/constants'
 
 jest.mock('../api', () => {
     return {
@@ -12,7 +11,7 @@ jest.mock('../api', () => {
 
 describe('AdyenEnvironmentService', () => {
     let adyenService
-    let mockToken = TOKEN_MOCK
+    let mockToken = 'mockToken'
 
     beforeEach(() => {
         adyenService = new AdyenEnvironmentService(mockToken)
