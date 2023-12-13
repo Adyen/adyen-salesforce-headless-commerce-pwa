@@ -1,7 +1,6 @@
 import {AdyenPaymentsDetailsService} from '../payments-details'
 import {ApiClient} from '../api'
 
-// Mocking the ApiClient class
 jest.mock('../api', () => {
     return {
         ApiClient: jest.fn().mockImplementation(() => ({
