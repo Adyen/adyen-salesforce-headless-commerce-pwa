@@ -6,8 +6,12 @@ application.
 ---
 **NOTE**
 
-This version is in beta and may not be suitable for production use. We anticipate the general availability solution to
-be ready by Q1 2024.
+This version is in beta and may not be suitable for production use.
+We anticipate the general availability solution to be ready by Q1 2024.
+
+Please be aware that the beta version is not supported by Adyen until general availability, will not be providing
+technical support for this specific beta release.
+
 We encourage users to explore the package, provide feedback, and report any issues via
 our [GitHub repository](https://github.com/Adyen/adyen-salesforce-headless-commerce-pwa.git).
 
