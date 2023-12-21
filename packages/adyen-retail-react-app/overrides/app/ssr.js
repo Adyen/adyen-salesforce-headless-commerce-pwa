@@ -11,8 +11,9 @@ import {isRemote} from '@salesforce/pwa-kit-runtime/utils/ssr-server'
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 import helmet from 'helmet'
 import bodyParser from 'body-parser'
+/* -----------------Adyen Begin ------------------------ */
 import {registerAdyenEndpoints} from '@adyen/adyen-salesforce-pwa/dist/ssr/index.js'
-
+/* -----------------Adyen End ------------------------ */
 const options = {
     // The build directory (an absolute path)
     buildDir: path.resolve(process.cwd(), 'build'),
@@ -35,7 +36,7 @@ const runtime = getRuntime()
 
 const {handler} = runtime.createHandler(options, (app) => {
     app.use(bodyParser.json())
-
+    /* -----------------Adyen Begin ------------------------ */
     // Set HTTP security headers
     app.use(
         helmet({
@@ -50,7 +51,9 @@ const {handler} = runtime.createHandler(options, (app) => {
                         '*.paypal.com',
                         '*.media-amazon.com',
                         '*.payments-amazon.com',
-                        'https://www.paypalobjects.com/js-sdk-logos/2.2.7/paypal-blue.svg'
+                        'https://www.paypalobjects.com/js-sdk-logos/2.2.7/paypal-blue.svg',
+                        'https://*.cash.app',
+                        'https://*.gstatic.com'
                     ],
                     'script-src': [
                         "'self'",
@@ -62,7 +65,10 @@ const {handler} = runtime.createHandler(options, (app) => {
                         'https://static-eu.payments-amazon.com/checkout.js',
                         'https://sandbox.src.mastercard.com/sdk/srcsdk.mastercard.js',
                         'https://sandbox-assets.secure.checkout.visa.com/checkout-widget/resources/js/src-i-adapter/visa-sdk.js?v2',
-                        'https://pay.google.com/gp/p/js/pay.js'
+                        'https://pay.google.com/gp/p/js/pay.js',
+                        'https://*.cash.app',
+                        'https://*.checkout.visa.com',
+                        'https://*.mastercard.com'
                     ],
                     'connect-src': [
                         "'self'",
@@ -72,7 +78,7 @@ const {handler} = runtime.createHandler(options, (app) => {
                         'https://www.sandbox.paypal.com/xoplatform/logger/api/logger?disableSetCookie=true'
                     ],
                     'frame-src': ["'self'", '*.adyen.com', '*.paypal.com'],
-
+                    /* -----------------Adyen End ------------------------ */
                     // Do not upgrade insecure requests for local development
                     'upgrade-insecure-requests': isRemote() ? [] : null
                 }
@@ -90,7 +96,7 @@ const {handler} = runtime.createHandler(options, (app) => {
     app.get('/favicon.ico', runtime.serveStaticFile('static/ico/favicon.ico'))
 
     app.get('/worker.js(.map)?', runtime.serveServiceWorker)
-
+    /* -----------------Adyen Begin ------------------------ */
     /**
      * Adyen API Endpoints
      * - Environment
@@ -116,7 +122,7 @@ const {handler} = runtime.createHandler(options, (app) => {
      * }
      */
     registerAdyenEndpoints(app, runtime)
-
+    /* -----------------Adyen End ------------------------ */
     app.get('*', runtime.render)
 })
 // SSR requires that we export a single handler function called 'get', that

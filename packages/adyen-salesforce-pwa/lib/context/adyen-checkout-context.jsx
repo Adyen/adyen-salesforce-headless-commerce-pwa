@@ -8,10 +8,15 @@ import {AdyenPaymentMethodsService} from '../services/payment-methods'
 import {paymentMethodsConfiguration} from '../components/paymentMethodsConfiguration'
 import {AdyenEnvironmentService} from '../services/environment'
 
-const AdyenCheckoutContext = React.createContext()
+const AdyenCheckoutContext = React.createContext({})
 
-export const AdyenCheckoutProvider = ({children, useAccessToken, useCustomerId, useCustomerType}) => {
-    const {getTokenWhenReady, token} = useAccessToken()
+export const AdyenCheckoutProvider = ({
+    children,
+    useAccessToken,
+    useCustomerId,
+    useCustomerType
+}) => {
+    const {getTokenWhenReady} = useAccessToken()
     const customerId = useCustomerId()
     const customerType = useCustomerType()
     const {data: basket} = useCurrentBasket()
@@ -63,12 +68,12 @@ export const AdyenCheckoutProvider = ({children, useAccessToken, useCustomerId, 
     }, [basket?.basketId])
 
     const getPaymentMethodsConfiguration = async ({
-                                                      beforeSubmit = [],
-                                                      afterSubmit = [],
-                                                      beforeAdditionalDetails = [],
-                                                      afterAdditionalDetails = [],
-                                                      onError
-                                                  }) => {
+        beforeSubmit = [],
+        afterSubmit = [],
+        beforeAdditionalDetails = [],
+        afterAdditionalDetails = [],
+        onError
+    }) => {
         const token = await getTokenWhenReady()
         return paymentMethodsConfiguration({
             paymentMethods: adyenPaymentMethods?.paymentMethods,
@@ -124,7 +129,7 @@ AdyenCheckoutProvider.propTypes = {
     children: PropTypes.any,
     useAccessToken: PropTypes.any,
     useCustomerId: PropTypes.any,
-    useCustomerType: PropTypes.any,
+    useCustomerType: PropTypes.any
 }
 
 /**
