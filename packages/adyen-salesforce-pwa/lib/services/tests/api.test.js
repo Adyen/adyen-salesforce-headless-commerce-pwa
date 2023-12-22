@@ -1,5 +1,5 @@
 import {ApiClient} from '../api'
-import {ADYEN_API_BASEPATH} from '../../../mocks/adyenApi/constants'
+import {ADYEN_API_BASEPATH} from '../../../__mocks__/adyenApi/constants'
 
 describe('ApiClient', () => {
     let apiClient
