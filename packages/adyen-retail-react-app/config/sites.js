@@ -39,7 +39,8 @@ module.exports = [
         },
         adyen: {
             clientKey: process.env.ADYEN_CLIENT_KEY,
-            environment: process.env.ADYEN_ENVIRONMENT
+            environment: process.env.ADYEN_ENVIRONMENT,
+            merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT
         }
     }
 ]

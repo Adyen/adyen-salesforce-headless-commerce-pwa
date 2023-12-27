@@ -16,7 +16,8 @@ describe('getAdyenConfigForCurrentSite', () => {
                         id: 'currentSiteId',
                         adyen: {
                             clientKey: 'mockClientKey',
-                            environment: 'mockEnvironment'
+                            environment: 'mockEnvironment',
+                            merchantAccount: 'mockMerchantAccount'
                         }
                     }
                 ]
@@ -29,7 +30,8 @@ describe('getAdyenConfigForCurrentSite', () => {
 
         expect(adyenConfig).toEqual({
             clientKey: 'mockClientKey',
-            environment: 'mockEnvironment'
+            environment: 'mockEnvironment',
+            merchantAccount: 'mockMerchantAccount'
         })
     })
 })
