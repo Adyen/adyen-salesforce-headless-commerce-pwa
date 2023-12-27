@@ -36,6 +36,10 @@ module.exports = [
                     preferredCurrency: 'SEK'
                 }
             ]
+        },
+        adyen: {
+            clientKey: process.env.ADYEN_CLIENT_KEY,
+            environment: process.env.ADYEN_ENVIRONMENT
         }
     }
 ]
