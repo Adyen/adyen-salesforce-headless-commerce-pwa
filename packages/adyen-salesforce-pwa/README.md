@@ -46,7 +46,7 @@ our [GitHub repository](https://github.com/Adyen/adyen-salesforce-headless-comme
 
 6. In your `retail-react-app` you would need to update the `config/sites.js` file and include the adyen config.
    Your sites.js file should look something similar to this:
-   ```json
+   ```ecmascript 5
    module.exports = [
     {
         id: 'RefArch',
