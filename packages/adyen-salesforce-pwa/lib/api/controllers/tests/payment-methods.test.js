@@ -2,6 +2,7 @@ import {PaymentMethodsController} from '../../index'
 
 let mockPaymentMethods = jest.fn()
 let mockGetCustomerBaskets = jest.fn()
+
 jest.mock('@salesforce/pwa-kit-runtime/utils/ssr-config', () => {
     return {
         getConfig: jest.fn().mockImplementation(() => {
