@@ -2,8 +2,8 @@ import {http, HttpResponse} from 'msw'
 import {ADYEN_API_BASEPATH} from './constants'
 
 export const paymentMethodsHandlers = [
-    http.post(`${ADYEN_API_BASEPATH}/paymentMethods`, ({request}) => {
-        return HttpResponse.json(paymentMethodsResponse)
+    http.post(`${ADYEN_API_BASEPATH}/paymentMethods`, () => {
+        return HttpResponse.json(paymentMethodsResponse, {complete: true})
     })
 ]
 const paymentMethodsResponse = {

@@ -18,10 +18,11 @@ module.exports = {
         '!lib/scripts/**/*{js,jsx,mjs,cjs}',
         '!**/node_modules/**',
         '!**/dist/**',
-        '!**/mocks/**',
+        '!**/mocks/**'
     ],
     clearMocks: true,
     restoreMocks: true,
-    setupFilesAfterEnv: ['jest-extended/all', './mocks/mockSetup.js'],
-    setupFiles: ['dotenv/config']
+    resetModules: true,
+    setupFilesAfterEnv: ['jest-extended/all'],
+    setupFiles: ['./__mocks__/mockEnv.js']
 }

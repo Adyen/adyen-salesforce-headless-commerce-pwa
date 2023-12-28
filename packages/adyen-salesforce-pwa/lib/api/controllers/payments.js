@@ -163,13 +163,13 @@ async function removeAllPaymentInstrumentsFromBasket(basket, shopperBaskets) {
 async function sendPayments(req, res, next) {
     Logger.info('sendPayments', 'start')
     if (!validateRequestParams(req)) {
-        throw new Error(errorMessages.INVALID_PARAMS)
+        const err = new Error(errorMessages.INVALID_PARAMS)
+        Logger.error('sendPayments', err.message)
+        return next(err)
     }
-
-    const checkout = AdyenCheckoutConfig.getInstance()
     let order
-
     try {
+        const checkout = AdyenCheckoutConfig.getInstance()
         const {data} = req.body
 
         const {app: appConfig} = getConfig()
@@ -183,7 +183,6 @@ async function sendPayments(req, res, next) {
                 basketId: req.headers.basketid
             }
         })
-
         if (!basket) {
             throw new Error(errorMessages.INVALID_BASKET)
         }
