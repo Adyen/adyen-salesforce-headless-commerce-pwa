@@ -14,7 +14,16 @@ jest.mock('@salesforce/pwa-kit-runtime/utils/ssr-config', () => {
         getConfig: jest.fn().mockImplementation(() => {
             return {
                 app: {
-                    commerceAPI: {}
+                    sites: [
+                        {
+                            id: 'RefArch'
+                        }
+                    ],
+                    commerceAPI: {
+                        parameters: {
+                            siteId: 'RefArch'
+                        }
+                    }
                 }
             }
         })
