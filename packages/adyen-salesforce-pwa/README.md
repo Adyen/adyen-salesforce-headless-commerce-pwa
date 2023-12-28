@@ -47,8 +47,7 @@ our [GitHub repository](https://github.com/Adyen/adyen-salesforce-headless-comme
 6. In your `retail-react-app` you would need to update the `config/sites.js` file and include the adyen config.
    Your sites.js file should look something similar to this:
    ```ecmascript 5
-   module.exports = [
-    {
+   module.exports = [{
         id: 'RefArch',
         l10n: {
             ...
@@ -63,8 +62,7 @@ our [GitHub repository](https://github.com/Adyen/adyen-salesforce-headless-comme
             webhookPassword: process.env.ADYEN_WEBHOOK_PASSWORD,
             webhookHmacKey: process.env.ADYEN_HMAC_KEY
         }
-    }
-   ]
+   }]
    ```
 
 7. Import `countrylist` in `constants.js` of your `retail-react-app` and export it as `SHIPPING_COUNTRY_CODES`:
