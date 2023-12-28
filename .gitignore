@@ -9,6 +9,6 @@ screenshots/
 playwright-report/
 Vagrantfile
 .env
-/build/
+build
 dist
 coverage
