@@ -14,6 +14,7 @@ import AdyenCheckoutConfig from './checkout-config'
 import Logger from './logger'
 import {v4 as uuidv4} from 'uuid'
 import {OrderApiClient} from './orderApi'
+import { getAdyenConfigForCurrentSite } from "../../utils/getAdyenConfigForCurrentSite.mjs";
 
 const errorMessages = {
     AMOUNT_NOT_CORRECT: 'amount not correct',
@@ -69,7 +70,7 @@ function getShopperName(order) {
     }
 }
 
-function getApplicationInfo() {
+function getApplicationInfo(systemIntegratorName) {
     return {
         merchantApplication: {
             name: 'adyen-salesforce-commerce-cloud',
@@ -78,7 +79,7 @@ function getApplicationInfo() {
         externalPlatform: {
             name: 'SalesforceCommerceCloud',
             version: 'PWA',
-            integrator: process.env.SYSTEM_INTEGRATOR_NAME
+            integrator: systemIntegratorName
         }
     }
 }
@@ -170,6 +171,7 @@ async function sendPayments(req, res, next) {
     let order
     try {
         const checkout = AdyenCheckoutConfig.getInstance()
+        const adyenConfig = getAdyenConfigForCurrentSite()
         const {data} = req.body
 
         const {app: appConfig} = getConfig()
@@ -226,12 +228,12 @@ async function sendPayments(req, res, next) {
                 data.deliveryAddress ||
                 formatAddressInAdyenFormat(order.shipments[0].shippingAddress),
             reference: order.orderNo,
-            merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT,
+            merchantAccount: adyenConfig.merchantAccount,
             amount: {
                 value: getCurrencyValueForApi(order.orderTotal, order.currency),
                 currency: order.currency
             },
-            applicationInfo: getApplicationInfo(),
+            applicationInfo: getApplicationInfo(adyenConfig.systemIntegratorName),
             authenticationData: {
                 threeDSRequestData: {
                     nativeThreeDS: 'preferred'

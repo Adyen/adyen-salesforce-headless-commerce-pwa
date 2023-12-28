@@ -41,7 +41,8 @@ module.exports = [
             apiKey: process.env.ADYEN_API_KEY,
             clientKey: process.env.ADYEN_CLIENT_KEY,
             environment: process.env.ADYEN_ENVIRONMENT,
-            merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT
+            merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT,
+            systemIntegratorName: process.env.SYSTEM_INTEGRATOR_NAME
         }
     }
 ]

@@ -16,7 +16,13 @@ jest.mock('@salesforce/pwa-kit-runtime/utils/ssr-config', () => {
                 app: {
                     sites: [
                         {
-                            id: 'RefArch'
+                            id: 'RefArch',
+                            adyen: {
+                                clientKey: process.env.ADYEN_CLIENT_KEY,
+                                environment: process.env.ADYEN_ENVIRONMENT,
+                                merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT,
+                                systemIntegratorName: process.env.SYSTEM_INTEGRATOR_NAME
+                            }
                         }
                     ],
                     commerceAPI: {
