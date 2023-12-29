@@ -2,12 +2,27 @@ import {PaymentMethodsController} from '../../index'
 
 let mockPaymentMethods = jest.fn()
 let mockGetCustomerBaskets = jest.fn()
+
 jest.mock('@salesforce/pwa-kit-runtime/utils/ssr-config', () => {
     return {
         getConfig: jest.fn().mockImplementation(() => {
             return {
                 app: {
-                    commerceAPI: {}
+                    sites: [
+                        {
+                            id: 'RefArch',
+                            adyen: {
+                                clientKey: process.env.ADYEN_CLIENT_KEY,
+                                environment: process.env.ADYEN_ENVIRONMENT,
+                                merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT
+                            }
+                        }
+                    ],
+                    commerceAPI: {
+                        parameters: {
+                            siteId: 'RefArch'
+                        }
+                    }
                 }
             }
         })

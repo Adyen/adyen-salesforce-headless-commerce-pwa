@@ -16,6 +16,9 @@ module.exports = {
     collectCoverageFrom: [
         'lib/**/*.{js,jsx,mjs,cjs}',
         '!lib/scripts/**/*{js,jsx,mjs,cjs}',
+        '!lib/pages/**/*',
+        '!lib/index.js',
+        '!lib/api/index.js',
         '!**/node_modules/**',
         '!**/dist/**',
         '!**/mocks/**'
