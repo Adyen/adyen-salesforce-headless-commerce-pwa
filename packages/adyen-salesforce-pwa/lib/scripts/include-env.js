@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 // this script helps load environment variables when running the retail-react-app on local
 'use strict'
-const {spawn} = require('node:child_process')
+const spawn = require('cross-spawn');
 const dotenv = require('dotenv')
 var argv = require('minimist')(process.argv.slice(2))
 ;(async function () {
