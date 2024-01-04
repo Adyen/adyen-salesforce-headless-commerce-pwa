@@ -54,6 +54,9 @@ const CheckoutConfirmation = loadable(() => import('@adyen/adyen-salesforce-pwa'
                 useProducts={useProducts}
                 useAuthHelper={useAuthHelper}
                 AuthHelpers={AuthHelpers}
+                useAccessToken={useAccessToken}
+                useCustomerId={useCustomerId}
+                useCustomerType={useCustomerType}
             />
         )
     }

@@ -14,7 +14,7 @@ import AdyenCheckoutConfig from './checkout-config'
 import Logger from './logger'
 import {v4 as uuidv4} from 'uuid'
 import {OrderApiClient} from './orderApi'
-import { getAdyenConfigForCurrentSite } from "../../utils/getAdyenConfigForCurrentSite.mjs";
+import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrentSite.mjs'
 
 const errorMessages = {
     AMOUNT_NOT_CORRECT: 'amount not correct',

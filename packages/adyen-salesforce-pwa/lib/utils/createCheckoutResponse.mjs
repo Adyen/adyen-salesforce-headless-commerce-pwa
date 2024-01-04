@@ -23,13 +23,20 @@ export function createCheckoutResponse(response) {
       RESULT_CODES.REDIRECTSHOPPER,
       RESULT_CODES.IDENTIFYSHOPPER,
       RESULT_CODES.CHALLENGESHOPPER,
-      RESULT_CODES.PRESENTTOSHOPPER,
       RESULT_CODES.PENDING,
     ].includes(response.resultCode)
   ) {
     return {
       isFinal: false,
       action: response.action,
+    };
+  }
+
+  if (response.resultCode === RESULT_CODES.PRESENTTOSHOPPER) {
+    return {
+      isFinal: true,
+      action: response.action,
+      merchantReference: response.merchantReference,
     };
   }
 
