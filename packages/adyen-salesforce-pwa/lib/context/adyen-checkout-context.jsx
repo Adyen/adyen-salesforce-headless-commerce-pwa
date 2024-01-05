@@ -68,7 +68,7 @@ export const AdyenCheckoutProvider = ({
     }, [basket?.basketId])
 
     const handleAction = async (component, responses) => {
-        if (responses.paymentsResponse.isFinal) {
+        if (responses?.paymentsResponse?.action?.type === 'voucher') {
             const action = btoa(JSON.stringify(responses?.paymentsResponse?.action))
             const url = `/checkout/confirmation/${responses?.paymentsResponse?.merchantReference}?adyenAction=${action}`
             navigate(url)

@@ -1,6 +1,6 @@
 import { RESULT_CODES } from "./constants.mjs";
 
-export function createCheckoutResponse(response) {
+export function createCheckoutResponse(response, orderNumber) {
   if (
     [
       RESULT_CODES.AUTHORISED,
@@ -14,7 +14,7 @@ export function createCheckoutResponse(response) {
       isFinal: true,
       isSuccessful:
         response.resultCode === RESULT_CODES.AUTHORISED || response.resultCode === RESULT_CODES.RECEIVED,
-      merchantReference: response.merchantReference,
+      merchantReference: response.merchantReference || orderNumber,
     };
   }
 
@@ -24,19 +24,13 @@ export function createCheckoutResponse(response) {
       RESULT_CODES.IDENTIFYSHOPPER,
       RESULT_CODES.CHALLENGESHOPPER,
       RESULT_CODES.PENDING,
+      RESULT_CODES.PRESENTTOSHOPPER
     ].includes(response.resultCode)
   ) {
     return {
       isFinal: false,
       action: response.action,
-    };
-  }
-
-  if (response.resultCode === RESULT_CODES.PRESENTTOSHOPPER) {
-    return {
-      isFinal: true,
-      action: response.action,
-      merchantReference: response.merchantReference,
+      merchantReference: response.merchantReference || orderNumber,
     };
   }
 

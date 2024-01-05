@@ -272,11 +272,12 @@ async function sendPayments(req, res, next) {
             )
         }
 
-        const checkoutResponse = createCheckoutResponse(response)
+        const checkoutResponse = createCheckoutResponse(response, order.orderNo)
         if (checkoutResponse.isFinal && !checkoutResponse.isSuccessful) {
             throw new Error(errorMessages.PAYMENT_NOT_SUCCESSFUL)
         }
 
+        Logger.info('sendPayments', `checkoutResponse ${JSON.stringify(checkoutResponse)}`)
         res.locals.response = checkoutResponse
         next()
     } catch (err) {
