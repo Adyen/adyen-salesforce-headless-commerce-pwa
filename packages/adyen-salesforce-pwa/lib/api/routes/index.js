@@ -54,6 +54,11 @@ function registerAdyenEndpoints(app, runtime, overrides) {
         query('amazonCheckoutSessionId').optional().escape(),
         runtime.render
     )
+    app.get(
+        '*/checkout/confirmation/:orderNo',
+        query('adyenAction').optional().escape(),
+        runtime.render
+    )
     app.get('/api/adyen/environment', ...environmentHandler)
     app.get('/api/adyen/paymentMethods', ...paymentMethodsHandler)
     app.post('/api/adyen/payments/details', ...paymentsDetailsHandler)

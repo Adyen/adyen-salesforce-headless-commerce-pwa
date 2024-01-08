@@ -174,7 +174,7 @@ describe('payments controller', () => {
             isSuccessful: true,
             merchantReference: 'reference123'
         })
-        expect(consoleInfoSpy).toHaveBeenCalledTimes(3)
+        expect(consoleInfoSpy).toHaveBeenCalledTimes(4)
         expect(consoleInfoSpy.mock.calls[0][0]).toContain('sendPayments start')
         expect(consoleInfoSpy.mock.calls[1][0]).toContain('sendPayments orderCreated 123')
         expect(consoleInfoSpy.mock.calls[2][0]).toContain('sendPayments resultCode Authorised')
@@ -259,7 +259,7 @@ describe('payments controller', () => {
             merchantReference: 'reference123'
         })
         expect(mockAddPaymentInstrumentToBasket).toHaveBeenCalled()
-        expect(consoleInfoSpy).toHaveBeenCalledTimes(4)
+        expect(consoleInfoSpy).toHaveBeenCalledTimes(5)
         expect(consoleInfoSpy.mock.calls[0][0]).toContain('sendPayments start')
         expect(consoleInfoSpy.mock.calls[1][0]).toContain(
             'sendPayments addPaymentInstrumentToBasket'
@@ -384,7 +384,7 @@ describe('payments controller', () => {
             isSuccessful: true,
             merchantReference: 'reference123'
         })
-        expect(consoleInfoSpy).toHaveBeenCalledTimes(3)
+        expect(consoleInfoSpy).toHaveBeenCalledTimes(4)
         expect(consoleInfoSpy.mock.calls[0][0]).toContain('sendPayments start')
         expect(consoleInfoSpy.mock.calls[1][0]).toContain('sendPayments orderCreated 123')
         expect(consoleInfoSpy.mock.calls[2][0]).toContain('sendPayments resultCode Authorised')
@@ -540,7 +540,7 @@ describe('payments controller', () => {
                 idempotencyKey: expect.any(String)
             }
         )
-        expect(consoleInfoSpy).toHaveBeenCalledTimes(3)
+        expect(consoleInfoSpy).toHaveBeenCalledTimes(4)
         expect(consoleInfoSpy.mock.calls[0][0]).toContain('sendPayments start')
         expect(consoleInfoSpy.mock.calls[1][0]).toContain('sendPayments orderCreated 123')
         expect(consoleInfoSpy.mock.calls[2][0]).toContain('sendPayments resultCode Authorised')
@@ -620,7 +620,7 @@ describe('payments controller', () => {
                 idempotencyKey: expect.any(String)
             }
         )
-        expect(consoleInfoSpy).toHaveBeenCalledTimes(3)
+        expect(consoleInfoSpy).toHaveBeenCalledTimes(4)
         expect(consoleInfoSpy.mock.calls[0][0]).toContain('sendPayments start')
         expect(consoleInfoSpy.mock.calls[1][0]).toContain('sendPayments orderCreated 123')
         expect(consoleInfoSpy.mock.calls[2][0]).toContain('sendPayments resultCode Authorised')
@@ -703,7 +703,7 @@ describe('payments controller', () => {
                 idempotencyKey: expect.any(String)
             }
         )
-        expect(consoleInfoSpy).toHaveBeenCalledTimes(3)
+        expect(consoleInfoSpy).toHaveBeenCalledTimes(4)
         expect(consoleInfoSpy.mock.calls[0][0]).toContain('sendPayments start')
         expect(consoleInfoSpy.mock.calls[1][0]).toContain('sendPayments orderCreated 123')
         expect(consoleInfoSpy.mock.calls[2][0]).toContain('sendPayments resultCode Authorised')
@@ -780,7 +780,7 @@ describe('payments controller', () => {
             merchantReference: 'reference123'
         })
         expect(mockUpdateOrderPaymentTransaction).toHaveBeenCalled()
-        expect(consoleInfoSpy).toHaveBeenCalledTimes(3)
+        expect(consoleInfoSpy).toHaveBeenCalledTimes(4)
         expect(consoleInfoSpy.mock.calls[0][0]).toContain('sendPayments start')
         expect(consoleInfoSpy.mock.calls[1][0]).toContain('sendPayments orderCreated 123')
         expect(consoleInfoSpy.mock.calls[2][0]).toContain('sendPayments resultCode Authorised')

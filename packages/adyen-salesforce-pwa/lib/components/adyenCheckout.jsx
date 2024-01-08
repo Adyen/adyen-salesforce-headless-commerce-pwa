@@ -17,6 +17,7 @@ const AdyenCheckoutComponent = (props) => {
         const urlParams = new URLSearchParams(location.search)
         const redirectResult = urlParams.get('redirectResult')
         const amazonCheckoutSessionId = urlParams.get('amazonCheckoutSessionId')
+        const adyenAction = urlParams.get('adyenAction')
 
         const createCheckout = async () => {
             const paymentMethodsConfiguration = await getPaymentMethodsConfiguration(props)
@@ -56,6 +57,10 @@ const AdyenCheckoutComponent = (props) => {
                     })
                     .mount(amazonPayContainer)
                 amazonPay.submit()
+            } else if (adyenAction) {
+                const actionString = atob(adyenAction)
+                const action = JSON.parse(actionString)
+                checkout.createFromAction(action).mount(paymentContainer.current)
             } else {
                 checkout.create('dropin').mount(paymentContainer.current)
             }

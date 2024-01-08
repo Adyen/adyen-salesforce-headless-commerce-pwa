@@ -14,7 +14,7 @@ import AdyenCheckoutConfig from './checkout-config'
 import Logger from './logger'
 import {v4 as uuidv4} from 'uuid'
 import {OrderApiClient} from './orderApi'
-import { getAdyenConfigForCurrentSite } from "../../utils/getAdyenConfigForCurrentSite.mjs";
+import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrentSite.mjs'
 
 const errorMessages = {
     AMOUNT_NOT_CORRECT: 'amount not correct',
@@ -272,11 +272,12 @@ async function sendPayments(req, res, next) {
             )
         }
 
-        const checkoutResponse = createCheckoutResponse(response)
+        const checkoutResponse = createCheckoutResponse(response, order.orderNo)
         if (checkoutResponse.isFinal && !checkoutResponse.isSuccessful) {
             throw new Error(errorMessages.PAYMENT_NOT_SUCCESSFUL)
         }
 
+        Logger.info('sendPayments', `checkoutResponse ${JSON.stringify(checkoutResponse)}`)
         res.locals.response = checkoutResponse
         next()
     } catch (err) {
