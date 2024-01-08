@@ -17,7 +17,18 @@ our [GitHub repository](https://github.com/Adyen/adyen-salesforce-headless-comme
 
 ---
 
-## Instalation
+## Dependencies & Requirements
+
+Adyen Payments Composable Storefront Integration for B2C Commerce depends on:
+
+1. PWA v3.1.1
+2. Adyen Web Components v5.51.0
+3. Adyen API Library for Node.js v14.3.0
+4. Node v18 or later
+5. NPM v9 or later
+6. Salesforce Managed Runtime
+
+## Installation
 
 1. Install the npm package using the following command
     ```shell
