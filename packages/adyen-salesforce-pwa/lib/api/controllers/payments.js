@@ -14,6 +14,7 @@ import AdyenCheckoutConfig from './checkout-config'
 import Logger from './logger'
 import {v4 as uuidv4} from 'uuid'
 import {OrderApiClient} from './orderApi'
+import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrentSite.mjs'
 
 const errorMessages = {
     AMOUNT_NOT_CORRECT: 'amount not correct',
@@ -69,7 +70,7 @@ function getShopperName(order) {
     }
 }
 
-function getApplicationInfo() {
+function getApplicationInfo(systemIntegratorName) {
     return {
         merchantApplication: {
             name: 'adyen-salesforce-commerce-cloud',
@@ -78,7 +79,7 @@ function getApplicationInfo() {
         externalPlatform: {
             name: 'SalesforceCommerceCloud',
             version: 'PWA',
-            integrator: process.env.SYSTEM_INTEGRATOR_NAME
+            integrator: systemIntegratorName
         }
     }
 }
@@ -163,13 +164,14 @@ async function removeAllPaymentInstrumentsFromBasket(basket, shopperBaskets) {
 async function sendPayments(req, res, next) {
     Logger.info('sendPayments', 'start')
     if (!validateRequestParams(req)) {
-        throw new Error(errorMessages.INVALID_PARAMS)
+        const err = new Error(errorMessages.INVALID_PARAMS)
+        Logger.error('sendPayments', err.message)
+        return next(err)
     }
-
-    const checkout = AdyenCheckoutConfig.getInstance()
     let order
-
     try {
+        const checkout = AdyenCheckoutConfig.getInstance()
+        const adyenConfig = getAdyenConfigForCurrentSite()
         const {data} = req.body
 
         const {app: appConfig} = getConfig()
@@ -183,7 +185,6 @@ async function sendPayments(req, res, next) {
                 basketId: req.headers.basketid
             }
         })
-
         if (!basket) {
             throw new Error(errorMessages.INVALID_BASKET)
         }
@@ -227,12 +228,12 @@ async function sendPayments(req, res, next) {
                 data.deliveryAddress ||
                 formatAddressInAdyenFormat(order.shipments[0].shippingAddress),
             reference: order.orderNo,
-            merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT,
+            merchantAccount: adyenConfig.merchantAccount,
             amount: {
                 value: getCurrencyValueForApi(order.orderTotal, order.currency),
                 currency: order.currency
             },
-            applicationInfo: getApplicationInfo(),
+            applicationInfo: getApplicationInfo(adyenConfig.systemIntegratorName),
             authenticationData: {
                 threeDSRequestData: {
                     nativeThreeDS: 'preferred'
@@ -271,11 +272,12 @@ async function sendPayments(req, res, next) {
             )
         }
 
-        const checkoutResponse = createCheckoutResponse(response)
+        const checkoutResponse = createCheckoutResponse(response, order.orderNo)
         if (checkoutResponse.isFinal && !checkoutResponse.isSuccessful) {
             throw new Error(errorMessages.PAYMENT_NOT_SUCCESSFUL)
         }
 
+        Logger.info('sendPayments', `checkoutResponse ${JSON.stringify(checkoutResponse)}`)
         res.locals.response = checkoutResponse
         next()
     } catch (err) {

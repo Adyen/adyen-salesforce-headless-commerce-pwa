@@ -67,6 +67,16 @@ export const AdyenCheckoutProvider = ({
         }
     }, [basket?.basketId])
 
+    const handleAction = async (component, responses) => {
+        if (responses?.paymentsResponse?.action?.type === 'voucher') {
+            const action = btoa(JSON.stringify(responses?.paymentsResponse?.action))
+            const url = `/checkout/confirmation/${responses?.paymentsResponse?.merchantReference}?adyenAction=${action}`
+            navigate(url)
+        } else {
+            await component.handleAction(responses?.paymentsResponse?.action)
+        }
+    }
+
     const getPaymentMethodsConfiguration = async ({
         beforeSubmit = [],
         afterSubmit = [],
@@ -94,7 +104,7 @@ export const AdyenCheckoutProvider = ({
         if (responses?.paymentsResponse?.isSuccessful) {
             navigate(`/checkout/confirmation/${responses?.paymentsResponse?.merchantReference}`)
         } else if (responses?.paymentsResponse?.action) {
-            await component.handleAction(responses?.paymentsResponse?.action)
+            await handleAction(component, responses)
         } else {
             return new Error(responses?.paymentsResponse)
         }

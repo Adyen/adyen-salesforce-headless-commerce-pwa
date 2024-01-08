@@ -17,7 +17,18 @@ our [GitHub repository](https://github.com/Adyen/adyen-salesforce-headless-comme
 
 ---
 
-## Instalation
+## Dependencies & Requirements
+
+Adyen Payments Composable Storefront Integration for B2C Commerce depends on:
+
+1. PWA v3.1.1
+2. Adyen Web Components v5.51.0
+3. Adyen API Library for Node.js v14.3.0
+4. Node v18 or later
+5. NPM v9 or later
+6. Salesforce Managed Runtime
+
+## Installation
 
 1. Install the npm package using the following command
     ```shell
@@ -44,22 +55,43 @@ our [GitHub repository](https://github.com/Adyen/adyen-salesforce-headless-comme
 5. In your `retail-react-app` you would need to create a .env file. Check
    the [example file](../adyen-retail-react-app/.env.example) in our reference application.
 
-6. Import `countrylist` in `constants.js` of your `retail-react-app` and export it as `SHIPPING_COUNTRY_CODES`:
+6. In your `retail-react-app` you would need to update the `config/sites.js` file and include the adyen config.
+   Your sites.js file should look something similar to this:
+   ```ecmascript 5
+   module.exports = [{
+        id: 'RefArch',
+        l10n: {
+            ...
+        },
+        adyen: {
+            apiKey: process.env.ADYEN_API_KEY,
+            clientKey: process.env.ADYEN_CLIENT_KEY,
+            environment: process.env.ADYEN_ENVIRONMENT,
+            merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT,
+            systemIntegratorName: process.env.SYSTEM_INTEGRATOR_NAME,
+            webhookUser: process.env.ADYEN_WEBHOOK_USER,
+            webhookPassword: process.env.ADYEN_WEBHOOK_PASSWORD,
+            webhookHmacKey: process.env.ADYEN_HMAC_KEY
+        }
+   }]
+   ```
+
+7. Import `countrylist` in `constants.js` of your `retail-react-app` and export it as `SHIPPING_COUNTRY_CODES`:
 
     ```ecmascript 6
    import {countryList} from '@adyen/adyen-salesforce-pwa'
 
    export const SHIPPING_COUNTRY_CODES = countryList
     ```
-7. To run the app locally with env variables execute the following command:
+8. To run the app locally with env variables execute the following command:
     ```shell
     npm run start:env
     ```
-8. To push your env variables to the MRT environment execute the following command:
+9. To push your env variables to the MRT environment execute the following command:
     ```shell
     npm run upload-env
     ```
-9. To see which env variables are present in the MRT environment execute the following command:
+10. To see which env variables are present in the MRT environment execute the following command:
     ```shell
     npm run get-env   
     ```

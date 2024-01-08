@@ -48,4 +48,4 @@ export const ORDER = Object.freeze({
     CONFIRMATION_STATUS_NOT_CONFIRMED: 'not_confirmed'
 })
 
-export const APPLICATION_VERSION = '1.0.0-beta.3'
+export const APPLICATION_VERSION = '1.0.0-beta.4'

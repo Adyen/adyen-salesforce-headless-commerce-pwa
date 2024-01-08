@@ -1,6 +1,7 @@
 import {hmacValidator} from '@adyen/api-library'
 import NotificationRequest from '@adyen/api-library/lib/src/notification/notificationRequest'
 import Logger from './logger'
+import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrentSite.mjs'
 
 const messages = {
     AUTH_ERROR: 'Access Denied!',
@@ -24,6 +25,7 @@ async function handleWebhook(req, res, next) {
 function authenticate(req, res, next) {
     try {
         const authHeader = req.headers.authorization
+        const adyenConfig = getAdyenConfigForCurrentSite()
         if (!authHeader) {
             throw new Error(messages.AUTH_ERROR)
         }
@@ -37,10 +39,7 @@ function authenticate(req, res, next) {
         const user = auth[0]
         const pass = auth[1]
 
-        if (
-            user === process.env.ADYEN_WEBHOOK_USER &&
-            pass === process.env.ADYEN_WEBHOOK_PASSWORD
-        ) {
+        if (user === adyenConfig.webhookUser && pass === adyenConfig.webhookPassword) {
             return next()
         } else {
             throw new Error(messages.AUTH_ERROR)
@@ -52,13 +51,15 @@ function authenticate(req, res, next) {
 }
 
 function validateHmac(req, res, next) {
-    const ADYEN_HMAC_KEY = process.env.ADYEN_HMAC_KEY
-    if (!ADYEN_HMAC_KEY) return next()
+    const adyenConfig = getAdyenConfigForCurrentSite()
+    if (!adyenConfig?.webhookHmacKey) {
+        return next()
+    }
     const {notificationItems} = req.body
     const {NotificationRequestItem} = notificationItems[0]
     try {
         const HmacValidator = new hmacValidator()
-        if (HmacValidator.validateHMAC(NotificationRequestItem, ADYEN_HMAC_KEY)) {
+        if (HmacValidator.validateHMAC(NotificationRequestItem, adyenConfig?.webhookHmacKey)) {
             return next()
         } else {
             throw new Error(messages.AUTH_ERROR)
