@@ -24,7 +24,7 @@ const AdyenCheckoutComponent = (props) => {
         const createCheckout = async () => {
             const paymentMethodsConfiguration = await getPaymentMethodsConfiguration(props)
             const translations = getTranslations()
-            const baseConfig = {
+            const checkoutConfig = {
                 environment: adyenEnvironment.ADYEN_ENVIRONMENT,
                 clientKey: adyenEnvironment.ADYEN_CLIENT_KEY,
                 paymentMethodsResponse: adyenPaymentMethods,
@@ -32,10 +32,10 @@ const AdyenCheckoutComponent = (props) => {
                 locale: locale.id
             }
             if (translations) {
-                baseConfig.translations = translations
+                checkoutConfig.translations = translations
             }
             const checkout = await AdyenCheckout({
-                ...baseConfig,
+                ...checkoutConfig,
                 onSubmit(state, element) {
                     const onSubmit =
                         paymentMethodsConfiguration.onSubmit ||
