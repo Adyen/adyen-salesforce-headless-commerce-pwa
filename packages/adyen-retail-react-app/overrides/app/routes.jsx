@@ -27,6 +27,41 @@ import {
 // Components
 const fallback = <Skeleton height="75vh" width="100%" />
 
+/**
+ * Customize Adyen Checkout
+ * - Translations
+ * - Payment Methods
+ * - Execute Callbacks
+ *
+ * const checkoutCustomizations = {
+ *     beforeSubmit: [
+ *         function logAfterSubmit() {
+ *             console.log('before submit')
+ *             return true
+ *         }
+ *     ],
+ *     afterSubmit: [
+ *         function logAfterSubmit() {
+ *             console.log('after submit')
+ *             return true
+ *         }
+ *     ],
+ *     translations: {
+ *         'en-US': {
+ *             payButton: ''
+ *         }
+ *     },
+ *     paymentMethodsConfiguration: {
+ *         paypal: {
+ *             style: {
+ *                 layout: 'vertical',
+ *                 color: 'blue'
+ *             }
+ *         }
+ *     }
+ * }
+ */
+
 // Create your pages here and add them to the routes array
 // Use loadable to split code into smaller js chunks
 // Checkout page from Adyen
@@ -39,6 +74,7 @@ const Checkout = loadable(() => import('@adyen/adyen-salesforce-pwa'), {
                 useCustomerId={useCustomerId}
                 useCustomerType={useCustomerType}
                 useShopperBasketsMutation={useShopperBasketsMutation}
+                // adyenConfig={checkoutCustomizations}
             />
         )
     }
