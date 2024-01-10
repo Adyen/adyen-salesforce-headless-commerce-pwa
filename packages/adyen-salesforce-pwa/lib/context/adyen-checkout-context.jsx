@@ -79,7 +79,9 @@ export const AdyenCheckoutProvider = ({
     }
 
     const getTranslations = () => {
-        return adyenConfig?.translations || null
+        return Object.hasOwn(adyenConfig?.translations, locale.id)
+            ? adyenConfig?.translations
+            : null
     }
 
     const getPaymentMethodsConfiguration = async ({
