@@ -48,7 +48,8 @@ const filterStateData = (stateData) => {
         'browserInfo',
         'installments',
         'storePaymentMethod',
-        'conversionId'
+        'conversionId',
+        'origin'
     ]
     const filteredStateData = {}
     const stateDataKeys = Object.keys(stateData)
