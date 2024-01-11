@@ -83,13 +83,15 @@ const CheckoutContainer = ({
     useAccessToken,
     useCustomerId,
     useCustomerType,
-    useShopperBasketsMutation
+    useShopperBasketsMutation,
+    adyenConfig
 }) => {
     return (
         <AdyenCheckoutProvider
             useAccessToken={useAccessToken}
             useCustomerId={useCustomerId}
             useCustomerType={useCustomerType}
+            adyenConfig={adyenConfig}
         >
             <CheckoutProvider>
                 <CheckoutChildren useShopperBasketsMutation={useShopperBasketsMutation} />
@@ -98,12 +100,21 @@ const CheckoutContainer = ({
     )
 }
 
+Checkout.propTypes = {
+    useShopperBasketsMutation: PropTypes.any
+}
+
+CheckoutChildren.propTypes = {
+    useShopperBasketsMutation: PropTypes.any
+}
+
 CheckoutContainer.propTypes = {
     children: PropTypes.any,
     useAccessToken: PropTypes.any,
     useCustomerId: PropTypes.any,
     useCustomerType: PropTypes.any,
-    useShopperBasketsMutation: PropTypes.any
+    useShopperBasketsMutation: PropTypes.any,
+    adyenConfig: PropTypes.any
 }
 
 export default CheckoutContainer

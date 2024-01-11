@@ -14,7 +14,8 @@ export const AdyenCheckoutProvider = ({
     children,
     useAccessToken,
     useCustomerId,
-    useCustomerType
+    useCustomerType,
+    adyenConfig
 }) => {
     const {getTokenWhenReady} = useAccessToken()
     const customerId = useCustomerId()
@@ -77,6 +78,12 @@ export const AdyenCheckoutProvider = ({
         }
     }
 
+    const getTranslations = () => {
+        return adyenConfig?.translations && Object.hasOwn(adyenConfig?.translations, locale.id)
+            ? adyenConfig?.translations
+            : null
+    }
+
     const getPaymentMethodsConfiguration = async ({
         beforeSubmit = [],
         afterSubmit = [],
@@ -86,17 +93,25 @@ export const AdyenCheckoutProvider = ({
     }) => {
         const token = await getTokenWhenReady()
         return paymentMethodsConfiguration({
+            additionalPaymentMethodsConfiguration: adyenConfig?.paymentMethodsConfiguration,
             paymentMethods: adyenPaymentMethods?.paymentMethods,
             customerType,
             token,
             basket: basket,
             customerId,
-            onError: onError,
+            onError: adyenConfig?.onError || onError,
             onNavigate: navigate,
-            afterSubmit: [...afterSubmit, onPaymentsSuccess],
-            beforeSubmit: beforeSubmit,
-            afterAdditionalDetails: [...afterAdditionalDetails, onPaymentsDetailsSuccess],
-            beforeAdditionalDetails: beforeAdditionalDetails
+            afterSubmit: [...afterSubmit, ...(adyenConfig?.afterSubmit || []), onPaymentsSuccess],
+            beforeSubmit: [...beforeSubmit, ...(adyenConfig?.beforeSubmit || [])],
+            afterAdditionalDetails: [
+                ...afterAdditionalDetails,
+                ...(adyenConfig?.afterAdditionalDetails || []),
+                onPaymentsDetailsSuccess
+            ],
+            beforeAdditionalDetails: [
+                ...beforeAdditionalDetails,
+                ...(adyenConfig?.beforeAdditionalDetails || [])
+            ]
         })
     }
 
@@ -127,9 +142,11 @@ export const AdyenCheckoutProvider = ({
         adyenPaymentMethods,
         adyenStateData,
         adyenPaymentInProgress,
+        locale,
         setAdyenPaymentInProgress: (data) => setAdyenPaymentInProgress(data),
         setAdyenStateData: (data) => setAdyenStateData(data),
-        getPaymentMethodsConfiguration
+        getPaymentMethodsConfiguration,
+        getTranslations
     }
 
     return <AdyenCheckoutContext.Provider value={value}>{children}</AdyenCheckoutContext.Provider>
@@ -139,7 +156,8 @@ AdyenCheckoutProvider.propTypes = {
     children: PropTypes.any,
     useAccessToken: PropTypes.any,
     useCustomerId: PropTypes.any,
-    useCustomerType: PropTypes.any
+    useCustomerType: PropTypes.any,
+    adyenConfig: PropTypes.any
 }
 
 /**
