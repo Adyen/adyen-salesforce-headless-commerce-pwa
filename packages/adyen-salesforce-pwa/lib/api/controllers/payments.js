@@ -237,8 +237,6 @@ async function sendPayments(req, res, next) {
             throw new Error(errorMessages.INVALID_ORDER)
         }
 
-        console.log(order)
-
         const paymentRequest = {
             ...filterStateData(data),
             billingAddress: data.billingAddress || formatAddressInAdyenFormat(order.billingAddress),
