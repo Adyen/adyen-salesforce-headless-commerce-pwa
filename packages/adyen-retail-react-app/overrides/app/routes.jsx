@@ -62,6 +62,37 @@ const fallback = <Skeleton height="75vh" width="100%" />
  * }
  */
 
+const checkoutCustomizations = {
+    beforeSubmit: [
+        function logAfterSubmit() {
+            console.log('before submit')
+            return true
+        }
+    ],
+    afterSubmit: [
+        function logAfterSubmit() {
+            console.log('after submit')
+            return true
+        }
+    ],
+    translations: {
+        'en-US': {
+            payButton: ''
+        },
+        'fr-FR': {
+            payButton: 'parle vouz fransais'
+        }
+    },
+    paymentMethodsConfiguration: {
+        paypal: {
+            style: {
+                layout: 'vertical',
+                color: 'blue'
+            }
+        }
+    }
+}
+
 // Create your pages here and add them to the routes array
 // Use loadable to split code into smaller js chunks
 // Checkout page from Adyen
@@ -74,7 +105,7 @@ const Checkout = loadable(() => import('@adyen/adyen-salesforce-pwa'), {
                 useCustomerId={useCustomerId}
                 useCustomerType={useCustomerType}
                 useShopperBasketsMutation={useShopperBasketsMutation}
-                // adyenConfig={checkoutCustomizations}
+                adyenConfig={checkoutCustomizations}
             />
         )
     }
@@ -98,6 +129,20 @@ const CheckoutConfirmation = loadable(() => import('@adyen/adyen-salesforce-pwa'
     }
 })
 
+// Checkout Redirect page from Adyen
+const AdyenCheckoutRedirect = loadable(() => import('@adyen/adyen-salesforce-pwa'), {
+    fallback: fallback,
+    resolveComponent: (components) => {
+        return () => (
+            <components.AdyenCheckoutRedirect
+                useAccessToken={useAccessToken}
+                useCustomerId={useCustomerId}
+                useCustomerType={useCustomerType}
+            />
+        )
+    }
+})
+
 // Checkout Error page from Adyen
 const AdyenCheckoutError = loadable(() => import('@adyen/adyen-salesforce-pwa'), {
     fallback: fallback,
@@ -111,6 +156,10 @@ const routes = [
         path: '/checkout',
         component: Checkout,
         exact: true
+    },
+    {
+        path: '/checkout/redirect',
+        component: AdyenCheckoutRedirect
     },
     {
         path: '/checkout/error',
