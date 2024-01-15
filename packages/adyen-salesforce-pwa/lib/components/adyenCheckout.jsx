@@ -28,10 +28,10 @@ const AdyenCheckoutComponent = (props) => {
                 environment: adyenEnvironment.ADYEN_ENVIRONMENT,
                 clientKey: adyenEnvironment.ADYEN_CLIENT_KEY,
                 paymentMethodsResponse: adyenPaymentMethods,
-                paymentMethodsConfiguration: paymentMethodsConfiguration,
-                locale: locale.id
+                paymentMethodsConfiguration: paymentMethodsConfiguration
             }
             if (translations) {
+                checkoutConfig.locale = locale.id
                 checkoutConfig.translations = translations
             }
             const checkout = await AdyenCheckout({

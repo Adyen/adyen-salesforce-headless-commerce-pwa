@@ -12,9 +12,12 @@ import {useForm} from 'react-hook-form'
 import {useToast} from '@salesforce/retail-react-app/app/hooks/use-toast'
 import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 import {getCreditCardIcon} from '@salesforce/retail-react-app/app/utils/cc-utils'
-import {ToggleCard, ToggleCardEdit, ToggleCardSummary} from '@salesforce/retail-react-app/app/components/toggle-card'
-import ShippingAddressSelection
-    from '@salesforce/retail-react-app/app/pages/checkout/partials/shipping-address-selection'
+import {
+    ToggleCard,
+    ToggleCardEdit,
+    ToggleCardSummary
+} from '@salesforce/retail-react-app/app/components/toggle-card'
+import ShippingAddressSelection from '@salesforce/retail-react-app/app/pages/checkout/partials/shipping-address-selection'
 import AddressDisplay from '@salesforce/retail-react-app/app/components/address-display'
 import {PromoCode, usePromoCode} from '@salesforce/retail-react-app/app/components/promo-code'
 import {API_ERROR_MESSAGE} from '@salesforce/retail-react-app/app/constants'
@@ -211,5 +214,7 @@ const PaymentCardSummary = ({payment}) => {
 }
 
 PaymentCardSummary.propTypes = {payment: PropTypes.object}
+
+Payment.propTypes = {useShopperBasketsMutation: PropTypes.any}
 
 export default Payment
