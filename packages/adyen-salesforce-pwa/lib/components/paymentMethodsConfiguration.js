@@ -31,8 +31,7 @@ export const paymentMethodsConfiguration = ({
             const basePaymentMethodConfig = Object.hasOwn(paymentMethodsConfig, type)
                 ? paymentMethodsConfig[type]
                 : defaultConfig
-            return additionalPaymentMethodsConfiguration &&
-                additionalPaymentMethodsConfiguration[type]
+            return additionalPaymentMethodsConfiguration?.[type]
                 ? [
                       type,
                       {...basePaymentMethodConfig, ...additionalPaymentMethodsConfiguration[type]}

@@ -97,6 +97,21 @@ function isOpenInvoiceMethod(paymentMethod) {
     )
 }
 
+function getAdditionalData(order) {
+    const additionalData = {}
+    order.productItems.forEach((product, index) => {
+        additionalData[`riskdata.basket.item${index + 1}.itemID`] = product.itemId
+        additionalData[`riskdata.basket.item${index + 1}.productTitle`] = product.productName
+        additionalData[`riskdata.basket.item${index + 1}.amountPerItem`] = getCurrencyValueForApi(
+            product.basePrice,
+            order.currency
+        )
+        additionalData[`riskdata.basket.item${index + 1}.quantity`] = product.quantity
+        additionalData[`riskdata.basket.item${index + 1}.currency`] = order.currency
+    })
+    return additionalData
+}
+
 function getLineItems(order) {
     const productLineItems = order?.productItems?.length
         ? order?.productItems?.map((productItem) => {
@@ -258,6 +273,8 @@ async function sendPayments(req, res, next) {
                 ? SHOPPER_INTERACTIONS.CONT_AUTH
                 : SHOPPER_INTERACTIONS.ECOMMERCE
         }
+
+        paymentRequest.additionalData = getAdditionalData(order)
 
         const response = await checkout.instance.payments(paymentRequest, {
             idempotencyKey: uuidv4()

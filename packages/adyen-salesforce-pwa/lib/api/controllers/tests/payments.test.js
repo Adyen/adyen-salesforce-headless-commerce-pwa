@@ -157,7 +157,28 @@ describe('payments controller', () => {
                     postalCode: '10001',
                     stateCode: 'NY',
                     address1: '123 Main St'
-                }
+                },
+                productItems: [
+                    {
+                        adjustedTax: 1.5,
+                        basePrice: 29.99,
+                        bonusProductLineItem: false,
+                        gift: false,
+                        itemId: 'f9fe488b0b925984ffd1d5b360',
+                        itemText: 'Striped Silk Tie',
+                        price: 29.99,
+                        priceAfterItemDiscount: 29.99,
+                        priceAfterOrderDiscount: 29.99,
+                        productId: '793775362380M',
+                        productName: 'Striped Silk Tie',
+                        quantity: 1,
+                        shipmentId: 'me',
+                        tax: 1.5,
+                        taxBasis: 29.99,
+                        taxClassId: 'standard',
+                        taxRate: 0.05
+                    }
+                ]
             }
         })
 
@@ -241,7 +262,28 @@ describe('payments controller', () => {
                     postalCode: '10001',
                     stateCode: 'NY',
                     address1: '123 Main St'
-                }
+                },
+                productItems: [
+                    {
+                        adjustedTax: 1.5,
+                        basePrice: 29.99,
+                        bonusProductLineItem: false,
+                        gift: false,
+                        itemId: 'f9fe488b0b925984ffd1d5b360',
+                        itemText: 'Striped Silk Tie',
+                        price: 29.99,
+                        priceAfterItemDiscount: 29.99,
+                        priceAfterOrderDiscount: 29.99,
+                        productId: '793775362380M',
+                        productName: 'Striped Silk Tie',
+                        quantity: 1,
+                        shipmentId: 'me',
+                        tax: 1.5,
+                        taxBasis: 29.99,
+                        taxClassId: 'standard',
+                        taxRate: 0.05
+                    }
+                ]
             }
         })
 
@@ -306,7 +348,28 @@ describe('payments controller', () => {
                     postalCode: '10001',
                     stateCode: 'NY',
                     address1: '123 Main St'
-                }
+                },
+                productItems: [
+                    {
+                        adjustedTax: 1.5,
+                        basePrice: 29.99,
+                        bonusProductLineItem: false,
+                        gift: false,
+                        itemId: 'f9fe488b0b925984ffd1d5b360',
+                        itemText: 'Striped Silk Tie',
+                        price: 29.99,
+                        priceAfterItemDiscount: 29.99,
+                        priceAfterOrderDiscount: 29.99,
+                        productId: '793775362380M',
+                        productName: 'Striped Silk Tie',
+                        quantity: 1,
+                        shipmentId: 'me',
+                        tax: 1.5,
+                        taxBasis: 29.99,
+                        taxClassId: 'standard',
+                        taxRate: 0.05
+                    }
+                ]
             }
         })
 
@@ -358,7 +421,28 @@ describe('payments controller', () => {
                     postalCode: '10001',
                     stateCode: 'NY',
                     address1: '123 Main St'
-                }
+                },
+                productItems: [
+                    {
+                        adjustedTax: 1.5,
+                        basePrice: 29.99,
+                        bonusProductLineItem: false,
+                        gift: false,
+                        itemId: 'f9fe488b0b925984ffd1d5b360',
+                        itemText: 'Striped Silk Tie',
+                        price: 29.99,
+                        priceAfterItemDiscount: 29.99,
+                        priceAfterOrderDiscount: 29.99,
+                        productId: '793775362380M',
+                        productName: 'Striped Silk Tie',
+                        quantity: 1,
+                        shipmentId: 'me',
+                        tax: 1.5,
+                        taxBasis: 29.99,
+                        taxClassId: 'standard',
+                        taxRate: 0.05
+                    }
+                ]
             }
         })
 
@@ -584,7 +668,28 @@ describe('payments controller', () => {
                     postalCode: '10001',
                     stateCode: 'NY',
                     address1: '123 Main St'
-                }
+                },
+                productItems: [
+                    {
+                        adjustedTax: 1.5,
+                        basePrice: 29.99,
+                        bonusProductLineItem: false,
+                        gift: false,
+                        itemId: 'f9fe488b0b925984ffd1d5b360',
+                        itemText: 'Striped Silk Tie',
+                        price: 29.99,
+                        priceAfterItemDiscount: 29.99,
+                        priceAfterOrderDiscount: 29.99,
+                        productId: '793775362380M',
+                        productName: 'Striped Silk Tie',
+                        quantity: 1,
+                        shipmentId: 'me',
+                        tax: 1.5,
+                        taxBasis: 29.99,
+                        taxClassId: 'standard',
+                        taxRate: 0.05
+                    }
+                ]
             }
         })
 
@@ -664,7 +769,28 @@ describe('payments controller', () => {
                     postalCode: '10001',
                     stateCode: 'NY',
                     address1: '123 Main St'
-                }
+                },
+                productItems: [
+                    {
+                        adjustedTax: 1.5,
+                        basePrice: 29.99,
+                        bonusProductLineItem: false,
+                        gift: false,
+                        itemId: 'f9fe488b0b925984ffd1d5b360',
+                        itemText: 'Striped Silk Tie',
+                        price: 29.99,
+                        priceAfterItemDiscount: 29.99,
+                        priceAfterOrderDiscount: 29.99,
+                        productId: '793775362380M',
+                        productName: 'Striped Silk Tie',
+                        quantity: 1,
+                        shipmentId: 'me',
+                        tax: 1.5,
+                        taxBasis: 29.99,
+                        taxClassId: 'standard',
+                        taxRate: 0.05
+                    }
+                ]
             }
         })
 
@@ -754,6 +880,27 @@ describe('payments controller', () => {
                         paymentInstrumentId: 'ca47e0da3d49b067b630db624a',
                         paymentMethodId: 'BML'
                     }
+                ],
+                productItems: [
+                    {
+                        adjustedTax: 1.5,
+                        basePrice: 29.99,
+                        bonusProductLineItem: false,
+                        gift: false,
+                        itemId: 'f9fe488b0b925984ffd1d5b360',
+                        itemText: 'Striped Silk Tie',
+                        price: 29.99,
+                        priceAfterItemDiscount: 29.99,
+                        priceAfterOrderDiscount: 29.99,
+                        productId: '793775362380M',
+                        productName: 'Striped Silk Tie',
+                        quantity: 1,
+                        shipmentId: 'me',
+                        tax: 1.5,
+                        taxBasis: 29.99,
+                        taxClassId: 'standard',
+                        taxRate: 0.05
+                    }
                 ]
             }
         })
@@ -824,7 +971,28 @@ describe('payments controller', () => {
                     postalCode: '10001',
                     stateCode: 'NY',
                     address1: '123 Main St'
-                }
+                },
+                productItems: [
+                    {
+                        adjustedTax: 1.5,
+                        basePrice: 29.99,
+                        bonusProductLineItem: false,
+                        gift: false,
+                        itemId: 'f9fe488b0b925984ffd1d5b360',
+                        itemText: 'Striped Silk Tie',
+                        price: 29.99,
+                        priceAfterItemDiscount: 29.99,
+                        priceAfterOrderDiscount: 29.99,
+                        productId: '793775362380M',
+                        productName: 'Striped Silk Tie',
+                        quantity: 1,
+                        shipmentId: 'me',
+                        tax: 1.5,
+                        taxBasis: 29.99,
+                        taxClassId: 'standard',
+                        taxRate: 0.05
+                    }
+                ]
             }
         })
         mockPayments.mockImplementationOnce(() => {
@@ -893,7 +1061,28 @@ describe('payments controller', () => {
                     postalCode: '10001',
                     stateCode: 'NY',
                     address1: '123 Main St'
-                }
+                },
+                productItems: [
+                    {
+                        adjustedTax: 1.5,
+                        basePrice: 29.99,
+                        bonusProductLineItem: false,
+                        gift: false,
+                        itemId: 'f9fe488b0b925984ffd1d5b360',
+                        itemText: 'Striped Silk Tie',
+                        price: 29.99,
+                        priceAfterItemDiscount: 29.99,
+                        priceAfterOrderDiscount: 29.99,
+                        productId: '793775362380M',
+                        productName: 'Striped Silk Tie',
+                        quantity: 1,
+                        shipmentId: 'me',
+                        tax: 1.5,
+                        taxBasis: 29.99,
+                        taxClassId: 'standard',
+                        taxRate: 0.05
+                    }
+                ]
             }
         })
         mockPayments.mockImplementationOnce(() => {
