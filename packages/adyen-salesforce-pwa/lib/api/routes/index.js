@@ -49,7 +49,7 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     ]
 
     app.get(
-        '*/checkout',
+        '*/checkout/redirect',
         query('redirectResult').optional().escape(),
         query('amazonCheckoutSessionId').optional().escape(),
         runtime.render
