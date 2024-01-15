@@ -31,7 +31,7 @@ describe('Adyen Endpoints', () => {
             registerAdyenEndpoints(app, runtime, overrides)
 
             expect(app.get).toHaveBeenCalledWith(
-                '*/checkout',
+                '*/checkout/redirect',
                 expect.any(Function),
                 expect.any(Function),
                 runtime.render
