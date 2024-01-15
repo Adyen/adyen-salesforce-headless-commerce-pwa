@@ -16,7 +16,6 @@ const AdyenCheckoutRedirectContainer = ({useAccessToken, useCustomerId, useCusto
 }
 
 AdyenCheckoutRedirectContainer.propTypes = {
-    children: PropTypes.any,
     useAccessToken: PropTypes.any,
     useCustomerId: PropTypes.any,
     useCustomerType: PropTypes.any
