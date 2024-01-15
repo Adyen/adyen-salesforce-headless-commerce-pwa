@@ -34,46 +34,44 @@ Adyen Payments Composable Storefront Integration for B2C Commerce depends on:
     ```shell
     npm install @adyen/adyen-salesforce-pwa
     ```
+
 2. Import the Adyen endpoints function in the `ssr.js` file:
     ```ecmascript 6
     import {registerAdyenEndpoints} from '@adyen/adyen-salesforce-pwa/dist/ssr/index.js'
     ```
+
 3. Include it as part of the server handler callback in the `ssr.js` file before last `app.get()` handler:
 
     ```ecmascript 6
     const {handler} = runtime.createHandler(options, (app) => {
       // ...
-   
+
       registerAdyenEndpoints(app, runtime)
-   
+
       app.get('*', runtime.render)
     })
     ```
+
 4. Include Adyen checkout pages in the `routes.jsx` of your `retail-react-app`.
    Check [routes.jsx](../adyen-retail-react-app/overrides/app/routes.jsx) file for reference.
 
 5. In your `retail-react-app` you would need to create a .env file. Check
    the [example file](../adyen-retail-react-app/.env.example) in our reference application.
 
-6. In your `retail-react-app` you would need to update the `config/sites.js` file and include the adyen config.
-   Your sites.js file should look something similar to this:
-   ```ecmascript 5
-   module.exports = [{
-        id: 'RefArch',
-        l10n: {
-            ...
-        },
-        adyen: {
-            apiKey: process.env.ADYEN_API_KEY,
-            clientKey: process.env.ADYEN_CLIENT_KEY,
-            environment: process.env.ADYEN_ENVIRONMENT,
-            merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT,
-            systemIntegratorName: process.env.SYSTEM_INTEGRATOR_NAME,
-            webhookUser: process.env.ADYEN_WEBHOOK_USER,
-            webhookPassword: process.env.ADYEN_WEBHOOK_PASSWORD,
-            webhookHmacKey: process.env.ADYEN_HMAC_KEY
-        }
-   }]
+6. In your `retail-react-app` you would need to create the `config/{siteId}/adyen.js` file and include the adyen config.
+   Your `config/{siteId}/adyen.js` file should look something similar to this:
+
+    ```ecmascript 5
+    module.exports = {
+        apiKey: process.env.ADYEN_API_KEY,
+        clientKey: process.env.ADYEN_CLIENT_KEY,
+        environment: process.env.ADYEN_ENVIRONMENT,
+        merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT,
+        systemIntegratorName: process.env.SYSTEM_INTEGRATOR_NAME,
+        webhookUser: process.env.ADYEN_WEBHOOK_USER,
+        webhookPassword: process.env.ADYEN_WEBHOOK_PASSWORD,
+        webhookHmacKey: process.env.ADYEN_HMAC_KEY
+    }
    ```
 
 7. Import `countrylist` in `constants.js` of your `retail-react-app` and export it as `SHIPPING_COUNTRY_CODES`:
@@ -83,17 +81,20 @@ Adyen Payments Composable Storefront Integration for B2C Commerce depends on:
 
    export const SHIPPING_COUNTRY_CODES = countryList
     ```
+
 8. To run the app locally with env variables execute the following command:
     ```shell
     npm run start:env
     ```
+
 9. To push your env variables to the MRT environment execute the following command:
     ```shell
     npm run upload-env
     ```
+
 10. To see which env variables are present in the MRT environment execute the following command:
     ```shell
-    npm run get-env   
+    npm run get-env
     ```
 
 ## Prerequisites

@@ -1,10 +1,10 @@
 import {Client, Config} from '@adyen/api-library'
 import {PaymentsApi} from '@adyen/api-library/lib/src/services/checkout/paymentsApi'
-import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrentSite.mjs'
+import {getSiteConfig} from '../../utils/getConfig.mjs'
 
 class AdyenCheckoutConfig {
     constructor() {
-        const adyenConfig = getAdyenConfigForCurrentSite()
+        const adyenConfig = getSiteConfig('adyen')
         const config = new Config()
         config.apiKey = adyenConfig.apiKey
         const client = new Client({config})

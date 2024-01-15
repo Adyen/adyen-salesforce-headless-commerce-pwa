@@ -1,34 +1,7 @@
 import AdyenCheckoutConfig from '../checkout-config'
 
-jest.mock('@salesforce/pwa-kit-runtime/utils/ssr-config', () => {
-    return {
-        getConfig: jest.fn().mockImplementation(() => {
-            return {
-                app: {
-                    sites: [
-                        {
-                            id: 'RefArch',
-                            adyen: {
-                                apiKey: process.env.ADYEN_API_KEY,
-                                clientKey: process.env.ADYEN_CLIENT_KEY,
-                                environment: process.env.ADYEN_ENVIRONMENT,
-                                merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT
-                            }
-                        }
-                    ],
-                    commerceAPI: {
-                        parameters: {
-                            siteId: 'RefArch'
-                        }
-                    }
-                }
-            }
-        })
-    }
-})
-
-jest.mock('../../../utils/getAdyenConfigForCurrentSite.mjs', () => ({
-    getAdyenConfigForCurrentSite: jest.fn(() => ({
+jest.mock('../../../utils/getConfig.mjs', () => ({
+    getSiteConfig: jest.fn(() => ({
         apiKey: 'mock-api-key',
         environment: 'TEST'
     }))

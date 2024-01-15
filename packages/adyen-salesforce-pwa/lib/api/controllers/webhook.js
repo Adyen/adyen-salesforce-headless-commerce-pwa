@@ -1,7 +1,7 @@
 import {hmacValidator} from '@adyen/api-library'
 import NotificationRequest from '@adyen/api-library/lib/src/notification/notificationRequest'
 import Logger from './logger'
-import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrentSite.mjs'
+import {getSiteConfig} from '../../utils/getConfig.mjs'
 
 const messages = {
     AUTH_ERROR: 'Access Denied!',
@@ -25,7 +25,7 @@ async function handleWebhook(req, res, next) {
 function authenticate(req, res, next) {
     try {
         const authHeader = req.headers.authorization
-        const adyenConfig = getAdyenConfigForCurrentSite()
+        const adyenConfig = getSiteConfig('adyen')
         if (!authHeader) {
             throw new Error(messages.AUTH_ERROR)
         }
@@ -51,7 +51,7 @@ function authenticate(req, res, next) {
 }
 
 function validateHmac(req, res, next) {
-    const adyenConfig = getAdyenConfigForCurrentSite()
+    const adyenConfig = getSiteConfig('adyen')
     if (!adyenConfig?.webhookHmacKey) {
         return next()
     }

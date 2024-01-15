@@ -5,12 +5,12 @@ import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 import AdyenCheckoutConfig from './checkout-config'
 import Logger from './logger'
 import {v4 as uuidv4} from 'uuid'
-import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrentSite.mjs'
+import {getSiteConfig} from '../../utils/getConfig.mjs'
 
 async function getPaymentMethods(req, res, next) {
     Logger.info('getPaymentMethods', 'start')
     const checkout = AdyenCheckoutConfig.getInstance()
-    const adyenConfig = getAdyenConfigForCurrentSite()
+    const adyenConfig = getSiteConfig('adyen')
 
     try {
         const {app: appConfig} = getConfig()

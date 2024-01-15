@@ -1,8 +1,8 @@
 import getEnvironment from '../environment'
-import {getAdyenConfigForCurrentSite} from '../../../utils/getAdyenConfigForCurrentSite.mjs'
+import {getSiteConfig} from '../../../utils/getConfig.mjs'
 
-jest.mock('../../../utils/getAdyenConfigForCurrentSite.mjs', () => ({
-    getAdyenConfigForCurrentSite: jest.fn()
+jest.mock('../../../utils/getConfig.mjs', () => ({
+    getSiteConfig: jest.fn()
 }))
 
 describe('getEnvironment middleware', () => {
@@ -26,10 +26,10 @@ describe('getEnvironment middleware', () => {
             environment: 'mockEnvironment'
         }
 
-        getAdyenConfigForCurrentSite.mockReturnValueOnce(mockAdyenConfig)
+        getSiteConfig.mockReturnValueOnce(mockAdyenConfig)
         await getEnvironment(req, res, next)
 
-        expect(getAdyenConfigForCurrentSite).toHaveBeenCalled()
+        expect(getSiteConfig).toHaveBeenCalled()
         expect(res.locals.response).toEqual({
             ADYEN_CLIENT_KEY: 'mockClientKey',
             ADYEN_ENVIRONMENT: 'mockEnvironment'

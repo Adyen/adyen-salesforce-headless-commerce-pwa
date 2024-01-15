@@ -2,31 +2,17 @@ import {authenticate, parseNotification, validateHmac} from '../webhook'
 
 let mockValidateHMAC = jest.fn()
 
-jest.mock('@salesforce/pwa-kit-runtime/utils/ssr-config', () => {
+jest.mock('../../../utils/getConfig.mjs', () => {
     return {
-        getConfig: jest.fn().mockImplementation(() => {
+        getSiteConfig: jest.fn().mockImplementation(() => {
             return {
-                app: {
-                    sites: [
-                        {
-                            id: 'RefArch',
-                            adyen: {
-                                clientKey: process.env.ADYEN_CLIENT_KEY,
-                                environment: process.env.ADYEN_ENVIRONMENT,
-                                merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT,
-                                systemIntegratorName: process.env.SYSTEM_INTEGRATOR_NAME,
-                                webhookUser: process.env.ADYEN_WEBHOOK_USER,
-                                webhookPassword: process.env.ADYEN_WEBHOOK_PASSWORD,
-                                webhookHmacKey: process.env.ADYEN_HMAC_KEY
-                            }
-                        }
-                    ],
-                    commerceAPI: {
-                        parameters: {
-                            siteId: 'RefArch'
-                        }
-                    }
-                }
+                clientKey: process.env.ADYEN_CLIENT_KEY,
+                environment: process.env.ADYEN_ENVIRONMENT,
+                merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT,
+                systemIntegratorName: process.env.SYSTEM_INTEGRATOR_NAME,
+                webhookUser: process.env.ADYEN_WEBHOOK_USER,
+                webhookPassword: process.env.ADYEN_WEBHOOK_PASSWORD,
+                webhookHmacKey: process.env.ADYEN_HMAC_KEY
             }
         })
     }
