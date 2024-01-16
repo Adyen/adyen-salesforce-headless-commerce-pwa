@@ -5,6 +5,7 @@ export const amazonPayConfig = (props) => {
         ...baseConfig(props),
         showPayButton: true,
         productType: 'PayAndShip',
-        checkoutMode: 'ProcessOrder'
+        checkoutMode: 'ProcessOrder',
+        returnUrl: window.location.href
     }
 }
