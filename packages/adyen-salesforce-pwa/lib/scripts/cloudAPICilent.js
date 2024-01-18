@@ -21,7 +21,7 @@ class CloudAPIClientCustom extends CloudAPIClient {
             Accept: 'application/json'
         }
         const res = await this.opts.fetch(url.toString(), {
-            env,
+            body: JSON.stringify(env),
             method: 'PATCH',
             headers
         })
