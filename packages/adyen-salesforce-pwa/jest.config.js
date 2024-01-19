@@ -3,6 +3,7 @@ module.exports = {
         '\\.[jt]sx?$': 'babel-jest',
         '\\.[cm]js?$': 'babel-jest'
     },
+    transformIgnorePatterns: ['!node_modules/'],
     testPathIgnorePatterns: ['/dist/', '/node_modules/'],
     moduleFileExtensions: ['js', 'jsx', 'mjs', 'cjs'],
     coverageThreshold: {
