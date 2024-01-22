@@ -50,7 +50,7 @@ const Payment = ({useShopperBasketsMutation}) => {
     }
 
     const {step, STEPS, goToStep} = useCheckout()
-    const {adyenPaymentMethods, adyenPaymentInProgress} = useAdyenCheckout()
+    const {adyenPaymentMethods} = useAdyenCheckout()
     const [isSubmittingPayment] = useState(false)
 
     const billingAddressForm = useForm({
@@ -105,7 +105,6 @@ const Payment = ({useShopperBasketsMutation}) => {
             editing={step === STEPS.PAYMENT}
             isLoading={
                 !adyenPaymentMethods ||
-                adyenPaymentInProgress ||
                 billingAddressForm.formState.isSubmitting ||
                 isSubmittingPayment
             }

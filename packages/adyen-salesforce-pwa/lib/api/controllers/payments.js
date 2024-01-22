@@ -184,6 +184,7 @@ async function sendPayments(req, res, next) {
         Logger.error('sendPayments', err.message)
         return next(err)
     }
+
     let order
     try {
         const checkout = AdyenCheckoutConfig.getInstance()
@@ -201,6 +202,7 @@ async function sendPayments(req, res, next) {
                 basketId: req.headers.basketid
             }
         })
+
         if (!basket) {
             throw new Error(errorMessages.INVALID_BASKET)
         }
