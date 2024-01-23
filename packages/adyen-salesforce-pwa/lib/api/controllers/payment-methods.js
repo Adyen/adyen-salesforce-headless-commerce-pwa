@@ -11,7 +11,7 @@ import {AdyenError} from '../models/AdyenError'
 const errorMessages = {
     UNAUTHORIZED: 'unauthorized',
     INVALID_BASKET: 'invalid basket',
-    PAYMENT_METHODS_UNSUCCESSFUL: 'payment methods unsuccessful'
+    NO_PAYMENT_METHODS: 'no payment methods'
 }
 
 async function getPaymentMethods(req, res, next) {

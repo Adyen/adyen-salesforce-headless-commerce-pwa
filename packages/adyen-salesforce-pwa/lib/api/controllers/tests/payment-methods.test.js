@@ -245,6 +245,6 @@ describe('payment methods controller', () => {
         )
         expect(consoleInfoSpy).toHaveBeenCalledTimes(1)
         expect(consoleInfoSpy.mock.calls[0][0]).toContain('getPaymentMethods start')
-        expect(next).toHaveBeenCalledWith(new AdyenError('payment methods unsuccessful', 400))
+        expect(next).toHaveBeenCalledWith(new AdyenError('no payment methods', 400))
     })
 })
