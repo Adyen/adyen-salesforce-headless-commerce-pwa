@@ -70,7 +70,7 @@ async function getPaymentMethods(req, res, next) {
         })
 
         if (!response?.paymentMethods?.length) {
-            throw new AdyenError(errorMessages.PAYMENT_METHODS_UNSUCCESSFUL, 400)
+            throw new AdyenError(errorMessages.NO_PAYMENT_METHODS, 400)
         }
 
         Logger.info('getPaymentMethods', 'success')
