@@ -6,6 +6,12 @@ import AdyenCheckoutConfig from './checkout-config'
 import Logger from './logger'
 import {v4 as uuidv4} from 'uuid'
 import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrentSite.mjs'
+import {AdyenError} from '../models/AdyenError'
+
+const errorMessages = {
+    UNAUTHORIZED: 'unauthorized',
+    INVALID_BASKET: 'invalid basket'
+}
 
 async function getPaymentMethods(req, res, next) {
     Logger.info('getPaymentMethods', 'start')
@@ -19,12 +25,27 @@ async function getPaymentMethods(req, res, next) {
             headers: {authorization: req.headers.authorization}
         })
 
-        const {baskets} = await shopperCustomers.getCustomerBaskets({
+        const customer = await shopperCustomers.getCustomer({
             parameters: {
                 customerId: req.headers.customerid
             }
         })
 
+        if (!customer?.customerId) {
+            throw new AdyenError(errorMessages.UNAUTHORIZED, 401)
+        }
+
+        const {baskets} = await shopperCustomers.getCustomerBaskets({
+            parameters: {
+                customerId: customer?.customerId
+            }
+        })
+
+        if (!baskets?.length) {
+            throw new AdyenError(errorMessages.INVALID_BASKET, 404)
+        }
+
+        const [{orderTotal, productTotal, currency}] = baskets
         const {locale: shopperLocale} = req.query
         const countryCode = shopperLocale?.slice(-2)
 
@@ -33,15 +54,14 @@ async function getPaymentMethods(req, res, next) {
             shopperLocale,
             countryCode,
             merchantAccount: adyenConfig.merchantAccount,
-            shopperReference: req.headers.customerid
-        }
-
-        if (baskets?.length) {
-            const [{orderTotal, productTotal, currency}] = baskets
-            paymentMethodsRequest.amount = {
+            amount: {
                 value: getCurrencyValueForApi(orderTotal || productTotal, currency),
                 currency: currency
             }
+        }
+
+        if (customer?.authType === 'registered') {
+            paymentMethodsRequest.shopperReference = customer.customerId
         }
 
         const response = await checkout.instance.paymentMethods(paymentMethodsRequest, {

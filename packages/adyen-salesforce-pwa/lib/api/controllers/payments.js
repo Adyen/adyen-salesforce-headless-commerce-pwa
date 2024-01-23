@@ -15,6 +15,7 @@ import Logger from './logger'
 import {v4 as uuidv4} from 'uuid'
 import {OrderApiClient} from './orderApi'
 import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrentSite.mjs'
+import {AdyenError} from '../models/AdyenError'
 
 const errorMessages = {
     AMOUNT_NOT_CORRECT: 'amount not correct',
@@ -204,7 +205,7 @@ async function sendPayments(req, res, next) {
         })
 
         if (!basket) {
-            throw new Error(errorMessages.INVALID_BASKET)
+            throw new AdyenError(errorMessages.INVALID_BASKET, 404)
         }
 
         if (!basket?.paymentInstruments || !basket?.paymentInstruments?.length) {
@@ -236,7 +237,7 @@ async function sendPayments(req, res, next) {
         Logger.info('sendPayments', `orderCreated ${order?.orderNo}`)
 
         if (order?.customerInfo?.customerId !== req.headers.customerid) {
-            throw new Error(errorMessages.INVALID_ORDER)
+            throw new AdyenError(errorMessages.INVALID_ORDER, 404)
         }
 
         const paymentRequest = {
@@ -294,7 +295,7 @@ async function sendPayments(req, res, next) {
 
         const checkoutResponse = createCheckoutResponse(response, order.orderNo)
         if (checkoutResponse.isFinal && !checkoutResponse.isSuccessful) {
-            throw new Error(errorMessages.PAYMENT_NOT_SUCCESSFUL)
+            throw new AdyenError(errorMessages.PAYMENT_NOT_SUCCESSFUL, 400)
         }
 
         Logger.info('sendPayments', `checkoutResponse ${JSON.stringify(checkoutResponse)}`)
