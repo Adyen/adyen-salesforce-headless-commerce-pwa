@@ -98,6 +98,20 @@ const CheckoutConfirmation = loadable(() => import('@adyen/adyen-salesforce-pwa'
     }
 })
 
+// Checkout Redirect page from Adyen
+const AdyenCheckoutRedirect = loadable(() => import('@adyen/adyen-salesforce-pwa'), {
+    fallback: fallback,
+    resolveComponent: (components) => {
+        return () => (
+            <components.AdyenCheckoutRedirect
+                useAccessToken={useAccessToken}
+                useCustomerId={useCustomerId}
+                useCustomerType={useCustomerType}
+            />
+        )
+    }
+})
+
 // Checkout Error page from Adyen
 const AdyenCheckoutError = loadable(() => import('@adyen/adyen-salesforce-pwa'), {
     fallback: fallback,
@@ -111,6 +125,10 @@ const routes = [
         path: '/checkout',
         component: Checkout,
         exact: true
+    },
+    {
+        path: '/checkout/redirect',
+        component: AdyenCheckoutRedirect
     },
     {
         path: '/checkout/error',
