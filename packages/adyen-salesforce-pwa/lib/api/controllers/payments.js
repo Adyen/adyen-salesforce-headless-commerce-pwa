@@ -181,7 +181,7 @@ async function removeAllPaymentInstrumentsFromBasket(basket, shopperBaskets) {
 async function sendPayments(req, res, next) {
     Logger.info('sendPayments', 'start')
     if (!validateRequestParams(req)) {
-        const err = new Error(errorMessages.INVALID_PARAMS)
+        const err = new AdyenError(errorMessages.INVALID_PARAMS, 400)
         Logger.error('sendPayments', err.message)
         return next(err)
     }

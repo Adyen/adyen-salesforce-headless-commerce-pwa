@@ -79,8 +79,9 @@ function parseNotification(req, res, next) {
         )
         if (!notificationRequestItem[0]) {
             return next(
-                new Error(
-                    'Handling of Adyen notification has failed. No input parameters were provided.'
+                new AdyenError(
+                    'Handling of Adyen notification has failed. No input parameters were provided.',
+                    400
                 )
             )
         }

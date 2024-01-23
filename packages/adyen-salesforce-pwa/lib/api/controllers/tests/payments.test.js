@@ -1,5 +1,6 @@
 import {PaymentsController} from '../../index'
 import {RESULT_CODES} from '../../../utils/constants.mjs'
+import { AdyenError } from "../../models/AdyenError";
 
 let mockPayments = jest.fn()
 let mockGetBasket = jest.fn()
@@ -211,7 +212,7 @@ describe('payments controller', () => {
         expect(consoleInfoSpy).toHaveBeenCalledTimes(1)
         expect(consoleInfoSpy.mock.calls[0][0]).toContain('sendPayments start')
         expect(consoleErrorSpy.mock.calls[0][0]).toContain('sendPayments invalid request params')
-        expect(next).toHaveBeenCalledWith(new Error('invalid request params'))
+        expect(next).toHaveBeenCalledWith(new AdyenError('invalid request params', 400))
     })
     it('returns error if basket is empty', async () => {
         mockGetBasket.mockImplementationOnce(() => {
@@ -228,7 +229,7 @@ describe('payments controller', () => {
         expect(consoleInfoSpy).toHaveBeenCalledTimes(1)
         expect(consoleInfoSpy.mock.calls[0][0]).toContain('sendPayments start')
         expect(consoleErrorSpy.mock.calls[0][0]).toContain('sendPayments invalid basket')
-        expect(next).toHaveBeenCalledWith(new Error('invalid basket'))
+        expect(next).toHaveBeenCalledWith(new AdyenError('invalid basket', 404))
     })
     it('adds paymentInstrument to basket if basket has no paymentInstrument and returns checkout response', async () => {
         mockGetBasket.mockImplementationOnce(() => {
@@ -381,7 +382,7 @@ describe('payments controller', () => {
         expect(consoleInfoSpy.mock.calls[1][0]).toContain('sendPayments orderCreated 123')
         expect(consoleErrorSpy).toHaveBeenCalled()
         expect(consoleErrorSpy.mock.calls[0][0]).toContain('sendPayments order is invalid')
-        expect(next).toHaveBeenCalledWith(new Error('order is invalid'))
+        expect(next).toHaveBeenCalledWith(new AdyenError('order is invalid', 404))
     })
     it('returns checkout response even if request has no billing address and delivery address', async () => {
         mockGetBasket.mockImplementationOnce(() => {
@@ -1010,7 +1011,7 @@ describe('payments controller', () => {
         expect(consoleInfoSpy.mock.calls[2][0]).toContain('sendPayments resultCode Error')
         expect(consoleErrorSpy).toHaveBeenCalled()
         expect(consoleErrorSpy.mock.calls[0][0]).toContain('sendPayments payment not successful')
-        expect(next).toHaveBeenCalledWith(new Error('payment not successful'))
+        expect(next).toHaveBeenCalledWith(new AdyenError('payment not successful', 400))
     })
     it('returns error if payment response is error and remove all paymentInstrument', async () => {
         mockGetBasket.mockImplementationOnce(() => {
@@ -1101,6 +1102,6 @@ describe('payments controller', () => {
         expect(consoleInfoSpy.mock.calls[2][0]).toContain('sendPayments resultCode Error')
         expect(consoleErrorSpy).toHaveBeenCalled()
         expect(consoleErrorSpy.mock.calls[0][0]).toContain('sendPayments payment not successful')
-        expect(next).toHaveBeenCalledWith(new Error('payment not successful'))
+        expect(next).toHaveBeenCalledWith(new AdyenError('payment not successful', 400))
     })
 })

@@ -1,4 +1,5 @@
 import {authenticate, parseNotification, validateHmac} from '../webhook'
+import {AdyenError} from '../../models/AdyenError'
 
 let mockValidateHMAC = jest.fn()
 
@@ -75,7 +76,7 @@ describe('WebhookHandler', () => {
             authenticate(req, res, next)
             expect(consoleErrorSpy).toHaveBeenCalledTimes(1)
             expect(consoleErrorSpy.mock.calls[0][0]).toContain('authenticate Access Denied!')
-            expect(next).toHaveBeenCalledWith(new Error('Access Denied!'))
+            expect(next).toHaveBeenCalledWith(new AdyenError('Access Denied!', 401))
         })
         it('when invalid authorization is passed', () => {
             const authorization = 'Basic ' + btoa('mockUser' + ':' + 'mockPassword')
@@ -83,7 +84,7 @@ describe('WebhookHandler', () => {
             authenticate(req, res, next)
             expect(consoleErrorSpy).toHaveBeenCalledTimes(1)
             expect(consoleErrorSpy.mock.calls[0][0]).toContain('authenticate Access Denied!')
-            expect(next).toHaveBeenCalledWith(new Error('Access Denied!'))
+            expect(next).toHaveBeenCalledWith(new AdyenError('Access Denied!', 401))
         })
     })
     describe('validateHmac', () => {
@@ -109,7 +110,7 @@ describe('WebhookHandler', () => {
             expect(mockValidateHMAC).toHaveBeenCalled()
             expect(consoleErrorSpy).toHaveBeenCalledTimes(1)
             expect(consoleErrorSpy.mock.calls[0][0]).toContain('validateHmac Access Denied!')
-            expect(next).toHaveBeenCalledWith(new Error('Access Denied!'))
+            expect(next).toHaveBeenCalledWith(new AdyenError('Access Denied!', 401))
         })
     })
     describe('parseNotification', () => {
@@ -123,8 +124,9 @@ describe('WebhookHandler', () => {
             req.body.notificationItems = []
             parseNotification(req, res, next)
             expect(next).toHaveBeenCalledWith(
-                new Error(
-                    'Handling of Adyen notification has failed. No input parameters were provided.'
+                new AdyenError(
+                    'Handling of Adyen notification has failed. No input parameters were provided.',
+                    400
                 )
             )
         })
@@ -132,8 +134,9 @@ describe('WebhookHandler', () => {
             req.body = {}
             parseNotification(req, res, next)
             expect(next).toHaveBeenCalledWith(
-                new Error(
-                    'Handling of Adyen notification has failed. No input parameters were provided.'
+                new AdyenError(
+                    'Handling of Adyen notification has failed. No input parameters were provided.',
+                    400
                 )
             )
         })

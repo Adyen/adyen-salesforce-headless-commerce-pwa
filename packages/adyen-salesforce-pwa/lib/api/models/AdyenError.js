@@ -1,6 +1,6 @@
 export class AdyenError {
-    constructor(errMessage, statusCode, cause) {
-        this.errMessage = errMessage
+    constructor(message, statusCode, cause) {
+        this.message = message
         this.statusCode = statusCode
         this.cause = cause
     }

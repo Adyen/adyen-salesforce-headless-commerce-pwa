@@ -9,43 +9,32 @@ import {createErrorResponse} from '../../utils/createErrorResponse.mjs'
 import Logger from '../controllers/logger'
 
 function SuccessHandler(req, res) {
-    Logger.info('Success', res.toString())
+    Logger.info('Success')
     return res.status(200).json(res.locals.response)
 }
 
-function ErrorHandler(err, req, res) {
+function ErrorHandler(err, req, res, next) {
     Logger.error(err.message, err.cause)
-    res.status(err.statusCode || 500).json(createErrorResponse(err.message))
+    return res.status(err.statusCode || 500).json(createErrorResponse(err.message))
 }
 
 function registerAdyenEndpoints(app, runtime, overrides) {
-    const environmentHandler = overrides?.environment || [
-        EnvironmentController,
-        SuccessHandler,
-        ErrorHandler
-    ]
+    const environmentHandler = overrides?.environment || [EnvironmentController, SuccessHandler]
     const paymentMethodsHandler = overrides?.paymentMethods || [
         PaymentMethodsController,
-        SuccessHandler,
-        ErrorHandler
+        SuccessHandler
     ]
     const paymentsDetailsHandler = overrides?.paymentsDetails || [
         PaymentsDetailsController,
-        SuccessHandler,
-        ErrorHandler
+        SuccessHandler
     ]
-    const paymentsHandler = overrides?.payments || [
-        PaymentsController,
-        SuccessHandler,
-        ErrorHandler
-    ]
+    const paymentsHandler = overrides?.payments || [PaymentsController, SuccessHandler]
     const webhookHandler = overrides?.webhook || [
         authenticate,
         validateHmac,
         parseNotification,
         authorizationWebhookHandler,
-        SuccessHandler,
-        ErrorHandler
+        SuccessHandler
     ]
 
     app.get(
@@ -64,6 +53,7 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     app.post('/api/adyen/payments/details', ...paymentsDetailsHandler)
     app.post('/api/adyen/payments', ...paymentsHandler)
     app.post('/api/adyen/webhook', ...webhookHandler)
+    app.use(overrides?.ErrorHandler || ErrorHandler)
 }
 
 export {registerAdyenEndpoints, SuccessHandler, ErrorHandler}

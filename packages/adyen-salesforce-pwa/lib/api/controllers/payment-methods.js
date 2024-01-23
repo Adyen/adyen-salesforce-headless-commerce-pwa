@@ -10,7 +10,8 @@ import {AdyenError} from '../models/AdyenError'
 
 const errorMessages = {
     UNAUTHORIZED: 'unauthorized',
-    INVALID_BASKET: 'invalid basket'
+    INVALID_BASKET: 'invalid basket',
+    PAYMENT_METHODS_UNSUCCESSFUL: 'payment methods unsuccessful'
 }
 
 async function getPaymentMethods(req, res, next) {
@@ -67,6 +68,10 @@ async function getPaymentMethods(req, res, next) {
         const response = await checkout.instance.paymentMethods(paymentMethodsRequest, {
             idempotencyKey: uuidv4()
         })
+
+        if (!response?.paymentMethods?.length) {
+            throw new AdyenError(errorMessages.PAYMENT_METHODS_UNSUCCESSFUL, 400)
+        }
 
         Logger.info('getPaymentMethods', 'success')
         res.locals.response = response
