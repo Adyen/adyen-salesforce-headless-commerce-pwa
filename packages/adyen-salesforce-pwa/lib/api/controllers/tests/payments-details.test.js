@@ -1,5 +1,6 @@
 import {PaymentsDetailsController} from '../../index'
 import {RESULT_CODES} from '../../../utils/constants.mjs'
+import {AdyenError} from '../../models/AdyenError'
 
 let mockPaymentsDetails = jest.fn()
 jest.mock('../checkout-config', () => {
@@ -73,6 +74,8 @@ describe('payments details controller', () => {
         expect(consoleErrorSpy.mock.calls[0][0]).toContain(
             'sendPaymentDetails payments details call not successful'
         )
-        expect(next).toHaveBeenCalledWith(new Error('payments details call not successful'))
+        expect(next).toHaveBeenCalledWith(
+            new AdyenError('payments details call not successful', 400)
+        )
     })
 })

@@ -2,6 +2,7 @@ import {hmacValidator} from '@adyen/api-library'
 import NotificationRequest from '@adyen/api-library/lib/src/notification/notificationRequest'
 import Logger from './logger'
 import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrentSite.mjs'
+import {AdyenError} from '../models/AdyenError'
 
 const messages = {
     AUTH_ERROR: 'Access Denied!',
@@ -27,7 +28,7 @@ function authenticate(req, res, next) {
         const authHeader = req.headers.authorization
         const adyenConfig = getAdyenConfigForCurrentSite()
         if (!authHeader) {
-            throw new Error(messages.AUTH_ERROR)
+            throw new AdyenError(messages.AUTH_ERROR, 401)
         }
         const credentialSeparator = ':'
         const authHeaderSeparator = ' '
@@ -42,7 +43,7 @@ function authenticate(req, res, next) {
         if (user === adyenConfig.webhookUser && pass === adyenConfig.webhookPassword) {
             return next()
         } else {
-            throw new Error(messages.AUTH_ERROR)
+            throw new AdyenError(messages.AUTH_ERROR, 401)
         }
     } catch (err) {
         Logger.error('authenticate', err.message)
@@ -62,7 +63,7 @@ function validateHmac(req, res, next) {
         if (HmacValidator.validateHMAC(NotificationRequestItem, adyenConfig?.webhookHmacKey)) {
             return next()
         } else {
-            throw new Error(messages.AUTH_ERROR)
+            throw new AdyenError(messages.AUTH_ERROR, 401)
         }
     } catch (err) {
         Logger.error('validateHmac', err.message)
@@ -78,8 +79,9 @@ function parseNotification(req, res, next) {
         )
         if (!notificationRequestItem[0]) {
             return next(
-                new Error(
-                    'Handling of Adyen notification has failed. No input parameters were provided.'
+                new AdyenError(
+                    'Handling of Adyen notification has failed. No input parameters were provided.',
+                    400
                 )
             )
         }
