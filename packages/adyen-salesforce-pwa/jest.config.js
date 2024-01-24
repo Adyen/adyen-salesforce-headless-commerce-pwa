@@ -33,5 +33,5 @@ module.exports = {
     setupFiles: ['./__mocks__/mockEnv.js'],
     testMatch: ['**/adyen-checkout-context.test.js'],
     verbose: true,
-    transformIgnorePatterns: ['/node_modules/']
+    transformIgnorePatterns: ['/node_modules/@adyen/adyen-web']
 }
