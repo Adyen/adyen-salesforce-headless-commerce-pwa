@@ -2,10 +2,11 @@
  * @jest-environment jest-environment-jsdom
  * @jest-environment-options {"url": "http://localhost:3000/", "resources": "usable"}
  */
-import React, {useEffect} from 'react'
-import {AdyenCheckoutProvider, useAdyenCheckout} from '../adyen-checkout-context'
+import React from 'react'
+import {AdyenCheckoutProvider} from '../adyen-checkout-context'
 import AdyenCheckout from '../../components/adyenCheckout'
-import {render} from '@testing-library/react'
+import {render, screen} from '@testing-library/react'
+// import {act} from 'react-dom/test-utils'
 
 let mockFetchPaymentMethods = jest.fn()
 let mockFetchEnvironment = jest.fn()
@@ -118,59 +119,21 @@ describe('<AdyenCheckoutProvider />', () => {
                     ]
                 }
             })
-            const TestingComponent = async () => {
-                const {
-                    adyenEnvironment,
-                    adyenPaymentMethods,
-                    adyenStateData,
-                    adyenPaymentInProgress,
-                    getPaymentMethodsConfiguration
-                } = useAdyenCheckout()
-
-                useEffect(() => {
-                    // const paymentMethodsConfiguration = await getPaymentMethodsConfiguration({
-                    //     onError: jest.fn()
-                    // })
-                }, [adyenEnvironment, adyenPaymentMethods])
-                const paymentMethodsConfiguration = await getPaymentMethodsConfiguration({
-                    onError: jest.fn()
-                })
-                return (
-                    <>
-                        <div id="adyenEnvironment">{adyenEnvironment}</div>
-                        <div id="paymentMethodsConfiguration">{paymentMethodsConfiguration}</div>
-                    </>
-                )
-            }
-            let root
-            const createNodeMock = () => {
-                return <div></div>
-            }
-            // await act(() => {
-            //     root = create(
-            //         <AdyenCheckoutProvider
-            //             useAccessToken={useAccessToken}
-            //             useCustomerId={useCustomerId}
-            //             useCustomerType={useCustomerType}
-            //         >
-            //             <AdyenCheckout />
-            //         </AdyenCheckoutProvider>,
-            //         {createNodeMock}
-            //     )
-            // })
-            //
-            // expect(root).toMatchSnapshot()
-            render(
+            const wrapper = ({children}) => (
                 <AdyenCheckoutProvider
                     useAccessToken={useAccessToken}
                     useCustomerId={useCustomerId}
                     useCustomerType={useCustomerType}
                 >
-                    <AdyenCheckout />
+                    {children}
                 </AdyenCheckoutProvider>
             )
+            // await act(() => {
+            //     render(<AdyenCheckout />, {wrapper})
+            // })
+            render(<AdyenCheckout />, {wrapper})
+            expect(await screen.findByText('Cards')).toBeInTheDocument()
 
-            // render(<div>hello world</div>)
             expect(useAccessToken).toHaveBeenCalled()
             expect(useCustomerId).toHaveBeenCalled()
             expect(useCustomerType).toHaveBeenCalled()
