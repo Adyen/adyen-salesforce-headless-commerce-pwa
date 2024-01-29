@@ -3,7 +3,9 @@ module.exports = {
         '\\.[jt]sx?$': 'babel-jest',
         '\\.[cm]js?$': 'babel-jest'
     },
-    transformIgnorePatterns: ['!node_modules/'],
+    moduleNameMapper: {
+        '\\.(css|sass|scss)$': '<rootDir>/__mocks__/styleMock.js'
+    },
     testPathIgnorePatterns: ['/dist/', '/node_modules/'],
     moduleFileExtensions: ['js', 'jsx', 'mjs', 'cjs'],
     coverageThreshold: {
@@ -27,6 +29,8 @@ module.exports = {
     clearMocks: true,
     restoreMocks: true,
     resetModules: true,
-    setupFilesAfterEnv: ['jest-extended/all'],
-    setupFiles: ['./__mocks__/mockEnv.js']
+    setupFilesAfterEnv: ['jest-extended/all', '@testing-library/jest-dom'],
+    setupFiles: ['./__mocks__/mockEnv.js'],
+    verbose: true,
+    transformIgnorePatterns: ['/node_modules/@adyen/adyen-web']
 }

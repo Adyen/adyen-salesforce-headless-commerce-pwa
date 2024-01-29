@@ -7,6 +7,7 @@ import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation
 import {AdyenPaymentMethodsService} from '../services/payment-methods'
 import {paymentMethodsConfiguration} from '../components/paymentMethodsConfiguration'
 import {AdyenEnvironmentService} from '../services/environment'
+import {onPaymentsDetailsSuccess, onPaymentsSuccess} from './helper'
 
 const AdyenCheckoutContext = React.createContext({})
 
@@ -101,40 +102,18 @@ export const AdyenCheckoutProvider = ({
             customerId,
             onError: adyenConfig?.onError || onError,
             onNavigate: navigate,
-            afterSubmit: [...afterSubmit, ...(adyenConfig?.afterSubmit || []), onPaymentsSuccess],
+            afterSubmit: [...afterSubmit, ...(adyenConfig?.afterSubmit || []), onPaymentsSuccess(navigate)],
             beforeSubmit: [...beforeSubmit, ...(adyenConfig?.beforeSubmit || [])],
             afterAdditionalDetails: [
                 ...afterAdditionalDetails,
                 ...(adyenConfig?.afterAdditionalDetails || []),
-                onPaymentsDetailsSuccess
+                onPaymentsDetailsSuccess(navigate)
             ],
             beforeAdditionalDetails: [
                 ...beforeAdditionalDetails,
                 ...(adyenConfig?.beforeAdditionalDetails || [])
             ]
         })
-    }
-
-    const onPaymentsSuccess = async (state, component, props, responses) => {
-        if (responses?.paymentsResponse?.isSuccessful) {
-            navigate(`/checkout/confirmation/${responses?.paymentsResponse?.merchantReference}`)
-        } else if (responses?.paymentsResponse?.action) {
-            await handleAction(component, responses)
-        } else {
-            return new Error(responses?.paymentsResponse)
-        }
-    }
-
-    const onPaymentsDetailsSuccess = async (state, component, props, responses) => {
-        if (responses?.paymentsDetailsResponse?.isSuccessful) {
-            navigate(
-                `/checkout/confirmation/${responses?.paymentsDetailsResponse?.merchantReference}`
-            )
-        } else if (responses?.paymentsDetailsResponse?.action) {
-            await component.handleAction(responses?.paymentsDetailsResponse?.action)
-        } else {
-            return new Error(responses?.paymentsDetailsResponse)
-        }
     }
 
     const value = {
