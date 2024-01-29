@@ -64,7 +64,6 @@
     "jest-environment-jsdom": "^29.7.0",
     "jest-extended": "^4.0.2",
     "mini-css-extract-plugin": "^2.7.6",
-    "react-test-renderer": "^18.2.0",
     "style-loader": "^3.3.3",
     "url-loader": "^4.1.1",
     "webpack": "^5.89.0",
