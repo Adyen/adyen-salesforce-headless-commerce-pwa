@@ -188,9 +188,11 @@ async function sendPayments(req, res, next) {
 
     let order
     try {
-        const checkout = AdyenCheckoutConfig.getInstance()
-        const adyenConfig = getAdyenConfigForCurrentSite()
         const {data} = req.body
+        const {siteId} = req.query
+
+        const checkout = AdyenCheckoutConfig.getInstance(siteId)
+        const adyenConfig = getAdyenConfigForCurrentSite(siteId)
 
         const {app: appConfig} = getConfig()
         const shopperBaskets = new ShopperBaskets({

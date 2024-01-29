@@ -4,8 +4,8 @@ export class AdyenPaymentMethodsService {
     baseUrl = '/api/adyen/paymentMethods'
     apiClient = null
 
-    constructor(token) {
-        this.apiClient = new ApiClient(this.baseUrl, token)
+    constructor(token, site) {
+        this.apiClient = new ApiClient(this.baseUrl, token, site)
     }
 
     async fetchPaymentMethods(customerId, locale) {

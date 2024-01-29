@@ -12,9 +12,10 @@ jest.mock('../api', () => {
 describe('AdyenEnvironmentService', () => {
     let adyenService
     let mockToken = 'mockToken'
+    let mockSite = {id: 'RefArch'}
 
     beforeEach(() => {
-        adyenService = new AdyenEnvironmentService(mockToken)
+        adyenService = new AdyenEnvironmentService(mockToken, mockSite)
     })
 
     afterEach(() => {

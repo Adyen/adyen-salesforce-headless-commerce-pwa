@@ -1,8 +1,7 @@
 import React, {useEffect, useState} from 'react'
-import {useLocation} from 'react-router-dom'
 import PropTypes from 'prop-types'
 import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
-import {resolveLocaleFromUrl} from '@salesforce/retail-react-app/app/utils/site-utils'
+import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
 import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
 import {AdyenPaymentMethodsService} from '../services/payment-methods'
 import {paymentMethodsConfiguration} from '../components/paymentMethodsConfiguration'
@@ -22,8 +21,7 @@ export const AdyenCheckoutProvider = ({
     const customerId = useCustomerId()
     const customerType = useCustomerType()
     const {data: basket} = useCurrentBasket()
-    const location = useLocation()
-    const locale = resolveLocaleFromUrl(`${location.pathname}${location.search}`)
+    const {locale, site} = useMultiSite()
     const navigate = useNavigation()
 
     const [fetchingPaymentMethods, setFetchingPaymentMethods] = useState(false)
@@ -35,7 +33,7 @@ export const AdyenCheckoutProvider = ({
     useEffect(() => {
         const fetchEnvironment = async () => {
             const token = await getTokenWhenReady()
-            const adyenEnvironmentService = new AdyenEnvironmentService(token)
+            const adyenEnvironmentService = new AdyenEnvironmentService(token, site)
             try {
                 const data = await adyenEnvironmentService.fetchEnvironment()
                 setAdyenEnvironment(data ? data : {error: true})
@@ -50,7 +48,7 @@ export const AdyenCheckoutProvider = ({
         const fetchPaymentMethods = async () => {
             setFetchingPaymentMethods(true)
             const token = await getTokenWhenReady()
-            const adyenPaymentMethodsService = new AdyenPaymentMethodsService(token)
+            const adyenPaymentMethodsService = new AdyenPaymentMethodsService(token, site)
             try {
                 const data = await adyenPaymentMethodsService.fetchPaymentMethods(
                     customerId,
@@ -68,16 +66,6 @@ export const AdyenCheckoutProvider = ({
             fetchPaymentMethods()
         }
     }, [basket?.basketId])
-
-    const handleAction = async (component, responses) => {
-        if (responses?.paymentsResponse?.action?.type === 'voucher') {
-            const action = btoa(JSON.stringify(responses?.paymentsResponse?.action))
-            const url = `/checkout/confirmation/${responses?.paymentsResponse?.merchantReference}?adyenAction=${action}`
-            navigate(url)
-        } else {
-            await component.handleAction(responses?.paymentsResponse?.action)
-        }
-    }
 
     const getTranslations = () => {
         return adyenConfig?.translations && Object.hasOwn(adyenConfig?.translations, locale.id)
@@ -98,11 +86,16 @@ export const AdyenCheckoutProvider = ({
             paymentMethods: adyenPaymentMethods?.paymentMethods,
             customerType,
             token,
+            site,
             basket: basket,
             customerId,
             onError: adyenConfig?.onError || onError,
             onNavigate: navigate,
-            afterSubmit: [...afterSubmit, ...(adyenConfig?.afterSubmit || []), onPaymentsSuccess(navigate)],
+            afterSubmit: [
+                ...afterSubmit,
+                ...(adyenConfig?.afterSubmit || []),
+                onPaymentsSuccess(navigate)
+            ],
             beforeSubmit: [...beforeSubmit, ...(adyenConfig?.beforeSubmit || [])],
             afterAdditionalDetails: [
                 ...afterAdditionalDetails,

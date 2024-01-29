@@ -2,25 +2,21 @@ import Logger from "../api/controllers/logger.js";
 
 export const getAdyenConfigForCurrentSite = (currentSiteId) => {
     return {
-        apiKey: setProperty(currentSiteId, ADYEN_ENV.ADYEN_API_KEY, true),
-        clientKey: setProperty(currentSiteId, ADYEN_ENV.ADYEN_CLIENT_KEY, true),
-        environment: setProperty(currentSiteId, ADYEN_ENV.ADYEN_ENVIRONMENT, true),
-        merchantAccount: setProperty(currentSiteId, ADYEN_ENV.ADYEN_MERCHANT_ACCOUNT, true),
-        systemIntegratorName: setProperty(currentSiteId, ADYEN_ENV.SYSTEM_INTEGRATOR_NAME, false),
-        webhookUser: setProperty(currentSiteId, ADYEN_ENV.ADYEN_WEBHOOK_USER, false),
-        webhookPassword: setProperty(currentSiteId, ADYEN_ENV.ADYEN_WEBHOOK_PASSWORD, Object.hasOwn(process.env, `${currentSiteId}_${ADYEN_ENV.ADYEN_WEBHOOK_USER}`)),
-        webhookHmacKey: setProperty(currentSiteId, ADYEN_ENV.ADYEN_HMAC_KEY, false)
+        apiKey: setProperty(currentSiteId, ADYEN_ENV.ADYEN_API_KEY),
+        clientKey: setProperty(currentSiteId, ADYEN_ENV.ADYEN_CLIENT_KEY),
+        environment: setProperty(currentSiteId, ADYEN_ENV.ADYEN_ENVIRONMENT),
+        merchantAccount: setProperty(currentSiteId, ADYEN_ENV.ADYEN_MERCHANT_ACCOUNT),
+        systemIntegratorName: setProperty(currentSiteId, ADYEN_ENV.SYSTEM_INTEGRATOR_NAME),
+        webhookUser: setProperty(currentSiteId, ADYEN_ENV.ADYEN_WEBHOOK_USER),
+        webhookPassword: setProperty(currentSiteId, ADYEN_ENV.ADYEN_WEBHOOK_PASSWORD),
+        webhookHmacKey: setProperty(currentSiteId, ADYEN_ENV.ADYEN_HMAC_KEY)
     }
 }
 
-const setProperty = (currentSiteId, property, isRequired) => {
-    const siteEnv = `${currentSiteId}_${property}`
+const setProperty = (currentSiteId, property) => {
+    const siteEnv = currentSiteId ? `${currentSiteId}_${property}` : property
     if (Object.hasOwn(process.env, siteEnv)) {
         return process.env[siteEnv]
-    } else if (isRequired) {
-        const errorMessage = `${currentSiteId}_${property} is not defined in environment variables`
-        Logger.error('SET ADYEN CONFIG FOR SITE', errorMessage)
-        throw new Error(errorMessage)
     }
     return ''
 }

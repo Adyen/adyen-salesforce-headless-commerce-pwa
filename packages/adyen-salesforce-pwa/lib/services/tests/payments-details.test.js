@@ -14,9 +14,10 @@ describe('AdyenPaymentsDetailsService', () => {
     let mockToken = 'mockTokenHere'
     let mockData = {someData: 'mockData'}
     let mockCustomerId = 'mockCustomerId'
+    let mockSite = {id: 'RefArch'}
 
     beforeEach(() => {
-        paymentsDetailsService = new AdyenPaymentsDetailsService(mockToken)
+        paymentsDetailsService = new AdyenPaymentsDetailsService(mockToken, mockSite)
     })
 
     afterEach(() => {

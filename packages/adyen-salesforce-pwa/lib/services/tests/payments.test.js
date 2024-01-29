@@ -13,12 +13,13 @@ jest.mock('../api', () => {
 describe('AdyenPaymentsService', () => {
     let paymentsService
     let mockToken = 'mockToken'
+    let mockSite = {id: 'RefArch'}
     let mockAdyenStateData = {someData: 'mockData'}
     let mockBasketId = 'mockBasketId'
     let mockCustomerId = CUSTOMER_ID_MOCK
 
     beforeEach(() => {
-        paymentsService = new AdyenPaymentsService(mockToken)
+        paymentsService = new AdyenPaymentsService(mockToken, mockSite)
     })
 
     afterEach(() => {

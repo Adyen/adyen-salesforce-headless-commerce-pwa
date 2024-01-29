@@ -26,7 +26,7 @@ describe('getAdyenConfigForCurrentSite', () => {
 
         jest.spyOn(ssrConfigUtils, 'getConfig').mockReturnValue(mockConfig)
 
-        const adyenConfig = getAdyenConfigForCurrentSite()
+        const adyenConfig = getAdyenConfigForCurrentSite('RefArch')
 
         expect(adyenConfig).toEqual({
             clientKey: 'mockClientKey',
