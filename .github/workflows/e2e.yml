@@ -45,7 +45,6 @@ jobs:
                 ADYEN_CLIENT_KEY: ${{secrets.ADYEN_CLIENT_KEY}}
                 ADYEN_ENVIRONMENT: ${{secrets.ADYEN_ENVIRONMENT}}
                 SYSTEM_INTEGRATOR_NAME: ${{ secrets.SYSTEM_INTEGRATOR_NAME }}
-                HOST_URL: ${{ secrets.HOST_URL }}
                 COMMERCE_API_CLIENT_ID: ${{ secrets.COMMERCE_API_CLIENT_ID }}
                 COMMERCE_API_ORG_ID: ${{ secrets.COMMERCE_API_ORG_ID }}
                 COMMERCE_API_SHORT_CODE: ${{ secrets.COMMERCE_API_SHORT_CODE }}
