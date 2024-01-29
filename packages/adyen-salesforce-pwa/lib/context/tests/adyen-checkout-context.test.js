@@ -6,12 +6,9 @@ import React from 'react'
 import {AdyenCheckoutProvider} from '../adyen-checkout-context'
 import AdyenCheckout from '../../components/adyenCheckout'
 import {render, screen} from '@testing-library/react'
-// import {act} from 'react-dom/test-utils'
 
 let mockFetchPaymentMethods = jest.fn()
 let mockFetchEnvironment = jest.fn()
-let mockPaymentMethodsConfiguration = jest.fn()
-let mockUseCurrentBasket = jest.fn()
 
 jest.mock('@salesforce/retail-react-app/app/hooks/use-current-basket', () => {
     return {
@@ -57,10 +54,6 @@ jest.mock('../../services/environment', () => ({
         fetchEnvironment: mockFetchEnvironment
     }))
 }))
-
-// jest.mock('../../components/paymentMethodsConfiguration', () => ({
-//     paymentMethodsConfiguration: mockPaymentMethodsConfiguration
-// }))
 
 describe('<AdyenCheckoutProvider />', () => {
     let useAccessToken, useCustomerId, useCustomerType, locationSpy
@@ -128,9 +121,6 @@ describe('<AdyenCheckoutProvider />', () => {
                     {children}
                 </AdyenCheckoutProvider>
             )
-            // await act(() => {
-            //     render(<AdyenCheckout />, {wrapper})
-            // })
             render(<AdyenCheckout />, {wrapper})
             expect(await screen.findByText('Cards')).toBeInTheDocument()
 
