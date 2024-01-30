@@ -286,15 +286,6 @@ async function sendPayments(req, res, next) {
         })
         Logger.info('sendPayments', `resultCode ${response.resultCode}`)
 
-        if (order?.paymentInstruments?.length) {
-            const orderApi = new OrderApiClient()
-            await orderApi.updateOrderPaymentTransaction(
-                order.orderNo,
-                order.paymentInstruments[0].paymentInstrumentId,
-                response.pspReference
-            )
-        }
-
         const checkoutResponse = createCheckoutResponse(response, order.orderNo)
         if (checkoutResponse.isFinal && !checkoutResponse.isSuccessful) {
             throw new AdyenError(errorMessages.PAYMENT_NOT_SUCCESSFUL, 400)
