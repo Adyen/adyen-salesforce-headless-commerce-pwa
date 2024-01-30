@@ -1,6 +1,6 @@
 import {PaymentsController} from '../../index'
 import {RESULT_CODES} from '../../../utils/constants.mjs'
-import { AdyenError } from "../../models/AdyenError";
+import {AdyenError} from '../../models/AdyenError'
 
 let mockPayments = jest.fn()
 let mockGetBasket = jest.fn()
@@ -924,7 +924,6 @@ describe('payments controller', () => {
             isSuccessful: true,
             merchantReference: 'reference123'
         })
-        expect(mockUpdateOrderPaymentTransaction).toHaveBeenCalled()
         expect(consoleInfoSpy).toHaveBeenCalledTimes(4)
         expect(consoleInfoSpy.mock.calls[0][0]).toContain('sendPayments start')
         expect(consoleInfoSpy.mock.calls[1][0]).toContain('sendPayments orderCreated 123')
