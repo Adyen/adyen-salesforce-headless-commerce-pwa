@@ -53,7 +53,8 @@ function authenticate(req, res, next) {
 }
 
 function validateHmac(req, res, next) {
-    const adyenConfig = getAdyenConfigForCurrentSite()
+    const {siteId} = req.query
+    const adyenConfig = getAdyenConfigForCurrentSite(siteId)
     if (!adyenConfig?.webhookHmacKey) {
         return next()
     }
