@@ -26,7 +26,7 @@ describe('AdyenPaymentMethodsService', () => {
     })
 
     it('should create an instance of AdyenPaymentMethodsService with ApiClient', () => {
-        expect(ApiClient).toHaveBeenCalledWith('/api/adyen/paymentMethods', mockToken)
+        expect(ApiClient).toHaveBeenCalledWith('/api/adyen/paymentMethods', mockToken, mockSite)
     })
 
     it('should fetch payment methods successfully', async () => {

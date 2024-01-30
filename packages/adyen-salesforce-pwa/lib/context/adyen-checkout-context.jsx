@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
-import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
 import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
 import {AdyenPaymentMethodsService} from '../services/payment-methods'
 import {paymentMethodsConfiguration} from '../components/paymentMethodsConfiguration'
@@ -15,6 +14,7 @@ export const AdyenCheckoutProvider = ({
     useAccessToken,
     useCustomerId,
     useCustomerType,
+    useMultiSite,
     adyenConfig
 }) => {
     const {getTokenWhenReady} = useAccessToken()
@@ -129,6 +129,7 @@ AdyenCheckoutProvider.propTypes = {
     useAccessToken: PropTypes.any,
     useCustomerId: PropTypes.any,
     useCustomerType: PropTypes.any,
+    useMultiSite: PropTypes.any,
     adyenConfig: PropTypes.any
 }
 

@@ -26,7 +26,8 @@ async function handleWebhook(req, res, next) {
 function authenticate(req, res, next) {
     try {
         const authHeader = req.headers.authorization
-        const adyenConfig = getAdyenConfigForCurrentSite()
+        const {siteId} = req.query
+        const adyenConfig = getAdyenConfigForCurrentSite(siteId)
         if (!authHeader) {
             throw new AdyenError(messages.AUTH_ERROR, 401)
         }

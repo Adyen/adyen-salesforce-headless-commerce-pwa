@@ -24,6 +24,8 @@ import {
     useProducts,
     useShopperBasketsMutation
 } from '@salesforce/commerce-sdk-react'
+import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
+
 // Components
 const fallback = <Skeleton height="75vh" width="100%" />
 
@@ -74,6 +76,7 @@ const Checkout = loadable(() => import('@adyen/adyen-salesforce-pwa'), {
                 useCustomerId={useCustomerId}
                 useCustomerType={useCustomerType}
                 useShopperBasketsMutation={useShopperBasketsMutation}
+                useMultiSite={useMultiSite}
                 // adyenConfig={checkoutCustomizations}
             />
         )
@@ -93,6 +96,7 @@ const CheckoutConfirmation = loadable(() => import('@adyen/adyen-salesforce-pwa'
                 useAccessToken={useAccessToken}
                 useCustomerId={useCustomerId}
                 useCustomerType={useCustomerType}
+                useMultiSite={useMultiSite}
             />
         )
     }
@@ -107,6 +111,7 @@ const AdyenCheckoutRedirect = loadable(() => import('@adyen/adyen-salesforce-pwa
                 useAccessToken={useAccessToken}
                 useCustomerId={useCustomerId}
                 useCustomerType={useCustomerType}
+                useMultiSite={useMultiSite}
             />
         )
     }

@@ -56,7 +56,7 @@ jest.mock('../../services/environment', () => ({
 }))
 
 describe('<AdyenCheckoutProvider />', () => {
-    let useAccessToken, useCustomerId, useCustomerType, locationSpy
+    let useAccessToken, useCustomerId, useCustomerType, useMultiSite, locationSpy
     beforeEach(() => {
         useAccessToken = jest.fn().mockImplementation(() => {
             return {
@@ -70,6 +70,16 @@ describe('<AdyenCheckoutProvider />', () => {
         })
         useCustomerType = jest.fn().mockImplementation(() => {
             return 'mockCustomerType'
+        })
+        useMultiSite = jest.fn().mockImplementation(() => {
+            return {
+                site: {
+                    id: 'RefArch'
+                },
+                locale: {
+                    id: 'en-US'
+                }
+            }
         })
     })
 
@@ -117,6 +127,7 @@ describe('<AdyenCheckoutProvider />', () => {
                     useAccessToken={useAccessToken}
                     useCustomerId={useCustomerId}
                     useCustomerType={useCustomerType}
+                    useMultiSite={useMultiSite}
                 >
                     {children}
                 </AdyenCheckoutProvider>

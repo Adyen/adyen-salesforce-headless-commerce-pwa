@@ -535,6 +535,7 @@ const CheckoutConfirmationContainer = ({
     useOrder,
     useProducts,
     useAuthHelper,
+    useMultiSite,
     AuthHelpers
 }) => {
     return (
@@ -542,6 +543,7 @@ const CheckoutConfirmationContainer = ({
             useAccessToken={useAccessToken}
             useCustomerId={useCustomerId}
             useCustomerType={useCustomerType}
+            useMultiSite={useMultiSite}
         >
             <CheckoutConfirmation
                 useOrder={useOrder}
@@ -567,7 +569,8 @@ CheckoutConfirmationContainer.propTypes = {
     AuthHelpers: PropTypes.any,
     useAccessToken: PropTypes.any,
     useCustomerId: PropTypes.any,
-    useCustomerType: PropTypes.any
+    useCustomerType: PropTypes.any,
+    useMultiSite: PropTypes.any
 }
 
 export default CheckoutConfirmationContainer

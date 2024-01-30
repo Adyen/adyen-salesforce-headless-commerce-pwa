@@ -26,7 +26,7 @@ describe('AdyenPaymentsDetailsService', () => {
 
     it('should create an instance of AdyenPaymentsDetailsService with ApiClient', () => {
         expect(paymentsDetailsService).toBeInstanceOf(AdyenPaymentsDetailsService)
-        expect(ApiClient).toHaveBeenCalledWith('/api/adyen/payments/details', mockToken)
+        expect(ApiClient).toHaveBeenCalledWith('/api/adyen/payments/details', mockToken, mockSite)
     })
 
     it('should submit payment details successfully', async () => {

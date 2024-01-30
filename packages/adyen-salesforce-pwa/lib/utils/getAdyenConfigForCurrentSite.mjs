@@ -1,5 +1,3 @@
-import Logger from "../api/controllers/logger.js";
-
 export const getAdyenConfigForCurrentSite = (currentSiteId) => {
     return {
         apiKey: setProperty(currentSiteId, ADYEN_ENV.ADYEN_API_KEY),
@@ -13,7 +11,7 @@ export const getAdyenConfigForCurrentSite = (currentSiteId) => {
     }
 }
 
-const setProperty = (currentSiteId, property) => {
+export const setProperty = (currentSiteId, property) => {
     const siteEnv = currentSiteId ? `${currentSiteId}_${property}` : property
     if (Object.hasOwn(process.env, siteEnv)) {
         return process.env[siteEnv]

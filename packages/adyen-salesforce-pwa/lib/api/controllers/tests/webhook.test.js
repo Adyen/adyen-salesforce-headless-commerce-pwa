@@ -10,16 +10,7 @@ jest.mock('@salesforce/pwa-kit-runtime/utils/ssr-config', () => {
                 app: {
                     sites: [
                         {
-                            id: 'RefArch',
-                            adyen: {
-                                clientKey: process.env.ADYEN_CLIENT_KEY,
-                                environment: process.env.ADYEN_ENVIRONMENT,
-                                merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT,
-                                systemIntegratorName: process.env.SYSTEM_INTEGRATOR_NAME,
-                                webhookUser: process.env.ADYEN_WEBHOOK_USER,
-                                webhookPassword: process.env.ADYEN_WEBHOOK_PASSWORD,
-                                webhookHmacKey: process.env.ADYEN_HMAC_KEY
-                            }
+                            id: 'RefArch'
                         }
                     ],
                     commerceAPI: {
@@ -53,6 +44,9 @@ describe('WebhookHandler', () => {
                         NotificationRequestItem: {}
                     }
                 ]
+            },
+            query: {
+                siteId: 'RefArch'
             }
         }
         res = {
