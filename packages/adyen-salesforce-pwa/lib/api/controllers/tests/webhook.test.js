@@ -87,7 +87,7 @@ describe('WebhookHandler', () => {
             expect(next).toHaveBeenCalled()
         })
         it('when valid HMAC is present', () => {
-            process.env.ADYEN_HMAC_KEY = 'test'
+            process.env.RefArch_ADYEN_HMAC_KEY = 'test'
             mockValidateHMAC.mockImplementationOnce(() => {
                 return true
             })
@@ -96,7 +96,7 @@ describe('WebhookHandler', () => {
             expect(next).toHaveBeenCalled()
         })
         it('when invalid HMAC is present', () => {
-            process.env.ADYEN_HMAC_KEY = 'test'
+            process.env.RefArch_ADYEN_HMAC_KEY = 'test'
             mockValidateHMAC.mockImplementationOnce(() => {
                 return false
             })
