@@ -27,6 +27,9 @@ describe('payments details controller', () => {
             },
             body: {
                 data: {}
+            },
+            query: {
+                siteId: 'RefArch'
             }
         }
         res = {

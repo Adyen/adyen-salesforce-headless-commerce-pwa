@@ -3,8 +3,8 @@ import {PaymentsApi} from '@adyen/api-library/lib/src/services/checkout/payments
 import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrentSite.mjs'
 
 class AdyenCheckoutConfig {
-    constructor() {
-        const adyenConfig = getAdyenConfigForCurrentSite()
+    constructor(siteId) {
+        const adyenConfig = getAdyenConfigForCurrentSite(siteId)
         const config = new Config()
         config.apiKey = adyenConfig.apiKey
         const client = new Client({config})
@@ -12,9 +12,9 @@ class AdyenCheckoutConfig {
         this.instance = new PaymentsApi(client)
     }
 
-    static getInstance() {
+    static getInstance(siteId) {
         if (!this.instance) {
-            this.instance = new AdyenCheckoutConfig()
+            this.instance = new AdyenCheckoutConfig(siteId)
         }
         return this.instance
     }

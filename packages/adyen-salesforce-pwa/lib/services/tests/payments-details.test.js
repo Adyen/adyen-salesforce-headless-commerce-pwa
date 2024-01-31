@@ -14,9 +14,10 @@ describe('AdyenPaymentsDetailsService', () => {
     let mockToken = 'mockTokenHere'
     let mockData = {someData: 'mockData'}
     let mockCustomerId = 'mockCustomerId'
+    let mockSite = {id: 'RefArch'}
 
     beforeEach(() => {
-        paymentsDetailsService = new AdyenPaymentsDetailsService(mockToken)
+        paymentsDetailsService = new AdyenPaymentsDetailsService(mockToken, mockSite)
     })
 
     afterEach(() => {
@@ -25,7 +26,7 @@ describe('AdyenPaymentsDetailsService', () => {
 
     it('should create an instance of AdyenPaymentsDetailsService with ApiClient', () => {
         expect(paymentsDetailsService).toBeInstanceOf(AdyenPaymentsDetailsService)
-        expect(ApiClient).toHaveBeenCalledWith('/api/adyen/payments/details', mockToken)
+        expect(ApiClient).toHaveBeenCalledWith('/api/adyen/payments/details', mockToken, mockSite)
     })
 
     it('should submit payment details successfully', async () => {

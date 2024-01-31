@@ -13,12 +13,13 @@ jest.mock('../api', () => {
 describe('AdyenPaymentsService', () => {
     let paymentsService
     let mockToken = 'mockToken'
+    let mockSite = {id: 'RefArch'}
     let mockAdyenStateData = {someData: 'mockData'}
     let mockBasketId = 'mockBasketId'
     let mockCustomerId = CUSTOMER_ID_MOCK
 
     beforeEach(() => {
-        paymentsService = new AdyenPaymentsService(mockToken)
+        paymentsService = new AdyenPaymentsService(mockToken, mockSite)
     })
 
     afterEach(() => {
@@ -27,7 +28,7 @@ describe('AdyenPaymentsService', () => {
 
     it('should create an instance of AdyenPaymentsService with ApiClient', () => {
         expect(paymentsService).toBeInstanceOf(AdyenPaymentsService)
-        expect(ApiClient).toHaveBeenCalledWith('/api/adyen/payments', mockToken)
+        expect(ApiClient).toHaveBeenCalledWith('/api/adyen/payments', mockToken, mockSite)
     })
 
     it('should submit payment successfully', async () => {

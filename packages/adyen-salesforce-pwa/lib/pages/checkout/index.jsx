@@ -73,6 +73,7 @@ const CheckoutContainer = ({
     useCustomerId,
     useCustomerType,
     useShopperBasketsMutation,
+    useMultiSite,
     adyenConfig
 }) => {
     return (
@@ -80,6 +81,7 @@ const CheckoutContainer = ({
             useAccessToken={useAccessToken}
             useCustomerId={useCustomerId}
             useCustomerType={useCustomerType}
+            useMultiSite={useMultiSite}
             adyenConfig={adyenConfig}
         >
             <CheckoutProvider>
@@ -99,6 +101,7 @@ CheckoutContainer.propTypes = {
     useCustomerId: PropTypes.any,
     useCustomerType: PropTypes.any,
     useShopperBasketsMutation: PropTypes.any,
+    useMultiSite: PropTypes.any,
     adyenConfig: PropTypes.any
 }
 

@@ -40,12 +40,14 @@ jobs:
               working-directory: ./tests
               run: npm run test
               env: 
-                ADYEN_API_KEY: ${{secrets.ADYEN_API_KEY}}
-                ADYEN_MERCHANT_ACCOUNT: ${{secrets.ADYEN_MERCHANT_ACCOUNT}}
-                ADYEN_CLIENT_KEY: ${{secrets.ADYEN_CLIENT_KEY}}
-                ADYEN_ENVIRONMENT: ${{secrets.ADYEN_ENVIRONMENT}}
+                RefArch_ADYEN_API_KEY: ${{secrets.ADYEN_API_KEY}}
+                RefArch_ADYEN_MERCHANT_ACCOUNT: ${{secrets.ADYEN_MERCHANT_ACCOUNT}}
+                RefArch_ADYEN_CLIENT_KEY: ${{secrets.ADYEN_CLIENT_KEY}}
+                RefArch_ADYEN_ENVIRONMENT: ${{secrets.ADYEN_ENVIRONMENT}}
+                RefArch_ADYEN_WEBHOOK_USER: ${{ secrets.ADYEN_WEBHOOK_USER }}
+                RefArch_ADYEN_WEBHOOK_PASSWORD: ${{ secrets.ADYEN_WEBHOOK_PASSWORD }}
+                RefArch_ADYEN_HMAC_KEY: ${{ secrets.ADYEN_HMAC_KEY }}
                 SYSTEM_INTEGRATOR_NAME: ${{ secrets.SYSTEM_INTEGRATOR_NAME }}
-                HOST_URL: ${{ secrets.HOST_URL }}
                 COMMERCE_API_CLIENT_ID: ${{ secrets.COMMERCE_API_CLIENT_ID }}
                 COMMERCE_API_ORG_ID: ${{ secrets.COMMERCE_API_ORG_ID }}
                 COMMERCE_API_SHORT_CODE: ${{ secrets.COMMERCE_API_SHORT_CODE }}
@@ -53,9 +55,6 @@ jobs:
                 COMMERCE_API_DEFAULT_SITE: ${{ secrets.COMMERCE_API_DEFAULT_SITE }}
                 SCAPI_URL: ${{ secrets.SCAPI_URL }}
                 OCAPI_URL: ${{ secrets.OCAPI_URL }}
-                ADYEN_WEBHOOK_USER: ${{ secrets.ADYEN_WEBHOOK_USER }}
-                ADYEN_WEBHOOK_PASSWORD: ${{ secrets.ADYEN_WEBHOOK_PASSWORD }}
-                ADYEN_HMAC_KEY: ${{ secrets.ADYEN_HMAC_KEY }}
                 ENVIRONMENT_ID: ${{ secrets.ENVIRONMENT_ID }}
                 PROJECT_ID: ${{ secrets.PROJECT_ID }}
                 COMMERCE_API_CLIENT_ID_PRIVATE: ${{ secrets.COMMERCE_API_CLIENT_ID_PRIVATE }}

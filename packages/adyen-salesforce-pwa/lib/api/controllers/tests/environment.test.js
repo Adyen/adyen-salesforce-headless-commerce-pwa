@@ -9,7 +9,11 @@ describe('getEnvironment middleware', () => {
     let req, res, next
 
     beforeEach(() => {
-        req = {}
+        req = {
+            query: {
+                siteId: 'RefArch'
+            }
+        }
         res = {
             locals: {}
         }

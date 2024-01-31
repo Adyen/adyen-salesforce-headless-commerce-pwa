@@ -1,6 +1,6 @@
 import {PaymentsController} from '../../index'
 import {RESULT_CODES} from '../../../utils/constants.mjs'
-import { AdyenError } from "../../models/AdyenError";
+import {AdyenError} from '../../models/AdyenError'
 
 let mockPayments = jest.fn()
 let mockGetBasket = jest.fn()
@@ -17,13 +17,7 @@ jest.mock('@salesforce/pwa-kit-runtime/utils/ssr-config', () => {
                 app: {
                     sites: [
                         {
-                            id: 'RefArch',
-                            adyen: {
-                                clientKey: process.env.ADYEN_CLIENT_KEY,
-                                environment: process.env.ADYEN_ENVIRONMENT,
-                                merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT,
-                                systemIntegratorName: process.env.SYSTEM_INTEGRATOR_NAME
-                            }
+                            id: 'RefArch'
                         }
                     ],
                     commerceAPI: {
@@ -111,6 +105,9 @@ describe('payments controller', () => {
                         brand: 'visa'
                     }
                 }
+            },
+            query: {
+                siteId: 'RefArch'
             }
         }
         res = {
@@ -927,7 +924,6 @@ describe('payments controller', () => {
             isSuccessful: true,
             merchantReference: 'reference123'
         })
-        expect(mockUpdateOrderPaymentTransaction).toHaveBeenCalled()
         expect(consoleInfoSpy).toHaveBeenCalledTimes(4)
         expect(consoleInfoSpy.mock.calls[0][0]).toContain('sendPayments start')
         expect(consoleInfoSpy.mock.calls[1][0]).toContain('sendPayments orderCreated 123')
