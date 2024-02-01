@@ -17,6 +17,8 @@ const errorMessages = {
 async function getPaymentMethods(req, res, next) {
     Logger.info('getPaymentMethods', 'start')
     const {siteId} = req.query
+    Logger.info('siteId', siteId)
+    Logger.info('env', process.env.RefArch_ADYEN_ENVIRONMENT)
     const checkout = AdyenCheckoutConfig.getInstance(siteId)
     const adyenConfig = getAdyenConfigForCurrentSite(siteId)
 
