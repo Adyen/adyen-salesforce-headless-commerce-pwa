@@ -251,7 +251,7 @@ async function sendPayments(req, res, next) {
             reference: order.orderNo,
             merchantAccount: adyenConfig.merchantAccount,
             amount: {
-                value: 0.01,
+                value: getCurrencyValueForApi(order.orderTotal, order.currency),
                 currency: order.currency
             },
             applicationInfo: getApplicationInfo(adyenConfig.systemIntegratorName),
@@ -295,7 +295,7 @@ async function sendPayments(req, res, next) {
         res.locals.response = checkoutResponse
         next()
     } catch (err) {
-        Logger.error('sendPayments', err.message)
+        Logger.error('sendPayments', JSON.stringify(err))
         const {app: appConfig} = getConfig()
         const shopperBaskets = new ShopperBaskets({
             ...appConfig.commerceAPI,

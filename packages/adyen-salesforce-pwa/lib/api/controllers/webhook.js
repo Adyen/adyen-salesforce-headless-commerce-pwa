@@ -47,7 +47,7 @@ function authenticate(req, res, next) {
             throw new AdyenError(messages.AUTH_ERROR, 401)
         }
     } catch (err) {
-        Logger.error('authenticate', err.message)
+        Logger.error('authenticate', JSON.stringify(err))
         return next(err)
     }
 }
@@ -68,7 +68,7 @@ function validateHmac(req, res, next) {
             throw new AdyenError(messages.AUTH_ERROR, 401)
         }
     } catch (err) {
-        Logger.error('validateHmac', err.message)
+        Logger.error('validateHmac', JSON.stringify(err))
         return next(err)
     }
 }
