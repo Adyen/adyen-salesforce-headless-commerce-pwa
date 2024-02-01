@@ -53,14 +53,15 @@ function authenticate(req, res, next) {
 }
 
 function validateHmac(req, res, next) {
-    const {siteId} = req.query
-    const adyenConfig = getAdyenConfigForCurrentSite(siteId)
-    if (!adyenConfig?.webhookHmacKey) {
-        return next()
-    }
-    const {notificationItems} = req.body
-    const {NotificationRequestItem} = notificationItems[0]
     try {
+        const {siteId} = req.query
+
+        const adyenConfig = getAdyenConfigForCurrentSite(siteId)
+        if (!adyenConfig?.webhookHmacKey) {
+            return next()
+        }
+        const {notificationItems} = req.body
+        const {NotificationRequestItem} = notificationItems[0]
         const HmacValidator = new hmacValidator()
         if (HmacValidator.validateHMAC(NotificationRequestItem, adyenConfig?.webhookHmacKey)) {
             return next()
