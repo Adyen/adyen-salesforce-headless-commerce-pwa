@@ -7,7 +7,8 @@ export const getAdyenConfigForCurrentSite = (currentSiteId) => {
         systemIntegratorName: setProperty(currentSiteId, ADYEN_ENV.SYSTEM_INTEGRATOR_NAME),
         webhookUser: setProperty(currentSiteId, ADYEN_ENV.ADYEN_WEBHOOK_USER),
         webhookPassword: setProperty(currentSiteId, ADYEN_ENV.ADYEN_WEBHOOK_PASSWORD),
-        webhookHmacKey: setProperty(currentSiteId, ADYEN_ENV.ADYEN_HMAC_KEY)
+        webhookHmacKey: setProperty(currentSiteId, ADYEN_ENV.ADYEN_HMAC_KEY),
+        liveEndpointUrlPrefix: setProperty(currentSiteId, ADYEN_ENV.ADYEN_LIVE_URL_PREFIX)
     }
 }
 
@@ -27,5 +28,6 @@ const ADYEN_ENV = {
     SYSTEM_INTEGRATOR_NAME: 'SYSTEM_INTEGRATOR_NAME',
     ADYEN_WEBHOOK_USER: 'ADYEN_WEBHOOK_USER',
     ADYEN_WEBHOOK_PASSWORD: 'ADYEN_WEBHOOK_PASSWORD',
-    ADYEN_HMAC_KEY: 'ADYEN_HMAC_KEY'
+    ADYEN_HMAC_KEY: 'ADYEN_HMAC_KEY',
+    ADYEN_LIVE_URL_PREFIX: 'ADYEN_LIVE_URL_PREFIX'
 }

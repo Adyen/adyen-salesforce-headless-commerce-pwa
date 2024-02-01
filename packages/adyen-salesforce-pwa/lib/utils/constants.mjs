@@ -48,4 +48,12 @@ export const ORDER = Object.freeze({
     CONFIRMATION_STATUS_NOT_CONFIRMED: 'not_confirmed'
 })
 
+export const ADYEN_ENVIRONMENTS = {
+    LIVE_EU: 'live',
+    LIVE_APSE: 'live-apse',
+    LIVE_AU: 'live-au',
+    LIVE_US: 'live-us',
+    LIVE_IN: 'live-in'
+}
+
 export const APPLICATION_VERSION = '1.0.0-beta.4'

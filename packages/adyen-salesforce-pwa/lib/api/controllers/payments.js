@@ -251,7 +251,7 @@ async function sendPayments(req, res, next) {
             reference: order.orderNo,
             merchantAccount: adyenConfig.merchantAccount,
             amount: {
-                value: getCurrencyValueForApi(order.orderTotal, order.currency),
+                value: 0.01,
                 currency: order.currency
             },
             applicationInfo: getApplicationInfo(adyenConfig.systemIntegratorName),
