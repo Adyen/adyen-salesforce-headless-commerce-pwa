@@ -79,6 +79,8 @@ async function getPaymentMethods(req, res, next) {
         res.locals.response = response
         next()
     } catch (err) {
+        Logger.error('errorType', err.errorType)
+        Logger.error('errorCode', err.errorCode)
         Logger.error('getPaymentMethods', err.message)
         next(err)
     }
