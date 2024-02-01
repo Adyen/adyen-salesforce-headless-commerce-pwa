@@ -17,10 +17,11 @@ const errorMessages = {
 async function getPaymentMethods(req, res, next) {
     Logger.info('getPaymentMethods', 'start')
     const {siteId} = req.query
-    const checkout = AdyenCheckoutConfig.getInstance(siteId)
-    const adyenConfig = getAdyenConfigForCurrentSite(siteId)
 
     try {
+        const checkout = AdyenCheckoutConfig.getInstance(siteId)
+        const adyenConfig = getAdyenConfigForCurrentSite(siteId)
+
         const {app: appConfig} = getConfig()
         const shopperCustomers = new ShopperCustomers({
             ...appConfig.commerceAPI,

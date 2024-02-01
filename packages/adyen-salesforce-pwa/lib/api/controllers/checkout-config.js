@@ -14,16 +14,20 @@ class AdyenCheckoutConfig {
         const isLiveEnvironment = this.isLiveEnvironment(adyenConfig.environment)
 
         const config = new Config()
+        config.apiKey = adyenConfig.apiKey
+
+        let client
         if (isLiveEnvironment) {
             if (!adyenConfig.liveEndpointUrlPrefix) {
                 throw new AdyenError(errorMessages.MISSING_LIVE_PREFIX, 400)
             }
-            config.liveEndpointUrlPrefix = adyenConfig.liveEndpointUrlPrefix
+            client = new Client({config})
+            client.setEnvironment(ADYEN_ENVIRONMENT.LIVE, adyenConfig.liveEndpointUrlPrefix)
+        } else {
+            client = new Client({config})
+            client.setEnvironment(ADYEN_ENVIRONMENT.TEST)
         }
-        config.apiKey = adyenConfig.apiKey
-        config.environment = isLiveEnvironment ? ADYEN_ENVIRONMENT.LIVE : ADYEN_ENVIRONMENT.TEST
 
-        const client = new Client({config})
         this.instance = new PaymentsApi(client)
     }
 
