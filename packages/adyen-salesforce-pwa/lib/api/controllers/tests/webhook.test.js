@@ -69,7 +69,7 @@ describe('WebhookHandler', () => {
         it('when no authorization is passed', () => {
             authenticate(req, res, next)
             expect(consoleErrorSpy).toHaveBeenCalledTimes(1)
-            expect(consoleErrorSpy.mock.calls[0][0]).toContain('authenticate Access Denied!')
+            expect(consoleErrorSpy.mock.calls[0][0]).toContain('Access Denied!')
             expect(next).toHaveBeenCalledWith(new AdyenError('Access Denied!', 401))
         })
         it('when invalid authorization is passed', () => {
@@ -77,7 +77,7 @@ describe('WebhookHandler', () => {
             req.headers.authorization = authorization
             authenticate(req, res, next)
             expect(consoleErrorSpy).toHaveBeenCalledTimes(1)
-            expect(consoleErrorSpy.mock.calls[0][0]).toContain('authenticate Access Denied!')
+            expect(consoleErrorSpy.mock.calls[0][0]).toContain('Access Denied!')
             expect(next).toHaveBeenCalledWith(new AdyenError('Access Denied!', 401))
         })
     })
@@ -103,7 +103,7 @@ describe('WebhookHandler', () => {
             validateHmac(req, res, next)
             expect(mockValidateHMAC).toHaveBeenCalled()
             expect(consoleErrorSpy).toHaveBeenCalledTimes(1)
-            expect(consoleErrorSpy.mock.calls[0][0]).toContain('validateHmac Access Denied!')
+            expect(consoleErrorSpy.mock.calls[0][0]).toContain('Access Denied!')
             expect(next).toHaveBeenCalledWith(new AdyenError('Access Denied!', 401))
         })
     })

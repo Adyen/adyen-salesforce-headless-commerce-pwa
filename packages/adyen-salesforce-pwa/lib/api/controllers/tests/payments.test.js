@@ -208,7 +208,7 @@ describe('payments controller', () => {
         expect(res.locals.response).toBeNil()
         expect(consoleInfoSpy).toHaveBeenCalledTimes(1)
         expect(consoleInfoSpy.mock.calls[0][0]).toContain('sendPayments start')
-        expect(consoleErrorSpy.mock.calls[0][0]).toContain('sendPayments invalid request params')
+        expect(consoleErrorSpy.mock.calls[0][0]).toContain('invalid request params')
         expect(next).toHaveBeenCalledWith(new AdyenError('invalid request params', 400))
     })
     it('returns error if basket is empty', async () => {
@@ -225,7 +225,7 @@ describe('payments controller', () => {
         expect(res.locals.response).toBeNil()
         expect(consoleInfoSpy).toHaveBeenCalledTimes(1)
         expect(consoleInfoSpy.mock.calls[0][0]).toContain('sendPayments start')
-        expect(consoleErrorSpy.mock.calls[0][0]).toContain('sendPayments invalid basket')
+        expect(consoleErrorSpy.mock.calls[0][0]).toContain('invalid basket')
         expect(next).toHaveBeenCalledWith(new AdyenError('invalid basket', 404))
     })
     it('adds paymentInstrument to basket if basket has no paymentInstrument and returns checkout response', async () => {
@@ -378,7 +378,7 @@ describe('payments controller', () => {
         expect(consoleInfoSpy.mock.calls[0][0]).toContain('sendPayments start')
         expect(consoleInfoSpy.mock.calls[1][0]).toContain('sendPayments orderCreated 123')
         expect(consoleErrorSpy).toHaveBeenCalled()
-        expect(consoleErrorSpy.mock.calls[0][0]).toContain('sendPayments order is invalid')
+        expect(consoleErrorSpy.mock.calls[0][0]).toContain('order is invalid')
         expect(next).toHaveBeenCalledWith(new AdyenError('order is invalid', 404))
     })
     it('returns checkout response even if request has no billing address and delivery address', async () => {
@@ -1006,7 +1006,7 @@ describe('payments controller', () => {
         expect(consoleInfoSpy.mock.calls[1][0]).toContain('sendPayments orderCreated 123')
         expect(consoleInfoSpy.mock.calls[2][0]).toContain('sendPayments resultCode Error')
         expect(consoleErrorSpy).toHaveBeenCalled()
-        expect(consoleErrorSpy.mock.calls[0][0]).toContain('sendPayments payment not successful')
+        expect(consoleErrorSpy.mock.calls[0][0]).toContain('payment not successful')
         expect(next).toHaveBeenCalledWith(new AdyenError('payment not successful', 400))
     })
     it('returns error if payment response is error and remove all paymentInstrument', async () => {
@@ -1097,7 +1097,7 @@ describe('payments controller', () => {
         expect(consoleInfoSpy.mock.calls[1][0]).toContain('sendPayments orderCreated 123')
         expect(consoleInfoSpy.mock.calls[2][0]).toContain('sendPayments resultCode Error')
         expect(consoleErrorSpy).toHaveBeenCalled()
-        expect(consoleErrorSpy.mock.calls[0][0]).toContain('sendPayments payment not successful')
+        expect(consoleErrorSpy.mock.calls[0][0]).toContain('payment not successful')
         expect(next).toHaveBeenCalledWith(new AdyenError('payment not successful', 400))
     })
 })

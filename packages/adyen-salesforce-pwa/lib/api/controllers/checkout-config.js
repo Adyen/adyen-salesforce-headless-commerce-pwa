@@ -11,20 +11,18 @@ const errorMessages = {
 class AdyenCheckoutConfig {
     constructor(siteId) {
         const adyenConfig = getAdyenConfigForCurrentSite(siteId)
-        const isLiveEnvironment = this.isLiveEnvironment(adyenConfig.environment)
-
         const config = new Config()
         config.apiKey = adyenConfig.apiKey
+        const client = new Client({config})
 
-        let client
+        const isLiveEnvironment = this.isLiveEnvironment(adyenConfig.environment)
+
         if (isLiveEnvironment) {
             if (!adyenConfig.liveEndpointUrlPrefix) {
                 throw new AdyenError(errorMessages.MISSING_LIVE_PREFIX, 400)
             }
-            client = new Client({config})
             client.setEnvironment(ADYEN_ENVIRONMENT.LIVE, adyenConfig.liveEndpointUrlPrefix)
         } else {
-            client = new Client({config})
             client.setEnvironment(ADYEN_ENVIRONMENT.TEST)
         }
 
