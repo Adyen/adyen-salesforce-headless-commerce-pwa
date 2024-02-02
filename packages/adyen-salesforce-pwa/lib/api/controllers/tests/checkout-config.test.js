@@ -63,7 +63,8 @@ describe('AdyenCheckoutConfig', () => {
             environment: 'live',
             apiKey: 'live-api-key'
         })
-        expect(() => new AdyenCheckoutConfig('siteId')).toThrow(AdyenError)
+        const adyenCheckoutConfig = new AdyenCheckoutConfig('siteId')
+        expect(() => adyenCheckoutConfig.createInstance()).toThrow(AdyenError)
     })
 
     it('should return if its live environment', () => {
@@ -72,7 +73,7 @@ describe('AdyenCheckoutConfig', () => {
             liveEndpointUrlPrefix: 'prefix'
         })
         const config = getAdyenConfigForCurrentSite('siteId')
-        const instance = new AdyenCheckoutConfig('siteId')
-        expect(instance.isLiveEnvironment(config.environment)).toBe(true)
+        const adyenCheckoutConfig = new AdyenCheckoutConfig('siteId')
+        expect(adyenCheckoutConfig.isLiveEnvironment(config.environment)).toBe(true)
     })
 })

@@ -10,7 +10,15 @@ const errorMessages = {
 
 class AdyenCheckoutConfig {
     constructor(siteId) {
-        const adyenConfig = getAdyenConfigForCurrentSite(siteId)
+        this.siteId = siteId
+    }
+
+    isLiveEnvironment(environment) {
+        return Object.values(ADYEN_LIVE_REGIONS).includes(environment)
+    }
+
+    createInstance() {
+        const adyenConfig = getAdyenConfigForCurrentSite(this.siteId)
         const config = new Config()
         config.apiKey = adyenConfig.apiKey
         const client = new Client({config})
@@ -26,16 +34,13 @@ class AdyenCheckoutConfig {
             client.setEnvironment(ADYEN_ENVIRONMENT.TEST)
         }
 
-        this.instance = new PaymentsApi(client)
-    }
-
-    isLiveEnvironment(environment) {
-        return Object.values(ADYEN_LIVE_REGIONS).includes(environment)
+        return new PaymentsApi(client)
     }
 
     static getInstance(siteId) {
         if (!this.instance) {
-            this.instance = new AdyenCheckoutConfig(siteId)
+            const adyenCheckoutConfig = new AdyenCheckoutConfig(siteId)
+            this.instance = adyenCheckoutConfig.createInstance()
         }
         return this.instance
     }

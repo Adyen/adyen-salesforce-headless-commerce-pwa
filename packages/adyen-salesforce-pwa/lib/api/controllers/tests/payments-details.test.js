@@ -7,9 +7,7 @@ jest.mock('../checkout-config', () => {
     return {
         getInstance: jest.fn().mockImplementation(() => {
             return {
-                instance: {
-                    paymentsDetails: mockPaymentsDetails
-                }
+                paymentsDetails: mockPaymentsDetails
             }
         })
     }

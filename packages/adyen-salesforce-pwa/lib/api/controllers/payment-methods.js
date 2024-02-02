@@ -68,7 +68,7 @@ async function getPaymentMethods(req, res, next) {
             paymentMethodsRequest.shopperReference = customer.customerId
         }
 
-        const response = await checkout.instance.paymentMethods(paymentMethodsRequest, {
+        const response = await checkout.paymentMethods(paymentMethodsRequest, {
             idempotencyKey: uuidv4()
         })
 

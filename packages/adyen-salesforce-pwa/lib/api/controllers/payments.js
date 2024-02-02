@@ -281,7 +281,7 @@ async function sendPayments(req, res, next) {
 
         paymentRequest.additionalData = getAdditionalData(order)
 
-        const response = await checkout.instance.payments(paymentRequest, {
+        const response = await checkout.payments(paymentRequest, {
             idempotencyKey: uuidv4()
         })
         Logger.info('sendPayments', `resultCode ${response.resultCode}`)
