@@ -47,20 +47,21 @@ function authenticate(req, res, next) {
             throw new AdyenError(messages.AUTH_ERROR, 401)
         }
     } catch (err) {
-        Logger.error('authenticate', err.message)
+        Logger.error('authenticate', JSON.stringify(err))
         return next(err)
     }
 }
 
 function validateHmac(req, res, next) {
-    const {siteId} = req.query
-    const adyenConfig = getAdyenConfigForCurrentSite(siteId)
-    if (!adyenConfig?.webhookHmacKey) {
-        return next()
-    }
-    const {notificationItems} = req.body
-    const {NotificationRequestItem} = notificationItems[0]
     try {
+        const {siteId} = req.query
+
+        const adyenConfig = getAdyenConfigForCurrentSite(siteId)
+        if (!adyenConfig?.webhookHmacKey) {
+            return next()
+        }
+        const {notificationItems} = req.body
+        const {NotificationRequestItem} = notificationItems[0]
         const HmacValidator = new hmacValidator()
         if (HmacValidator.validateHMAC(NotificationRequestItem, adyenConfig?.webhookHmacKey)) {
             return next()
@@ -68,7 +69,7 @@ function validateHmac(req, res, next) {
             throw new AdyenError(messages.AUTH_ERROR, 401)
         }
     } catch (err) {
-        Logger.error('validateHmac', err.message)
+        Logger.error('validateHmac', JSON.stringify(err))
         return next(err)
     }
 }

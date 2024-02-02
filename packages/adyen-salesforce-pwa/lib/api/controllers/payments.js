@@ -281,7 +281,7 @@ async function sendPayments(req, res, next) {
 
         paymentRequest.additionalData = getAdditionalData(order)
 
-        const response = await checkout.instance.payments(paymentRequest, {
+        const response = await checkout.payments(paymentRequest, {
             idempotencyKey: uuidv4()
         })
         Logger.info('sendPayments', `resultCode ${response.resultCode}`)
@@ -295,7 +295,7 @@ async function sendPayments(req, res, next) {
         res.locals.response = checkoutResponse
         next()
     } catch (err) {
-        Logger.error('sendPayments', err.message)
+        Logger.error('sendPayments', JSON.stringify(err))
         const {app: appConfig} = getConfig()
         const shopperBaskets = new ShopperBaskets({
             ...appConfig.commerceAPI,

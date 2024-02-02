@@ -16,11 +16,13 @@ const errorMessages = {
 
 async function getPaymentMethods(req, res, next) {
     Logger.info('getPaymentMethods', 'start')
-    const {siteId} = req.query
-    const checkout = AdyenCheckoutConfig.getInstance(siteId)
-    const adyenConfig = getAdyenConfigForCurrentSite(siteId)
 
     try {
+        const {siteId} = req.query
+
+        const checkout = AdyenCheckoutConfig.getInstance(siteId)
+        const adyenConfig = getAdyenConfigForCurrentSite(siteId)
+
         const {app: appConfig} = getConfig()
         const shopperCustomers = new ShopperCustomers({
             ...appConfig.commerceAPI,
@@ -66,7 +68,7 @@ async function getPaymentMethods(req, res, next) {
             paymentMethodsRequest.shopperReference = customer.customerId
         }
 
-        const response = await checkout.instance.paymentMethods(paymentMethodsRequest, {
+        const response = await checkout.paymentMethods(paymentMethodsRequest, {
             idempotencyKey: uuidv4()
         })
 
@@ -78,7 +80,7 @@ async function getPaymentMethods(req, res, next) {
         res.locals.response = response
         next()
     } catch (err) {
-        Logger.error('getPaymentMethods', err.message)
+        Logger.error('getPaymentMethods', JSON.stringify(err))
         next(err)
     }
 }

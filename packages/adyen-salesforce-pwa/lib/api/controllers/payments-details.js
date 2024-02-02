@@ -10,10 +10,12 @@ const errorMessages = {
 
 async function sendPaymentDetails(req, res, next) {
     Logger.info('sendPaymentDetails', 'start')
-    const checkout = AdyenCheckoutConfig.getInstance()
+
     try {
         const {data} = req.body
-        const response = await checkout.instance.paymentsDetails(data, {
+
+        const checkout = AdyenCheckoutConfig.getInstance()
+        const response = await checkout.paymentsDetails(data, {
             idempotencyKey: uuidv4()
         })
         Logger.info('sendPaymentDetails', `resultCode ${response.resultCode}`)
@@ -24,7 +26,7 @@ async function sendPaymentDetails(req, res, next) {
         res.locals.response = checkoutResponse
         next()
     } catch (err) {
-        Logger.error('sendPaymentDetails', err.message)
+        Logger.error('sendPaymentDetails', JSON.stringify(err))
         next(err)
     }
 }

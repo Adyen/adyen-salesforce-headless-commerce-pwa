@@ -7,9 +7,7 @@ jest.mock('../checkout-config', () => {
     return {
         getInstance: jest.fn().mockImplementation(() => {
             return {
-                instance: {
-                    paymentsDetails: mockPaymentsDetails
-                }
+                paymentsDetails: mockPaymentsDetails
             }
         })
     }
@@ -74,9 +72,7 @@ describe('payments details controller', () => {
         expect(consoleInfoSpy.mock.calls[0][0]).toContain('sendPaymentDetails start')
         expect(consoleInfoSpy.mock.calls[1][0]).toContain('sendPaymentDetails resultCode Error')
         expect(consoleErrorSpy).toHaveBeenCalled()
-        expect(consoleErrorSpy.mock.calls[0][0]).toContain(
-            'sendPaymentDetails payments details call not successful'
-        )
+        expect(consoleErrorSpy.mock.calls[0][0]).toContain('payments details call not successful')
         expect(next).toHaveBeenCalledWith(
             new AdyenError('payments details call not successful', 400)
         )
