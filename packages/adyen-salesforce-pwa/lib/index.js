@@ -1,5 +1,6 @@
 export {default as Checkout} from './pages/checkout/index'
 export {default as CheckoutConfirmation} from './pages/checkout/confirmation'
+export {default as AdyenCheckoutRedirect} from './pages/checkout/redirect/index'
 export {default as AdyenCheckoutError} from './pages/checkout/error/index'
 export * from './context/adyen-checkout-context'
 export {default as AdyenCheckout} from './components/adyenCheckout'

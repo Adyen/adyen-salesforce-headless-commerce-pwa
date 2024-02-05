@@ -5,6 +5,16 @@ export const amazonPayConfig = (props) => {
         ...baseConfig(props),
         showPayButton: true,
         productType: 'PayAndShip',
-        checkoutMode: 'ProcessOrder'
+        checkoutMode: 'ProcessOrder',
+        returnUrl: props.returnUrl || `${window.location.href}/redirect`,
+        onClick: async (resolve, reject) => {
+            try {
+                const [onBillingSubmit] = props.beforeSubmit
+                await onBillingSubmit()
+                resolve()
+            } catch (err) {
+                reject(err)
+            }
+        }
     }
 }

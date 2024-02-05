@@ -28,13 +28,11 @@ export const onSubmit = async (state, component, props) => {
     if (!state.isValid) {
         throw new Error('invalid state')
     }
-    const adyenPaymentService = new AdyenPaymentsService(props?.token)
+    const adyenPaymentService = new AdyenPaymentsService(props?.token, props?.site)
     const paymentsResponse = await adyenPaymentService.submitPayment(
         {
             ...state.data,
-            origin: state.data.origin
-                ? state.data.origin
-                : `${window.location.protocol}//${window.location.host}`
+            origin: state.data.origin ? state.data.origin : window.location.href
         },
         props.basket?.basketId,
         props?.customerId
@@ -43,7 +41,7 @@ export const onSubmit = async (state, component, props) => {
 }
 
 export const onAdditionalDetails = async (state, component, props) => {
-    const adyenPaymentsDetailsService = new AdyenPaymentsDetailsService(props?.token)
+    const adyenPaymentsDetailsService = new AdyenPaymentsDetailsService(props?.token, props?.site)
     const paymentsDetailsResponse = await adyenPaymentsDetailsService.submitPaymentsDetails(
         state.data,
         props?.customerId

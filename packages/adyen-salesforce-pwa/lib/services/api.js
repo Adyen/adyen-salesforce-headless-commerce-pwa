@@ -1,16 +1,20 @@
 export class ApiClient {
     url = null
     token = null
+    site = null
 
-    constructor(url, token) {
+    constructor(url, token, site) {
         this.url = url
         this.token = token
+        this.site = site
     }
 
     base(method, options) {
-        if (options?.queryParams) {
-            this.url = `${this.url}?${new URLSearchParams(options.queryParams)}`
+        const queryParams = {
+            siteId: this.site.id,
+            ...(options?.queryParams || {})
         }
+        this.url = `${this.url}?${new URLSearchParams(queryParams)}`
         return fetch(this.url, {
             method: method,
             body: options?.body || null,

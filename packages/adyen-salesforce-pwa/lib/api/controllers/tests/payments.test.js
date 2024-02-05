@@ -1,5 +1,6 @@
 import {PaymentsController} from '../../index'
 import {RESULT_CODES} from '../../../utils/constants.mjs'
+import {AdyenError} from '../../models/AdyenError'
 
 let mockPayments = jest.fn()
 let mockGetBasket = jest.fn()
@@ -16,13 +17,7 @@ jest.mock('@salesforce/pwa-kit-runtime/utils/ssr-config', () => {
                 app: {
                     sites: [
                         {
-                            id: 'RefArch',
-                            adyen: {
-                                clientKey: process.env.ADYEN_CLIENT_KEY,
-                                environment: process.env.ADYEN_ENVIRONMENT,
-                                merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT,
-                                systemIntegratorName: process.env.SYSTEM_INTEGRATOR_NAME
-                            }
+                            id: 'RefArch'
                         }
                     ],
                     commerceAPI: {
@@ -56,9 +51,7 @@ jest.mock('../checkout-config', () => {
     return {
         getInstance: jest.fn().mockImplementation(() => {
             return {
-                instance: {
-                    payments: mockPayments
-                }
+                payments: mockPayments
             }
         })
     }
@@ -110,6 +103,9 @@ describe('payments controller', () => {
                         brand: 'visa'
                     }
                 }
+            },
+            query: {
+                siteId: 'RefArch'
             }
         }
         res = {
@@ -157,7 +153,28 @@ describe('payments controller', () => {
                     postalCode: '10001',
                     stateCode: 'NY',
                     address1: '123 Main St'
-                }
+                },
+                productItems: [
+                    {
+                        adjustedTax: 1.5,
+                        basePrice: 29.99,
+                        bonusProductLineItem: false,
+                        gift: false,
+                        itemId: 'f9fe488b0b925984ffd1d5b360',
+                        itemText: 'Striped Silk Tie',
+                        price: 29.99,
+                        priceAfterItemDiscount: 29.99,
+                        priceAfterOrderDiscount: 29.99,
+                        productId: '793775362380M',
+                        productName: 'Striped Silk Tie',
+                        quantity: 1,
+                        shipmentId: 'me',
+                        tax: 1.5,
+                        taxBasis: 29.99,
+                        taxClassId: 'standard',
+                        taxRate: 0.05
+                    }
+                ]
             }
         })
 
@@ -189,8 +206,8 @@ describe('payments controller', () => {
         expect(res.locals.response).toBeNil()
         expect(consoleInfoSpy).toHaveBeenCalledTimes(1)
         expect(consoleInfoSpy.mock.calls[0][0]).toContain('sendPayments start')
-        expect(consoleErrorSpy.mock.calls[0][0]).toContain('sendPayments invalid request params')
-        expect(next).toHaveBeenCalledWith(new Error('invalid request params'))
+        expect(consoleErrorSpy.mock.calls[0][0]).toContain('invalid request params')
+        expect(next).toHaveBeenCalledWith(new AdyenError('invalid request params', 400))
     })
     it('returns error if basket is empty', async () => {
         mockGetBasket.mockImplementationOnce(() => {
@@ -206,8 +223,8 @@ describe('payments controller', () => {
         expect(res.locals.response).toBeNil()
         expect(consoleInfoSpy).toHaveBeenCalledTimes(1)
         expect(consoleInfoSpy.mock.calls[0][0]).toContain('sendPayments start')
-        expect(consoleErrorSpy.mock.calls[0][0]).toContain('sendPayments invalid basket')
-        expect(next).toHaveBeenCalledWith(new Error('invalid basket'))
+        expect(consoleErrorSpy.mock.calls[0][0]).toContain('invalid basket')
+        expect(next).toHaveBeenCalledWith(new AdyenError('invalid basket', 404))
     })
     it('adds paymentInstrument to basket if basket has no paymentInstrument and returns checkout response', async () => {
         mockGetBasket.mockImplementationOnce(() => {
@@ -241,7 +258,28 @@ describe('payments controller', () => {
                     postalCode: '10001',
                     stateCode: 'NY',
                     address1: '123 Main St'
-                }
+                },
+                productItems: [
+                    {
+                        adjustedTax: 1.5,
+                        basePrice: 29.99,
+                        bonusProductLineItem: false,
+                        gift: false,
+                        itemId: 'f9fe488b0b925984ffd1d5b360',
+                        itemText: 'Striped Silk Tie',
+                        price: 29.99,
+                        priceAfterItemDiscount: 29.99,
+                        priceAfterOrderDiscount: 29.99,
+                        productId: '793775362380M',
+                        productName: 'Striped Silk Tie',
+                        quantity: 1,
+                        shipmentId: 'me',
+                        tax: 1.5,
+                        taxBasis: 29.99,
+                        taxClassId: 'standard',
+                        taxRate: 0.05
+                    }
+                ]
             }
         })
 
@@ -306,7 +344,28 @@ describe('payments controller', () => {
                     postalCode: '10001',
                     stateCode: 'NY',
                     address1: '123 Main St'
-                }
+                },
+                productItems: [
+                    {
+                        adjustedTax: 1.5,
+                        basePrice: 29.99,
+                        bonusProductLineItem: false,
+                        gift: false,
+                        itemId: 'f9fe488b0b925984ffd1d5b360',
+                        itemText: 'Striped Silk Tie',
+                        price: 29.99,
+                        priceAfterItemDiscount: 29.99,
+                        priceAfterOrderDiscount: 29.99,
+                        productId: '793775362380M',
+                        productName: 'Striped Silk Tie',
+                        quantity: 1,
+                        shipmentId: 'me',
+                        tax: 1.5,
+                        taxBasis: 29.99,
+                        taxClassId: 'standard',
+                        taxRate: 0.05
+                    }
+                ]
             }
         })
 
@@ -317,8 +376,8 @@ describe('payments controller', () => {
         expect(consoleInfoSpy.mock.calls[0][0]).toContain('sendPayments start')
         expect(consoleInfoSpy.mock.calls[1][0]).toContain('sendPayments orderCreated 123')
         expect(consoleErrorSpy).toHaveBeenCalled()
-        expect(consoleErrorSpy.mock.calls[0][0]).toContain('sendPayments order is invalid')
-        expect(next).toHaveBeenCalledWith(new Error('order is invalid'))
+        expect(consoleErrorSpy.mock.calls[0][0]).toContain('order is invalid')
+        expect(next).toHaveBeenCalledWith(new AdyenError('order is invalid', 404))
     })
     it('returns checkout response even if request has no billing address and delivery address', async () => {
         mockGetBasket.mockImplementationOnce(() => {
@@ -358,7 +417,28 @@ describe('payments controller', () => {
                     postalCode: '10001',
                     stateCode: 'NY',
                     address1: '123 Main St'
-                }
+                },
+                productItems: [
+                    {
+                        adjustedTax: 1.5,
+                        basePrice: 29.99,
+                        bonusProductLineItem: false,
+                        gift: false,
+                        itemId: 'f9fe488b0b925984ffd1d5b360',
+                        itemText: 'Striped Silk Tie',
+                        price: 29.99,
+                        priceAfterItemDiscount: 29.99,
+                        priceAfterOrderDiscount: 29.99,
+                        productId: '793775362380M',
+                        productName: 'Striped Silk Tie',
+                        quantity: 1,
+                        shipmentId: 'me',
+                        tax: 1.5,
+                        taxBasis: 29.99,
+                        taxClassId: 'standard',
+                        taxRate: 0.05
+                    }
+                ]
             }
         })
 
@@ -584,7 +664,28 @@ describe('payments controller', () => {
                     postalCode: '10001',
                     stateCode: 'NY',
                     address1: '123 Main St'
-                }
+                },
+                productItems: [
+                    {
+                        adjustedTax: 1.5,
+                        basePrice: 29.99,
+                        bonusProductLineItem: false,
+                        gift: false,
+                        itemId: 'f9fe488b0b925984ffd1d5b360',
+                        itemText: 'Striped Silk Tie',
+                        price: 29.99,
+                        priceAfterItemDiscount: 29.99,
+                        priceAfterOrderDiscount: 29.99,
+                        productId: '793775362380M',
+                        productName: 'Striped Silk Tie',
+                        quantity: 1,
+                        shipmentId: 'me',
+                        tax: 1.5,
+                        taxBasis: 29.99,
+                        taxClassId: 'standard',
+                        taxRate: 0.05
+                    }
+                ]
             }
         })
 
@@ -664,7 +765,28 @@ describe('payments controller', () => {
                     postalCode: '10001',
                     stateCode: 'NY',
                     address1: '123 Main St'
-                }
+                },
+                productItems: [
+                    {
+                        adjustedTax: 1.5,
+                        basePrice: 29.99,
+                        bonusProductLineItem: false,
+                        gift: false,
+                        itemId: 'f9fe488b0b925984ffd1d5b360',
+                        itemText: 'Striped Silk Tie',
+                        price: 29.99,
+                        priceAfterItemDiscount: 29.99,
+                        priceAfterOrderDiscount: 29.99,
+                        productId: '793775362380M',
+                        productName: 'Striped Silk Tie',
+                        quantity: 1,
+                        shipmentId: 'me',
+                        tax: 1.5,
+                        taxBasis: 29.99,
+                        taxClassId: 'standard',
+                        taxRate: 0.05
+                    }
+                ]
             }
         })
 
@@ -754,6 +876,27 @@ describe('payments controller', () => {
                         paymentInstrumentId: 'ca47e0da3d49b067b630db624a',
                         paymentMethodId: 'BML'
                     }
+                ],
+                productItems: [
+                    {
+                        adjustedTax: 1.5,
+                        basePrice: 29.99,
+                        bonusProductLineItem: false,
+                        gift: false,
+                        itemId: 'f9fe488b0b925984ffd1d5b360',
+                        itemText: 'Striped Silk Tie',
+                        price: 29.99,
+                        priceAfterItemDiscount: 29.99,
+                        priceAfterOrderDiscount: 29.99,
+                        productId: '793775362380M',
+                        productName: 'Striped Silk Tie',
+                        quantity: 1,
+                        shipmentId: 'me',
+                        tax: 1.5,
+                        taxBasis: 29.99,
+                        taxClassId: 'standard',
+                        taxRate: 0.05
+                    }
                 ]
             }
         })
@@ -779,7 +922,6 @@ describe('payments controller', () => {
             isSuccessful: true,
             merchantReference: 'reference123'
         })
-        expect(mockUpdateOrderPaymentTransaction).toHaveBeenCalled()
         expect(consoleInfoSpy).toHaveBeenCalledTimes(4)
         expect(consoleInfoSpy.mock.calls[0][0]).toContain('sendPayments start')
         expect(consoleInfoSpy.mock.calls[1][0]).toContain('sendPayments orderCreated 123')
@@ -824,7 +966,28 @@ describe('payments controller', () => {
                     postalCode: '10001',
                     stateCode: 'NY',
                     address1: '123 Main St'
-                }
+                },
+                productItems: [
+                    {
+                        adjustedTax: 1.5,
+                        basePrice: 29.99,
+                        bonusProductLineItem: false,
+                        gift: false,
+                        itemId: 'f9fe488b0b925984ffd1d5b360',
+                        itemText: 'Striped Silk Tie',
+                        price: 29.99,
+                        priceAfterItemDiscount: 29.99,
+                        priceAfterOrderDiscount: 29.99,
+                        productId: '793775362380M',
+                        productName: 'Striped Silk Tie',
+                        quantity: 1,
+                        shipmentId: 'me',
+                        tax: 1.5,
+                        taxBasis: 29.99,
+                        taxClassId: 'standard',
+                        taxRate: 0.05
+                    }
+                ]
             }
         })
         mockPayments.mockImplementationOnce(() => {
@@ -841,8 +1004,8 @@ describe('payments controller', () => {
         expect(consoleInfoSpy.mock.calls[1][0]).toContain('sendPayments orderCreated 123')
         expect(consoleInfoSpy.mock.calls[2][0]).toContain('sendPayments resultCode Error')
         expect(consoleErrorSpy).toHaveBeenCalled()
-        expect(consoleErrorSpy.mock.calls[0][0]).toContain('sendPayments payment not successful')
-        expect(next).toHaveBeenCalledWith(new Error('payment not successful'))
+        expect(consoleErrorSpy.mock.calls[0][0]).toContain('payment not successful')
+        expect(next).toHaveBeenCalledWith(new AdyenError('payment not successful', 400))
     })
     it('returns error if payment response is error and remove all paymentInstrument', async () => {
         mockGetBasket.mockImplementationOnce(() => {
@@ -893,7 +1056,28 @@ describe('payments controller', () => {
                     postalCode: '10001',
                     stateCode: 'NY',
                     address1: '123 Main St'
-                }
+                },
+                productItems: [
+                    {
+                        adjustedTax: 1.5,
+                        basePrice: 29.99,
+                        bonusProductLineItem: false,
+                        gift: false,
+                        itemId: 'f9fe488b0b925984ffd1d5b360',
+                        itemText: 'Striped Silk Tie',
+                        price: 29.99,
+                        priceAfterItemDiscount: 29.99,
+                        priceAfterOrderDiscount: 29.99,
+                        productId: '793775362380M',
+                        productName: 'Striped Silk Tie',
+                        quantity: 1,
+                        shipmentId: 'me',
+                        tax: 1.5,
+                        taxBasis: 29.99,
+                        taxClassId: 'standard',
+                        taxRate: 0.05
+                    }
+                ]
             }
         })
         mockPayments.mockImplementationOnce(() => {
@@ -911,7 +1095,7 @@ describe('payments controller', () => {
         expect(consoleInfoSpy.mock.calls[1][0]).toContain('sendPayments orderCreated 123')
         expect(consoleInfoSpy.mock.calls[2][0]).toContain('sendPayments resultCode Error')
         expect(consoleErrorSpy).toHaveBeenCalled()
-        expect(consoleErrorSpy.mock.calls[0][0]).toContain('sendPayments payment not successful')
-        expect(next).toHaveBeenCalledWith(new Error('payment not successful'))
+        expect(consoleErrorSpy.mock.calls[0][0]).toContain('payment not successful')
+        expect(next).toHaveBeenCalledWith(new AdyenError('payment not successful', 400))
     })
 })

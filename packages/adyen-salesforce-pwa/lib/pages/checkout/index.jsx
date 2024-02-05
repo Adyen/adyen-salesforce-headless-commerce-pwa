@@ -5,7 +5,6 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import React, {useEffect, useState} from 'react'
-import {useLocation} from 'react-router-dom'
 import {Alert, AlertIcon, Box, Container, Grid, GridItem, Stack} from '@chakra-ui/react'
 import {
     CheckoutProvider,
@@ -18,7 +17,6 @@ import OrderSummary from '@salesforce/retail-react-app/app/components/order-summ
 import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 import Payment from './partials/payment'
 import {AdyenCheckoutProvider} from '../../context/adyen-checkout-context'
-import AdyenCheckout from '../../components/adyenCheckout'
 import PropTypes from 'prop-types'
 
 const Checkout = ({useShopperBasketsMutation}) => {
@@ -70,32 +68,31 @@ const Checkout = ({useShopperBasketsMutation}) => {
     )
 }
 
-const CheckoutChildren = ({useShopperBasketsMutation}) => {
-    const location = useLocation()
-    return location?.search?.includes('redirectResult') ? (
-        <AdyenCheckout />
-    ) : (
-        <Checkout useShopperBasketsMutation={useShopperBasketsMutation} />
-    )
-}
-
 const CheckoutContainer = ({
     useAccessToken,
     useCustomerId,
     useCustomerType,
-    useShopperBasketsMutation
+    useShopperBasketsMutation,
+    useMultiSite,
+    adyenConfig
 }) => {
     return (
         <AdyenCheckoutProvider
             useAccessToken={useAccessToken}
             useCustomerId={useCustomerId}
             useCustomerType={useCustomerType}
+            useMultiSite={useMultiSite}
+            adyenConfig={adyenConfig}
         >
             <CheckoutProvider>
-                <CheckoutChildren useShopperBasketsMutation={useShopperBasketsMutation} />
+                <Checkout useShopperBasketsMutation={useShopperBasketsMutation} />
             </CheckoutProvider>
         </AdyenCheckoutProvider>
     )
+}
+
+Checkout.propTypes = {
+    useShopperBasketsMutation: PropTypes.any
 }
 
 CheckoutContainer.propTypes = {
@@ -103,7 +100,9 @@ CheckoutContainer.propTypes = {
     useAccessToken: PropTypes.any,
     useCustomerId: PropTypes.any,
     useCustomerType: PropTypes.any,
-    useShopperBasketsMutation: PropTypes.any
+    useShopperBasketsMutation: PropTypes.any,
+    useMultiSite: PropTypes.any,
+    adyenConfig: PropTypes.any
 }
 
 export default CheckoutContainer

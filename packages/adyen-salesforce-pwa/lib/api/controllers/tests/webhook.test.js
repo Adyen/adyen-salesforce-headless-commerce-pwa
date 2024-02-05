@@ -1,4 +1,5 @@
 import {authenticate, parseNotification, validateHmac} from '../webhook'
+import {AdyenError} from '../../models/AdyenError'
 
 let mockValidateHMAC = jest.fn()
 
@@ -9,16 +10,7 @@ jest.mock('@salesforce/pwa-kit-runtime/utils/ssr-config', () => {
                 app: {
                     sites: [
                         {
-                            id: 'RefArch',
-                            adyen: {
-                                clientKey: process.env.ADYEN_CLIENT_KEY,
-                                environment: process.env.ADYEN_ENVIRONMENT,
-                                merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT,
-                                systemIntegratorName: process.env.SYSTEM_INTEGRATOR_NAME,
-                                webhookUser: process.env.ADYEN_WEBHOOK_USER,
-                                webhookPassword: process.env.ADYEN_WEBHOOK_PASSWORD,
-                                webhookHmacKey: process.env.ADYEN_HMAC_KEY
-                            }
+                            id: 'RefArch'
                         }
                     ],
                     commerceAPI: {
@@ -52,6 +44,9 @@ describe('WebhookHandler', () => {
                         NotificationRequestItem: {}
                     }
                 ]
+            },
+            query: {
+                siteId: 'RefArch'
             }
         }
         res = {
@@ -74,16 +69,16 @@ describe('WebhookHandler', () => {
         it('when no authorization is passed', () => {
             authenticate(req, res, next)
             expect(consoleErrorSpy).toHaveBeenCalledTimes(1)
-            expect(consoleErrorSpy.mock.calls[0][0]).toContain('authenticate Access Denied!')
-            expect(next).toHaveBeenCalledWith(new Error('Access Denied!'))
+            expect(consoleErrorSpy.mock.calls[0][0]).toContain('Access Denied!')
+            expect(next).toHaveBeenCalledWith(new AdyenError('Access Denied!', 401))
         })
         it('when invalid authorization is passed', () => {
             const authorization = 'Basic ' + btoa('mockUser' + ':' + 'mockPassword')
             req.headers.authorization = authorization
             authenticate(req, res, next)
             expect(consoleErrorSpy).toHaveBeenCalledTimes(1)
-            expect(consoleErrorSpy.mock.calls[0][0]).toContain('authenticate Access Denied!')
-            expect(next).toHaveBeenCalledWith(new Error('Access Denied!'))
+            expect(consoleErrorSpy.mock.calls[0][0]).toContain('Access Denied!')
+            expect(next).toHaveBeenCalledWith(new AdyenError('Access Denied!', 401))
         })
     })
     describe('validateHmac', () => {
@@ -92,7 +87,7 @@ describe('WebhookHandler', () => {
             expect(next).toHaveBeenCalled()
         })
         it('when valid HMAC is present', () => {
-            process.env.ADYEN_HMAC_KEY = 'test'
+            process.env.RefArch_ADYEN_HMAC_KEY = 'test'
             mockValidateHMAC.mockImplementationOnce(() => {
                 return true
             })
@@ -101,15 +96,15 @@ describe('WebhookHandler', () => {
             expect(next).toHaveBeenCalled()
         })
         it('when invalid HMAC is present', () => {
-            process.env.ADYEN_HMAC_KEY = 'test'
+            process.env.RefArch_ADYEN_HMAC_KEY = 'test'
             mockValidateHMAC.mockImplementationOnce(() => {
                 return false
             })
             validateHmac(req, res, next)
             expect(mockValidateHMAC).toHaveBeenCalled()
             expect(consoleErrorSpy).toHaveBeenCalledTimes(1)
-            expect(consoleErrorSpy.mock.calls[0][0]).toContain('validateHmac Access Denied!')
-            expect(next).toHaveBeenCalledWith(new Error('Access Denied!'))
+            expect(consoleErrorSpy.mock.calls[0][0]).toContain('Access Denied!')
+            expect(next).toHaveBeenCalledWith(new AdyenError('Access Denied!', 401))
         })
     })
     describe('parseNotification', () => {
@@ -123,8 +118,9 @@ describe('WebhookHandler', () => {
             req.body.notificationItems = []
             parseNotification(req, res, next)
             expect(next).toHaveBeenCalledWith(
-                new Error(
-                    'Handling of Adyen notification has failed. No input parameters were provided.'
+                new AdyenError(
+                    'Handling of Adyen notification has failed. No input parameters were provided.',
+                    400
                 )
             )
         })
@@ -132,8 +128,9 @@ describe('WebhookHandler', () => {
             req.body = {}
             parseNotification(req, res, next)
             expect(next).toHaveBeenCalledWith(
-                new Error(
-                    'Handling of Adyen notification has failed. No input parameters were provided.'
+                new AdyenError(
+                    'Handling of Adyen notification has failed. No input parameters were provided.',
+                    400
                 )
             )
         })

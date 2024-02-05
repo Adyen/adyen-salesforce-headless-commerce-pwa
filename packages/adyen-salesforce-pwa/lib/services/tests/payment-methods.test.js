@@ -15,9 +15,10 @@ describe('AdyenPaymentMethodsService', () => {
     let mockToken = 'mockToken'
     let mockCustomerId = CUSTOMER_ID_MOCK
     let mockLocale = {id: LOCALE_MOCK}
+    let mockSite = {id: 'RefArch'}
 
     beforeEach(() => {
-        paymentMethodsService = new AdyenPaymentMethodsService(mockToken)
+        paymentMethodsService = new AdyenPaymentMethodsService(mockToken, mockSite)
     })
 
     afterEach(() => {
@@ -25,7 +26,7 @@ describe('AdyenPaymentMethodsService', () => {
     })
 
     it('should create an instance of AdyenPaymentMethodsService with ApiClient', () => {
-        expect(ApiClient).toHaveBeenCalledWith('/api/adyen/paymentMethods', mockToken)
+        expect(ApiClient).toHaveBeenCalledWith('/api/adyen/paymentMethods', mockToken, mockSite)
     })
 
     it('should fetch payment methods successfully', async () => {

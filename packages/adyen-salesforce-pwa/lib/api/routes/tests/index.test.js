@@ -13,7 +13,8 @@ describe('Adyen Endpoints', () => {
     beforeEach(() => {
         app = {
             get: jest.fn(),
-            post: jest.fn()
+            post: jest.fn(),
+            use: jest.fn()
         }
         runtime = {
             render: jest.fn()
@@ -29,19 +30,9 @@ describe('Adyen Endpoints', () => {
             const overrides = {}
 
             registerAdyenEndpoints(app, runtime, overrides)
-
-            expect(app.get).toHaveBeenCalledWith(
-                '*/checkout',
-                expect.any(Function),
-                expect.any(Function),
-                runtime.render
-            )
-            expect(app.get).toHaveBeenCalledWith(
-                '/api/adyen/environment',
-                expect.any(Function),
-                expect.any(Function),
-                expect.any(Function)
-            )
+            expect(app.get).toHaveBeenCalledTimes(4)
+            expect(app.post).toHaveBeenCalledTimes(3)
+            expect(app.use).toHaveBeenCalledTimes(1)
         })
     })
 
@@ -59,7 +50,7 @@ describe('Adyen Endpoints', () => {
 
             SuccessHandler(req, res)
 
-            expect(Logger.info).toHaveBeenCalledWith('Success', 'Response object')
+            expect(Logger.info).toHaveBeenCalledWith('Success')
             expect(res.status).toHaveBeenCalledWith(200)
             expect(res.json).toHaveBeenCalledWith({message: 'Success response'})
         })

@@ -24,8 +24,45 @@ import {
     useProducts,
     useShopperBasketsMutation
 } from '@salesforce/commerce-sdk-react'
+import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
+
 // Components
 const fallback = <Skeleton height="75vh" width="100%" />
+
+/**
+ * Customize Adyen Checkout
+ * - Translations
+ * - Payment Methods
+ * - Execute Callbacks
+ *
+ * const checkoutCustomizations = {
+ *     beforeSubmit: [
+ *         function logAfterSubmit() {
+ *             console.log('before submit')
+ *             return true
+ *         }
+ *     ],
+ *     afterSubmit: [
+ *         function logAfterSubmit() {
+ *             console.log('after submit')
+ *             return true
+ *         }
+ *     ],
+ *     translations: {
+ *         'en-US': {
+ *             payButton: ''
+ *         }
+ *     },
+ *     paymentMethodsConfiguration: {
+ *         paypal: {
+ *             style: {
+ *                 layout: 'vertical',
+ *                 color: 'blue'
+ *             }
+ *         }
+ *     }
+ * }
+ */
 
 // Create your pages here and add them to the routes array
 // Use loadable to split code into smaller js chunks
@@ -39,6 +76,8 @@ const Checkout = loadable(() => import('@adyen/adyen-salesforce-pwa'), {
                 useCustomerId={useCustomerId}
                 useCustomerType={useCustomerType}
                 useShopperBasketsMutation={useShopperBasketsMutation}
+                useMultiSite={useMultiSite}
+                // adyenConfig={checkoutCustomizations}
             />
         )
     }
@@ -57,6 +96,22 @@ const CheckoutConfirmation = loadable(() => import('@adyen/adyen-salesforce-pwa'
                 useAccessToken={useAccessToken}
                 useCustomerId={useCustomerId}
                 useCustomerType={useCustomerType}
+                useMultiSite={useMultiSite}
+            />
+        )
+    }
+})
+
+// Checkout Redirect page from Adyen
+const AdyenCheckoutRedirect = loadable(() => import('@adyen/adyen-salesforce-pwa'), {
+    fallback: fallback,
+    resolveComponent: (components) => {
+        return () => (
+            <components.AdyenCheckoutRedirect
+                useAccessToken={useAccessToken}
+                useCustomerId={useCustomerId}
+                useCustomerType={useCustomerType}
+                useMultiSite={useMultiSite}
             />
         )
     }
@@ -75,6 +130,10 @@ const routes = [
         path: '/checkout',
         component: Checkout,
         exact: true
+    },
+    {
+        path: '/checkout/redirect',
+        component: AdyenCheckoutRedirect
     },
     {
         path: '/checkout/error',

@@ -1,4 +1,6 @@
 import AdyenCheckoutConfig from '../checkout-config'
+import {getAdyenConfigForCurrentSite} from '../../../utils/getAdyenConfigForCurrentSite.mjs'
+import {AdyenError} from '../../models/AdyenError'
 
 jest.mock('@salesforce/pwa-kit-runtime/utils/ssr-config', () => {
     return {
@@ -7,13 +9,7 @@ jest.mock('@salesforce/pwa-kit-runtime/utils/ssr-config', () => {
                 app: {
                     sites: [
                         {
-                            id: 'RefArch',
-                            adyen: {
-                                apiKey: process.env.ADYEN_API_KEY,
-                                clientKey: process.env.ADYEN_CLIENT_KEY,
-                                environment: process.env.ADYEN_ENVIRONMENT,
-                                merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT
-                            }
+                            id: 'RefArch'
                         }
                     ],
                     commerceAPI: {
@@ -60,5 +56,24 @@ describe('AdyenCheckoutConfig', () => {
         const instance2 = AdyenCheckoutConfig.getInstance()
 
         expect(instance1).toBe(instance2)
+    })
+
+    it('should throw AdyenError for missing live endpoint URL prefix in live environment', () => {
+        getAdyenConfigForCurrentSite.mockReturnValue({
+            environment: 'live',
+            apiKey: 'live-api-key'
+        })
+        const adyenCheckoutConfig = new AdyenCheckoutConfig('siteId')
+        expect(() => adyenCheckoutConfig.createInstance()).toThrow(AdyenError)
+    })
+
+    it('should return if its live environment', () => {
+        getAdyenConfigForCurrentSite.mockReturnValue({
+            environment: 'live',
+            liveEndpointUrlPrefix: 'prefix'
+        })
+        const config = getAdyenConfigForCurrentSite('siteId')
+        const adyenCheckoutConfig = new AdyenCheckoutConfig('siteId')
+        expect(adyenCheckoutConfig.isLiveEnvironment(config.environment)).toBe(true)
     })
 })

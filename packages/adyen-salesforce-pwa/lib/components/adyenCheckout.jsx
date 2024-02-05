@@ -2,6 +2,8 @@ import React, {useEffect, useRef} from 'react'
 import AdyenCheckout from '@adyen/adyen-web'
 import '@adyen/adyen-web/dist/adyen.css'
 import {useAdyenCheckout} from '../context/adyen-checkout-context'
+import {Spinner, Flex} from '@chakra-ui/react'
+import PropTypes from 'prop-types'
 
 const AdyenCheckoutComponent = (props) => {
     const {
@@ -9,6 +11,9 @@ const AdyenCheckoutComponent = (props) => {
         adyenPaymentMethods,
         getPaymentMethodsConfiguration,
         setAdyenStateData,
+        getTranslations,
+        locale,
+        adyenPaymentInProgress,
         setAdyenPaymentInProgress
     } = useAdyenCheckout()
     const paymentContainer = useRef(null)
@@ -21,11 +26,19 @@ const AdyenCheckoutComponent = (props) => {
 
         const createCheckout = async () => {
             const paymentMethodsConfiguration = await getPaymentMethodsConfiguration(props)
-            const checkout = await AdyenCheckout({
+            const translations = getTranslations()
+            const checkoutConfig = {
                 environment: adyenEnvironment.ADYEN_ENVIRONMENT,
                 clientKey: adyenEnvironment.ADYEN_CLIENT_KEY,
                 paymentMethodsResponse: adyenPaymentMethods,
-                paymentMethodsConfiguration: paymentMethodsConfiguration,
+                paymentMethodsConfiguration: paymentMethodsConfiguration
+            }
+            if (translations) {
+                checkoutConfig.locale = locale.id
+                checkoutConfig.translations = translations
+            }
+            const checkout = await AdyenCheckout({
+                ...checkoutConfig,
                 onSubmit(state, element) {
                     const onSubmit =
                         paymentMethodsConfiguration.onSubmit ||
@@ -65,13 +78,26 @@ const AdyenCheckoutComponent = (props) => {
                 checkout.create('dropin').mount(paymentContainer.current)
             }
         }
-        if (adyenEnvironment && paymentContainer.current) {
+        if (adyenEnvironment && paymentContainer.current && !adyenPaymentInProgress) {
             window.paypal = undefined
             createCheckout()
         }
     }, [adyenEnvironment, adyenPaymentMethods])
 
-    return <div ref={paymentContainer}></div>
+    return (
+        <>
+            {props.showLoading && (
+                <Flex align={'center'} justify={'center'}>
+                    <Spinner size={'lg'} mt={4} />
+                </Flex>
+            )}
+            <div ref={paymentContainer}></div>
+        </>
+    )
+}
+
+AdyenCheckoutComponent.propTypes = {
+    showLoading: PropTypes.bool
 }
 
 export default AdyenCheckoutComponent

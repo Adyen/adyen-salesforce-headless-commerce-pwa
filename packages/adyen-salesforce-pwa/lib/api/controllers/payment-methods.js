@@ -6,25 +6,50 @@ import AdyenCheckoutConfig from './checkout-config'
 import Logger from './logger'
 import {v4 as uuidv4} from 'uuid'
 import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrentSite.mjs'
+import {AdyenError} from '../models/AdyenError'
+
+const errorMessages = {
+    UNAUTHORIZED: 'unauthorized',
+    INVALID_BASKET: 'invalid basket',
+    NO_PAYMENT_METHODS: 'no payment methods'
+}
 
 async function getPaymentMethods(req, res, next) {
     Logger.info('getPaymentMethods', 'start')
-    const checkout = AdyenCheckoutConfig.getInstance()
-    const adyenConfig = getAdyenConfigForCurrentSite()
 
     try {
+        const {siteId} = req.query
+
+        const checkout = AdyenCheckoutConfig.getInstance(siteId)
+        const adyenConfig = getAdyenConfigForCurrentSite(siteId)
+
         const {app: appConfig} = getConfig()
         const shopperCustomers = new ShopperCustomers({
             ...appConfig.commerceAPI,
             headers: {authorization: req.headers.authorization}
         })
 
-        const {baskets} = await shopperCustomers.getCustomerBaskets({
+        const customer = await shopperCustomers.getCustomer({
             parameters: {
                 customerId: req.headers.customerid
             }
         })
 
+        if (!customer?.customerId) {
+            throw new AdyenError(errorMessages.UNAUTHORIZED, 401)
+        }
+
+        const {baskets} = await shopperCustomers.getCustomerBaskets({
+            parameters: {
+                customerId: customer?.customerId
+            }
+        })
+
+        if (!baskets?.length) {
+            throw new AdyenError(errorMessages.INVALID_BASKET, 404)
+        }
+
+        const [{orderTotal, productTotal, currency}] = baskets
         const {locale: shopperLocale} = req.query
         const countryCode = shopperLocale?.slice(-2)
 
@@ -33,26 +58,29 @@ async function getPaymentMethods(req, res, next) {
             shopperLocale,
             countryCode,
             merchantAccount: adyenConfig.merchantAccount,
-            shopperReference: req.headers.customerid
-        }
-
-        if (baskets?.length) {
-            const [{orderTotal, productTotal, currency}] = baskets
-            paymentMethodsRequest.amount = {
+            amount: {
                 value: getCurrencyValueForApi(orderTotal || productTotal, currency),
                 currency: currency
             }
         }
 
-        const response = await checkout.instance.paymentMethods(paymentMethodsRequest, {
+        if (customer?.authType === 'registered') {
+            paymentMethodsRequest.shopperReference = customer.customerId
+        }
+
+        const response = await checkout.paymentMethods(paymentMethodsRequest, {
             idempotencyKey: uuidv4()
         })
+
+        if (!response?.paymentMethods?.length) {
+            throw new AdyenError(errorMessages.NO_PAYMENT_METHODS, 400)
+        }
 
         Logger.info('getPaymentMethods', 'success')
         res.locals.response = response
         next()
     } catch (err) {
-        Logger.error('getPaymentMethods', err.message)
+        Logger.error('getPaymentMethods', JSON.stringify(err))
         next(err)
     }
 }

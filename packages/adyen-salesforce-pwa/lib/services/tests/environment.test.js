@@ -12,9 +12,10 @@ jest.mock('../api', () => {
 describe('AdyenEnvironmentService', () => {
     let adyenService
     let mockToken = 'mockToken'
+    let mockSite = {id: 'RefArch'}
 
     beforeEach(() => {
-        adyenService = new AdyenEnvironmentService(mockToken)
+        adyenService = new AdyenEnvironmentService(mockToken, mockSite)
     })
 
     afterEach(() => {
@@ -22,7 +23,7 @@ describe('AdyenEnvironmentService', () => {
     })
 
     it('should create an instance of AdyenEnvironmentService with ApiClient', () => {
-        expect(ApiClient).toHaveBeenCalledWith('/api/adyen/environment', mockToken)
+        expect(ApiClient).toHaveBeenCalledWith('/api/adyen/environment', mockToken, mockSite)
     })
 
     it('should fetch environment successfully', async () => {

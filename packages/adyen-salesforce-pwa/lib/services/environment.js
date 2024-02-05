@@ -4,8 +4,8 @@ export class AdyenEnvironmentService {
     baseUrl = '/api/adyen/environment'
     apiClient = null
 
-    constructor(token) {
-        this.apiClient = new ApiClient(this.baseUrl, token)
+    constructor(token, site) {
+        this.apiClient = new ApiClient(this.baseUrl, token, site)
     }
 
     async fetchEnvironment() {

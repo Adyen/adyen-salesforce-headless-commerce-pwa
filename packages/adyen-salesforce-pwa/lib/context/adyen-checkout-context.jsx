@@ -1,12 +1,11 @@
 import React, {useEffect, useState} from 'react'
-import {useLocation} from 'react-router-dom'
 import PropTypes from 'prop-types'
 import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
-import {resolveLocaleFromUrl} from '@salesforce/retail-react-app/app/utils/site-utils'
 import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
 import {AdyenPaymentMethodsService} from '../services/payment-methods'
 import {paymentMethodsConfiguration} from '../components/paymentMethodsConfiguration'
 import {AdyenEnvironmentService} from '../services/environment'
+import {onPaymentsDetailsSuccess, onPaymentsSuccess} from './helper'
 
 const AdyenCheckoutContext = React.createContext({})
 
@@ -14,14 +13,15 @@ export const AdyenCheckoutProvider = ({
     children,
     useAccessToken,
     useCustomerId,
-    useCustomerType
+    useCustomerType,
+    useMultiSite,
+    adyenConfig
 }) => {
     const {getTokenWhenReady} = useAccessToken()
     const customerId = useCustomerId()
     const customerType = useCustomerType()
     const {data: basket} = useCurrentBasket()
-    const location = useLocation()
-    const locale = resolveLocaleFromUrl(`${location.pathname}${location.search}`)
+    const {locale, site} = useMultiSite()
     const navigate = useNavigation()
 
     const [fetchingPaymentMethods, setFetchingPaymentMethods] = useState(false)
@@ -33,7 +33,7 @@ export const AdyenCheckoutProvider = ({
     useEffect(() => {
         const fetchEnvironment = async () => {
             const token = await getTokenWhenReady()
-            const adyenEnvironmentService = new AdyenEnvironmentService(token)
+            const adyenEnvironmentService = new AdyenEnvironmentService(token, site)
             try {
                 const data = await adyenEnvironmentService.fetchEnvironment()
                 setAdyenEnvironment(data ? data : {error: true})
@@ -48,7 +48,7 @@ export const AdyenCheckoutProvider = ({
         const fetchPaymentMethods = async () => {
             setFetchingPaymentMethods(true)
             const token = await getTokenWhenReady()
-            const adyenPaymentMethodsService = new AdyenPaymentMethodsService(token)
+            const adyenPaymentMethodsService = new AdyenPaymentMethodsService(token, site)
             try {
                 const data = await adyenPaymentMethodsService.fetchPaymentMethods(
                     customerId,
@@ -67,14 +67,10 @@ export const AdyenCheckoutProvider = ({
         }
     }, [basket?.basketId])
 
-    const handleAction = async (component, responses) => {
-        if (responses?.paymentsResponse?.action?.type === 'voucher') {
-            const action = btoa(JSON.stringify(responses?.paymentsResponse?.action))
-            const url = `/checkout/confirmation/${responses?.paymentsResponse?.merchantReference}?adyenAction=${action}`
-            navigate(url)
-        } else {
-            await component.handleAction(responses?.paymentsResponse?.action)
-        }
+    const getTranslations = () => {
+        return adyenConfig?.translations && Object.hasOwn(adyenConfig?.translations, locale.id)
+            ? adyenConfig?.translations
+            : null
     }
 
     const getPaymentMethodsConfiguration = async ({
@@ -86,40 +82,31 @@ export const AdyenCheckoutProvider = ({
     }) => {
         const token = await getTokenWhenReady()
         return paymentMethodsConfiguration({
+            additionalPaymentMethodsConfiguration: adyenConfig?.paymentMethodsConfiguration,
             paymentMethods: adyenPaymentMethods?.paymentMethods,
             customerType,
             token,
+            site,
             basket: basket,
             customerId,
-            onError: onError,
+            onError: adyenConfig?.onError || onError,
             onNavigate: navigate,
-            afterSubmit: [...afterSubmit, onPaymentsSuccess],
-            beforeSubmit: beforeSubmit,
-            afterAdditionalDetails: [...afterAdditionalDetails, onPaymentsDetailsSuccess],
-            beforeAdditionalDetails: beforeAdditionalDetails
+            afterSubmit: [
+                ...afterSubmit,
+                ...(adyenConfig?.afterSubmit || []),
+                onPaymentsSuccess(navigate)
+            ],
+            beforeSubmit: [...beforeSubmit, ...(adyenConfig?.beforeSubmit || [])],
+            afterAdditionalDetails: [
+                ...afterAdditionalDetails,
+                ...(adyenConfig?.afterAdditionalDetails || []),
+                onPaymentsDetailsSuccess(navigate)
+            ],
+            beforeAdditionalDetails: [
+                ...beforeAdditionalDetails,
+                ...(adyenConfig?.beforeAdditionalDetails || [])
+            ]
         })
-    }
-
-    const onPaymentsSuccess = async (state, component, props, responses) => {
-        if (responses?.paymentsResponse?.isSuccessful) {
-            navigate(`/checkout/confirmation/${responses?.paymentsResponse?.merchantReference}`)
-        } else if (responses?.paymentsResponse?.action) {
-            await handleAction(component, responses)
-        } else {
-            return new Error(responses?.paymentsResponse)
-        }
-    }
-
-    const onPaymentsDetailsSuccess = async (state, component, props, responses) => {
-        if (responses?.paymentsDetailsResponse?.isSuccessful) {
-            navigate(
-                `/checkout/confirmation/${responses?.paymentsDetailsResponse?.merchantReference}`
-            )
-        } else if (responses?.paymentsDetailsResponse?.action) {
-            await component.handleAction(responses?.paymentsDetailsResponse?.action)
-        } else {
-            return new Error(responses?.paymentsDetailsResponse)
-        }
     }
 
     const value = {
@@ -127,9 +114,11 @@ export const AdyenCheckoutProvider = ({
         adyenPaymentMethods,
         adyenStateData,
         adyenPaymentInProgress,
+        locale,
         setAdyenPaymentInProgress: (data) => setAdyenPaymentInProgress(data),
         setAdyenStateData: (data) => setAdyenStateData(data),
-        getPaymentMethodsConfiguration
+        getPaymentMethodsConfiguration,
+        getTranslations
     }
 
     return <AdyenCheckoutContext.Provider value={value}>{children}</AdyenCheckoutContext.Provider>
@@ -139,7 +128,9 @@ AdyenCheckoutProvider.propTypes = {
     children: PropTypes.any,
     useAccessToken: PropTypes.any,
     useCustomerId: PropTypes.any,
-    useCustomerType: PropTypes.any
+    useCustomerType: PropTypes.any,
+    useMultiSite: PropTypes.any,
+    adyenConfig: PropTypes.any
 }
 
 /**

@@ -3,9 +3,10 @@ import {ADYEN_API_BASEPATH} from '../../../__mocks__/adyenApi/constants'
 
 describe('ApiClient', () => {
     let apiClient
+    let mockSite = {id: 'RefArch'}
 
     beforeEach(() => {
-        apiClient = new ApiClient(ADYEN_API_BASEPATH, 'mockToken')
+        apiClient = new ApiClient(ADYEN_API_BASEPATH, 'mockToken', mockSite)
     })
 
     afterEach(() => {
@@ -35,7 +36,7 @@ describe('ApiClient', () => {
         await apiClient.get(options)
 
         expect(global.fetch).toHaveBeenCalledWith(
-            `${ADYEN_API_BASEPATH}?param=value`,
+            `${ADYEN_API_BASEPATH}?siteId=${mockSite.id}&param=value`,
             expect.objectContaining({
                 method: 'get',
                 body: null,
@@ -66,7 +67,7 @@ describe('ApiClient', () => {
         await apiClient.post(options)
 
         expect(global.fetch).toHaveBeenCalledWith(
-            ADYEN_API_BASEPATH,
+            `${ADYEN_API_BASEPATH}?siteId=${mockSite.id}`,
             expect.objectContaining({
                 method: 'post',
                 body: JSON.stringify({key: 'value'}),
