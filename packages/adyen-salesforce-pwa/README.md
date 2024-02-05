@@ -53,7 +53,7 @@ Adyen Payments Composable Storefront Integration for B2C Commerce depends on:
    Check [routes.jsx](../adyen-retail-react-app/overrides/app/routes.jsx) file for reference.
 
 5. In your `retail-react-app` you would need to create a .env file. Check
-   the [example file](../adyen-retail-react-app/.env.example) in our reference application. 
+   the [example file](../adyen-retail-react-app/.env.example) in our reference application.
 
 6. Import `countrylist` in `constants.js` of your `retail-react-app` and export it as `SHIPPING_COUNTRY_CODES`:
 
