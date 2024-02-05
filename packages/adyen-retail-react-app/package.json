@@ -1,6 +1,6 @@
 {
   "name": "adyen-retail-react-app",
-  "version": "1.0.0-beta.5",
+  "version": "1.0.0-beta.6",
   "license": "See license in LICENSE",
   "engines": {
     "node": "^16.0.0 || ^18.0.0",
