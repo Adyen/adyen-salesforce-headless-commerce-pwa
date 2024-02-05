@@ -61,4 +61,4 @@ export const ADYEN_ENVIRONMENT = {
     TEST: 'TEST'
 }
 
-export const APPLICATION_VERSION = '1.0.0-beta.5'
+export const APPLICATION_VERSION = '1.0.0-beta.6'
