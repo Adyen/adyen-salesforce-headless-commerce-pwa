@@ -60,7 +60,7 @@ jobs:
                 COMMERCE_API_CLIENT_ID_PRIVATE: ${{ secrets.COMMERCE_API_CLIENT_ID_PRIVATE }}
                 COMMERCE_API_CLIENT_SECRET: ${{ secrets.COMMERCE_API_CLIENT_SECRET }}
                 NODE_ENV: ${{ secrets.NODE_ENV }}
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               if: always()
               with:
                   name: playwright-report
