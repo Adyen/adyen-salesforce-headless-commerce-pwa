@@ -14,7 +14,6 @@ In this GitHub repo there are two packages:
 * [Client key](https://docs.adyen.com/development-resources/client-side-authentication#get-your-client-key)
 
 ## Installation and Configuration
-* ? CONSOLIDATE WITH NEXT POINT ? See the NPM package [Readme](https://www.npmjs.com/package/@adyen/adyen-salesforce-pwa?activeTab=readme) for installation instructions.
 * Refer to [Adyen Docs](https://docs.adyen.com/plugins/salesforce-commerce-cloud/composable-storefront) for NPM set-up, installation and Go-Live instructions.
 * Refer to [Adyen Docs](https://docs.adyen.com/plugins/salesforce-commerce-cloud/composable-storefront/customization-guide) for customisation instructions.
 * Available Payment methods and features can be found on [Adyen Docs](https://docs.adyen.com/plugins/salesforce-commerce-cloud).
