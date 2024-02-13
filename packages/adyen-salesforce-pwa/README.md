@@ -12,7 +12,7 @@ Adyen Payments Composable Storefront Integration for B2C Commerce depends on:
 
 1. PWA v3.1.1
 2. [Adyen Web v5.51.0](https://www.npmjs.com/package/@adyen/adyen-web)
-3. [Adyen API Library for Node.js v14.3.0](https://www.npmjs.com/package/@adyen/api-library)
+3. [Adyen API Library for Node.js v16.0.1](https://www.npmjs.com/package/@adyen/api-library)
 4. Node v18 or later
 5. NPM v9 or later
 6. Salesforce Managed Runtime
