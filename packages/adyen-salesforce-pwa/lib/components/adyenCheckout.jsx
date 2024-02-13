@@ -5,6 +5,57 @@ import {useAdyenCheckout} from '../context/adyen-checkout-context'
 import {Spinner, Flex} from '@chakra-ui/react'
 import PropTypes from 'prop-types'
 
+export const getCheckoutConfig = (
+    adyenEnvironment,
+    adyenPaymentMethods,
+    paymentMethodsConfiguration,
+    translations,
+    locale
+) => {
+    const checkoutConfig = {
+        environment: adyenEnvironment?.ADYEN_ENVIRONMENT,
+        clientKey: adyenEnvironment?.ADYEN_CLIENT_KEY,
+        paymentMethodsResponse: adyenPaymentMethods,
+        paymentMethodsConfiguration: paymentMethodsConfiguration
+    }
+    if (translations) {
+        checkoutConfig.locale = locale.id
+        checkoutConfig.translations = translations
+    }
+    return checkoutConfig
+}
+
+export const handleQueryParams = (
+    urlParams,
+    checkout,
+    setAdyenPaymentInProgress,
+    paymentContainer
+) => {
+    const redirectResult = urlParams.get('redirectResult')
+    const amazonCheckoutSessionId = urlParams.get('amazonCheckoutSessionId')
+    const adyenAction = urlParams.get('adyenAction')
+
+    if (redirectResult) {
+        checkout.submitDetails({data: {details: {redirectResult}}})
+    } else if (amazonCheckoutSessionId) {
+        setAdyenPaymentInProgress(true)
+        const amazonPayContainer = document.createElement('div')
+        const amazonPay = checkout
+            .create('amazonpay', {
+                amazonCheckoutSessionId,
+                showOrderButton: false
+            })
+            .mount(amazonPayContainer)
+        amazonPay.submit()
+    } else if (adyenAction) {
+        const actionString = atob(adyenAction)
+        const action = JSON.parse(actionString)
+        checkout.createFromAction(action).mount(paymentContainer.current)
+    } else {
+        checkout.create('dropin').mount(paymentContainer.current)
+    }
+}
+
 const AdyenCheckoutComponent = (props) => {
     const {
         adyenEnvironment,
@@ -20,23 +71,17 @@ const AdyenCheckoutComponent = (props) => {
 
     useEffect(() => {
         const urlParams = new URLSearchParams(location.search)
-        const redirectResult = urlParams.get('redirectResult')
-        const amazonCheckoutSessionId = urlParams.get('amazonCheckoutSessionId')
-        const adyenAction = urlParams.get('adyenAction')
 
         const createCheckout = async () => {
             const paymentMethodsConfiguration = await getPaymentMethodsConfiguration(props)
             const translations = getTranslations()
-            const checkoutConfig = {
-                environment: adyenEnvironment.ADYEN_ENVIRONMENT,
-                clientKey: adyenEnvironment.ADYEN_CLIENT_KEY,
-                paymentMethodsResponse: adyenPaymentMethods,
-                paymentMethodsConfiguration: paymentMethodsConfiguration
-            }
-            if (translations) {
-                checkoutConfig.locale = locale.id
-                checkoutConfig.translations = translations
-            }
+            const checkoutConfig = getCheckoutConfig(
+                adyenEnvironment,
+                adyenPaymentMethods,
+                paymentMethodsConfiguration,
+                translations,
+                locale
+            )
             const checkout = await AdyenCheckout({
                 ...checkoutConfig,
                 onSubmit(state, element) {
@@ -58,25 +103,7 @@ const AdyenCheckoutComponent = (props) => {
                 }
             })
 
-            if (redirectResult) {
-                checkout.submitDetails({data: {details: {redirectResult}}})
-            } else if (amazonCheckoutSessionId) {
-                setAdyenPaymentInProgress(true)
-                const amazonPayContainer = document.createElement('div')
-                const amazonPay = checkout
-                    .create('amazonpay', {
-                        amazonCheckoutSessionId,
-                        showOrderButton: false
-                    })
-                    .mount(amazonPayContainer)
-                amazonPay.submit()
-            } else if (adyenAction) {
-                const actionString = atob(adyenAction)
-                const action = JSON.parse(actionString)
-                checkout.createFromAction(action).mount(paymentContainer.current)
-            } else {
-                checkout.create('dropin').mount(paymentContainer.current)
-            }
+            handleQueryParams(urlParams, checkout, setAdyenPaymentInProgress, paymentContainer)
         }
         if (adyenEnvironment && paymentContainer.current && !adyenPaymentInProgress) {
             window.paypal = undefined

@@ -22,7 +22,6 @@ jest.mock('@salesforce/retail-react-app/app/hooks/use-current-basket', () => {
         }))
     }
 })
-
 jest.mock('react-router-dom', () => {
     return {
         useLocation: jest.fn().mockImplementation(() => {
@@ -56,7 +55,12 @@ jest.mock('../../services/environment', () => ({
 }))
 
 describe('<AdyenCheckoutProvider />', () => {
-    let useAccessToken, useCustomerId, useCustomerType, useMultiSite, locationSpy
+    let useAccessToken,
+        useCustomerId,
+        useCustomerType,
+        useMultiSite,
+        locationSpy,
+        setAdyenPaymentInProgress
     beforeEach(() => {
         useAccessToken = jest.fn().mockImplementation(() => {
             return {
@@ -81,47 +85,54 @@ describe('<AdyenCheckoutProvider />', () => {
                 }
             }
         })
+        setAdyenPaymentInProgress = jest.fn().mockImplementation(() => {
+            return 'success'
+        })
+        mockFetchEnvironment.mockImplementationOnce(() => ({
+            ADYEN_ENVIRONMENT: 'test',
+            ADYEN_CLIENT_KEY: 'testKey'
+        }))
+        mockFetchPaymentMethods.mockImplementationOnce(() => {
+            return {
+                paymentMethods: [
+                    {
+                        details: [
+                            {
+                                key: 'encryptedCardNumber',
+                                type: 'cardToken'
+                            },
+                            {
+                                key: 'encryptedSecurityCode',
+                                type: 'cardToken'
+                            },
+                            {
+                                key: 'encryptedExpiryMonth',
+                                type: 'cardToken'
+                            },
+                            {
+                                key: 'encryptedExpiryYear',
+                                type: 'cardToken'
+                            },
+                            {
+                                key: 'holderName',
+                                optional: true,
+                                type: 'text'
+                            }
+                        ],
+                        name: 'Cards',
+                        type: 'scheme'
+                    },
+                    {
+                        name: 'Amazon Pay',
+                        type: 'amazonpay'
+                    }
+                ]
+            }
+        })
     })
 
     describe('when page is initialized', () => {
         it('render correct payment methods', async () => {
-            mockFetchEnvironment.mockImplementationOnce(() => ({
-                ADYEN_ENVIRONMENT: 'test',
-                ADYEN_CLIENT_KEY: 'testKey'
-            }))
-            mockFetchPaymentMethods.mockImplementationOnce(() => {
-                return {
-                    paymentMethods: [
-                        {
-                            details: [
-                                {
-                                    key: 'encryptedCardNumber',
-                                    type: 'cardToken'
-                                },
-                                {
-                                    key: 'encryptedSecurityCode',
-                                    type: 'cardToken'
-                                },
-                                {
-                                    key: 'encryptedExpiryMonth',
-                                    type: 'cardToken'
-                                },
-                                {
-                                    key: 'encryptedExpiryYear',
-                                    type: 'cardToken'
-                                },
-                                {
-                                    key: 'holderName',
-                                    optional: true,
-                                    type: 'text'
-                                }
-                            ],
-                            name: 'Cards',
-                            type: 'scheme'
-                        }
-                    ]
-                }
-            })
             const wrapper = ({children}) => (
                 <AdyenCheckoutProvider
                     useAccessToken={useAccessToken}
