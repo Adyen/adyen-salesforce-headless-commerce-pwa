@@ -47,6 +47,7 @@ jest.mock('../checkout-config', () => {
 })
 describe('payment methods controller', () => {
     let req, res, next, consoleInfoSpy, consoleErrorSpy
+    let blockedPaymentMethods = ['giftcard', 'wechatpayMiniProgram', 'wechatpayQR', 'wechatpaySDK']
 
     beforeEach(() => {
         req = {
@@ -99,7 +100,7 @@ describe('payment methods controller', () => {
         expect(mockPaymentMethods).toHaveBeenCalledWith(
             {
                 amount: {currency: 'USD', value: 10000},
-                blockedPaymentMethods: ['giftcard'],
+                blockedPaymentMethods,
                 countryCode: 'US',
                 merchantAccount: 'mock_ADYEN_MERCHANT_ACCOUNT',
                 shopperLocale: 'en-US',
@@ -153,7 +154,7 @@ describe('payment methods controller', () => {
         expect(mockPaymentMethods).toHaveBeenCalledWith(
             {
                 amount: {currency: 'USD', value: 10000},
-                blockedPaymentMethods: ['giftcard'],
+                blockedPaymentMethods,
                 countryCode: 'US',
                 merchantAccount: 'mock_ADYEN_MERCHANT_ACCOUNT',
                 shopperLocale: 'en-US',
@@ -223,7 +224,7 @@ describe('payment methods controller', () => {
         await PaymentMethodsController(req, res, next)
         expect(mockPaymentMethods).toHaveBeenCalledWith(
             {
-                blockedPaymentMethods: ['giftcard'],
+                blockedPaymentMethods,
                 countryCode: 'US',
                 merchantAccount: 'mock_ADYEN_MERCHANT_ACCOUNT',
                 shopperLocale: 'en-US',
