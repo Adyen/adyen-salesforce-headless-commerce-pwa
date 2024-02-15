@@ -8,7 +8,8 @@ export const getAdyenConfigForCurrentSite = (currentSiteId) => {
         webhookUser: setProperty(currentSiteId, ADYEN_ENV.ADYEN_WEBHOOK_USER),
         webhookPassword: setProperty(currentSiteId, ADYEN_ENV.ADYEN_WEBHOOK_PASSWORD),
         webhookHmacKey: setProperty(currentSiteId, ADYEN_ENV.ADYEN_HMAC_KEY),
-        liveEndpointUrlPrefix: setProperty(currentSiteId, ADYEN_ENV.ADYEN_LIVE_URL_PREFIX)
+        liveEndpointUrlPrefix: setProperty(currentSiteId, ADYEN_ENV.ADYEN_LIVE_URL_PREFIX),
+        appleDomainAssociation: setProperty(currentSiteId, ADYEN_ENV.ADYEN_APPLE_DOMAIN_ASSOCIATION)
     }
 }
 
@@ -29,5 +30,6 @@ const ADYEN_ENV = {
     ADYEN_WEBHOOK_USER: 'ADYEN_WEBHOOK_USER',
     ADYEN_WEBHOOK_PASSWORD: 'ADYEN_WEBHOOK_PASSWORD',
     ADYEN_HMAC_KEY: 'ADYEN_HMAC_KEY',
-    ADYEN_LIVE_URL_PREFIX: 'ADYEN_LIVE_URL_PREFIX'
+    ADYEN_LIVE_URL_PREFIX: 'ADYEN_LIVE_URL_PREFIX',
+    ADYEN_APPLE_DOMAIN_ASSOCIATION: 'ADYEN_APPLE_DOMAIN_ASSOCIATION'
 }
