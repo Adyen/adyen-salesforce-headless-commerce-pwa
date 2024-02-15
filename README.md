@@ -4,25 +4,30 @@ This integration provides the opportunity to use Adyen as a payment service prov
 [Download the NPM package of Adyen integration here](https://www.npmjs.com/package/@adyen/adyen-salesforce-pwa?activeTab=readme) 
 
 In this GitHub repo there are two packages:
-* `Adyen retail react app`: Reference application how to integrate the Adyen Payments Integration into your PWA application. This reference applicaiton should not be used in production projects.
-* `Adyen salesforce pwa`: source code for the Adyen PWA NPM package. This code is published to the [NPM](https://www.npmjs.com/package/@adyen/adyen-salesforce-pwa?activeTab=readm).  
+* `Adyen-salesforce-pwa`: source code for the Adyen PWA NPM package, that contains the default payments integration. This code is published to the [NPM](https://www.npmjs.com/package/@adyen/adyen-salesforce-pwa?activeTab=readme).  
+* `Adyen-retail-react-app`: a reference application that can be used for a demo of how to integrate the Adyen Payments Integration (NPM package) into your PWA Retail application. This reference application should not be used in production projects and we do not provide support on this implementaiotn.
 
 ## Prerequisites
 
 * [Adyen test account](https://www.adyen.com/signup)
 * [API key](https://docs.adyen.com/development-resources/how-to-get-the-api-key)
 * [Client key](https://docs.adyen.com/development-resources/client-side-authentication#get-your-client-key)
-* See the NPM package [Readme](https://www.npmjs.com/package/@adyen/adyen-salesforce-pwa?activeTab=readme) for installation instructions. 
+
+## Installation and Configuration
+* Refer to [Adyen Docs](https://docs.adyen.com/plugins/salesforce-commerce-cloud/composable-storefront) for NPM set-up, installation and Go-Live instructions.
+* Refer to [Adyen Docs](https://docs.adyen.com/plugins/salesforce-commerce-cloud/composable-storefront/customization-guide) for customisation instructions.
+* Available Payment methods and features can be found on [Adyen Docs](https://docs.adyen.com/plugins/salesforce-commerce-cloud).
 
 ## Support & Maintenance
 
-The NPM package version is in beta and may not be suitable for production use. We anticipate the General Availability solution to be ready by Q1 2024. 
-
-Please be aware, that the NPM package in Beta and 'Adyen retail react app` are not supported by Adyen Support. 
-
-To request a feature, report a bug, or report a security vulnerability, [create a GitHub issue](https://github.com/Adyen/adyen-salesforce-headless-commerce-pwa/issues/new/choose).
-
+We provide specialized integration support for major versions of the NPM package following the [SFCC B2C Support policy](https://docs.adyen.com/plugins/salesforce-commerce-cloud/#support-levels), along with permanent Adyen support.
+Migration from SFRA/SG and Upgrade Guide can be found on [Adyen Docs](https://docs.adyen.com/plugins/salesforce-commerce-cloud/composable-storefront).
 For other questions, contact our [support team](https://www.adyen.help).
+
+## Upgrade
+
+We recommend that you upgrade when we have a major release, such as v**2**.x.x. 
+You can find the latest version on our [NPM](https://www.npmjs.com/package/@adyen/adyen-salesforce-pwa?activeTab=readme) repository.
 
 ## License
 
