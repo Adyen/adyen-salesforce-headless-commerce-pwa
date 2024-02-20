@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import React, {useState} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {FormattedMessage, useIntl} from 'react-intl'
 import {Box, Checkbox, Divider, Heading, Stack, Text} from '@chakra-ui/react'
@@ -53,6 +53,8 @@ const Payment = ({useShopperBasketsMutation}) => {
     const {adyenPaymentMethods} = useAdyenCheckout()
     const [isSubmittingPayment] = useState(false)
 
+    const billingSameAsShippingRef = useRef()
+
     const billingAddressForm = useForm({
         mode: 'onChange',
         shouldUnregister: false,
@@ -68,7 +70,7 @@ const Payment = ({useShopperBasketsMutation}) => {
         if (!isFormValid) {
             return
         }
-        const billingAddress = billingSameAsShipping
+        const billingAddress = billingSameAsShippingRef.current
             ? selectedShippingAddress
             : billingAddressForm.getValues()
         // Using destructuring to remove properties from the object...
@@ -80,6 +82,9 @@ const Payment = ({useShopperBasketsMutation}) => {
         })
     }
 
+    useEffect(() => {
+        billingSameAsShippingRef.current = billingSameAsShipping
+    }, [billingSameAsShipping])
     const onPaymentRemoval = async () => {
         try {
             await removePaymentInstrumentFromBasket({
