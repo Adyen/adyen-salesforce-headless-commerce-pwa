@@ -77,7 +77,7 @@ const {handler} = runtime.createHandler(options, (app) => {
                         '*.amazon.com',
                         'https://www.sandbox.paypal.com/xoplatform/logger/api/logger?disableSetCookie=true'
                     ],
-                    'frame-src': ["'self'", '*.adyen.com', '*.paypal.com'],
+                    'frame-src': ["'self'", '*.adyen.com', '*.paypal.com', '*.google.com'],
                     /* -----------------Adyen End ------------------------ */
                     // Do not upgrade insecure requests for local development
                     'upgrade-insecure-requests': isRemote() ? [] : null
