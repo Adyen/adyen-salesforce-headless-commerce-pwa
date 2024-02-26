@@ -4,7 +4,10 @@ export const PAYMENT_METHODS = {
 }
 
 export const PAYMENT_METHOD_TYPES = {
-    GIFT_CARD: 'giftcard'
+    GIFT_CARD: 'giftcard',
+    WECHATPAY_MINI_PROGRAM: 'wechatpayMiniProgram',
+    WECHATPAY_QR: 'wechatpayQR',
+    WECHATPAY_SDK: 'wechatpaySDK'
 }
 
 export const RESULT_CODES = {
@@ -20,7 +23,12 @@ export const RESULT_CODES = {
     REFUSED: 'Refused',
 }
 
-export const BLOCKED_PAYMENT_METHODS = [PAYMENT_METHOD_TYPES.GIFT_CARD]
+export const BLOCKED_PAYMENT_METHODS = [
+    PAYMENT_METHOD_TYPES.GIFT_CARD,
+    PAYMENT_METHOD_TYPES.WECHATPAY_MINI_PROGRAM,
+    PAYMENT_METHOD_TYPES.WECHATPAY_QR,
+    PAYMENT_METHOD_TYPES.WECHATPAY_SDK
+]
 
 export const SHOPPER_INTERACTIONS = {
     CONT_AUTH: 'ContAuth',
@@ -61,4 +69,4 @@ export const ADYEN_ENVIRONMENT = {
     TEST: 'TEST'
 }
 
-export const APPLICATION_VERSION = '1.0.0-beta.6'
+export const APPLICATION_VERSION = '1.0.0'

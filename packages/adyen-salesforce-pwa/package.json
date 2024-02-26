@@ -9,7 +9,7 @@
     "payments",
     "components"
   ],
-  "version": "1.0.0-beta.6",
+  "version": "1.0.0",
   "main": "dist/app/index.js",
   "bin": {
     "include-env": "dist/scripts/include-env.js",
@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "@adyen/adyen-web": "^5.51.0",
-    "@adyen/api-library": "^14.3.0",
+    "@adyen/api-library": "^16.0.1",
     "@salesforce/retail-react-app": "2.0.0",
     "dotenv": "^16.3.1",
     "express-validator": "^7.0.1",

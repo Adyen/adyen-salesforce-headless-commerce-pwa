@@ -7,6 +7,7 @@ import {authenticate, parseNotification, validateHmac} from '../controllers/webh
 import {authorizationWebhookHandler} from '../controllers/authorization-webhook-handler'
 import {createErrorResponse} from '../../utils/createErrorResponse.mjs'
 import Logger from '../controllers/logger'
+import {appleDomainAssociation} from '../controllers/apple-domain-association'
 
 function SuccessHandler(req, res) {
     Logger.info('Success')
@@ -37,6 +38,10 @@ function registerAdyenEndpoints(app, runtime, overrides) {
         SuccessHandler
     ]
 
+    const appleDomainAssociationHandler = overrides?.appleDomainAssociation || [
+        appleDomainAssociation
+    ]
+
     app.get(
         '*/checkout/redirect',
         query('redirectResult').optional().escape(),
@@ -53,6 +58,10 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     app.post('/api/adyen/payments/details', ...paymentsDetailsHandler)
     app.post('/api/adyen/payments', ...paymentsHandler)
     app.post('/api/adyen/webhook', ...webhookHandler)
+    app.get(
+        '/.well-known/apple-developer-merchantid-domain-association',
+        ...appleDomainAssociationHandler
+    )
     app.use(overrides?.ErrorHandler || ErrorHandler)
 }
 

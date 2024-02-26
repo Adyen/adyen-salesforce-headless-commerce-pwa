@@ -19,7 +19,12 @@ export class OrderApiClient {
                 scope: `SALESFORCE_COMMERCE_API:${process.env.SFCC_REALM_ID}_${process.env.SFCC_INSTANCE_ID} ${process.env.SFCC_OAUTH_SCOPES}`
             })
         })
-
+        if (!token.ok) {
+            const error = await token.text()
+            throw new Error(`${token.status} ${token.statusText}`, {
+                cause: error
+            })
+        }
         return token.json()
     }
 
