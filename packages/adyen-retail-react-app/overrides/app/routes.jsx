@@ -38,19 +38,8 @@ const fallback = <Skeleton height="75vh" width="100%" />
 
 const checkoutCustomizations = {
     paymentMethodsConfiguration: {
-        affirm: {
-            visibility: {
-                personalDetails: 'editable',
-                billingAddress: 'hidden',
-                deliveryAddress: 'hidden'
-            }
-        },
-        ach: {
-            visibility: {
-                personalDetails: 'editable',
-                billingAddress: 'hidden',
-                deliveryAddress: 'hidden'
-            }
+        klarna_account: {
+            useKlarnaWidget: false
         }
     }
 }

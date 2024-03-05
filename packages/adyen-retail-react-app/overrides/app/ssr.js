@@ -73,11 +73,18 @@ const {handler} = runtime.createHandler(options, (app) => {
                     'connect-src': [
                         "'self'",
                         'api.cquotient.com',
+                        'https://api.lab.amplitude.com/sdk/vardata',
                         '*.adyen.com',
                         '*.amazon.com',
                         'https://www.sandbox.paypal.com/xoplatform/logger/api/logger?disableSetCookie=true'
                     ],
-                    'frame-src': ["'self'", '*.adyen.com', '*.paypal.com', '*.google.com'],
+                    'frame-src': [
+                        "'self'",
+                        '*.adyen.com',
+                        '*.paypal.com',
+                        '*.google.com',
+                        'https://sandbox.kit.cash.app'
+                    ],
                     /* -----------------Adyen End ------------------------ */
                     // Do not upgrade insecure requests for local development
                     'upgrade-insecure-requests': isRemote() ? [] : null
