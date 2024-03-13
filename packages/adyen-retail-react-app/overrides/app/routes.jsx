@@ -12,19 +12,7 @@ import {routes as _routes} from '@salesforce/retail-react-app/app/routes'
 import {Skeleton} from '@chakra-ui/react'
 
 /* -----------------Adyen Begin ------------------------ */
-// these hooks need to be passed to checkout page from Adyen
 import '@adyen/adyen-salesforce-pwa/dist/app/adyen.css'
-import {
-    AuthHelpers,
-    useAccessToken,
-    useAuthHelper,
-    useCustomerId,
-    useCustomerType,
-    useOrder,
-    useProducts,
-    useShopperBasketsMutation
-} from '@salesforce/commerce-sdk-react'
-import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
 
 // Components
 const fallback = <Skeleton height="75vh" width="100%" />
