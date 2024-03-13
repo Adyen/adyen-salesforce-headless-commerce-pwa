@@ -261,11 +261,13 @@ async function sendPayments(req, res, next) {
                 }
             },
             channel: 'Web',
-            returnUrl: `${data.origin}/redirect`,
+            returnUrl: `${data.origin}/checkout/redirect`,
             shopperReference: order?.customerInfo?.customerId,
             shopperEmail: order?.customerInfo?.email,
-            shopperName: getShopperName(order)
+            shopperName: getShopperName(order),
+            origin: null
         }
+        console.log(paymentRequest)
 
         if (isOpenInvoiceMethod(data?.paymentMethod?.type)) {
             paymentRequest.lineItems = getLineItems(order)

@@ -29,80 +29,27 @@ import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
 // Components
 const fallback = <Skeleton height="75vh" width="100%" />
 
-/**
- * Customize Adyen Checkout
- * - Translations
- * - Payment Methods
- * - Execute Callbacks
- */
-
-const checkoutCustomizations = {
-    paymentMethodsConfiguration: {
-        klarna_account: {
-            useKlarnaWidget: false
-        }
-    }
-}
-
 // Create your pages here and add them to the routes array
 // Use loadable to split code into smaller js chunks
+
 // Checkout page from Adyen
-const Checkout = loadable(() => import('@adyen/adyen-salesforce-pwa'), {
-    fallback: fallback,
-    resolveComponent: (components) => {
-        return () => (
-            <components.Checkout
-                useAccessToken={useAccessToken}
-                useCustomerId={useCustomerId}
-                useCustomerType={useCustomerType}
-                useShopperBasketsMutation={useShopperBasketsMutation}
-                useMultiSite={useMultiSite}
-                adyenConfig={checkoutCustomizations}
-            />
-        )
-    }
+const Checkout = loadable(() => import('./pages/checkout'), {
+    fallback: fallback
 })
 
 // CheckoutConfirmation page from Adyen
-const CheckoutConfirmation = loadable(() => import('@adyen/adyen-salesforce-pwa'), {
-    fallback: fallback,
-    resolveComponent: (components) => {
-        return () => (
-            <components.CheckoutConfirmation
-                useOrder={useOrder}
-                useProducts={useProducts}
-                useAuthHelper={useAuthHelper}
-                AuthHelpers={AuthHelpers}
-                useAccessToken={useAccessToken}
-                useCustomerId={useCustomerId}
-                useCustomerType={useCustomerType}
-                useMultiSite={useMultiSite}
-            />
-        )
-    }
+const CheckoutConfirmation = loadable(() => import('./pages/checkout/confirmation'), {
+    fallback: fallback
 })
 
 // Checkout Redirect page from Adyen
-const AdyenCheckoutRedirect = loadable(() => import('@adyen/adyen-salesforce-pwa'), {
-    fallback: fallback,
-    resolveComponent: (components) => {
-        return () => (
-            <components.AdyenCheckoutRedirect
-                useAccessToken={useAccessToken}
-                useCustomerId={useCustomerId}
-                useCustomerType={useCustomerType}
-                useMultiSite={useMultiSite}
-            />
-        )
-    }
+const AdyenCheckoutRedirect = loadable(() => import('./pages/checkout/redirect'), {
+    fallback: fallback
 })
 
 // Checkout Error page from Adyen
-const AdyenCheckoutError = loadable(() => import('@adyen/adyen-salesforce-pwa'), {
-    fallback: fallback,
-    resolveComponent: (components) => {
-        return () => <components.AdyenCheckoutError />
-    }
+const AdyenCheckoutError = loadable(() => import('./pages/checkout/error'), {
+    fallback: fallback
 })
 
 const routes = [
