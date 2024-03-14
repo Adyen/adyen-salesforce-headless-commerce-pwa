@@ -1,6 +1,7 @@
 export const PAYMENT_METHODS = {
     ADYEN_COMPONENT: 'AdyenComponent',
-    CREDIT_CARD: 'CREDIT_CARD'
+    CREDIT_CARD: 'CREDIT_CARD',
+    APPLE_PAY: 'applepay'
 }
 
 export const PAYMENT_METHOD_TYPES = {
