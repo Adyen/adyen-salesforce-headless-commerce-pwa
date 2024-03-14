@@ -15,6 +15,13 @@ import {
     VisaIcon
 } from '@salesforce/retail-react-app/app/components/icons'
 import Link from '@salesforce/retail-react-app/app/components/link'
+/* -----------------Adyen Begin ------------------------ */
+import '@adyen/adyen-salesforce-pwa/dist/app/adyen.css'
+import {useAccessToken, useCustomerId, useCustomerType} from '@salesforce/commerce-sdk-react'
+import {AdyenExpressCheckoutProvider} from '@adyen/adyen-salesforce-pwa/lib/context/adyen-express-checkout-context'
+import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
+import ApplePayExpressComponent from '@adyen/adyen-salesforce-pwa/lib/components/applePayExpress'
+/* -----------------Adyen End ------------------------ */
 
 const CartCta = () => {
     return (
@@ -33,6 +40,14 @@ const CartCta = () => {
                     id="cart_cta.link.checkout"
                 />
             </Button>
+            <AdyenExpressCheckoutProvider
+                useAccessToken={useAccessToken}
+                useCustomerId={useCustomerId}
+                useCustomerType={useCustomerType}
+                useMultiSite={useMultiSite}
+            >
+                <ApplePayExpressComponent />
+            </AdyenExpressCheckoutProvider>
             <Flex justify={'center'}>
                 <VisaIcon height={8} width={10} mr={2} />
                 <MastercardIcon height={8} width={10} mr={2} />
