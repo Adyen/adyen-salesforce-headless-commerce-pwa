@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
+import {useShippingMethodsForShipment, useCommerceApi} from '@salesforce/commerce-sdk-react'
 import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
 import {AdyenPaymentMethodsService} from '../services/payment-methods'
@@ -49,7 +50,7 @@ export const AdyenExpressCheckoutProvider = ({
     }
 
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchAdyenData = async () => {
             const [environment, paymentMethods] = await Promise.all([
                 fetchEnvironment(),
                 fetchPaymentMethods()
@@ -58,7 +59,7 @@ export const AdyenExpressCheckoutProvider = ({
             setAdyenPaymentMethods(paymentMethods || {error: true})
         }
 
-        fetchData()
+        fetchAdyenData()
     }, [])
 
     const getPaymentMethodsConfiguration = async ({
@@ -101,6 +102,7 @@ export const AdyenExpressCheckoutProvider = ({
         adyenEnvironment,
         adyenPaymentMethods,
         adyenStateData,
+        basket,
         locale,
         setAdyenStateData: (data) => setAdyenStateData(data),
         getPaymentMethodsConfiguration

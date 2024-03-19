@@ -5,6 +5,7 @@ import {Spinner, Flex} from '@chakra-ui/react'
 import PropTypes from 'prop-types'
 import {useAdyenExpressCheckout} from '../context/adyen-express-checkout-context'
 import {PAYMENT_METHODS} from '../utils/constants.mjs'
+import {getCurrencyValueForApi} from '../utils/parsers.mjs'
 
 const getCheckoutConfig = (
     adyenEnvironment,
@@ -28,21 +29,19 @@ const getApplePaymentMethodConfig = (checkout) => {
     return applePayPaymentMethod?.configuration || null
 }
 
-const getAppleButtonConfig = (checkout, applePayConfig) => {
+const getAppleButtonConfig = (checkout, shippingMethods, applePayConfig) => {
     return {
         showPayButton: true,
         configuration: applePayConfig,
-        amount: 10000,
+        amount: checkout.options.amount,
         requiredShippingContactFields: ['postalAddress', 'email', 'phone'],
         requiredBillingContactFields: ['postalAddress', 'phone'],
-        shippingMethods: [
-            {
-                label: 'test',
-                detail: 'test',
-                identifier: 1,
-                amount: 100
-            }
-        ],
+        shippingMethods: shippingMethods?.map((sm) => ({
+            label: sm.name,
+            detail: sm.description,
+            identifier: sm.id,
+            amount: `${sm.price}`
+        })),
         onAuthorized: async (resolve, reject, event) => {},
         onSubmit: () => {
             // This handler is empty to prevent sending a second payment request
@@ -59,39 +58,52 @@ const ApplePayExpressComponent = (props) => {
         adyenPaymentMethods,
         getPaymentMethodsConfiguration,
         setAdyenStateData,
+        basket,
         locale
     } = useAdyenExpressCheckout()
     const paymentContainer = useRef(null)
 
     useEffect(() => {
         const createCheckout = async () => {
-            const paymentMethodsConfiguration = await getPaymentMethodsConfiguration(props)
-            const checkoutConfig = getCheckoutConfig(
-                adyenEnvironment,
-                adyenPaymentMethods,
-                paymentMethodsConfiguration,
-                locale
-            )
-            const checkout = await AdyenCheckout({
-                ...checkoutConfig,
-                onChange: (state) => {
-                    if (state.isValid) {
-                        setAdyenStateData(state.data)
+            try {
+                const paymentMethodsConfiguration = await getPaymentMethodsConfiguration(props)
+                const checkoutConfig = getCheckoutConfig(
+                    adyenEnvironment,
+                    adyenPaymentMethods,
+                    paymentMethodsConfiguration,
+                    locale
+                )
+                const checkout = await AdyenCheckout({
+                    ...checkoutConfig,
+                    amount: {
+                        value: getCurrencyValueForApi(basket.orderTotal, basket.currency),
+                        currency: basket.currency
+                    },
+                    onChange: (state) => {
+                        if (state.isValid) {
+                            setAdyenStateData(state.data)
+                        }
                     }
+                })
+                const applePaymentMethodConfig = getApplePaymentMethodConfig(checkout)
+                const appleButtonConfig = getAppleButtonConfig(
+                    checkout,
+                    props.shippingMethods,
+                    applePaymentMethodConfig
+                )
+                const applePayButton = await checkout.create(
+                    PAYMENT_METHODS.APPLE_PAY,
+                    appleButtonConfig
+                )
+                const isApplePayButtonAvailable = await applePayButton.isAvailable()
+                if (isApplePayButtonAvailable) {
+                    applePayButton.mount(paymentContainer.current)
                 }
-            })
-            const applePaymentMethodConfig = getApplePaymentMethodConfig(checkout)
-            console.log(applePaymentMethodConfig)
-            const appleButtonConfig = getAppleButtonConfig(checkout, applePaymentMethodConfig)
-            console.log(appleButtonConfig)
-            const applePayButton = await checkout.create(
-                PAYMENT_METHODS.APPLE_PAY,
-                appleButtonConfig
-            )
-            const isApplePayButtonAvailable = await applePayButton.isAvailable()
-            console.log(isApplePayButtonAvailable)
+            } catch (err) {
+                console.log(err)
+            }
         }
-        if (adyenEnvironment && paymentContainer.current) {
+        if (adyenEnvironment && adyenPaymentMethods && basket && paymentContainer.current) {
             createCheckout()
         }
     }, [adyenEnvironment, adyenPaymentMethods])
@@ -109,7 +121,8 @@ const ApplePayExpressComponent = (props) => {
 }
 
 ApplePayExpressComponent.propTypes = {
-    showLoading: PropTypes.bool
+    showLoading: PropTypes.bool,
+    shippingMethods: PropTypes.array
 }
 
 export default ApplePayExpressComponent
