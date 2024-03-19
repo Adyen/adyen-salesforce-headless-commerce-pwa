@@ -30,7 +30,7 @@
     "lint": "pwa-kit-dev lint \"**/*.{js,jsx}\"",
     "lint:fix": "npm run lint -- --fix",
     "postinstall": "npm run compile-translations && npm run compile-translations:pseudo",
-    "push": "npm run build && pwa-kit-dev push",
+    "push": "npm run build && pwa-kit-dev push --projectSlug adyen-salesforce-pwa --target demo",
     "save-credentials": "pwa-kit-dev save-credentials",
     "start": "cross-env NODE_ICU_DATA=node_modules/full-icu pwa-kit-dev start",
     "start:inspect": "npm run start -- --inspect",
@@ -41,8 +41,8 @@
     "test:max-file-size": "npm run build && bundlesize",
     "upload-env": "upload-env",
     "get-env": "get-env",
-    "prepare:dev": "rm -f ./node_modules/.bin/include-env && rm -rf ./node_modules/@adyen/adyen-salesforce-pwa && cd ../adyen-salesforce-pwa && rm -rf dist && npm run build-dev",
-    "start:env": "include-env -p=npm run start",
+    "prepare:dev": "rm -f ./node_modules/.bin/include-env && rm -rf ./node_modules/@adyen/adyen-salesforce-pwa && cd ../adyen-salesforce-pwa && rm -rf dist && npm run build-prod",
+    "start:env": "npm run prepare:dev && npm link @adyen/adyen-salesforce-pwa && include-env -p=npm run start",
     "push:env": "include-env -p=npm run push"
   },
   "bundlesize": [
