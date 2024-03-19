@@ -37,8 +37,21 @@ import CartItemVariantPrice from '@salesforce/retail-react-app/app/components/it
 import {useCurrentCustomer} from '@salesforce/retail-react-app/app/hooks/use-current-customer'
 import {API_ERROR_MESSAGE} from '@salesforce/retail-react-app/app/constants'
 import PropTypes from 'prop-types'
-import AdyenCheckout from '../../components/adyenCheckout'
-import {AdyenCheckoutProvider} from '../../context/adyen-checkout-context'
+import AdyenCheckout from '@adyen/adyen-salesforce-pwa/lib/components/adyenCheckout'
+import {AdyenCheckoutProvider} from '@adyen/adyen-salesforce-pwa/lib/context/adyen-checkout-context'
+
+/* -----------------Adyen Begin ------------------------ */
+import {
+    AuthHelpers,
+    useAccessToken,
+    useAuthHelper,
+    useCustomerId,
+    useCustomerType,
+    useOrder,
+    useProducts
+} from '@salesforce/commerce-sdk-react'
+import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
+/* -----------------Adyen End ------------------------ */
 
 const onClient = typeof window !== 'undefined'
 
@@ -528,16 +541,8 @@ const CheckoutConfirmation = ({useOrder, useProducts, useAuthHelper, AuthHelpers
     )
 }
 
-const CheckoutConfirmationContainer = ({
-    useAccessToken,
-    useCustomerId,
-    useCustomerType,
-    useOrder,
-    useProducts,
-    useAuthHelper,
-    useMultiSite,
-    AuthHelpers
-}) => {
+/* -----------------Adyen Begin ------------------------ */
+const CheckoutConfirmationContainer = () => {
     return (
         <AdyenCheckoutProvider
             useAccessToken={useAccessToken}
@@ -561,16 +566,6 @@ CheckoutConfirmation.propTypes = {
     useAuthHelper: PropTypes.any,
     AuthHelpers: PropTypes.any
 }
-
-CheckoutConfirmationContainer.propTypes = {
-    useOrder: PropTypes.any,
-    useProducts: PropTypes.any,
-    useAuthHelper: PropTypes.any,
-    AuthHelpers: PropTypes.any,
-    useAccessToken: PropTypes.any,
-    useCustomerId: PropTypes.any,
-    useCustomerType: PropTypes.any,
-    useMultiSite: PropTypes.any
-}
+/* -----------------Adyen End ------------------------ */
 
 export default CheckoutConfirmationContainer

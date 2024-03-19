@@ -1,15 +1,12 @@
 import React from 'react'
-import AdyenCheckout from '../../../components/adyenCheckout'
-import {AdyenCheckoutProvider} from '../../../context/adyen-checkout-context'
+import AdyenCheckout from '@adyen/adyen-salesforce-pwa/lib/components/adyenCheckout'
+import {AdyenCheckoutProvider} from '@adyen/adyen-salesforce-pwa/lib/context/adyen-checkout-context'
 import PropTypes from 'prop-types'
 import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
-
-const AdyenCheckoutRedirectContainer = ({
-    useAccessToken,
-    useCustomerId,
-    useCustomerType,
-    useMultiSite
-}) => {
+import '@adyen/adyen-salesforce-pwa/dist/app/adyen.css'
+import {useAccessToken, useCustomerId, useCustomerType} from '@salesforce/commerce-sdk-react'
+import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
+const AdyenCheckoutRedirectContainer = () => {
     const {data: basket} = useCurrentBasket()
     if (!basket) {
         return null
