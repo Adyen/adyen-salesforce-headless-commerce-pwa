@@ -40,10 +40,6 @@ const AdyenCheckoutError = loadable(() => import('./pages/checkout/error'), {
     fallback: fallback
 })
 
-const Cart = loadable(() => import('./pages/cart'), {
-    fallback: fallback
-})
-
 const routes = [
     {
         path: '/checkout',
@@ -61,11 +57,6 @@ const routes = [
     {
         path: '/checkout/confirmation/:orderNo',
         component: CheckoutConfirmation
-    },
-    {
-        path: '/cart',
-        component: Cart,
-        exact: true
     },
     ..._routes
 ]
