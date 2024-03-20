@@ -18,22 +18,6 @@ module.exports = [
                 {
                     id: 'en-US',
                     preferredCurrency: 'USD'
-                },
-                {
-                    id: 'fr-FR',
-                    preferredCurrency: 'EUR'
-                },
-                {
-                    id: 'pt-BR',
-                    preferredCurrency: 'BRL'
-                },
-                {
-                    id: 'ja-JP',
-                    preferredCurrency: 'JPY'
-                },
-                {
-                    id: 'sv-SE',
-                    preferredCurrency: 'SEK'
                 }
             ]
         }

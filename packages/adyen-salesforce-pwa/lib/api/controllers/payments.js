@@ -261,7 +261,7 @@ async function sendPayments(req, res, next) {
                 }
             },
             channel: 'Web',
-            returnUrl: `${data.origin}/redirect`,
+            returnUrl: `${data.origin}/checkout/redirect`,
             shopperReference: order?.customerInfo?.customerId,
             shopperEmail: order?.customerInfo?.email,
             shopperName: getShopperName(order)

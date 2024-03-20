@@ -16,8 +16,19 @@ import ShippingOptions from '@salesforce/retail-react-app/app/pages/checkout/par
 import OrderSummary from '@salesforce/retail-react-app/app/components/order-summary'
 import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 import Payment from './partials/payment'
-import {AdyenCheckoutProvider} from '../../context/adyen-checkout-context'
+import {AdyenCheckoutProvider} from '@adyen/adyen-salesforce-pwa/lib/context/adyen-checkout-context'
 import PropTypes from 'prop-types'
+
+/* -----------------Adyen Begin ------------------------ */
+import '@adyen/adyen-salesforce-pwa/dist/app/adyen.css'
+import {
+    useAccessToken,
+    useCustomerId,
+    useCustomerType,
+    useShopperBasketsMutation
+} from '@salesforce/commerce-sdk-react'
+import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
+/* -----------------Adyen End ------------------------ */
 
 const Checkout = ({useShopperBasketsMutation}) => {
     const {step} = useCheckout()
@@ -68,21 +79,29 @@ const Checkout = ({useShopperBasketsMutation}) => {
     )
 }
 
-const CheckoutContainer = ({
-    useAccessToken,
-    useCustomerId,
-    useCustomerType,
-    useShopperBasketsMutation,
-    useMultiSite,
-    adyenConfig
-}) => {
+/**
+ * Customize Adyen Checkout
+ * - Translations
+ * - Payment Methods
+ * - Execute Callbacks
+ */
+
+const checkoutCustomizations = {
+    paymentMethodsConfiguration: {
+        klarna_account: {
+            useKlarnaWidget: false
+        }
+    }
+}
+
+const CheckoutContainer = () => {
     return (
         <AdyenCheckoutProvider
             useAccessToken={useAccessToken}
             useCustomerId={useCustomerId}
             useCustomerType={useCustomerType}
             useMultiSite={useMultiSite}
-            adyenConfig={adyenConfig}
+            adyenConfig={checkoutCustomizations}
         >
             <CheckoutProvider>
                 <Checkout useShopperBasketsMutation={useShopperBasketsMutation} />
