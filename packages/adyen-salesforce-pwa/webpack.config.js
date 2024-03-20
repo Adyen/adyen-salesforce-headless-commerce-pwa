@@ -7,7 +7,10 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const scriptsConfig = {
     target: 'node',
     resolve: {
-        extensions: ['.js', '.jsx', '.ts', '.tsx', '.cjs', '.mjs', '...']
+        extensions: ['.js', '.jsx', '.ts', '.tsx', '.cjs', '.mjs', '...'],
+        fallback: {
+            crypto: require.resolve('crypto-browserify')
+        }
     },
     entry: {
         'include-env': './lib/scripts/include-env.js',
