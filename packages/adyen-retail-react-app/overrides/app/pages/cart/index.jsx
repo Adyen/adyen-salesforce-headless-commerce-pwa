@@ -19,7 +19,7 @@ import {
 } from '@salesforce/retail-react-app/app/components/shared/ui'
 
 // Project Components
-import CartCta from '@salesforce/retail-react-app/app/pages/cart/partials/cart-cta'
+import CartCta from './partials/cart-cta'
 import CartSecondaryButtonGroup from '@salesforce/retail-react-app/app/pages/cart/partials/cart-secondary-button-group'
 import CartSkeleton from '@salesforce/retail-react-app/app/pages/cart/partials/cart-skeleton'
 import CartTitle from '@salesforce/retail-react-app/app/pages/cart/partials/cart-title'
