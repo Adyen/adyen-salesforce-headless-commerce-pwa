@@ -1,5 +1,1 @@
 @import '~@adyen/adyen-web/dist/adyen.css';
-
-.adyen-checkout__applepay__button {
-    width: 100%;
-}

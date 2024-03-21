@@ -111,7 +111,7 @@ const ApplePayExpressComponent = (props) => {
                     <Spinner size={'lg'} mt={4} />
                 </Flex>
             )}
-            <div style={{width: '100%'}} ref={paymentContainer}></div>
+            <div ref={paymentContainer}></div>
         </>
     )
 }
