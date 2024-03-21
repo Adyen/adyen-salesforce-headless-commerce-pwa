@@ -63,7 +63,7 @@ const routes = [
         component: CheckoutConfirmation
     },
     {
-        path: '/checkout/cart',
+        path: '/cart',
         component: Cart,
         exact: true
     },
