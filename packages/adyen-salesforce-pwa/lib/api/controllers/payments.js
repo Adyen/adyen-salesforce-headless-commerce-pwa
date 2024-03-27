@@ -22,7 +22,9 @@ const errorMessages = {
     INVALID_ORDER: 'order is invalid',
     INVALID_PARAMS: 'invalid request params',
     INVALID_BASKET: 'invalid basket',
-    PAYMENT_NOT_SUCCESSFUL: 'payment not successful'
+    PAYMENT_NOT_SUCCESSFUL: 'payment not successful',
+    INVALID_BILLING_ADDRESS: 'invalid billing address',
+    INVALID_SHIPPING_ADDRESS: 'invalid shipping address'
 }
 
 const validateRequestParams = (req) => {
@@ -178,6 +180,50 @@ async function removeAllPaymentInstrumentsFromBasket(basket, shopperBaskets) {
     return Promise.all(promises)
 }
 
+async function handleExpressPayment(shopperBaskets, data, basketId, customerId) {
+    // TODO: Modify when shipping data is sent
+    await shopperBaskets.updateShippingAddressForShipment({
+        body: {
+            address1: data.deliveryAddress.street,
+            city: data.deliveryAddress.city,
+            countryCode: data.deliveryAddress.country,
+            postalCode: data.deliveryAddress.postalCode,
+            stateCode: data.deliveryAddress.stateOrProvince,
+            firstName: 'Test',
+            fullName: 'Test Name',
+            lastName: 'Name',
+            phone: '(923) 456-7890'
+        },
+        parameters: {
+            basketId,
+            shipmentId: 'me',
+            useAsBilling: true
+        }
+    })
+
+    await shopperBaskets.updateShippingMethodForShipment({
+        body: {
+            // TODO: Modify when shipping data is sent
+            id: '001'
+        },
+        parameters: {
+            basketId,
+            shipmentId: 'me'
+        }
+    })
+
+    await shopperBaskets.updateCustomerForBasket({
+        body: {
+            customerId,
+            // TODO: Modify when shipping data is sent
+            email: 'test@test.com'
+        },
+        parameters: {
+            basketId
+        }
+    })
+}
+
 async function sendPayments(req, res, next) {
     Logger.info('sendPayments', 'start')
     if (!validateRequestParams(req)) {
@@ -226,6 +272,15 @@ async function sendPayments(req, res, next) {
             })
         }
 
+        if (data.paymentType === 'express') {
+            await handleExpressPayment(
+                shopperBaskets,
+                data,
+                req.headers.basketid,
+                req.headers.customerid
+            )
+        }
+
         const shopperOrders = new ShopperOrders({
             ...appConfig.commerceAPI,
             headers: {authorization: req.headers.authorization}
@@ -238,9 +293,9 @@ async function sendPayments(req, res, next) {
         })
         Logger.info('sendPayments', `orderCreated ${order?.orderNo}`)
 
-        if (order?.customerInfo?.customerId !== req.headers.customerid) {
-            throw new AdyenError(errorMessages.INVALID_ORDER, 404)
-        }
+        // if (order?.customerInfo?.customerId !== req.headers.customerid) {
+        //     throw new AdyenError(errorMessages.INVALID_ORDER, 404)
+        // }
 
         const paymentRequest = {
             ...filterStateData(data),

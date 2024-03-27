@@ -5,46 +5,97 @@ import {Spinner, Flex} from '@chakra-ui/react'
 import PropTypes from 'prop-types'
 import {useAdyenExpressCheckout} from '../context/adyen-express-checkout-context'
 import {getCurrencyValueForApi} from '../utils/parsers.mjs'
+import {AdyenPaymentsService} from '../services/payments'
 
-const getCheckoutConfig = (
-    adyenEnvironment,
-    adyenPaymentMethods,
-    paymentMethodsConfiguration,
-    locale
-) => {
-    return {
-        environment: adyenEnvironment?.ADYEN_ENVIRONMENT,
-        clientKey: adyenEnvironment?.ADYEN_CLIENT_KEY,
-        paymentMethodsResponse: adyenPaymentMethods,
-        paymentMethodsConfiguration: paymentMethodsConfiguration,
-        locale: locale.id
-    }
-}
-
-const getApplePaymentMethodConfig = (checkout) => {
-    const applePayPaymentMethod = checkout?.paymentMethodsResponse?.paymentMethods?.find(
+const getApplePaymentMethodConfig = (paymentMethodsResponse) => {
+    const applePayPaymentMethod = paymentMethodsResponse?.paymentMethods?.find(
         (pm) => pm.type === 'applepay'
     )
     return applePayPaymentMethod?.configuration || null
 }
 
-const getAppleButtonConfig = (checkout, shippingMethods, applePayConfig) => {
+const getAppleButtonConfig = (
+    commerceApiToken,
+    site,
+    basket,
+    shippingMethods,
+    applePayConfig,
+    navigate
+) => {
+    const amount = {
+        value: getCurrencyValueForApi(basket.orderTotal, basket.currency),
+        currency: basket.currency
+    }
     return {
         showPayButton: true,
         configuration: applePayConfig,
-        amount: checkout.options.amount,
-        requiredShippingContactFields: ['postalAddress', 'email', 'phone'],
-        requiredBillingContactFields: ['postalAddress', 'phone'],
+        amount,
+        // requiredShippingContactFields: ['postalAddress', 'name', 'phoneticName', 'phone', 'email'],
+        requiredBillingContactFields: ['postalAddress'],
         shippingMethods: shippingMethods?.map((sm) => ({
             label: sm.name,
             detail: sm.description,
             identifier: sm.id,
             amount: `${sm.price}`
         })),
-        onAuthorized: async (resolve, reject, event) => {},
-        onSubmit: () => {
+        onAuthorized: async (resolve, reject, event) => {
+            const {billingContact, token} = event.payment
+            const state = {
+                data: {
+                    paymentType: 'express',
+                    paymentMethod: {
+                        type: 'applepay',
+                        applePayToken: token.paymentData
+                    },
+                    billingAddress: {
+                        city: billingContact.locality,
+                        country: billingContact.countryCode,
+                        houseNumberOrName:
+                            billingContact.addressLines.length > 1
+                                ? billingContact.addressLines[1]
+                                : null,
+                        postalCode: billingContact.postalCode,
+                        stateOrProvince: billingContact.administrativeArea,
+                        street: billingContact.addressLines[0]
+                    },
+                    deliveryAddress: {
+                        city: billingContact.locality,
+                        country: billingContact.countryCode,
+                        houseNumberOrName:
+                            billingContact.addressLines.length > 1
+                                ? billingContact.addressLines[1]
+                                : null,
+                        postalCode: billingContact.postalCode,
+                        stateOrProvince: billingContact.administrativeArea,
+                        street: billingContact.addressLines[0]
+                    }
+                }
+            }
+            const adyenPaymentService = new AdyenPaymentsService(commerceApiToken, site)
+            const paymentsResponse = await adyenPaymentService.submitPayment(
+                {
+                    ...state.data,
+                    origin: state.data.origin ? state.data.origin : window.location.href
+                },
+                basket?.basketId,
+                basket?.customerId
+            )
+            if (paymentsResponse?.isFinal && paymentsResponse?.isSuccessful) {
+                const finalPriceUpdate = {
+                    newTotal: {
+                        type: 'final',
+                        label: applePayConfig.merchantName,
+                        amount: `${amount.value}`
+                    }
+                }
+                resolve(finalPriceUpdate)
+                navigate(`/checkout/confirmation/${paymentsResponse?.merchantReference}`)
+            } else {
+                reject()
+            }
+        },
+        onSubmit: (state, component) => {
             // This handler is empty to prevent sending a second payment request
-            // We already do the payment in paymentFromComponent
         },
         onShippingMethodSelected: async (resolve, reject, event) => {},
         onShippingContactSelected: async (resolve, reject, event) => {}
@@ -55,40 +106,31 @@ const ApplePayExpressComponent = (props) => {
     const {
         adyenEnvironment,
         adyenPaymentMethods,
-        getPaymentMethodsConfiguration,
-        setAdyenStateData,
         basket,
-        locale
+        locale,
+        site,
+        getTokenWhenReady,
+        navigate
     } = useAdyenExpressCheckout()
     const paymentContainer = useRef(null)
 
     useEffect(() => {
         const createCheckout = async () => {
             try {
-                const paymentMethodsConfiguration = await getPaymentMethodsConfiguration(props)
-                const checkoutConfig = getCheckoutConfig(
-                    adyenEnvironment,
-                    adyenPaymentMethods,
-                    paymentMethodsConfiguration,
-                    locale
-                )
                 const checkout = await AdyenCheckout({
-                    ...checkoutConfig,
-                    amount: {
-                        value: getCurrencyValueForApi(basket.orderTotal, basket.currency),
-                        currency: basket.currency
-                    },
-                    onChange: (state) => {
-                        if (state.isValid) {
-                            setAdyenStateData(state.data)
-                        }
-                    }
+                    environment: adyenEnvironment?.ADYEN_ENVIRONMENT,
+                    clientKey: adyenEnvironment?.ADYEN_CLIENT_KEY,
+                    locale: locale.id
                 })
-                const applePaymentMethodConfig = getApplePaymentMethodConfig(checkout)
+                const token = await getTokenWhenReady()
+                const applePaymentMethodConfig = getApplePaymentMethodConfig(adyenPaymentMethods)
                 const appleButtonConfig = getAppleButtonConfig(
-                    checkout,
+                    token,
+                    site,
+                    basket,
                     props.shippingMethods,
-                    applePaymentMethodConfig
+                    applePaymentMethodConfig,
+                    navigate
                 )
                 const applePayButton = await checkout.create('applepay', appleButtonConfig)
                 const isApplePayButtonAvailable = await applePayButton.isAvailable()

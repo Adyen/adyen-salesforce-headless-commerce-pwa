@@ -103,6 +103,9 @@ export const AdyenExpressCheckoutProvider = ({
         adyenStateData,
         basket,
         locale,
+        site,
+        getTokenWhenReady,
+        navigate,
         setAdyenStateData: (data) => setAdyenStateData(data),
         getPaymentMethodsConfiguration
     }
