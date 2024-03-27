@@ -293,9 +293,9 @@ async function sendPayments(req, res, next) {
         })
         Logger.info('sendPayments', `orderCreated ${order?.orderNo}`)
 
-        // if (order?.customerInfo?.customerId !== req.headers.customerid) {
-        //     throw new AdyenError(errorMessages.INVALID_ORDER, 404)
-        // }
+        if (order?.customerInfo?.customerId !== req.headers.customerid) {
+            throw new AdyenError(errorMessages.INVALID_ORDER, 404)
+        }
 
         const paymentRequest = {
             ...filterStateData(data),
