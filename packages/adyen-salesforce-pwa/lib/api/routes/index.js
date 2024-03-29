@@ -63,7 +63,7 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     app.post('/api/adyen/payments/details', ...paymentsDetailsHandler)
     app.post('/api/adyen/payments', ...paymentsHandler)
     app.post('/api/adyen/webhook', ...webhookHandler)
-    app.put('/api/adyen/shipping-methods', ...shippingMethodsHandler)
+    app.post('/api/adyen/shipping-methods', ...shippingMethodsHandler)
     app.get(
         '/.well-known/apple-developer-merchantid-domain-association',
         ...appleDomainAssociationHandler

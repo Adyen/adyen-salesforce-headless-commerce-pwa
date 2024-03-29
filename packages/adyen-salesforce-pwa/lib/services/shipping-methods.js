@@ -9,7 +9,7 @@ export class AdyenShippingMethodsService {
     }
 
     async updateShippingMethod(shippingMethodId, basketId) {
-        const res = await this.apiClient.put({
+        const res = await this.apiClient.post({
             body: JSON.stringify({
                 shippingMethodId
             }),

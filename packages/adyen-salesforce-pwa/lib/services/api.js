@@ -33,8 +33,4 @@ export class ApiClient {
     post(options) {
         return this.base('post', options)
     }
-
-    put(options) {
-        return this.base('put', options)
-    }
 }
