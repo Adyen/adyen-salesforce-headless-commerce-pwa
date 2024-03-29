@@ -18,9 +18,8 @@ import Link from '@salesforce/retail-react-app/app/components/link'
 /* -----------------Adyen Begin ------------------------ */
 import '@adyen/adyen-salesforce-pwa/dist/app/adyen.css'
 import {useAccessToken, useCustomerId, useCustomerType} from '@salesforce/commerce-sdk-react'
-import {AdyenExpressCheckoutProvider} from '@adyen/adyen-salesforce-pwa/lib/context/adyen-express-checkout-context'
+import {AdyenExpressCheckoutProvider, ApplePayExpress} from '@adyen/adyen-salesforce-pwa'
 import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
-import ApplePayExpressComponent from '@adyen/adyen-salesforce-pwa/lib/components/applePayExpress'
 import PropTypes from 'prop-types'
 /* -----------------Adyen End ------------------------ */
 
@@ -49,7 +48,7 @@ const CartCta = ({shippingMethods}) => {
                         useCustomerType={useCustomerType}
                         useMultiSite={useMultiSite}
                     >
-                        <ApplePayExpressComponent
+                        <ApplePayExpress
                             shippingMethods={shippingMethods.applicableShippingMethods}
                         />
                     </AdyenExpressCheckoutProvider>

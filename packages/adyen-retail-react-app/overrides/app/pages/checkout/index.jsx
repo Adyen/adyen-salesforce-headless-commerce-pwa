@@ -15,11 +15,11 @@ import ShippingAddress from '@salesforce/retail-react-app/app/pages/checkout/par
 import ShippingOptions from '@salesforce/retail-react-app/app/pages/checkout/partials/shipping-options'
 import OrderSummary from '@salesforce/retail-react-app/app/components/order-summary'
 import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
-import Payment from './partials/payment'
-import {AdyenCheckoutProvider} from '@adyen/adyen-salesforce-pwa/lib/context/adyen-checkout-context'
 import PropTypes from 'prop-types'
 
 /* -----------------Adyen Begin ------------------------ */
+import Payment from './partials/payment'
+import {AdyenCheckoutProvider} from '@adyen/adyen-salesforce-pwa'
 import '@adyen/adyen-salesforce-pwa/dist/app/adyen.css'
 import {
     useAccessToken,

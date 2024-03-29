@@ -1,6 +1,5 @@
 import React from 'react'
-import AdyenCheckout from '@adyen/adyen-salesforce-pwa/lib/components/adyenCheckout'
-import {AdyenCheckoutProvider} from '@adyen/adyen-salesforce-pwa/lib/context/adyen-checkout-context'
+import {AdyenCheckout, AdyenCheckoutProvider} from '@adyen/adyen-salesforce-pwa'
 import PropTypes from 'prop-types'
 import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 import '@adyen/adyen-salesforce-pwa/dist/app/adyen.css'

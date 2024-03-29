@@ -3,7 +3,7 @@
  * @jest-environment-options {"url": "http://localhost:3000/", "resources": "usable"}
  */
 import React from 'react'
-import {AdyenCheckoutProvider} from '../adyen-checkout-context'
+import AdyenCheckoutProvider from '../adyen-checkout-context'
 import AdyenCheckout from '../../components/adyenCheckout'
 import {render, screen} from '@testing-library/react'
 

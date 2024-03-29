@@ -3,10 +3,10 @@ import AdyenCheckout from '@adyen/adyen-web'
 import '@adyen/adyen-web/dist/adyen.css'
 import {Spinner, Flex} from '@chakra-ui/react'
 import PropTypes from 'prop-types'
-import {useAdyenExpressCheckout} from '../context/adyen-express-checkout-context'
 import {getCurrencyValueForApi} from '../utils/parsers.mjs'
 import {AdyenPaymentsService} from '../services/payments'
 import {AdyenShippingMethodsService} from '../services/shipping-methods'
+import useAdyenExpressCheckout from '../hooks/useAdyenExpressCheckout'
 
 const getApplePaymentMethodConfig = (paymentMethodsResponse) => {
     const applePayPaymentMethod = paymentMethodsResponse?.paymentMethods?.find(
