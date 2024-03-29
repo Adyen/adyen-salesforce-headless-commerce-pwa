@@ -1,7 +1,6 @@
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 import Logger from './logger'
 import {ShopperBaskets} from 'commerce-sdk-isomorphic'
-import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 
 async function setShippingMethod(req, res, next) {
     Logger.info('setShippingMethod', 'start')
