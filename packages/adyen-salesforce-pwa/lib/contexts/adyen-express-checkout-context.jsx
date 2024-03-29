@@ -5,7 +5,7 @@ import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation
 import {AdyenPaymentMethodsService} from '../services/payment-methods'
 import {AdyenEnvironmentService} from '../services/environment'
 
-const AdyenExpressCheckoutContext = React.createContext({})
+export const AdyenExpressCheckoutContext = React.createContext({})
 
 export const AdyenExpressCheckoutProvider = ({
     children,
@@ -80,10 +80,4 @@ AdyenExpressCheckoutProvider.propTypes = {
     useMultiSite: PropTypes.any
 }
 
-/**
- * A hook for managing checkout state and actions
- * @returns {Object} Checkout data and actions
- */
-export const useAdyenExpressCheckout = () => {
-    return React.useContext(AdyenExpressCheckoutContext)
-}
+export default AdyenExpressCheckoutProvider

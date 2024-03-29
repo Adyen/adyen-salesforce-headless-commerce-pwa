@@ -1,7 +1,7 @@
 import React, {useEffect, useRef} from 'react'
 import AdyenCheckout from '@adyen/adyen-web'
 import '@adyen/adyen-web/dist/adyen.css'
-import {useAdyenCheckout} from '../context/adyen-checkout-context'
+import useAdyenCheckout from '../hooks/useAdyenCheckout'
 import {Spinner, Flex} from '@chakra-ui/react'
 import PropTypes from 'prop-types'
 
