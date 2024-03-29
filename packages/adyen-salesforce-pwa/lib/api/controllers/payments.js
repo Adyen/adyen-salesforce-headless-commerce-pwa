@@ -201,17 +201,6 @@ async function handleExpressPayment(shopperBaskets, data, basketId, customerId) 
         }
     })
 
-    await shopperBaskets.updateShippingMethodForShipment({
-        body: {
-            // TODO: Modify when shipping data is sent
-            id: '001'
-        },
-        parameters: {
-            basketId,
-            shipmentId: 'me'
-        }
-    })
-
     await shopperBaskets.updateCustomerForBasket({
         body: {
             customerId,
