@@ -3,6 +3,7 @@ import EnvironmentController from '../controllers/environment'
 import PaymentMethodsController from '../controllers/payment-methods'
 import PaymentsDetailsController from '../controllers/payments-details'
 import PaymentsController from '../controllers/payments'
+import ShippingMethodsController from '../controllers/shipping-methods'
 import {authenticate, parseNotification, validateHmac} from '../controllers/webhook'
 import {authorizationWebhookHandler} from '../controllers/authorization-webhook-handler'
 import {createErrorResponse} from '../../utils/createErrorResponse.mjs'
@@ -37,6 +38,10 @@ function registerAdyenEndpoints(app, runtime, overrides) {
         authorizationWebhookHandler,
         SuccessHandler
     ]
+    const shippingMethodsHandler = overrides?.shippingMethods || [
+        ShippingMethodsController,
+        SuccessHandler
+    ]
 
     const appleDomainAssociationHandler = overrides?.appleDomainAssociation || [
         appleDomainAssociation
@@ -58,6 +63,7 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     app.post('/api/adyen/payments/details', ...paymentsDetailsHandler)
     app.post('/api/adyen/payments', ...paymentsHandler)
     app.post('/api/adyen/webhook', ...webhookHandler)
+    app.put('/api/adyen/shipping-methods', ...shippingMethodsHandler)
     app.get(
         '/.well-known/apple-developer-merchantid-domain-association',
         ...appleDomainAssociationHandler

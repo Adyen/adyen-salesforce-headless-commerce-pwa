@@ -6,6 +6,7 @@ import PropTypes from 'prop-types'
 import {useAdyenExpressCheckout} from '../context/adyen-express-checkout-context'
 import {getCurrencyValueForApi} from '../utils/parsers.mjs'
 import {AdyenPaymentsService} from '../services/payments'
+import {AdyenShippingMethodsService} from '../services/shipping-methods'
 
 const getApplePaymentMethodConfig = (paymentMethodsResponse) => {
     const applePayPaymentMethod = paymentMethodsResponse?.paymentMethods?.find(
@@ -15,7 +16,7 @@ const getApplePaymentMethodConfig = (paymentMethodsResponse) => {
 }
 
 const getAppleButtonConfig = (
-    commerceApiToken,
+    getTokenWhenReady,
     site,
     basket,
     shippingMethods,
@@ -26,7 +27,7 @@ const getAppleButtonConfig = (
         value: getCurrencyValueForApi(basket.orderTotal, basket.currency),
         currency: basket.currency
     }
-    return {
+    const buttonConfig = {
         showPayButton: true,
         configuration: applePayConfig,
         amount,
@@ -71,6 +72,7 @@ const getAppleButtonConfig = (
                     }
                 }
             }
+            const commerceApiToken = await getTokenWhenReady()
             const adyenPaymentService = new AdyenPaymentsService(commerceApiToken, site)
             const paymentsResponse = await adyenPaymentService.submitPayment(
                 {
@@ -97,9 +99,42 @@ const getAppleButtonConfig = (
         onSubmit: (state, component) => {
             // This handler is empty to prevent sending a second payment request
         },
-        onShippingMethodSelected: async (resolve, reject, event) => {},
+        onShippingMethodSelected: async (resolve, reject, event) => {
+            try {
+                const {shippingMethod} = event
+                const commerceApiToken = await getTokenWhenReady()
+                const adyenShippingMethodsService = new AdyenShippingMethodsService(
+                    commerceApiToken,
+                    site
+                )
+                const response = await adyenShippingMethodsService.updateShippingMethod(
+                    shippingMethod.identifier,
+                    basket.basketId
+                )
+                if (response.error) {
+                    reject()
+                } else {
+                    buttonConfig.amount = {
+                        value: getCurrencyValueForApi(response.orderTotal, response.currency),
+                        currency: response.currency
+                    }
+                    const applePayShippingMethodUpdate = {
+                        newTotal: {
+                            type: 'final',
+                            label: applePayConfig.merchantName,
+                            amount: `${response.orderTotal}`
+                        }
+                    }
+                    resolve(applePayShippingMethodUpdate)
+                }
+            } catch (err) {
+                console.error(err)
+                reject()
+            }
+        },
         onShippingContactSelected: async (resolve, reject, event) => {}
     }
+    return buttonConfig
 }
 
 const ApplePayExpressComponent = (props) => {
@@ -122,10 +157,9 @@ const ApplePayExpressComponent = (props) => {
                     clientKey: adyenEnvironment?.ADYEN_CLIENT_KEY,
                     locale: locale.id
                 })
-                const token = await getTokenWhenReady()
                 const applePaymentMethodConfig = getApplePaymentMethodConfig(adyenPaymentMethods)
                 const appleButtonConfig = getAppleButtonConfig(
-                    token,
+                    getTokenWhenReady,
                     site,
                     basket,
                     props.shippingMethods,
