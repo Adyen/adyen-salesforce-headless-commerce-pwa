@@ -181,7 +181,6 @@ async function removeAllPaymentInstrumentsFromBasket(basket, shopperBaskets) {
 }
 
 async function handleExpressPayment(shopperBaskets, data, basketId, customerId) {
-    // TODO: Modify when shipping data is sent
     await shopperBaskets.updateShippingAddressForShipment({
         body: {
             address1: data.deliveryAddress.street,
@@ -189,23 +188,39 @@ async function handleExpressPayment(shopperBaskets, data, basketId, customerId) 
             countryCode: data.deliveryAddress.country,
             postalCode: data.deliveryAddress.postalCode,
             stateCode: data.deliveryAddress.stateOrProvince,
-            firstName: 'Test',
-            fullName: 'Test Name',
-            lastName: 'Name',
-            phone: '(923) 456-7890'
+            firstName: data.profile.firstName,
+            fullName: `${data.profile.firstName} ${data.profile.lastName}`,
+            lastName: data.profile.lastName,
+            phone: data.profile.phone
         },
         parameters: {
             basketId,
-            shipmentId: 'me',
-            useAsBilling: true
+            shipmentId: 'me'
+        }
+    })
+
+    await shopperBaskets.updateBillingAddressForBasket({
+        body: {
+            address1: data.billingAddress.street,
+            city: data.billingAddress.city,
+            countryCode: data.billingAddress.country,
+            postalCode: data.billingAddress.postalCode,
+            stateCode: data.billingAddress.stateOrProvince,
+            firstName: data.profile.firstName,
+            fullName: `${data.profile.firstName} ${data.profile.lastName}`,
+            lastName: data.profile.lastName,
+            phone: data.profile.phone
+        },
+        parameters: {
+            basketId,
+            shipmentId: 'me'
         }
     })
 
     await shopperBaskets.updateCustomerForBasket({
         body: {
             customerId,
-            // TODO: Modify when shipping data is sent
-            email: 'test@test.com'
+            email: data.profile.email
         },
         parameters: {
             basketId

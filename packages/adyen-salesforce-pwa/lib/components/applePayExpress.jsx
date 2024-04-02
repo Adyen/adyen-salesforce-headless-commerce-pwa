@@ -31,7 +31,7 @@ const getAppleButtonConfig = (
         showPayButton: true,
         configuration: applePayConfig,
         amount,
-        // requiredShippingContactFields: ['postalAddress', 'name', 'phoneticName', 'phone', 'email'],
+        requiredShippingContactFields: ['postalAddress', 'email', 'phone'],
         requiredBillingContactFields: ['postalAddress'],
         shippingMethods: shippingMethods?.map((sm) => ({
             label: sm.name,
@@ -40,7 +40,7 @@ const getAppleButtonConfig = (
             amount: `${sm.price}`
         })),
         onAuthorized: async (resolve, reject, event) => {
-            const {billingContact, token} = event.payment
+            const {shippingContact, billingContact, token} = event.payment
             const state = {
                 data: {
                     paymentType: 'express',
@@ -54,21 +54,27 @@ const getAppleButtonConfig = (
                         houseNumberOrName:
                             billingContact.addressLines.length > 1
                                 ? billingContact.addressLines[1]
-                                : null,
+                                : '',
                         postalCode: billingContact.postalCode,
                         stateOrProvince: billingContact.administrativeArea,
                         street: billingContact.addressLines[0]
                     },
                     deliveryAddress: {
-                        city: billingContact.locality,
-                        country: billingContact.countryCode,
+                        city: shippingContact.locality,
+                        country: shippingContact.countryCode,
                         houseNumberOrName:
-                            billingContact.addressLines.length > 1
-                                ? billingContact.addressLines[1]
-                                : null,
-                        postalCode: billingContact.postalCode,
-                        stateOrProvince: billingContact.administrativeArea,
-                        street: billingContact.addressLines[0]
+                            shippingContact.addressLines.length > 1
+                                ? shippingContact.addressLines[1]
+                                : '',
+                        postalCode: shippingContact.postalCode,
+                        stateOrProvince: shippingContact.administrativeArea,
+                        street: shippingContact.addressLines[0]
+                    },
+                    profile: {
+                        firstName: shippingContact.givenName,
+                        lastName: shippingContact.familyName,
+                        email: shippingContact.emailAddress,
+                        phone: shippingContact.phoneNumber
                     }
                 }
             }
@@ -80,7 +86,7 @@ const getAppleButtonConfig = (
                     origin: state.data.origin ? state.data.origin : window.location.href
                 },
                 basket?.basketId,
-                basket?.customerId
+                basket?.customerInfo?.customerId
             )
             if (paymentsResponse?.isFinal && paymentsResponse?.isSuccessful) {
                 const finalPriceUpdate = {
@@ -96,9 +102,7 @@ const getAppleButtonConfig = (
                 reject()
             }
         },
-        onSubmit: (state, component) => {
-            // This handler is empty to prevent sending a second payment request
-        },
+        onSubmit: () => {},
         onShippingMethodSelected: async (resolve, reject, event) => {
             try {
                 const {shippingMethod} = event
@@ -132,7 +136,7 @@ const getAppleButtonConfig = (
                 reject()
             }
         },
-        onShippingContactSelected: async (resolve, reject, event) => {}
+        onError: (err) => console.log(err)
     }
     return buttonConfig
 }
