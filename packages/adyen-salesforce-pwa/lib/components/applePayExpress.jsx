@@ -135,8 +135,7 @@ const getAppleButtonConfig = (
                 console.error(err)
                 reject()
             }
-        },
-        onError: (err) => console.log(err)
+        }
     }
     return buttonConfig
 }
