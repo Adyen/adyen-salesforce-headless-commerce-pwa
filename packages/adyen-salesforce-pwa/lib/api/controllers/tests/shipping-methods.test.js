@@ -1,4 +1,4 @@
-import setShippingMethod from '../shipping-methods'
+import ShippingMethods from '../shipping-methods'
 import Logger from '../logger'
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 import {ShopperBaskets} from 'commerce-sdk-isomorphic'
@@ -41,7 +41,7 @@ describe('setShippingMethod', () => {
     })
 
     it('should call the appropriate functions and set response in locals', async () => {
-        await setShippingMethod(req, res, next)
+        await ShippingMethods.setShippingMethod(req, res, next)
         expect(Logger.info).toHaveBeenCalledWith('setShippingMethod', 'start')
         expect(getConfigMock).toHaveBeenCalled()
         expect(shopperBasketsInstanceMock.updateShippingMethodForShipment).toHaveBeenCalledWith({
@@ -61,7 +61,7 @@ describe('setShippingMethod', () => {
     it('should call next with error if an error occurs', async () => {
         const error = new Error('Test error')
         shopperBasketsInstanceMock.updateShippingMethodForShipment.mockRejectedValue(error)
-        await setShippingMethod(req, res, next)
+        await ShippingMethods.setShippingMethod(req, res, next)
         expect(Logger.error).toHaveBeenCalledWith('setShippingMethod', JSON.stringify(error))
         expect(next).toHaveBeenCalledWith(error)
     })
