@@ -4,6 +4,7 @@ import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-curre
 import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
 import {AdyenPaymentMethodsService} from '../services/payment-methods'
 import {AdyenEnvironmentService} from '../services/environment'
+import { AdyenShippingMethodsService } from "../services/shipping-methods";
 
 export const AdyenExpressCheckoutContext = React.createContext({})
 
@@ -21,6 +22,7 @@ export const AdyenExpressCheckoutProvider = ({
 
     const [adyenPaymentMethods, setAdyenPaymentMethods] = useState()
     const [adyenEnvironment, setAdyenEnvironment] = useState()
+    const [shippingMethods, setShippingMethods] = useState()
 
     const fetchPaymentMethods = async () => {
         const token = await getTokenWhenReady()
@@ -42,6 +44,16 @@ export const AdyenExpressCheckoutProvider = ({
         }
     }
 
+    const fetchShippingMethods = async (basketId) => {
+        const token = await getTokenWhenReady()
+        const adyenShippingMethodsService = new AdyenShippingMethodsService(token, site)
+        try {
+            return await adyenShippingMethodsService.getShippingMethods(basketId)
+        } catch (error) {
+            return null
+        }
+    }
+
     useEffect(() => {
         const fetchAdyenData = async () => {
             const [environment, paymentMethods] = await Promise.all([
@@ -55,6 +67,17 @@ export const AdyenExpressCheckoutProvider = ({
         fetchAdyenData()
     }, [])
 
+    useEffect(() => {
+        const fetchShippingMethodsData = async () => {
+            const shippingMethods = await fetchShippingMethods(basket?.basketId)
+            setShippingMethods(shippingMethods || {error: true})
+        }
+
+        if (basket && !shippingMethods) {
+            fetchShippingMethodsData()
+        }
+    }, [basket])
+
     const value = {
         adyenEnvironment,
         adyenPaymentMethods,
@@ -62,7 +85,8 @@ export const AdyenExpressCheckoutProvider = ({
         locale,
         site,
         getTokenWhenReady,
-        navigate
+        navigate,
+        shippingMethods
     }
 
     return (

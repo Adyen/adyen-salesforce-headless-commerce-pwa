@@ -148,7 +148,8 @@ const ApplePayExpressComponent = (props) => {
         locale,
         site,
         getTokenWhenReady,
-        navigate
+        navigate,
+        shippingMethods
     } = useAdyenExpressCheckout()
     const paymentContainer = useRef(null)
 
@@ -165,7 +166,7 @@ const ApplePayExpressComponent = (props) => {
                     getTokenWhenReady,
                     site,
                     basket,
-                    props.shippingMethods,
+                    shippingMethods?.applicableShippingMethods,
                     applePaymentMethodConfig,
                     navigate
                 )
@@ -178,7 +179,13 @@ const ApplePayExpressComponent = (props) => {
                 console.log(err)
             }
         }
-        if (adyenEnvironment && adyenPaymentMethods && basket && paymentContainer.current) {
+        if (
+            adyenEnvironment &&
+            adyenPaymentMethods &&
+            basket &&
+            shippingMethods &&
+            paymentContainer.current
+        ) {
             createCheckout()
         }
     }, [adyenEnvironment, adyenPaymentMethods])

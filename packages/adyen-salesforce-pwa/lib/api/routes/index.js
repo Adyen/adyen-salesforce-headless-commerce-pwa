@@ -38,11 +38,14 @@ function registerAdyenEndpoints(app, runtime, overrides) {
         authorizationWebhookHandler,
         SuccessHandler
     ]
-    const shippingMethodsHandler = overrides?.shippingMethods || [
-        ShippingMethodsController,
+    const shippingMethodsPostHandler = overrides?.setShippingMethods || [
+        ShippingMethodsController.setShippingMethod,
         SuccessHandler
     ]
-
+    const shippingMethodsGetHandler = overrides?.getShippingMethods || [
+        ShippingMethodsController.getShippingMethods,
+        SuccessHandler
+    ]
     const appleDomainAssociationHandler = overrides?.appleDomainAssociation || [
         appleDomainAssociation
     ]
@@ -63,7 +66,8 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     app.post('/api/adyen/payments/details', ...paymentsDetailsHandler)
     app.post('/api/adyen/payments', ...paymentsHandler)
     app.post('/api/adyen/webhook', ...webhookHandler)
-    app.post('/api/adyen/shipping-methods', ...shippingMethodsHandler)
+    app.post('/api/adyen/shipping-methods', ...shippingMethodsPostHandler)
+    app.get('/api/adyen/shipping-methods', ...shippingMethodsGetHandler)
     app.get(
         '/.well-known/apple-developer-merchantid-domain-association',
         ...appleDomainAssociationHandler

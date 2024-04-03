@@ -1,6 +1,7 @@
 export * from './routes/index'
 export * from './controllers/webhook'
 export * from './controllers/orderApi'
+export {default as ShippingMethodsController} from './controllers/shipping-methods'
 export {default as PaymentsController} from './controllers/payments'
 export {default as PaymentMethodsController} from './controllers/payment-methods'
 export {default as PaymentsDetailsController} from './controllers/payments-details'
