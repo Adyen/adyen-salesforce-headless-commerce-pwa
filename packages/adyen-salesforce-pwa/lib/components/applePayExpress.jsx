@@ -9,14 +9,14 @@ import {AdyenShippingMethodsService} from '../services/shipping-methods'
 import useAdyenExpressCheckout from '../hooks/useAdyenExpressCheckout'
 import {AdyenShippingAddressService} from '../services/shipping-address'
 
-const getApplePaymentMethodConfig = (paymentMethodsResponse) => {
+export const getApplePaymentMethodConfig = (paymentMethodsResponse) => {
     const applePayPaymentMethod = paymentMethodsResponse?.paymentMethods?.find(
         (pm) => pm.type === 'applepay'
     )
     return applePayPaymentMethod?.configuration || null
 }
 
-const getCustomerShippingDetails = (shippingContact) => {
+export const getCustomerShippingDetails = (shippingContact) => {
     return {
         deliveryAddress: {
             city: shippingContact.locality,
@@ -36,21 +36,21 @@ const getCustomerShippingDetails = (shippingContact) => {
     }
 }
 
-const getCustomerBillingDetails = (billingContact) => {
+export const getCustomerBillingDetails = (billingContact) => {
     return {
         billingAddress: {
             city: billingContact.locality,
             country: billingContact.countryCode,
             houseNumberOrName:
-                billingContact.addressLines.length > 1 ? billingContact.addressLines[1] : '',
+                billingContact?.addressLines?.length > 1 ? billingContact.addressLines[1] : '',
             postalCode: billingContact.postalCode,
             stateOrProvince: billingContact.administrativeArea,
-            street: billingContact.addressLines[0]
+            street: billingContact.addressLines?.[0]
         }
     }
 }
 
-const getAppleButtonConfig = (
+export const getAppleButtonConfig = (
     getTokenWhenReady,
     site,
     basket,
