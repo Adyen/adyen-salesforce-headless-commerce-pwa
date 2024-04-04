@@ -4,7 +4,7 @@ import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-curre
 import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
 import {AdyenPaymentMethodsService} from '../services/payment-methods'
 import {AdyenEnvironmentService} from '../services/environment'
-import { AdyenShippingMethodsService } from "../services/shipping-methods";
+import {AdyenShippingMethodsService} from '../services/shipping-methods'
 
 export const AdyenExpressCheckoutContext = React.createContext({})
 
@@ -86,7 +86,8 @@ export const AdyenExpressCheckoutProvider = ({
         site,
         getTokenWhenReady,
         navigate,
-        shippingMethods
+        shippingMethods,
+        fetchShippingMethods
     }
 
     return (
