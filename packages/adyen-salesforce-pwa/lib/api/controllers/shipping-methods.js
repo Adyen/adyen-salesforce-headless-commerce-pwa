@@ -23,7 +23,7 @@ async function getShippingMethods(req, res, next) {
         res.locals.response = shippingMethodsResponse
         next()
     } catch (err) {
-        Logger.error('setShippingMethod', JSON.stringify(err))
+        Logger.error('getShippingMethods', JSON.stringify(err))
         next(err)
     }
 }

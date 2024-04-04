@@ -35,6 +35,7 @@ describe('setShippingMethod', () => {
         }))
         getConfig.mockImplementation(getConfigMock)
         shopperBasketsInstanceMock = {
+            getShippingMethodsForShipment: jest.fn().mockResolvedValue({}),
             updateShippingMethodForShipment: jest.fn().mockResolvedValue({})
         }
         ShopperBaskets.mockImplementation(() => shopperBasketsInstanceMock)
@@ -63,6 +64,29 @@ describe('setShippingMethod', () => {
         shopperBasketsInstanceMock.updateShippingMethodForShipment.mockRejectedValue(error)
         await ShippingMethods.setShippingMethod(req, res, next)
         expect(Logger.error).toHaveBeenCalledWith('setShippingMethod', JSON.stringify(error))
+        expect(next).toHaveBeenCalledWith(error)
+    })
+
+    it('should call get shipping methods the appropriate functions and set response in locals', async () => {
+        await ShippingMethods.getShippingMethods(req, res, next)
+        expect(Logger.info).toHaveBeenCalledWith('getShippingMethods', 'start')
+        expect(getConfigMock).toHaveBeenCalled()
+        expect(shopperBasketsInstanceMock.getShippingMethodsForShipment).toHaveBeenCalledWith({
+            parameters: {
+                basketId: 'basket-id',
+                shipmentId: 'me'
+            }
+        })
+        expect(Logger.info).toHaveBeenCalledWith('getShippingMethods', 'success')
+        expect(res.locals.response).toEqual({})
+        expect(next).toHaveBeenCalled()
+    })
+
+    it('should call get shipping methods next with error if an error occurs', async () => {
+        const error = new Error('Test error')
+        shopperBasketsInstanceMock.getShippingMethodsForShipment.mockRejectedValue(error)
+        await ShippingMethods.getShippingMethods(req, res, next)
+        expect(Logger.error).toHaveBeenCalledWith('getShippingMethods', JSON.stringify(error))
         expect(next).toHaveBeenCalledWith(error)
     })
 })

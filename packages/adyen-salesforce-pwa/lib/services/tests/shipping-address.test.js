@@ -1,4 +1,4 @@
-import {AdyenShippingMethodsService} from '../shipping-methods'
+import {AdyenShippingAddressService} from '../shipping-address'
 import {ApiClient} from '../api'
 
 jest.mock('../api', () => {
@@ -9,7 +9,7 @@ jest.mock('../api', () => {
     }
 })
 
-describe('AdyenShippingMethodsService', () => {
+describe('AdyenShippingAddressService', () => {
     let adyenService, apiClientMock
 
     beforeEach(() => {
@@ -17,20 +17,35 @@ describe('AdyenShippingMethodsService', () => {
             post: jest.fn().mockResolvedValue({})
         }
         ApiClient.mockImplementation(() => apiClientMock)
-        adyenService = new AdyenShippingMethodsService('token', 'site')
+        adyenService = new AdyenShippingAddressService('token', 'site')
     })
 
     it('should create an instance with the correct properties', () => {
-        expect(adyenService.baseUrl).toBe('/api/adyen/shipping-methods')
+        expect(adyenService.baseUrl).toBe('/api/adyen/shipping-address')
         expect(adyenService.apiClient).toBe(apiClientMock)
     })
 
-    describe('updateShippingMethod', () => {
+    describe('updateShippingAddress', () => {
         it('should call apiClient post method with correct parameters and return response', async () => {
-            const shippingMethodId = 'method-id'
             const basketId = 'basket-id'
-            const expectedBody = {shippingMethodId}
-            const expectedHeaders = {basketid: basketId}
+            const expectedBody = {
+                data: {
+                    deliveryAddress: {
+                        city: 'Amsterdam',
+                        country: 'NL',
+                        houseNumberOrName: '',
+                        postalCode: '1000AA',
+                        stateOrProvince: '',
+                        street: 'SC'
+                    },
+                    profile: {
+                        firstName: 'Test',
+                        lastName: 'Test',
+                        email: 'test@test.com',
+                        phone: '9234567890'
+                    }
+                }
+            }
             const mockResponse = {}
             const mockJsonPromise = Promise.resolve(mockResponse)
             const mockFetchPromise = Promise.resolve({
@@ -40,19 +55,15 @@ describe('AdyenShippingMethodsService', () => {
 
             apiClientMock.post.mockResolvedValueOnce(mockFetchPromise)
 
-            const result = await adyenService.updateShippingMethod(shippingMethodId, basketId)
-
-            expect(apiClientMock.post).toHaveBeenCalledWith({
-                body: JSON.stringify(expectedBody),
-                headers: expectedHeaders
-            })
+            const result = await adyenService.updateShippingAddress(basketId, expectedBody)
             expect(result).toEqual(mockResponse)
         })
 
         it('should throw an error if response status is >= 300', async () => {
             const mockResponse = {
                 status: 400,
-                json: jest.fn().mockResolvedValueOnce({})
+                json: jest.fn().mockResolvedValueOnce({
+                })
             }
 
             apiClientMock.post.mockResolvedValueOnce(mockResponse)
