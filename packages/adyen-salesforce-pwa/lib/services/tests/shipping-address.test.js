@@ -60,14 +60,18 @@ describe('AdyenShippingAddressService', () => {
         })
 
         it('should throw an error if response status is >= 300', async () => {
-            const mockResponse = {
+            const shippingMethodId = 'method-id'
+            const basketId = 'basket-id'
+            const mockFetchPromise = Promise.resolve({
                 status: 400,
-                json: jest.fn().mockResolvedValueOnce({
-                })
-            }
+                statusText: 'Bad Request'
+            })
 
-            apiClientMock.post.mockResolvedValueOnce(mockResponse)
-            expect(mockResponse.json).not.toHaveBeenCalled()
+            adyenService.apiClient.post.mockResolvedValueOnce(mockFetchPromise)
+
+            await expect(
+                adyenService.updateShippingAddress(shippingMethodId, basketId)
+            ).rejects.toThrow('[object Object]')
         })
     })
 })
