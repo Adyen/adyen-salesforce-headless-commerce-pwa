@@ -30,7 +30,7 @@ describe('getAppleButtonConfig function', () => {
         })
     })
 
-    test('returns expected button configuration and resolves onAuthorized event', async () => {
+    it('returns expected button configuration and resolves onAuthorized event', async () => {
         const getTokenWhenReady = mockGetTokenWhenReady
         const site = 'mockSite'
         const basket = {
@@ -80,7 +80,7 @@ describe('getAppleButtonConfig function', () => {
 })
 
 describe('getCustomerBillingDetails function', () => {
-    test('returns expected billing details when all properties are provided', () => {
+    it('returns expected billing details when all properties are provided', () => {
         const billingContact = {
             locality: 'City',
             countryCode: 'US',
@@ -101,7 +101,7 @@ describe('getCustomerBillingDetails function', () => {
         expect(getCustomerBillingDetails(billingContact)).toEqual(expectedBillingDetails)
     })
 
-    test('returns expected billing details when addressLines is not provided', () => {
+    it('returns expected billing details when addressLines is not provided', () => {
         const billingContact = {
             locality: 'City',
             countryCode: 'US',
@@ -123,7 +123,7 @@ describe('getCustomerBillingDetails function', () => {
 })
 
 describe('getCustomerShippingDetails function', () => {
-    test('returns expected shipping details when all properties are provided', () => {
+    it('returns expected shipping details when all properties are provided', () => {
         const shippingContact = {
             locality: 'City',
             countryCode: 'US',
@@ -154,7 +154,7 @@ describe('getCustomerShippingDetails function', () => {
         expect(getCustomerShippingDetails(shippingContact)).toEqual(expectedShippingDetails)
     })
 
-    test('returns expected shipping details when addressLines is not provided', () => {
+    it('returns expected shipping details when addressLines is not provided', () => {
         const shippingContact = {
             locality: 'City',
             countryCode: 'US',
@@ -186,15 +186,15 @@ describe('getCustomerShippingDetails function', () => {
 })
 
 describe('getApplePaymentMethodConfig function', () => {
-    test('returns null if paymentMethodsResponse is undefined', () => {
+    it('returns null if paymentMethodsResponse is undefined', () => {
         expect(getApplePaymentMethodConfig()).toBeNull()
     })
 
-    test('returns null if paymentMethodsResponse.paymentMethods is undefined', () => {
+    it('returns null if paymentMethodsResponse.paymentMethods is undefined', () => {
         expect(getApplePaymentMethodConfig({})).toBeNull()
     })
 
-    test('returns null if no apple pay payment method is found', () => {
+    it('returns null if no apple pay payment method is found', () => {
         const paymentMethodsResponse = {
             paymentMethods: [
                 {
@@ -210,7 +210,7 @@ describe('getApplePaymentMethodConfig function', () => {
         expect(getApplePaymentMethodConfig(paymentMethodsResponse)).toBeNull()
     })
 
-    test('returns configuration object if apple pay payment method is found', () => {
+    it('returns configuration object if apple pay payment method is found', () => {
         const paymentMethodsResponse = {
             paymentMethods: [
                 {
