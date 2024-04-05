@@ -74,14 +74,10 @@ describe('fetchPaymentMethods function', () => {
 
     beforeEach(() => {
         mockGetTokenWhenReady = jest.fn().mockResolvedValue('mockToken')
-        mockFetchEnvironment.mockImplementationOnce(() => ({
-            ADYEN_ENVIRONMENT: 'test',
-            ADYEN_CLIENT_KEY: 'testKey'
-        }))
-        mockFetchPaymentMethods.mockImplementationOnce(() => paymentMethodsResponse)
     })
 
     it('returns payment methods when fetch is successful', async () => {
+        mockFetchPaymentMethods.mockImplementationOnce(() => paymentMethodsResponse)
         const customerId = 'mockCustomerId'
         const site = 'mockSite'
         const locale = 'en-US'
@@ -96,6 +92,23 @@ describe('fetchPaymentMethods function', () => {
         expect(paymentMethods).toEqual(paymentMethodsResponse)
         expect(mockGetTokenWhenReady).toHaveBeenCalledTimes(1)
     })
+
+    it('returns null when fetch fails', async () => {
+        mockFetchPaymentMethods.mockRejectedValue(() => new Error('Failed to payment methods'))
+        const customerId = 'mockCustomerId'
+        const site = 'mockSite'
+        const locale = 'en-US'
+
+        const paymentMethods = await fetchPaymentMethods(
+            customerId,
+            site,
+            locale,
+            mockGetTokenWhenReady
+        )
+
+        expect(paymentMethods).toBeNull()
+        expect(mockGetTokenWhenReady).toHaveBeenCalledTimes(1)
+    })
 })
 
 describe('fetchEnvironment function', () => {
@@ -103,10 +116,13 @@ describe('fetchEnvironment function', () => {
 
     beforeEach(() => {
         mockGetTokenWhenReady = jest.fn().mockResolvedValue('mockToken')
-        mockFetchPaymentMethods.mockImplementationOnce(() => paymentMethodsResponse)
     })
 
     it('returns environment when fetch is successful', async () => {
+        mockFetchEnvironment.mockImplementationOnce(() => ({
+            ADYEN_ENVIRONMENT: 'test',
+            ADYEN_CLIENT_KEY: 'testKey'
+        }))
         const site = 'mockSite'
 
         const environment = await fetchEnvironment(site, mockGetTokenWhenReady)
@@ -117,6 +133,16 @@ describe('fetchEnvironment function', () => {
         })
         expect(mockGetTokenWhenReady).toHaveBeenCalledTimes(1)
     })
+
+    it('returns null when fetch fails', async () => {
+        mockFetchEnvironment.mockRejectedValue(() => new Error('Failed to fetch environment'))
+        const site = 'mockSite'
+
+        const environmentData = await fetchEnvironment(site, mockGetTokenWhenReady)
+
+        expect(environmentData).toBeNull()
+        expect(mockGetTokenWhenReady).toHaveBeenCalledTimes(1)
+    })
 })
 
 describe('fetchShippingMethods function', () => {
@@ -124,16 +150,30 @@ describe('fetchShippingMethods function', () => {
 
     beforeEach(() => {
         mockGetTokenWhenReady = jest.fn().mockResolvedValue('mockToken')
-        mockFetchShippingMethods.mockImplementationOnce(() => shippingMethodsResponse)
     })
 
     it('returns shipping methods when fetch is successful', async () => {
+        mockFetchShippingMethods.mockImplementationOnce(() => shippingMethodsResponse)
+
         const basketId = 'basket-id'
         const site = 'mockSite'
 
         const shippingMethods = await fetchShippingMethods(basketId, site, mockGetTokenWhenReady)
 
         expect(shippingMethods).toEqual(shippingMethodsResponse)
+        expect(mockGetTokenWhenReady).toHaveBeenCalledTimes(1)
+    })
+
+    it('returns null when fetch fails', async () => {
+        mockFetchShippingMethods.mockRejectedValue(
+            () => new Error('Failed to fetch shipping methods')
+        )
+        const basketId = 'basket-id'
+        const site = 'mockSite'
+
+        const shippingMethods = await fetchShippingMethods(basketId, site, mockGetTokenWhenReady)
+
+        expect(shippingMethods).toBeNull()
         expect(mockGetTokenWhenReady).toHaveBeenCalledTimes(1)
     })
 })
