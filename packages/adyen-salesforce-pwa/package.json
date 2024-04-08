@@ -36,7 +36,7 @@
     "lint:fix": "eslint -- --fix"
   },
   "dependencies": {
-    "@adyen/adyen-web": "^5.51.0",
+    "@adyen/adyen-web": "^5.56.0",
     "@adyen/api-library": "^16.0.1",
     "@salesforce/retail-react-app": "2.0.0",
     "dotenv": "^16.3.1",

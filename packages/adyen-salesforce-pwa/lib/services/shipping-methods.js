@@ -8,6 +8,19 @@ export class AdyenShippingMethodsService {
         this.apiClient = new ApiClient(this.baseUrl, token, site)
     }
 
+    async getShippingMethods(basketId) {
+        const res = await this.apiClient.get({
+            headers: {
+                basketid: basketId
+            }
+        })
+        if (res.status >= 300) {
+            throw new Error(res)
+        } else {
+            return await res.json()
+        }
+    }
+
     async updateShippingMethod(shippingMethodId, basketId) {
         const res = await this.apiClient.post({
             body: JSON.stringify({

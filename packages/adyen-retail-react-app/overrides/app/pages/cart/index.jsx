@@ -103,7 +103,7 @@ const Cart = () => {
     /******************* Shipping Methods for basket shipment *******************/
     // do this action only if the basket shipping method is not defined
     // we need to fetch the shippment methods to get the default value before we can add it to the basket
-    const {data: shippingMethods} = useShippingMethodsForShipment(
+    useShippingMethodsForShipment(
         {
             parameters: {
                 basketId: basket?.basketId,
@@ -418,7 +418,7 @@ const Cart = () => {
                                         basket={basket}
                                     />
                                     <Box display={{base: 'none', lg: 'block'}}>
-                                        <CartCta shippingMethods={shippingMethods} />
+                                        <CartCta />
                                     </Box>
                                 </Stack>
                             </GridItem>
@@ -464,7 +464,7 @@ const Cart = () => {
                 display={{base: 'block', lg: 'none'}}
                 align="center"
             >
-                <CartCta shippingMethods={shippingMethods} />
+                <CartCta />
             </Box>
 
             <ConfirmationModal

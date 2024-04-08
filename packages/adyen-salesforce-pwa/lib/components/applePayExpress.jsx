@@ -7,31 +7,67 @@ import {getCurrencyValueForApi} from '../utils/parsers.mjs'
 import {AdyenPaymentsService} from '../services/payments'
 import {AdyenShippingMethodsService} from '../services/shipping-methods'
 import useAdyenExpressCheckout from '../hooks/useAdyenExpressCheckout'
+import {AdyenShippingAddressService} from '../services/shipping-address'
 
-const getApplePaymentMethodConfig = (paymentMethodsResponse) => {
+export const getApplePaymentMethodConfig = (paymentMethodsResponse) => {
     const applePayPaymentMethod = paymentMethodsResponse?.paymentMethods?.find(
         (pm) => pm.type === 'applepay'
     )
     return applePayPaymentMethod?.configuration || null
 }
 
-const getAppleButtonConfig = (
+export const getCustomerShippingDetails = (shippingContact) => {
+    return {
+        deliveryAddress: {
+            city: shippingContact.locality,
+            country: shippingContact.countryCode,
+            houseNumberOrName:
+                shippingContact.addressLines?.length > 1 ? shippingContact.addressLines[1] : '',
+            postalCode: shippingContact.postalCode,
+            stateOrProvince: shippingContact.administrativeArea,
+            street: shippingContact.addressLines?.[0]
+        },
+        profile: {
+            firstName: shippingContact.givenName,
+            lastName: shippingContact.familyName,
+            email: shippingContact.emailAddress,
+            phone: shippingContact.phoneNumber
+        }
+    }
+}
+
+export const getCustomerBillingDetails = (billingContact) => {
+    return {
+        billingAddress: {
+            city: billingContact.locality,
+            country: billingContact.countryCode,
+            houseNumberOrName:
+                billingContact?.addressLines?.length > 1 ? billingContact.addressLines[1] : '',
+            postalCode: billingContact.postalCode,
+            stateOrProvince: billingContact.administrativeArea,
+            street: billingContact.addressLines?.[0]
+        }
+    }
+}
+
+export const getAppleButtonConfig = (
     getTokenWhenReady,
     site,
     basket,
     shippingMethods,
     applePayConfig,
-    navigate
+    navigate,
+    fetchShippingMethods
 ) => {
-    const amount = {
-        value: getCurrencyValueForApi(basket.orderTotal, basket.currency),
-        currency: basket.currency
-    }
+    let applePayAmount = basket.orderTotal
     const buttonConfig = {
         showPayButton: true,
         configuration: applePayConfig,
-        amount,
-        // requiredShippingContactFields: ['postalAddress', 'name', 'phoneticName', 'phone', 'email'],
+        amount: {
+            value: getCurrencyValueForApi(basket.orderTotal, basket.currency),
+            currency: basket.currency
+        },
+        requiredShippingContactFields: ['postalAddress', 'name', 'phoneticName', 'email', 'phone'],
         requiredBillingContactFields: ['postalAddress'],
         shippingMethods: shippingMethods?.map((sm) => ({
             label: sm.name,
@@ -40,7 +76,7 @@ const getAppleButtonConfig = (
             amount: `${sm.price}`
         })),
         onAuthorized: async (resolve, reject, event) => {
-            const {billingContact, token} = event.payment
+            const {shippingContact, billingContact, token} = event.payment
             const state = {
                 data: {
                     paymentType: 'express',
@@ -48,28 +84,8 @@ const getAppleButtonConfig = (
                         type: 'applepay',
                         applePayToken: token.paymentData
                     },
-                    billingAddress: {
-                        city: billingContact.locality,
-                        country: billingContact.countryCode,
-                        houseNumberOrName:
-                            billingContact.addressLines.length > 1
-                                ? billingContact.addressLines[1]
-                                : null,
-                        postalCode: billingContact.postalCode,
-                        stateOrProvince: billingContact.administrativeArea,
-                        street: billingContact.addressLines[0]
-                    },
-                    deliveryAddress: {
-                        city: billingContact.locality,
-                        country: billingContact.countryCode,
-                        houseNumberOrName:
-                            billingContact.addressLines.length > 1
-                                ? billingContact.addressLines[1]
-                                : null,
-                        postalCode: billingContact.postalCode,
-                        stateOrProvince: billingContact.administrativeArea,
-                        street: billingContact.addressLines[0]
-                    }
+                    ...getCustomerBillingDetails(billingContact),
+                    ...getCustomerShippingDetails(shippingContact)
                 }
             }
             const commerceApiToken = await getTokenWhenReady()
@@ -80,14 +96,14 @@ const getAppleButtonConfig = (
                     origin: state.data.origin ? state.data.origin : window.location.href
                 },
                 basket?.basketId,
-                basket?.customerId
+                basket?.customerInfo?.customerId
             )
             if (paymentsResponse?.isFinal && paymentsResponse?.isSuccessful) {
                 const finalPriceUpdate = {
                     newTotal: {
                         type: 'final',
                         label: applePayConfig.merchantName,
-                        amount: `${amount.value}`
+                        amount: `${applePayAmount}`
                     }
                 }
                 resolve(finalPriceUpdate)
@@ -96,8 +112,39 @@ const getAppleButtonConfig = (
                 reject()
             }
         },
-        onSubmit: (state, component) => {
-            // This handler is empty to prevent sending a second payment request
+        onSubmit: () => {},
+        onShippingContactSelected: async (resolve, reject, event) => {
+            const {shippingContact} = event
+            const commerceApiToken = await getTokenWhenReady()
+            const adyenShippingMethodsService = new AdyenShippingAddressService(
+                commerceApiToken,
+                site
+            )
+            const customerShippingDetails = getCustomerShippingDetails(shippingContact)
+            const newBasket = await adyenShippingMethodsService.updateShippingAddress(
+                basket.basketId,
+                customerShippingDetails
+            )
+            const newShippingMethods = await fetchShippingMethods()
+            buttonConfig.amount = {
+                value: getCurrencyValueForApi(newBasket.orderTotal, newBasket.currency),
+                currency: newBasket.currency
+            }
+            applePayAmount = newBasket.orderTotal
+            const finalPriceUpdate = {
+                newShippingMethods: newShippingMethods?.applicableShippingMethods?.map((sm) => ({
+                    label: sm.name,
+                    detail: sm.description,
+                    identifier: sm.id,
+                    amount: `${sm.price}`
+                })),
+                newTotal: {
+                    type: 'final',
+                    label: applePayConfig.merchantName,
+                    amount: `${applePayAmount}`
+                }
+            }
+            resolve(finalPriceUpdate)
         },
         onShippingMethodSelected: async (resolve, reject, event) => {
             try {
@@ -118,11 +165,12 @@ const getAppleButtonConfig = (
                         value: getCurrencyValueForApi(response.orderTotal, response.currency),
                         currency: response.currency
                     }
+                    applePayAmount = response.orderTotal
                     const applePayShippingMethodUpdate = {
                         newTotal: {
                             type: 'final',
                             label: applePayConfig.merchantName,
-                            amount: `${response.orderTotal}`
+                            amount: `${applePayAmount}`
                         }
                     }
                     resolve(applePayShippingMethodUpdate)
@@ -131,8 +179,7 @@ const getAppleButtonConfig = (
                 console.error(err)
                 reject()
             }
-        },
-        onShippingContactSelected: async (resolve, reject, event) => {}
+        }
     }
     return buttonConfig
 }
@@ -145,7 +192,9 @@ const ApplePayExpressComponent = (props) => {
         locale,
         site,
         getTokenWhenReady,
-        navigate
+        navigate,
+        shippingMethods,
+        fetchShippingMethods
     } = useAdyenExpressCheckout()
     const paymentContainer = useRef(null)
 
@@ -162,9 +211,10 @@ const ApplePayExpressComponent = (props) => {
                     getTokenWhenReady,
                     site,
                     basket,
-                    props.shippingMethods,
+                    shippingMethods?.applicableShippingMethods,
                     applePaymentMethodConfig,
-                    navigate
+                    navigate,
+                    fetchShippingMethods
                 )
                 const applePayButton = await checkout.create('applepay', appleButtonConfig)
                 const isApplePayButtonAvailable = await applePayButton.isAvailable()
@@ -175,7 +225,13 @@ const ApplePayExpressComponent = (props) => {
                 console.log(err)
             }
         }
-        if (adyenEnvironment && adyenPaymentMethods && basket && paymentContainer.current) {
+        if (
+            adyenEnvironment &&
+            adyenPaymentMethods &&
+            basket &&
+            shippingMethods &&
+            paymentContainer.current
+        ) {
             createCheckout()
         }
     }, [adyenEnvironment, adyenPaymentMethods])
