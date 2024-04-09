@@ -2,26 +2,22 @@ import {test} from '@playwright/test'
 import {ScenarioHelper} from '../helpers/ScenarioHelper.js'
 import {ShopperData} from '../data/shopperData.js'
 import {PaymentHelper} from '../helpers/PaymentHelper.js'
-import { CardData } from "../data/cardData";
+import {CardData} from '../data/cardData.js'
 
 const user_US = new ShopperData().US
-const storedCard = new CardData().storedCard
+const threeDs2 = new CardData().threeDs2
 
 test.describe('Payments through PWA UI', () => {
-  test('Tokenized payment should succeed', async ({page}) => {
+  test.beforeEach(async ({page}) => {
     const scenarios = new ScenarioHelper(page)
-    await scenarios.login(user_US)
     await scenarios.visitStore()
-    await page.reload();
-
     await scenarios.setupCart()
-    await scenarios.arrangeShippingAndProceedToPaymentForLoggedInUser(user_US)
+  })
 
+  test('CashApp should render', async ({page}) => {
+    const scenarios = new ScenarioHelper(page)
+    await scenarios.arrangeShippingAndProceedToPayment(user_US)
     const paymentPage = new PaymentHelper(page)
-    await paymentPage.fillCVCInfo(
-      storedCard.cvc
-    )
-    await paymentPage.clickPay()
-    await scenarios.verifySuccessfulOrder()
+    await paymentPage.selectPaymentType('Cash App Pay')
   })
 })
