@@ -17,6 +17,12 @@ export class CardData {
         expirationDate: '0330',
         cvc: '737'
     }
+    storedCard = {
+        holderName: 'John Johnson',
+        cardNumber: '4111111111111111',
+        expirationDate: '0330',
+        cvc: '737'
+    }
     coBrandedBCMC = {
         holderName: 'John Doe',
         cardNumber: '4871049999999910',

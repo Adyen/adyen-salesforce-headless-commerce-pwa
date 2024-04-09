@@ -59,6 +59,10 @@ export class PaymentHelper {
         )
     }
 
+    async fillCVCInfo(cardCVC) {
+        await this.fillInput(this.cvcInput, cardCVC)
+    }
+
     // 3Ds2
     async validate3DS2(answer) {
         await this.fill3DS2PasswordAndSubmit(answer)
