@@ -11,7 +11,7 @@ export class LocaleData {
             heading: 'Account Details'
         },
         productDetailPage: {
-            productColor: 'Sugar',
+            productColor: 'Zinc Heather',
             addToCartButtonCaption: 'Add to Cart',
             proceedToCheckoutButtonCaption: 'Proceed to Checkout'
         },
