@@ -11,7 +11,7 @@ export class LocaleData {
             heading: 'Account Details'
         },
         productDetailPage: {
-            productColor: 'Gray',
+            productColor: 'Sugar',
             addToCartButtonCaption: 'Add to Cart',
             proceedToCheckoutButtonCaption: 'Proceed to Checkout'
         },
@@ -23,7 +23,7 @@ export class LocaleData {
             heading: 'React PWA Starter Store pour le retail'
         },
         productDetailPage: {
-            productColor: 'Gris',
+            productColor: 'Sucre',
             addToCartButtonCaption: 'Ajouter au panier',
             proceedToCheckoutButtonCaption: 'Passer au checkout'
         },
