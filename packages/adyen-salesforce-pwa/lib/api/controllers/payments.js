@@ -1,7 +1,6 @@
 import {formatAddressInAdyenFormat} from '../../utils/formatAddress.mjs'
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 import {
-    APPLICATION_VERSION,
     ORDER,
     PAYMENT_METHODS,
     RECURRING_PROCESSING_MODEL,
@@ -16,6 +15,7 @@ import {v4 as uuidv4} from 'uuid'
 import {OrderApiClient} from './orderApi'
 import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrentSite.mjs'
 import {AdyenError} from '../models/AdyenError'
+import {getApplicationInfo} from '../../utils/getApplicationInfo.mjs'
 
 const errorMessages = {
     AMOUNT_NOT_CORRECT: 'amount not correct',
@@ -71,20 +71,6 @@ function getShopperName(order) {
     return {
         firstName,
         lastName
-    }
-}
-
-function getApplicationInfo(systemIntegratorName) {
-    return {
-        merchantApplication: {
-            name: 'adyen-salesforce-commerce-cloud',
-            version: APPLICATION_VERSION
-        },
-        externalPlatform: {
-            name: 'SalesforceCommerceCloud',
-            version: 'PWA',
-            integrator: systemIntegratorName
-        }
     }
 }
 

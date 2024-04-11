@@ -62,6 +62,7 @@ export const getAppleButtonConfig = (
     let applePayAmount = basket.orderTotal
     const buttonConfig = {
         showPayButton: true,
+        isExpress: true,
         configuration: applePayConfig,
         amount: {
             value: getCurrencyValueForApi(basket.orderTotal, basket.currency),
@@ -229,7 +230,12 @@ const ApplePayExpressComponent = (props) => {
                 const checkout = await AdyenCheckout({
                     environment: adyenEnvironment?.ADYEN_ENVIRONMENT,
                     clientKey: adyenEnvironment?.ADYEN_CLIENT_KEY,
-                    locale: locale.id
+                    locale: locale.id,
+                    analytics: {
+                        analyticsData: {
+                            applicationInfo: adyenPaymentMethods?.applicationInfo
+                        }
+                    }
                 })
                 const applePaymentMethodConfig = getApplePaymentMethodConfig(adyenPaymentMethods)
                 const appleButtonConfig = getAppleButtonConfig(

@@ -7,6 +7,7 @@ import Logger from './logger'
 import {v4 as uuidv4} from 'uuid'
 import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrentSite.mjs'
 import {AdyenError} from '../models/AdyenError'
+import {getApplicationInfo} from '../../utils/getApplicationInfo.mjs'
 
 const errorMessages = {
     UNAUTHORIZED: 'unauthorized',
@@ -77,7 +78,10 @@ async function getPaymentMethods(req, res, next) {
         }
 
         Logger.info('getPaymentMethods', 'success')
-        res.locals.response = response
+        res.locals.response = {
+            ...response,
+            applicationInfo: getApplicationInfo(adyenConfig.systemIntegratorName)
+        }
         next()
     } catch (err) {
         Logger.error('getPaymentMethods', JSON.stringify(err))
