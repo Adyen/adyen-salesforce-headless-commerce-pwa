@@ -76,75 +76,101 @@ export const getAppleButtonConfig = (
             amount: `${sm.price}`
         })),
         onAuthorized: async (resolve, reject, event) => {
-            const {shippingContact, billingContact, token} = event.payment
-            const state = {
-                data: {
-                    paymentType: 'express',
-                    paymentMethod: {
-                        type: 'applepay',
-                        applePayToken: token.paymentData
-                    },
-                    ...getCustomerBillingDetails(billingContact),
-                    ...getCustomerShippingDetails(shippingContact)
-                }
-            }
-            const commerceApiToken = await getTokenWhenReady()
-            const adyenPaymentService = new AdyenPaymentsService(commerceApiToken, site)
-            const paymentsResponse = await adyenPaymentService.submitPayment(
-                {
-                    ...state.data,
-                    origin: state.data.origin ? state.data.origin : window.location.href
-                },
-                basket?.basketId,
-                basket?.customerInfo?.customerId
-            )
-            if (paymentsResponse?.isFinal && paymentsResponse?.isSuccessful) {
-                const finalPriceUpdate = {
-                    newTotal: {
-                        type: 'final',
-                        label: applePayConfig.merchantName,
-                        amount: `${applePayAmount}`
+            try {
+                const {shippingContact, billingContact, token} = event.payment
+                const state = {
+                    data: {
+                        paymentType: 'express',
+                        paymentMethod: {
+                            type: 'applepay',
+                            applePayToken: token.paymentData
+                        },
+                        ...getCustomerBillingDetails(billingContact),
+                        ...getCustomerShippingDetails(shippingContact)
                     }
                 }
-                resolve(finalPriceUpdate)
-                navigate(`/checkout/confirmation/${paymentsResponse?.merchantReference}`)
-            } else {
+                const commerceApiToken = await getTokenWhenReady()
+                const adyenPaymentService = new AdyenPaymentsService(commerceApiToken, site)
+                const paymentsResponse = await adyenPaymentService.submitPayment(
+                    {
+                        ...state.data,
+                        origin: state.data.origin ? state.data.origin : window.location.href
+                    },
+                    basket?.basketId,
+                    basket?.customerInfo?.customerId
+                )
+                if (paymentsResponse?.isFinal && paymentsResponse?.isSuccessful) {
+                    const finalPriceUpdate = {
+                        newTotal: {
+                            type: 'final',
+                            label: applePayConfig.merchantName,
+                            amount: `${applePayAmount}`
+                        }
+                    }
+                    resolve(finalPriceUpdate)
+                    navigate(`/checkout/confirmation/${paymentsResponse?.merchantReference}`)
+                } else {
+                    reject()
+                }
+            } catch (err) {
                 reject()
             }
         },
         onSubmit: () => {},
         onShippingContactSelected: async (resolve, reject, event) => {
-            const {shippingContact} = event
-            const commerceApiToken = await getTokenWhenReady()
-            const adyenShippingMethodsService = new AdyenShippingAddressService(
-                commerceApiToken,
-                site
-            )
-            const customerShippingDetails = getCustomerShippingDetails(shippingContact)
-            const newBasket = await adyenShippingMethodsService.updateShippingAddress(
-                basket.basketId,
-                customerShippingDetails
-            )
-            const newShippingMethods = await fetchShippingMethods()
-            buttonConfig.amount = {
-                value: getCurrencyValueForApi(newBasket.orderTotal, newBasket.currency),
-                currency: newBasket.currency
-            }
-            applePayAmount = newBasket.orderTotal
-            const finalPriceUpdate = {
-                newShippingMethods: newShippingMethods?.applicableShippingMethods?.map((sm) => ({
-                    label: sm.name,
-                    detail: sm.description,
-                    identifier: sm.id,
-                    amount: `${sm.price}`
-                })),
-                newTotal: {
-                    type: 'final',
-                    label: applePayConfig.merchantName,
-                    amount: `${applePayAmount}`
+            try {
+                const {shippingContact} = event
+                const commerceApiToken = await getTokenWhenReady()
+                const adyenShippingAddressService = new AdyenShippingAddressService(
+                    commerceApiToken,
+                    site
+                )
+                const adyenShippingMethodsService = new AdyenShippingMethodsService(
+                    commerceApiToken,
+                    site
+                )
+                const customerShippingDetails = getCustomerShippingDetails(shippingContact)
+                await adyenShippingAddressService.updateShippingAddress(
+                    basket.basketId,
+                    customerShippingDetails
+                )
+                const newShippingMethods = await fetchShippingMethods(
+                    basket?.basketId,
+                    site,
+                    getTokenWhenReady
+                )
+                if (!newShippingMethods?.applicableShippingMethods?.length) {
+                    reject()
+                } else {
+                    const response = await adyenShippingMethodsService.updateShippingMethod(
+                        newShippingMethods.applicableShippingMethods[0].id,
+                        basket.basketId
+                    )
+                    buttonConfig.amount = {
+                        value: getCurrencyValueForApi(response.orderTotal, response.currency),
+                        currency: response.currency
+                    }
+                    applePayAmount = response.orderTotal
+                    const finalPriceUpdate = {
+                        newShippingMethods: newShippingMethods?.applicableShippingMethods?.map(
+                            (sm) => ({
+                                label: sm.name,
+                                detail: sm.description,
+                                identifier: sm.id,
+                                amount: `${sm.price}`
+                            })
+                        ),
+                        newTotal: {
+                            type: 'final',
+                            label: applePayConfig.merchantName,
+                            amount: `${applePayAmount}`
+                        }
+                    }
+                    resolve(finalPriceUpdate)
                 }
+            } catch (err) {
+                reject()
             }
-            resolve(finalPriceUpdate)
         },
         onShippingMethodSelected: async (resolve, reject, event) => {
             try {
@@ -176,7 +202,6 @@ export const getAppleButtonConfig = (
                     resolve(applePayShippingMethodUpdate)
                 }
             } catch (err) {
-                console.error(err)
                 reject()
             }
         }
@@ -222,7 +247,7 @@ const ApplePayExpressComponent = (props) => {
                     applePayButton.mount(paymentContainer.current)
                 }
             } catch (err) {
-                console.log(err)
+                // Error
             }
         }
         if (
