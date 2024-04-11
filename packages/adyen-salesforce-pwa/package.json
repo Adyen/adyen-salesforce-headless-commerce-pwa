@@ -38,7 +38,7 @@
   "dependencies": {
     "@adyen/adyen-web": "^5.56.0",
     "@adyen/api-library": "^16.0.1",
-    "@salesforce/retail-react-app": "2.3.0",
+    "@salesforce/retail-react-app": "2.0.0",
     "dotenv": "^16.3.1",
     "express-validator": "^7.0.1",
     "minimist": "^1.2.8",
