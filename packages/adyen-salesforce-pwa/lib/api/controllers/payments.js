@@ -1,7 +1,6 @@
 import {formatAddressInAdyenFormat} from '../../utils/formatAddress.mjs'
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 import {
-    APPLICATION_VERSION,
     ORDER,
     PAYMENT_METHODS,
     RECURRING_PROCESSING_MODEL,
@@ -16,13 +15,16 @@ import {v4 as uuidv4} from 'uuid'
 import {OrderApiClient} from './orderApi'
 import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrentSite.mjs'
 import {AdyenError} from '../models/AdyenError'
+import {getApplicationInfo} from '../../utils/getApplicationInfo.mjs'
 
 const errorMessages = {
     AMOUNT_NOT_CORRECT: 'amount not correct',
     INVALID_ORDER: 'order is invalid',
     INVALID_PARAMS: 'invalid request params',
     INVALID_BASKET: 'invalid basket',
-    PAYMENT_NOT_SUCCESSFUL: 'payment not successful'
+    PAYMENT_NOT_SUCCESSFUL: 'payment not successful',
+    INVALID_BILLING_ADDRESS: 'invalid billing address',
+    INVALID_SHIPPING_ADDRESS: 'invalid shipping address'
 }
 
 const validateRequestParams = (req) => {
@@ -69,20 +71,6 @@ function getShopperName(order) {
     return {
         firstName,
         lastName
-    }
-}
-
-function getApplicationInfo(systemIntegratorName) {
-    return {
-        merchantApplication: {
-            name: 'adyen-salesforce-commerce-cloud',
-            version: APPLICATION_VERSION
-        },
-        externalPlatform: {
-            name: 'SalesforceCommerceCloud',
-            version: 'PWA',
-            integrator: systemIntegratorName
-        }
     }
 }
 
@@ -178,6 +166,54 @@ async function removeAllPaymentInstrumentsFromBasket(basket, shopperBaskets) {
     return Promise.all(promises)
 }
 
+async function handleExpressPayment(shopperBaskets, data, basketId, customerId) {
+    await shopperBaskets.updateShippingAddressForShipment({
+        body: {
+            address1: data.deliveryAddress.street,
+            city: data.deliveryAddress.city,
+            countryCode: data.deliveryAddress.country,
+            postalCode: data.deliveryAddress.postalCode,
+            stateCode: data.deliveryAddress.stateOrProvince,
+            firstName: data.profile.firstName,
+            fullName: `${data.profile.firstName} ${data.profile.lastName}`,
+            lastName: data.profile.lastName,
+            phone: data.profile.phone
+        },
+        parameters: {
+            basketId,
+            shipmentId: 'me'
+        }
+    })
+
+    await shopperBaskets.updateBillingAddressForBasket({
+        body: {
+            address1: data.billingAddress.street,
+            city: data.billingAddress.city,
+            countryCode: data.billingAddress.country,
+            postalCode: data.billingAddress.postalCode,
+            stateCode: data.billingAddress.stateOrProvince,
+            firstName: data.profile.firstName,
+            fullName: `${data.profile.firstName} ${data.profile.lastName}`,
+            lastName: data.profile.lastName,
+            phone: data.profile.phone
+        },
+        parameters: {
+            basketId,
+            shipmentId: 'me'
+        }
+    })
+
+    await shopperBaskets.updateCustomerForBasket({
+        body: {
+            customerId,
+            email: data.profile.email
+        },
+        parameters: {
+            basketId
+        }
+    })
+}
+
 async function sendPayments(req, res, next) {
     Logger.info('sendPayments', 'start')
     if (!validateRequestParams(req)) {
@@ -224,6 +260,15 @@ async function sendPayments(req, res, next) {
                     basketId: req.headers.basketid
                 }
             })
+        }
+
+        if (data.paymentType === 'express') {
+            await handleExpressPayment(
+                shopperBaskets,
+                data,
+                req.headers.basketid,
+                req.headers.customerid
+            )
         }
 
         const shopperOrders = new ShopperOrders({

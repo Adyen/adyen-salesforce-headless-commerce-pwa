@@ -37,10 +37,9 @@ import CartItemVariantPrice from '@salesforce/retail-react-app/app/components/it
 import {useCurrentCustomer} from '@salesforce/retail-react-app/app/hooks/use-current-customer'
 import {API_ERROR_MESSAGE} from '@salesforce/retail-react-app/app/constants'
 import PropTypes from 'prop-types'
-import AdyenCheckout from '@adyen/adyen-salesforce-pwa/lib/components/adyenCheckout'
-import {AdyenCheckoutProvider} from '@adyen/adyen-salesforce-pwa/lib/context/adyen-checkout-context'
 
 /* -----------------Adyen Begin ------------------------ */
+import {AdyenCheckout, AdyenCheckoutProvider} from '@adyen/adyen-salesforce-pwa'
 import {
     AuthHelpers,
     useAccessToken,
