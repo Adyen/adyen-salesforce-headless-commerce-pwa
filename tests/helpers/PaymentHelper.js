@@ -41,6 +41,14 @@ export class PaymentHelper {
         await this.payButton.click()
     }
 
+    waitForKlarnaLoad = async () => {
+        await this.page.waitForNavigation({
+            url: /.*playground.klarna/,
+            timeout: 20000,
+            waitUntil: 'load',
+        });
+    };
+
     async fillInput(inputField, value) {
         await inputField.click()
         await inputField.type(value, {delay: 50})

@@ -95,7 +95,7 @@ export const getAppleButtonConfig = (
                 const paymentsResponse = await adyenPaymentService.submitPayment(
                     {
                         ...state.data,
-                        origin: state.data.origin ? state.data.origin : window.location.href
+                        origin: state.data.origin ? state.data.origin : window.location.origin
                     },
                     basket?.basketId,
                     basket?.customerInfo?.customerId
