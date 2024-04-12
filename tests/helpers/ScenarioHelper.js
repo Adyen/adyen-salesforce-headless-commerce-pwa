@@ -103,6 +103,7 @@ export class ScenarioHelper {
     }
 
     async proceedToShippingMethodsAsLoggedInUser() {
+        if (this.continueToShippingMethodButtonLoggedInUser.isVisible())
         await this.continueToShippingMethodButtonLoggedInUser.click()
     }
 
@@ -142,7 +143,9 @@ export class ScenarioHelper {
     }
 
     async chooseShippingMethod() {
-        await this.standardShippingRadioButton.click()
+        if (this.standardShippingRadioButton.isVisible()) {
+            await this.standardShippingRadioButton.click()
+        }
     }
 
     async proceedToPayment() {
