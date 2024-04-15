@@ -72,11 +72,13 @@ export class PaymentHelper {
         this.loginButton = popup.locator('#btnLogin');
         this.agreeAndPayNowButton = popup.locator('#payment-submit-btn');
 
-        const paymentData = new PaymentData();
+        const payPalData = new PaymentData().PayPal;
         await this.emailInput.click();
-        await this.emailInput.fill(paymentData.PayPal.username);
+        await this.emailInput.fill(payPalData.username);
+        console.log(payPalData.username);
         await this.nextButton.click();
-        await this.passwordInput.fill(paymentData.PayPal.password);
+        await this.passwordInput.fill(payPalData.password);
+        console.log(payPalData.password);
         await this.loginButton.click();
         await this.agreeAndPayNowButton.click();
     };
