@@ -60,6 +60,8 @@ jobs:
                 COMMERCE_API_CLIENT_ID_PRIVATE: ${{ secrets.COMMERCE_API_CLIENT_ID_PRIVATE }}
                 COMMERCE_API_CLIENT_SECRET: ${{ secrets.COMMERCE_API_CLIENT_SECRET }}
                 NODE_ENV: ${{ secrets.NODE_ENV }}
+                E2E_PAYPAL_USERNAME: ${{secrets.E2E_PAYPAL_USERNAME}}
+                E2E_PAYPAL_PASSWORD: ${{secrets.E2E_PAYPAL_PASSWORD}}
             - uses: actions/upload-artifact@v3
               if: always()
               with:
