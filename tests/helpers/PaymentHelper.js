@@ -1,4 +1,4 @@
-import { PaymentData } from "../data/paymentData";
+import { PaymentData } from "../data/paymentData.js";
 
 export class PaymentHelper {
     constructor(page) {
