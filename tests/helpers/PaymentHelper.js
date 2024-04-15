@@ -1,3 +1,5 @@
+import { PaymentData } from "../data/paymentData";
+
 export class PaymentHelper {
     constructor(page) {
         this.page = page
@@ -47,6 +49,36 @@ export class PaymentHelper {
             timeout: 20000,
             waitUntil: 'load',
         });
+    };
+
+    initiatePayPalPayment = async () => {
+        const payPalButton = this.page
+          .frameLocator('.adyen-checkout__paypal__button--paypal iframe.visible')
+          .locator('.paypal-button');
+
+        const [popup] = await Promise.all([
+            this.page.waitForEvent('popup'),
+            payPalButton.click(),
+        ]);
+
+        await popup.waitForNavigation({
+            url: /.*sandbox.paypal.com*/,
+            timeout: 20000,
+        });
+
+        this.emailInput = popup.locator('#email');
+        this.nextButton = popup.locator('#btnNext');
+        this.passwordInput = popup.locator('#password');
+        this.loginButton = popup.locator('#btnLogin');
+        this.agreeAndPayNowButton = popup.locator('#payment-submit-btn');
+
+        const paymentData = new PaymentData();
+        await this.emailInput.click();
+        await this.emailInput.fill(paymentData.PayPal.username);
+        await this.nextButton.click();
+        await this.passwordInput.fill(paymentData.PayPal.password);
+        await this.loginButton.click();
+        await this.agreeAndPayNowButton.click();
     };
 
     async fillInput(inputField, value) {

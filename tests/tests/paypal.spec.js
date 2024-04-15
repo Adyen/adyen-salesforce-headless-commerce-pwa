@@ -12,12 +12,12 @@ test.describe('Payments through PWA UI', () => {
     await scenarios.setupCart()
   })
 
-  test('Klarna should redirect', async ({page}) => {
+  test('Making a Paypal payment', async ({page}) => {
     const scenarios = new ScenarioHelper(page)
     await scenarios.arrangeShippingAndProceedToPayment(user_US)
     const paymentPage = new PaymentHelper(page)
-    await paymentPage.selectPaymentType('Pay over time with Klarna.')
-    await paymentPage.clickPay()
-    await paymentPage.waitForKlarnaLoad()
+    await paymentPage.selectPaymentType('PayPal')
+    await paymentPage.initiatePayPalPayment()
+    await scenarios.verifySuccessfulOrder()
   })
 })
