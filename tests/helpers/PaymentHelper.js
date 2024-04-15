@@ -75,10 +75,8 @@ export class PaymentHelper {
         const payPalData = new PaymentData().PayPal;
         await this.emailInput.click();
         await this.emailInput.fill(payPalData.username);
-        console.log(payPalData.username);
         await this.nextButton.click();
         await this.passwordInput.fill(payPalData.password);
-        console.log(payPalData.password);
         await this.loginButton.click();
         await this.agreeAndPayNowButton.click();
     };
