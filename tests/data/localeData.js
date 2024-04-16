@@ -4,6 +4,12 @@ export class LocaleData {
         landingPage: {
             heading: 'The React PWA Starter Store for Retail'
         },
+        loginPage: {
+            paragraph: 'Welcome Back'
+        },
+        accountPage: {
+            heading: 'Account Details'
+        },
         productDetailPage: {
             productColor: 'Zinc Heather',
             addToCartButtonCaption: 'Add to Cart',
@@ -17,7 +23,7 @@ export class LocaleData {
             heading: 'React PWA Starter Store pour le retail'
         },
         productDetailPage: {
-            productColor: 'Gris',
+            productColor: 'Sucre',
             addToCartButtonCaption: 'Ajouter au panier',
             proceedToCheckoutButtonCaption: 'Passer au checkout'
         },

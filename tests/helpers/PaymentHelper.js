@@ -1,3 +1,5 @@
+import { PaymentData } from "../data/paymentData.js";
+
 export class PaymentHelper {
     constructor(page) {
         this.page = page
@@ -41,6 +43,44 @@ export class PaymentHelper {
         await this.payButton.click()
     }
 
+    waitForKlarnaLoad = async () => {
+        await this.page.waitForNavigation({
+            url: /.*playground.klarna/,
+            timeout: 20000,
+            waitUntil: 'load',
+        });
+    };
+
+    initiatePayPalPayment = async () => {
+        const payPalButton = this.page
+          .frameLocator('.adyen-checkout__paypal__button--paypal iframe.visible')
+          .locator('.paypal-button');
+
+        const [popup] = await Promise.all([
+            this.page.waitForEvent('popup'),
+            payPalButton.click(),
+        ]);
+
+        await popup.waitForNavigation({
+            url: /.*sandbox.paypal.com*/,
+            timeout: 20000,
+        });
+
+        this.emailInput = popup.locator('#email');
+        this.nextButton = popup.locator('#btnNext');
+        this.passwordInput = popup.locator('#password');
+        this.loginButton = popup.locator('#btnLogin');
+        this.agreeAndPayNowButton = popup.locator('#payment-submit-btn');
+
+        const payPalData = new PaymentData().PayPal;
+        await this.emailInput.click();
+        await this.emailInput.fill(payPalData.username);
+        await this.nextButton.click();
+        await this.passwordInput.fill(payPalData.password);
+        await this.loginButton.click();
+        await this.agreeAndPayNowButton.click();
+    };
+
     async fillInput(inputField, value) {
         await inputField.click()
         await inputField.type(value, {delay: 50})
@@ -57,6 +97,10 @@ export class PaymentHelper {
             this.holderNameInput,
             cardHolderName.firstName + ' ' + cardHolderName.lastName
         )
+    }
+
+    async fillCVCInfo(cardCVC) {
+        await this.fillInput(this.cvcInput, cardCVC)
     }
 
     // 3Ds2
