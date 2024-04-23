@@ -65,7 +65,8 @@ const AdyenCheckoutComponent = (props) => {
         getTranslations,
         locale,
         adyenPaymentInProgress,
-        setAdyenPaymentInProgress
+        setAdyenPaymentInProgress,
+        navigate
     } = useAdyenCheckout()
     const paymentContainer = useRef(null)
 
@@ -100,7 +101,8 @@ const AdyenCheckoutComponent = (props) => {
                     if (state.isValid) {
                         setAdyenStateData(state.data)
                     }
-                }
+                },
+                onError: () => navigate('/checkout/error')
             })
 
             handleQueryParams(urlParams, checkout, setAdyenPaymentInProgress, paymentContainer)

@@ -115,6 +115,7 @@ const AdyenCheckoutProvider = ({
         adyenStateData,
         adyenPaymentInProgress,
         locale,
+        navigate,
         setAdyenPaymentInProgress: (data) => setAdyenPaymentInProgress(data),
         setAdyenStateData: (data) => setAdyenStateData(data),
         getPaymentMethodsConfiguration,
