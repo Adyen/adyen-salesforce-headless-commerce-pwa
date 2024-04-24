@@ -119,7 +119,7 @@ describe('payment methods controller', () => {
             ],
             applicationInfo: {
                 externalPlatform: {integrator: '', name: 'SalesforceCommerceCloud', version: 'PWA'},
-                merchantApplication: {name: 'adyen-salesforce-commerce-cloud', version: '1.1.0'}
+                merchantApplication: {name: 'adyen-salesforce-commerce-cloud', version: '1.2.0'}
             }
         })
         expect(consoleInfoSpy).toHaveBeenCalledTimes(2)
@@ -177,7 +177,7 @@ describe('payment methods controller', () => {
             ],
             applicationInfo: {
                 externalPlatform: {integrator: '', name: 'SalesforceCommerceCloud', version: 'PWA'},
-                merchantApplication: {name: 'adyen-salesforce-commerce-cloud', version: '1.1.0'}
+                merchantApplication: {name: 'adyen-salesforce-commerce-cloud', version: '1.2.0'}
             }
         })
         expect(consoleInfoSpy).toHaveBeenCalledTimes(2)

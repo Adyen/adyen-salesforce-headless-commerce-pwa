@@ -9,7 +9,7 @@
     "payments",
     "components"
   ],
-  "version": "1.1.0",
+  "version": "1.2.0",
   "main": "dist/app/index.js",
   "bin": {
     "include-env": "dist/scripts/include-env.js",
