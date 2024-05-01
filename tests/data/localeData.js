@@ -2,7 +2,7 @@ export class LocaleData {
     EN = {
         lang: 'en-US',
         landingPage: {
-            heading: 'The React PWA Starter Store for Retail'
+            heading: 'Adyen Integration in React PWA Starter Store'
         },
         loginPage: {
             paragraph: 'Welcome Back'
