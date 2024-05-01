@@ -116,7 +116,11 @@ describe('payment methods controller', () => {
                     name: 'Adyen Voucher',
                     type: 'adyen_test_voucher'
                 }
-            ]
+            ],
+            applicationInfo: {
+                externalPlatform: {integrator: '', name: 'SalesforceCommerceCloud', version: 'PWA'},
+                merchantApplication: {name: 'adyen-salesforce-commerce-cloud', version: '1.2.0'}
+            }
         })
         expect(consoleInfoSpy).toHaveBeenCalledTimes(2)
         expect(consoleInfoSpy.mock.calls[0][0]).toContain('getPaymentMethods start')
@@ -170,7 +174,11 @@ describe('payment methods controller', () => {
                     name: 'Adyen Voucher',
                     type: 'adyen_test_voucher'
                 }
-            ]
+            ],
+            applicationInfo: {
+                externalPlatform: {integrator: '', name: 'SalesforceCommerceCloud', version: 'PWA'},
+                merchantApplication: {name: 'adyen-salesforce-commerce-cloud', version: '1.2.0'}
+            }
         })
         expect(consoleInfoSpy).toHaveBeenCalledTimes(2)
         expect(consoleInfoSpy.mock.calls[0][0]).toContain('getPaymentMethods start')

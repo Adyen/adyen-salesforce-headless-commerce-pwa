@@ -19,7 +19,7 @@ export class ScenarioHelper {
         this.productColorRadioButton = this.page.getByLabel(
             `${locale.productDetailPage.productColor}`
         )
-        this.productSizeRadioButton = this.page.getByLabel('28')
+        this.productSizeRadioButton = this.page.getByLabel('10')
         this.addToCartButton = this.page.getByRole('button', {
             name: `${locale.productDetailPage.addToCartButtonCaption}`
         })
@@ -32,9 +32,23 @@ export class ScenarioHelper {
         this.emailField = this.contactInfoSection.locator('#email')
         this.checkoutAsGuestButton = this.contactInfoSection.locator("[type='submit']")
 
+        // Login Page Locators
+        this.loginSection = this.page.locator(
+          "[data-testid='login-page']"
+        )
+        this.loginEmail = this.page.locator("input#email")
+        this.loginPassword = this.page.locator("input#password")
+        this.loginButton = this.loginSection.locator("[type='submit']")
+
+        // Account Page Locators
+        this.accountPageHeading = this.page.getByRole('heading', {
+            name: `${this.locale.accountPage.heading}`
+        })
+
         this.shippingAddressSection = this.page.locator(
             "[data-testid='sf-shipping-address-edit-form']"
         )
+        this.shippingAddressSectionLoggedInUser = this.page.locator("[data-testid='sf-checkout-container']")
         this.firstNameField = this.shippingAddressSection.locator('#firstName')
         this.lastNameField = this.shippingAddressSection.locator('#lastName')
         this.phoneNumberField = this.shippingAddressSection.locator('#phone')
@@ -44,6 +58,7 @@ export class ScenarioHelper {
         this.stateDropdown = this.shippingAddressSection.locator('#stateCode')
         this.zipCodeField = this.shippingAddressSection.locator('#postalCode')
         this.continueToShippingMethodButton = this.shippingAddressSection.locator("[type='submit']")
+        this.continueToShippingMethodButtonLoggedInUser = this.shippingAddressSectionLoggedInUser.locator("[type='submit']")
 
         this.shippingMethodSection = this.page.locator(
             "[data-testid='sf-toggle-card-step-2-content']"
@@ -60,6 +75,13 @@ export class ScenarioHelper {
         await this.heading.waitFor({state: 'visible', timeout: 30000})
     }
 
+    async login(user) {
+        await this.page.goto(`/RefArch/${this.locale.lang}/login`)
+        await this.fillShopperDetails(user)
+        await this.submitLoginDetails()
+        await this.accountPageHeading.waitFor({state: 'visible', timeout: 30000})
+    }
+
     async setupCart() {
         await this.carouselProduct.click()
         await this.productColorRadioButton.click()
@@ -72,6 +94,17 @@ export class ScenarioHelper {
         await this.fillShippingDetails(user)
         await this.chooseShippingMethod()
         await this.proceedToPayment()
+    }
+
+    async arrangeShippingAndProceedToPaymentForLoggedInUser() {
+        await this.proceedToShippingMethodsAsLoggedInUser()
+        await this.chooseShippingMethod()
+        await this.proceedToPayment()
+    }
+
+    async proceedToShippingMethodsAsLoggedInUser() {
+        if (this.continueToShippingMethodButtonLoggedInUser.isVisible())
+        await this.continueToShippingMethodButtonLoggedInUser.click()
     }
 
     async fillShippingDetails(user) {
@@ -100,8 +133,19 @@ export class ScenarioHelper {
         await this.continueToShippingMethodButton.click()
     }
 
+    async fillShopperDetails(user) {
+        await this.loginEmail.fill(user.shopperEmail)
+        await this.loginPassword.fill(user.password)
+    }
+
+    async submitLoginDetails() {
+        await this.loginButton.click()
+    }
+
     async chooseShippingMethod() {
-        await this.standardShippingRadioButton.click()
+        if (this.standardShippingRadioButton.isVisible()) {
+            await this.standardShippingRadioButton.click()
+        }
     }
 
     async proceedToPayment() {

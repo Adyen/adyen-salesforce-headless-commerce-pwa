@@ -7,9 +7,9 @@ import {paymentMethodsConfiguration} from '../components/paymentMethodsConfigura
 import {AdyenEnvironmentService} from '../services/environment'
 import {onPaymentsDetailsSuccess, onPaymentsSuccess} from './helper'
 
-const AdyenCheckoutContext = React.createContext({})
+export const AdyenCheckoutContext = React.createContext({})
 
-export const AdyenCheckoutProvider = ({
+const AdyenCheckoutProvider = ({
     children,
     useAccessToken,
     useCustomerId,
@@ -115,6 +115,7 @@ export const AdyenCheckoutProvider = ({
         adyenStateData,
         adyenPaymentInProgress,
         locale,
+        navigate,
         setAdyenPaymentInProgress: (data) => setAdyenPaymentInProgress(data),
         setAdyenStateData: (data) => setAdyenStateData(data),
         getPaymentMethodsConfiguration,
@@ -133,10 +134,4 @@ AdyenCheckoutProvider.propTypes = {
     adyenConfig: PropTypes.any
 }
 
-/**
- * A hook for managing checkout state and actions
- * @returns {Object} Checkout data and actions
- */
-export const useAdyenCheckout = () => {
-    return React.useContext(AdyenCheckoutContext)
-}
+export default AdyenCheckoutProvider
