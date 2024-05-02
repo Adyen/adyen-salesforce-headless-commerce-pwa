@@ -1552,7 +1552,7 @@
   "home.title.react_starter_store": [
     {
       "type": 0,
-      "value": "リテール用 React PWA スターターストア"
+      "value": "React PWA スターター ストアへの Adyen の統合"
     }
   ],
   "item_attributes.label.promotions": [
