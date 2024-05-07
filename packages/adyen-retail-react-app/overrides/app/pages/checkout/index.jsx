@@ -88,6 +88,9 @@ const Checkout = ({useShopperBasketsMutation}) => {
 
 const checkoutCustomizations = {
     paymentMethodsConfiguration: {
+        klarna: {
+            useKlarnaWidget: false
+        },
         klarna_account: {
             useKlarnaWidget: false
         }
