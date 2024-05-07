@@ -24,7 +24,7 @@ import {
 } from '@salesforce/retail-react-app/app/components/shared/ui'
 
 // Project Components
-import Hero from '@salesforce/retail-react-app/app/components/hero'
+import Hero from '../../components/hero'
 import Seo from '@salesforce/retail-react-app/app/components/seo'
 import Section from '@salesforce/retail-react-app/app/components/section'
 import ProductScroller from '@salesforce/retail-react-app/app/components/product-scroller'
@@ -85,14 +85,14 @@ const Home = () => {
                     id: 'home.title.react_starter_store'
                 })}
                 img={{
-                    src: getAssetUrl('static/img/hero.png'),
+                    src: getAssetUrl('static/img/sample_checkout_plugins.png'),
                     alt: 'npx pwa-kit-create-app'
                 }}
                 actions={
                     <Stack spacing={{base: 4, sm: 6}} direction={{base: 'column', sm: 'row'}}>
                         <Button
                             as={Link}
-                            href="https://developer.salesforce.com/docs/commerce/pwa-kit-managed-runtime/guide/getting-started.html"
+                            href="https://docs.adyen.com/plugins/salesforce-commerce-cloud/composable-storefront/"
                             target="_blank"
                             width={{base: 'full', md: 'inherit'}}
                             paddingX={7}
