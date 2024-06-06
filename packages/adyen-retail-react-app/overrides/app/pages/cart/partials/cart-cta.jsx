@@ -17,13 +17,16 @@ import {
 import Link from '@salesforce/retail-react-app/app/components/link'
 /* -----------------Adyen Begin ------------------------ */
 import '@adyen/adyen-salesforce-pwa/dist/app/adyen.css'
-import {useAccessToken, useCustomerId, useCustomerType} from '@salesforce/commerce-sdk-react'
+import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 import {AdyenExpressCheckoutProvider, ApplePayExpress} from '@adyen/adyen-salesforce-pwa'
 import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
 import PropTypes from 'prop-types'
+import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
+import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 /* -----------------Adyen End ------------------------ */
 
 const CartCta = () => {
+    const customerId = useCustomerId()
     return (
         <Fragment>
             <Button
@@ -42,10 +45,11 @@ const CartCta = () => {
             </Button>
             <Flex justify={'center'}>
                 <AdyenExpressCheckoutProvider
+                    customerId={customerId}
                     useAccessToken={useAccessToken}
-                    useCustomerId={useCustomerId}
-                    useCustomerType={useCustomerType}
                     useMultiSite={useMultiSite}
+                    useNavigation={useNavigation}
+                    useBasket={useCurrentBasket}
                 >
                     <ApplePayExpress />
                 </AdyenExpressCheckoutProvider>
