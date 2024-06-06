@@ -51,7 +51,7 @@ export const getCustomerBillingDetails = (billingContact) => {
 }
 
 export const getAppleButtonConfig = (
-    getTokenWhenReady,
+    authToken,
     site,
     basket,
     shippingMethods,
@@ -90,8 +90,7 @@ export const getAppleButtonConfig = (
                         ...getCustomerShippingDetails(shippingContact)
                     }
                 }
-                const commerceApiToken = await getTokenWhenReady()
-                const adyenPaymentService = new AdyenPaymentsService(commerceApiToken, site)
+                const adyenPaymentService = new AdyenPaymentsService(authToken, site)
                 const paymentsResponse = await adyenPaymentService.submitPayment(
                     {
                         ...state.data,
@@ -121,15 +120,8 @@ export const getAppleButtonConfig = (
         onShippingContactSelected: async (resolve, reject, event) => {
             try {
                 const {shippingContact} = event
-                const commerceApiToken = await getTokenWhenReady()
-                const adyenShippingAddressService = new AdyenShippingAddressService(
-                    commerceApiToken,
-                    site
-                )
-                const adyenShippingMethodsService = new AdyenShippingMethodsService(
-                    commerceApiToken,
-                    site
-                )
+                const adyenShippingAddressService = new AdyenShippingAddressService(authToken, site)
+                const adyenShippingMethodsService = new AdyenShippingMethodsService(authToken, site)
                 const customerShippingDetails = getCustomerShippingDetails(shippingContact)
                 await adyenShippingAddressService.updateShippingAddress(
                     basket.basketId,
@@ -138,7 +130,7 @@ export const getAppleButtonConfig = (
                 const newShippingMethods = await fetchShippingMethods(
                     basket?.basketId,
                     site,
-                    getTokenWhenReady
+                    authToken
                 )
                 if (!newShippingMethods?.applicableShippingMethods?.length) {
                     reject()
@@ -176,11 +168,7 @@ export const getAppleButtonConfig = (
         onShippingMethodSelected: async (resolve, reject, event) => {
             try {
                 const {shippingMethod} = event
-                const commerceApiToken = await getTokenWhenReady()
-                const adyenShippingMethodsService = new AdyenShippingMethodsService(
-                    commerceApiToken,
-                    site
-                )
+                const adyenShippingMethodsService = new AdyenShippingMethodsService(authToken, site)
                 const response = await adyenShippingMethodsService.updateShippingMethod(
                     shippingMethod.identifier,
                     basket.basketId
@@ -217,7 +205,7 @@ const ApplePayExpressComponent = (props) => {
         basket,
         locale,
         site,
-        getTokenWhenReady,
+        authToken,
         navigate,
         shippingMethods,
         fetchShippingMethods
@@ -239,7 +227,7 @@ const ApplePayExpressComponent = (props) => {
                 })
                 const applePaymentMethodConfig = getApplePaymentMethodConfig(adyenPaymentMethods)
                 const appleButtonConfig = getAppleButtonConfig(
-                    getTokenWhenReady,
+                    authToken,
                     site,
                     basket,
                     shippingMethods?.applicableShippingMethods,
