@@ -55,39 +55,18 @@ jest.mock('../../services/environment', () => ({
 }))
 
 describe('<AdyenCheckoutProvider />', () => {
-    let useAccessToken,
-        useCustomerId,
-        useCustomerType,
-        useMultiSite,
-        locationSpy,
-        setAdyenPaymentInProgress
+    let authToken, customerId, customerType, locale, site, locationSpy, setAdyenPaymentInProgress
     beforeEach(() => {
-        useAccessToken = jest.fn().mockImplementation(() => {
-            return {
-                getTokenWhenReady: jest.fn().mockImplementation(() => {
-                    return 'mockToken'
-                })
-            }
-        })
-        useCustomerId = jest.fn().mockImplementation(() => {
-            return 'mockCustomerId'
-        })
-        useCustomerType = jest.fn().mockImplementation(() => {
-            return 'mockCustomerType'
-        })
-        useMultiSite = jest.fn().mockImplementation(() => {
-            return {
-                site: {
-                    id: 'RefArch'
-                },
-                locale: {
-                    id: 'en-US'
-                }
-            }
-        })
+        authToken = 'testToken'
+        customerId = 'customer123'
+        customerType = 'guest'
+        locale = 'en-US'
+        site = 'RefArch'
+
         setAdyenPaymentInProgress = jest.fn().mockImplementation(() => {
             return 'success'
         })
+
         mockFetchEnvironment.mockImplementationOnce(() => ({
             ADYEN_ENVIRONMENT: 'test',
             ADYEN_CLIENT_KEY: 'testKey'
@@ -135,20 +114,17 @@ describe('<AdyenCheckoutProvider />', () => {
         it('render correct payment methods', async () => {
             const wrapper = ({children}) => (
                 <AdyenCheckoutProvider
-                    useAccessToken={useAccessToken}
-                    useCustomerId={useCustomerId}
-                    useCustomerType={useCustomerType}
-                    useMultiSite={useMultiSite}
+                    authToken={authToken}
+                    customerId={customerId}
+                    customerType={customerType}
+                    locale={locale}
+                    site={site}
                 >
                     {children}
                 </AdyenCheckoutProvider>
             )
             render(<AdyenCheckout />, {wrapper})
             expect(await screen.findByText('Cards')).toBeInTheDocument()
-
-            expect(useAccessToken).toHaveBeenCalled()
-            expect(useCustomerId).toHaveBeenCalled()
-            expect(useCustomerType).toHaveBeenCalled()
             expect(mockFetchEnvironment).toHaveBeenCalled()
         })
     })

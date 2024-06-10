@@ -34,7 +34,7 @@ import {SkipNavLink, SkipNavContent} from '@chakra-ui/skip-nav'
 import {CurrencyProvider} from '@salesforce/retail-react-app/app/contexts'
 
 // Local Project Components
-import Header from '@salesforce/retail-react-app/app/components/header'
+import Header from '../header'
 import OfflineBanner from '@salesforce/retail-react-app/app/components/offline-banner'
 import OfflineBoundary from '@salesforce/retail-react-app/app/components/offline-boundary'
 import ScrollToTop from '@salesforce/retail-react-app/app/components/scroll-to-top'

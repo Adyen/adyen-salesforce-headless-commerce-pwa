@@ -29,10 +29,10 @@ const errorMessages = {
 
 const validateRequestParams = (req) => {
     return !(
-        !req.body.data ||
-        !req.headers.authorization ||
-        !req.headers.basketid ||
-        !req.headers.customerid
+        !req.body?.data ||
+        !req.headers?.authorization ||
+        !req.headers?.basketid ||
+        !req.headers?.customerid
     )
 }
 

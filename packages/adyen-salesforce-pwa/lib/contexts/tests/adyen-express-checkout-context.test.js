@@ -70,27 +70,16 @@ const shippingMethodsResponse = [
 ]
 
 describe('fetchPaymentMethods function', () => {
-    let mockGetTokenWhenReady
-
-    beforeEach(() => {
-        mockGetTokenWhenReady = jest.fn().mockResolvedValue('mockToken')
-    })
-
     it('returns payment methods when fetch is successful', async () => {
         mockFetchPaymentMethods.mockImplementationOnce(() => paymentMethodsResponse)
         const customerId = 'mockCustomerId'
         const site = 'mockSite'
         const locale = 'en-US'
+        const authToken = 'authToken'
 
-        const paymentMethods = await fetchPaymentMethods(
-            customerId,
-            site,
-            locale,
-            mockGetTokenWhenReady
-        )
+        const paymentMethods = await fetchPaymentMethods(customerId, site, locale, authToken)
 
         expect(paymentMethods).toEqual(paymentMethodsResponse)
-        expect(mockGetTokenWhenReady).toHaveBeenCalledTimes(1)
     })
 
     it('returns null when fetch fails', async () => {
@@ -98,70 +87,53 @@ describe('fetchPaymentMethods function', () => {
         const customerId = 'mockCustomerId'
         const site = 'mockSite'
         const locale = 'en-US'
+        const authToken = 'authToken'
 
-        const paymentMethods = await fetchPaymentMethods(
-            customerId,
-            site,
-            locale,
-            mockGetTokenWhenReady
-        )
+        const paymentMethods = await fetchPaymentMethods(customerId, site, locale, authToken)
 
         expect(paymentMethods).toBeNull()
-        expect(mockGetTokenWhenReady).toHaveBeenCalledTimes(1)
     })
 })
 
 describe('fetchEnvironment function', () => {
-    let mockGetTokenWhenReady
-
-    beforeEach(() => {
-        mockGetTokenWhenReady = jest.fn().mockResolvedValue('mockToken')
-    })
-
     it('returns environment when fetch is successful', async () => {
         mockFetchEnvironment.mockImplementationOnce(() => ({
             ADYEN_ENVIRONMENT: 'test',
             ADYEN_CLIENT_KEY: 'testKey'
         }))
         const site = 'mockSite'
+        const authToken = 'testToken'
 
-        const environment = await fetchEnvironment(site, mockGetTokenWhenReady)
+        const environment = await fetchEnvironment(site, authToken)
 
         expect(environment).toEqual({
             ADYEN_ENVIRONMENT: 'test',
             ADYEN_CLIENT_KEY: 'testKey'
         })
-        expect(mockGetTokenWhenReady).toHaveBeenCalledTimes(1)
     })
 
     it('returns null when fetch fails', async () => {
         mockFetchEnvironment.mockRejectedValue(() => new Error('Failed to fetch environment'))
         const site = 'mockSite'
+        const authToken = 'testToken'
 
-        const environmentData = await fetchEnvironment(site, mockGetTokenWhenReady)
+        const environmentData = await fetchEnvironment(site, authToken)
 
         expect(environmentData).toBeNull()
-        expect(mockGetTokenWhenReady).toHaveBeenCalledTimes(1)
     })
 })
 
 describe('fetchShippingMethods function', () => {
-    let mockGetTokenWhenReady
-
-    beforeEach(() => {
-        mockGetTokenWhenReady = jest.fn().mockResolvedValue('mockToken')
-    })
-
     it('returns shipping methods when fetch is successful', async () => {
         mockFetchShippingMethods.mockImplementationOnce(() => shippingMethodsResponse)
 
         const basketId = 'basket-id'
         const site = 'mockSite'
+        const authToken = 'testToken'
 
-        const shippingMethods = await fetchShippingMethods(basketId, site, mockGetTokenWhenReady)
+        const shippingMethods = await fetchShippingMethods(basketId, site, authToken)
 
         expect(shippingMethods).toEqual(shippingMethodsResponse)
-        expect(mockGetTokenWhenReady).toHaveBeenCalledTimes(1)
     })
 
     it('returns null when fetch fails', async () => {
@@ -170,10 +142,10 @@ describe('fetchShippingMethods function', () => {
         )
         const basketId = 'basket-id'
         const site = 'mockSite'
+        const authToken = 'testToken'
 
-        const shippingMethods = await fetchShippingMethods(basketId, site, mockGetTokenWhenReady)
+        const shippingMethods = await fetchShippingMethods(basketId, site, authToken)
 
         expect(shippingMethods).toBeNull()
-        expect(mockGetTokenWhenReady).toHaveBeenCalledTimes(1)
     })
 })
