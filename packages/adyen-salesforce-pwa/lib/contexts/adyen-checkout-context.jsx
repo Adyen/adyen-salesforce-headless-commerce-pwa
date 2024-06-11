@@ -16,7 +16,8 @@ const AdyenCheckoutProvider = ({
     site,
     adyenConfig,
     navigate,
-    basket
+    basket,
+    returnUrl
 }) => {
     const [fetchingPaymentMethods, setFetchingPaymentMethods] = useState(false)
     const [adyenPaymentMethods, setAdyenPaymentMethods] = useState()
@@ -78,7 +79,8 @@ const AdyenCheckoutProvider = ({
             isCustomerRegistered,
             token: authToken,
             site,
-            basket: basket,
+            basket,
+            returnUrl,
             customerId,
             onError: adyenConfig?.onError || onError,
             onNavigate: navigate,
