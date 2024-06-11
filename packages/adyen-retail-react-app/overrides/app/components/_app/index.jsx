@@ -56,7 +56,6 @@ import {IntlProvider} from 'react-intl'
 // Others
 import {
     watchOnlineStatus,
-    flatten,
     mergeMatchedItems,
     isServer
 } from '@salesforce/retail-react-app/app/utils/utils'
@@ -110,7 +109,6 @@ const useLazyLoadCategories = () => {
 
 const App = (props) => {
     const {children} = props
-    const {data: categoriesTree} = useLazyLoadCategories()
     const {getTokenWhenReady} = useAccessToken()
     const appOrigin = getAppOrigin()
     const activeData = useActiveData()
