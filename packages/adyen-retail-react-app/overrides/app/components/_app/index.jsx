@@ -111,7 +111,6 @@ const useLazyLoadCategories = () => {
 const App = (props) => {
     const {children} = props
     const {data: categoriesTree} = useLazyLoadCategories()
-    const categories = flatten(categoriesTree || {}, 'categories')
     const {getTokenWhenReady} = useAccessToken()
     const appOrigin = getAppOrigin()
     const activeData = useActiveData()
@@ -124,7 +123,7 @@ const App = (props) => {
     const [isOnline, setIsOnline] = useState(true)
     const styles = useStyleConfig('App')
 
-    const {isOpen, onOpen, onClose} = useDisclosure()
+    const {onOpen, onClose} = useDisclosure()
 
     const targetLocale = getTargetLocale({
         getUserPreferredLocales: () => {
