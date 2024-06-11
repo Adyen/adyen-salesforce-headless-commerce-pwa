@@ -16,7 +16,6 @@ import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 import {useQuery, useQueries} from '@tanstack/react-query'
 import {
     useAccessToken,
-    useCategory,
     useCommerceApi,
     useCustomerBaskets,
     useShopperBasketsMutation
@@ -54,58 +53,18 @@ import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-curre
 import {IntlProvider} from 'react-intl'
 
 // Others
-import {
-    watchOnlineStatus,
-    mergeMatchedItems,
-    isServer
-} from '@salesforce/retail-react-app/app/utils/utils'
+import {watchOnlineStatus, isServer} from '@salesforce/retail-react-app/app/utils/utils'
 import {getTargetLocale, fetchTranslations} from '@salesforce/retail-react-app/app/utils/locale'
 import {
     DEFAULT_SITE_TITLE,
     HOME_HREF,
     THEME_COLOR,
-    CAT_MENU_DEFAULT_NAV_SSR_DEPTH,
-    CAT_MENU_DEFAULT_ROOT_CATEGORY,
     DEFAULT_LOCALE,
     ACTIVE_DATA_ENABLED
 } from '@salesforce/retail-react-app/app/constants'
 
 import Seo from '@salesforce/retail-react-app/app/components/seo'
 import {Helmet} from 'react-helmet'
-
-const onClient = typeof window !== 'undefined'
-
-/*
-The categories tree can be really large! For performance reasons,
-we only load the level 0 categories on server side, and load the rest
-on client side to reduce SSR page size.
-*/
-const useLazyLoadCategories = () => {
-    const itemsKey = 'categories'
-
-    const levelZeroCategoriesQuery = useCategory({
-        parameters: {id: CAT_MENU_DEFAULT_ROOT_CATEGORY, levels: CAT_MENU_DEFAULT_NAV_SSR_DEPTH}
-    })
-
-    const ids = levelZeroCategoriesQuery.data?.[itemsKey]?.map((category) => category.id)
-    const queries = useCategoryBulk(ids, {
-        enabled: onClient && ids?.length > 0
-    })
-    const dataArray = queries.map((query) => query.data).filter(Boolean)
-    const isLoading = queries.some((query) => query.isLoading)
-    const isError = queries.some((query) => query.isError)
-    return {
-        isLoading,
-        isError,
-        data: {
-            ...levelZeroCategoriesQuery.data,
-            [itemsKey]: mergeMatchedItems(
-                levelZeroCategoriesQuery.data?.categories || [],
-                dataArray
-            )
-        }
-    }
-}
 
 const App = (props) => {
     const {children} = props
