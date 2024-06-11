@@ -22,6 +22,9 @@ export class LocaleData {
         landingPage: {
             heading: 'React PWA Starter Store pour le retail'
         },
+        accountPage: {
+            heading: 'Détails du compte'
+        },
         productDetailPage: {
             productColor: 'Sucre',
             addToCartButtonCaption: 'Ajouter au panier',
