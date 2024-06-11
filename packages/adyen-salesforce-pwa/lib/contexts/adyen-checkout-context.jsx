@@ -127,7 +127,8 @@ AdyenCheckoutProvider.propTypes = {
     site: PropTypes.any,
     adyenConfig: PropTypes.any,
     navigate: PropTypes.any,
-    basket: PropTypes.any
+    basket: PropTypes.any,
+    returnUrl: PropTypes.string
 }
 
 export default AdyenCheckoutProvider
