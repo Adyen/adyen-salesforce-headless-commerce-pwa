@@ -26,7 +26,7 @@ export class LocaleData {
             heading: 'Détails du compte'
         },
         productDetailPage: {
-            productColor: 'Sucre',
+            productColor: 'Vif-argent',
             addToCartButtonCaption: 'Ajouter au panier',
             proceedToCheckoutButtonCaption: 'Passer au checkout'
         },

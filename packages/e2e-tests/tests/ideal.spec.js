@@ -8,7 +8,7 @@ const user_FR = new ShopperData().FR
 
 test.describe('Payments through PWA UI', () => {
   test.beforeEach(async ({page}) => {
-    const scenarios = new ScenarioHelper(page)
+    const scenarios = new ScenarioHelper(page, new LocaleData().FR)
     await scenarios.visitStore()
     await scenarios.setupCart()
   })

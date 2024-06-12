@@ -27,7 +27,7 @@ export class ShopperData {
         address: {
             city: 'Paris',
             country: 'FR',
-            stateOrProvince: '',
+            stateOrProvince: 'AL',
             postalCode: '32300',
             street: 'Rue des Fleurs',
             houseNumberOrName: '37'
