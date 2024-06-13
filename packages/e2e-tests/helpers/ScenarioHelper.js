@@ -19,7 +19,7 @@ export class ScenarioHelper {
         this.productColorRadioButton = this.page.getByLabel(
             `${locale.productDetailPage.productColor}`
         )
-        this.productSizeRadioButton = this.page.getByLabel('12')
+        this.productSizeRadioButton = this.page.getByLabel('8')
         this.addToCartButton = this.page.getByRole('button', {
             name: `${locale.productDetailPage.addToCartButtonCaption}`
         })
@@ -123,7 +123,7 @@ export class ScenarioHelper {
         await this.cityField.click()
         await this.cityField.fill(user.address.city)
 
-        if (user.address.stateOrProvince != '') {
+        if (user.address.stateOrProvince !== '') {
             await this.stateDropdown.selectOption(user.address.stateOrProvince)
         }
 

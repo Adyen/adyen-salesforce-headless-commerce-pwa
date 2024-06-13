@@ -10,38 +10,6 @@ import {render, screen} from '@testing-library/react'
 let mockFetchPaymentMethods = jest.fn()
 let mockFetchEnvironment = jest.fn()
 
-jest.mock('@salesforce/retail-react-app/app/hooks/use-current-basket', () => {
-    return {
-        useCurrentBasket: jest.fn().mockImplementation(() => ({
-            data: {
-                orderTotal: 100,
-                productTotal: 100,
-                currency: 'USD',
-                basketId: 'test123'
-            }
-        }))
-    }
-})
-jest.mock('react-router-dom', () => {
-    return {
-        useLocation: jest.fn().mockImplementation(() => {
-            return {
-                pathname: 'testPath',
-                search: 'testSearch'
-            }
-        })
-    }
-})
-jest.mock('@salesforce/retail-react-app/app/utils/site-utils', () => {
-    return {
-        resolveLocaleFromUrl: jest.fn().mockImplementation(() => {
-            return 'en-US'
-        })
-    }
-})
-jest.mock('@salesforce/retail-react-app/app/hooks/use-navigation', () => {
-    return () => jest.fn()
-})
 jest.mock('../../services/payment-methods', () => ({
     AdyenPaymentMethodsService: jest.fn().mockImplementation(() => ({
         fetchPaymentMethods: mockFetchPaymentMethods

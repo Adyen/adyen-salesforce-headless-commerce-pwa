@@ -51,6 +51,14 @@ export class PaymentHelper {
         });
     };
 
+    waitForIdealLoad = async () => {
+        await this.page.waitForNavigation({
+            url: /.*ideal.nl/,
+            timeout: 20000,
+            waitUntil: 'load',
+        });
+    };
+
     initiatePayPalPayment = async () => {
         const payPalButton = this.page
           .frameLocator('.adyen-checkout__paypal__button--paypal iframe.visible')

@@ -52,7 +52,8 @@ const filterStateData = (stateData) => {
         'installments',
         'storePaymentMethod',
         'conversionId',
-        'origin'
+        'origin',
+        'returnUrl'
     ]
     const filteredStateData = {}
     const stateDataKeys = Object.keys(stateData)
@@ -306,7 +307,7 @@ async function sendPayments(req, res, next) {
                 }
             },
             channel: 'Web',
-            returnUrl: `${data.origin}/checkout/redirect`,
+            returnUrl: data.returnUrl || `${data.origin}/checkout/redirect`,
             shopperReference: order?.customerInfo?.customerId,
             shopperEmail: order?.customerInfo?.email,
             shopperName: getShopperName(order)
