@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import React, {Fragment} from 'react'
+import React, {Fragment, useEffect, useState} from 'react'
 import {FormattedMessage} from 'react-intl'
 import {Flex, Button} from '@salesforce/retail-react-app/app/components/shared/ui'
 import {
@@ -27,6 +27,26 @@ import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-curre
 
 const CartCta = () => {
     const customerId = useCustomerId()
+    const {getTokenWhenReady} = useAccessToken()
+    const navigate = useNavigation()
+    const {locale, site} = useMultiSite()
+    const {data: basket} = useCurrentBasket()
+
+    const [authToken, setAuthToken] = useState()
+
+    useEffect(() => {
+        const getToken = async () => {
+            const token = await getTokenWhenReady()
+            setAuthToken(token)
+        }
+
+        getToken()
+    }, [])
+
+    if (!authToken) {
+        return
+    }
+
     return (
         <Fragment>
             <Button
@@ -45,11 +65,12 @@ const CartCta = () => {
             </Button>
             <Flex justify={'center'}>
                 <AdyenExpressCheckoutProvider
+                    authToken={authToken}
                     customerId={customerId}
-                    useAccessToken={useAccessToken}
-                    useMultiSite={useMultiSite}
-                    useNavigation={useNavigation}
-                    useBasket={useCurrentBasket}
+                    locale={locale}
+                    site={site}
+                    basket={basket}
+                    navigate={navigate}
                 >
                     <ApplePayExpress />
                 </AdyenExpressCheckoutProvider>
