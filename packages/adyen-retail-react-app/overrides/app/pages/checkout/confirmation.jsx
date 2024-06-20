@@ -544,7 +544,6 @@ const CheckoutConfirmation = ({useOrder, useProducts, useAuthHelper, AuthHelpers
 /* -----------------Adyen Begin ------------------------ */
 const CheckoutConfirmationContainer = () => {
     const customerId = useCustomerId()
-    const customerTypeData = useCustomerType()
     const {getTokenWhenReady} = useAccessToken()
     const navigate = useNavigation()
     const {locale, site} = useMultiSite()
@@ -569,7 +568,6 @@ const CheckoutConfirmationContainer = () => {
         <AdyenCheckoutProvider
             authToken={authToken}
             customerId={customerId}
-            customerType={customerTypeData.customerType}
             locale={locale}
             site={site}
             basket={basket}

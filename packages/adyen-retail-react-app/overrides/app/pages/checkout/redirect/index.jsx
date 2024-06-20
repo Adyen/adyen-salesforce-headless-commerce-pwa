@@ -10,7 +10,6 @@ import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation
 const AdyenCheckoutRedirectContainer = () => {
     const {data: basket} = useCurrentBasket()
     const customerId = useCustomerId()
-    const customerTypeData = useCustomerType()
     const {getTokenWhenReady} = useAccessToken()
     const navigate = useNavigation()
     const {locale, site} = useMultiSite()
@@ -34,7 +33,6 @@ const AdyenCheckoutRedirectContainer = () => {
         <AdyenCheckoutProvider
             authToken={authToken}
             customerId={customerId}
-            customerType={customerTypeData.customerType}
             locale={locale}
             site={site}
             basket={basket}

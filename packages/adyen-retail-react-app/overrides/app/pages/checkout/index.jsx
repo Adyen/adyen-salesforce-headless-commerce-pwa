@@ -101,6 +101,7 @@ const checkoutCustomizations = {
 const CheckoutContainer = () => {
     const customerId = useCustomerId()
     const customerTypeData = useCustomerType()
+    console.log(customerTypeData)
     const {getTokenWhenReady} = useAccessToken()
     const navigate = useNavigation()
     const {locale, site} = useMultiSite()
@@ -125,7 +126,7 @@ const CheckoutContainer = () => {
         <AdyenCheckoutProvider
             authToken={authToken}
             customerId={customerId}
-            isCustomerRegistered={customerTypeData.customerType?.isRegistered}
+            isCustomerRegistered={customerTypeData?.isRegistered}
             locale={locale}
             site={site}
             basket={basket}
