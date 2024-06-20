@@ -1,5 +1,6 @@
 import {PaymentMethodsController} from '../../index'
 import {AdyenError} from '../../models/AdyenError'
+import { APPLICATION_VERSION } from "../../../utils/constants.mjs";
 
 let mockPaymentMethods = jest.fn()
 let mockGetCustomerBaskets = jest.fn()
@@ -119,7 +120,7 @@ describe('payment methods controller', () => {
             ],
             applicationInfo: {
                 externalPlatform: {integrator: '', name: 'SalesforceCommerceCloud', version: 'PWA'},
-                merchantApplication: {name: 'adyen-salesforce-commerce-cloud', version: '1.2.0'}
+                merchantApplication: {name: 'adyen-salesforce-commerce-cloud', version: APPLICATION_VERSION}
             }
         })
         expect(consoleInfoSpy).toHaveBeenCalledTimes(2)
@@ -177,7 +178,7 @@ describe('payment methods controller', () => {
             ],
             applicationInfo: {
                 externalPlatform: {integrator: '', name: 'SalesforceCommerceCloud', version: 'PWA'},
-                merchantApplication: {name: 'adyen-salesforce-commerce-cloud', version: '1.2.0'}
+                merchantApplication: {name: 'adyen-salesforce-commerce-cloud', version: APPLICATION_VERSION}
             }
         })
         expect(consoleInfoSpy).toHaveBeenCalledTimes(2)
