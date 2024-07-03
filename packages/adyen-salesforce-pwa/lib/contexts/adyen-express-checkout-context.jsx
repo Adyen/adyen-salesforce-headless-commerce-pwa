@@ -1,16 +1,13 @@
 import React, {useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
-import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
-import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
 import {AdyenPaymentMethodsService} from '../services/payment-methods'
 import {AdyenEnvironmentService} from '../services/environment'
 import {AdyenShippingMethodsService} from '../services/shipping-methods'
 
 export const AdyenExpressCheckoutContext = React.createContext({})
 
-export const fetchPaymentMethods = async (customerId, site, locale, getTokenWhenReady) => {
-    const token = await getTokenWhenReady()
-    const adyenPaymentMethodsService = new AdyenPaymentMethodsService(token, site)
+export const fetchPaymentMethods = async (customerId, site, locale, authToken) => {
+    const adyenPaymentMethodsService = new AdyenPaymentMethodsService(authToken, site)
     try {
         return await adyenPaymentMethodsService.fetchPaymentMethods(customerId, locale)
     } catch (error) {
@@ -18,9 +15,8 @@ export const fetchPaymentMethods = async (customerId, site, locale, getTokenWhen
     }
 }
 
-export const fetchEnvironment = async (site, getTokenWhenReady) => {
-    const token = await getTokenWhenReady()
-    const adyenEnvironmentService = new AdyenEnvironmentService(token, site)
+export const fetchEnvironment = async (site, authToken) => {
+    const adyenEnvironmentService = new AdyenEnvironmentService(authToken, site)
     try {
         return await adyenEnvironmentService.fetchEnvironment()
     } catch (error) {
@@ -28,9 +24,8 @@ export const fetchEnvironment = async (site, getTokenWhenReady) => {
     }
 }
 
-export const fetchShippingMethods = async (basketId, site, getTokenWhenReady) => {
-    const token = await getTokenWhenReady()
-    const adyenShippingMethodsService = new AdyenShippingMethodsService(token, site)
+export const fetchShippingMethods = async (basketId, site, authToken) => {
+    const adyenShippingMethodsService = new AdyenShippingMethodsService(authToken, site)
     try {
         return await adyenShippingMethodsService.getShippingMethods(basketId)
     } catch (error) {
@@ -40,16 +35,13 @@ export const fetchShippingMethods = async (basketId, site, getTokenWhenReady) =>
 
 export const AdyenExpressCheckoutProvider = ({
     children,
-    useAccessToken,
-    useCustomerId,
-    useMultiSite
+    authToken,
+    customerId,
+    locale,
+    site,
+    basket,
+    navigate
 }) => {
-    const {getTokenWhenReady} = useAccessToken()
-    const customerId = useCustomerId()
-    const {data: basket} = useCurrentBasket()
-    const {locale, site} = useMultiSite()
-    const navigate = useNavigation()
-
     const [adyenPaymentMethods, setAdyenPaymentMethods] = useState()
     const [adyenEnvironment, setAdyenEnvironment] = useState()
     const [shippingMethods, setShippingMethods] = useState()
@@ -57,8 +49,8 @@ export const AdyenExpressCheckoutProvider = ({
     useEffect(() => {
         const fetchAdyenData = async () => {
             const [environment, paymentMethods] = await Promise.all([
-                fetchEnvironment(site, getTokenWhenReady),
-                fetchPaymentMethods(customerId, site, locale, getTokenWhenReady)
+                fetchEnvironment(site, authToken),
+                fetchPaymentMethods(customerId, site, locale, authToken)
             ])
             setAdyenEnvironment(environment || {error: true})
             setAdyenPaymentMethods(paymentMethods || {error: true})
@@ -69,11 +61,7 @@ export const AdyenExpressCheckoutProvider = ({
 
     useEffect(() => {
         const fetchShippingMethodsData = async () => {
-            const shippingMethods = await fetchShippingMethods(
-                basket?.basketId,
-                site,
-                getTokenWhenReady
-            )
+            const shippingMethods = await fetchShippingMethods(basket?.basketId, site, authToken)
             setShippingMethods(shippingMethods || {error: true})
         }
 
@@ -88,7 +76,7 @@ export const AdyenExpressCheckoutProvider = ({
         basket,
         locale,
         site,
-        getTokenWhenReady,
+        authToken,
         navigate,
         shippingMethods,
         fetchShippingMethods
@@ -103,10 +91,12 @@ export const AdyenExpressCheckoutProvider = ({
 
 AdyenExpressCheckoutProvider.propTypes = {
     children: PropTypes.any,
-    useAccessToken: PropTypes.any,
-    useCustomerId: PropTypes.any,
-    useCustomerType: PropTypes.any,
-    useMultiSite: PropTypes.any
+    authToken: PropTypes.any,
+    customerId: PropTypes.any,
+    locale: PropTypes.any,
+    site: PropTypes.any,
+    basket: PropTypes.any,
+    navigate: PropTypes.any
 }
 
 export default AdyenExpressCheckoutProvider

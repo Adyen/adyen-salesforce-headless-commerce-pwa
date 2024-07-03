@@ -18,9 +18,7 @@ describe('cardConfig', () => {
         baseConfig.mockReturnValue(mockedBaseConfigResult)
 
         const props = {
-            customerType: {
-                isRegistered: true
-            }
+            isCustomerRegistered: true
         }
 
         const expectedConfig = {
@@ -47,9 +45,7 @@ describe('cardConfig', () => {
         baseConfig.mockReturnValue(mockedBaseConfigResult)
 
         const props = {
-            customerType: {
-                isRegistered: false
-            }
+            isCustomerRegistered: false
         }
 
         const expectedConfig = {

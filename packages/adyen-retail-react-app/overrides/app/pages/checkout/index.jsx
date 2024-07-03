@@ -28,6 +28,7 @@ import {
     useShopperBasketsMutation
 } from '@salesforce/commerce-sdk-react'
 import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
+import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
 /* -----------------Adyen End ------------------------ */
 
 const Checkout = ({useShopperBasketsMutation}) => {
@@ -88,6 +89,9 @@ const Checkout = ({useShopperBasketsMutation}) => {
 
 const checkoutCustomizations = {
     paymentMethodsConfiguration: {
+        klarna: {
+            useKlarnaWidget: false
+        },
         klarna_account: {
             useKlarnaWidget: false
         }
@@ -95,12 +99,38 @@ const checkoutCustomizations = {
 }
 
 const CheckoutContainer = () => {
+    const customerId = useCustomerId()
+    const customerTypeData = useCustomerType()
+    console.log(customerTypeData)
+    const {getTokenWhenReady} = useAccessToken()
+    const navigate = useNavigation()
+    const {locale, site} = useMultiSite()
+    const {data: basket} = useCurrentBasket()
+
+    const [authToken, setAuthToken] = useState()
+
+    useEffect(() => {
+        const getToken = async () => {
+            const token = await getTokenWhenReady()
+            setAuthToken(token)
+        }
+
+        getToken()
+    }, [])
+
+    if (!authToken) {
+        return
+    }
+
     return (
         <AdyenCheckoutProvider
-            useAccessToken={useAccessToken}
-            useCustomerId={useCustomerId}
-            useCustomerType={useCustomerType}
-            useMultiSite={useMultiSite}
+            authToken={authToken}
+            customerId={customerId}
+            isCustomerRegistered={customerTypeData?.isRegistered}
+            locale={locale}
+            site={site}
+            basket={basket}
+            navigate={navigate}
             adyenConfig={checkoutCustomizations}
         >
             <CheckoutProvider>

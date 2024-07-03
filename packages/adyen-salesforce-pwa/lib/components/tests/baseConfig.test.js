@@ -51,7 +51,7 @@ describe('onSubmit function', () => {
     it('should call AdyenPaymentsService and return the payment response', async () => {
         const state = {data: {origin: 'https://adyen.com'}, isValid: true}
         const component = 'testComponent'
-        const props = {token: 'testToken', customerId: 'testCustomerId'}
+        const props = {token: 'testToken', customerId: 'testCustomerId', returnUrl: 'https://adyen.com'}
 
         const result = await onSubmit(state, component, props)
         expect(result).toEqual({paymentsResponse: {mockData: 'Mocked response'}})

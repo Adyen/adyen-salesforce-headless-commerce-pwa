@@ -54,7 +54,7 @@ const serverConfig = {
             type: 'commonjs-static'
         }
     },
-    externals: [/^@salesforce\/pwa-kit-runtime\/.+$/i],
+    externals: [/^@salesforce\/pwa-kit-runtime\/.+$/i, 'commerce-sdk-isomorphic'],
     module: {
         rules: [
             {
@@ -82,13 +82,7 @@ const webConfig = {
             type: 'commonjs-static'
         }
     },
-    externals: [
-        /^@salesforce\/retail-react-app\/.+$/i,
-        /^@chakra-ui\/.+$/i,
-        /^react.+$/i,
-        'react',
-        'prop-types'
-    ],
+    externals: [/^@chakra-ui\/.+$/i, /^react.+$/i, 'react', 'prop-types'],
     module: {
         rules: [
             {

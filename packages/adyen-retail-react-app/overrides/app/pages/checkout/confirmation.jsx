@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import React, {Fragment, useEffect} from 'react'
+import React, {Fragment, useEffect, useState} from 'react'
 import {useLocation} from 'react-router-dom'
 import {FormattedMessage, FormattedNumber} from 'react-intl'
 import {
@@ -50,6 +50,7 @@ import {
     useProducts
 } from '@salesforce/commerce-sdk-react'
 import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
+import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 /* -----------------Adyen End ------------------------ */
 
 const onClient = typeof window !== 'undefined'
@@ -542,12 +543,35 @@ const CheckoutConfirmation = ({useOrder, useProducts, useAuthHelper, AuthHelpers
 
 /* -----------------Adyen Begin ------------------------ */
 const CheckoutConfirmationContainer = () => {
+    const customerId = useCustomerId()
+    const {getTokenWhenReady} = useAccessToken()
+    const navigate = useNavigation()
+    const {locale, site} = useMultiSite()
+    const {data: basket} = useCurrentBasket()
+
+    const [authToken, setAuthToken] = useState()
+
+    useEffect(() => {
+        const getToken = async () => {
+            const token = await getTokenWhenReady()
+            setAuthToken(token)
+        }
+
+        getToken()
+    }, [])
+
+    if (!authToken) {
+        return
+    }
+
     return (
         <AdyenCheckoutProvider
-            useAccessToken={useAccessToken}
-            useCustomerId={useCustomerId}
-            useCustomerType={useCustomerType}
-            useMultiSite={useMultiSite}
+            authToken={authToken}
+            customerId={customerId}
+            locale={locale}
+            site={site}
+            basket={basket}
+            navigate={navigate}
         >
             <CheckoutConfirmation
                 useOrder={useOrder}

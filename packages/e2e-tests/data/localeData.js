@@ -2,7 +2,7 @@ export class LocaleData {
     EN = {
         lang: 'en-US',
         landingPage: {
-            heading: 'The React PWA Starter Store for Retail'
+            heading: 'Adyen Integration in React PWA Starter Store'
         },
         loginPage: {
             paragraph: 'Welcome Back'
@@ -22,8 +22,11 @@ export class LocaleData {
         landingPage: {
             heading: 'React PWA Starter Store pour le retail'
         },
+        accountPage: {
+            heading: 'Détails du compte'
+        },
         productDetailPage: {
-            productColor: 'Sucre',
+            productColor: 'Vif-argent',
             addToCartButtonCaption: 'Ajouter au panier',
             proceedToCheckoutButtonCaption: 'Passer au checkout'
         },

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import React, {Fragment} from 'react'
+import React, {Fragment, useEffect, useState} from 'react'
 import {FormattedMessage} from 'react-intl'
 import {Flex, Button} from '@salesforce/retail-react-app/app/components/shared/ui'
 import {
@@ -17,13 +17,36 @@ import {
 import Link from '@salesforce/retail-react-app/app/components/link'
 /* -----------------Adyen Begin ------------------------ */
 import '@adyen/adyen-salesforce-pwa/dist/app/adyen.css'
-import {useAccessToken, useCustomerId, useCustomerType} from '@salesforce/commerce-sdk-react'
+import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 import {AdyenExpressCheckoutProvider, ApplePayExpress} from '@adyen/adyen-salesforce-pwa'
 import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
 import PropTypes from 'prop-types'
+import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
+import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 /* -----------------Adyen End ------------------------ */
 
 const CartCta = () => {
+    const customerId = useCustomerId()
+    const {getTokenWhenReady} = useAccessToken()
+    const navigate = useNavigation()
+    const {locale, site} = useMultiSite()
+    const {data: basket} = useCurrentBasket()
+
+    const [authToken, setAuthToken] = useState()
+
+    useEffect(() => {
+        const getToken = async () => {
+            const token = await getTokenWhenReady()
+            setAuthToken(token)
+        }
+
+        getToken()
+    }, [])
+
+    if (!authToken) {
+        return
+    }
+
     return (
         <Fragment>
             <Button
@@ -42,10 +65,12 @@ const CartCta = () => {
             </Button>
             <Flex justify={'center'}>
                 <AdyenExpressCheckoutProvider
-                    useAccessToken={useAccessToken}
-                    useCustomerId={useCustomerId}
-                    useCustomerType={useCustomerType}
-                    useMultiSite={useMultiSite}
+                    authToken={authToken}
+                    customerId={customerId}
+                    locale={locale}
+                    site={site}
+                    basket={basket}
+                    navigate={navigate}
                 >
                     <ApplePayExpress />
                 </AdyenExpressCheckoutProvider>

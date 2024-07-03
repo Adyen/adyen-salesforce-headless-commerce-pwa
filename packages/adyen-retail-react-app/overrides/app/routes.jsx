@@ -44,7 +44,14 @@ const Cart = loadable(() => import('./pages/cart'), {
     fallback: fallback
 })
 
+const Home = loadable(() => import('./pages/home'), {fallback})
+
 const routes = [
+    {
+        path: '/',
+        component: Home,
+        exact: true
+    },
     {
         path: '/checkout',
         component: Checkout,

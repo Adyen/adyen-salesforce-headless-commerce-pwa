@@ -1,7 +1,7 @@
 import {baseConfig} from '../helpers/baseConfig'
 
 export const cardConfig = (props) => {
-    const isRegistered = props?.customerType?.isRegistered
+    const isRegistered = props?.isCustomerRegistered
     return {
         ...baseConfig(props),
         _disableClickToPay: true,
