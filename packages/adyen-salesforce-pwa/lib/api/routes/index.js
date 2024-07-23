@@ -1,4 +1,5 @@
 import {query} from 'express-validator'
+import bodyParser from 'body-parser'
 import EnvironmentController from '../controllers/environment'
 import PaymentMethodsController from '../controllers/payment-methods'
 import PaymentsDetailsController from '../controllers/payments-details'
@@ -22,6 +23,8 @@ function ErrorHandler(err, req, res, next) {
 }
 
 function registerAdyenEndpoints(app, runtime, overrides) {
+    app.use(bodyParser.json())
+
     const environmentHandler = overrides?.environment || [EnvironmentController, SuccessHandler]
     const paymentMethodsHandler = overrides?.paymentMethods || [
         PaymentMethodsController,

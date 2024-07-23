@@ -5,7 +5,7 @@ This integration provides the opportunity to use Adyen as a payment service prov
 
 In this GitHub repo there are two packages:
 * `Adyen-salesforce-pwa`: source code for the Adyen PWA NPM package, that contains the default payments integration. This code is published to the [NPM](https://www.npmjs.com/package/@adyen/adyen-salesforce-pwa?activeTab=readme).  
-* `Adyen-retail-react-app`: a reference application that can be used for a demo of how to integrate the Adyen Payments Integration (NPM package) into your PWA Retail application. This reference application should not be used in production projects and we do not provide support on this implementaiotn.
+* `Adyen-retail-react-app`: a reference application that can be used for a demo of how to integrate the Adyen Payments Integration (NPM package) into your PWA Retail application. This reference application should not be used in production projects and we do not provide support on this implementation.
 
 ## Prerequisites
 
