@@ -19,7 +19,7 @@ export class ScenarioHelper {
         this.productColorRadioButton = this.page.getByLabel(
             `${locale.productDetailPage.productColor}`
         )
-        this.productSizeRadioButton = this.page.getByLabel('8')
+        this.productSizeRadioButton = this.page.getByLabel('6')
         this.addToCartButton = this.page.getByRole('button', {
             name: `${locale.productDetailPage.addToCartButtonCaption}`
         })
