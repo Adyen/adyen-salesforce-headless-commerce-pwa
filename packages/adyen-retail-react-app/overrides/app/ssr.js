@@ -10,7 +10,6 @@ import {getRuntime} from '@salesforce/pwa-kit-runtime/ssr/server/express'
 import {isRemote} from '@salesforce/pwa-kit-runtime/utils/ssr-server'
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 import helmet from 'helmet'
-import bodyParser from 'body-parser'
 /* -----------------Adyen Begin ------------------------ */
 import {registerAdyenEndpoints} from '@adyen/adyen-salesforce-pwa/dist/ssr/index.js'
 /* -----------------Adyen End ------------------------ */
@@ -35,7 +34,6 @@ const options = {
 const runtime = getRuntime()
 
 const {handler} = runtime.createHandler(options, (app) => {
-    app.use(bodyParser.json())
     /* -----------------Adyen Begin ------------------------ */
     // Set HTTP security headers
     app.use(

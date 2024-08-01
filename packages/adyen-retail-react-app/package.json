@@ -1,10 +1,10 @@
 {
   "name": "adyen-retail-react-app",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "license": "See license in LICENSE",
   "engines": {
-    "node": "^16.0.0 || ^18.0.0",
-    "npm": "^7.0.0 || ^8.0.0 || ^9.0.0"
+    "node": "^16.0.0 || ^18.0.0 || ^20.0.0",
+    "npm": "^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0"
   },
   "ccExtensibility": {
     "extends": "@salesforce/retail-react-app",
