@@ -310,7 +310,8 @@ async function sendPayments(req, res, next) {
             returnUrl: data.returnUrl || `${data.origin}/checkout/redirect`,
             shopperReference: order?.customerInfo?.customerId,
             shopperEmail: order?.customerInfo?.email,
-            shopperName: getShopperName(order)
+            shopperName: getShopperName(order),
+            shopperIP: req.ip
         }
 
         if (isOpenInvoiceMethod(data?.paymentMethod?.type)) {
