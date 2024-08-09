@@ -24,6 +24,7 @@ function ErrorHandler(err, req, res, next) {
 
 function registerAdyenEndpoints(app, runtime, overrides) {
     app.use(bodyParser.json())
+    app.set('trust proxy', true)
 
     const environmentHandler = overrides?.environment || [EnvironmentController, SuccessHandler]
     const paymentMethodsHandler = overrides?.paymentMethods || [
