@@ -293,8 +293,7 @@ async function sendPayments(req, res, next) {
         Logger.info('sendPayments', `orderCreated ${order?.orderNo}`)
 
         if (order?.customerInfo?.customerId !== req.headers.customerid) {
-            Logger.error('sendPayments', `INVALID_ORDER ${JSON.stringify(order)}`)
-            throw new AdyenError(errorMessages.INVALID_ORDER, 404)
+            throw new AdyenError(errorMessages.INVALID_ORDER, 404, JSON.stringify(order))
         }
 
         const paymentRequest = {

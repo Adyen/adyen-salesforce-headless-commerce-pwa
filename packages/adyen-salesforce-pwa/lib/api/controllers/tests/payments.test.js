@@ -377,7 +377,7 @@ describe('payments controller', () => {
         expect(consoleInfoSpy.mock.calls[1][0]).toContain('sendPayments orderCreated 123')
         expect(consoleErrorSpy).toHaveBeenCalled()
         expect(consoleErrorSpy.mock.calls[0][0]).toContain('order is invalid')
-        expect(next).toHaveBeenCalledWith(new AdyenError('order is invalid', 404))
+        expect(next).toHaveBeenCalledWith(new AdyenError('order is invalid', 404, expect.any(String)))
     })
     it('returns checkout response even if request has no billing address and delivery address', async () => {
         mockGetBasket.mockImplementationOnce(() => {
