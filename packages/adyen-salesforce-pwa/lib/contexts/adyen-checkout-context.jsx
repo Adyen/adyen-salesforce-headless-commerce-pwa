@@ -17,13 +17,15 @@ const AdyenCheckoutProvider = ({
     adyenConfig,
     navigate,
     basket,
-    returnUrl
+    returnUrl,
+    page
 }) => {
     const [fetchingPaymentMethods, setFetchingPaymentMethods] = useState(false)
     const [adyenPaymentMethods, setAdyenPaymentMethods] = useState()
     const [adyenEnvironment, setAdyenEnvironment] = useState()
     const [adyenStateData, setAdyenStateData] = useState()
     const [adyenPaymentInProgress, setAdyenPaymentInProgress] = useState()
+    const callPaymentMethodsOnPages = ['checkout']
 
     useEffect(() => {
         const fetchEnvironment = async () => {
@@ -55,7 +57,7 @@ const AdyenCheckoutProvider = ({
             }
         }
 
-        if (!adyenPaymentMethods && !fetchingPaymentMethods) {
+        if (!adyenPaymentMethods && !fetchingPaymentMethods && callPaymentMethodsOnPages.includes(page)) {
             fetchPaymentMethods()
         }
     }, [basket?.basketId])
@@ -128,7 +130,8 @@ AdyenCheckoutProvider.propTypes = {
     adyenConfig: PropTypes.any,
     navigate: PropTypes.any,
     basket: PropTypes.any,
-    returnUrl: PropTypes.string
+    returnUrl: PropTypes.string,
+    page: PropTypes.string,
 }
 
 export default AdyenCheckoutProvider
