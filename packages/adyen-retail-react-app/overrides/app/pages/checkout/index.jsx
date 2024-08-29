@@ -19,7 +19,7 @@ import PropTypes from 'prop-types'
 
 /* -----------------Adyen Begin ------------------------ */
 import Payment from './partials/payment'
-import {AdyenCheckoutProvider} from '@adyen/adyen-salesforce-pwa'
+import {AdyenCheckoutProvider, pageTypes} from '@adyen/adyen-salesforce-pwa'
 import '@adyen/adyen-salesforce-pwa/dist/app/adyen.css'
 import {
     useAccessToken,
@@ -101,7 +101,6 @@ const checkoutCustomizations = {
 const CheckoutContainer = () => {
     const customerId = useCustomerId()
     const customerTypeData = useCustomerType()
-    console.log(customerTypeData)
     const {getTokenWhenReady} = useAccessToken()
     const navigate = useNavigation()
     const {locale, site} = useMultiSite()
@@ -132,7 +131,7 @@ const CheckoutContainer = () => {
             basket={basket}
             navigate={navigate}
             adyenConfig={checkoutCustomizations}
-            page={'checkout'}
+            page={pageTypes.CHECKOUT}
         >
             <CheckoutProvider>
                 <Checkout useShopperBasketsMutation={useShopperBasketsMutation} />

@@ -39,7 +39,7 @@ import {API_ERROR_MESSAGE} from '@salesforce/retail-react-app/app/constants'
 import PropTypes from 'prop-types'
 
 /* -----------------Adyen Begin ------------------------ */
-import {AdyenCheckout, AdyenCheckoutProvider} from '@adyen/adyen-salesforce-pwa'
+import {AdyenCheckout, AdyenCheckoutProvider, pageTypes} from '@adyen/adyen-salesforce-pwa'
 import {
     AuthHelpers,
     useAccessToken,
@@ -571,7 +571,7 @@ const CheckoutConfirmationContainer = () => {
             site={site}
             basket={basket}
             navigate={navigate}
-            page={'confirmation'}
+            page={pageTypes.CONFIRMATION}
         >
             <CheckoutConfirmation
                 useOrder={useOrder}

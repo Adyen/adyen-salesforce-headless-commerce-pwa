@@ -131,7 +131,7 @@ AdyenCheckoutProvider.propTypes = {
     navigate: PropTypes.any,
     basket: PropTypes.any,
     returnUrl: PropTypes.string,
-    page: PropTypes.string,
+    page: PropTypes.oneOf(['checkout', 'confirmation', 'redirect']),
 }
 
 export default AdyenCheckoutProvider

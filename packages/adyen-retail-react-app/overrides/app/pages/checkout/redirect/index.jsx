@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react'
-import {AdyenCheckout, AdyenCheckoutProvider} from '@adyen/adyen-salesforce-pwa'
+import {AdyenCheckout, AdyenCheckoutProvider, pageTypes} from '@adyen/adyen-salesforce-pwa'
 import PropTypes from 'prop-types'
 import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 import '@adyen/adyen-salesforce-pwa/dist/app/adyen.css'
@@ -37,7 +37,7 @@ const AdyenCheckoutRedirectContainer = () => {
             site={site}
             basket={basket}
             navigate={navigate}
-            page={'redirect'}
+            page={pageTypes.REDIRECT}
         >
             <AdyenCheckout showLoading />
         </AdyenCheckoutProvider>
