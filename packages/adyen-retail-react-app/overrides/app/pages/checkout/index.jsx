@@ -132,6 +132,7 @@ const CheckoutContainer = () => {
             basket={basket}
             navigate={navigate}
             adyenConfig={checkoutCustomizations}
+            page={'checkout'}
         >
             <CheckoutProvider>
                 <Checkout useShopperBasketsMutation={useShopperBasketsMutation} />

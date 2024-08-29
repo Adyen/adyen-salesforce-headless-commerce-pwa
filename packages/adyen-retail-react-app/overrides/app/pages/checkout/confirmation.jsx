@@ -45,7 +45,6 @@ import {
     useAccessToken,
     useAuthHelper,
     useCustomerId,
-    useCustomerType,
     useOrder,
     useProducts
 } from '@salesforce/commerce-sdk-react'
@@ -572,6 +571,7 @@ const CheckoutConfirmationContainer = () => {
             site={site}
             basket={basket}
             navigate={navigate}
+            page={'confirmation'}
         >
             <CheckoutConfirmation
                 useOrder={useOrder}
