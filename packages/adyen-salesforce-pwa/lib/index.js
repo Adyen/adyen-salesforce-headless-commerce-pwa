@@ -9,5 +9,6 @@ export {default as ApplePayExpress} from './components/applePayExpress'
 
 export {default as countryList} from './utils/countryList.mjs'
 export {default as currencyList} from './utils/currencyList.mjs'
+export {default as pageTypes} from './utils/pageTypes.mjs'
 
 export {ORDER} from './utils/constants.mjs'

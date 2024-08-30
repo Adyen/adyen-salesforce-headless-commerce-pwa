@@ -87,6 +87,7 @@ describe('<AdyenCheckoutProvider />', () => {
                     customerType={customerType}
                     locale={locale}
                     site={site}
+                    page={'checkout'}
                 >
                     {children}
                 </AdyenCheckoutProvider>
