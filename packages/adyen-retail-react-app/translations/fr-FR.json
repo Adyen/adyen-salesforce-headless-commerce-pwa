@@ -147,6 +147,9 @@
   "add_to_cart_modal.recommended_products.title.might_also_like": {
     "defaultMessage": "Vous aimerez peut-être aussi"
   },
+  "auth_modal.button.close.assistive_msg": {
+    "defaultMessage": "Fermer"
+  },
   "auth_modal.description.now_signed_in": {
     "defaultMessage": "Vous êtes bien connecté."
   },
@@ -554,6 +557,9 @@
   },
   "global.link.added_to_wishlist.view_wishlist": {
     "defaultMessage": "Afficher"
+  },
+  "header.button.assistive_msg.my_cart_with_num_items": {
+    "defaultMessage": ""
   },
   "header.button.assistive_msg.logo": {
     "defaultMessage": "Logo"
