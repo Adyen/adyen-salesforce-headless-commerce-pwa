@@ -11,7 +11,7 @@ export class LocaleData {
             heading: 'Account Details'
         },
         productDetailPage: {
-            productColor: 'Zinc Heather',
+            productColor: 'Black',
             addToCartButtonCaption: 'Add to Cart',
             proceedToCheckoutButtonCaption: 'Proceed to Checkout'
         },
@@ -26,7 +26,7 @@ export class LocaleData {
             heading: 'Détails du compte'
         },
         productDetailPage: {
-            productColor: 'Vif-argent',
+            productColor: 'Noir',
             addToCartButtonCaption: 'Ajouter au panier',
             proceedToCheckoutButtonCaption: 'Passer au checkout'
         },
