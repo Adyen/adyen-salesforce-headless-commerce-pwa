@@ -368,7 +368,7 @@ async function sendPayments(req, res, next) {
             await removeAllPaymentInstrumentsFromBasket(basket, shopperBaskets)
         }
         if (order?.orderNo) {
-            Logger.info('updateOrderStatus');
+            Logger.info('updateOrderStatus and recreate basket');
             const orderApi = new OrderApiClient()
             await orderApi.updateOrderStatus(order.orderNo, ORDER.ORDER_STATUS_FAILED)
             await shopperBaskets.createBasket({

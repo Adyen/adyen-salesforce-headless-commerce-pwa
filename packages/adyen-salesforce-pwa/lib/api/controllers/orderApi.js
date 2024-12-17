@@ -55,13 +55,11 @@ export class OrderApiClient {
     }
 
     async updateOrderStatus(orderNo, status) {
-        Logger.error('updateOrderStatus');
         const response = await this.base('PUT', `${orderNo}/status`, {
             body: JSON.stringify({status: status})
         })
         if (!response.ok) {
             const error = await response.text()
-            Logger.error(error);
             throw new Error(`${response.status} ${response.statusText}`, {
                 cause: error
             })
