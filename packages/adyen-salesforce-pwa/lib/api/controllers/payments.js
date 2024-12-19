@@ -225,6 +225,8 @@ async function sendPayments(req, res, next) {
     }
 
     let order
+    let initialBasket;
+
     try {
         const {data} = req.body
         const {siteId} = req.query
@@ -238,17 +240,17 @@ async function sendPayments(req, res, next) {
             headers: {authorization: req.headers.authorization}
         })
 
-        const basket = await shopperBaskets.getBasket({
+        initialBasket = await shopperBaskets.getBasket({
             parameters: {
                 basketId: req.headers.basketid
             }
         })
 
-        if (!basket) {
+        if (!initialBasket) {
             throw new AdyenError(errorMessages.INVALID_BASKET, 404)
         }
 
-        if (!basket?.paymentInstruments || !basket?.paymentInstruments?.length) {
+        if (!initialBasket?.paymentInstruments || !initialBasket?.paymentInstruments?.length) {
             Logger.info('sendPayments', 'addPaymentInstrumentToBasket')
             const isCardPayment = data?.paymentMethod?.type === 'scheme';
             const paymentMethodId = isCardPayment
@@ -256,7 +258,7 @@ async function sendPayments(req, res, next) {
               : PAYMENT_METHODS.ADYEN_COMPONENT;
             const paymentInstrumentReq = {
                 body: {
-                    amount: basket.orderTotal,
+                    amount: initialBasket.orderTotal,
                     paymentMethodId,
                     paymentCard: {
                         cardType: isCardPayment
@@ -362,11 +364,16 @@ async function sendPayments(req, res, next) {
             }
         })
         if (basket?.paymentInstruments?.length) {
+            Logger.info('removeAllPaymentInstrumentsFromBasket');
             await removeAllPaymentInstrumentsFromBasket(basket, shopperBaskets)
         }
         if (order?.orderNo) {
+            Logger.info('updateOrderStatus and recreate basket');
             const orderApi = new OrderApiClient()
             await orderApi.updateOrderStatus(order.orderNo, ORDER.ORDER_STATUS_FAILED)
+            await shopperBaskets.createBasket({
+                body: initialBasket,
+            })
         }
         next(err)
     }
