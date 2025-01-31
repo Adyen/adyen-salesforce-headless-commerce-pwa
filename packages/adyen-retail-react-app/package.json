@@ -42,7 +42,7 @@
     "upload-env": "upload-env",
     "get-env": "get-env",
     "prepare:dev": "rm -f ./node_modules/.bin/include-env && rm -rf ./node_modules/@adyen/adyen-salesforce-pwa && cd ../adyen-salesforce-pwa && rm -rf dist && npm run build-prod",
-    "start:env": "npm run prepare:dev && npm link @adyen/adyen-salesforce-pwa && include-env -p=npm run start",
+    "start:env": "include-env -p=npm run start",
     "push:env": "include-env -p=npm run push"
   },
   "bundlesize": [
