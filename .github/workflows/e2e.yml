@@ -62,7 +62,7 @@ jobs:
                 NODE_ENV: ${{ secrets.NODE_ENV }}
                 E2E_PAYPAL_USERNAME: ${{secrets.E2E_PAYPAL_USERNAME}}
                 E2E_PAYPAL_PASSWORD: ${{secrets.E2E_PAYPAL_PASSWORD}}
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               if: always()
               with:
                   name: playwright-report
