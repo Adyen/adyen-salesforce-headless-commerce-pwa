@@ -17,7 +17,7 @@
     "style-loader": "^3.3.3"
   },
   "dependencies": {
-    "@adyen/adyen-salesforce-pwa": "file:../adyen-salesforce-pwa"
+    "@adyen/adyen-salesforce-pwa": "2.0.1"
   },
   "scripts": {
     "analyze-build": "cross-env MOBIFY_ANALYZE=true npm run build",
