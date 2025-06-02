@@ -4,38 +4,53 @@
  * SPDX-License-Identifier: BSD-3-Clause
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import React, {useEffect, useRef, useState} from 'react'
+import React, {useState} from 'react'
 import PropTypes from 'prop-types'
-import {FormattedMessage, useIntl} from 'react-intl'
-import {Box, Checkbox, Divider, Heading, Stack, Text} from '@chakra-ui/react'
+import {defineMessage, FormattedMessage, useIntl} from 'react-intl'
+import {
+    Box,
+    Button,
+    Checkbox,
+    Container,
+    Heading,
+    Stack,
+    Text,
+    Divider
+} from '@salesforce/retail-react-app/app/components/shared/ui'
 import {useForm} from 'react-hook-form'
 import {useToast} from '@salesforce/retail-react-app/app/hooks/use-toast'
+import {useShopperBasketsMutation} from '@salesforce/commerce-sdk-react'
 import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
-import {getCreditCardIcon} from '@salesforce/retail-react-app/app/utils/cc-utils'
+import {useCheckout} from '@salesforce/retail-react-app/app/pages/checkout/util/checkout-context'
+import {
+    getPaymentInstrumentCardType,
+    getMaskCreditCardNumber,
+    getCreditCardIcon
+} from '@salesforce/retail-react-app/app/utils/cc-utils'
 import {
     ToggleCard,
     ToggleCardEdit,
     ToggleCardSummary
 } from '@salesforce/retail-react-app/app/components/toggle-card'
+import PaymentForm from '@salesforce/retail-react-app/app/pages/checkout/partials/payment-form'
 import ShippingAddressSelection from '@salesforce/retail-react-app/app/pages/checkout/partials/shipping-address-selection'
 import AddressDisplay from '@salesforce/retail-react-app/app/components/address-display'
 import {PromoCode, usePromoCode} from '@salesforce/retail-react-app/app/components/promo-code'
 import {API_ERROR_MESSAGE} from '@salesforce/retail-react-app/app/constants'
-import {useCheckout} from '@salesforce/retail-react-app/app/pages/checkout/util/checkout-context'
 /* -----------------Adyen Begin ------------------------ */
 import {AdyenCheckout, useAdyenCheckout} from '@adyen/adyen-salesforce-pwa'
 /* -----------------Adyen End ------------------------ */
 
-const Payment = ({useShopperBasketsMutation}) => {
+const Payment = () => {
     const {formatMessage} = useIntl()
     const {data: basket} = useCurrentBasket()
     const selectedShippingAddress = basket?.shipments && basket?.shipments[0]?.shippingAddress
-    const selectedBillingAddress = {
-        ...selectedShippingAddress,
-        ...basket?.billingAddress
-    }
+    const selectedBillingAddress = basket?.billingAddress
     const appliedPayment = basket?.paymentInstruments && basket?.paymentInstruments[0]
-    const [billingSameAsShipping, setBillingSameAsShipping] = useState(true)
+    const [billingSameAsShipping, setBillingSameAsShipping] = useState(true) // By default, have billing addr to be the same as shipping
+    const {mutateAsync: addPaymentInstrumentToBasket} = useShopperBasketsMutation(
+        'addPaymentInstrumentToBasket'
+    )
     const {mutateAsync: updateBillingAddressForBasket} = useShopperBasketsMutation(
         'updateBillingAddressForBasket'
     )
@@ -49,12 +64,8 @@ const Payment = ({useShopperBasketsMutation}) => {
             status: 'error'
         })
     }
-
-    const {step, STEPS, goToStep} = useCheckout()
     const {adyenPaymentMethods} = useAdyenCheckout()
-    const [isSubmittingPayment] = useState(false)
-
-    const billingSameAsShippingRef = useRef()
+    const {step, STEPS, goToStep, goToNextStep} = useCheckout()
 
     const billingAddressForm = useForm({
         mode: 'onChange',
@@ -66,12 +77,36 @@ const Payment = ({useShopperBasketsMutation}) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {removePromoCode, ...promoCodeProps} = usePromoCode()
 
+    const paymentMethodForm = useForm()
+
+    const onPaymentSubmit = async (formValue) => {
+        // The form gives us the expiration date as `MM/YY` - so we need to split it into
+        // month and year to submit them as individual fields.
+        const [expirationMonth, expirationYear] = formValue.expiry.split('/')
+
+        const paymentInstrument = {
+            paymentMethodId: 'CREDIT_CARD',
+            paymentCard: {
+                holder: formValue.holder,
+                maskedNumber: getMaskCreditCardNumber(formValue.number),
+                cardType: getPaymentInstrumentCardType(formValue.cardType),
+                expirationMonth: parseInt(expirationMonth),
+                expirationYear: parseInt(`20${expirationYear}`)
+            }
+        }
+
+        return addPaymentInstrumentToBasket({
+            parameters: {basketId: basket?.basketId},
+            body: paymentInstrument
+        })
+    }
     const onBillingSubmit = async () => {
         const isFormValid = await billingAddressForm.trigger()
+
         if (!isFormValid) {
             return
         }
-        const billingAddress = billingSameAsShippingRef.current
+        const billingAddress = billingSameAsShipping
             ? selectedShippingAddress
             : billingAddressForm.getValues()
         // Using destructuring to remove properties from the object...
@@ -79,13 +114,9 @@ const Payment = ({useShopperBasketsMutation}) => {
         const {addressId, creationDate, lastModified, preferred, ...address} = billingAddress
         return await updateBillingAddressForBasket({
             body: address,
-            parameters: {basketId: basket.basketId, shipmentId: 'me'}
+            parameters: {basketId: basket.basketId}
         })
     }
-
-    useEffect(() => {
-        billingSameAsShippingRef.current = billingSameAsShipping
-    }, [billingSameAsShipping])
     const onPaymentRemoval = async () => {
         try {
             await removePaymentInstrumentFromBasket({
@@ -99,23 +130,37 @@ const Payment = ({useShopperBasketsMutation}) => {
         }
     }
 
-    const onEdit = async () => {
-        await onPaymentRemoval()
-        goToStep(STEPS.PAYMENT)
-    }
+    const onSubmit = paymentMethodForm.handleSubmit(async (paymentFormValues) => {
+        if (!appliedPayment) {
+            await onPaymentSubmit(paymentFormValues)
+        }
+
+        // If successful `onBillingSubmit` returns the updated basket. If the form was invalid on
+        // submit, `undefined` is returned.
+        const updatedBasket = await onBillingSubmit()
+
+        if (updatedBasket) {
+            goToNextStep()
+        }
+    })
+
+    const billingAddressAriaLabel = defineMessage({
+        defaultMessage: 'Billing Address Form',
+        id: 'checkout_payment.label.billing_address_form'
+    })
 
     return (
         <ToggleCard
             id="step-3"
             title={formatMessage({defaultMessage: 'Payment', id: 'checkout_payment.title.payment'})}
             editing={step === STEPS.PAYMENT}
-            isLoading={
-                !adyenPaymentMethods ||
-                billingAddressForm.formState.isSubmitting ||
-                isSubmittingPayment
-            }
+            isLoading={!adyenPaymentMethods || billingAddressForm.formState.isSubmitting}
             disabled={appliedPayment == null}
-            onEdit={onEdit}
+            onEdit={() => goToStep(STEPS.PAYMENT)}
+            editLabel={formatMessage({
+                defaultMessage: 'Edit Payment Info',
+                id: 'toggle_card.action.editPaymentInfo'
+            })}
         >
             <ToggleCardEdit>
                 <Box mt={-2} mb={4}>
@@ -199,9 +244,6 @@ const Payment = ({useShopperBasketsMutation}) => {
 }
 
 const PaymentCardSummary = ({payment}) => {
-    if (!payment?.paymentCard) {
-        return null
-    }
     const CardIcon = getCreditCardIcon(payment?.paymentCard?.cardType)
     return (
         <Stack direction="row" alignItems="center" spacing={3}>
@@ -219,7 +261,5 @@ const PaymentCardSummary = ({payment}) => {
 }
 
 PaymentCardSummary.propTypes = {payment: PropTypes.object}
-
-Payment.propTypes = {useShopperBasketsMutation: PropTypes.any}
 
 export default Payment

@@ -361,6 +361,12 @@
       "value": "Vous aimerez peut-être aussi"
     }
   ],
+  "auth_modal.button.close.assistive_msg": [
+    {
+      "type": 0,
+      "value": "Fermer"
+    }
+  ],
   "auth_modal.description.now_signed_in": [
     {
       "type": 0,
@@ -1370,6 +1376,8 @@
       "type": 0,
       "value": "Mon panier"
     }
+  ],
+  "header.button.assistive_msg.my_cart_with_num_items": [
   ],
   "header.button.assistive_msg.wishlist": [
     {
