@@ -39,7 +39,8 @@ import useEinstein from '@salesforce/retail-react-app/app/hooks/use-einstein'
 // Constants
 import {
     MAX_CACHE_AGE,
-    HOME_SHOP_PRODUCTS_CATEGORY_ID
+    HOME_SHOP_PRODUCTS_CATEGORY_ID,
+    HOME_SHOP_PRODUCTS_LIMIT
 } from '@salesforce/retail-react-app/app/constants'
 import {useServerContext} from '@salesforce/pwa-kit-react-sdk/ssr/universal/hooks'
 import {useProductSearch} from '@salesforce/commerce-sdk-react'
@@ -62,6 +63,11 @@ const Home = () => {
 
     const {data: productSearchResult, isLoading} = useProductSearch({
         parameters: {
+            allImages: true,
+            allVariationProperties: true,
+            expand: ['promotions', 'variations', 'prices', 'images', 'custom_properties'],
+            limit: HOME_SHOP_PRODUCTS_LIMIT,
+            perPricebook: true,
             refine: [`cgid=${HOME_SHOP_PRODUCTS_CATEGORY_ID}`, 'htype=master']
         }
     })

@@ -9,7 +9,7 @@ export const baseConfig = ({
     beforeAdditionalDetails = [],
     afterAdditionalDetails = [],
     onError = () => {
-        props.onNavigate('/checkout/error')
+        window.location.reload()
     },
     ...props
 }) => {

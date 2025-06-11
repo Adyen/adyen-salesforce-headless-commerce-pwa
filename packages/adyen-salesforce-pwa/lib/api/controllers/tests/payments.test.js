@@ -4,6 +4,7 @@ import {AdyenError} from '../../models/AdyenError'
 
 let mockPayments = jest.fn()
 let mockGetBasket = jest.fn()
+let mockCreateBasket = jest.fn()
 let mockAddPaymentInstrumentToBasket = jest.fn()
 let mockRemovePaymentInstrumentFromBasket = jest.fn()
 let mockCreateOrder = jest.fn()
@@ -35,6 +36,7 @@ jest.mock('commerce-sdk-isomorphic', () => {
     return {
         ShopperBaskets: jest.fn().mockImplementation(() => {
             return {
+                createBasket: mockCreateBasket,
                 getBasket: mockGetBasket,
                 addPaymentInstrumentToBasket: mockAddPaymentInstrumentToBasket,
                 removePaymentInstrumentFromBasket: mockRemovePaymentInstrumentFromBasket
@@ -372,12 +374,12 @@ describe('payments controller', () => {
         await PaymentsController(req, res, next)
         expect(res.locals.response).toBeNil()
         expect(mockUpdateOrderStatus).toHaveBeenCalled()
-        expect(consoleInfoSpy).toHaveBeenCalledTimes(2)
+        expect(consoleInfoSpy).toHaveBeenCalledTimes(3)
         expect(consoleInfoSpy.mock.calls[0][0]).toContain('sendPayments start')
         expect(consoleInfoSpy.mock.calls[1][0]).toContain('sendPayments orderCreated 123')
         expect(consoleErrorSpy).toHaveBeenCalled()
         expect(consoleErrorSpy.mock.calls[0][0]).toContain('order is invalid')
-        expect(next).toHaveBeenCalledWith(new AdyenError('order is invalid', 404))
+        expect(next).toHaveBeenCalledWith(new AdyenError('order is invalid', 404, expect.any(String)))
     })
     it('returns checkout response even if request has no billing address and delivery address', async () => {
         mockGetBasket.mockImplementationOnce(() => {
@@ -999,7 +1001,7 @@ describe('payments controller', () => {
 
         await PaymentsController(req, res, next)
         expect(res.locals.response).toBeNil()
-        expect(consoleInfoSpy).toHaveBeenCalledTimes(3)
+        expect(consoleInfoSpy).toHaveBeenCalledTimes(4)
         expect(consoleInfoSpy.mock.calls[0][0]).toContain('sendPayments start')
         expect(consoleInfoSpy.mock.calls[1][0]).toContain('sendPayments orderCreated 123')
         expect(consoleInfoSpy.mock.calls[2][0]).toContain('sendPayments resultCode Error')
@@ -1090,7 +1092,7 @@ describe('payments controller', () => {
         await PaymentsController(req, res, next)
         expect(res.locals.response).toBeNil()
         expect(mockRemovePaymentInstrumentFromBasket).toHaveBeenCalled()
-        expect(consoleInfoSpy).toHaveBeenCalledTimes(3)
+        expect(consoleInfoSpy).toHaveBeenCalledTimes(5)
         expect(consoleInfoSpy.mock.calls[0][0]).toContain('sendPayments start')
         expect(consoleInfoSpy.mock.calls[1][0]).toContain('sendPayments orderCreated 123')
         expect(consoleInfoSpy.mock.calls[2][0]).toContain('sendPayments resultCode Error')

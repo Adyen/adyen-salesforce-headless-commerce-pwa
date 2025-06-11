@@ -16,6 +16,7 @@ import {OrderApiClient} from './orderApi'
 import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrentSite.mjs'
 import {AdyenError} from '../models/AdyenError'
 import {getApplicationInfo} from '../../utils/getApplicationInfo.mjs'
+import {getCardType} from '../../utils/getCardType.mjs'
 
 const errorMessages = {
     AMOUNT_NOT_CORRECT: 'amount not correct',
@@ -224,6 +225,8 @@ async function sendPayments(req, res, next) {
     }
 
     let order
+    let initialBasket;
+
     try {
         const {data} = req.body
         const {siteId} = req.query
@@ -237,30 +240,37 @@ async function sendPayments(req, res, next) {
             headers: {authorization: req.headers.authorization}
         })
 
-        const basket = await shopperBaskets.getBasket({
+        initialBasket = await shopperBaskets.getBasket({
             parameters: {
                 basketId: req.headers.basketid
             }
         })
 
-        if (!basket) {
+        if (!initialBasket) {
             throw new AdyenError(errorMessages.INVALID_BASKET, 404)
         }
 
-        if (!basket?.paymentInstruments || !basket?.paymentInstruments?.length) {
+        if (!initialBasket?.paymentInstruments || !initialBasket?.paymentInstruments?.length) {
             Logger.info('sendPayments', 'addPaymentInstrumentToBasket')
-            await shopperBaskets.addPaymentInstrumentToBasket({
+            const isCardPayment = data?.paymentMethod?.type === 'scheme';
+            const paymentMethodId = isCardPayment
+              ? PAYMENT_METHODS.CREDIT_CARD
+              : PAYMENT_METHODS.ADYEN_COMPONENT;
+            const paymentInstrumentReq = {
                 body: {
-                    amount: basket.orderTotal,
-                    paymentMethodId: PAYMENT_METHODS.ADYEN_COMPONENT,
+                    amount: initialBasket.orderTotal,
+                    paymentMethodId,
                     paymentCard: {
-                        cardType: data?.paymentMethod?.type
+                        cardType: isCardPayment
+                            ? getCardType(data?.paymentMethod?.brand)
+                            : data?.paymentMethod?.type
                     }
                 },
                 parameters: {
                     basketId: req.headers.basketid
                 }
-            })
+            }
+            await shopperBaskets.addPaymentInstrumentToBasket(paymentInstrumentReq)
         }
 
         if (data.paymentType === 'express') {
@@ -285,7 +295,7 @@ async function sendPayments(req, res, next) {
         Logger.info('sendPayments', `orderCreated ${order?.orderNo}`)
 
         if (order?.customerInfo?.customerId !== req.headers.customerid) {
-            throw new AdyenError(errorMessages.INVALID_ORDER, 404)
+            throw new AdyenError(errorMessages.INVALID_ORDER, 404, JSON.stringify(order))
         }
 
         const paymentRequest = {
@@ -310,7 +320,8 @@ async function sendPayments(req, res, next) {
             returnUrl: data.returnUrl || `${data.origin}/checkout/redirect`,
             shopperReference: order?.customerInfo?.customerId,
             shopperEmail: order?.customerInfo?.email,
-            shopperName: getShopperName(order)
+            shopperName: getShopperName(order),
+            shopperIP: req.ip
         }
 
         if (isOpenInvoiceMethod(data?.paymentMethod?.type)) {
@@ -353,11 +364,16 @@ async function sendPayments(req, res, next) {
             }
         })
         if (basket?.paymentInstruments?.length) {
+            Logger.info('removeAllPaymentInstrumentsFromBasket');
             await removeAllPaymentInstrumentsFromBasket(basket, shopperBaskets)
         }
         if (order?.orderNo) {
+            Logger.info('updateOrderStatus and recreate basket');
             const orderApi = new OrderApiClient()
             await orderApi.updateOrderStatus(order.orderNo, ORDER.ORDER_STATUS_FAILED)
+            await shopperBaskets.createBasket({
+                body: initialBasket,
+            })
         }
         next(err)
     }

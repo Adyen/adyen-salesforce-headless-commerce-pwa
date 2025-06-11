@@ -14,7 +14,8 @@ describe('Adyen Endpoints', () => {
         app = {
             get: jest.fn(),
             post: jest.fn(),
-            use: jest.fn()
+            use: jest.fn(),
+            set: jest.fn(),
         }
         runtime = {
             render: jest.fn()

@@ -4,22 +4,27 @@
  * SPDX-License-Identifier: BSD-3-Clause
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
+/*
+ * Copyright (c) 2021, salesforce.com, inc.
+ * All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ */
 import React, {Fragment, useEffect, useState} from 'react'
-import {useLocation} from 'react-router-dom'
 import {FormattedMessage, FormattedNumber} from 'react-intl'
 import {
-    Alert,
-    AlertIcon,
     Box,
     Button,
     Container,
-    Divider,
     Flex,
     Heading,
     SimpleGrid,
     Spacer,
     Stack,
-    Text
+    Text,
+    Alert,
+    AlertIcon,
+    Divider
 } from '@salesforce/retail-react-app/app/components/shared/ui'
 import {useForm} from 'react-hook-form'
 import {useParams} from 'react-router-dom'
@@ -36,16 +41,16 @@ import CartItemVariantAttributes from '@salesforce/retail-react-app/app/componen
 import CartItemVariantPrice from '@salesforce/retail-react-app/app/components/item-variant/item-price'
 import {useCurrentCustomer} from '@salesforce/retail-react-app/app/hooks/use-current-customer'
 import {API_ERROR_MESSAGE} from '@salesforce/retail-react-app/app/constants'
+import {useCurrency} from '@salesforce/retail-react-app/app/hooks'
 import PropTypes from 'prop-types'
 
 /* -----------------Adyen Begin ------------------------ */
-import {AdyenCheckout, AdyenCheckoutProvider} from '@adyen/adyen-salesforce-pwa'
+import {AdyenCheckoutProvider, pageTypes} from '@adyen/adyen-salesforce-pwa'
 import {
     AuthHelpers,
     useAccessToken,
     useAuthHelper,
     useCustomerId,
-    useCustomerType,
     useOrder,
     useProducts
 } from '@salesforce/commerce-sdk-react'
@@ -55,10 +60,9 @@ import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-curre
 
 const onClient = typeof window !== 'undefined'
 
-const CheckoutConfirmation = ({useOrder, useProducts, useAuthHelper, AuthHelpers}) => {
+const CheckoutConfirmation = () => {
     const {orderNo} = useParams()
     const navigate = useNavigation()
-    const location = useLocation()
     const {data: customer} = useCurrentCustomer()
     const register = useAuthHelper(AuthHelpers.Register)
     const {data: order} = useOrder(
@@ -69,6 +73,7 @@ const CheckoutConfirmation = ({useOrder, useProducts, useAuthHelper, AuthHelpers
             enabled: !!orderNo && onClient
         }
     )
+    const {currency} = useCurrency()
     const itemIds = order?.productItems.map((item) => item.productId)
     const {data: products} = useProducts({parameters: {ids: itemIds?.join(',')}})
     const productItemsMap = products?.data.reduce((map, item) => ({...map, [item.id]: item}), {})
@@ -175,12 +180,6 @@ const CheckoutConfirmation = ({useOrder, useProducts, useAuthHelper, AuthHelpers
                                                 }}
                                             />
                                         </Text>
-
-                                        <Spacer />
-
-                                        {location?.search?.includes('adyenAction') && (
-                                            <AdyenCheckout />
-                                        )}
 
                                         <Spacer />
 
@@ -347,7 +346,9 @@ const CheckoutConfirmation = ({useOrder, useProducts, useAuthHelper, AuthHelpers
                                                                     <CartItemVariantAttributes
                                                                         includeQuantity
                                                                     />
-                                                                    <CartItemVariantPrice />
+                                                                    <CartItemVariantPrice
+                                                                        currency={currency}
+                                                                    />
                                                                 </Flex>
                                                             </Stack>
                                                         </Flex>
@@ -513,8 +514,8 @@ const CheckoutConfirmation = ({useOrder, useProducts, useAuthHelper, AuthHelpers
                                     <Stack spacing={1}>
                                         <Heading as="h3" fontSize="sm">
                                             <FormattedMessage
-                                                defaultMessage="Payment Method"
-                                                id="checkout_confirmation.heading.payment_method"
+                                                defaultMessage="Credit Card"
+                                                id="checkout_confirmation.heading.credit_card"
                                             />
                                         </Heading>
 
@@ -528,6 +529,26 @@ const CheckoutConfirmation = ({useOrder, useProducts, useAuthHelper, AuthHelpers
                                                             ?.cardType
                                                     }
                                                 </Text>
+                                                <Stack direction="row">
+                                                    <Text>
+                                                        &bull;&bull;&bull;&bull;{' '}
+                                                        {
+                                                            order.paymentInstruments[0].paymentCard
+                                                                ?.numberLastDigits
+                                                        }
+                                                    </Text>
+                                                    <Text>
+                                                        {
+                                                            order.paymentInstruments[0].paymentCard
+                                                                ?.expirationMonth
+                                                        }
+                                                        /
+                                                        {
+                                                            order.paymentInstruments[0].paymentCard
+                                                                ?.expirationYear
+                                                        }
+                                                    </Text>
+                                                </Stack>
                                             </Box>
                                         </Stack>
                                     </Stack>
@@ -572,6 +593,7 @@ const CheckoutConfirmationContainer = () => {
             site={site}
             basket={basket}
             navigate={navigate}
+            page={pageTypes.CONFIRMATION}
         >
             <CheckoutConfirmation
                 useOrder={useOrder}
