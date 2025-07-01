@@ -1,11 +1,6 @@
 import {formatAddressInAdyenFormat} from '../../utils/formatAddress.mjs'
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
-import {
-    ORDER,
-    PAYMENT_METHODS,
-    RECURRING_PROCESSING_MODEL,
-    SHOPPER_INTERACTIONS
-} from '../../utils/constants.mjs'
+import {ORDER, PAYMENT_METHODS, RECURRING_PROCESSING_MODEL, SHOPPER_INTERACTIONS} from '../../utils/constants.mjs'
 import {createCheckoutResponse} from '../../utils/createCheckoutResponse.mjs'
 import {ShopperBaskets, ShopperOrders} from 'commerce-sdk-isomorphic'
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
@@ -28,7 +23,7 @@ const errorMessages = {
     INVALID_SHIPPING_ADDRESS: 'invalid shipping address'
 }
 
-const validateRequestParams = (req) => {
+export const validateRequestParams = (req) => {
     return !(
         !req.body?.data ||
         !req.headers?.authorization ||
@@ -37,7 +32,7 @@ const validateRequestParams = (req) => {
     )
 }
 
-const filterStateData = (stateData) => {
+export const filterStateData = (stateData) => {
     const validFields = [
         'paymentMethod',
         'billingAddress',
@@ -68,7 +63,7 @@ const filterStateData = (stateData) => {
     return filteredStateData
 }
 
-function getShopperName(order) {
+export function getShopperName(order) {
     const [firstName, lastName] = order.customerName.split(' ')
     return {
         firstName,
@@ -76,7 +71,7 @@ function getShopperName(order) {
     }
 }
 
-function isOpenInvoiceMethod(paymentMethod) {
+export function isOpenInvoiceMethod(paymentMethod) {
     return (
         paymentMethod.indexOf('afterpay') > -1 ||
         paymentMethod.indexOf('klarna') > -1 ||
@@ -88,7 +83,7 @@ function isOpenInvoiceMethod(paymentMethod) {
     )
 }
 
-function getAdditionalData(order) {
+export function getAdditionalData(order) {
     const additionalData = {}
     order.productItems.forEach((product, index) => {
         additionalData[`riskdata.basket.item${index + 1}.itemID`] = product.itemId
@@ -103,56 +98,105 @@ function getAdditionalData(order) {
     return additionalData
 }
 
-function getLineItems(order) {
+export function getLineItems(order) {
     const productLineItems = order?.productItems?.length
         ? order?.productItems?.map((productItem) => {
-              return {
-                  id: productItem.itemId,
-                  quantity: productItem.quantity,
-                  description: productItem.itemText,
-                  amountExcludingTax: getCurrencyValueForApi(productItem.basePrice, order.currency),
-                  taxAmount: getCurrencyValueForApi(productItem.tax, order.currency),
-                  taxCategory: 'None',
-                  taxPercentage: productItem.taxRate
-              }
-          })
+            return {
+                id: productItem.itemId,
+                quantity: productItem.quantity,
+                description: productItem.itemText,
+                amountExcludingTax: getCurrencyValueForApi(productItem.basePrice, order.currency),
+                taxAmount: getCurrencyValueForApi(productItem.tax, order.currency),
+                taxCategory: 'None',
+                taxPercentage: productItem.taxRate
+            }
+        })
         : []
     const shippingLineItems = order?.shippingItems?.length
         ? order?.shippingItems?.map((shippingItem) => {
-              return {
-                  id: shippingItem.itemId,
-                  quantity: 1,
-                  description: shippingItem.itemText,
-                  amountExcludingTax: getCurrencyValueForApi(
-                      shippingItem.basePrice,
-                      order.currency
-                  ),
-                  taxAmount: getCurrencyValueForApi(shippingItem.tax, order.currency),
-                  taxCategory: 'None',
-                  taxPercentage: shippingItem.taxRate
-              }
-          })
+            return {
+                id: shippingItem.itemId,
+                quantity: 1,
+                description: shippingItem.itemText,
+                amountExcludingTax: getCurrencyValueForApi(
+                    shippingItem.basePrice,
+                    order.currency
+                ),
+                taxAmount: getCurrencyValueForApi(shippingItem.tax, order.currency),
+                taxCategory: 'None',
+                taxPercentage: shippingItem.taxRate
+            }
+        })
         : []
     const priceAdjustmentLineItems = order?.priceAdjustments?.length
         ? order.priceAdjustments.map((priceAdjustment) => {
-              return {
-                  id: priceAdjustment.priceAdjustmentId,
-                  quantity: priceAdjustment.quantity,
-                  description: priceAdjustment.itemText,
-                  amountExcludingTax: getCurrencyValueForApi(
-                      priceAdjustment.basePrice,
-                      order.currency
-                  ),
-                  taxAmount: getCurrencyValueForApi(priceAdjustment.tax, order.currency),
-                  taxCategory: 'None',
-                  taxPercentage: priceAdjustment.taxRate
-              }
-          })
+            return {
+                id: priceAdjustment.priceAdjustmentId,
+                quantity: priceAdjustment.quantity,
+                description: priceAdjustment.itemText,
+                amountExcludingTax: getCurrencyValueForApi(
+                    priceAdjustment.basePrice,
+                    order.currency
+                ),
+                taxAmount: getCurrencyValueForApi(priceAdjustment.tax, order.currency),
+                taxCategory: 'None',
+                taxPercentage: priceAdjustment.taxRate
+            }
+        })
         : []
     return [...productLineItems, ...shippingLineItems, ...priceAdjustmentLineItems]
 }
 
-async function removeAllPaymentInstrumentsFromBasket(basket, shopperBaskets) {
+export function createPaymentRequestObject(order, data, adyenConfig, req) {
+    const paymentRequest = {
+        ...filterStateData(data),
+        billingAddress: data.billingAddress || formatAddressInAdyenFormat(order.billingAddress),
+        deliveryAddress:
+            data.deliveryAddress ||
+            formatAddressInAdyenFormat(order.shipments[0].shippingAddress),
+        reference: order.orderNo,
+        merchantAccount: adyenConfig.merchantAccount,
+        amount: {
+            value: getCurrencyValueForApi(order.orderTotal, order.currency),
+            currency: order.currency
+        },
+        applicationInfo: getApplicationInfo(adyenConfig.systemIntegratorName),
+        authenticationData: {
+            threeDSRequestData: {
+                nativeThreeDS: 'preferred'
+            }
+        },
+        channel: 'Web',
+        returnUrl: data.returnUrl || `${data.origin}/checkout/redirect`,
+        shopperReference: order?.customerInfo?.customerId,
+        shopperEmail: order?.customerInfo?.email,
+        shopperName: getShopperName(order),
+        shopperIP: req.ip
+    }
+
+    if (isOpenInvoiceMethod(data?.paymentMethod?.type)) {
+        paymentRequest.lineItems = getLineItems(order)
+        paymentRequest.countryCode = paymentRequest.billingAddress.country
+    }
+
+    // Add recurringProcessingModel in case shopper wants to save the card from checkout
+    if (data.storePaymentMethod) {
+        paymentRequest.recurringProcessingModel = RECURRING_PROCESSING_MODEL.CARD_ON_FILE
+    }
+
+    if (data.paymentMethod?.storedPaymentMethodId) {
+        paymentRequest.recurringProcessingModel = RECURRING_PROCESSING_MODEL.CARD_ON_FILE
+        paymentRequest.shopperInteraction = SHOPPER_INTERACTIONS.CONT_AUTH
+    } else {
+        paymentRequest.shopperInteraction = SHOPPER_INTERACTIONS.ECOMMERCE
+    }
+
+    paymentRequest.additionalData = getAdditionalData(order)
+
+    return paymentRequest
+}
+
+export async function removeAllPaymentInstrumentsFromBasket(basket, shopperBaskets) {
     const promises = []
     if (basket?.paymentInstruments?.length) {
         basket?.paymentInstruments.forEach((paymentInstrument) => {
@@ -168,7 +212,7 @@ async function removeAllPaymentInstrumentsFromBasket(basket, shopperBaskets) {
     return Promise.all(promises)
 }
 
-async function handleExpressPayment(shopperBaskets, data, basketId, customerId) {
+export async function handleExpressPayment(shopperBaskets, data, basketId, customerId) {
     await shopperBaskets.updateShippingAddressForShipment({
         body: {
             address1: data.deliveryAddress.street,
@@ -254,8 +298,8 @@ async function sendPayments(req, res, next) {
             Logger.info('sendPayments', 'addPaymentInstrumentToBasket')
             const isCardPayment = data?.paymentMethod?.type === 'scheme';
             const paymentMethodId = isCardPayment
-              ? PAYMENT_METHODS.CREDIT_CARD
-              : PAYMENT_METHODS.ADYEN_COMPONENT;
+                ? PAYMENT_METHODS.CREDIT_CARD
+                : PAYMENT_METHODS.ADYEN_COMPONENT;
             const paymentInstrumentReq = {
                 body: {
                     amount: initialBasket.orderTotal,
@@ -297,46 +341,7 @@ async function sendPayments(req, res, next) {
         if (order?.customerInfo?.customerId !== req.headers.customerid) {
             throw new AdyenError(errorMessages.INVALID_ORDER, 404, JSON.stringify(order))
         }
-
-        const paymentRequest = {
-            ...filterStateData(data),
-            billingAddress: data.billingAddress || formatAddressInAdyenFormat(order.billingAddress),
-            deliveryAddress:
-                data.deliveryAddress ||
-                formatAddressInAdyenFormat(order.shipments[0].shippingAddress),
-            reference: order.orderNo,
-            merchantAccount: adyenConfig.merchantAccount,
-            amount: {
-                value: getCurrencyValueForApi(order.orderTotal, order.currency),
-                currency: order.currency
-            },
-            applicationInfo: getApplicationInfo(adyenConfig.systemIntegratorName),
-            authenticationData: {
-                threeDSRequestData: {
-                    nativeThreeDS: 'preferred'
-                }
-            },
-            channel: 'Web',
-            returnUrl: data.returnUrl || `${data.origin}/checkout/redirect`,
-            shopperReference: order?.customerInfo?.customerId,
-            shopperEmail: order?.customerInfo?.email,
-            shopperName: getShopperName(order),
-            shopperIP: req.ip
-        }
-
-        if (isOpenInvoiceMethod(data?.paymentMethod?.type)) {
-            paymentRequest.lineItems = getLineItems(order)
-            paymentRequest.countryCode = paymentRequest.billingAddress.country
-        }
-
-        if (data.storePaymentMethod || data.paymentMethod?.storedPaymentMethodId) {
-            paymentRequest.recurringProcessingModel = RECURRING_PROCESSING_MODEL.CARD_ON_FILE
-            paymentRequest.shopperInteraction = data.paymentMethod?.storedPaymentMethodId
-                ? SHOPPER_INTERACTIONS.CONT_AUTH
-                : SHOPPER_INTERACTIONS.ECOMMERCE
-        }
-
-        paymentRequest.additionalData = getAdditionalData(order)
+        const paymentRequest = createPaymentRequestObject(order, data, adyenConfig, req)
 
         const response = await checkout.payments(paymentRequest, {
             idempotencyKey: uuidv4()
