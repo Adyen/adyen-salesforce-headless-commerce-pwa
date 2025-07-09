@@ -2,85 +2,85 @@
   "account.accordion.button.my_account": [
     {
       "type": 0,
-      "value": "내 계정"
+      "value": "Mitt konto"
     }
   ],
   "account.heading.my_account": [
     {
       "type": 0,
-      "value": "내 계정"
+      "value": "Mitt konto"
     }
   ],
   "account.logout_button.button.log_out": [
     {
       "type": 0,
-      "value": "로그아웃"
+      "value": "Logga ut"
     }
   ],
   "account_addresses.badge.default": [
     {
       "type": 0,
-      "value": "기본값"
+      "value": "Standard"
     }
   ],
   "account_addresses.button.add_address": [
     {
       "type": 0,
-      "value": "주소 추가"
+      "value": "Lägg till adress"
     }
   ],
   "account_addresses.info.address_removed": [
     {
       "type": 0,
-      "value": "주소가 제거됨"
+      "value": "Adressen har tagits bort"
     }
   ],
   "account_addresses.info.address_updated": [
     {
       "type": 0,
-      "value": "주소가 업데이트됨"
+      "value": "Adressen har uppdaterats"
     }
   ],
   "account_addresses.info.new_address_saved": [
     {
       "type": 0,
-      "value": "새 주소가 저장됨"
+      "value": "En ny adress har sparats"
     }
   ],
   "account_addresses.page_action_placeholder.button.add_address": [
     {
       "type": 0,
-      "value": "주소 추가"
+      "value": "Lägg till adress"
     }
   ],
   "account_addresses.page_action_placeholder.heading.no_saved_addresses": [
     {
       "type": 0,
-      "value": "저장된 주소 없음"
+      "value": "Inga sparade adresser"
     }
   ],
   "account_addresses.page_action_placeholder.message.add_new_address": [
     {
       "type": 0,
-      "value": "빠른 체크아웃을 위해 새 주소를 추가합니다."
+      "value": "Lägg till en ny adressmetod för snabbare betalning."
     }
   ],
   "account_addresses.title.addresses": [
     {
       "type": 0,
-      "value": "주소"
+      "value": "Adresser"
     }
   ],
   "account_detail.title.account_details": [
     {
       "type": 0,
-      "value": "계정 세부 정보"
+      "value": "Kontouppgifter"
     }
   ],
   "account_order_detail.heading.billing_address": [
     {
       "type": 0,
-      "value": "청구 주소"
+      "value": "Faktureringsadress"
     }
   ],
   "account_order_detail.heading.num_of_items": [
@@ -90,31 +90,31 @@
     },
     {
       "type": 0,
-      "value": "개 항목"
+      "value": " artiklar"
     }
   ],
   "account_order_detail.heading.payment_method": [
     {
       "type": 0,
-      "value": "결제 방법"
+      "value": "Betalningsmetod"
     }
   ],
   "account_order_detail.heading.shipping_address": [
     {
       "type": 0,
-      "value": "배송 주소"
+      "value": "Fraktadress"
     }
   ],
   "account_order_detail.heading.shipping_method": [
     {
       "type": 0,
-      "value": "배송 방법"
+      "value": "Fraktmetod"
     }
   ],
   "account_order_detail.label.order_number": [
     {
       "type": 0,
-      "value": "주문 번호: "
+      "value": "Beställningsnummer: "
     },
     {
       "type": 1,
@@ -124,7 +124,7 @@
   "account_order_detail.label.ordered_date": [
     {
       "type": 0,
-      "value": "주문 날짜: "
+      "value": "Beställdes: "
     },
     {
       "type": 1,
@@ -134,61 +134,61 @@
   "account_order_detail.label.pending_tracking_number": [
     {
       "type": 0,
-      "value": "대기 중"
+      "value": "Väntande"
     }
   ],
   "account_order_detail.label.tracking_number": [
     {
       "type": 0,
-      "value": "추적 번호"
+      "value": "Spårningsnummer"
     }
   ],
   "account_order_detail.link.back_to_history": [
     {
       "type": 0,
-      "value": "주문 내역으로 돌아가기"
+      "value": "Tillbaka till beställningshistorik"
     }
   ],
   "account_order_detail.shipping_status.not_shipped": [
     {
       "type": 0,
-      "value": "출고되지 않음"
+      "value": "Har inte skickats"
     }
   ],
   "account_order_detail.shipping_status.part_shipped": [
     {
       "type": 0,
-      "value": "부분 출고됨"
+      "value": "Har delvis skickats"
     }
   ],
   "account_order_detail.shipping_status.shipped": [
     {
       "type": 0,
-      "value": "출고됨"
+      "value": "Har skickats"
     }
   ],
   "account_order_detail.title.order_details": [
     {
       "type": 0,
-      "value": "주문 세부 정보"
+      "value": "Beställningsinformation"
     }
   ],
   "account_order_history.button.continue_shopping": [
     {
       "type": 0,
-      "value": "계속 쇼핑하기"
+      "value": "Fortsätt handla"
     }
   ],
   "account_order_history.description.once_you_place_order": [
     {
       "type": 0,
-      "value": "주문을 하면 여기에 세부 정보가 표시됩니다."
+      "value": "När du har gjort en beställning kommer informationen att visas här."
     }
   ],
   "account_order_history.heading.no_order_yet": [
     {
       "type": 0,
-      "value": "아직 주문한 내역이 없습니다."
+      "value": "Du har gjort någon beställning ännu."
     }
   ],
   "account_order_history.label.num_of_items": [
@@ -198,13 +198,13 @@
     },
     {
       "type": 0,
-      "value": "개 항목"
+      "value": " artiklar"
     }
   ],
   "account_order_history.label.order_number": [
     {
       "type": 0,
-      "value": "주문 번호: "
+      "value": "Beställningsnummer: "
     },
     {
       "type": 1,
@@ -214,7 +214,7 @@
   "account_order_history.label.ordered_date": [
     {
       "type": 0,
-      "value": "주문 날짜: "
+      "value": "Beställdes: "
     },
     {
       "type": 1,
@@ -224,7 +224,7 @@
   "account_order_history.label.shipped_to": [
     {
       "type": 0,
-      "value": "받는 사람: "
+      "value": "Skickas till: "
     },
     {
       "type": 1,
@@ -234,49 +234,49 @@
   "account_order_history.link.view_details": [
     {
       "type": 0,
-      "value": "세부 정보 보기"
+      "value": "Visa detaljerad information"
     }
   ],
   "account_order_history.title.order_history": [
     {
       "type": 0,
-      "value": "주문 내역"
+      "value": "Beställningshistorik"
     }
   ],
   "account_wishlist.button.continue_shopping": [
     {
       "type": 0,
-      "value": "계속 쇼핑하기"
+      "value": "Fortsätt handla"
     }
   ],
   "account_wishlist.description.continue_shopping": [
     {
       "type": 0,
-      "value": "계속 쇼핑하면서 위시리스트에 항목을 추가합니다."
+      "value": "Fortsätt handla och lägg till produkter i din önskelista."
     }
   ],
   "account_wishlist.heading.no_wishlist": [
     {
       "type": 0,
-      "value": "위시리스트 항목 없음"
+      "value": "Inga produkter i önskelistan"
     }
   ],
   "account_wishlist.title.wishlist": [
     {
       "type": 0,
-      "value": "위시리스트"
+      "value": "Önskelista"
     }
   ],
   "action_card.action.edit": [
     {
       "type": 0,
-      "value": "편집"
+      "value": "Redigera"
     }
   ],
   "action_card.action.remove": [
     {
       "type": 0,
-      "value": "제거"
+      "value": "Ta bort"
     }
   ],
   "add_to_cart_modal.info.added_to_cart": [
@@ -295,7 +295,7 @@
           "value": [
             {
               "type": 0,
-              "value": "개 항목"
+              "value": "artikel"
             }
           ]
         },
@@ -303,7 +303,7 @@
           "value": [
             {
               "type": 0,
-              "value": "개 항목"
+              "value": "artiklar"
             }
           ]
         }
@@ -314,13 +314,13 @@
     },
     {
       "type": 0,
-      "value": "이 카트에 추가됨"
+      "value": " har lagts till i kundvagnen"
     }
   ],
   "add_to_cart_modal.label.cart_subtotal": [
     {
       "type": 0,
-      "value": "카트 소계("
+      "value": "Delsumma för kundvagnen ("
     },
     {
       "type": 1,
@@ -328,55 +328,55 @@
     },
     {
       "type": 0,
-      "value": "개 항목)"
+      "value": " artikel)"
     }
   ],
   "add_to_cart_modal.label.quantity": [
     {
       "type": 0,
-      "value": "수량"
+      "value": "Antal"
     }
   ],
   "add_to_cart_modal.link.checkout": [
     {
       "type": 0,
-      "value": "체크아웃 진행"
+      "value": "Fortsätt till kassan"
     }
   ],
   "add_to_cart_modal.link.view_cart": [
     {
       "type": 0,
-      "value": "카트 보기"
+      "value": "Visa kundvagn"
     }
   ],
   "add_to_cart_modal.recommended_products.title.might_also_like": [
     {
       "type": 0,
-      "value": "추천 상품"
+      "value": "Du kanske också skulle gilla"
     }
   ],
   "auth_modal.button.close.assistive_msg": [
     {
       "type": 0,
-      "value": "로그인 양식 닫기"
+      "value": "Stäng inloggningsformulär"
     }
   ],
   "auth_modal.check_email.button.resend_link": [
     {
       "type": 0,
-      "value": "링크 재전송"
+      "value": "Skicka länk på nytt"
     }
   ],
   "auth_modal.check_email.description.check_spam_folder": [
     {
       "type": 0,
-      "value": "링크가 도착하는 데 몇 분 정도 걸릴 수 있습니다. 링크를 찾는 데 문제가 있는 경우 스팸 폴더를 확인하십시오."
+      "value": "Det kan ta några minuter innan länken kommer fram. Kontrollera din skräppostmapp om du har problem att hitta den."
     }
   ],
   "auth_modal.check_email.description.just_sent": [
     {
       "type": 0,
-      "value": "방금 "
+      "value": "Vi har skickat en inloggningslänk till "
     },
     {
       "children": [
@@ -387,47 +387,51 @@
       ],
       "type": 8,
       "value": "b"
-    },
-    {
-      "type": 0,
-      "value": "(으)로 로그인 링크를 보냈습니다."
     }
   ],
   "auth_modal.check_email.title.check_your_email": [
     {
       "type": 0,
-      "value": "이메일을 확인하십시오."
+      "value": "Kontrollera din e-post"
     }
   ],
   "auth_modal.description.now_signed_in": [
     {
       "type": 0,
-      "value": "이제 로그인되었습니다."
+      "value": "Du är nu inloggad."
     }
   ],
   "auth_modal.error.incorrect_email_or_password": [
     {
       "type": 0,
-      "value": "이메일 또는 암호가 잘못되었습니다. 다시 시도하십시오."
+      "value": "Det är något som inte stämmer med din e-postadress eller ditt lösenord. Försök igen."
     }
   ],
   "auth_modal.info.welcome_user": [
+    {
+      "type": 0,
+      "value": "Välkommen "
+    },
     {
       "type": 1,
       "value": "name"
     },
     {
       "type": 0,
-      "value": " 님 안녕하세요."
+      "value": "!"
     }
   ],
   "auth_modal.password_reset_success.button.back_to_sign_in": [
     {
       "type": 0,
-      "value": "로그인 페이지로 돌아가기"
+      "value": "Tillbaka till inloggning"
     }
   ],
   "auth_modal.password_reset_success.info.will_email_shortly": [
+    {
+      "type": 0,
+      "value": "Inom kort får du ett e-postmeddelande på adressen "
+    },
     {
       "children": [
         {
@@ -440,101 +444,101 @@
     },
     {
       "type": 0,
-      "value": "(으)로 암호 재설정 링크가 포함된 이메일이 곧 발송됩니다."
+      "value": " med en länk för att återställa ditt lösenord."
     }
   ],
   "auth_modal.password_reset_success.title.password_reset": [
     {
       "type": 0,
-      "value": "암호 재설정"
+      "value": "Återställning av lösenord"
     }
   ],
   "carousel.button.scroll_left.assistive_msg": [
     {
       "type": 0,
-      "value": "회전식 보기 왼쪽으로 스크롤"
+      "value": "Bläddra till vänster i karusellen"
     }
   ],
   "carousel.button.scroll_right.assistive_msg": [
     {
       "type": 0,
-      "value": "회전식 보기 오른쪽으로 스크롤"
+      "value": "Bläddra till höger i karusellen"
     }
   ],
   "cart.info.removed_from_cart": [
     {
       "type": 0,
-      "value": "항목이 카트에서 제거됨"
+      "value": "Artikeln har tagits bort från kundvagnen"
     }
   ],
   "cart.product_edit_modal.modal_label": [
     {
-      "type": 1,
-      "value": "productName"
+      "type": 0,
+      "value": "Redigera modal för "
     },
     {
-      "type": 0,
-      "value": "에 대한 모달 편집"
+      "type": 1,
+      "value": "productName"
     }
   ],
   "cart.recommended_products.title.may_also_like": [
     {
       "type": 0,
-      "value": "추천 상품"
+      "value": "Du kanske också skulle gilla"
     }
   ],
   "cart.recommended_products.title.recently_viewed": [
     {
       "type": 0,
-      "value": "최근에 봄"
+      "value": "Senast visade"
     }
   ],
   "cart_cta.link.checkout": [
     {
       "type": 0,
-      "value": "체크아웃 진행"
+      "value": "Fortsätt till kassan"
     }
   ],
   "cart_secondary_button_group.action.added_to_wishlist": [
     {
       "type": 0,
-      "value": "위시리스트에 추가"
+      "value": "Lägg till i önskelistan"
     }
   ],
   "cart_secondary_button_group.action.edit": [
     {
       "type": 0,
-      "value": "편집"
+      "value": "Redigera"
     }
   ],
   "cart_secondary_button_group.action.remove": [
     {
       "type": 0,
-      "value": "제거"
+      "value": "Ta bort"
     }
   ],
   "cart_secondary_button_group.label.this_is_gift": [
     {
       "type": 0,
-      "value": "선물로 구매"
+      "value": "Det här är en present."
     }
   ],
   "cart_skeleton.heading.order_summary": [
     {
       "type": 0,
-      "value": "주문 요약"
+      "value": "Beställningssammanfattning"
     }
   ],
   "cart_skeleton.title.cart": [
     {
       "type": 0,
-      "value": "카트"
+      "value": "Kundvagn"
     }
   ],
   "cart_title.title.cart_num_of_items": [
     {
       "type": 0,
-      "value": "카트("
+      "value": "Kundvagn ("
     },
     {
       "offset": 0,
@@ -543,7 +547,7 @@
           "value": [
             {
               "type": 0,
-              "value": "0개 항목"
+              "value": "0 artiklar"
             }
           ]
         },
@@ -554,7 +558,7 @@
             },
             {
               "type": 0,
-              "value": "개 항목"
+              "value": " artikel"
             }
           ]
         },
@@ -565,7 +569,7 @@
             },
             {
               "type": 0,
-              "value": "개 항목"
+              "value": " artiklar"
             }
           ]
         }
@@ -582,127 +586,127 @@
   "category_links.button_text": [
     {
       "type": 0,
-      "value": "카테고리"
+      "value": "Kategorier"
     }
   ],
   "cc_radio_group.action.remove": [
     {
       "type": 0,
-      "value": "제거"
+      "value": "Ta bort"
     }
   ],
   "cc_radio_group.button.add_new_card": [
     {
       "type": 0,
-      "value": "새 카드 추가"
+      "value": "Lägg till nytt kort"
     }
   ],
   "checkout.button.place_order": [
     {
       "type": 0,
-      "value": "주문하기"
+      "value": "Slutför beställning"
     }
   ],
   "checkout.message.generic_error": [
     {
       "type": 0,
-      "value": "체크아웃하는 중에 예상치 못한 오류가 발생했습니다. "
+      "value": "Ett oväntat fel inträffade vid betalning."
     }
   ],
   "checkout_confirmation.button.create_account": [
     {
       "type": 0,
-      "value": "계정 생성"
+      "value": "Skapa konto"
     }
   ],
   "checkout_confirmation.heading.billing_address": [
     {
       "type": 0,
-      "value": "청구 주소"
+      "value": "Faktureringsadress"
     }
   ],
   "checkout_confirmation.heading.create_account": [
     {
       "type": 0,
-      "value": "빠른 체크아웃을 위해 계정을 만듭니다."
+      "value": "Skapa ett konto för snabbare betalning"
     }
   ],
   "checkout_confirmation.heading.credit_card": [
     {
       "type": 0,
-      "value": "신용카드"
+      "value": "Kreditkort"
     }
   ],
   "checkout_confirmation.heading.delivery_details": [
     {
       "type": 0,
-      "value": "배송 세부 정보"
+      "value": "Leveransinformation"
     }
   ],
   "checkout_confirmation.heading.order_summary": [
     {
       "type": 0,
-      "value": "주문 요약"
+      "value": "Beställningssammanfattning"
     }
   ],
   "checkout_confirmation.heading.payment_details": [
     {
       "type": 0,
-      "value": "결제 세부 정보"
+      "value": "Betalningsinformation"
     }
   ],
   "checkout_confirmation.heading.shipping_address": [
     {
       "type": 0,
-      "value": "배송 주소"
+      "value": "Fraktadress"
     }
   ],
   "checkout_confirmation.heading.shipping_method": [
     {
       "type": 0,
-      "value": "배송 방법"
+      "value": "Fraktmetod"
     }
   ],
   "checkout_confirmation.heading.thank_you_for_order": [
     {
       "type": 0,
-      "value": "주문해 주셔서 감사합니다."
+      "value": "Tack för din beställning!"
     }
   ],
   "checkout_confirmation.label.free": [
     {
       "type": 0,
-      "value": "무료"
+      "value": "Gratis"
     }
   ],
   "checkout_confirmation.label.order_number": [
     {
       "type": 0,
-      "value": "주문 번호"
+      "value": "Beställningsnummer"
     }
   ],
   "checkout_confirmation.label.order_total": [
     {
       "type": 0,
-      "value": "주문 합계"
+      "value": "Beställning totalt"
     }
   ],
   "checkout_confirmation.label.promo_applied": [
     {
       "type": 0,
-      "value": "프로모션이 적용됨"
+      "value": "kampanjerbjudande tillämpat"
     }
   ],
   "checkout_confirmation.label.shipping": [
     {
       "type": 0,
-      "value": "배송"
+      "value": "Frakt"
     }
   ],
   "checkout_confirmation.label.shipping.strikethrough.price": [
     {
       "type": 0,
-      "value": "원래 가격: "
+      "value": "Ursprungligt pris "
     },
     {
       "type": 1,
@@ -710,7 +714,7 @@
     },
     {
       "type": 0,
-      "value": " , 현재 가격: "
+      "value": ", nu "
     },
     {
       "type": 1,
@@ -720,31 +724,31 @@
   "checkout_confirmation.label.subtotal": [
     {
       "type": 0,
-      "value": "소계"
+      "value": "Delsumma"
     }
   ],
   "checkout_confirmation.label.tax": [
     {
       "type": 0,
-      "value": "세금"
+      "value": "Skatt"
     }
   ],
   "checkout_confirmation.link.continue_shopping": [
     {
       "type": 0,
-      "value": "계속 쇼핑하기"
+      "value": "Fortsätt handla"
     }
   ],
   "checkout_confirmation.link.login": [
     {
       "type": 0,
-      "value": "여기서 로그인하십시오."
+      "value": "Logga in här"
     }
   ],
   "checkout_confirmation.message.already_has_account": [
     {
       "type": 0,
-      "value": "이 이메일을 사용한 계정이 이미 있습니다."
+      "value": "Det finns redan ett konto med den här e-postadressen."
     }
   ],
   "checkout_confirmation.message.num_of_items_in_order": [
@@ -755,7 +759,7 @@
           "value": [
             {
               "type": 0,
-              "value": "0개 항목"
+              "value": "0 artiklar"
             }
           ]
         },
@@ -766,7 +770,7 @@
             },
             {
               "type": 0,
-              "value": "개 항목"
+              "value": " artikel"
             }
           ]
         },
@@ -777,7 +781,7 @@
             },
             {
               "type": 0,
-              "value": "개 항목"
+              "value": " artiklar"
             }
           ]
         }
@@ -788,6 +792,10 @@
     }
   ],
   "checkout_confirmation.message.will_email_shortly": [
+    {
+      "type": 0,
+      "value": "Vi kommer inom kort att skicka ett e-postmeddelande till "
+    },
     {
       "children": [
         {
@@ -800,49 +808,49 @@
     },
     {
       "type": 0,
-      "value": "(으)로 확인 번호와 영수증이 포함된 이메일을 곧 보내드리겠습니다."
+      "value": " med ditt bekräftelsenummer och kvitto."
     }
   ],
   "checkout_footer.link.privacy_policy": [
     {
       "type": 0,
-      "value": "개인정보보호 정책"
+      "value": "Sekretesspolicy"
     }
   ],
   "checkout_footer.link.returns_exchanges": [
     {
       "type": 0,
-      "value": "반품 및 교환"
+      "value": "Returer och byten"
     }
   ],
   "checkout_footer.link.shipping": [
     {
       "type": 0,
-      "value": "배송"
+      "value": "Frakt"
     }
   ],
   "checkout_footer.link.site_map": [
     {
       "type": 0,
-      "value": "사이트 맵"
+      "value": "Webbplatskarta"
     }
   ],
   "checkout_footer.link.terms_conditions": [
     {
       "type": 0,
-      "value": "이용 약관"
+      "value": "Villkor"
     }
   ],
   "checkout_footer.message.copyright": [
     {
       "type": 0,
-      "value": "Salesforce or its affiliates. All rights reserved. 데모용 매장입니다. 주문이 처리되지 않습니다."
+      "value": "Salesforce eller dess närstående bolag. Alla rättigheter förbehållna. Detta är endast en demobutik. Gjorda beställningar kommer INTE att behandlas."
     }
   ],
   "checkout_header.link.assistive_msg.cart": [
     {
       "type": 0,
-      "value": "카트로 돌아가기, 품목 수: "
+      "value": "Tillbaka till kundvagnen, antal artiklar: "
     },
     {
       "type": 1,
@@ -852,49 +860,49 @@
   "checkout_header.link.cart": [
     {
       "type": 0,
-      "value": "카트로 돌아가기"
+      "value": "Tillbaka till kundvagnen"
     }
   ],
   "checkout_payment.action.remove": [
     {
       "type": 0,
-      "value": "제거"
+      "value": "Ta bort"
     }
   ],
   "checkout_payment.button.review_order": [
     {
       "type": 0,
-      "value": "주문 검토"
+      "value": "Granska beställning"
     }
   ],
   "checkout_payment.heading.billing_address": [
     {
       "type": 0,
-      "value": "청구 주소"
+      "value": "Faktureringsadress"
     }
   ],
   "checkout_payment.heading.credit_card": [
     {
       "type": 0,
-      "value": "신용카드"
+      "value": "Kreditkort"
     }
   ],
   "checkout_payment.label.billing_address_form": [
     {
       "type": 0,
-      "value": "청구 주소 양식"
+      "value": "Formulär för faktureringsadress"
     }
   ],
   "checkout_payment.label.same_as_shipping": [
     {
       "type": 0,
-      "value": "배송 주소와 동일"
+      "value": "Samma som fraktadress"
     }
   ],
   "checkout_payment.title.payment": [
     {
       "type": 0,
-      "value": "결제"
+      "value": "Betalning"
     }
   ],
   "colorRefinements.label.hitCount": [
@@ -904,7 +912,7 @@
     },
     {
       "type": 0,
-      "value": "("
+      "value": " ("
     },
     {
       "type": 1,
@@ -918,211 +926,211 @@
   "confirmation_modal.default.action.no": [
     {
       "type": 0,
-      "value": "아니요"
+      "value": "Nej"
     }
   ],
   "confirmation_modal.default.action.yes": [
     {
       "type": 0,
-      "value": "예"
+      "value": "Ja"
     }
   ],
   "confirmation_modal.default.assistive_msg.no": [
     {
       "type": 0,
-      "value": "아니요, 작업을 취소합니다."
+      "value": "Nej, avbryt åtgärden"
     }
   ],
   "confirmation_modal.default.assistive_msg.yes": [
     {
       "type": 0,
-      "value": "예, 작업을 확인합니다"
+      "value": "Ja, bekräfta åtgärden"
     }
   ],
   "confirmation_modal.default.message.you_want_to_continue": [
     {
       "type": 0,
-      "value": "계속하시겠습니까?"
+      "value": "Är du säker på att du vill fortsätta?"
     }
   ],
   "confirmation_modal.default.title.confirm_action": [
     {
       "type": 0,
-      "value": "작업 확인"
+      "value": "Bekräfta åtgärden"
     }
   ],
   "confirmation_modal.remove_cart_item.action.no": [
     {
       "type": 0,
-      "value": "아니요. 항목을 그대로 둡니다."
+      "value": "Nej, behåll artikeln"
     }
   ],
   "confirmation_modal.remove_cart_item.action.remove": [
     {
       "type": 0,
-      "value": "제거"
+      "value": "Ta bort"
     }
   ],
   "confirmation_modal.remove_cart_item.action.yes": [
     {
       "type": 0,
-      "value": "예. 항목을 제거합니다."
+      "value": "Ja, ta bort artikeln"
     }
   ],
   "confirmation_modal.remove_cart_item.assistive_msg.no": [
     {
       "type": 0,
-      "value": "아니요. 항목을 그대로 둡니다."
+      "value": "Nej, behåll artikeln"
     }
   ],
   "confirmation_modal.remove_cart_item.assistive_msg.remove": [
     {
       "type": 0,
-      "value": "사용할 수 없는 제품 제거"
+      "value": "Ta bort otillgängliga produkter"
     }
   ],
   "confirmation_modal.remove_cart_item.assistive_msg.yes": [
     {
       "type": 0,
-      "value": "예. 항목을 제거합니다."
+      "value": "Ja, ta bort artikeln"
     }
   ],
   "confirmation_modal.remove_cart_item.message.need_to_remove_due_to_unavailability": [
     {
       "type": 0,
-      "value": "더 이상 온라인으로 구매할 수 없는 일부 품목이 카트에서 제거됩니다."
+      "value": "Vissa artiklar är inte längre tillgängliga online och kommer att tas bort från din kundvagn."
     }
   ],
   "confirmation_modal.remove_cart_item.message.sure_to_remove": [
     {
       "type": 0,
-      "value": "이 항목을 카트에서 제거하시겠습니까?"
+      "value": "Är du säker på att du vill ta bort den här artikeln från din kundvagn?"
     }
   ],
   "confirmation_modal.remove_cart_item.title.confirm_remove": [
     {
       "type": 0,
-      "value": "항목 제거 확인"
+      "value": "Bekräfta att du vill ta bort artikeln"
     }
   ],
   "confirmation_modal.remove_cart_item.title.items_unavailable": [
     {
       "type": 0,
-      "value": "품목 구매 불가"
+      "value": "Otillgängliga artiklar"
     }
   ],
   "confirmation_modal.remove_wishlist_item.action.no": [
     {
       "type": 0,
-      "value": "아니요. 항목을 그대로 둡니다."
+      "value": "Nej, behåll artikeln"
     }
   ],
   "confirmation_modal.remove_wishlist_item.action.yes": [
     {
       "type": 0,
-      "value": "예. 항목을 제거합니다."
+      "value": "Ja, ta bort artikeln"
     }
   ],
   "confirmation_modal.remove_wishlist_item.message.sure_to_remove": [
     {
       "type": 0,
-      "value": "이 항목을 위시리스트에서 제거하시겠습니까?"
+      "value": "Är du säker på att du vill ta bort den här artikeln från din önskelista?"
     }
   ],
   "confirmation_modal.remove_wishlist_item.title.confirm_remove": [
     {
       "type": 0,
-      "value": "항목 제거 확인"
+      "value": "Bekräfta att du vill ta bort artikeln"
     }
   ],
   "contact_info.action.sign_out": [
     {
       "type": 0,
-      "value": "로그아웃"
+      "value": "Logga ut"
     }
   ],
   "contact_info.button.already_have_account": [
     {
       "type": 0,
-      "value": "계정이 이미 있습니까? 로그인"
+      "value": "Har du redan ett konto? Logga in"
     }
   ],
   "contact_info.button.back_to_sign_in_options": [
     {
       "type": 0,
-      "value": "로그인 옵션으로 돌아가기"
+      "value": "Tillbaka till inloggningsalternativ"
     }
   ],
   "contact_info.button.checkout_as_guest": [
     {
       "type": 0,
-      "value": "비회원으로 체크아웃"
+      "value": "Betala som gäst"
     }
   ],
   "contact_info.button.login": [
     {
       "type": 0,
-      "value": "로그인"
+      "value": "Logga in"
     }
   ],
   "contact_info.button.password": [
     {
       "type": 0,
-      "value": "암호"
+      "value": "Lösenord"
     }
   ],
   "contact_info.button.secure_link": [
     {
       "type": 0,
-      "value": "보안 링크"
+      "value": "Säker länk"
     }
   ],
   "contact_info.error.incorrect_username_or_password": [
     {
       "type": 0,
-      "value": "사용자 이름 또는 암호가 올바르지 않습니다. 다시 시도하십시오."
+      "value": "Felaktigt användarnamn eller lösenord, försök igen."
     }
   ],
   "contact_info.link.forgot_password": [
     {
       "type": 0,
-      "value": "암호가 기억나지 않습니까?"
+      "value": "Har du glömt lösenordet?"
     }
   ],
   "contact_info.message.or_login_with": [
     {
       "type": 0,
-      "value": "또는 다음으로 로그인"
+      "value": "Eller logga in med"
     }
   ],
   "contact_info.title.contact_info": [
     {
       "type": 0,
-      "value": "연락처 정보"
+      "value": "Kontaktuppgifter"
     }
   ],
   "credit_card_fields.tool_tip.security_code": [
     {
       "type": 0,
-      "value": "이 3자리 코드는 카드의 뒷면에서 확인할 수 있습니다."
+      "value": "Denna tresiffriga kod finns på baksidan av ditt kort."
     }
   ],
   "credit_card_fields.tool_tip.security_code.american_express": [
     {
       "type": 0,
-      "value": "이 4자리 코드는 카드의 전면에서 확인할 수 있습니다."
+      "value": "Denna fyrsiffriga kod finns på framsidan av ditt kort."
     }
   ],
   "credit_card_fields.tool_tip.security_code_aria_label": [
     {
       "type": 0,
-      "value": "보안 코드 정보"
+      "value": "Information om säkerhetskod"
     }
   ],
   "display_price.assistive_msg.current_price": [
     {
       "type": 0,
-      "value": "현재 가격 "
+      "value": "aktuellt pris "
     },
     {
       "type": 1,
@@ -1132,21 +1140,17 @@
   "display_price.assistive_msg.current_price_with_range": [
     {
       "type": 0,
-      "value": "현재 가격 "
+      "value": "Från aktuellt pris "
     },
     {
       "type": 1,
       "value": "currentPrice"
-    },
-    {
-      "type": 0,
-      "value": "에서"
     }
   ],
   "display_price.assistive_msg.strikethrough_price": [
     {
       "type": 0,
-      "value": "원래 가격 "
+      "value": "ursprungligt pris "
     },
     {
       "type": 1,
@@ -1156,55 +1160,51 @@
   "display_price.assistive_msg.strikethrough_price_with_range": [
     {
       "type": 0,
-      "value": "원래 가격 "
+      "value": "Från ursprungligt pris "
     },
     {
       "type": 1,
       "value": "listPrice"
-    },
-    {
-      "type": 0,
-      "value": "에서"
     }
   ],
   "display_price.label.current_price_with_range": [
     {
-      "type": 1,
-      "value": "currentPrice"
+      "type": 0,
+      "value": "Från "
     },
     {
-      "type": 0,
-      "value": "부터 시작"
+      "type": 1,
+      "value": "currentPrice"
     }
   ],
   "dnt_notification.button.accept": [
     {
       "type": 0,
-      "value": "채택"
+      "value": "Acceptera"
     }
   ],
   "dnt_notification.button.assistive_msg.accept": [
     {
       "type": 0,
-      "value": "추적 수락"
+      "value": "Acceptera spårning"
     }
   ],
   "dnt_notification.button.assistive_msg.close": [
     {
       "type": 0,
-      "value": "추적 동의 양식 닫기"
+      "value": "Stäng samtyckesformulär för spårning"
     }
   ],
   "dnt_notification.button.assistive_msg.decline": [
     {
       "type": 0,
-      "value": "추적 거부"
+      "value": "Neka spårning"
     }
   ],
   "dnt_notification.button.decline": [
     {
       "type": 0,
-      "value": "거부"
+      "value": "Neka"
     }
   ],
   "dnt_notification.description": [
@@ -1216,155 +1216,159 @@
   "dnt_notification.title": [
     {
       "type": 0,
-      "value": "추적 동의"
+      "value": "Samtycke till spårning"
     }
   ],
   "drawer_menu.button.account_details": [
     {
       "type": 0,
-      "value": "계정 세부 정보"
+      "value": "Kontouppgifter"
     }
   ],
   "drawer_menu.button.addresses": [
     {
       "type": 0,
-      "value": "주소"
+      "value": "Adresser"
     }
   ],
   "drawer_menu.button.log_out": [
     {
       "type": 0,
-      "value": "로그아웃"
+      "value": "Logga ut"
     }
   ],
   "drawer_menu.button.my_account": [
     {
       "type": 0,
-      "value": "내 계정"
+      "value": "Mitt konto"
     }
   ],
   "drawer_menu.button.order_history": [
     {
       "type": 0,
-      "value": "주문 내역"
+      "value": "Beställningshistorik"
     }
   ],
   "drawer_menu.header.assistive_msg.title": [
     {
       "type": 0,
-      "value": "메뉴 서랍"
+      "value": "Menyfönster"
     }
   ],
   "drawer_menu.link.about_us": [
     {
       "type": 0,
-      "value": "회사 정보"
+      "value": "Om oss"
     }
   ],
   "drawer_menu.link.customer_support": [
     {
       "type": 0,
-      "value": "고객 지원"
+      "value": "Kundsupport"
     }
   ],
   "drawer_menu.link.customer_support.contact_us": [
     {
       "type": 0,
-      "value": "문의"
+      "value": "Kontakta oss"
     }
   ],
   "drawer_menu.link.customer_support.shipping_and_returns": [
     {
       "type": 0,
-      "value": "배송 및 반품"
+      "value": "Frakt och returer"
     }
   ],
   "drawer_menu.link.our_company": [
     {
       "type": 0,
-      "value": "회사"
+      "value": "Vårt företag"
     }
   ],
   "drawer_menu.link.privacy_and_security": [
     {
       "type": 0,
-      "value": "개인정보보호 및 보안"
+      "value": "Sekretess och säkerhet"
     }
   ],
   "drawer_menu.link.privacy_policy": [
     {
       "type": 0,
-      "value": "개인정보보호 정책"
+      "value": "Sekretesspolicy"
     }
   ],
   "drawer_menu.link.shop_all": [
     {
       "type": 0,
-      "value": "모두 구매"
+      "value": "Handla allt"
     }
   ],
   "drawer_menu.link.sign_in": [
     {
       "type": 0,
-      "value": "로그인"
+      "value": "Logga in"
     }
   ],
   "drawer_menu.link.site_map": [
     {
       "type": 0,
-      "value": "사이트 맵"
+      "value": "Webbplatskarta"
     }
   ],
   "drawer_menu.link.store_locator": [
     {
       "type": 0,
-      "value": "매장 찾기"
+      "value": "Butikslokaliserare"
     }
   ],
   "drawer_menu.link.terms_and_conditions": [
     {
       "type": 0,
-      "value": "이용 약관"
+      "value": "Villkor"
     }
   ],
   "empty_cart.description.empty_cart": [
     {
       "type": 0,
-      "value": "카트가 비어 있습니다."
+      "value": "Din kundvagn är tom."
     }
   ],
   "empty_cart.link.continue_shopping": [
     {
       "type": 0,
-      "value": "계속 쇼핑하기"
+      "value": "Fortsätt handla"
     }
   ],
   "empty_cart.link.sign_in": [
     {
       "type": 0,
-      "value": "로그인"
+      "value": "Logga in"
     }
   ],
   "empty_cart.message.continue_shopping": [
     {
       "type": 0,
-      "value": "계속 쇼핑하면서 카트에 항목을 추가합니다."
+      "value": "Fortsätt handla för att lägga till artiklar i din kundvagn."
     }
   ],
   "empty_cart.message.sign_in_or_continue_shopping": [
     {
       "type": 0,
-      "value": "로그인하여 저장된 항목을 검색하거나 쇼핑을 계속하십시오."
+      "value": "Logga in för att hämta dina sparade artiklar eller fortsätt handla."
     }
   ],
   "empty_search_results.info.cant_find_anything_for_category": [
+    {
+      "type": 0,
+      "value": "Vi kunde inte hitta något för "
+    },
     {
       "type": 1,
       "value": "category"
     },
     {
       "type": 0,
-      "value": "에 해당하는 항목을 찾을 수 없습니다. 제품을 검색하거나 "
+      "value": ". Försök att söka efter en produkt eller "
     },
     {
       "type": 1,
@@ -1372,19 +1376,27 @@
     },
     {
       "type": 0,
-      "value": "을(를) 클릭해 보십시오."
+      "value": "."
     }
   ],
   "empty_search_results.info.cant_find_anything_for_query": [
     {
       "type": 0,
-      "value": "{searchQuery}에 해당하는 항목을 찾을 수 없습니다."
+      "value": "Vi kunde inte hitta något för ”"
+    },
+    {
+      "type": 1,
+      "value": "searchQuery"
+    },
+    {
+      "type": 0,
+      "value": "”."
     }
   ],
   "empty_search_results.info.double_check_spelling": [
     {
       "type": 0,
-      "value": "철자를 다시 확인하고 다시 시도하거나 "
+      "value": "Dubbelkolla stavningen och försök igen eller "
     },
     {
       "type": 1,
@@ -1392,205 +1404,205 @@
     },
     {
       "type": 0,
-      "value": "을(를) 클릭해 보십시오."
+      "value": "."
     }
   ],
   "empty_search_results.link.contact_us": [
     {
       "type": 0,
-      "value": "문의"
+      "value": "Kontakta oss"
     }
   ],
   "empty_search_results.recommended_products.title.most_viewed": [
     {
       "type": 0,
-      "value": "가장 많이 본 항목"
+      "value": "Mest visade"
     }
   ],
   "empty_search_results.recommended_products.title.top_sellers": [
     {
       "type": 0,
-      "value": "탑셀러"
+      "value": "Toppsäljare"
     }
   ],
   "field.password.assistive_msg.hide_password": [
     {
       "type": 0,
-      "value": "암호 숨기기"
+      "value": "Dölj lösenord"
     }
   ],
   "field.password.assistive_msg.show_password": [
     {
       "type": 0,
-      "value": "암호 표시"
+      "value": "Visa lösenord"
     }
   ],
   "footer.column.account": [
     {
       "type": 0,
-      "value": "계정"
+      "value": "Konto"
     }
   ],
   "footer.column.customer_support": [
     {
       "type": 0,
-      "value": "고객 지원"
+      "value": "Kundsupport"
     }
   ],
   "footer.column.our_company": [
     {
       "type": 0,
-      "value": "회사"
+      "value": "Vårt företag"
     }
   ],
   "footer.link.about_us": [
     {
       "type": 0,
-      "value": "회사 정보"
+      "value": "Om oss"
     }
   ],
   "footer.link.contact_us": [
     {
       "type": 0,
-      "value": "문의"
+      "value": "Kontakta oss"
     }
   ],
   "footer.link.order_status": [
     {
       "type": 0,
-      "value": "주문 상태"
+      "value": "Beställningsstatus"
     }
   ],
   "footer.link.privacy_policy": [
     {
       "type": 0,
-      "value": "개인정보보호 정책"
+      "value": "Sekretesspolicy"
     }
   ],
   "footer.link.shipping": [
     {
       "type": 0,
-      "value": "배송"
+      "value": "Frakt"
     }
   ],
   "footer.link.signin_create_account": [
     {
       "type": 0,
-      "value": "로그인 또는 계정 생성"
+      "value": "Logga in eller skapa konto"
     }
   ],
   "footer.link.site_map": [
     {
       "type": 0,
-      "value": "사이트 맵"
+      "value": "Webbplatskarta"
     }
   ],
   "footer.link.store_locator": [
     {
       "type": 0,
-      "value": "매장 찾기"
+      "value": "Butikslokaliserare"
     }
   ],
   "footer.link.terms_conditions": [
     {
       "type": 0,
-      "value": "이용 약관"
+      "value": "Villkor"
     }
   ],
   "footer.locale_selector.assistive_msg": [
     {
       "type": 0,
-      "value": "언어 선택"
+      "value": "Välj språk"
     }
   ],
   "footer.message.copyright": [
     {
       "type": 0,
-      "value": "Salesforce or its affiliates. All rights reserved. 데모용 매장입니다. 주문이 처리되지 않습니다."
+      "value": "Salesforce eller dess närstående bolag. Alla rättigheter förbehållna. Detta är endast en demobutik. Gjorda beställningar kommer INTE att behandlas."
     }
   ],
   "footer.subscribe.button.sign_up": [
     {
       "type": 0,
-      "value": "가입하기"
+      "value": "Registrera dig"
     }
   ],
   "footer.subscribe.description.sign_up": [
     {
       "type": 0,
-      "value": "특별한 구매 기회를 놓치지 않으려면 가입하세요."
+      "value": "Registrera dig för att hålla koll på de hetaste erbjudandena"
     }
   ],
   "footer.subscribe.email.assistive_msg": [
     {
       "type": 0,
-      "value": "뉴스레터 수신 이메일 주소"
+      "value": "E-postadress för nyhetsbrev"
     }
   ],
   "footer.subscribe.heading.first_to_know": [
     {
       "type": 0,
-      "value": "최신 정보를 누구보다 빨리 받아보세요."
+      "value": "Håll dig uppdaterad"
     }
   ],
   "form_action_buttons.button.cancel": [
     {
       "type": 0,
-      "value": "취소"
+      "value": "Avbryt"
     }
   ],
   "form_action_buttons.button.save": [
     {
       "type": 0,
-      "value": "저장"
+      "value": "Spara"
     }
   ],
   "global.account.link.account_details": [
     {
       "type": 0,
-      "value": "계정 세부 정보"
+      "value": "Kontouppgifter"
     }
   ],
   "global.account.link.addresses": [
     {
       "type": 0,
-      "value": "주소"
+      "value": "Adresser"
     }
   ],
   "global.account.link.order_history": [
     {
       "type": 0,
-      "value": "주문 내역"
+      "value": "Beställningshistorik"
     }
   ],
   "global.account.link.wishlist": [
     {
       "type": 0,
-      "value": "위시리스트"
+      "value": "Önskelista"
     }
   ],
   "global.error.create_account": [
     {
       "type": 0,
-      "value": "이 기능은 현재 사용할 수 없습니다. 이 기능에 액세스하려면 계정을 만들어야 합니다."
+      "value": "Denna funktion är inte tillgänglig för närvarande. Du måste skapa ett konto för att få tillgång till den här funktionen."
     }
   ],
   "global.error.feature_unavailable": [
     {
       "type": 0,
-      "value": "이 기능은 현재 사용할 수 없습니다."
+      "value": "Denna funktion är inte tillgänglig för närvarande."
     }
   ],
   "global.error.invalid_token": [
     {
       "type": 0,
-      "value": "유효하지 않은 토큰입니다. 다시 시도하십시오."
+      "value": "Ogiltig token. Försök igen."
     }
   ],
   "global.error.something_went_wrong": [
     {
       "type": 0,
-      "value": "문제가 발생했습니다. 다시 시도하십시오."
+      "value": "Något gick fel. Försök igen!"
     }
   ],
   "global.info.added_to_wishlist": [
@@ -1609,7 +1621,7 @@
           "value": [
             {
               "type": 0,
-              "value": "개 항목"
+              "value": "produkt"
             }
           ]
         },
@@ -1617,7 +1629,7 @@
           "value": [
             {
               "type": 0,
-              "value": "개 항목"
+              "value": "produkter"
             }
           ]
         }
@@ -1628,61 +1640,61 @@
     },
     {
       "type": 0,
-      "value": "이 위시리스트에 추가됨"
+      "value": " läggs till i önskelistan"
     }
   ],
   "global.info.already_in_wishlist": [
     {
       "type": 0,
-      "value": "이미 위시리스트에 추가한 품목"
+      "value": "Produkten finns redan i önskelistan"
     }
   ],
   "global.info.removed_from_wishlist": [
     {
       "type": 0,
-      "value": "항목이 위시리스트에서 제거됨"
+      "value": "Produkten har tagits bort från önskelistan"
     }
   ],
   "global.link.added_to_wishlist.view_wishlist": [
     {
       "type": 0,
-      "value": "보기"
+      "value": "Visa"
     }
   ],
   "header.button.assistive_msg.logo": [
     {
       "type": 0,
-      "value": "로고"
+      "value": "Logotyp"
     }
   ],
   "header.button.assistive_msg.menu": [
     {
       "type": 0,
-      "value": "메뉴"
+      "value": "Meny"
     }
   ],
   "header.button.assistive_msg.menu.open_dialog": [
     {
       "type": 0,
-      "value": "대화창 열기"
+      "value": "Öppnar en dialogruta"
     }
   ],
   "header.button.assistive_msg.my_account": [
     {
       "type": 0,
-      "value": "내 계정"
+      "value": "Mitt konto"
     }
   ],
   "header.button.assistive_msg.my_account_menu": [
     {
       "type": 0,
-      "value": "계정 메뉴 열기"
+      "value": "Öppna kontomeny"
     }
   ],
   "header.button.assistive_msg.my_cart_with_num_items": [
     {
       "type": 0,
-      "value": "내 카트, 품목 수: "
+      "value": "Min kundvagn, antal artiklar: "
     },
     {
       "type": 1,
@@ -1692,55 +1704,55 @@
   "header.button.assistive_msg.store_locator": [
     {
       "type": 0,
-      "value": "매장 찾기"
+      "value": "Butikslokaliserare"
     }
   ],
   "header.button.assistive_msg.wishlist": [
     {
       "type": 0,
-      "value": "위시리스트"
+      "value": "Önskelista"
     }
   ],
   "header.field.placeholder.search_for_products": [
     {
       "type": 0,
-      "value": "제품 검색..."
+      "value": "Sök efter produkter ..."
     }
   ],
   "header.popover.action.log_out": [
     {
       "type": 0,
-      "value": "로그아웃"
+      "value": "Logga ut"
     }
   ],
   "header.popover.title.my_account": [
     {
       "type": 0,
-      "value": "내 계정"
+      "value": "Mitt konto"
     }
   ],
   "home.description.features": [
     {
       "type": 0,
-      "value": "향상된 기능을 추가하는 데 집중할 수 있도록 기본 기능을 제공합니다."
+      "value": "Färdiga funktioner så att du bara behöver fokusera på att lägga till förbättringar."
     }
   ],
   "home.description.here_to_help": [
     {
       "type": 0,
-      "value": "지원 담당자에게 문의하세요."
+      "value": "Kontakta vår supportpersonal."
     }
   ],
   "home.description.here_to_help_line_2": [
     {
       "type": 0,
-      "value": "올바른 위치로 안내해 드립니다."
+      "value": "De hjälper dig att komma till rätt plats."
     }
   ],
   "home.description.shop_products": [
     {
       "type": 0,
-      "value": "이 섹션에는 카탈로그의 컨텐츠가 포함되어 있습니다. 바꾸는 방법은 "
+      "value": "Detta avsnitt innehåller innehåll från katalogen. "
     },
     {
       "type": 1,
@@ -1748,157 +1760,157 @@
     },
     {
       "type": 0,
-      "value": "에서 확인하세요."
+      "value": " om hur du byter ut den."
     }
   ],
   "home.features.description.cart_checkout": [
     {
       "type": 0,
-      "value": "구매자의 카트 및 체크아웃 경험에 대한 이커머스 모범 사례입니다."
+      "value": "Bästa praxis för e-handel för en köpares upplevelse när det gäller kundvagn och betalning."
     }
   ],
   "home.features.description.components": [
     {
       "type": 0,
-      "value": "이용이 간편한 모듈식 React 구성요소 라이브러리인 Chakra UI를 사용하여 구축되었습니다."
+      "value": "Byggt med Chakra UI, ett enkelt, modulärt och lättillgängligt React-komponentbibliotek."
     }
   ],
   "home.features.description.einstein_recommendations": [
     {
       "type": 0,
-      "value": "제품 추천을 통해 모든 구매자에게 다른 추천 제품이나 오퍼를 제공합니다."
+      "value": "Leverera nästa topprodukt eller topperbjudande till varje kund med hjälp av produktrekommendationer."
     }
   ],
   "home.features.description.my_account": [
     {
       "type": 0,
-      "value": "구매자가 프로필, 주소, 결제, 주문 등의 계정 정보를 관리할 수 있습니다."
+      "value": "Kunder kan hantera kontoinformation som profil, adresser, betalningar och beställningar."
     }
   ],
   "home.features.description.shopper_login": [
     {
       "type": 0,
-      "value": "구매자가 보다 개인화된 쇼핑 경험을 통해 편리하게 로그인할 수 있습니다."
+      "value": "Gör det möjligt för kunderna att enkelt logga in och få en mer personlig köpupplevelse."
     }
   ],
   "home.features.description.wishlist": [
     {
       "type": 0,
-      "value": "등록된 구매자가 나중에 구매할 제품 항목을 위시리스트에 추가할 수 있습니다."
+      "value": "Registrerade kunder kan lägga till produkter på sin önskelista och köpa dem senare."
     }
   ],
   "home.features.heading.cart_checkout": [
     {
       "type": 0,
-      "value": "카트 및 체크아웃"
+      "value": "Kundvagn och betalning"
     }
   ],
   "home.features.heading.components": [
     {
       "type": 0,
-      "value": "구성요소 및 디자인 키트"
+      "value": "Komponenter och designkit"
     }
   ],
   "home.features.heading.einstein_recommendations": [
     {
       "type": 0,
-      "value": "Einstein 제품 추천"
+      "value": "Einstein-rekommendationer"
     }
   ],
   "home.features.heading.my_account": [
     {
       "type": 0,
-      "value": "내 계정"
+      "value": "Mitt konto"
     }
   ],
   "home.features.heading.shopper_login": [
     {
       "type": 0,
-      "value": "Shopper Login and API Access Service(SLAS)"
+      "value": "Inloggning för kunder och tjänst för API-åtkomst"
     }
   ],
   "home.features.heading.wishlist": [
     {
       "type": 0,
-      "value": "위시리스트"
+      "value": "Önskelista"
     }
   ],
   "home.heading.features": [
     {
       "type": 0,
-      "value": "기능"
+      "value": "Funktioner"
     }
   ],
   "home.heading.here_to_help": [
     {
       "type": 0,
-      "value": "도움 받기"
+      "value": "Vi finns här för att hjälpa dig"
     }
   ],
   "home.heading.shop_products": [
     {
       "type": 0,
-      "value": "제품 쇼핑"
+      "value": "Handla produkter"
     }
   ],
   "home.hero_features.link.design_kit": [
     {
       "type": 0,
-      "value": "Figma PWA Design Kit를 사용하여 생성"
+      "value": "Skapa med Figma PWA Design Kit"
     }
   ],
   "home.hero_features.link.on_github": [
     {
       "type": 0,
-      "value": "Github에서 다운로드"
+      "value": "Ladda ner via Github"
     }
   ],
   "home.hero_features.link.on_managed_runtime": [
     {
       "type": 0,
-      "value": "Managed Runtime에서 배포"
+      "value": "Distribuera via Managed Runtime"
     }
   ],
   "home.link.contact_us": [
     {
       "type": 0,
-      "value": "문의"
+      "value": "Kontakta oss"
     }
   ],
   "home.link.get_started": [
     {
       "type": 0,
-      "value": "시작하기"
+      "value": "Kom igång"
     }
   ],
   "home.link.read_docs": [
     {
       "type": 0,
-      "value": "문서 읽기"
+      "value": "Läs dokumenten"
     }
   ],
   "home.title.react_starter_store": [
     {
       "type": 0,
-      "value": "소매점용 Adyen React PWA 스타터 스토어"
+      "value": "Adyen React PWA startbutik för detaljhandel"
     }
   ],
   "icons.assistive_msg.lock": [
     {
       "type": 0,
-      "value": "보안"
+      "value": "Säker"
     }
   ],
   "item_attributes.label.promotions": [
     {
       "type": 0,
-      "value": "프로모션"
+      "value": "Kampanjer"
     }
   ],
   "item_attributes.label.quantity": [
     {
       "type": 0,
-      "value": "수량: "
+      "value": "Kvantitet: "
     },
     {
       "type": 1,
@@ -1908,25 +1920,25 @@
   "item_attributes.label.selected_options": [
     {
       "type": 0,
-      "value": "선택한 옵션"
+      "value": "Valda alternativ"
     }
   ],
   "item_image.label.sale": [
     {
       "type": 0,
-      "value": "판매"
+      "value": "Försäljning"
     }
   ],
   "item_image.label.unavailable": [
     {
       "type": 0,
-      "value": "사용 불가"
+      "value": "Ej tillgänglig"
     }
   ],
   "item_variant.assistive_msg.quantity": [
     {
       "type": 0,
-      "value": "수량 "
+      "value": "Kvantitet "
     },
     {
       "type": 1,
@@ -1935,356 +1947,356 @@
   ],
   "item_variant.quantity.label": [
     {
+      "type": 0,
+      "value": "Kvantitetsväljare för "
+    },
+    {
       "type": 1,
       "value": "productName"
     },
     {
       "type": 0,
-      "value": "에 대한 수량 선택기 선택한 수량은 "
+      "value": ". Vald kvantitet är "
     },
     {
       "type": 1,
       "value": "quantity"
-    },
-    {
-      "type": 0,
-      "value": "개입니다."
     }
   ],
   "lCPCxk": [
     {
       "type": 0,
-      "value": "위에서 옵션을 모두 선택하세요."
+      "value": "Välj alla dina alternativ ovan"
     }
   ],
   "list_menu.nav.assistive_msg": [
     {
       "type": 0,
-      "value": "기본 탐색 메뉴"
+      "value": "Huvudnavigering"
     }
   ],
   "locale_text.message.ar-SA": [
     {
       "type": 0,
-      "value": "아랍어(사우디아라비아)"
+      "value": "Arabiska (Saudiarabien)"
     }
   ],
   "locale_text.message.bn-BD": [
     {
       "type": 0,
-      "value": "벵골어(방글라데시)"
+      "value": "Bangla (Bangladesh)"
     }
   ],
   "locale_text.message.bn-IN": [
     {
       "type": 0,
-      "value": "벵골어(인도)"
+      "value": "Bangla (Indien)"
     }
   ],
   "locale_text.message.cs-CZ": [
     {
       "type": 0,
-      "value": "체코어(체코)"
+      "value": "Tjeckiska (Tjeckien)"
     }
   ],
   "locale_text.message.da-DK": [
     {
       "type": 0,
-      "value": "덴마크어(덴마크)"
+      "value": "Danska (Danmark)"
     }
   ],
   "locale_text.message.de-AT": [
     {
       "type": 0,
-      "value": "독일어(오스트리아)"
+      "value": "Tyska (Österrike)"
     }
   ],
   "locale_text.message.de-CH": [
     {
       "type": 0,
-      "value": "독일어(스위스)"
+      "value": "Tyska (Schweiz)"
     }
   ],
   "locale_text.message.de-DE": [
     {
       "type": 0,
-      "value": "독일어(독일)"
+      "value": "Tyska (Tyskland)"
     }
   ],
   "locale_text.message.el-GR": [
     {
       "type": 0,
-      "value": "그리스어(그리스)"
+      "value": "Grekiska (Grekland)"
     }
   ],
   "locale_text.message.en-AU": [
     {
       "type": 0,
-      "value": "영어(오스트레일리아)"
+      "value": "Engelska (Australien)"
     }
   ],
   "locale_text.message.en-CA": [
     {
       "type": 0,
-      "value": "영어(캐나다)"
+      "value": "Engelska (Kanada)"
     }
   ],
   "locale_text.message.en-GB": [
     {
       "type": 0,
-      "value": "영어(영국)"
+      "value": "Engelska (Storbritannien)"
     }
   ],
   "locale_text.message.en-IE": [
     {
       "type": 0,
-      "value": "영어(아일랜드)"
+      "value": "Engelska (Irland)"
     }
   ],
   "locale_text.message.en-IN": [
     {
       "type": 0,
-      "value": "영어(인도)"
+      "value": "Engelska (Indien)"
     }
   ],
   "locale_text.message.en-NZ": [
     {
       "type": 0,
-      "value": "영어(뉴질랜드)"
+      "value": "Engelska (Nya Zeeland)"
     }
   ],
   "locale_text.message.en-US": [
     {
       "type": 0,
-      "value": "영어(미국)"
+      "value": "Engelska (USA)"
     }
   ],
   "locale_text.message.en-ZA": [
     {
       "type": 0,
-      "value": "영어(남아프리카공화국)"
+      "value": "Engelska (Sydafrika)"
     }
   ],
   "locale_text.message.es-AR": [
     {
       "type": 0,
-      "value": "스페인어(아르헨티나)"
+      "value": "Spanska (Argentina)"
     }
   ],
   "locale_text.message.es-CL": [
     {
       "type": 0,
-      "value": "스페인어(칠레)"
+      "value": "Spanska (Chile)"
     }
   ],
   "locale_text.message.es-CO": [
     {
       "type": 0,
-      "value": "스페인어(콜롬비아)"
+      "value": "Spanska (Colombia)"
     }
   ],
   "locale_text.message.es-ES": [
     {
       "type": 0,
-      "value": "스페인어(스페인)"
+      "value": "Spanska (Spanien)"
     }
   ],
   "locale_text.message.es-MX": [
     {
       "type": 0,
-      "value": "스페인어(멕시코)"
+      "value": "Spanska (Mexiko)"
     }
   ],
   "locale_text.message.es-US": [
     {
       "type": 0,
-      "value": "스페인어(미국)"
+      "value": "Spanska (USA)"
     }
   ],
   "locale_text.message.fi-FI": [
     {
       "type": 0,
-      "value": "핀란드어(핀란드)"
+      "value": "Finska (Finland)"
     }
   ],
   "locale_text.message.fr-BE": [
     {
       "type": 0,
-      "value": "프랑스어(벨기에)"
+      "value": "Franska (Belgien)"
     }
   ],
   "locale_text.message.fr-CA": [
     {
       "type": 0,
-      "value": "프랑스어(캐나다)"
+      "value": "Franska (Kanada)"
     }
   ],
   "locale_text.message.fr-CH": [
     {
       "type": 0,
-      "value": "프랑스어(스위스)"
+      "value": "Franska (Schweiz)"
     }
   ],
   "locale_text.message.fr-FR": [
     {
       "type": 0,
-      "value": "프랑스어(프랑스)"
+      "value": "Franska (Frankrike)"
     }
   ],
   "locale_text.message.he-IL": [
     {
       "type": 0,
-      "value": "히브리어(이스라엘)"
+      "value": "Hebreiska (Israel)"
     }
   ],
   "locale_text.message.hi-IN": [
     {
       "type": 0,
-      "value": "힌디어(인도)"
+      "value": "Hindi (Indien)"
     }
   ],
   "locale_text.message.hu-HU": [
     {
       "type": 0,
-      "value": "헝가리어(헝가리)"
+      "value": "Ungerska (Ungern)"
     }
   ],
   "locale_text.message.id-ID": [
     {
       "type": 0,
-      "value": "인도네시아어(인도네시아)"
+      "value": "Indonesiska (Indonesien)"
     }
   ],
   "locale_text.message.it-CH": [
     {
       "type": 0,
-      "value": "이탈리아어(스위스)"
+      "value": "Italienska (Schweiz)"
     }
   ],
   "locale_text.message.it-IT": [
     {
       "type": 0,
-      "value": "이탈리아어(이탈리아)"
+      "value": "Italienska (Italien)"
     }
   ],
   "locale_text.message.ja-JP": [
     {
       "type": 0,
-      "value": "일본어(일본)"
+      "value": "Japanska (Japan)"
     }
   ],
   "locale_text.message.ko-KR": [
     {
       "type": 0,
-      "value": "한국어(대한민국)"
+      "value": "Koreanska (Republiken Korea)"
     }
   ],
   "locale_text.message.nl-BE": [
     {
       "type": 0,
-      "value": "네덜란드어(벨기에)"
+      "value": "Nederländska (Belgien)"
     }
   ],
   "locale_text.message.nl-NL": [
     {
       "type": 0,
-      "value": "네덜란드어(네덜란드)"
+      "value": "Nederländska (Nederländerna)"
     }
   ],
   "locale_text.message.no-NO": [
     {
       "type": 0,
-      "value": "노르웨이어(노르웨이)"
+      "value": "Norska (Norge)"
     }
   ],
   "locale_text.message.pl-PL": [
     {
       "type": 0,
-      "value": "폴란드어(폴란드)"
+      "value": "Polska (Polen)"
     }
   ],
   "locale_text.message.pt-BR": [
     {
       "type": 0,
-      "value": "포르투갈어(브라질)"
+      "value": "Portugisiska (Brasilien)"
     }
   ],
   "locale_text.message.pt-PT": [
     {
       "type": 0,
-      "value": "포르투갈어(포르투갈)"
+      "value": "Portugisiska (Portugal)"
     }
   ],
   "locale_text.message.ro-RO": [
     {
       "type": 0,
-      "value": "루마니아어(루마니아)"
+      "value": "Rumänska (Rumänien)"
     }
   ],
   "locale_text.message.ru-RU": [
     {
       "type": 0,
-      "value": "러시아어(러시아)"
+      "value": "Ryska (Ryssland)"
     }
   ],
   "locale_text.message.sk-SK": [
     {
       "type": 0,
-      "value": "슬로바키아어(슬로바키아)"
+      "value": "Slovakiska (Slovakien)"
     }
   ],
   "locale_text.message.sv-SE": [
     {
       "type": 0,
-      "value": "스웨덴어(스웨덴)"
+      "value": "Svenska (Sverige)"
     }
   ],
   "locale_text.message.ta-IN": [
     {
       "type": 0,
-      "value": "타밀어(인도)"
+      "value": "Tamil (Indien)"
     }
   ],
   "locale_text.message.ta-LK": [
     {
       "type": 0,
-      "value": "타밀어(스리랑카)"
+      "value": "Tamil (Sri Lanka)"
     }
   ],
   "locale_text.message.th-TH": [
     {
       "type": 0,
-      "value": "태국어(태국)"
+      "value": "Thailändska (Thailand)"
     }
   ],
   "locale_text.message.tr-TR": [
     {
       "type": 0,
-      "value": "터키어(터키)"
+      "value": "Turkiska (Turkiet)"
     }
   ],
   "locale_text.message.zh-CN": [
     {
       "type": 0,
-      "value": "중국어(중국)"
+      "value": "Kinesiska (Kina)"
     }
   ],
   "locale_text.message.zh-HK": [
     {
       "type": 0,
-      "value": "중국어(홍콩)"
+      "value": "Kinesiska (Hongkong)"
     }
   ],
   "locale_text.message.zh-TW": [
     {
       "type": 0,
-      "value": "중국어(타이완)"
+      "value": "Kinesiska (Taiwan)"
     }
   ],
   "login_form.action.create_account": [
     {
       "type": 0,
-      "value": "계정 생성"
+      "value": "Skapa konto"
     }
   ],
   "login_form.button.apple": [
@@ -2296,13 +2308,13 @@
   "login_form.button.back": [
     {
       "type": 0,
-      "value": "로그인 옵션으로 돌아가기"
+      "value": "Tillbaka till inloggningsalternativ"
     }
   ],
   "login_form.button.continue_securely": [
     {
       "type": 0,
-      "value": "보안 모드로 계속하기"
+      "value": "Fortsätt tryggt och säkert"
     }
   ],
   "login_form.button.google": [
@@ -2314,62 +2326,58 @@
   "login_form.button.password": [
     {
       "type": 0,
-      "value": "암호"
+      "value": "Lösenord"
     }
   ],
   "login_form.button.sign_in": [
     {
       "type": 0,
-      "value": "로그인"
+      "value": "Logga in"
     }
   ],
   "login_form.link.forgot_password": [
     {
       "type": 0,
-      "value": "암호가 기억나지 않습니까?"
+      "value": "Har du glömt lösenordet?"
     }
   ],
   "login_form.message.dont_have_account": [
     {
       "type": 0,
-      "value": "계정이 없습니까?"
+      "value": "Har du inget konto?"
     }
   ],
   "login_form.message.or_login_with": [
     {
       "type": 0,
-      "value": "또는 다음으로 로그인"
+      "value": "Eller logga in med"
     }
   ],
   "login_form.message.welcome_back": [
     {
       "type": 0,
-      "value": "다시 오신 것을 환영합니다."
+      "value": "Välkommen tillbaka"
     }
   ],
   "login_page.error.incorrect_username_or_password": [
     {
       "type": 0,
-      "value": "사용자 이름 또는 암호가 올바르지 않습니다. 다시 시도하십시오."
+      "value": "Felaktigt användarnamn eller lösenord, försök igen."
     }
   ],
   "offline_banner.description.browsing_offline_mode": [
     {
       "type": 0,
-      "value": "현재 오프라인 모드로 검색 중입니다."
+      "value": "Du surfar för närvarande i offlineläge"
     }
   ],
   "order_summary.action.remove_promo": [
     {
       "type": 0,
-      "value": "제거"
+      "value": "Ta bort"
     }
   ],
   "order_summary.cart_items.action.num_of_items_in_cart": [
-    {
-      "type": 0,
-      "value": "카트에 "
-    },
     {
       "offset": 0,
       "options": {
@@ -2377,7 +2385,7 @@
           "value": [
             {
               "type": 0,
-              "value": "0개 항목"
+              "value": "0 artiklar"
             }
           ]
         },
@@ -2388,7 +2396,7 @@
             },
             {
               "type": 0,
-              "value": "개 항목"
+              "value": " artikel"
             }
           ]
         },
@@ -2399,7 +2407,7 @@
             },
             {
               "type": 0,
-              "value": "개 항목"
+              "value": " artiklar"
             }
           ]
         }
@@ -2410,97 +2418,97 @@
     },
     {
       "type": 0,
-      "value": "이 있음"
+      "value": " i kundvagnen"
     }
   ],
   "order_summary.cart_items.link.edit_cart": [
     {
       "type": 0,
-      "value": "카트 편집"
+      "value": "Redigera kundvagn"
     }
   ],
   "order_summary.heading.order_summary": [
     {
       "type": 0,
-      "value": "주문 요약"
+      "value": "Beställningssammanfattning"
     }
   ],
   "order_summary.label.estimated_total": [
     {
       "type": 0,
-      "value": "예상 합계"
+      "value": "Beräknad totalsumma"
     }
   ],
   "order_summary.label.free": [
     {
       "type": 0,
-      "value": "무료"
+      "value": "Gratis"
     }
   ],
   "order_summary.label.order_total": [
     {
       "type": 0,
-      "value": "주문 합계"
+      "value": "Beställning totalt"
     }
   ],
   "order_summary.label.promo_applied": [
     {
       "type": 0,
-      "value": "프로모션이 적용됨"
+      "value": "kampanjerbjudande tillämpat"
     }
   ],
   "order_summary.label.promotions_applied": [
     {
       "type": 0,
-      "value": "프로모션이 적용됨"
+      "value": "Kampanjerbjudanden tillämpade"
     }
   ],
   "order_summary.label.shipping": [
     {
       "type": 0,
-      "value": "배송"
+      "value": "Frakt"
     }
   ],
   "order_summary.label.subtotal": [
     {
       "type": 0,
-      "value": "소계"
+      "value": "Delsumma"
     }
   ],
   "order_summary.label.tax": [
     {
       "type": 0,
-      "value": "세금"
+      "value": "Skatt"
     }
   ],
   "page_not_found.action.go_back": [
     {
       "type": 0,
-      "value": "이전 페이지로 돌아가기"
+      "value": "Tillbaka till föregående sida"
     }
   ],
   "page_not_found.link.homepage": [
     {
       "type": 0,
-      "value": "홈 페이지로 이동"
+      "value": "Gå till startsidan"
     }
   ],
   "page_not_found.message.suggestion_to_try": [
     {
       "type": 0,
-      "value": "이 주소로 다시 시도해보거나 이전 페이지로 돌아가거나 홈 페이지로 돌아가십시오."
+      "value": "Försök att skriva in adressen igen, återvänd till föregående sida eller gå till startsidan."
     }
   ],
   "page_not_found.title.page_cant_be_found": [
     {
       "type": 0,
-      "value": "해당 페이지를 찾을 수 없습니다."
+      "value": "Sidan du letar efter går inte att hitta."
     }
   ],
   "pagination.field.num_of_pages": [
     {
       "type": 0,
-      "value": "/"
+      "value": "av "
     },
     {
       "type": 1,
@@ -2510,175 +2518,175 @@
   "pagination.field.page_number_select": [
     {
       "type": 0,
-      "value": "페이지 번호 선택"
+      "value": "Välj sidnummer"
     }
   ],
   "pagination.link.next": [
     {
       "type": 0,
-      "value": "다음"
+      "value": "Nästa"
     }
   ],
   "pagination.link.next.assistive_msg": [
     {
       "type": 0,
-      "value": "다음 페이지"
+      "value": "Nästa sida"
     }
   ],
   "pagination.link.prev": [
     {
       "type": 0,
-      "value": "이전"
+      "value": "Föreg."
     }
   ],
   "pagination.link.prev.assistive_msg": [
     {
       "type": 0,
-      "value": "이전 페이지"
+      "value": "Föregående sida"
     }
   ],
   "password_card.info.password_updated": [
     {
       "type": 0,
-      "value": "암호가 업데이트됨"
+      "value": "Lösenord uppdaterat"
     }
   ],
   "password_card.label.password": [
     {
       "type": 0,
-      "value": "암호"
+      "value": "Lösenord"
     }
   ],
   "password_card.title.password": [
     {
       "type": 0,
-      "value": "암호"
+      "value": "Lösenord"
     }
   ],
   "password_requirements.error.eight_letter_minimum": [
     {
       "type": 0,
-      "value": "최소 8자"
+      "value": "Minst 8 tecken"
     }
   ],
   "password_requirements.error.one_lowercase_letter": [
     {
       "type": 0,
-      "value": "소문자 1개"
+      "value": "1 liten bokstav"
     }
   ],
   "password_requirements.error.one_number": [
     {
       "type": 0,
-      "value": "숫자 1개"
+      "value": "1 siffra"
     }
   ],
   "password_requirements.error.one_special_character": [
     {
       "type": 0,
-      "value": "특수 문자 1개(예: , S ! % #)"
+      "value": "1 specialtecken (till exempel: , S ! % #)"
     }
   ],
   "password_requirements.error.one_uppercase_letter": [
     {
       "type": 0,
-      "value": "대문자 1개"
+      "value": "1 stor bokstav"
     }
   ],
   "password_reset_success.toast": [
     {
       "type": 0,
-      "value": "암호 재설정 성공"
+      "value": "Lösenordsåterställningen lyckades"
     }
   ],
   "payment_selection.heading.credit_card": [
     {
       "type": 0,
-      "value": "신용카드"
+      "value": "Kreditkort"
     }
   ],
   "payment_selection.radio_group.assistive_msg": [
     {
       "type": 0,
-      "value": "결제"
+      "value": "Betalning"
     }
   ],
   "payment_selection.tooltip.secure_payment": [
     {
       "type": 0,
-      "value": "안전한 SSL 암호화 결제입니다."
+      "value": "Detta är en säker SSL-krypterad betalning."
     }
   ],
   "price_per_item.label.each": [
     {
       "type": 0,
-      "value": "개"
+      "value": " st."
     }
   ],
   "product_detail.accordion.button.product_detail": [
     {
       "type": 0,
-      "value": "제품 세부 정보"
+      "value": "Produktinformation"
     }
   ],
   "product_detail.accordion.button.questions": [
     {
       "type": 0,
-      "value": "문의"
+      "value": "Frågor"
     }
   ],
   "product_detail.accordion.button.reviews": [
     {
       "type": 0,
-      "value": "리뷰"
+      "value": "Omdömen"
     }
   ],
   "product_detail.accordion.button.size_fit": [
     {
       "type": 0,
-      "value": "사이즈와 핏"
+      "value": "Storlek och passform"
     }
   ],
   "product_detail.accordion.message.coming_soon": [
     {
       "type": 0,
-      "value": "제공 예정"
+      "value": "Kommer snart"
     }
   ],
   "product_detail.recommended_products.title.complete_set": [
     {
       "type": 0,
-      "value": "세트 완성"
+      "value": "Få ett komplett set"
     }
   ],
   "product_detail.recommended_products.title.might_also_like": [
     {
       "type": 0,
-      "value": "추천 상품"
+      "value": "Du kanske också gillar"
     }
   ],
   "product_detail.recommended_products.title.recently_viewed": [
     {
       "type": 0,
-      "value": "최근에 봄"
+      "value": "Senast visade"
     }
   ],
   "product_item.label.quantity": [
     {
       "type": 0,
-      "value": "수량:"
+      "value": "Kvantitet:"
     }
   ],
   "product_list.button.filter": [
     {
       "type": 0,
-      "value": "필터"
+      "value": "Filter"
     }
   ],
   "product_list.button.sort_by": [
     {
       "type": 0,
-      "value": "정렬 기준: "
+      "value": "Sortera efter: "
     },
     {
       "type": 1,
@@ -2688,35 +2696,39 @@
   "product_list.drawer.title.sort_by": [
     {
       "type": 0,
-      "value": "정렬 기준"
+      "value": "Sortera efter"
     }
   ],
   "product_list.modal.button.clear_filters": [
     {
       "type": 0,
-      "value": "필터 지우기"
+      "value": "Rensa filter"
     }
   ],
   "product_list.modal.button.view_items": [
+    {
+      "type": 0,
+      "value": "Visa "
+    },
     {
       "type": 1,
       "value": "prroductCount"
     },
     {
       "type": 0,
-      "value": "개 항목 보기"
+      "value": " artiklar"
     }
   ],
   "product_list.modal.title.filter": [
     {
       "type": 0,
-      "value": "필터"
+      "value": "Filter"
     }
   ],
   "product_list.refinements.button.assistive_msg.add_filter": [
     {
       "type": 0,
-      "value": "필터 추가: "
+      "value": "Lägg till filter: "
     },
     {
       "type": 1,
@@ -2726,7 +2738,7 @@
   "product_list.refinements.button.assistive_msg.add_filter_with_hit_count": [
     {
       "type": 0,
-      "value": "필터 추가: "
+      "value": "Lägg till filter: "
     },
     {
       "type": 1,
@@ -2734,7 +2746,7 @@
     },
     {
       "type": 0,
-      "value": "("
+      "value": " ("
     },
     {
       "type": 1,
@@ -2748,7 +2760,7 @@
   "product_list.refinements.button.assistive_msg.remove_filter": [
     {
       "type": 0,
-      "value": "필터 제거: "
+      "value": "Ta bort filter: "
     },
     {
       "type": 1,
@@ -2758,7 +2770,7 @@
   "product_list.refinements.button.assistive_msg.remove_filter_with_hit_count": [
     {
       "type": 0,
-      "value": "필터 제거: "
+      "value": "Ta bort filter: "
     },
     {
       "type": 1,
@@ -2766,7 +2778,7 @@
     },
     {
       "type": 0,
-      "value": "("
+      "value": " ("
     },
     {
       "type": 1,
@@ -2780,7 +2792,7 @@
   "product_list.select.sort_by": [
     {
       "type": 0,
-      "value": "정렬 기준: "
+      "value": "Sortera efter: "
     },
     {
       "type": 1,
@@ -2790,25 +2802,25 @@
   "product_list.sort_by.label.assistive_msg": [
     {
       "type": 0,
-      "value": "제품 정렬 기준"
+      "value": "Sortera produkter efter"
     }
   ],
   "product_scroller.assistive_msg.scroll_left": [
     {
       "type": 0,
-      "value": "제품 왼쪽으로 스크롤"
+      "value": "Bläddra produkter till vänster"
     }
   ],
   "product_scroller.assistive_msg.scroll_right": [
     {
       "type": 0,
-      "value": "제품 오른쪽으로 스크롤"
+      "value": "Bläddra produkter till höger"
     }
   ],
   "product_tile.assistive_msg.add_to_wishlist": [
     {
       "type": 0,
-      "value": "위시리스트에 "
+      "value": "Lägg till "
     },
     {
       "type": 1,
@@ -2816,13 +2828,13 @@
     },
     {
       "type": 0,
-      "value": " 추가"
+      "value": " på önskelistan"
     }
   ],
   "product_tile.assistive_msg.remove_from_wishlist": [
     {
       "type": 0,
-      "value": "위시리스트에서 "
+      "value": "Ta bort "
     },
     {
       "type": 1,
@@ -2830,93 +2842,93 @@
     },
     {
       "type": 0,
-      "value": " 제거"
+      "value": " från önskelistan"
     }
   ],
   "product_tile.badge.label.new": [
     {
       "type": 0,
-      "value": "신규"
+      "value": "Ny"
     }
   ],
   "product_tile.badge.label.sale": [
     {
       "type": 0,
-      "value": "판매"
+      "value": "Försäljning"
     }
   ],
   "product_view.button.add_bundle_to_cart": [
     {
       "type": 0,
-      "value": "카트에 번들 추가"
+      "value": "Lägg till paket i kundvagnen"
     }
   ],
   "product_view.button.add_bundle_to_wishlist": [
     {
       "type": 0,
-      "value": "위시리스트에 번들 추가"
+      "value": "Lägg till paket i önskelistan"
     }
   ],
   "product_view.button.add_set_to_cart": [
     {
       "type": 0,
-      "value": "카트에 세트 추가"
+      "value": "Lägg till set i kundvagnen"
     }
   ],
   "product_view.button.add_set_to_wishlist": [
     {
       "type": 0,
-      "value": "위시리스트에 세트 추가"
+      "value": "Lägg till set i önskelistan"
     }
   ],
   "product_view.button.add_to_cart": [
     {
       "type": 0,
-      "value": "카트에 추가"
+      "value": "Lägg till i kundvagnen"
     }
   ],
   "product_view.button.add_to_wishlist": [
     {
       "type": 0,
-      "value": "위시리스트에 추가"
+      "value": "Lägg till i önskelistan"
     }
   ],
   "product_view.button.update": [
     {
       "type": 0,
-      "value": "업데이트"
+      "value": "Uppdatera"
     }
   ],
   "product_view.label.assistive_msg.quantity_decrement": [
     {
-      "type": 1,
-      "value": "productName"
+      "type": 0,
+      "value": "Minska kvantitet för "
     },
     {
-      "type": 0,
-      "value": "의 감소 수량"
+      "type": 1,
+      "value": "productName"
     }
   ],
   "product_view.label.assistive_msg.quantity_increment": [
     {
-      "type": 1,
-      "value": "productName"
+      "type": 0,
+      "value": "Öka kvantitet för "
     },
     {
-      "type": 0,
-      "value": "에 대한 증분 수량"
+      "type": 1,
+      "value": "productName"
     }
   ],
   "product_view.label.quantity": [
     {
       "type": 0,
-      "value": "수량"
+      "value": "Kvantitet"
     }
   ],
   "product_view.label.quantity_decrement": [
     {
       "type": 0,
-      "value": "−"
+      "value": "–"
     }
   ],
   "product_view.label.quantity_increment": [
@@ -2934,115 +2946,115 @@
   "product_view.link.full_details": [
     {
       "type": 0,
-      "value": "전체 세부 정보 보기"
+      "value": "Se fullständig information"
     }
   ],
   "profile_card.info.profile_updated": [
     {
       "type": 0,
-      "value": "프로필이 업데이트됨"
+      "value": "Profilen har uppdaterats"
     }
   ],
   "profile_card.label.email": [
     {
       "type": 0,
-      "value": "이메일"
+      "value": "E-post"
     }
   ],
   "profile_card.label.full_name": [
     {
       "type": 0,
-      "value": "성명"
+      "value": "Fullständigt namn"
     }
   ],
   "profile_card.label.phone": [
     {
       "type": 0,
-      "value": "전화번호"
+      "value": "Telefonnummer"
     }
   ],
   "profile_card.message.not_provided": [
     {
       "type": 0,
-      "value": "제공되지 않음"
+      "value": "Uppgift saknas"
     }
   ],
   "profile_card.title.my_profile": [
     {
       "type": 0,
-      "value": "내 프로필"
+      "value": "Min profil"
     }
   ],
   "profile_fields.label.profile_form": [
     {
       "type": 0,
-      "value": "프로필 양식"
+      "value": "Profilformulär"
     }
   ],
   "promo_code_fields.button.apply": [
     {
       "type": 0,
-      "value": "적용"
+      "value": "Tillämpa"
     }
   ],
   "promo_popover.assistive_msg.info": [
     {
       "type": 0,
-      "value": "정보"
+      "value": "Info"
     }
   ],
   "promo_popover.heading.promo_applied": [
     {
       "type": 0,
-      "value": "프로모션이 적용됨"
+      "value": "Kampanjerbjudanden tillämpade"
     }
   ],
   "promocode.accordion.button.have_promocode": [
     {
       "type": 0,
-      "value": "프로모션 코드가 있습니까?"
+      "value": "Har du en kampanjkod?"
     }
   ],
   "recent_searches.action.clear_searches": [
     {
       "type": 0,
-      "value": "최근 검색 지우기"
+      "value": "Ta bort senaste sökningar"
     }
   ],
   "recent_searches.heading.recent_searches": [
     {
       "type": 0,
-      "value": "최근 검색"
+      "value": "Senaste sökningar"
     }
   ],
   "register_form.action.sign_in": [
     {
       "type": 0,
-      "value": "로그인"
+      "value": "Logga in"
     }
   ],
   "register_form.button.create_account": [
     {
       "type": 0,
-      "value": "계정 생성"
+      "value": "Skapa konto"
     }
   ],
   "register_form.heading.lets_get_started": [
     {
       "type": 0,
-      "value": "이제 시작하세요!"
+      "value": "Låt oss komma igång!"
     }
   ],
   "register_form.message.agree_to_policy_terms": [
     {
       "type": 0,
-      "value": "계정을 만들면 Salesforce "
+      "value": "Genom att skapa ett konto godkänner du "
     },
     {
       "children": [
         {
           "type": 0,
-          "value": "개인정보 보호정책"
+          "value": "Sekretesspolicyn"
         }
       ],
       "type": 8,
@@ -3050,13 +3062,13 @@
     },
     {
       "type": 0,
-      "value": " 및 "
+      "value": " och "
     },
     {
       "children": [
         {
           "type": 0,
-          "value": "약관"
+          "value": "Villkoren"
         }
       ],
       "type": 8,
@@ -3064,207 +3076,207 @@
     },
     {
       "type": 0,
-      "value": "에 동의하는 것입니다."
+      "value": " för Salesforce"
     }
   ],
   "register_form.message.already_have_account": [
     {
       "type": 0,
-      "value": "계정이 이미 있습니까?"
+      "value": "Har du redan ett konto?"
     }
   ],
   "register_form.message.create_an_account": [
     {
       "type": 0,
-      "value": "계정을 만들고 최고의 제품, 아이디어, 커뮤니티를 누구보다 빨리 이용해 보세요."
+      "value": "Skapa ett konto och få tillgång till de allra bästa produkterna, inspiration och vår community."
     }
   ],
   "reset_password_form.action.sign_in": [
     {
       "type": 0,
-      "value": "로그인"
+      "value": "Logga in"
     }
   ],
   "reset_password_form.button.reset_password": [
     {
       "type": 0,
-      "value": "암호 재설정"
+      "value": "Återställ lösenord"
     }
   ],
   "reset_password_form.message.enter_your_email": [
     {
       "type": 0,
-      "value": "암호를 재설정하는 방법에 대한 지침을 안내받으려면 이메일을 입력하십시오."
+      "value": "Ange din e-postadress för att få instruktioner om hur du återställer ditt lösenord"
     }
   ],
   "reset_password_form.message.return_to_sign_in": [
     {
       "type": 0,
-      "value": "돌아가기"
+      "value": "Eller återvänd till"
     }
   ],
   "reset_password_form.title.reset_password": [
     {
       "type": 0,
-      "value": "암호 재설정"
+      "value": "Återställ lösenord"
     }
   ],
   "search.action.cancel": [
     {
       "type": 0,
-      "value": "취소"
+      "value": "Avbryt"
     }
   ],
   "selected_refinements.action.assistive_msg.clear_all": [
     {
       "type": 0,
-      "value": "필터 모두 지우기"
+      "value": "Rensa alla filter"
     }
   ],
   "selected_refinements.action.clear_all": [
     {
       "type": 0,
-      "value": "모두 지우기"
+      "value": "Rensa alla"
     }
   ],
   "shipping_address.button.continue_to_shipping": [
     {
       "type": 0,
-      "value": "배송 방법으로 계속 진행하기"
+      "value": "Fortsätt till fraktmetod"
     }
   ],
   "shipping_address.label.edit_button": [
     {
-      "type": 1,
-      "value": "address"
+      "type": 0,
+      "value": "Redigera "
     },
     {
-      "type": 0,
-      "value": " 편집"
+      "type": 1,
+      "value": "address"
     }
   ],
   "shipping_address.label.remove_button": [
     {
-      "type": 1,
-      "value": "address"
+      "type": 0,
+      "value": "Ta bort "
     },
     {
-      "type": 0,
-      "value": " 제거"
+      "type": 1,
+      "value": "address"
     }
   ],
   "shipping_address.label.shipping_address_form": [
     {
       "type": 0,
-      "value": "배송 주소 양식"
+      "value": "Formulär för fraktadress"
     }
   ],
   "shipping_address.title.shipping_address": [
     {
       "type": 0,
-      "value": "배송 주소"
+      "value": "Fraktadress"
     }
   ],
   "shipping_address_edit_form.button.save_and_continue": [
     {
       "type": 0,
-      "value": "저장하고 배송 방법으로 계속 진행하기"
+      "value": "Spara och fortsätt till fraktmetod"
     }
   ],
   "shipping_address_form.heading.edit_address": [
     {
       "type": 0,
-      "value": "주소 편집"
+      "value": "Redigera adress"
     }
   ],
   "shipping_address_form.heading.new_address": [
     {
       "type": 0,
-      "value": "새 주소 추가"
+      "value": "Lägg till ny adress"
     }
   ],
   "shipping_address_selection.button.add_address": [
     {
       "type": 0,
-      "value": "새 주소 추가"
+      "value": "Lägg till ny adress"
     }
   ],
   "shipping_address_selection.button.submit": [
     {
       "type": 0,
-      "value": "제출"
+      "value": "Skicka"
     }
   ],
   "shipping_address_selection.title.add_address": [
     {
       "type": 0,
-      "value": "새 주소 추가"
+      "value": "Lägg till ny adress"
     }
   ],
   "shipping_address_selection.title.edit_shipping": [
     {
       "type": 0,
-      "value": "배송 주소 편집"
+      "value": "Redigera fraktadress"
     }
   ],
   "shipping_options.action.send_as_a_gift": [
     {
       "type": 0,
-      "value": "이 제품을 선물로 보내시겠습니까?"
+      "value": "Vill du skicka som present?"
     }
   ],
   "shipping_options.button.continue_to_payment": [
     {
       "type": 0,
-      "value": "결제로 계속 진행하기"
+      "value": "Fortsätt till betalning"
     }
   ],
   "shipping_options.title.shipping_gift_options": [
     {
       "type": 0,
-      "value": "배송 및 선물 옵션"
+      "value": "Frakt och presentalternativ"
     }
   ],
   "signout_confirmation_dialog.button.cancel": [
     {
       "type": 0,
-      "value": "취소"
+      "value": "Avbryt"
     }
   ],
   "signout_confirmation_dialog.button.sign_out": [
     {
       "type": 0,
-      "value": "로그아웃"
+      "value": "Logga ut"
     }
   ],
   "signout_confirmation_dialog.heading.sign_out": [
     {
       "type": 0,
-      "value": "로그아웃"
+      "value": "Logga ut"
     }
   ],
   "signout_confirmation_dialog.message.sure_to_sign_out": [
     {
       "type": 0,
-      "value": "로그아웃하시겠습니까? 현재 주문을 처리하려면 다시 로그인해야 합니다."
+      "value": "Är du säker på att du vill logga ut? Du måste logga in igen för att fortsätta med din nuvarande beställning."
     }
   ],
   "social_login_redirect.message.authenticating": [
     {
       "type": 0,
-      "value": "인증 중..."
+      "value": "Autentiserar ..."
     }
   ],
   "social_login_redirect.message.redirect_link": [
     {
       "type": 0,
-      "value": "자동으로 리디렉션되지 않으면 "
+      "value": "Om du inte omdirigeras automatiskt klickar du på "
     },
     {
       "children": [
         {
           "type": 0,
-          "value": "이 링크"
+          "value": "den här länken"
         }
       ],
       "type": 8,
@@ -3272,75 +3284,75 @@
     },
     {
       "type": 0,
-      "value": "를 클릭하여 계속 진행하십시오."
+      "value": " för att fortsätta."
     }
   ],
   "store_locator.action.find": [
     {
       "type": 0,
-      "value": "찾기"
+      "value": "Hitta"
     }
   ],
   "store_locator.action.select_a_country": [
     {
       "type": 0,
-      "value": "국가 선택"
+      "value": "Välj ett land"
     }
   ],
   "store_locator.action.use_my_location": [
     {
       "type": 0,
-      "value": "내 위치 사용"
+      "value": "Använd min plats"
     }
   ],
   "store_locator.action.viewMore": [
     {
       "type": 0,
-      "value": "자세히 보기"
+      "value": "Visa mer"
     }
   ],
   "store_locator.description.away": [
     {
       "type": 0,
-      "value": "떨어진 곳에 위치"
+      "value": "bort"
     }
   ],
   "store_locator.description.loading_locations": [
     {
       "type": 0,
-      "value": "위치 로드 중..."
+      "value": "Laddar platser ..."
     }
   ],
   "store_locator.description.no_locations": [
     {
       "type": 0,
-      "value": "죄송하지만 이 지역에는 위치가 없습니다."
+      "value": "Tyvärr finns det inga platser i detta område"
     }
   ],
   "store_locator.description.or": [
     {
       "type": 0,
-      "value": "Or"
+      "value": "Eller"
     }
   ],
   "store_locator.description.phone": [
     {
       "type": 0,
-      "value": "전화번호:"
+      "value": "Telefon:"
     }
   ],
   "store_locator.description.viewing_near_postal_code": [
     {
-      "type": 1,
-      "value": "postalCode"
-    },
-    {
       "type": 0,
-      "value": "에서 "
+      "value": "Visar butiker inom "
     },
     {
       "type": 1,
       "value": "distance"
+    },
+    {
+      "type": 0,
+      "value": " "
     },
     {
       "type": 1,
@@ -3348,61 +3360,69 @@
     },
     {
       "type": 0,
-      "value": " 내에 위치한 매장 보기"
+      "value": " från "
+    },
+    {
+      "type": 1,
+      "value": "postalCode"
+    },
+    {
+      "type": 0,
+      "value": " i"
     }
   ],
   "store_locator.description.viewing_near_your_location": [
     {
       "type": 0,
-      "value": "현재 위치에서 가까운 매장 보기"
+      "value": "Visar butiker nära din plats"
     }
   ],
   "store_locator.dropdown.germany": [
     {
       "type": 0,
-      "value": "독일"
+      "value": "Tyskland"
     }
   ],
   "store_locator.dropdown.united_states": [
     {
       "type": 0,
-      "value": "미국"
+      "value": "USA"
     }
   ],
   "store_locator.error.agree_to_share_your_location": [
     {
       "type": 0,
-      "value": "위치 공유에 동의하십시오."
+      "value": "Samtyck till att dela din plats"
     }
   ],
   "store_locator.error.please_enter_a_postal_code": [
     {
       "type": 0,
-      "value": "우편번호를 입력해 주세요."
+      "value": "Ange ett postnummer."
     }
   ],
   "store_locator.error.please_select_a_country": [
     {
       "type": 0,
-      "value": "국가를 선택하십시오."
+      "value": "Välj ett land."
     }
   ],
   "store_locator.field.placeholder.enter_postal_code": [
     {
       "type": 0,
-      "value": "우편번호 입력"
+      "value": "Ange postnummer"
     }
   ],
   "store_locator.pagination.load_more": [
     {
       "type": 0,
-      "value": "추가 로드"
+      "value": "Ladda mer"
     }
   ],
   "store_locator.title": [
     {
       "type": 0,
-      "value": "매장 찾기"
+      "value": "Hitta en butik"
     }
   ],
   "swatch_group.selected.label": [
@@ -3418,283 +3438,283 @@
   "toggle_card.action.edit": [
     {
       "type": 0,
-      "value": "편집"
+      "value": "Redigera"
     }
   ],
   "toggle_card.action.editContactInfo": [
     {
       "type": 0,
-      "value": "연락처 정보 편집"
+      "value": "Redigera kontaktuppgifter"
     }
   ],
   "toggle_card.action.editPaymentInfo": [
     {
       "type": 0,
-      "value": "결제 정보 편집"
+      "value": "Redigera betalningsinformation"
     }
   ],
   "toggle_card.action.editShippingAddress": [
     {
       "type": 0,
-      "value": "배송 주소 편집"
+      "value": "Redigera fraktadress"
     }
   ],
   "toggle_card.action.editShippingOptions": [
     {
       "type": 0,
-      "value": "배송 옵션 편집"
+      "value": "Redigera fraktalternativ"
     }
   ],
   "update_password_fields.button.forgot_password": [
     {
       "type": 0,
-      "value": "암호가 기억나지 않습니까?"
+      "value": "Glömt lösenord?"
     }
   ],
   "use_address_fields.error.please_enter_first_name": [
     {
       "type": 0,
-      "value": "이름을 입력하십시오."
+      "value": "Ange ditt förnamn."
     }
   ],
   "use_address_fields.error.please_enter_last_name": [
     {
       "type": 0,
-      "value": "성을 입력하십시오."
+      "value": "Ange ditt efternamn."
     }
   ],
   "use_address_fields.error.please_enter_phone_number": [
     {
       "type": 0,
-      "value": "전화번호를 입력하십시오."
+      "value": "Ange ditt telefonnummer."
     }
   ],
   "use_address_fields.error.please_enter_your_postal_or_zip": [
     {
       "type": 0,
-      "value": "우편번호를 입력하십시오."
+      "value": "Ange ditt postnummer."
     }
   ],
   "use_address_fields.error.please_select_your_address": [
     {
       "type": 0,
-      "value": "주소를 입력하십시오."
+      "value": "Ange din adress."
     }
   ],
   "use_address_fields.error.please_select_your_city": [
     {
       "type": 0,
-      "value": "구/군/시를 입력하십시오."
+      "value": "Ange din ort."
     }
   ],
   "use_address_fields.error.please_select_your_country": [
     {
       "type": 0,
-      "value": "국가를 선택하십시오."
+      "value": "Välj ditt land."
     }
   ],
   "use_address_fields.error.please_select_your_state_or_province": [
     {
       "type": 0,
-      "value": "주를 선택하십시오."
+      "value": "Välj din delstat."
     }
   ],
   "use_address_fields.error.required": [
     {
       "type": 0,
-      "value": "필수"
+      "value": "Krävs"
     }
   ],
   "use_address_fields.error.state_code_invalid": [
     {
       "type": 0,
-      "value": "2자리 시/도를 입력하십시오."
+      "value": "Ange delstat/provins förkortad till två bokstäver."
     }
   ],
   "use_address_fields.label.address": [
     {
       "type": 0,
-      "value": "주소"
+      "value": "Adress"
     }
   ],
   "use_address_fields.label.address_form": [
     {
       "type": 0,
-      "value": "주소 양식"
+      "value": "Adressformulär"
     }
   ],
   "use_address_fields.label.city": [
     {
       "type": 0,
-      "value": "구/군/시"
+      "value": "Ort"
     }
   ],
   "use_address_fields.label.country": [
     {
       "type": 0,
-      "value": "국가"
+      "value": "Land"
     }
   ],
   "use_address_fields.label.first_name": [
     {
       "type": 0,
-      "value": "이름"
+      "value": "Förnamn"
     }
   ],
   "use_address_fields.label.last_name": [
     {
       "type": 0,
-      "value": "성"
+      "value": "Efternamn"
     }
   ],
   "use_address_fields.label.phone": [
     {
       "type": 0,
-      "value": "전화번호"
+      "value": "Telefon"
     }
   ],
   "use_address_fields.label.postal_code": [
     {
       "type": 0,
-      "value": "우편번호"
+      "value": "Postnummer"
     }
   ],
   "use_address_fields.label.preferred": [
     {
       "type": 0,
-      "value": "기본값으로 설정"
+      "value": "Ställ in som standard"
     }
   ],
   "use_address_fields.label.province": [
     {
       "type": 0,
-      "value": "시/도"
+      "value": "Provins"
     }
   ],
   "use_address_fields.label.state": [
     {
       "type": 0,
-      "value": "시/도"
+      "value": "Delstat"
     }
   ],
   "use_address_fields.label.zipCode": [
     {
       "type": 0,
-      "value": "우편번호"
+      "value": "Postnummer"
     }
   ],
   "use_credit_card_fields.error.required": [
     {
       "type": 0,
-      "value": "필수"
+      "value": "Krävs"
     }
   ],
   "use_credit_card_fields.error.required_card_number": [
     {
       "type": 0,
-      "value": "카드 번호를 입력하십시오."
+      "value": "Ange ditt kortnummer."
     }
   ],
   "use_credit_card_fields.error.required_expiry": [
     {
       "type": 0,
-      "value": "만료 날짜를 입력하십시오."
+      "value": "Ange ditt utgångsdatum."
     }
   ],
   "use_credit_card_fields.error.required_name": [
     {
       "type": 0,
-      "value": "카드에 표시된 대로 이름을 입력하십시오."
+      "value": "Ange ditt namn så som det står på ditt kort."
     }
   ],
   "use_credit_card_fields.error.required_security_code": [
     {
       "type": 0,
-      "value": "보안 코드를 입력하십시오."
+      "value": "Ange din säkerhetskod."
     }
   ],
   "use_credit_card_fields.error.valid_card_number": [
     {
       "type": 0,
-      "value": "유효한 카드 번호를 입력하십시오."
+      "value": "Ange ett giltigt kortnummer."
     }
   ],
   "use_credit_card_fields.error.valid_date": [
     {
       "type": 0,
-      "value": "유효한 날짜를 입력하십시오."
+      "value": "Ange ett giltigt datum."
     }
   ],
   "use_credit_card_fields.error.valid_name": [
     {
       "type": 0,
-      "value": "올바른 이름을 입력하십시오."
+      "value": "Ange ett giltigt namn."
     }
   ],
   "use_credit_card_fields.error.valid_security_code": [
     {
       "type": 0,
-      "value": "유효한 보안 코드를 입력하십시오."
+      "value": "Ange en giltig säkerhetskod."
     }
   ],
   "use_credit_card_fields.label.card_number": [
     {
       "type": 0,
-      "value": "카드 번호"
+      "value": "Kortnummer"
     }
   ],
   "use_credit_card_fields.label.card_type": [
     {
       "type": 0,
-      "value": "카드 유형"
+      "value": "Typ av kort"
     }
   ],
   "use_credit_card_fields.label.expiry": [
     {
       "type": 0,
-      "value": "만료 날짜"
+      "value": "Utgångsdatum"
     }
   ],
   "use_credit_card_fields.label.name": [
     {
       "type": 0,
-      "value": "카드에 표시된 이름"
+      "value": "Namn på kortet"
     }
   ],
   "use_credit_card_fields.label.security_code": [
     {
       "type": 0,
-      "value": "보안 코드"
+      "value": "Säkerhetskod"
     }
   ],
   "use_login_fields.error.required_email": [
     {
       "type": 0,
-      "value": "이메일 주소를 입력하십시오."
+      "value": "Ange din e-postadress."
     }
   ],
   "use_login_fields.error.required_password": [
     {
       "type": 0,
-      "value": "암호를 입력하십시오."
+      "value": "Ange ditt lösenord."
     }
   ],
   "use_login_fields.label.email": [
     {
       "type": 0,
-      "value": "이메일"
+      "value": "E-post"
     }
   ],
   "use_login_fields.label.password": [
     {
       "type": 0,
-      "value": "암호"
+      "value": "Lösenord"
     }
   ],
   "use_product.message.inventory_remaining": [
     {
       "type": 0,
-      "value": "품절 임박("
+      "value": "Det finns bara "
     },
     {
       "type": 1,
@@ -3702,31 +3722,35 @@
     },
     {
       "type": 0,
-      "value": "개 남음)"
+      "value": " kvar!"
     }
   ],
   "use_product.message.inventory_remaining_for_product": [
+    {
+      "type": 0,
+      "value": "Det finns bara "
+    },
+    {
+      "type": 1,
+      "value": "stockLevel"
+    },
+    {
+      "type": 0,
+      "value": " kvar av "
+    },
     {
       "type": 1,
       "value": "productName"
     },
     {
       "type": 0,
-      "value": "이(가) "
-    },
-    {
-      "type": 1,
-      "value": "stockLevel"
-    },
-    {
-      "type": 0,
-      "value": "개 남았습니다!"
+      "value": "!"
     }
   ],
   "use_product.message.out_of_stock": [
     {
       "type": 0,
-      "value": "품절"
+      "value": "Finns inte i lager"
     }
   ],
   "use_product.message.out_of_stock_for_product": [
@@ -3736,259 +3760,259 @@
     },
     {
       "type": 0,
-      "value": "이(가) 품절입니다."
+      "value": " finns inte i lager"
     }
   ],
   "use_profile_fields.error.required_email": [
     {
       "type": 0,
-      "value": "유효한 이메일 주소를 입력하십시오."
+      "value": "Ange en giltig e-postadress."
     }
   ],
   "use_profile_fields.error.required_first_name": [
     {
       "type": 0,
-      "value": "이름을 입력하십시오."
+      "value": "Ange ditt förnamn."
     }
   ],
   "use_profile_fields.error.required_last_name": [
     {
       "type": 0,
-      "value": "성을 입력하십시오."
+      "value": "Ange ditt efternamn."
     }
   ],
   "use_profile_fields.error.required_phone": [
     {
       "type": 0,
-      "value": "전화번호를 입력하십시오."
+      "value": "Ange ditt telefonnummer."
     }
   ],
   "use_profile_fields.label.email": [
     {
       "type": 0,
-      "value": "이메일"
+      "value": "E-post"
     }
   ],
   "use_profile_fields.label.first_name": [
     {
       "type": 0,
-      "value": "이름"
+      "value": "Förnamn"
     }
   ],
   "use_profile_fields.label.last_name": [
     {
       "type": 0,
-      "value": "성"
+      "value": "Efternamn"
     }
   ],
   "use_profile_fields.label.phone": [
     {
       "type": 0,
-      "value": "전화번호"
+      "value": "Telefonnummer"
     }
   ],
   "use_promo_code_fields.error.required_promo_code": [
     {
       "type": 0,
-      "value": "유효한 프로모션 코드를 제공하십시오."
+      "value": "Ange en giltig kampanjkod."
     }
   ],
   "use_promo_code_fields.label.promo_code": [
     {
       "type": 0,
-      "value": "프로모션 코드"
+      "value": "Kampanjkod"
     }
   ],
   "use_promocode.error.check_the_code": [
     {
       "type": 0,
-      "value": "코드를 확인하고 다시 시도하십시오. 이미 적용되었거나 프로모션이 만료되었을 수 있습니다."
+      "value": "Kontrollera koden och försök igen. Den kanske redan har tillämpats eller så har kampanjen avslutats."
     }
   ],
   "use_promocode.info.promo_applied": [
     {
       "type": 0,
-      "value": "프로모션이 적용됨"
+      "value": "kampanjerbjudande tillämpat"
     }
   ],
   "use_promocode.info.promo_removed": [
     {
       "type": 0,
-      "value": "프로모션이 제거됨"
+      "value": "Kampanjerbjudande har tagits bort"
     }
   ],
   "use_registration_fields.error.contain_number": [
     {
       "type": 0,
-      "value": "암호에는 숫자가 하나 이상 포함되어야 합니다."
+      "value": "Lösenordet måste innehålla minst en siffra."
     }
   ],
   "use_registration_fields.error.lowercase_letter": [
     {
       "type": 0,
-      "value": "암호에는 소문자가 하나 이상 포함되어야 합니다."
+      "value": "Lösenordet måste innehålla minst en liten bokstav."
     }
   ],
   "use_registration_fields.error.minimum_characters": [
     {
       "type": 0,
-      "value": "암호는 8자 이상이어야 합니다."
+      "value": "Lösenordet måste innehålla minst 8 tecken."
     }
   ],
   "use_registration_fields.error.required_email": [
     {
       "type": 0,
-      "value": "유효한 이메일 주소를 입력하십시오."
+      "value": "Ange en giltig e-postadress."
     }
   ],
   "use_registration_fields.error.required_first_name": [
     {
       "type": 0,
-      "value": "이름을 입력하십시오."
+      "value": "Ange ditt förnamn."
     }
   ],
   "use_registration_fields.error.required_last_name": [
     {
       "type": 0,
-      "value": "성을 입력하십시오."
+      "value": "Ange ditt efternamn."
     }
   ],
   "use_registration_fields.error.required_password": [
     {
       "type": 0,
-      "value": "암호를 생성하십시오."
+      "value": "Skapa ett lösenord."
     }
   ],
   "use_registration_fields.error.special_character": [
     {
       "type": 0,
-      "value": "암호에는 특수 문자가 하나 이상 포함되어야 합니다."
+      "value": "Lösenordet måste innehålla minst ett specialtecken."
     }
   ],
   "use_registration_fields.error.uppercase_letter": [
     {
       "type": 0,
-      "value": "암호에는 대문자가 하나 이상 포함되어야 합니다."
+      "value": "Lösenordet måste innehålla minst en stor bokstav."
     }
   ],
   "use_registration_fields.label.email": [
     {
       "type": 0,
-      "value": "이메일"
+      "value": "E-post"
     }
   ],
   "use_registration_fields.label.first_name": [
     {
       "type": 0,
-      "value": "이름"
+      "value": "Förnamn"
     }
   ],
   "use_registration_fields.label.last_name": [
     {
       "type": 0,
-      "value": "성"
+      "value": "Efternamn"
     }
   ],
   "use_registration_fields.label.password": [
     {
       "type": 0,
-      "value": "암호"
+      "value": "Lösenord"
     }
   ],
   "use_registration_fields.label.sign_up_to_emails": [
     {
       "type": 0,
-      "value": "Salesforce 이메일 가입(언제든지 탈퇴 가능)"
+      "value": "Registrera mig för e-post från Salesforce (du kan avsluta prenumerationen när som helst)"
     }
   ],
   "use_reset_password_fields.error.required_email": [
     {
       "type": 0,
-      "value": "유효한 이메일 주소를 입력하십시오."
+      "value": "Ange en giltig e-postadress."
     }
   ],
   "use_reset_password_fields.label.email": [
     {
       "type": 0,
-      "value": "이메일"
+      "value": "E-post"
     }
   ],
   "use_update_password_fields.error.contain_number": [
     {
       "type": 0,
-      "value": "암호에는 숫자가 하나 이상 포함되어야 합니다."
+      "value": "Lösenordet måste innehålla minst en siffra."
     }
   ],
   "use_update_password_fields.error.lowercase_letter": [
     {
       "type": 0,
-      "value": "암호에는 소문자가 하나 이상 포함되어야 합니다."
+      "value": "Lösenordet måste innehålla minst en liten bokstav."
     }
   ],
   "use_update_password_fields.error.minimum_characters": [
     {
       "type": 0,
-      "value": "암호는 8자 이상이어야 합니다."
+      "value": "Lösenordet måste innehålla minst 8 tecken."
     }
   ],
   "use_update_password_fields.error.password_mismatch": [
     {
       "type": 0,
-      "value": "암호가 일치하지 않습니다."
+      "value": "Lösenorden stämmer inte överens."
     }
   ],
   "use_update_password_fields.error.required_confirm_password": [
     {
       "type": 0,
-      "value": "암호를 확인해 주십시오."
+      "value": "Bekräfta ditt lösenord."
     }
   ],
   "use_update_password_fields.error.required_new_password": [
     {
       "type": 0,
-      "value": "새 암호를 제공하십시오."
+      "value": "Ange ett nytt lösenord."
     }
   ],
   "use_update_password_fields.error.required_password": [
     {
       "type": 0,
-      "value": "암호를 입력하십시오."
+      "value": "Ange ditt lösenord."
     }
   ],
   "use_update_password_fields.error.special_character": [
     {
       "type": 0,
-      "value": "암호에는 특수 문자가 하나 이상 포함되어야 합니다."
+      "value": "Lösenordet måste innehålla minst ett specialtecken."
     }
   ],
   "use_update_password_fields.error.uppercase_letter": [
     {
       "type": 0,
-      "value": "암호에는 대문자가 하나 이상 포함되어야 합니다."
+      "value": "Lösenordet måste innehålla minst en stor bokstav."
     }
   ],
   "use_update_password_fields.label.confirm_new_password": [
     {
       "type": 0,
-      "value": "새 암호 확인"
+      "value": "Bekräfta nytt lösenord"
     }
   ],
   "use_update_password_fields.label.current_password": [
     {
       "type": 0,
-      "value": "현재 암호"
+      "value": "Nuvarande lösenord"
     }
   ],
   "use_update_password_fields.label.new_password": [
     {
       "type": 0,
-      "value": "새 암호"
+      "value": "Nytt lösenord"
     }
   ],
   "wishlist_primary_action.button.addSetToCart.label": [
     {
       "type": 0,
-      "value": "카트에 "
+      "value": "Lägg till "
     },
     {
       "type": 1,
@@ -3996,13 +4020,13 @@
     },
     {
       "type": 0,
-      "value": " 세트 추가"
+      "value": "-set i varukorgen"
     }
   ],
   "wishlist_primary_action.button.addToCart.label": [
     {
       "type": 0,
-      "value": "카트에 "
+      "value": "Lägg till "
     },
     {
       "type": 1,
@@ -4010,51 +4034,51 @@
     },
     {
       "type": 0,
-      "value": " 추가"
+      "value": " i varukorgen"
     }
   ],
   "wishlist_primary_action.button.add_set_to_cart": [
     {
       "type": 0,
-      "value": "카트에 세트 추가"
+      "value": "Lägg till set i kundvagnen"
     }
   ],
   "wishlist_primary_action.button.add_to_cart": [
     {
       "type": 0,
-      "value": "카트에 추가"
+      "value": "Lägg till i kundvagnen"
     }
   ],
   "wishlist_primary_action.button.viewFullDetails.label": [
     {
-      "type": 1,
-      "value": "productName"
+      "type": 0,
+      "value": "Visa fullständig information för "
     },
     {
-      "type": 0,
-      "value": "에 대한 전체 세부 정보 보기"
+      "type": 1,
+      "value": "productName"
     }
   ],
   "wishlist_primary_action.button.view_full_details": [
     {
       "type": 0,
-      "value": "전체 세부 정보 보기"
+      "value": "Visa fullständig information"
     }
   ],
   "wishlist_primary_action.button.view_options": [
     {
       "type": 0,
-      "value": "옵션 보기"
+      "value": "Visa alternativ"
     }
   ],
   "wishlist_primary_action.button.view_options.label": [
     {
-      "type": 1,
-      "value": "productName"
+      "type": 0,
+      "value": "Visa alternativ för "
     },
     {
-      "type": 0,
-      "value": "에 대한 보기 옵션"
+      "type": 1,
+      "value": "productName"
     }
   ],
   "wishlist_primary_action.info.added_to_cart": [
@@ -4073,7 +4097,7 @@
           "value": [
             {
               "type": 0,
-              "value": "개 항목"
+              "value": "artikel"
             }
           ]
         },
@@ -4081,7 +4105,7 @@
           "value": [
             {
               "type": 0,
-              "value": "개 항목"
+              "value": "artiklar"
             }
           ]
         }
@@ -4092,35 +4116,35 @@
     },
     {
       "type": 0,
-      "value": "이 카트에 추가됨"
+      "value": " har lagts till i kundvagnen"
     }
   ],
   "wishlist_secondary_button_group.action.remove": [
     {
       "type": 0,
-      "value": "제거"
+      "value": "Ta bort"
     }
   ],
   "wishlist_secondary_button_group.info.item.remove.label": [
     {
-      "type": 1,
-      "value": "productName"
+      "type": 0,
+      "value": "Ta bort "
     },
     {
-      "type": 0,
-      "value": " 제거"
+      "type": 1,
+      "value": "productName"
     }
   ],
   "wishlist_secondary_button_group.info.item_removed": [
     {
       "type": 0,
-      "value": "항목이 위시리스트에서 제거됨"
+      "value": "Produkten har tagits bort från önskelistan"
     }
   ],
   "with_registration.info.please_sign_in": [
     {
       "type": 0,
-      "value": "계속하려면 로그인하십시오."
+      "value": "Logga in för att fortsätta!"
     }
   ]
 }
