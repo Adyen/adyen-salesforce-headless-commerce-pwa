@@ -2,7 +2,7 @@ import React, {useEffect, useRef} from 'react'
 import AdyenCheckout from '@adyen/adyen-web'
 import '@adyen/adyen-web/dist/adyen.css'
 import useAdyenCheckout from '../hooks/useAdyenCheckout'
-import {Spinner, Flex} from '@chakra-ui/react'
+import {Flex, Spinner} from '@chakra-ui/react'
 import PropTypes from 'prop-types'
 
 export const getCheckoutConfig = (
@@ -60,8 +60,10 @@ const AdyenCheckoutComponent = (props) => {
     const {
         adyenEnvironment,
         adyenPaymentMethods,
+        orderNo,
         getPaymentMethodsConfiguration,
         setAdyenStateData,
+        setOrderNo,
         getTranslations,
         locale,
         adyenPaymentInProgress,
@@ -85,11 +87,12 @@ const AdyenCheckoutComponent = (props) => {
             )
             const checkout = await AdyenCheckout({
                 ...checkoutConfig,
-                onSubmit(state, element) {
+                onSubmit: async (state, element) => {
                     const onSubmit =
                         paymentMethodsConfiguration.onSubmit ||
                         paymentMethodsConfiguration.card.onSubmit
-                    onSubmit(state, element)
+                    const {paymentsResponse} = await onSubmit(state, element)
+                    setOrderNo(paymentsResponse.merchantReference)
                 },
                 onAdditionalDetails(state, element) {
                     const onAdditionalDetails =
@@ -102,7 +105,12 @@ const AdyenCheckoutComponent = (props) => {
                         setAdyenStateData(state.data)
                     }
                 },
-                onError: () => navigate('/checkout/error')
+                onError() {
+                    const onError =
+                        paymentMethodsConfiguration.onError ||
+                        paymentMethodsConfiguration.card.onError
+                    onError(orderNo, navigate)
+                }
             })
 
             handleQueryParams(urlParams, checkout, setAdyenPaymentInProgress, paymentContainer)

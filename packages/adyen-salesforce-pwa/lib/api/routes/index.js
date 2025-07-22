@@ -11,6 +11,7 @@ import {authorizationWebhookHandler} from '../controllers/authorization-webhook-
 import {createErrorResponse} from '../../utils/createErrorResponse.mjs'
 import Logger from '../controllers/logger'
 import {appleDomainAssociation} from '../controllers/apple-domain-association'
+import OrderCancelController from '../controllers/order-cancel';
 
 function SuccessHandler(req, res) {
     Logger.info('Success')
@@ -59,6 +60,8 @@ function registerAdyenEndpoints(app, runtime, overrides) {
         appleDomainAssociation
     ]
 
+    const orderCancelHandler = overrides?.onOrderCancel || [OrderCancelController, SuccessHandler]
+
     app.get(
         '*/checkout/redirect',
         query('redirectResult').optional().escape(),
@@ -83,6 +86,7 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     app.post('/api/adyen/webhook', ...webhookHandler)
     app.post('/api/adyen/shipping-methods', ...shippingMethodsPostHandler)
     app.post('/api/adyen/shipping-address', ...shippingAddressHandler)
+    app.post('/api/adyen/order/cancel', ...orderCancelHandler)
 
     app.use(overrides?.ErrorHandler || ErrorHandler)
 }
