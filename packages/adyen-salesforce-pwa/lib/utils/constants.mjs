@@ -45,6 +45,7 @@ export const ORDER = Object.freeze({
     ORDER_STATUS_COMPLETED: 'completed',
     ORDER_STATUS_CANCELED: 'cancelled',
     ORDER_STATUS_FAILED: 'failed',
+    ORDER_STATUS_FAILED_REOPEN: 'failed_with_reopen',
     PAYMENT_STATUS_PAID: 'paid',
     PAYMENT_STATUS_PART_PAID: 'part_paid',
     PAYMENT_STATUS_NOT_PAID: 'not_paid',
