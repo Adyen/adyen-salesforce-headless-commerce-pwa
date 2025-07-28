@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata xmlns="http://www.demandware.com/xml/impex/metadata/2006-10-31">
+    <type-extension type-id="OrderPaymentInstrument">
+        <attribute-definition attribute-id="adyenPartialPaymentsOrder">
+            <display-name xml:lang="x-default">adyenPartialPaymentsOrder</display-name>
+            <description xml:lang="x-default">partial payments order data</description>
+            <type>string</type>
+            <mandatory-flag>false</mandatory-flag>
+            <externally-managed-flag>false</externally-managed-flag>
+            <min-length>0</min-length>
+            <field-length>0</field-length>
+        </attribute-definition>
+        <attribute-definition attribute-id="adyenAdditionalPaymentData">
+            <display-name xml:lang="x-default">adyenAdditionalPaymentData</display-name>
+            <description xml:lang="x-default">Additional data for payment method</description>
+            <type>string</type>
+            <mandatory-flag>false</mandatory-flag>
+            <externally-managed-flag>false</externally-managed-flag>
+            <min-length>0</min-length>
+            <field-length>0</field-length>
+        </attribute-definition>
+    </type-extension>
+    <type-extension type-id="PaymentTransaction">
+        <system-attribute-definitions>
+            <attribute-definition attribute-id="UUID">
+                <min-length>0</min-length>
+                <field-length>28</field-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="creationDate"/>
+            <attribute-definition attribute-id="lastModified"/>
+            <attribute-definition attribute-id="transactionID">
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="type">
+                <value-definitions immutable="true">
+                    <value-definition>
+                        <display xml:lang="x-default">Authorization</display>
+                        <value>TYPE_AUTH</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">Authorization Reversal</display>
+                        <value>TYPE_AUTH_REVERSAL</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">Capture</display>
+                        <value>TYPE_CAPTURE</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">Credit</display>
+                        <value>TYPE_CREDIT</value>
+                    </value-definition>
+                </value-definitions>
+            </attribute-definition>
+        </system-attribute-definitions>
+    </type-extension>
+    <type-extension type-id="Basket">
+        <attribute-definition attribute-id="adyenGiftCards">
+            <display-name xml:lang="x-default">adyenGiftCards</display-name>
+            <description xml:lang="x-default">Adyen Gift Cards</description>
+            <type>text</type>
+            <mandatory-flag>false</mandatory-flag>
+            <externally-managed-flag>false</externally-managed-flag>
+            <min-length>0</min-length>
+        </attribute-definition>
+        <attribute-definition attribute-id="adyenGiftCardsOrderNo">
+            <display-name xml:lang="x-default">adyenGiftCardsOrderNo</display-name>
+            <description xml:lang="x-default">Adyen Gift Cards Order Number</description>
+            <type>text</type>
+            <mandatory-flag>false</mandatory-flag>
+            <externally-managed-flag>false</externally-managed-flag>
+            <min-length>0</min-length>
+        </attribute-definition>
+    </type-extension>
+</metadata>

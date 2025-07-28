@@ -12,3 +12,4 @@ Vagrantfile
 build
 dist
 coverage
+/cartridges/
