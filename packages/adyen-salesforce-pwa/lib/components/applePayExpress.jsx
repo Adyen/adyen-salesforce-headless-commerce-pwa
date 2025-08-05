@@ -146,7 +146,7 @@ export const getAppleButtonConfig = (
                     }
                     applePayAmount = response.orderTotal
                     const finalPriceUpdate = {
-                        newShippingMethods: applicableShippingMethods?.sort((a, b) => {
+                        newShippingMethods: [...applicableShippingMethods].sort((a, b) => {
                             if (a.id === defaultShippingMethodId) {
                                 return -1
                             } else if (b.id === defaultShippingMethodId) {
