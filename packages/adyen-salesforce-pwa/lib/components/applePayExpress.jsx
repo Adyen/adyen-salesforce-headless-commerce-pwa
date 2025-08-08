@@ -1,7 +1,7 @@
 import React, {useEffect, useRef} from 'react'
 import AdyenCheckout from '@adyen/adyen-web'
 import '@adyen/adyen-web/dist/adyen.css'
-import {Spinner, Flex} from '@chakra-ui/react'
+import {Flex, Spinner} from '@chakra-ui/react'
 import PropTypes from 'prop-types'
 import {getCurrencyValueForApi} from '../utils/parsers.mjs'
 import {AdyenPaymentsService} from '../services/payments'
@@ -116,7 +116,8 @@ export const getAppleButtonConfig = (
                 reject()
             }
         },
-        onSubmit: () => {},
+        onSubmit: () => {
+        },
         onShippingContactSelected: async (resolve, reject, event) => {
             try {
                 const {shippingContact} = event
@@ -127,16 +128,16 @@ export const getAppleButtonConfig = (
                     basket.basketId,
                     customerShippingDetails
                 )
-                const newShippingMethods = await fetchShippingMethods(
+                const {defaultShippingMethodId, applicableShippingMethods} = await fetchShippingMethods(
                     basket?.basketId,
                     site,
                     authToken
                 )
-                if (!newShippingMethods?.applicableShippingMethods?.length) {
+                if (!applicableShippingMethods?.length) {
                     reject()
                 } else {
                     const response = await adyenShippingMethodsService.updateShippingMethod(
-                        newShippingMethods.applicableShippingMethods[0].id,
+                        defaultShippingMethodId ? defaultShippingMethodId : applicableShippingMethods[0].id,
                         basket.basketId
                     )
                     buttonConfig.amount = {
@@ -145,7 +146,14 @@ export const getAppleButtonConfig = (
                     }
                     applePayAmount = response.orderTotal
                     const finalPriceUpdate = {
-                        newShippingMethods: newShippingMethods?.applicableShippingMethods?.map(
+                        newShippingMethods: [...applicableShippingMethods].sort((a, b) => {
+                            if (a.id === defaultShippingMethodId) {
+                                return -1
+                            } else if (b.id === defaultShippingMethodId) {
+                                return 1
+                            }
+                            return 0
+                        }).map(
                             (sm) => ({
                                 label: sm.name,
                                 detail: sm.description,
