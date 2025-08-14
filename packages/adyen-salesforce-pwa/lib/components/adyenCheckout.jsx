@@ -63,7 +63,6 @@ const AdyenCheckoutComponent = (props) => {
         orderNo,
         getPaymentMethodsConfiguration,
         setAdyenStateData,
-        setOrderNo,
         getTranslations,
         locale,
         adyenPaymentInProgress,
@@ -87,12 +86,11 @@ const AdyenCheckoutComponent = (props) => {
             )
             const checkout = await AdyenCheckout({
                 ...checkoutConfig,
-                onSubmit: async (state, element) => {
+                onSubmit(state, element) {
                     const onSubmit =
                         paymentMethodsConfiguration.onSubmit ||
                         paymentMethodsConfiguration.card.onSubmit
-                    const {paymentsResponse} = await onSubmit(state, element)
-                    setOrderNo(paymentsResponse.merchantReference)
+                    onSubmit(state, element)
                 },
                 onAdditionalDetails(state, element) {
                     const onAdditionalDetails =
