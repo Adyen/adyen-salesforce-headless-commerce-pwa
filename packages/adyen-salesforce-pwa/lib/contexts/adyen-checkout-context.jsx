@@ -90,7 +90,7 @@ const AdyenCheckoutProvider = ({
             afterSubmit: [
                 ...afterSubmit,
                 ...(adyenConfig?.afterSubmit || []),
-                onPaymentsSuccess(navigate)
+                onPaymentsSuccess(navigate, setOrderNo)
             ],
             beforeSubmit: [...beforeSubmit, ...(adyenConfig?.beforeSubmit || [])],
             afterAdditionalDetails: [
@@ -115,7 +115,6 @@ const AdyenCheckoutProvider = ({
         navigate,
         setAdyenPaymentInProgress: (data) => setAdyenPaymentInProgress(data),
         setAdyenStateData: (data) => setAdyenStateData(data),
-        setOrderNo: (data) => setOrderNo(data),
         getPaymentMethodsConfiguration,
         getTranslations
     }

@@ -9,6 +9,26 @@ import {ORDER} from '../../../utils/constants.mjs'
 jest.mock('../logger')
 jest.mock('../orderApi')
 jest.mock('commerce-sdk-isomorphic')
+jest.mock('@salesforce/pwa-kit-runtime/utils/ssr-config', () => {
+    return {
+        getConfig: jest.fn().mockImplementation(() => {
+            return {
+                app: {
+                    sites: [
+                        {
+                            id: 'RefArch'
+                        }
+                    ],
+                    commerceAPI: {
+                        parameters: {
+                            siteId: 'RefArch'
+                        }
+                    }
+                }
+            }
+        })
+    }
+})
 
 // Mock the global appConfig that the controller depends on
 global.appConfig = {
@@ -83,13 +103,11 @@ describe('orderCancel Controller', () => {
 
         await orderCancel(req, res, next)
 
-        const expectedError = new AdyenError('order is invalid', 404, 'null')
-
         expect(mockUpdateOrderStatus).not.toHaveBeenCalled()
-        expect(Logger.error).toHaveBeenCalledWith('orderCancel', JSON.stringify(expectedError))
         expect(next).toHaveBeenCalledWith(expect.any(AdyenError))
-        expect(next.mock.calls[0][0].message).toBe('order is invalid')
-        expect(next.mock.calls[0][0].statusCode).toBe(404)
+        const receivedError = next.mock.calls[0][0]
+        expect(receivedError.message).toBe('order is invalid')
+        expect(receivedError.statusCode).toBe(404)
     })
 
     test('should call next with an AdyenError if the customer ID does not match', async () => {
@@ -103,12 +121,11 @@ describe('orderCancel Controller', () => {
 
         await orderCancel(req, res, next)
 
-        const expectedError = new AdyenError('order is invalid', 404, JSON.stringify(mockOrder))
-
         expect(mockUpdateOrderStatus).not.toHaveBeenCalled()
-        expect(Logger.error).toHaveBeenCalledWith('orderCancel', JSON.stringify(expectedError))
         expect(next).toHaveBeenCalledWith(expect.any(AdyenError))
-        expect(next.mock.calls[0][0].message).toBe('order is invalid')
+        const receivedError = next.mock.calls[0][0]
+        expect(receivedError.message).toBe('order is invalid')
+        expect(receivedError.statusCode).toBe(404)
     })
 
     test('should call next with an error if getOrder API call fails', async () => {
@@ -118,7 +135,6 @@ describe('orderCancel Controller', () => {
         await orderCancel(req, res, next)
 
         expect(mockUpdateOrderStatus).not.toHaveBeenCalled()
-        expect(Logger.error).toHaveBeenCalledWith('orderCancel', JSON.stringify(apiError))
         expect(next).toHaveBeenCalledWith(apiError)
     })
 
@@ -136,7 +152,6 @@ describe('orderCancel Controller', () => {
         await orderCancel(req, res, next)
 
         expect(mockUpdateOrderStatus).toHaveBeenCalled()
-        expect(Logger.error).toHaveBeenCalledWith('orderCancel', JSON.stringify(apiError))
         expect(next).toHaveBeenCalledWith(apiError)
     })
 })

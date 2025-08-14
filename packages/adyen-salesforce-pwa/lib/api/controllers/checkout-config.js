@@ -1,7 +1,8 @@
 import {Client, Config} from '@adyen/api-library'
 import {PaymentsApi} from '@adyen/api-library/lib/src/services/checkout/paymentsApi'
+import {OrdersApi} from '@adyen/api-library/lib/src/services/checkout/ordersApi'
 import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrentSite.mjs'
-import {ADYEN_LIVE_REGIONS, ADYEN_ENVIRONMENT} from '../../utils/constants.mjs'
+import {ADYEN_ENVIRONMENT, ADYEN_LIVE_REGIONS} from '../../utils/constants.mjs'
 import {AdyenError} from '../models/AdyenError'
 
 const errorMessages = {
@@ -17,7 +18,7 @@ class AdyenCheckoutConfig {
         return Object.values(ADYEN_LIVE_REGIONS).includes(environment)
     }
 
-    createInstance() {
+    getClient() {
         const adyenConfig = getAdyenConfigForCurrentSite(this.siteId)
         const config = new Config()
         config.apiKey = adyenConfig.apiKey
@@ -34,15 +35,25 @@ class AdyenCheckoutConfig {
             client.setEnvironment(ADYEN_ENVIRONMENT.TEST)
         }
 
-        return new PaymentsApi(client)
+        return client
     }
 
     static getInstance(siteId) {
         if (!this.instance) {
             const adyenCheckoutConfig = new AdyenCheckoutConfig(siteId)
-            this.instance = adyenCheckoutConfig.createInstance()
+            const client = adyenCheckoutConfig.getClient();
+            this.instance = new PaymentsApi(client)
         }
         return this.instance
+    }
+
+    static getOrdersApiInstance(siteId) {
+        if (!this.ordersApiInstance) {
+            const adyenCheckoutConfig = new AdyenCheckoutConfig(siteId)
+            const client = adyenCheckoutConfig.getClient();
+            this.ordersApiInstance = new OrdersApi(client)
+        }
+        return this.ordersApiInstance
     }
 }
 

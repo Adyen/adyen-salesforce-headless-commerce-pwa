@@ -1,6 +1,6 @@
 import {PaymentMethodsController} from '../../index'
 import {AdyenError} from '../../models/AdyenError'
-import { APPLICATION_VERSION } from "../../../utils/constants.mjs";
+import {APPLICATION_VERSION} from "../../../utils/constants.mjs";
 
 let mockPaymentMethods = jest.fn()
 let mockGetCustomerBaskets = jest.fn()
@@ -48,7 +48,7 @@ jest.mock('../checkout-config', () => {
 })
 describe('payment methods controller', () => {
     let req, res, next, consoleInfoSpy, consoleErrorSpy
-    let blockedPaymentMethods = ['giftcard', 'wechatpayMiniProgram', 'wechatpayQR', 'wechatpaySDK']
+    let blockedPaymentMethods = ['wechatpayMiniProgram', 'wechatpayQR', 'wechatpaySDK']
 
     beforeEach(() => {
         req = {
@@ -65,8 +65,10 @@ describe('payment methods controller', () => {
             locals: {}
         }
         next = jest.fn()
-        consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation(() => {})
-        consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+        consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation(() => {
+        })
+        consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {
+        })
     })
     it('returns payment method list', async () => {
         mockGetCustomer.mockImplementation(() => {

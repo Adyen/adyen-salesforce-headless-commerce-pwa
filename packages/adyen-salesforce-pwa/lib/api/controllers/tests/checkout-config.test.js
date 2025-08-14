@@ -64,7 +64,7 @@ describe('AdyenCheckoutConfig', () => {
             apiKey: 'live-api-key'
         })
         const adyenCheckoutConfig = new AdyenCheckoutConfig('siteId')
-        expect(() => adyenCheckoutConfig.createInstance()).toThrow(AdyenError)
+        expect(() => adyenCheckoutConfig.getClient()).toThrow(AdyenError)
     })
 
     it('should return if its live environment', () => {

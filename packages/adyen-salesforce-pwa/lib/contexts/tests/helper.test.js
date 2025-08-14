@@ -5,6 +5,7 @@ describe('onPaymentsSuccess', () => {
         const state = {}
         const props = {}
         const navigate = jest.fn()
+        const setOrderNo = jest.fn()
         const responses = {
             paymentsResponse: {
                 isSuccessful: true,
@@ -14,14 +15,16 @@ describe('onPaymentsSuccess', () => {
         const component = {
             handleAction: jest.fn()
         }
-        await onPaymentsSuccess(navigate)(state, component, props, responses)
+        await onPaymentsSuccess(navigate, setOrderNo)(state, component, props, responses)
         expect(navigate).toHaveBeenCalled()
+        expect(setOrderNo).toHaveBeenCalled()
     })
 
     it('when response is action', async () => {
         const state = {}
         const props = {}
         const navigate = jest.fn()
+        const setOrderNo = jest.fn()
         const responses = {
             paymentsResponse: {
                 isSuccessful: false,
@@ -34,14 +37,16 @@ describe('onPaymentsSuccess', () => {
         const component = {
             handleAction: jest.fn()
         }
-        await onPaymentsSuccess(navigate)(state, component, props, responses)
+        await onPaymentsSuccess(navigate, setOrderNo)(state, component, props, responses)
         expect(component.handleAction).toHaveBeenCalled()
+        expect(setOrderNo).toHaveBeenCalled()
     })
 
     it('when response action is voucher', async () => {
         const state = {}
         const props = {}
         const navigate = jest.fn()
+        const setOrderNo = jest.fn()
         const responses = {
             paymentsResponse: {
                 isSuccessful: false,
@@ -54,14 +59,16 @@ describe('onPaymentsSuccess', () => {
         const component = {
             handleAction: jest.fn()
         }
-        await onPaymentsSuccess(navigate)(state, component, props, responses)
+        await onPaymentsSuccess(navigate, setOrderNo)(state, component, props, responses)
         expect(navigate).toHaveBeenCalled()
+        expect(setOrderNo).toHaveBeenCalled()
     })
 
     it('when response is not successful', async () => {
         const state = {}
         const props = {}
         const navigate = jest.fn()
+        const setOrderNo = jest.fn()
         const responses = {
             paymentsResponse: {
                 isSuccessful: false,
@@ -71,8 +78,9 @@ describe('onPaymentsSuccess', () => {
         const component = {
             handleAction: jest.fn()
         }
-        const result = await onPaymentsSuccess(navigate)(state, component, props, responses)
+        const result = await onPaymentsSuccess(navigate, setOrderNo)(state, component, props, responses)
         expect(result instanceof Error).toBeTrue()
+        expect(setOrderNo).toHaveBeenCalled()
     })
 })
 

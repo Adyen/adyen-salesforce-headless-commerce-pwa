@@ -12,6 +12,7 @@ import {createErrorResponse} from '../../utils/createErrorResponse.mjs'
 import Logger from '../controllers/logger'
 import {appleDomainAssociation} from '../controllers/apple-domain-association'
 import OrderCancelController from '../controllers/order-cancel';
+import {balanceCheck, cancelOrder, createOrder} from "../controllers/giftCard";
 
 function SuccessHandler(req, res) {
     Logger.info('Success')
@@ -62,6 +63,11 @@ function registerAdyenEndpoints(app, runtime, overrides) {
 
     const orderCancelHandler = overrides?.onOrderCancel || [OrderCancelController, SuccessHandler]
 
+    const balanceCheckHandler = overrides?.balanceCheck || [balanceCheck, SuccessHandler]
+    const createOrderHandler = overrides?.createOrder || [createOrder, SuccessHandler]
+    const cancelOrderHandler = overrides?.cancelOrder || [cancelOrder, SuccessHandler]
+
+
     app.get(
         '*/checkout/redirect',
         query('redirectResult').optional().escape(),
@@ -87,6 +93,10 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     app.post('/api/adyen/shipping-methods', ...shippingMethodsPostHandler)
     app.post('/api/adyen/shipping-address', ...shippingAddressHandler)
     app.post('/api/adyen/order/cancel', ...orderCancelHandler)
+    app.post('/api/adyen/gift-card/balance-check', ...balanceCheckHandler)
+    app.post('/api/adyen/gift-card/create-order', ...createOrderHandler)
+    app.post('/api/adyen/gift-card/cancel-order', ...cancelOrderHandler)
+
 
     app.use(overrides?.ErrorHandler || ErrorHandler)
 }
