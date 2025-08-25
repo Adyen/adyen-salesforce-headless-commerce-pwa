@@ -2,6 +2,7 @@ import Logger from './logger'
 import {AdyenError} from '../models/AdyenError'
 import {OrderApiClient} from "./orderApi";
 import {ShopperOrders} from "commerce-sdk-isomorphic";
+import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 import {ORDER} from "../../utils/constants.mjs";
 
 const errorMessages = {
@@ -14,6 +15,7 @@ async function orderCancel(req, res, next) {
     try {
         const {orderNo} = req.body
 
+        const {app: appConfig} = getConfig()
         const shopperOrders = new ShopperOrders({
             ...appConfig.commerceAPI,
             headers: {authorization: req.headers.authorization}
@@ -25,10 +27,10 @@ async function orderCancel(req, res, next) {
             }
         })
         if (!order) {
-            throw new AdyenError(errorMessages.INVALID_ORDER, 404, JSON.stringify(order))
+            throw new AdyenError(errorMessages.INVALID_ORDER, 404)
         }
         if (order?.customerInfo?.customerId !== req.headers.customerid) {
-            throw new AdyenError(errorMessages.INVALID_ORDER, 404, JSON.stringify(order))
+            throw new AdyenError(errorMessages.INVALID_ORDER, 404)
         }
         const orderApi = new OrderApiClient()
         await orderApi.updateOrderStatus(order.orderNo, ORDER.ORDER_STATUS_FAILED_REOPEN);

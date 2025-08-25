@@ -8,7 +8,10 @@ const handleAction = (navigate) => async (component, responses) => {
     }
 }
 
-export const onPaymentsSuccess = (navigate) => async (state, component, props, responses) => {
+export const onPaymentsSuccess = (navigate, setOrderNo) => async (state, component, props, responses) => {
+    if (responses?.paymentsResponse?.merchantReference) {
+        setOrderNo(responses?.paymentsResponse?.merchantReference)
+    }
     if (responses?.paymentsResponse?.isSuccessful) {
         navigate(`/checkout/confirmation/${responses?.paymentsResponse?.merchantReference}`)
     } else if (responses?.paymentsResponse?.action) {
