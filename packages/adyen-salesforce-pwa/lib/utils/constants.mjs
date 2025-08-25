@@ -38,6 +38,11 @@ export const RECURRING_PROCESSING_MODEL = {
     CARD_ON_FILE: 'CardOnFile',
 };
 
+export const GIFT_CARD_RESULT_CODES = {
+    NOTENOUGHBALANCE: 'NotEnoughBalance',
+    SUCCESS: 'Success',
+}
+
 export const ORDER = Object.freeze({
     ORDER_STATUS_CREATED: 'created',
     ORDER_STATUS_NEW: 'new',

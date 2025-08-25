@@ -1,41 +1,38 @@
-import { RESULT_CODES } from "./constants.mjs";
+import {RESULT_CODES} from './constants.mjs'
+
+const ACTION_CODES = new Set([
+    RESULT_CODES.REDIRECTSHOPPER,
+    RESULT_CODES.IDENTIFYSHOPPER,
+    RESULT_CODES.CHALLENGESHOPPER,
+    RESULT_CODES.PENDING,
+    RESULT_CODES.PRESENTTOSHOPPER
+])
+
+const SUCCESSFUL_CODES = new Set([RESULT_CODES.AUTHORISED, RESULT_CODES.RECEIVED])
+const FAILURE_CODES = new Set([RESULT_CODES.REFUSED, RESULT_CODES.ERROR, RESULT_CODES.CANCELLED])
 
 export function createCheckoutResponse(response, orderNumber) {
-  if (
-    [
-      RESULT_CODES.AUTHORISED,
-      RESULT_CODES.REFUSED,
-      RESULT_CODES.ERROR,
-      RESULT_CODES.CANCELLED,
-      RESULT_CODES.RECEIVED,
-    ].includes(response.resultCode)
-  ) {
+    const {resultCode, action, order} = response
+    const merchantReference = response.merchantReference || orderNumber
+    if (FAILURE_CODES.has(resultCode)) {
+        return {
+            isFinal: true,
+            isSuccessful: false,
+            merchantReference,
+            refusalReason: response.refusalReason
+        }
+    }
+    if (ACTION_CODES.has(resultCode)) {
+        return {
+            isFinal: false,
+            action,
+            merchantReference
+        }
+    }
+    const isFinal = order ? order.remainingAmount.value <= 0 : true
     return {
-      isFinal: true,
-      isSuccessful:
-        response.resultCode === RESULT_CODES.AUTHORISED || response.resultCode === RESULT_CODES.RECEIVED,
-      merchantReference: response.merchantReference || orderNumber,
-    };
-  }
-
-  if (
-    [
-      RESULT_CODES.REDIRECTSHOPPER,
-      RESULT_CODES.IDENTIFYSHOPPER,
-      RESULT_CODES.CHALLENGESHOPPER,
-      RESULT_CODES.PENDING,
-      RESULT_CODES.PRESENTTOSHOPPER
-    ].includes(response.resultCode)
-  ) {
-    return {
-      isFinal: false,
-      action: response.action,
-      merchantReference: response.merchantReference || orderNumber,
-    };
-  }
-
-  return {
-    isFinal: true,
-    isSuccessful: false,
-  };
+        isFinal,
+        isSuccessful: SUCCESSFUL_CODES.has(resultCode),
+        merchantReference
+    }
 }

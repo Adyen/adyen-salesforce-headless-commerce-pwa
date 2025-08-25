@@ -8,3 +8,10 @@ export function getCurrencyValueForApi(amount, currencyCode) {
     if (!currency) throw new Error(INVALID_CURRENCY_ERROR)
     return Math.round(amount * Math.pow(10, currency.Decimals))
 }
+
+// converts the currency value from minor units to major units
+export function convertCurrencyValueToMajorUnits(amount, currencyCode) {
+    const currency = currencyList.find((currency) => currency.Code === currencyCode)
+    if (!currency) throw new Error(INVALID_CURRENCY_ERROR)
+    return amount / Math.pow(10, currency.Decimals)
+}

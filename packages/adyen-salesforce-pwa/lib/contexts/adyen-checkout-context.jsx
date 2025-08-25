@@ -25,6 +25,8 @@ const AdyenCheckoutProvider = ({
     const [adyenEnvironment, setAdyenEnvironment] = useState()
     const [adyenStateData, setAdyenStateData] = useState()
     const [orderNo, setOrderNo] = useState()
+    const [adyenOrder, setAdyenOrder] = useState()
+    const [checkoutDropin, setCheckoutDropin] = useState()
     const [adyenPaymentInProgress, setAdyenPaymentInProgress] = useState()
     const callPaymentMethodsOnPages = ['checkout']
 
@@ -90,7 +92,7 @@ const AdyenCheckoutProvider = ({
             afterSubmit: [
                 ...afterSubmit,
                 ...(adyenConfig?.afterSubmit || []),
-                onPaymentsSuccess(navigate, setOrderNo)
+                onPaymentsSuccess(navigate, setOrderNo, setAdyenOrder)
             ],
             beforeSubmit: [...beforeSubmit, ...(adyenConfig?.beforeSubmit || [])],
             afterAdditionalDetails: [
@@ -110,6 +112,9 @@ const AdyenCheckoutProvider = ({
         adyenPaymentMethods,
         adyenStateData,
         orderNo,
+        adyenOrder,
+        checkoutDropin,
+        setCheckoutDropin,
         adyenPaymentInProgress,
         locale,
         navigate,
