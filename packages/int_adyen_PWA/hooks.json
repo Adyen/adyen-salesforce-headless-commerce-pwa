@@ -31,6 +31,18 @@
     {
       "name": "dw.ocapi.shop.order.payment_instrument.beforePOST",
       "script": "./cartridge/scripts/hooks/orderPaymentHooks.js"
+    },
+    {
+      "name": "dw.ocapi.shop.basket.afterPOST",
+      "script": "./cartridge/scripts/hooks/basketHooks.js"
+    },
+    {
+      "name": "dw.ocapi.shop.basket.afterPATCH",
+      "script": "./cartridge/scripts/hooks/basketHooks.js"
+    },
+    {
+      "name": "dw.ocapi.shop.basket.beforePATCH",
+      "script": "./cartridge/scripts/hooks/basketHooks.js"
     }
   ]
 }

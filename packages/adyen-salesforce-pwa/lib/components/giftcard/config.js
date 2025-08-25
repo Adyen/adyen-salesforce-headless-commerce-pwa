@@ -6,12 +6,20 @@ export const giftcardConfig = (props) => {
     return {
         ...baseConfig(props),
         onBalanceCheck: async (resolve, reject, data) => {
-            const BalanceResponse = await giftCardService.balanceCheck(data, props?.customerId)
-            resolve(BalanceResponse);
+            const response = await giftCardService.balanceCheck(data, props?.customerId)
+            if (response && !!response.error) {
+                reject(response.errorMessage);
+            } else {
+                resolve(response);
+            }
         },
         onOrderRequest: async (resolve, reject, data) => {
-            const OrderResponse = await giftCardService.createOrder(data, props?.customerId)
-            resolve(OrderResponse);
+            const response = await giftCardService.createOrder(data, props?.customerId)
+            if (response && !!response.error) {
+                reject(response.errorMessage);
+            } else {
+                resolve(response);
+            }
         },
         onOrderCancel: async (Order) => {
             await giftCardService.cancelOrder(Order, props?.customerId)

@@ -36,7 +36,7 @@ export const handleQueryParams = (
     const adyenAction = urlParams.get('adyenAction')
 
     if (redirectResult) {
-        checkout.submitDetails({data: {details: {redirectResult}}})
+        return checkout.submitDetails({data: {details: {redirectResult}}})
     } else if (amazonCheckoutSessionId) {
         setAdyenPaymentInProgress(true)
         const amazonPayContainer = document.createElement('div')
@@ -47,12 +47,13 @@ export const handleQueryParams = (
             })
             .mount(amazonPayContainer)
         amazonPay.submit()
+        return null
     } else if (adyenAction) {
         const actionString = atob(adyenAction)
         const action = JSON.parse(actionString)
-        checkout.createFromAction(action).mount(paymentContainer.current)
+        return checkout.createFromAction(action).mount(paymentContainer.current)
     } else {
-        checkout.create('dropin').mount(paymentContainer.current)
+        return checkout.create('dropin').mount(paymentContainer.current)
     }
 }
 
@@ -61,6 +62,9 @@ const AdyenCheckoutComponent = (props) => {
         adyenEnvironment,
         adyenPaymentMethods,
         orderNo,
+        adyenOrder,
+        checkoutDropin,
+        setCheckoutDropin,
         getPaymentMethodsConfiguration,
         setAdyenStateData,
         getTranslations,
@@ -72,54 +76,60 @@ const AdyenCheckoutComponent = (props) => {
     const paymentContainer = useRef(null)
 
     useEffect(() => {
-        const urlParams = new URLSearchParams(location.search)
+        (async () => {
+            const urlParams = new URLSearchParams(location.search)
 
-        const createCheckout = async () => {
-            const paymentMethodsConfiguration = await getPaymentMethodsConfiguration(props)
-            const translations = getTranslations()
-            const checkoutConfig = getCheckoutConfig(
-                adyenEnvironment,
-                adyenPaymentMethods,
-                paymentMethodsConfiguration,
-                translations,
-                locale
-            )
-            const checkout = await AdyenCheckout({
-                ...checkoutConfig,
-                onSubmit(state, element) {
-                    const onSubmit =
-                        paymentMethodsConfiguration.onSubmit ||
-                        paymentMethodsConfiguration.card.onSubmit
-                    onSubmit(state, element)
-                },
-                onAdditionalDetails(state, element) {
-                    const onAdditionalDetails =
-                        paymentMethodsConfiguration.onAdditionalDetails ||
-                        paymentMethodsConfiguration.card.onAdditionalDetails
-                    onAdditionalDetails(state, element)
-                },
-                onChange: (state) => {
-                    if (state.isValid) {
-                        setAdyenStateData(state.data)
+            const createCheckout = async () => {
+                const paymentMethodsConfiguration = await getPaymentMethodsConfiguration({...props, adyenOrder})
+                const translations = getTranslations()
+                const checkoutConfig = getCheckoutConfig(
+                    adyenEnvironment,
+                    adyenPaymentMethods,
+                    paymentMethodsConfiguration,
+                    translations,
+                    locale
+                )
+                const checkout = await AdyenCheckout({
+                    ...checkoutConfig,
+                    order: adyenOrder,
+                    onSubmit(state, element) {
+                        const onSubmit =
+                            paymentMethodsConfiguration.onSubmit ||
+                            paymentMethodsConfiguration.card.onSubmit
+                        onSubmit(state, element)
+                    },
+                    onAdditionalDetails(state, element) {
+                        const onAdditionalDetails =
+                            paymentMethodsConfiguration.onAdditionalDetails ||
+                            paymentMethodsConfiguration.card.onAdditionalDetails
+                        onAdditionalDetails(state, element)
+                    },
+                    onChange: (state) => {
+                        if (state.isValid) {
+                            setAdyenStateData(state.data)
+                        }
+                    },
+                    onError() {
+                        const onError =
+                            paymentMethodsConfiguration.onError ||
+                            paymentMethodsConfiguration.card.onError
+                        onError(orderNo, navigate)
                     }
-                },
-                onError() {
-                    const onError =
-                        paymentMethodsConfiguration.onError ||
-                        paymentMethodsConfiguration.card.onError
-                    onError(orderNo, navigate)
-                }
-            })
+                })
 
-            handleQueryParams(urlParams, checkout, setAdyenPaymentInProgress, paymentContainer)
-        }
-        if (adyenEnvironment && paymentContainer.current && !adyenPaymentInProgress) {
-            if (window?.paypal?.firstElementChild) {
-                window.paypal = undefined
+                return handleQueryParams(urlParams, checkout, setAdyenPaymentInProgress, paymentContainer)
             }
-            createCheckout()
-        }
-    }, [adyenEnvironment, adyenPaymentMethods])
+            if (adyenEnvironment && paymentContainer.current && !adyenPaymentInProgress) {
+                window.paypal = undefined
+                if (checkoutDropin && adyenOrder) {
+                    checkoutDropin.unmount()
+                    setCheckoutDropin(null)
+                }
+                const dropin = await createCheckout()
+                setCheckoutDropin(dropin)
+            }
+        })()
+    }, [adyenEnvironment, adyenPaymentMethods, adyenOrder])
 
     return (
         <>

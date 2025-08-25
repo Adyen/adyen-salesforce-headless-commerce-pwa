@@ -58,8 +58,11 @@ export const onErrorHandler = async (orderNo, navigate, props) => {
     navigate(response?.headers?.location);
 }
 
-export const getAmount = ({basket}) => {
+export const getAmount = ({basket, adyenOrder}) => {
     if (!basket) return null
+    if (adyenOrder) {
+        return adyenOrder.remainingAmount
+    }
     return {
         value: getCurrencyValueForApi(basket.orderTotal, basket.currency),
         currency: basket.currency

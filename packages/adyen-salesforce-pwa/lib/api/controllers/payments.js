@@ -7,7 +7,7 @@ import {
     SHOPPER_INTERACTIONS
 } from '../../utils/constants.mjs'
 import {createCheckoutResponse} from '../../utils/createCheckoutResponse.mjs'
-import {ShopperBaskets, ShopperOrders} from 'commerce-sdk-isomorphic'
+import {ShopperBaskets} from 'commerce-sdk-isomorphic'
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 import AdyenCheckoutConfig from './checkout-config'
 import Logger from './logger'
@@ -17,6 +17,8 @@ import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrent
 import {AdyenError} from '../models/AdyenError'
 import {getApplicationInfo} from '../../utils/getApplicationInfo.mjs'
 import {getCardType} from '../../utils/getCardType.mjs'
+import {saveToBasket} from "./helper";
+
 
 const errorMessages = {
     AMOUNT_NOT_CORRECT: 'amount not correct',
@@ -29,63 +31,61 @@ const errorMessages = {
 }
 
 export const validateRequestParams = (req) => {
-    return !(
-        !req.body?.data ||
-        !req.headers?.authorization ||
-        !req.headers?.basketid ||
-        !req.headers?.customerid
+    return !!(
+        req.body?.data &&
+        req.headers?.authorization &&
+        req.headers?.basketid &&
+        req.headers?.customerid
     )
 }
 
-export const filterStateData = (stateData) => {
-    const validFields = [
-        'paymentMethod',
-        'billingAddress',
-        'deliveryAddress',
-        'riskData',
-        'shopperName',
-        'dateOfBirth',
-        'telephoneNumber',
-        'shopperEmail',
-        'countryCode',
-        'socialSecurityNumber',
-        'browserInfo',
-        'installments',
-        'storePaymentMethod',
-        'conversionId',
-        'origin',
-        'returnUrl'
-    ]
-    const filteredStateData = {}
-    const stateDataKeys = Object.keys(stateData)
-    for (let i = 0; i < stateDataKeys.length; i++) {
-        const keyName = stateDataKeys[i]
-        const isFieldValid = validFields.includes(keyName)
-        if (isFieldValid) {
-            filteredStateData[keyName] = stateData[keyName]
+const VALID_STATE_DATA_FIELDS = new Set([
+    'paymentMethod',
+    'billingAddress',
+    'deliveryAddress',
+    'riskData',
+    'shopperName',
+    'dateOfBirth',
+    'telephoneNumber',
+    'shopperEmail',
+    'countryCode',
+    'socialSecurityNumber',
+    'browserInfo',
+    'installments',
+    'storePaymentMethod',
+    'conversionId',
+    'origin',
+    'returnUrl',
+    'order'
+])
+
+export const filterStateData = (stateData) =>
+    Object.entries(stateData).reduce((acc, [key, value]) => {
+        if (VALID_STATE_DATA_FIELDS.has(key)) {
+            acc[key] = value
         }
-    }
-    return filteredStateData
-}
+        return acc
+    }, {})
 
 export function getShopperName(order) {
-    const [firstName, lastName] = order.customerName.split(' ')
+    const [firstName, lastName] = order?.customerName?.split(' ')
     return {
         firstName,
         lastName
     }
 }
 
-export function isOpenInvoiceMethod(paymentMethod) {
-    return (
-        paymentMethod.indexOf('afterpay') > -1 ||
-        paymentMethod.indexOf('klarna') > -1 ||
-        paymentMethod.indexOf('ratepay') > -1 ||
-        paymentMethod.indexOf('facilypay') > -1 ||
-        paymentMethod === 'zip' ||
-        paymentMethod === 'affirm' ||
-        paymentMethod === 'clearpay'
-    )
+const OPEN_INVOICE_METHODS = new Set(['zip', 'affirm', 'clearpay'])
+const OPEN_INVOICE_PREFIXES = ['afterpay', 'klarna', 'ratepay', 'facilypay']
+
+export function isOpenInvoiceMethod(paymentMethodType) {
+    if (!paymentMethodType) {
+        return false
+    }
+    if (OPEN_INVOICE_METHODS.has(paymentMethodType)) {
+        return true
+    }
+    return OPEN_INVOICE_PREFIXES.some((prefix) => paymentMethodType.includes(prefix))
 }
 
 export function getAdditionalData(order) {
@@ -103,52 +103,25 @@ export function getAdditionalData(order) {
     return additionalData
 }
 
+const mapToLineItem = (item, currency, quantity = item.quantity) => ({
+    id: item.itemId || item.priceAdjustmentId,
+    quantity,
+    description: item.itemText,
+    amountExcludingTax: getCurrencyValueForApi(item.basePrice, currency),
+    taxAmount: getCurrencyValueForApi(item.tax, currency),
+    taxCategory: 'None',
+    taxPercentage: item.taxRate
+})
+
 export function getLineItems(order) {
-    const productLineItems = order?.productItems?.length
-        ? order?.productItems?.map((productItem) => {
-              return {
-                  id: productItem.itemId,
-                  quantity: productItem.quantity,
-                  description: productItem.itemText,
-                  amountExcludingTax: getCurrencyValueForApi(productItem.basePrice, order.currency),
-                  taxAmount: getCurrencyValueForApi(productItem.tax, order.currency),
-                  taxCategory: 'None',
-                  taxPercentage: productItem.taxRate
-              }
-          })
-        : []
-    const shippingLineItems = order?.shippingItems?.length
-        ? order?.shippingItems?.map((shippingItem) => {
-              return {
-                  id: shippingItem.itemId,
-                  quantity: 1,
-                  description: shippingItem.itemText,
-                  amountExcludingTax: getCurrencyValueForApi(
-                      shippingItem.basePrice,
-                      order.currency
-                  ),
-                  taxAmount: getCurrencyValueForApi(shippingItem.tax, order.currency),
-                  taxCategory: 'None',
-                  taxPercentage: shippingItem.taxRate
-              }
-          })
-        : []
-    const priceAdjustmentLineItems = order?.priceAdjustments?.length
-        ? order.priceAdjustments.map((priceAdjustment) => {
-              return {
-                  id: priceAdjustment.priceAdjustmentId,
-                  quantity: priceAdjustment.quantity,
-                  description: priceAdjustment.itemText,
-                  amountExcludingTax: getCurrencyValueForApi(
-                      priceAdjustment.basePrice,
-                      order.currency
-                  ),
-                  taxAmount: getCurrencyValueForApi(priceAdjustment.tax, order.currency),
-                  taxCategory: 'None',
-                  taxPercentage: priceAdjustment.taxRate
-              }
-          })
-        : []
+    const {currency, productItems, shippingItems, priceAdjustments} = order
+
+    const productLineItems = productItems?.map((item) => mapToLineItem(item, currency)) || []
+    const shippingLineItems =
+        shippingItems?.map((item) => mapToLineItem(item, currency, 1)) || []
+    const priceAdjustmentLineItems =
+        priceAdjustments?.map((item) => mapToLineItem(item, currency)) || []
+
     return [...productLineItems, ...shippingLineItems, ...priceAdjustmentLineItems]
 }
 
@@ -160,6 +133,7 @@ function getNativeThreeDS(adyenConfig) {
 }
 
 export function createPaymentRequestObject(order, data, adyenConfig, req) {
+    Logger.info('sendPayments', 'createPaymentRequestObject')
     const paymentRequest = {
         ...filterStateData(data),
         billingAddress: data.billingAddress || formatAddressInAdyenFormat(order.billingAddress),
@@ -207,6 +181,45 @@ export function createPaymentRequestObject(order, data, adyenConfig, req) {
     return paymentRequest
 }
 
+export async function createPartialPaymentRequestObject(data, adyenConfig, req) {
+    Logger.info('sendPayments', 'createPartialPaymentRequestObject')
+    const {app: appConfig} = getConfig()
+    const shopperBaskets = new ShopperBaskets({
+        ...appConfig.commerceAPI,
+        headers: {authorization: req.headers.authorization}
+    })
+    const basket = await shopperBaskets.getBasket({
+        parameters: {
+            basketId: req.headers.basketid
+        }
+    })
+    const {balance = {}} = JSON.parse(basket.c_giftCardCheckBalance || '{}')
+    return {
+        ...filterStateData(data),
+        billingAddress: data.billingAddress || formatAddressInAdyenFormat(basket.billingAddress),
+        deliveryAddress:
+            data.deliveryAddress ||
+            formatAddressInAdyenFormat(basket.shipments[0].shippingAddress),
+        reference: basket.c_orderNo,
+        merchantAccount: adyenConfig.merchantAccount,
+        amount: {
+            value: balance?.value,
+            currency: basket.currency
+        },
+        applicationInfo: getApplicationInfo(adyenConfig.systemIntegratorName),
+        authenticationData: {
+            threeDSRequestData: {
+                nativeThreeDS: 'preferred'
+            }
+        },
+        channel: 'Web',
+        returnUrl: data.returnUrl || `${data.origin}/checkout/redirect`,
+        shopperReference: basket?.customerInfo?.customerId,
+        shopperEmail: basket?.customerInfo?.email,
+        shopperIP: req.ip
+    }
+}
+
 export async function removeAllPaymentInstrumentsFromBasket(basket, shopperBaskets) {
     const promises = []
     if (basket?.paymentInstruments?.length) {
@@ -223,7 +236,7 @@ export async function removeAllPaymentInstrumentsFromBasket(basket, shopperBaske
     return Promise.all(promises)
 }
 
-export async function handleExpressPayment(shopperBaskets, data, basketId, customerId) {
+export async function addShopperDataToBasketForExpressPayment(shopperBaskets, data, basketId, customerId) {
     await shopperBaskets.updateShippingAddressForShipment({
         body: {
             address1: data.deliveryAddress.street,
@@ -271,104 +284,37 @@ export async function handleExpressPayment(shopperBaskets, data, basketId, custo
     })
 }
 
-async function sendPayments(req, res, next) {
-    Logger.info('sendPayments', 'start')
-    if (!validateRequestParams(req)) {
-        const err = new AdyenError(errorMessages.INVALID_PARAMS, 400)
-        Logger.error('sendPayments', err.message)
-        return next(err)
+function isPartialPayment(data) {
+    return Object.hasOwn(data, 'order') && data?.paymentMethod?.type === 'giftcard';
+
+}
+
+async function addPaymentInstrument(basket, shopperBaskets, data) {
+    Logger.info('sendPayments', 'addPaymentInstrument')
+    const isCardPayment = data?.paymentMethod?.type === 'scheme'
+    const paymentMethodId = isCardPayment
+        ? PAYMENT_METHODS.CREDIT_CARD
+        : PAYMENT_METHODS.ADYEN_COMPONENT
+    const paymentInstrumentReq = {
+        body: {
+            amount: basket.orderTotal,
+            paymentMethodId,
+            paymentCard: {
+                cardType: isCardPayment
+                    ? getCardType(data?.paymentMethod?.brand)
+                    : data?.paymentMethod?.type
+            }
+        },
+        parameters: {
+            basketId: basket.basketId
+        }
     }
+    await shopperBaskets.addPaymentInstrumentToBasket(paymentInstrumentReq)
+}
 
-    let order
-    let initialBasket
-
+async function handlePaymentError(err, req, order, initialBasket) {
+    Logger.error('sendPayments', err.stack)
     try {
-        const {data} = req.body
-        const {siteId} = req.query
-
-        const checkout = AdyenCheckoutConfig.getInstance(siteId)
-        const adyenConfig = getAdyenConfigForCurrentSite(siteId)
-
-        const {app: appConfig} = getConfig()
-        const shopperBaskets = new ShopperBaskets({
-            ...appConfig.commerceAPI,
-            headers: {authorization: req.headers.authorization}
-        })
-
-        initialBasket = await shopperBaskets.getBasket({
-            parameters: {
-                basketId: req.headers.basketid
-            }
-        })
-
-        if (!initialBasket) {
-            throw new AdyenError(errorMessages.INVALID_BASKET, 404)
-        }
-
-        if (!initialBasket?.paymentInstruments || !initialBasket?.paymentInstruments?.length) {
-            Logger.info('sendPayments', 'addPaymentInstrumentToBasket')
-            const isCardPayment = data?.paymentMethod?.type === 'scheme'
-            const paymentMethodId = isCardPayment
-                ? PAYMENT_METHODS.CREDIT_CARD
-                : PAYMENT_METHODS.ADYEN_COMPONENT
-            const paymentInstrumentReq = {
-                body: {
-                    amount: initialBasket.orderTotal,
-                    paymentMethodId,
-                    paymentCard: {
-                        cardType: isCardPayment
-                            ? getCardType(data?.paymentMethod?.brand)
-                            : data?.paymentMethod?.type
-                    }
-                },
-                parameters: {
-                    basketId: req.headers.basketid
-                }
-            }
-            await shopperBaskets.addPaymentInstrumentToBasket(paymentInstrumentReq)
-        }
-
-        if (data.paymentType === 'express') {
-            await handleExpressPayment(
-                shopperBaskets,
-                data,
-                req.headers.basketid,
-                req.headers.customerid
-            )
-        }
-
-        const shopperOrders = new ShopperOrders({
-            ...appConfig.commerceAPI,
-            headers: {authorization: req.headers.authorization}
-        })
-
-        order = await shopperOrders.createOrder({
-            body: {
-                basketId: req.headers.basketid
-            }
-        })
-        Logger.info('sendPayments', `orderCreated ${order?.orderNo}`)
-
-        if (order?.customerInfo?.customerId !== req.headers.customerid) {
-            throw new AdyenError(errorMessages.INVALID_ORDER, 404, JSON.stringify(order))
-        }
-        const paymentRequest = createPaymentRequestObject(order, data, adyenConfig, req)
-
-        const response = await checkout.payments(paymentRequest, {
-            idempotencyKey: uuidv4()
-        })
-        Logger.info('sendPayments', `resultCode ${response.resultCode}`)
-
-        const checkoutResponse = createCheckoutResponse(response, order.orderNo)
-        if (checkoutResponse.isFinal && !checkoutResponse.isSuccessful) {
-            throw new AdyenError(errorMessages.PAYMENT_NOT_SUCCESSFUL, 400)
-        }
-
-        Logger.info('sendPayments', `checkoutResponse ${JSON.stringify(checkoutResponse)}`)
-        res.locals.response = checkoutResponse
-        next()
-    } catch (err) {
-        Logger.error('sendPayments', JSON.stringify(err))
         const {app: appConfig} = getConfig()
         const shopperBaskets = new ShopperBaskets({
             ...appConfig.commerceAPI,
@@ -387,11 +333,112 @@ async function sendPayments(req, res, next) {
             Logger.info('updateOrderStatus and recreate basket')
             const orderApi = new OrderApiClient()
             await orderApi.updateOrderStatus(order.orderNo, ORDER.ORDER_STATUS_FAILED)
-            await shopperBaskets.createBasket({
-                body: initialBasket
+            if (initialBasket) {
+                await shopperBaskets.createBasket({
+                    body: initialBasket
+                })
+            }
+        }
+    } catch (e) {
+        Logger.error('sendPayments - failed to handle payment error', e.stack)
+    }
+}
+
+async function sendPayments(req, res, next) {
+    Logger.info('sendPayments', 'start')
+    if (!validateRequestParams(req)) {
+        return next(new AdyenError(errorMessages.INVALID_PARAMS, 400))
+    }
+
+    let order
+    let initialBasket
+
+    try {
+        const {data} = req.body
+        const {siteId} = req.query
+
+        const adyenConfig = getAdyenConfigForCurrentSite(siteId)
+        const checkout = AdyenCheckoutConfig.getInstance(siteId)
+
+        const {app: appConfig} = getConfig()
+        const shopperBaskets = new ShopperBaskets({
+            ...appConfig.commerceAPI,
+            headers: {authorization: req.headers.authorization}
+        })
+
+        initialBasket = await shopperBaskets.getBasket({
+            parameters: {
+                basketId: req.headers.basketid
+            }
+        })
+
+        if (!initialBasket) {
+            throw new AdyenError(errorMessages.INVALID_BASKET, 404)
+        }
+
+        await addPaymentInstrument(initialBasket, shopperBaskets, data)
+
+        if (data.paymentType === 'express') {
+            await addShopperDataToBasketForExpressPayment(
+                shopperBaskets,
+                data,
+                req.headers.basketid,
+                req.headers.customerid
+            )
+        }
+        let paymentRequest = {}
+        if (isPartialPayment(data)) {
+            if (initialBasket?.customerInfo?.customerId !== req.headers.customerid) {
+                throw new AdyenError(errorMessages.INVALID_ORDER, 404, initialBasket)
+            }
+            paymentRequest = await createPartialPaymentRequestObject(data, adyenConfig, req)
+        } else {
+            // const shopperOrders = new ShopperOrders({
+            //     ...appConfig.commerceAPI,
+            //     headers: {authorization: req.headers.authorization}
+            // })
+            //
+            // order = await shopperOrders.createOrder({
+            //     body: {
+            //         basketId: req.headers.basketid
+            //     }
+            // })
+            order = await saveToBasket(req, initialBasket.basketId, {
+                c_createOrder: true
+            })
+
+            Logger.info('sendPayments', `orderCreated ${order}`)
+
+            if (order?.customerInfo?.customerId !== req.headers.customerid) {
+                throw new AdyenError(errorMessages.INVALID_ORDER, 404, order)
+            }
+            paymentRequest = createPaymentRequestObject(order, data, adyenConfig, req)
+        }
+        const response = await checkout.payments(paymentRequest, {
+            idempotencyKey: uuidv4()
+        })
+        Logger.info('sendPayments', `resultCode ${response.resultCode}`)
+
+        const checkoutResponse = {
+            ...createCheckoutResponse(response, order?.orderNo),
+            order: response.order
+        }
+
+        if (!checkoutResponse.isFinal && checkoutResponse.isSuccessful && response.order) {
+            await saveToBasket(req, initialBasket.basketId, {
+                c_orderData: JSON.stringify(response.order)
             })
         }
-        next(err)
+
+        Logger.info('sendPayments', `checkoutResponse ${JSON.stringify(checkoutResponse)}`)
+        if (checkoutResponse.isFinal && !checkoutResponse.isSuccessful) {
+            throw new AdyenError(errorMessages.PAYMENT_NOT_SUCCESSFUL, 400, response)
+        }
+        res.locals.response = checkoutResponse
+        return next()
+    } catch (err) {
+        await handlePaymentError(err, req, order, initialBasket)
+        return next(err)
     }
 }
 
