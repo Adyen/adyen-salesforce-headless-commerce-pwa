@@ -8,6 +8,7 @@ describe('onPaymentsSuccess', () => {
         const setOrderNo = jest.fn()
         const responses = {
             paymentsResponse: {
+                isFinal: true,
                 isSuccessful: true,
                 merchantReference: 'test'
             }

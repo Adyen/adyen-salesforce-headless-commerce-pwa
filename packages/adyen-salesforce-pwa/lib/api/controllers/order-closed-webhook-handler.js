@@ -2,7 +2,6 @@ import {OrderApiClient} from './orderApi'
 import {NotificationRequestItem} from '@adyen/api-library/lib/src/typings/notification/notificationRequestItem'
 import {ORDER} from '../../utils/constants.mjs'
 import Logger from './logger'
-import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 
 const messages = {
     AUTH_ERROR: 'Access Denied!',
@@ -10,11 +9,11 @@ const messages = {
     DEFAULT_ERROR: 'Technical error!'
 }
 
-async function authorizationWebhookHandler(req, res, next) {
+async function orderClosedWebhookHandler(req, res, next) {
     try {
         const notification = res.locals.notification
-        const AUTHORISATION = NotificationRequestItem.EventCodeEnum.Authorisation.toString()
-        if (notification.eventCode !== AUTHORISATION) {
+        const ORDER_CLOSED = NotificationRequestItem.EventCodeEnum.OrderClosed.toString()
+        if (notification.eventCode !== ORDER_CLOSED) {
             return next()
         }
         const orderNo = notification.merchantReference
@@ -22,26 +21,19 @@ async function authorizationWebhookHandler(req, res, next) {
         if (notification.success === NotificationRequestItem.SuccessEnum.True.toString()) {
             Logger.info(
                 notification.eventCode,
-                `Authorization for order ${orderNo} was successful.`
+                `ORDER_CLOSED for order ${orderNo} was successful.`
             )
-            const order = await orderApi.getOrder(orderNo)
-            const totalAmount = getCurrencyValueForApi(order.orderTotal, order.currency)
-            const amount = notification.amount.value
-            if (amount < totalAmount) {
-                await orderApi.updateOrderPaymentStatus(orderNo, ORDER.PAYMENT_STATUS_PART_PAID)
-            } else {
-                await orderApi.updateOrderConfirmationStatus(
-                    orderNo,
-                    ORDER.CONFIRMATION_STATUS_CONFIRMED
-                )
-                await orderApi.updateOrderPaymentStatus(orderNo, ORDER.PAYMENT_STATUS_PAID)
-                await orderApi.updateOrderExportStatus(orderNo, ORDER.EXPORT_STATUS_READY)
-                await orderApi.updateOrderStatus(orderNo, ORDER.ORDER_STATUS_NEW)
-            }
+            await orderApi.updateOrderConfirmationStatus(
+                orderNo,
+                ORDER.CONFIRMATION_STATUS_CONFIRMED
+            )
+            await orderApi.updateOrderPaymentStatus(orderNo, ORDER.PAYMENT_STATUS_PAID)
+            await orderApi.updateOrderExportStatus(orderNo, ORDER.EXPORT_STATUS_READY)
+            await orderApi.updateOrderStatus(orderNo, ORDER.ORDER_STATUS_NEW)
         } else {
             Logger.info(
                 notification.eventCode,
-                `Authorization for order ${orderNo} was not successful.`
+                `ORDER_CLOSED for order ${orderNo} was not successful.`
             )
             await orderApi.updateOrderConfirmationStatus(
                 orderNo,
@@ -59,4 +51,4 @@ async function authorizationWebhookHandler(req, res, next) {
     }
 }
 
-export {authorizationWebhookHandler}
+export {orderClosedWebhookHandler}

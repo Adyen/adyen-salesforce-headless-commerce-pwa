@@ -8,6 +8,7 @@ import ShippingAddressController from '../controllers/shipping-address'
 import ShippingMethodsController from '../controllers/shipping-methods'
 import {authenticate, parseNotification, validateHmac} from '../controllers/webhook'
 import {authorizationWebhookHandler} from '../controllers/authorization-webhook-handler'
+import {orderClosedWebhookHandler} from '../controllers/order-closed-webhook-handler'
 import {createErrorResponse} from '../../utils/createErrorResponse.mjs'
 import Logger from '../controllers/logger'
 import {appleDomainAssociation} from '../controllers/apple-domain-association'
@@ -43,6 +44,7 @@ function registerAdyenEndpoints(app, runtime, overrides) {
         validateHmac,
         parseNotification,
         authorizationWebhookHandler,
+        orderClosedWebhookHandler,
         SuccessHandler
     ]
     const shippingMethodsPostHandler = overrides?.setShippingMethods || [

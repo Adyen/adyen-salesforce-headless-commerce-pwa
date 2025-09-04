@@ -65,6 +65,12 @@ const AdyenCheckoutProvider = ({
         }
     }, [basket?.basketId])
 
+    useEffect(() => {
+        if (basket?.c_orderData) {
+            setAdyenOrder(JSON.parse(basket?.c_orderData))
+        }
+    }, [basket?.c_orderData])
+
     const getTranslations = () => {
         return adyenConfig?.translations && Object.hasOwn(adyenConfig?.translations, locale.id)
             ? adyenConfig?.translations
@@ -85,6 +91,7 @@ const AdyenCheckoutProvider = ({
             token: authToken,
             site,
             basket,
+            adyenOrder,
             returnUrl,
             customerId,
             onError: adyenConfig?.onError || onError,
