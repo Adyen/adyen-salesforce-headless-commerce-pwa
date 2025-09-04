@@ -16,7 +16,11 @@ export const onPaymentsSuccess = (navigate, setOrderNo, setAdyenOrder) => async 
         setAdyenOrder(responses?.paymentsResponse?.order)
     }
     if (responses?.paymentsResponse?.isSuccessful && responses?.paymentsResponse?.isFinal) {
-        if (responses?.paymentsResponse?.order?.remainingAmount?.value <= 0) {
+        if (responses?.paymentsResponse?.order) {
+            if (responses?.paymentsResponse?.order?.remainingAmount?.value <= 0) {
+                navigate(`/checkout/confirmation/${responses?.paymentsResponse?.merchantReference}`)
+            }
+        } else {
             navigate(`/checkout/confirmation/${responses?.paymentsResponse?.merchantReference}`)
         }
     } else if (responses?.paymentsResponse?.action) {

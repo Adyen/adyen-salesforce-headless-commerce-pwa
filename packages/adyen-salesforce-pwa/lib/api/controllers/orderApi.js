@@ -1,113 +1,91 @@
-import fetch from 'node-fetch'
-import Logger from './logger'
+import {BaseApiClient} from './baseApiClient'
 
-export class OrderApiClient {
-    tokenUrl =
-        'https://account.demandware.com/dwsso/oauth2/access_token?grant_type=client_credentials'
-
-    async getAdminAuthToken() {
-        const base64data = Buffer.from(
-            `${process.env.COMMERCE_API_CLIENT_ID_PRIVATE}:${process.env.COMMERCE_API_CLIENT_SECRET}`
-        ).toString('base64')
-        const token = await fetch(this.tokenUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                authorization: `Basic ${base64data}`
-            },
-            body: new URLSearchParams({
-                scope: `SALESFORCE_COMMERCE_API:${process.env.SFCC_REALM_ID}_${process.env.SFCC_INSTANCE_ID} ${process.env.SFCC_OAUTH_SCOPES}`
-            })
-        })
-        if (!token.ok) {
-            const error = await token.text()
-            throw new Error(`${token.status} ${token.statusText}`, {
-                cause: error
-            })
-        }
-        return token.json()
+/**
+ * A client for interacting with the Salesforce Commerce Cloud Checkout/Orders API.
+ * This class extends the BaseApiClient to handle authentication and requests.
+ */
+export class OrderApiClient extends BaseApiClient {
+    /**
+     * @constructor
+     */
+    constructor() {
+        const baseUrl = `https://${process.env.COMMERCE_API_SHORT_CODE}.api.commercecloud.salesforce.com/checkout/orders/v1/organizations/${process.env.COMMERCE_API_ORG_ID}/orders`
+        super(baseUrl)
     }
 
-    async base(method, path, options) {
-        const token = await this.getAdminAuthToken()
-        const baseUrl = `https://${process.env.COMMERCE_API_SHORT_CODE}.api.commercecloud.salesforce.com/checkout/orders/v1/organizations/${process.env.COMMERCE_API_ORG_ID}/orders/${path}?siteId=${process.env.COMMERCE_API_SITE_ID}`
-
-        return fetch(baseUrl, {
-            method: method,
-            body: options?.body || null,
-            headers: {
-                'Content-Type': 'application/json',
-                authorization: `Bearer ${token.access_token}`,
-                ...options?.headers
-            }
+    /**
+     * A private helper to update various status types on an order.
+     * @param {string} orderNo - The order number.
+     * @param {string} statusType - The type of status to update (e.g., 'status', 'payment-status').
+     * @param {string} status - The new status value.
+     * @returns {Promise<Response>} A promise that resolves to the fetch Response object.
+     * @private
+     */
+    async #updateStatus(orderNo, statusType, status) {
+        return this._callAdminApi('PUT', `${orderNo}/${statusType}`, {
+            body: JSON.stringify({status: status})
         })
     }
 
+    /**
+     * Gets an order by its order number.
+     * @param {string} orderNo - The order number.
+     * @returns {Promise<object>} A promise that resolves to the order object.
+     */
     async getOrder(orderNo) {
-        const response = await this.base('GET', orderNo)
-        if (!response.ok) {
-            const error = await response.text()
-            throw new Error(`${response.status} ${response.statusText}`, {
-                cause: error
-            })
-        }
-        return await response.json()
+        const response = await this._callAdminApi('GET', orderNo)
+        return response.json()
     }
 
+    /**
+     * Updates the status of an order.
+     * @param {string} orderNo - The order number.
+     * @param {string} status - The new order status.
+     * @returns {Promise<Response>} A promise that resolves to the fetch Response object.
+     */
     async updateOrderStatus(orderNo, status) {
-        const response = await this.base('PUT', `${orderNo}/status`, {
-            body: JSON.stringify({status: status})
-        })
-        if (!response.ok) {
-            const error = await response.text()
-            throw new Error(`${response.status} ${response.statusText}`, {
-                cause: error
-            })
-        }
-        return response
+        return this.#updateStatus(orderNo, 'status', status)
     }
 
+    /**
+     * Updates the payment status of an order.
+     * @param {string} orderNo - The order number.
+     * @param {string} status - The new payment status.
+     * @returns {Promise<Response>} A promise that resolves to the fetch Response object.
+     */
     async updateOrderPaymentStatus(orderNo, status) {
-        const response = await this.base('PUT', `${orderNo}/payment-status`, {
-            body: JSON.stringify({status: status})
-        })
-        if (!response.ok) {
-            const error = await response.text()
-            throw new Error(`${response.status} ${response.statusText}`, {
-                cause: error
-            })
-        }
-        return response
+        return this.#updateStatus(orderNo, 'payment-status', status)
     }
 
+    /**
+     * Updates the export status of an order.
+     * @param {string} orderNo - The order number.
+     * @param {string} status - The new export status.
+     * @returns {Promise<Response>} A promise that resolves to the fetch Response object.
+     */
     async updateOrderExportStatus(orderNo, status) {
-        const response = await this.base('PUT', `${orderNo}/export-status`, {
-            body: JSON.stringify({status: status})
-        })
-        if (!response.ok) {
-            const error = await response.text()
-            throw new Error(`${response.status} ${response.statusText}`, {
-                cause: error
-            })
-        }
-        return response
+        return this.#updateStatus(orderNo, 'export-status', status)
     }
 
+    /**
+     * Updates the confirmation status of an order.
+     * @param {string} orderNo - The order number.
+     * @param {string} status - The new confirmation status.
+     * @returns {Promise<Response>} A promise that resolves to the fetch Response object.
+     */
     async updateOrderConfirmationStatus(orderNo, status) {
-        const response = await this.base('PUT', `${orderNo}/confirmation-status`, {
-            body: JSON.stringify({status: status})
-        })
-        if (!response.ok) {
-            const error = await response.text()
-            throw new Error(`${response.status} ${response.statusText}`, {
-                cause: error
-            })
-        }
-        return response
+        return this.#updateStatus(orderNo, 'confirmation-status', status)
     }
 
+    /**
+     * Updates an order's payment transaction with the external PSP reference.
+     * @param {string} orderNo - The order number.
+     * @param {string} paymentInstrumentId - The ID of the payment instrument.
+     * @param {string} pspReference - The Adyen PSP reference for the transaction.
+     * @returns {Promise<Response>} A promise that resolves to the fetch Response object.
+     */
     async updateOrderPaymentTransaction(orderNo, paymentInstrumentId, pspReference) {
-        const response = await this.base(
+        const response = await this._callAdminApi(
             'PATCH',
             `${orderNo}/payment-instruments/${paymentInstrumentId}/transaction`,
             {
@@ -116,10 +94,6 @@ export class OrderApiClient {
                 })
             }
         )
-        if (!response.ok) {
-            const error = await response.text()
-            Logger.error(`Payment transaction update failed ${JSON.stringify(error)}`)
-        }
         return response
     }
 }

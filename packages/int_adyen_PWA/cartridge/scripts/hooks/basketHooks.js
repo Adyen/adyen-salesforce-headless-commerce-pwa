@@ -10,17 +10,11 @@ exports.afterPOST = function (basket) {
     });
 };
 
-exports.modifyPATCHResponse = function (basket, basketResponse) {
+exports.afterPATCH = function (basket, basketResponse) {
+    Logger.getLogger('Adyen_debug', 'Adyen').debug(basket)
+    Logger.getLogger('Adyen_debug', 'Adyen').debug(basketResponse)
     Transaction.wrap(() => {
         const orderNo = basket.custom.orderNo
         const orderData = basket.custom.orderData
-        if (orderNo && orderData && orderData?.remainingAmount?.value === 0) {
-            const order = OrderMgr.createOrder(
-                basket,
-                orderNo,
-            );
-            basketResponse.c_order = order
-        }
-
     });
 };

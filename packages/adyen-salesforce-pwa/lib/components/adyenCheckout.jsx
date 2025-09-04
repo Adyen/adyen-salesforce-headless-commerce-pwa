@@ -114,6 +114,12 @@ const AdyenCheckoutComponent = (props) => {
                             paymentMethodsConfiguration.onError ||
                             paymentMethodsConfiguration.card.onError
                         onError(orderNo, navigate)
+                    },
+                    onOrderCancel(order, action) {
+                        const onOrderCancel =
+                            paymentMethodsConfiguration.onOrderCancel ||
+                            paymentMethodsConfiguration.giftcard.onOrderCancel
+                        onOrderCancel(order, action)
                     }
                 })
 

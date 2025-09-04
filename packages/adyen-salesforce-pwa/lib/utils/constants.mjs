@@ -61,6 +61,20 @@ export const ORDER = Object.freeze({
     CONFIRMATION_STATUS_NOT_CONFIRMED: 'not_confirmed'
 })
 
+export const ERROR_MESSAGE = {
+    AMOUNT_NOT_CORRECT: 'amount not correct',
+    INVALID_ORDER: 'order is invalid',
+    INVALID_PARAMS: 'invalid request params',
+    INVALID_BASKET: 'invalid basket',
+    PAYMENT_NOT_SUCCESSFUL: 'payment not successful',
+    INVALID_BILLING_ADDRESS: 'invalid billing address',
+    INVALID_SHIPPING_ADDRESS: 'invalid shipping address',
+    UNAUTHORIZED: 'unauthorized',
+    ORDER_ALREADY_EXISTS: 'order already exists',
+    ORDER_NOT_FOUND: 'order not found',
+    PAYMENTS_DETAILS_NOT_SUCCESSFUL: 'payments details call not successful'
+}
+
 export const ADYEN_LIVE_REGIONS = {
     LIVE_EU: 'live',
     LIVE_APSE: 'live-apse',

@@ -23,7 +23,7 @@ describe('OrderApiClient', () => {
                 json: jest.fn().mockResolvedValue(tokenData)
             })
 
-            const result = await orderApiClient.getAdminAuthToken()
+            const result = await orderApiClient.#getAdminAuthToken()
 
             expect(result).toEqual(tokenData)
             expect(fetch).toHaveBeenCalledWith(orderApiClient.tokenUrl, expect.any(Object))

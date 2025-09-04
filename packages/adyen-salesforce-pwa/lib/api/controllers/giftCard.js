@@ -1,49 +1,18 @@
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
-import {ShopperCustomers} from 'commerce-sdk-isomorphic'
-import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 import AdyenCheckoutConfig from './checkout-config'
 import Logger from './logger'
 import {v4 as uuidv4} from 'uuid'
 import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrentSite.mjs'
-import {AdyenError} from '../models/AdyenError'
-import {filterStateData} from "./payments";
-import {saveToBasket} from './helper'
+import {filterStateData} from "./payments"
+import {getCurrentBasketForAuthorizedShopper, saveToBasket} from '../../utils/basketHelper.mjs'
 
-const errorMessages = {
-    UNAUTHORIZED: 'unauthorized',
-    INVALID_BASKET: 'invalid basket',
-}
-
-export async function getCurrentBasketForAuthorizedShopper(authorization, customerId) {
-    const {app: appConfig} = getConfig()
-    const shopperCustomers = new ShopperCustomers({
-        ...appConfig.commerceAPI,
-        headers: {authorization: authorization}
-    })
-
-    const customer = await shopperCustomers.getCustomer({
-        parameters: {
-            customerId: customerId
-        }
-    })
-
-    if (!customer?.customerId) {
-        throw new AdyenError(errorMessages.UNAUTHORIZED, 401)
-    }
-
-    const {baskets} = await shopperCustomers.getCustomerBaskets({
-        parameters: {
-            customerId: customer?.customerId
-        }
-    })
-
-    if (!baskets?.length) {
-        throw new AdyenError(errorMessages.INVALID_BASKET, 404)
-    }
-
-    return baskets[0]
-}
-
+/**
+ * Handles the Adyen gift card balance check.
+ * @param {object} req - The Express request object.
+ * @param {object} res - The Express response object.
+ * @param {Function} next - The Express next middleware function.
+ * @returns {Promise<void>}
+ */
 export async function balanceCheck(req, res, next) {
     Logger.info('giftCards-balanceCheck', 'start')
 
@@ -66,7 +35,7 @@ export async function balanceCheck(req, res, next) {
         const response = await ordersApi.getBalanceOfGiftCard(request, {
             idempotencyKey: uuidv4()
         })
-        await saveToBasket(req, basketId, {
+        await saveToBasket(authorization, basketId, {
             c_giftCardCheckBalance: JSON.stringify(response)
         })
         Logger.info('giftCards-balanceCheck', 'success')
@@ -78,6 +47,13 @@ export async function balanceCheck(req, res, next) {
     }
 }
 
+/**
+ * Creates a partial payment order using an Adyen gift card.
+ * @param {object} req - The Express request object.
+ * @param {object} res - The Express response object.
+ * @param {Function} next - The Express next middleware function.
+ * @returns {Promise<void>}
+ */
 export async function createOrder(req, res, next) {
     Logger.info('giftCards-createOrder', 'start')
 
@@ -100,7 +76,7 @@ export async function createOrder(req, res, next) {
         const response = await ordersApi.orders(request, {
             idempotencyKey: uuidv4()
         })
-        await saveToBasket(req, basketId, {
+        await saveToBasket(authorization, basketId, {
             c_orderData: JSON.stringify(response)
         })
         Logger.info('giftCards-createOrder', 'success')
@@ -112,6 +88,13 @@ export async function createOrder(req, res, next) {
     }
 }
 
+/**
+ * Cancels a partial payment order made with an Adyen gift card.
+ * @param {object} req - The Express request object.
+ * @param {object} res - The Express response object.
+ * @param {Function} next - The Express next middleware function.
+ * @returns {Promise<void>}
+ */
 export async function cancelOrder(req, res, next) {
     Logger.info('giftCards-cancelOrder', 'start')
 
@@ -138,4 +121,3 @@ export async function cancelOrder(req, res, next) {
         next(err)
     }
 }
-
