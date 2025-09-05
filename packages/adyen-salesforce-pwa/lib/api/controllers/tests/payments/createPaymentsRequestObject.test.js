@@ -131,7 +131,6 @@ describe('createPaymentRequestObject', () => {
                 id: 'f9fe488b0b925984ffd1d5b360',
                 quantity: 1,
                 taxAmount: 150,
-                taxCategory: 'None',
                 taxPercentage: 0.05
             }
         ])
