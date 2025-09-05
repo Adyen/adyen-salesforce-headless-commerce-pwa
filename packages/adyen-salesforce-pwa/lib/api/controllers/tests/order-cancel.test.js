@@ -106,7 +106,7 @@ describe('orderCancel Controller', () => {
         expect(mockUpdateOrderStatus).not.toHaveBeenCalled()
         expect(next).toHaveBeenCalledWith(expect.any(AdyenError))
         const receivedError = next.mock.calls[0][0]
-        expect(receivedError.message).toBe('order is invalid')
+        expect(receivedError.message).toBe('order not found')
         expect(receivedError.statusCode).toBe(404)
     })
 

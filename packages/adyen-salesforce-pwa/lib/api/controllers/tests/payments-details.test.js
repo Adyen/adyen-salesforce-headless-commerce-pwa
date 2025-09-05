@@ -1,80 +1,124 @@
-import {PaymentsDetailsController} from '../../index'
+import sendPaymentDetails from '../payments-details.js'
 import {RESULT_CODES} from '../../../utils/constants.mjs'
 import {AdyenError} from '../../models/AdyenError'
+import * as basketHelper from '../../../utils/basketHelper.mjs'
+import * as orderHelper from '../../../utils/orderHelper.mjs'
 
 let mockPaymentsDetails = jest.fn()
-jest.mock('../checkout-config', () => {
-    return {
-        getInstance: jest.fn().mockImplementation(() => {
-            return {
-                paymentsDetails: mockPaymentsDetails
-            }
-        })
-    }
-})
+
+jest.mock('../checkout-config', () => ({
+    getInstance: jest.fn().mockImplementation(() => ({
+        paymentsDetails: mockPaymentsDetails
+    }))
+}))
+
+jest.mock('../../../utils/basketHelper.mjs', () => ({
+    getBasket: jest.fn(),
+    removeAllPaymentInstrumentsFromBasket: jest.fn(),
+    saveToBasket: jest.fn()
+}))
+
+jest.mock('../../../utils/orderHelper.mjs', () => ({
+    createOrderUsingOrderNo: jest.fn(),
+    failOrderAndReopenBasket: jest.fn()
+}))
+
 describe('payments details controller', () => {
     let req, res, next, consoleInfoSpy, consoleErrorSpy
-    afterEach(() => {
-        mockPaymentsDetails.mockReset()
-    })
+    const mockBasket = {
+        basketId: 'testBasket',
+        c_orderNo: '123'
+    }
+
     beforeEach(() => {
         req = {
             headers: {
                 authorization: 'mockToken',
-                customerid: 'testCustomer'
+                customerid: 'testCustomer',
+                basketid: 'testBasket'
             },
-            body: {
-                data: {}
-            },
-            query: {
-                siteId: 'RefArch'
-            }
+            body: {data: {details: {redirectResult: '...'}}},
+            query: {siteId: 'RefArch'}
         }
-        res = {
-            locals: {}
-        }
+        res = {locals: {}}
         next = jest.fn()
-        consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation(() => {})
-        consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
-    })
-    it('returns checkout response if payments details response is successful', async () => {
-        mockPaymentsDetails.mockImplementationOnce(() => {
-            return {
-                resultCode: RESULT_CODES.AUTHORISED,
-                merchantReference: 'reference123'
-            }
+        consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation(() => {
+        })
+        consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {
         })
 
-        await PaymentsDetailsController(req, res, next)
+        jest.clearAllMocks()
+
+        basketHelper.getBasket.mockResolvedValue(mockBasket)
+        orderHelper.createOrderUsingOrderNo.mockResolvedValue({orderNo: '123'})
+    })
+
+    it('returns checkout response if payments details response is AUTHORISED', async () => {
+        mockPaymentsDetails.mockResolvedValue({resultCode: RESULT_CODES.AUTHORISED, merchantReference: 'ref123'})
+
+        await sendPaymentDetails(req, res, next)
+
+        expect(basketHelper.getBasket).toHaveBeenCalled()
+        expect(mockPaymentsDetails).toHaveBeenCalled()
+        expect(orderHelper.createOrderUsingOrderNo).toHaveBeenCalled()
         expect(res.locals.response).toEqual({
             isFinal: true,
             isSuccessful: true,
-            merchantReference: 'reference123'
+            merchantReference: 'ref123',
+            order: undefined
         })
-        expect(consoleInfoSpy).toHaveBeenCalledTimes(2)
-        expect(consoleInfoSpy.mock.calls[0][0]).toContain('sendPaymentDetails start')
-        expect(consoleInfoSpy.mock.calls[1][0]).toContain(
-            'sendPaymentDetails resultCode Authorised'
-        )
-        expect(next).toHaveBeenCalled()
+        expect(next).toHaveBeenCalledWith()
     })
-    it('returns error response if payments details response is unsuccessful', async () => {
-        mockPaymentsDetails.mockImplementationOnce(() => {
-            return {
-                resultCode: RESULT_CODES.ERROR,
-                merchantReference: 'reference123'
-            }
-        })
 
-        await PaymentsDetailsController(req, res, next)
-        expect(res.locals.response).toBeNil()
-        expect(consoleInfoSpy).toHaveBeenCalledTimes(2)
-        expect(consoleInfoSpy.mock.calls[0][0]).toContain('sendPaymentDetails start')
-        expect(consoleInfoSpy.mock.calls[1][0]).toContain('sendPaymentDetails resultCode Error')
-        expect(consoleErrorSpy).toHaveBeenCalled()
-        expect(consoleErrorSpy.mock.calls[0][0]).toContain('payments details call not successful')
+    it('handles payment details failure and attempts to roll back SFCC order', async () => {
+        mockPaymentsDetails.mockResolvedValue({resultCode: RESULT_CODES.ERROR, merchantReference: 'ref123'})
+
+        await sendPaymentDetails(req, res, next)
+
+        expect(orderHelper.failOrderAndReopenBasket).toHaveBeenCalled()
         expect(next).toHaveBeenCalledWith(
-            new AdyenError('payments details call not successful', 400)
+            new AdyenError('payments details call not successful', 400, {
+                resultCode: 'Error',
+                merchantReference: 'ref123'
+            })
         )
+    })
+
+    it('handles non-final payment details with an action', async () => {
+        const mockAction = {type: 'redirect'}
+        mockPaymentsDetails.mockResolvedValue({resultCode: RESULT_CODES.REDIRECT_SHOPPER, action: mockAction})
+
+        await sendPaymentDetails(req, res, next)
+
+        expect(res.locals.response).toEqual({
+            isFinal: false,
+            isSuccessful: true,
+            merchantReference: "123",
+            action: mockAction,
+            order: undefined
+        })
+        expect(next).toHaveBeenCalledWith()
+    })
+
+    it('saves partial payment order data to basket', async () => {
+        const mockOrderData = {orderData: '...'}
+        mockPaymentsDetails.mockResolvedValue({resultCode: RESULT_CODES.PRESENT_TO_SHOPPER, order: mockOrderData})
+
+        await sendPaymentDetails(req, res, next)
+
+        expect(basketHelper.saveToBasket).toHaveBeenCalledWith(
+            'mockToken',
+            'testBasket',
+            {c_orderData: JSON.stringify(mockOrderData)}
+        )
+        expect(res.locals.response.isFinal).toBe(false)
+        expect(res.locals.response.isSuccessful).toBe(true)
+        expect(next).toHaveBeenCalledWith()
+    })
+
+    it('should call next with an error if getBasket fails', async () => {
+        basketHelper.getBasket.mockRejectedValue(new Error('Basket error'))
+        await sendPaymentDetails(req, res, next)
+        expect(next).toHaveBeenCalledWith(new Error('Basket error'))
     })
 })

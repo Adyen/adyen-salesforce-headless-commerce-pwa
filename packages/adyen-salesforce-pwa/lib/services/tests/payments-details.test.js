@@ -14,6 +14,7 @@ describe('AdyenPaymentsDetailsService', () => {
     let mockToken = 'mockTokenHere'
     let mockData = {someData: 'mockData'}
     let mockCustomerId = 'mockCustomerId'
+    let mockBasketId = 'mockBasketId'
     let mockSite = {id: 'RefArch'}
 
     beforeEach(() => {
@@ -41,13 +42,15 @@ describe('AdyenPaymentsDetailsService', () => {
 
         const paymentDetailsResult = await paymentsDetailsService.submitPaymentsDetails(
             mockData,
+            mockBasketId,
             mockCustomerId
         )
 
         expect(paymentsDetailsService.apiClient.post).toHaveBeenCalledWith({
             body: JSON.stringify({data: mockData}),
             headers: {
-                customerid: mockCustomerId
+                customerid: mockCustomerId,
+                basketid: mockBasketId
             }
         })
         expect(paymentDetailsResult).toEqual(mockResponse)

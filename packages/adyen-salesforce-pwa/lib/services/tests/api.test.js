@@ -14,7 +14,7 @@ describe('ApiClient', () => {
     })
 
     it('should construct ApiClient with url and token', () => {
-        expect(apiClient.url).toBe(ADYEN_API_BASEPATH)
+        expect(apiClient.baseUrl).toBe(ADYEN_API_BASEPATH)
         expect(apiClient.token).toBe('mockToken')
     })
 

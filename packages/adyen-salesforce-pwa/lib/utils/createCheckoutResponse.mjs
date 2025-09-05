@@ -1,11 +1,11 @@
 import {RESULT_CODES} from './constants.mjs'
 
 const ACTION_CODES = new Set([
-    RESULT_CODES.REDIRECTSHOPPER,
-    RESULT_CODES.IDENTIFYSHOPPER,
-    RESULT_CODES.CHALLENGESHOPPER,
+    RESULT_CODES.REDIRECT_SHOPPER,
+    RESULT_CODES.IDENTIFY_SHOPPER,
+    RESULT_CODES.CHALLENGE_SHOPPER,
     RESULT_CODES.PENDING,
-    RESULT_CODES.PRESENTTOSHOPPER
+    RESULT_CODES.PRESENT_TO_SHOPPER
 ])
 
 const SUCCESSFUL_CODES = new Set([RESULT_CODES.AUTHORISED, RESULT_CODES.RECEIVED])
@@ -25,6 +25,7 @@ export function createCheckoutResponse(response, orderNumber) {
     if (ACTION_CODES.has(resultCode)) {
         return {
             isFinal: false,
+            isSuccessful: true,
             action,
             merchantReference
         }

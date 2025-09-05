@@ -13,13 +13,13 @@ export const PAYMENT_METHOD_TYPES = {
 export const RESULT_CODES = {
     AUTHORISED: 'Authorised',
     CANCELLED: 'Cancelled',
-    CHALLENGESHOPPER: 'ChallengeShopper',
+    CHALLENGE_SHOPPER: 'ChallengeShopper',
     ERROR: 'Error',
-    IDENTIFYSHOPPER: 'IdentifyShopper',
+    IDENTIFY_SHOPPER: 'IdentifyShopper',
     PENDING: 'Pending',
-    PRESENTTOSHOPPER: 'PresentToShopper',
+    PRESENT_TO_SHOPPER: 'PresentToShopper',
     RECEIVED: 'Received',
-    REDIRECTSHOPPER: 'RedirectShopper',
+    REDIRECT_SHOPPER: 'RedirectShopper',
     REFUSED: 'Refused',
 }
 
@@ -66,7 +66,7 @@ export const ERROR_MESSAGE = {
     INVALID_ORDER: 'order is invalid',
     INVALID_PARAMS: 'invalid request params',
     INVALID_BASKET: 'invalid basket',
-    PAYMENT_NOT_SUCCESSFUL: 'payment not successful',
+    PAYMENT_NOT_SUCCESSFUL: 'payment was not successful',
     INVALID_BILLING_ADDRESS: 'invalid billing address',
     INVALID_SHIPPING_ADDRESS: 'invalid shipping address',
     UNAUTHORIZED: 'unauthorized',

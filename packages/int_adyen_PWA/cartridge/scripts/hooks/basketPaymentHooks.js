@@ -1,7 +1,3 @@
-const Transaction = require('dw/system/Transaction');
-const OrderMgr = require('dw/order/OrderMgr');
-const Logger = require('dw/system/Logger');
-
 exports.beforePOST = function (basket, paymentInstrument) {
 };
 

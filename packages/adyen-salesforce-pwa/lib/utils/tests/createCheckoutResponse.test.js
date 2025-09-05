@@ -16,16 +16,19 @@ describe('createCheckoutResponse', () => {
         })
     })
 
-    it('should return non-final response for REDIRECTSHOPPER resultCode', () => {
+    it('should return non-final response for REDIRECT SHOPPER resultCode', () => {
         const response = {
-            resultCode: RESULT_CODES.REDIRECTSHOPPER,
-            action: 'redirectAction'
+            resultCode: RESULT_CODES.REDIRECT_SHOPPER,
+            action: 'redirectAction',
+            merchantReference: 'reference123'
         }
 
         const checkoutResponse = createCheckoutResponse(response)
         expect(checkoutResponse).toEqual({
             isFinal: false,
-            action: 'redirectAction'
+            isSuccessful: true,
+            action: 'redirectAction',
+            merchantReference: 'reference123'
         })
     })
 
