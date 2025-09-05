@@ -1,20 +1,25 @@
 import {authorizationWebhookHandler} from '../../index'
 
-let mockUpdateOrderPaymentTransaction = jest.fn()
-let mockUpdateOrderStatus = jest.fn()
-let mockUpdateOrderConfirmationStatus = jest.fn()
-let mockUpdateOrderExportStatus = jest.fn()
-let mockUpdateOrderPaymentStatus = jest.fn()
+const mockUpdateOrderPaymentTransaction = jest.fn()
+const mockUpdateOrderStatus = jest.fn()
+const mockUpdateOrderConfirmationStatus = jest.fn()
+const mockUpdateOrderExportStatus = jest.fn()
+const mockUpdateOrderPaymentStatus = jest.fn()
+const mockGetOrder = jest.fn(() => ({
+    orderTotal: "25.00",
+    currency: 'EUR'
+}))
 
 jest.mock('../orderApi', () => {
     return {
         OrderApiClient: jest.fn().mockImplementation(() => {
             return {
-                updateOrderPaymentTransaction: mockUpdateOrderPaymentTransaction,
-                updateOrderStatus: mockUpdateOrderStatus,
+                updateOrderPaymentTransaction: mockUpdateOrderPaymentTransaction, // This mock is not used in the tests
+                updateOrderStatus: mockUpdateOrderStatus, // This mock is not used in the tests
                 updateOrderConfirmationStatus: mockUpdateOrderConfirmationStatus,
                 updateOrderExportStatus: mockUpdateOrderExportStatus,
-                updateOrderPaymentStatus: mockUpdateOrderPaymentStatus
+                updateOrderPaymentStatus: mockUpdateOrderPaymentStatus,
+                getOrder: mockGetOrder
             }
         })
     }
@@ -23,6 +28,13 @@ describe('authorizationWebhookHandler', () => {
     let req, res, next, consoleInfoSpy, consoleErrorSpy
 
     beforeEach(() => {
+        jest.clearAllMocks()
+
+        mockUpdateOrderConfirmationStatus.mockResolvedValue({})
+        mockUpdateOrderExportStatus.mockResolvedValue({})
+        mockUpdateOrderPaymentStatus.mockResolvedValue({})
+        mockUpdateOrderStatus.mockResolvedValue({})
+
         req = {
             headers: {
                 authorization: 'mockToken',
@@ -57,8 +69,10 @@ describe('authorizationWebhookHandler', () => {
             }
         }
         next = jest.fn()
-        consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation(() => {})
-        consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+        consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation(() => {
+        })
+        consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {
+        })
     })
     it('update order when success notification is received', async () => {
         await authorizationWebhookHandler(req, res, next)
@@ -90,7 +104,7 @@ describe('authorizationWebhookHandler', () => {
     it('does not process notification if eventCode is not AUTHORISATION', async () => {
         res.locals.notification.eventCode = 'CANCELLATION'
         await authorizationWebhookHandler(req, res, next)
-        expect(res.locals.response).toBeNil()
+        expect(res.locals.response).toBeUndefined()
         expect(next).toHaveBeenCalled()
     })
     it('return error if order update fails', async () => {
@@ -98,7 +112,7 @@ describe('authorizationWebhookHandler', () => {
             new Error('order confirmation failed')
         )
         await authorizationWebhookHandler(req, res, next)
-        expect(res.locals.response).toBeNil()
+        expect(res.locals.response).toBeUndefined()
         expect(next).toHaveBeenCalledWith(new Error('order confirmation failed'))
     })
 })
