@@ -129,7 +129,6 @@ const mapToLineItem = (item, currency, quantity = item.quantity) => ({
     description: item.itemText,
     amountExcludingTax: getCurrencyValueForApi(item.basePrice, currency),
     taxAmount: getCurrencyValueForApi(item.tax, currency),
-    taxCategory: 'None',
     taxPercentage: item.taxRate
 })
 
