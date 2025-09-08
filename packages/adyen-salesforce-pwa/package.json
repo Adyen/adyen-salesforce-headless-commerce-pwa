@@ -39,6 +39,7 @@
     "@adyen/adyen-web": "^5.66.0"
   },
   "dependencies": {
+    "@adyen/adyen-web": "^6.21.0",
     "@adyen/api-library": "^16.0.1",
     "@chakra-ui/react": "^2.8.2",
     "@emotion/react": "^11.11.4",

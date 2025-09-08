@@ -1,6 +1,6 @@
 import React, {useEffect, useRef} from 'react'
-import AdyenCheckout from '@adyen/adyen-web'
-import '@adyen/adyen-web/dist/adyen.css'
+import {AdyenCheckout, ApplePay} from '@adyen/adyen-web'
+import '@adyen/adyen-web/styles/adyen.css';
 import {Flex, Spinner} from '@chakra-ui/react'
 import PropTypes from 'prop-types'
 import {getCurrencyValueForApi} from '../utils/parsers.mjs'
@@ -223,9 +223,11 @@ const ApplePayExpressComponent = (props) => {
     useEffect(() => {
         const createCheckout = async () => {
             try {
+                const countryCode = locale?.id?.slice(-2)
                 const checkout = await AdyenCheckout({
                     environment: adyenEnvironment?.ADYEN_ENVIRONMENT,
                     clientKey: adyenEnvironment?.ADYEN_CLIENT_KEY,
+                    countryCode,
                     locale: locale.id,
                     analytics: {
                         analyticsData: {
@@ -243,7 +245,7 @@ const ApplePayExpressComponent = (props) => {
                     navigate,
                     fetchShippingMethods
                 )
-                const applePayButton = await checkout.create('applepay', appleButtonConfig)
+                const applePayButton = new ApplePay(checkout, appleButtonConfig)
                 const isApplePayButtonAvailable = await applePayButton.isAvailable()
                 if (isApplePayButtonAvailable) {
                     applePayButton.mount(paymentContainer.current)
