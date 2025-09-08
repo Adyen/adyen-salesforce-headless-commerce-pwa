@@ -1,6 +1,6 @@
 import React, {useEffect, useRef} from 'react'
-import AdyenCheckout from '@adyen/adyen-web'
-import '@adyen/adyen-web/dist/adyen.css'
+import {AdyenCheckout, Dropin} from '@adyen/adyen-web/auto'
+import '@adyen/adyen-web/styles/adyen.css';
 import useAdyenCheckout from '../hooks/useAdyenCheckout'
 import {Flex, Spinner} from '@chakra-ui/react'
 import PropTypes from 'prop-types'
@@ -8,15 +8,15 @@ import PropTypes from 'prop-types'
 export const getCheckoutConfig = (
     adyenEnvironment,
     adyenPaymentMethods,
-    paymentMethodsConfiguration,
     translations,
     locale
 ) => {
+    const countryCode = locale?.id?.slice(-2)
     const checkoutConfig = {
         environment: adyenEnvironment?.ADYEN_ENVIRONMENT,
         clientKey: adyenEnvironment?.ADYEN_CLIENT_KEY,
+        countryCode,
         paymentMethodsResponse: adyenPaymentMethods,
-        paymentMethodsConfiguration: paymentMethodsConfiguration
     }
     if (translations) {
         checkoutConfig.locale = locale.id
@@ -29,7 +29,8 @@ export const handleQueryParams = (
     urlParams,
     checkout,
     setAdyenPaymentInProgress,
-    paymentContainer
+    paymentContainer,
+    paymentMethodsConfiguration
 ) => {
     const redirectResult = urlParams.get('redirectResult')
     const amazonCheckoutSessionId = urlParams.get('amazonCheckoutSessionId')
@@ -53,7 +54,7 @@ export const handleQueryParams = (
         const action = JSON.parse(actionString)
         return checkout.createFromAction(action).mount(paymentContainer.current)
     } else {
-        return checkout.create('dropin').mount(paymentContainer.current)
+        return new Dropin(checkout, paymentMethodsConfiguration).mount(paymentContainer.current)
     }
 }
 
@@ -85,7 +86,6 @@ const AdyenCheckoutComponent = (props) => {
                 const checkoutConfig = getCheckoutConfig(
                     adyenEnvironment,
                     adyenPaymentMethods,
-                    paymentMethodsConfiguration,
                     translations,
                     locale
                 )
@@ -123,7 +123,7 @@ const AdyenCheckoutComponent = (props) => {
                     }
                 })
 
-                return handleQueryParams(urlParams, checkout, setAdyenPaymentInProgress, paymentContainer)
+                return handleQueryParams(urlParams, checkout, setAdyenPaymentInProgress, paymentContainer, paymentMethodsConfiguration)
             }
             if (adyenEnvironment && paymentContainer.current && !adyenPaymentInProgress) {
                 window.paypal = undefined
