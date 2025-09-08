@@ -116,7 +116,9 @@ const AdyenCheckoutComponent = (props) => {
             handleQueryParams(urlParams, checkout, setAdyenPaymentInProgress, paymentContainer)
         }
         if (adyenEnvironment && paymentContainer.current && !adyenPaymentInProgress) {
-            window.paypal = undefined
+            if (window?.paypal?.firstElementChild) {
+                window.paypal = undefined
+            }
             createCheckout()
         }
     }, [adyenEnvironment, adyenPaymentMethods])
