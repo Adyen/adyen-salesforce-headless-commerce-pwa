@@ -1,1 +1,8 @@
-@import '~@adyen/adyen-web/dist/adyen.css';
+@import '~@adyen/adyen-web/styles/adyen.css';
+
+.adyen-checkout-spinner-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}

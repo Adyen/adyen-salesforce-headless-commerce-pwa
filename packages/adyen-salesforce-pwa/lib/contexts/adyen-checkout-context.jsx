@@ -1,11 +1,45 @@
-import React, {useEffect, useState} from 'react'
+import React, {useCallback, useEffect, useMemo, useReducer} from 'react'
 import PropTypes from 'prop-types'
 import {AdyenPaymentMethodsService} from '../services/payment-methods'
-import {paymentMethodsConfiguration} from '../components/paymentMethodsConfiguration'
+import {paymentMethodsConfiguration as getPaymentMethodsConfig} from '../components/paymentMethodsConfiguration'
 import {AdyenEnvironmentService} from '../services/environment'
 import {onPaymentsDetailsSuccess, onPaymentsSuccess} from './helper'
 
 export const AdyenCheckoutContext = React.createContext({})
+
+const initialState = {
+    adyenPaymentMethods: null,
+    adyenEnvironment: null,
+    adyenStateData: null,
+    adyenOrder: null,
+    checkoutDropin: null,
+    adyenPaymentInProgress: false,
+    fetchingPaymentMethods: false,
+    orderNo: null
+}
+
+const reducer = (state, action) => {
+    switch (action.type) {
+        case 'SET_ADYEN_PAYMENT_METHODS':
+            return {...state, adyenPaymentMethods: action.payload}
+        case 'SET_ADYEN_ENVIRONMENT':
+            return {...state, adyenEnvironment: action.payload}
+        case 'SET_ADYEN_STATE_DATA':
+            return {...state, adyenStateData: action.payload}
+        case 'SET_ADYEN_ORDER':
+            return {...state, adyenOrder: action.payload}
+        case 'SET_CHECKOUT_DROPIN':
+            return {...state, checkoutDropin: action.payload}
+        case 'SET_ADYEN_PAYMENT_IN_PROGRESS':
+            return {...state, adyenPaymentInProgress: action.payload}
+        case 'SET_FETCHING_PAYMENT_METHODS':
+            return {...state, fetchingPaymentMethods: action.payload}
+        case 'SET_ORDER_NO':
+            return {...state, orderNo: action.payload}
+        default:
+            return state
+    }
+}
 
 const AdyenCheckoutProvider = ({
                                    children,
@@ -20,116 +54,175 @@ const AdyenCheckoutProvider = ({
                                    returnUrl,
                                    page
                                }) => {
-    const [fetchingPaymentMethods, setFetchingPaymentMethods] = useState(false)
-    const [adyenPaymentMethods, setAdyenPaymentMethods] = useState()
-    const [adyenEnvironment, setAdyenEnvironment] = useState()
-    const [adyenStateData, setAdyenStateData] = useState()
-    const [orderNo, setOrderNo] = useState()
-    const [adyenOrder, setAdyenOrder] = useState()
-    const [checkoutDropin, setCheckoutDropin] = useState()
-    const [adyenPaymentInProgress, setAdyenPaymentInProgress] = useState()
+    const [state, dispatch] = useReducer(reducer, initialState)
+    const {adyenPaymentMethods, fetchingPaymentMethods, adyenOrder} = state
     const callPaymentMethodsOnPages = ['checkout']
 
+    const {
+        paymentMethodsConfiguration: additionalPaymentMethodsConfiguration,
+        onError: adyenOnError,
+        afterSubmit: adyenAfterSubmit,
+        beforeSubmit: adyenBeforeSubmit,
+        afterAdditionalDetails: adyenAfterAdditionalDetails,
+        beforeAdditionalDetails: adyenBeforeAdditionalDetails,
+        translations: adyenTranslations
+    } = adyenConfig || {}
+    const localeId = locale?.id
+
     useEffect(() => {
-        const fetchEnvironment = async () => {
+        const fetchInitialData = async () => {
+            // Fetch environment
             const adyenEnvironmentService = new AdyenEnvironmentService(authToken, site)
             try {
                 const data = await adyenEnvironmentService.fetchEnvironment()
-                setAdyenEnvironment(data ? data : {error: true})
+                dispatch({type: 'SET_ADYEN_ENVIRONMENT', payload: data ? data : {error: true}})
             } catch (error) {
-                setAdyenEnvironment({error})
+                dispatch({type: 'SET_ADYEN_ENVIRONMENT', payload: {error}})
+            }
+
+            // Fetch payment methods
+            if (
+                !adyenPaymentMethods &&
+                !fetchingPaymentMethods &&
+                callPaymentMethodsOnPages.includes(page)
+            ) {
+                dispatch({type: 'SET_FETCHING_PAYMENT_METHODS', payload: true})
+                const adyenPaymentMethodsService = new AdyenPaymentMethodsService(authToken, site)
+                try {
+                    const data = await adyenPaymentMethodsService.fetchPaymentMethods(
+                        customerId,
+                        locale
+                    )
+                    dispatch({
+                        type: 'SET_ADYEN_PAYMENT_METHODS',
+                        payload: data ? data : {error: true}
+                    })
+                } catch (error) {
+                    dispatch({type: 'SET_ADYEN_PAYMENT_METHODS', payload: {error}})
+                } finally {
+                    dispatch({type: 'SET_FETCHING_PAYMENT_METHODS', payload: false})
+                }
             }
         }
-        fetchEnvironment()
-    }, [])
 
-    useEffect(() => {
-        const fetchPaymentMethods = async () => {
-            setFetchingPaymentMethods(true)
-            const adyenPaymentMethodsService = new AdyenPaymentMethodsService(authToken, site)
-            try {
-                const data = await adyenPaymentMethodsService.fetchPaymentMethods(
-                    customerId,
-                    locale
-                )
-                setAdyenPaymentMethods(data ? data : {error: true})
-                setFetchingPaymentMethods(false)
-            } catch (error) {
-                setAdyenPaymentMethods({error})
-                setFetchingPaymentMethods(false)
-            }
-        }
-
-        if (!adyenPaymentMethods && !fetchingPaymentMethods && callPaymentMethodsOnPages.includes(page)) {
-            fetchPaymentMethods()
-        }
-    }, [basket?.basketId])
+        fetchInitialData()
+    }, [
+        authToken,
+        site,
+        customerId,
+        localeId,
+        page,
+        adyenPaymentMethods,
+        fetchingPaymentMethods,
+        locale
+    ])
 
     useEffect(() => {
         if (basket?.c_orderData) {
-            setAdyenOrder(JSON.parse(basket?.c_orderData))
+            dispatch({type: 'SET_ADYEN_ORDER', payload: JSON.parse(basket.c_orderData)})
         }
     }, [basket?.c_orderData])
 
-    const getTranslations = () => {
-        return adyenConfig?.translations && Object.hasOwn(adyenConfig?.translations, locale.id)
-            ? adyenConfig?.translations
-            : null
-    }
+    const setAdyenPaymentInProgress = useCallback(
+        (data) => dispatch({type: 'SET_ADYEN_PAYMENT_IN_PROGRESS', payload: data}),
+        [dispatch]
+    )
+    const setAdyenStateData = useCallback(
+        (data) => dispatch({type: 'SET_ADYEN_STATE_DATA', payload: data}),
+        [dispatch]
+    )
+    const setCheckoutDropin = useCallback(
+        (data) => dispatch({type: 'SET_CHECKOUT_DROPIN', payload: data}),
+        [dispatch]
+    )
 
-    const getPaymentMethodsConfiguration = async ({
-                                                      beforeSubmit = [],
-                                                      afterSubmit = [],
-                                                      beforeAdditionalDetails = [],
-                                                      afterAdditionalDetails = [],
-                                                      onError
-                                                  }) => {
-        return paymentMethodsConfiguration({
-            additionalPaymentMethodsConfiguration: adyenConfig?.paymentMethodsConfiguration,
-            paymentMethods: adyenPaymentMethods?.paymentMethods,
+    const getTranslations = useCallback(() => {
+        return adyenTranslations && adyenTranslations[localeId] ? adyenTranslations : null
+    }, [adyenTranslations, localeId])
+
+    const getPaymentMethodsConfiguration = useCallback(
+        async ({
+                   beforeSubmit = [],
+                   afterSubmit = [],
+                   beforeAdditionalDetails = [],
+                   afterAdditionalDetails = [],
+                   onError
+               }) => {
+            return getPaymentMethodsConfig({
+                additionalPaymentMethodsConfiguration,
+                paymentMethods: adyenPaymentMethods?.paymentMethods,
+                isCustomerRegistered,
+                token: authToken,
+                site,
+                basket,
+                adyenOrder,
+                returnUrl,
+                customerId,
+                onError: adyenOnError || onError,
+                onNavigate: navigate,
+                afterSubmit: [
+                    ...afterSubmit,
+                    ...(adyenAfterSubmit || []),
+                    onPaymentsSuccess(
+                        navigate,
+                        (orderNo) => dispatch({type: 'SET_ORDER_NO', payload: orderNo}),
+                        (adyenOrder) => dispatch({type: 'SET_ADYEN_ORDER', payload: adyenOrder})
+                    )
+                ],
+                beforeSubmit: [...beforeSubmit, ...(adyenBeforeSubmit || [])],
+                afterAdditionalDetails: [
+                    ...afterAdditionalDetails,
+                    ...(adyenAfterAdditionalDetails || []),
+                    onPaymentsDetailsSuccess(navigate)
+                ],
+                beforeAdditionalDetails: [
+                    ...beforeAdditionalDetails,
+                    ...(adyenBeforeAdditionalDetails || [])
+                ]
+            })
+        },
+        [
+            additionalPaymentMethodsConfiguration,
+            adyenOnError,
+            adyenAfterSubmit,
+            adyenBeforeSubmit,
+            adyenAfterAdditionalDetails,
+            adyenBeforeAdditionalDetails,
+            adyenPaymentMethods,
+            adyenOrder,
             isCustomerRegistered,
-            token: authToken,
+            authToken,
             site,
             basket,
-            adyenOrder,
             returnUrl,
             customerId,
-            onError: adyenConfig?.onError || onError,
-            onNavigate: navigate,
-            afterSubmit: [
-                ...afterSubmit,
-                ...(adyenConfig?.afterSubmit || []),
-                onPaymentsSuccess(navigate, setOrderNo, setAdyenOrder)
-            ],
-            beforeSubmit: [...beforeSubmit, ...(adyenConfig?.beforeSubmit || [])],
-            afterAdditionalDetails: [
-                ...afterAdditionalDetails,
-                ...(adyenConfig?.afterAdditionalDetails || []),
-                onPaymentsDetailsSuccess(navigate)
-            ],
-            beforeAdditionalDetails: [
-                ...beforeAdditionalDetails,
-                ...(adyenConfig?.beforeAdditionalDetails || [])
-            ]
-        })
-    }
+            navigate,
+            dispatch
+        ]
+    )
 
-    const value = {
-        adyenEnvironment,
-        adyenPaymentMethods,
-        adyenStateData,
-        orderNo,
-        adyenOrder,
-        checkoutDropin,
-        setCheckoutDropin,
-        adyenPaymentInProgress,
-        locale,
-        navigate,
-        setAdyenPaymentInProgress: (data) => setAdyenPaymentInProgress(data),
-        setAdyenStateData: (data) => setAdyenStateData(data),
-        getPaymentMethodsConfiguration,
-        getTranslations
-    }
+    const value = useMemo(
+        () => ({
+            ...state,
+            locale,
+            navigate,
+            setAdyenPaymentInProgress,
+            setAdyenStateData,
+            setCheckoutDropin,
+            getPaymentMethodsConfiguration,
+            getTranslations
+        }),
+        [
+            state,
+            locale,
+            navigate,
+            setAdyenPaymentInProgress,
+            setAdyenStateData,
+            setCheckoutDropin,
+            getPaymentMethodsConfiguration,
+            getTranslations
+        ]
+    )
 
     return <AdyenCheckoutContext.Provider value={value}>{children}</AdyenCheckoutContext.Provider>
 }
@@ -145,7 +238,7 @@ AdyenCheckoutProvider.propTypes = {
     navigate: PropTypes.any,
     basket: PropTypes.any,
     returnUrl: PropTypes.string,
-    page: PropTypes.oneOf(['checkout', 'confirmation', 'redirect']),
+    page: PropTypes.oneOf(['checkout', 'confirmation', 'redirect'])
 }
 
 export default AdyenCheckoutProvider

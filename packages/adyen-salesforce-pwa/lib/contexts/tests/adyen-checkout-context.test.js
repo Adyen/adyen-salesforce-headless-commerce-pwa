@@ -29,7 +29,9 @@ describe('<AdyenCheckoutProvider />', () => {
         customerId = 'customer123'
         customerType = 'guest'
         locale = 'en-US'
-        site = 'RefArch'
+        site = {
+            id: 'RefArch'
+        }
 
         setAdyenPaymentInProgress = jest.fn().mockImplementation(() => {
             return 'success'

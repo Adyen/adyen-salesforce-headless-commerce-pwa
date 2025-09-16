@@ -1,8 +1,7 @@
 import React, {useEffect, useRef} from 'react'
+import PropTypes from 'prop-types'
 import {AdyenCheckout, ApplePay} from '@adyen/adyen-web'
 import '@adyen/adyen-web/styles/adyen.css';
-import {Flex, Spinner} from '@chakra-ui/react'
-import PropTypes from 'prop-types'
 import {getCurrencyValueForApi} from '../utils/parsers.mjs'
 import {AdyenPaymentsService} from '../services/payments'
 import {AdyenShippingMethodsService} from '../services/shipping-methods'
@@ -264,13 +263,11 @@ const ApplePayExpressComponent = (props) => {
             createCheckout()
         }
     }, [adyenEnvironment, adyenPaymentMethods])
-
+    const {showLoading, spinner} = props
     return (
         <>
-            {props.showLoading && (
-                <Flex align={'center'} justify={'center'}>
-                    <Spinner size={'lg'} mt={4} />
-                </Flex>
+            {showLoading && spinner && (
+                <div className='adyen-checkout-spinner-container'>{spinner}</div>
             )}
             <div ref={paymentContainer}></div>
         </>
@@ -279,6 +276,7 @@ const ApplePayExpressComponent = (props) => {
 
 ApplePayExpressComponent.propTypes = {
     showLoading: PropTypes.bool,
+    spinner: PropTypes.node,
     shippingMethods: PropTypes.array
 }
 
