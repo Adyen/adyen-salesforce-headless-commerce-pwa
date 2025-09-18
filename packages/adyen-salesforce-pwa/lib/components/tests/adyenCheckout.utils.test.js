@@ -2,7 +2,7 @@
  * @jest-environment jest-environment-jsdom
  * @jest-environment-options {"url": "http://localhost:3000/", "resources": "usable"}
  */
-import {getCheckoutConfig, handleQueryParams} from '../adyenCheckout.utils'
+import {getCheckoutConfig, handleQueryParams} from '../helpers/adyenCheckout.utils'
 import {Dropin} from '@adyen/adyen-web/auto'
 
 jest.mock('@adyen/adyen-web/auto', () => ({

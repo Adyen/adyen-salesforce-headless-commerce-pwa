@@ -26,7 +26,7 @@ describe('createCheckoutResponse', () => {
 
     it('should return non-final successful response for REDIRECT', () => {
         const response = {
-            resultCode: RESULT_CODES.REDIRECT,
+            resultCode: RESULT_CODES.REDIRECT_SHOPPER,
             action: 'redirectAction',
             merchantReference: 'ref3'
         }

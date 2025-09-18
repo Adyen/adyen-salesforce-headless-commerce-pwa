@@ -44,13 +44,13 @@ export const GIFT_CARD_RESULT_CODES = {
 }
 
 export const NOTIFICATION_EVENT_CODES = {
-    AUTHORISATION: 'Authorisation',
-    ORDER_CLOSED: 'OrderClosed',
+    AUTHORISATION: 'AUTHORISATION',
+    ORDER_CLOSED: 'ORDER_CLOSED',
 }
 
 export const NOTIFICATION_SUCCESS = {
-    TRUE: true,
-    FALSE: false,
+    TRUE: 'true',
+    FALSE: 'false',
 }
 
 export const ORDER = Object.freeze({
