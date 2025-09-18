@@ -9,6 +9,7 @@ screenshots/
 playwright-report/
 Vagrantfile
 .env
+.env*
 build
 dist
 coverage

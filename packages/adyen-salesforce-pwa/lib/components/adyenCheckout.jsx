@@ -2,7 +2,7 @@ import React, {useEffect, useRef} from 'react'
 import PropTypes from 'prop-types'
 import useAdyenCheckout from '../hooks/useAdyenCheckout'
 import '../style/adyenCheckout.css'
-import {createCheckoutInstance, handleQueryParams} from './adyenCheckout.utils'
+import {createCheckoutInstance, handleQueryParams} from './helpers/adyenCheckout.utils'
 
 const AdyenCheckoutComponent = (props) => {
     const {

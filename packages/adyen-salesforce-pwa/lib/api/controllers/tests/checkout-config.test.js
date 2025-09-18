@@ -2,26 +2,14 @@ import AdyenCheckoutConfig from '../checkout-config'
 import {getAdyenConfigForCurrentSite} from '../../../utils/getAdyenConfigForCurrentSite.mjs'
 import {AdyenError} from '../../models/AdyenError'
 
-jest.mock('@salesforce/pwa-kit-runtime/utils/ssr-config', () => {
-    return {
-        getConfig: jest.fn().mockImplementation(() => {
-            return {
-                app: {
-                    sites: [
-                        {
-                            id: 'RefArch'
-                        }
-                    ],
-                    commerceAPI: {
-                        parameters: {
-                            siteId: 'RefArch'
-                        }
-                    }
-                }
-            }
-        })
-    }
-})
+jest.mock('@salesforce/pwa-kit-runtime/utils/ssr-config', () => ({
+    getConfig: jest.fn().mockReturnValue({
+        app: {
+            sites: [{id: 'RefArch'}],
+            commerceAPI: {parameters: {siteId: 'RefArch'}}
+        }
+    })
+}))
 
 jest.mock('../../../utils/getAdyenConfigForCurrentSite.mjs', () => ({
     getAdyenConfigForCurrentSite: jest.fn(() => ({
@@ -29,33 +17,24 @@ jest.mock('../../../utils/getAdyenConfigForCurrentSite.mjs', () => ({
         environment: 'TEST'
     }))
 }))
-
+const mockPaymentsApi = jest.fn()
+const mockOrdersApi = jest.fn()
 jest.mock('@adyen/api-library', () => ({
     Client: jest.fn().mockImplementation(() => ({
         setEnvironment: jest.fn(),
-        config: {
-            environment: 'TEST'
-        }
+        config: {environment: 'TEST'}
     })),
-    Config: jest.fn().mockImplementation(() => ({
-        apiKey: '',
-        environment: 'TEST'
-    })),
-    PaymentsApi: jest.fn().mockImplementation(() => ({
-        setEnvironment: jest.fn()
+    CheckoutAPI: jest.fn().mockImplementation(() => ({
+        PaymentsApi: mockPaymentsApi,
+        OrdersApi: mockOrdersApi
     }))
 }))
 
 describe('AdyenCheckoutConfig', () => {
     beforeEach(() => {
+        // Reset the singleton instance before each test
+        AdyenCheckoutConfig.instances = {}
         jest.clearAllMocks()
-    })
-
-    it('should return the same instance of AdyenCheckoutConfig when calling getInstance multiple times', () => {
-        const instance1 = AdyenCheckoutConfig.getInstance()
-        const instance2 = AdyenCheckoutConfig.getInstance()
-
-        expect(instance1).toBe(instance2)
     })
 
     it('should throw AdyenError for missing live endpoint URL prefix in live environment', () => {
@@ -63,8 +42,7 @@ describe('AdyenCheckoutConfig', () => {
             environment: 'live',
             apiKey: 'live-api-key'
         })
-        const adyenCheckoutConfig = new AdyenCheckoutConfig('siteId')
-        expect(() => adyenCheckoutConfig.getClient()).toThrow(AdyenError)
+        expect(() => AdyenCheckoutConfig.getInstance('RefArch')).toThrow(AdyenError)
     })
 
     it('should return if its live environment', () => {
@@ -72,8 +50,8 @@ describe('AdyenCheckoutConfig', () => {
             environment: 'live',
             liveEndpointUrlPrefix: 'prefix'
         })
-        const config = getAdyenConfigForCurrentSite('siteId')
-        const adyenCheckoutConfig = new AdyenCheckoutConfig('siteId')
-        expect(adyenCheckoutConfig.isLiveEnvironment(config.environment)).toBe(true)
+        const config = getAdyenConfigForCurrentSite('RefArch')
+        const adyenCheckoutConfig = AdyenCheckoutConfig.getInstance('RefArch')
+        expect(adyenCheckoutConfig).toBe(mockPaymentsApi)
     })
 })

@@ -6,10 +6,10 @@ import React from 'react'
 import {render, screen} from '@testing-library/react'
 import AdyenCheckoutComponent from '../adyenCheckout'
 import useAdyenCheckout from '../../hooks/useAdyenCheckout'
-import {createCheckoutInstance, handleQueryParams} from '../adyenCheckout.utils'
+import {createCheckoutInstance, handleQueryParams} from '../helpers/adyenCheckout.utils'
 
 jest.mock('../../hooks/useAdyenCheckout')
-jest.mock('../adyenCheckout.utils', () => ({
+jest.mock('../helpers/adyenCheckout.utils', () => ({
     createCheckoutInstance: jest.fn(),
     handleQueryParams: jest.fn()
 }))
