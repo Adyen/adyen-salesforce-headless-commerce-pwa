@@ -43,6 +43,16 @@ export const GIFT_CARD_RESULT_CODES = {
     SUCCESS: 'Success',
 }
 
+export const NOTIFICATION_EVENT_CODES = {
+    AUTHORISATION: 'AUTHORISATION',
+    ORDER_CLOSED: 'ORDER_CLOSED',
+}
+
+export const NOTIFICATION_SUCCESS = {
+    TRUE: 'true',
+    FALSE: 'false',
+}
+
 export const ORDER = Object.freeze({
     ORDER_STATUS_CREATED: 'created',
     ORDER_STATUS_NEW: 'new',

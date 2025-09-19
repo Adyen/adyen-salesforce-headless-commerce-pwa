@@ -4,6 +4,15 @@ export class ApiClient {
     site = null
 
     constructor(url, token, site) {
+        if (!url) {
+            throw new Error('ApiClient constructor: url is required')
+        }
+        if (!token) {
+            throw new Error('ApiClient constructor: token is required')
+        }
+        if (!site || !site.id) {
+            throw new Error('ApiClient constructor: site object with id property is required')
+        }
         this.baseUrl = url
         this.token = token
         this.site = site

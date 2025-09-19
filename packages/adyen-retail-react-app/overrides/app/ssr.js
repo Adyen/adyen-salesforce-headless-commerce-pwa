@@ -66,7 +66,8 @@ const {handler} = runtime.createHandler(options, (app) => {
                         'https://pay.google.com/gp/p/js/pay.js',
                         'https://*.cash.app',
                         'https://*.checkout.visa.com',
-                        'https://*.mastercard.com'
+                        'https://*.mastercard.com',
+                        'https://applepay.cdn-apple.com'
                     ],
                     'connect-src': [
                         "'self'",

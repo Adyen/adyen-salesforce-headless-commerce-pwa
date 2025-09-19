@@ -1,148 +1,101 @@
 import React, {useEffect, useRef} from 'react'
-import AdyenCheckout from '@adyen/adyen-web'
-import '@adyen/adyen-web/dist/adyen.css'
-import useAdyenCheckout from '../hooks/useAdyenCheckout'
-import {Flex, Spinner} from '@chakra-ui/react'
 import PropTypes from 'prop-types'
-
-export const getCheckoutConfig = (
-    adyenEnvironment,
-    adyenPaymentMethods,
-    paymentMethodsConfiguration,
-    translations,
-    locale
-) => {
-    const checkoutConfig = {
-        environment: adyenEnvironment?.ADYEN_ENVIRONMENT,
-        clientKey: adyenEnvironment?.ADYEN_CLIENT_KEY,
-        paymentMethodsResponse: adyenPaymentMethods,
-        paymentMethodsConfiguration: paymentMethodsConfiguration
-    }
-    if (translations) {
-        checkoutConfig.locale = locale.id
-        checkoutConfig.translations = translations
-    }
-    return checkoutConfig
-}
-
-export const handleQueryParams = (
-    urlParams,
-    checkout,
-    setAdyenPaymentInProgress,
-    paymentContainer
-) => {
-    const redirectResult = urlParams.get('redirectResult')
-    const amazonCheckoutSessionId = urlParams.get('amazonCheckoutSessionId')
-    const adyenAction = urlParams.get('adyenAction')
-
-    if (redirectResult) {
-        return checkout.submitDetails({data: {details: {redirectResult}}})
-    } else if (amazonCheckoutSessionId) {
-        setAdyenPaymentInProgress(true)
-        const amazonPayContainer = document.createElement('div')
-        const amazonPay = checkout
-            .create('amazonpay', {
-                amazonCheckoutSessionId,
-                showOrderButton: false
-            })
-            .mount(amazonPayContainer)
-        amazonPay.submit()
-        return null
-    } else if (adyenAction) {
-        const actionString = atob(adyenAction)
-        const action = JSON.parse(actionString)
-        return checkout.createFromAction(action).mount(paymentContainer.current)
-    } else {
-        return checkout.create('dropin').mount(paymentContainer.current)
-    }
-}
+import useAdyenCheckout from '../hooks/useAdyenCheckout'
+import '../style/adyenCheckout.css'
+import {createCheckoutInstance, handleQueryParams} from './helpers/adyenCheckout.utils'
 
 const AdyenCheckoutComponent = (props) => {
     const {
+        showLoading,
+        spinner,
+        beforeSubmit,
+        afterSubmit,
+        beforeAdditionalDetails,
+        afterAdditionalDetails,
+        onError
+    } = props
+
+    const {
         adyenEnvironment,
         adyenPaymentMethods,
-        orderNo,
         adyenOrder,
         checkoutDropin,
         setCheckoutDropin,
         getPaymentMethodsConfiguration,
-        setAdyenStateData,
-        getTranslations,
-        locale,
         adyenPaymentInProgress,
         setAdyenPaymentInProgress,
+        getTranslations,
+        locale,
+        setAdyenStateData,
+        orderNo,
         navigate
     } = useAdyenCheckout()
+
     const paymentContainer = useRef(null)
+    const dropinRef = useRef(checkoutDropin)
+    dropinRef.current = checkoutDropin
 
     useEffect(() => {
-        (async () => {
-            const urlParams = new URLSearchParams(location.search)
-
-            const createCheckout = async () => {
-                const paymentMethodsConfiguration = await getPaymentMethodsConfiguration({...props, adyenOrder})
-                const translations = getTranslations()
-                const checkoutConfig = getCheckoutConfig(
-                    adyenEnvironment,
-                    adyenPaymentMethods,
-                    paymentMethodsConfiguration,
-                    translations,
-                    locale
-                )
-                const checkout = await AdyenCheckout({
-                    ...checkoutConfig,
-                    order: adyenOrder,
-                    onSubmit(state, element) {
-                        const onSubmit =
-                            paymentMethodsConfiguration.onSubmit ||
-                            paymentMethodsConfiguration.card.onSubmit
-                        onSubmit(state, element)
-                    },
-                    onAdditionalDetails(state, element) {
-                        const onAdditionalDetails =
-                            paymentMethodsConfiguration.onAdditionalDetails ||
-                            paymentMethodsConfiguration.card.onAdditionalDetails
-                        onAdditionalDetails(state, element)
-                    },
-                    onChange: (state) => {
-                        if (state.isValid) {
-                            setAdyenStateData(state.data)
-                        }
-                    },
-                    onError() {
-                        const onError =
-                            paymentMethodsConfiguration.onError ||
-                            paymentMethodsConfiguration.card.onError
-                        onError(orderNo, navigate)
-                    },
-                    onOrderCancel(order, action) {
-                        const onOrderCancel =
-                            paymentMethodsConfiguration.onOrderCancel ||
-                            paymentMethodsConfiguration.giftcard.onOrderCancel
-                        onOrderCancel(order, action)
-                    }
-                })
-
-                return handleQueryParams(urlParams, checkout, setAdyenPaymentInProgress, paymentContainer)
+        const initializeCheckout = async () => {
+            // Guard against running initialization when not ready
+            if (!adyenEnvironment || !paymentContainer.current || adyenPaymentInProgress) {
+                return
             }
-            if (adyenEnvironment && paymentContainer.current && !adyenPaymentInProgress) {
-                window.paypal = undefined
-                if (checkoutDropin && adyenOrder) {
-                    checkoutDropin.unmount()
-                    setCheckoutDropin(null)
-                }
-                const dropin = await createCheckout()
-                setCheckoutDropin(dropin)
+
+            // Unmount any existing checkout instance
+            if (dropinRef.current) {
+                dropinRef.current.unmount()
             }
-        })()
+            window.paypal = undefined
+
+            // 1. Fetch the payment methods configuration
+            const paymentMethodsConfiguration = await getPaymentMethodsConfiguration({
+                beforeSubmit,
+                afterSubmit,
+                beforeAdditionalDetails,
+                afterAdditionalDetails,
+                onError
+            })
+
+            // 2. Create a new Adyen Checkout instance
+            const checkout = await createCheckoutInstance({
+                paymentMethodsConfiguration,
+                adyenEnvironment,
+                adyenPaymentMethods,
+                adyenOrder,
+                getTranslations,
+                locale,
+                setAdyenStateData,
+                orderNo,
+                navigate
+            })
+
+            // 3. Handle URL query parameters and mount the checkout component
+            const urlParams = new URLSearchParams(window.location.search)
+            const dropin = handleQueryParams(
+                urlParams,
+                checkout,
+                setAdyenPaymentInProgress,
+                paymentContainer,
+                paymentMethodsConfiguration
+            )
+            setCheckoutDropin(dropin)
+        }
+
+        initializeCheckout()
+
+        // Cleanup function to unmount the dropin when the component unmounts or dependencies change
+        return () => {
+            if (dropinRef.current) {
+                dropinRef.current.unmount()
+            }
+        }
     }, [adyenEnvironment, adyenPaymentMethods, adyenOrder])
 
     return (
         <>
-            {props.showLoading && (
-                <Flex align={'center'} justify={'center'}>
-                    <Spinner size={'lg'} mt={4} />
-                </Flex>
+            {showLoading && spinner && (
+                <div className='adyen-checkout-spinner-container'>{spinner}</div>
             )}
             <div ref={paymentContainer}></div>
         </>
@@ -150,7 +103,13 @@ const AdyenCheckoutComponent = (props) => {
 }
 
 AdyenCheckoutComponent.propTypes = {
-    showLoading: PropTypes.bool
+    showLoading: PropTypes.bool,
+    spinner: PropTypes.node,
+    beforeSubmit: PropTypes.arrayOf(PropTypes.func),
+    afterSubmit: PropTypes.arrayOf(PropTypes.func),
+    beforeAdditionalDetails: PropTypes.arrayOf(PropTypes.func),
+    afterAdditionalDetails: PropTypes.arrayOf(PropTypes.func),
+    onError: PropTypes.arrayOf(PropTypes.func)
 }
 
 export default AdyenCheckoutComponent

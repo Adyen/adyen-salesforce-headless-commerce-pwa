@@ -1,35 +1,57 @@
-import React, {useEffect, useState} from 'react'
+import React, {useCallback, useEffect, useMemo, useReducer} from 'react'
 import PropTypes from 'prop-types'
 import {AdyenPaymentMethodsService} from '../services/payment-methods'
 import {AdyenEnvironmentService} from '../services/environment'
 import {AdyenShippingMethodsService} from '../services/shipping-methods'
 
-export const AdyenExpressCheckoutContext = React.createContext({})
-
-export const fetchPaymentMethods = async (customerId, site, locale, authToken) => {
+const _fetchPaymentMethods = async (customerId, site, locale, authToken) => {
     const adyenPaymentMethodsService = new AdyenPaymentMethodsService(authToken, site)
     try {
         return await adyenPaymentMethodsService.fetchPaymentMethods(customerId, locale)
     } catch (error) {
+        console.error(error)
         return null
     }
 }
 
-export const fetchEnvironment = async (site, authToken) => {
+const _fetchEnvironment = async (site, authToken) => {
     const adyenEnvironmentService = new AdyenEnvironmentService(authToken, site)
     try {
         return await adyenEnvironmentService.fetchEnvironment()
     } catch (error) {
+        console.error(error)
         return null
     }
 }
 
-export const fetchShippingMethods = async (basketId, site, authToken) => {
+const _fetchShippingMethods = async (basketId, site, authToken) => {
     const adyenShippingMethodsService = new AdyenShippingMethodsService(authToken, site)
     try {
         return await adyenShippingMethodsService.getShippingMethods(basketId)
     } catch (error) {
+        console.error(error)
         return null
+    }
+}
+
+export const AdyenExpressCheckoutContext = React.createContext({})
+
+const initialState = {
+    adyenEnvironment: null,
+    adyenPaymentMethods: null,
+    shippingMethods: null
+}
+
+const reducer = (state, action) => {
+    switch (action.type) {
+        case 'SET_ADYEN_ENVIRONMENT':
+            return {...state, adyenEnvironment: action.payload}
+        case 'SET_ADYEN_PAYMENT_METHODS':
+            return {...state, adyenPaymentMethods: action.payload}
+        case 'SET_SHIPPING_METHODS':
+            return {...state, shippingMethods: action.payload}
+        default:
+            return state
     }
 }
 
@@ -42,45 +64,65 @@ export const AdyenExpressCheckoutProvider = ({
     basket,
     navigate
 }) => {
-    const [adyenPaymentMethods, setAdyenPaymentMethods] = useState()
-    const [adyenEnvironment, setAdyenEnvironment] = useState()
-    const [shippingMethods, setShippingMethods] = useState()
+    const [state, dispatch] = useReducer(reducer, initialState)
+    const {adyenEnvironment, adyenPaymentMethods, shippingMethods} = state
+    const basketId = basket?.basketId
 
     useEffect(() => {
         const fetchAdyenData = async () => {
+            if (!authToken) {
+                return
+            }
             const [environment, paymentMethods] = await Promise.all([
-                fetchEnvironment(site, authToken),
-                fetchPaymentMethods(customerId, site, locale, authToken)
+                _fetchEnvironment(site, authToken),
+                _fetchPaymentMethods(customerId, site, locale, authToken)
             ])
-            setAdyenEnvironment(environment || {error: true})
-            setAdyenPaymentMethods(paymentMethods || {error: true})
+            dispatch({type: 'SET_ADYEN_ENVIRONMENT', payload: environment || {error: true}})
+            dispatch({type: 'SET_ADYEN_PAYMENT_METHODS', payload: paymentMethods || {error: true}})
         }
 
         fetchAdyenData()
-    }, [])
+    }, [authToken, customerId, locale?.id, site?.id])
+
+    const fetchShippingMethods = useCallback(async () => {
+        if (!basketId || !authToken) {
+            return null
+        }
+        const methods = await _fetchShippingMethods(basketId, site, authToken)
+        dispatch({type: 'SET_SHIPPING_METHODS', payload: methods || {error: true}})
+        return methods
+    }, [basketId, site, authToken])
 
     useEffect(() => {
-        const fetchShippingMethodsData = async () => {
-            const shippingMethods = await fetchShippingMethods(basket?.basketId, site, authToken)
-            setShippingMethods(shippingMethods || {error: true})
+        if (basketId) {
+            fetchShippingMethods()
         }
+    }, [basketId, fetchShippingMethods])
 
-        if (basket && !shippingMethods) {
-            fetchShippingMethodsData()
-        }
-    }, [basket])
-
-    const value = {
-        adyenEnvironment,
-        adyenPaymentMethods,
-        basket,
-        locale,
-        site,
-        authToken,
-        navigate,
-        shippingMethods,
-        fetchShippingMethods
-    }
+    const value = useMemo(
+        () => ({
+            adyenEnvironment,
+            adyenPaymentMethods,
+            shippingMethods,
+            basket,
+            locale,
+            site,
+            authToken,
+            navigate,
+            fetchShippingMethods
+        }),
+        [
+            adyenEnvironment,
+            adyenPaymentMethods,
+            shippingMethods,
+            basket,
+            locale,
+            site,
+            authToken,
+            navigate,
+            fetchShippingMethods
+        ]
+    )
 
     return (
         <AdyenExpressCheckoutContext.Provider value={value}>
@@ -91,12 +133,12 @@ export const AdyenExpressCheckoutProvider = ({
 
 AdyenExpressCheckoutProvider.propTypes = {
     children: PropTypes.any,
-    authToken: PropTypes.any,
-    customerId: PropTypes.any,
-    locale: PropTypes.any,
-    site: PropTypes.any,
-    basket: PropTypes.any,
-    navigate: PropTypes.any
+    authToken: PropTypes.string,
+    customerId: PropTypes.string,
+    locale: PropTypes.object,
+    site: PropTypes.object,
+    basket: PropTypes.object,
+    navigate: PropTypes.func
 }
 
 export default AdyenExpressCheckoutProvider
