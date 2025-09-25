@@ -1,0 +1,59 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Adyen order api
+components:
+  securitySchemes:
+    ShopperToken:
+      type: http
+      scheme: bearer
+      flows:
+        authorizationCode:
+          authorizationUrl: https://shortcode.api.commercecloud.salesforce.com/shopper/auth/v1/organizations/my-org-id/oauth2/authorize
+          tokenUrl: https://shortcode.api.commercecloud.salesforce.com/shopper/auth/v1/organizations/my-org-id/oauth2/token
+          scopes:
+            c_order_rw: Read and write access to order information
+security:
+  - ShopperToken: [ "c_order_rw" ]
+paths:
+  /orders:
+    post:
+      summary: create order with order number
+      operationId: createOrder
+      parameters:
+        - in: query
+          name: siteId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: {
+                "basketId": {
+                  "description": "basketId to use when creating order",
+                  "type": "string",
+                },
+                "customerId": {
+                  "description": "customerId to use when creating order",
+                  "type": "string"
+                },
+                "orderNo": {
+                  "description": "orderNo to use when creating order",
+                  "type": "string"
+                },
+              }
+      responses:
+        "200":
+          description: Order created successfully.
+        "400":
+          description: Bad request, for example, a missing order number.
+        "403":
+          description: Shows that the order creation failed.
+        "404":
+          description: The requested order was not found.
+        "500":
+          description: An internal server error occurred.

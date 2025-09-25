@@ -4,12 +4,12 @@ import {BaseApiClient} from './baseApiClient'
  * A client for interacting with the custom Adyen order API.
  * This class extends the BaseApiClient to handle authentication and requests.
  */
-export class CustomOrderApiClient extends BaseApiClient {
+export class CustomShopperOrderApiClient extends BaseApiClient {
     /**
      * @constructor
      */
     constructor() {
-        const baseUrl = `https://${process.env.COMMERCE_API_SHORT_CODE}.api.commercecloud.salesforce.com/custom/adyen-order/v1/organizations/${process.env.COMMERCE_API_ORG_ID}`
+        const baseUrl = `https://${process.env.COMMERCE_API_SHORT_CODE}.api.commercecloud.salesforce.com/custom/adyen-shopper-order/v1/organizations/${process.env.COMMERCE_API_ORG_ID}`
         super(baseUrl)
     }
 
@@ -22,7 +22,7 @@ export class CustomOrderApiClient extends BaseApiClient {
      * @returns {Promise<object>} A promise that resolves to the created order object.
      */
     async createOrder(authorization, basketId, customerId, orderNo) {
-        const response = await this._callShopperApi('POST', 'create', {
+        const response = await this._callShopperApi('POST', 'orders', {
             body: JSON.stringify({
                 basketId: basketId,
                 customerId: customerId,

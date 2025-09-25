@@ -1,7 +1,7 @@
 import {getConfig} from "@salesforce/pwa-kit-runtime/utils/ssr-config.js";
 import {ShopperOrders} from "commerce-sdk-isomorphic";
 import {AdyenError} from "../api/models/AdyenError.js";
-import {CustomOrderApiClient, OrderApiClient} from "../api/index.js";
+import {CustomShopperOrderApiClient, CustomAdminOrderApiClient, OrderApiClient} from "../api/index.js";
 import {ERROR_MESSAGE, ORDER} from "./constants.mjs";
 
 /**
@@ -64,6 +64,17 @@ export async function createOrderUsingOrderNo(authorization, basketId, customerI
     if (order?.orderNo) {
         throw new AdyenError(ERROR_MESSAGE.ORDER_ALREADY_EXISTS, 409)
     }
-    const customOrderApi = new CustomOrderApiClient()
+    const customOrderApi = new CustomShopperOrderApiClient()
     return await customOrderApi.createOrder(authorization, basketId, customerId, orderNo)
+}
+
+/**
+ * Retrieves an SFCC order using its order number.
+ * This function uses an admin-level API client to fetch order details.
+ * @param {string} orderNo - The number of the order to retrieve.
+ * @returns {Promise<object>} A promise that resolves to the order object.
+ */
+export async function getOrderUsingOrderNo(orderNo) {
+    const customOrderApi = new CustomAdminOrderApiClient()
+    return await customOrderApi.getOrder(orderNo)
 }

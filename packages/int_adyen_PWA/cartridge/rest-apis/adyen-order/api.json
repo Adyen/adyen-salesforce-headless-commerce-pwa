@@ -1,9 +1,9 @@
 {
   "endpoints": [
     {
-      "endpoint": "createOrder",
+      "endpoint": "getOrder",
       "schema": "schema.yaml",
-      "implementation": "script"
+      "implementation": "getOrder"
     }
   ]
 }

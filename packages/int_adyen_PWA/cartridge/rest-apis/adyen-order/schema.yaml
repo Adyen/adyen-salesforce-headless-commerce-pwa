@@ -4,22 +4,20 @@ info:
   title: Adyen order api
 components:
   securitySchemes:
-    ShopperToken:
-      type: http
-      scheme: bearer
+    AmOAuth2:
+      type: oauth2
       flows:
-        authorizationCode:
-          authorizationUrl: https://shortcode.api.commercecloud.salesforce.com/shopper/auth/v1/organizations/my-org-id/oauth2/authorize
-          tokenUrl: https://shortcode.api.commercecloud.salesforce.com/shopper/auth/v1/organizations/my-org-id/oauth2/token
+        clientCredentials:
+          tokenUrl: https://account.demandware.com/dwsso/oauth2/access_token
           scopes:
             c_order_rw: Read and write access to order information
 security:
-  - ShopperToken: [ "c_order_rw" ]
+  - AmOAuth2: [ "c_order_rw" ]
 paths:
-  /create:
-    post:
-      summary: create order with order number
-      operationId: createOrder
+  /orders/{orderNo}:
+    get:
+      summary: Get an order by its order number
+      operationId: getOrder
       parameters:
         - in: query
           name: siteId
@@ -27,27 +25,19 @@ paths:
           schema:
             type: string
             minLength: 1
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties: {
-                "basketId": {
-                  "description": "basketId to use when creating order",
-                  "type": "string",
-                },
-                "customerId": {
-                  "description": "customerId to use when creating order",
-                  "type": "string"
-                },
-                "orderNo": {
-                  "description": "orderNo to use when creating order",
-                  "type": "string"
-                },
-              }
+        - in: path
+          name: orderNo
+          required: true
+          description: The order number to retrieve.
+          schema:
+            type: string
+            minLength: 1
       responses:
         "200":
-          description: Order created successfully
-        "403":
-          description: Shows that the order creation failed
+          description: Order retrieved successfully
+        "400":
+          description: Bad request, for example, a missing order number.
+        "404":
+          description: The requested order was not found.
+        "500":
+          description: An internal server error occurred.

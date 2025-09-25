@@ -24,6 +24,15 @@ jest.mock('../orderApi', () => {
         })
     }
 })
+
+jest.mock('../../../utils/orderHelper.mjs', () => {
+    return {
+        getOrderUsingOrderNo: jest.fn(() => ({
+            orderTotal: "25.00",
+            currency: 'EUR'
+        }))
+    }
+})
 describe('authorizationWebhookHandler', () => {
     let req, res, next, consoleInfoSpy, consoleErrorSpy
 
