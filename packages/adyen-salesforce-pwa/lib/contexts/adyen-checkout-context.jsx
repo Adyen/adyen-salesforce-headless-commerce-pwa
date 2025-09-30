@@ -136,6 +136,16 @@ const AdyenCheckoutProvider = ({
         [dispatch]
     )
 
+    const setAdyenOrder = useCallback(
+        (data) => dispatch({type: 'SET_ADYEN_ORDER', payload: data}),
+        [dispatch]
+    )
+
+    const setOrderNo = useCallback(
+        (data) => dispatch({type: 'SET_ORDER_NO', payload: data}),
+        [dispatch]
+    )
+
     const getTranslations = useCallback(() => {
         return adyenTranslations && adyenTranslations[localeId] ? adyenTranslations : null
     }, [adyenTranslations, localeId])
@@ -158,6 +168,8 @@ const AdyenCheckoutProvider = ({
                 adyenOrder,
                 returnUrl,
                 customerId,
+                setAdyenOrder,
+                setOrderNo,
                 onError: adyenOnError || onError,
                 onNavigate: navigate,
                 afterSubmit: [
@@ -165,8 +177,8 @@ const AdyenCheckoutProvider = ({
                     ...(adyenAfterSubmit || []),
                     onPaymentsSuccess(
                         navigate,
-                        (orderNo) => dispatch({type: 'SET_ORDER_NO', payload: orderNo}),
-                        (adyenOrder) => dispatch({type: 'SET_ADYEN_ORDER', payload: adyenOrder})
+                        setOrderNo,
+                        setAdyenOrder
                     )
                 ],
                 beforeSubmit: [...beforeSubmit, ...(adyenBeforeSubmit || [])],

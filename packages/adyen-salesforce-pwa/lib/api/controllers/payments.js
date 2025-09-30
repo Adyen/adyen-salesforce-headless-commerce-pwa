@@ -1,6 +1,11 @@
 import {formatAddressInAdyenFormat} from '../../utils/formatAddress.mjs'
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
-import {ERROR_MESSAGE, RECURRING_PROCESSING_MODEL, SHOPPER_INTERACTIONS} from '../../utils/constants.mjs'
+import {
+    ERROR_MESSAGE,
+    PAYMENT_METHOD_TYPES,
+    RECURRING_PROCESSING_MODEL,
+    SHOPPER_INTERACTIONS
+} from '../../utils/constants.mjs'
 import {createCheckoutResponse} from '../../utils/createCheckoutResponse.mjs'
 import AdyenCheckoutConfig from './checkout-config'
 import Logger from './logger'
@@ -29,6 +34,34 @@ export const validateRequestParams = (req) => {
         req.headers?.basketid &&
         req.headers?.customerid
     )
+}
+
+/**
+ * Checks if the current payment is a partial payment using a gift card.
+ * @param {object} data - The payment state data from the client.
+ * @returns {boolean} True if it is a partial gift card payment.
+ * @private
+ */
+function isPartialPayment(data) {
+    return Object.hasOwn(data, 'order');
+}
+
+/**
+ * Calculates the amount for a partial payment.
+ * If the payment method is a gift card, it returns the minimum of the remaining amount and the card's balance.
+ * Otherwise, it returns the remaining amount.
+ * @param {object} data - The payment state data from the client.
+ * @param {object} basket - The shopper's basket object.
+ * @returns {number} The amount to be paid.
+ * @private
+ */
+function amountForPartialPayments(data, basket) {
+    const remainingAmountValue = JSON.parse(basket.c_orderData || '{}')?.remainingAmount?.value ?? 0
+    if (data.paymentMethod.type === PAYMENT_METHOD_TYPES.GIFT_CARD) {
+        const balanceValue = JSON.parse(basket.c_giftCardCheckBalance || '{}')?.balance?.value ?? 0
+        return Math.min(remainingAmountValue, balanceValue)
+    }
+    return remainingAmountValue
 }
 
 const VALID_STATE_DATA_FIELDS = new Set([
@@ -162,8 +195,7 @@ export async function createPaymentRequestObject(data, adyenConfig, req) {
     let amountValue = getCurrencyValueForApi(basket.orderTotal, basket.currency)
     if (isPartialPayment(data)) {
         Logger.info('sendPayments', 'partial payment')
-        const {balance = {}} = JSON.parse(basket.c_giftCardCheckBalance || '{}')
-        amountValue = balance?.value
+        amountValue = amountForPartialPayments(data, basket)
     }
     const paymentRequest = {
         ...filterStateData(data),
@@ -211,17 +243,6 @@ export async function createPaymentRequestObject(data, adyenConfig, req) {
     paymentRequest.additionalData = getAdditionalData(basket)
 
     return paymentRequest
-}
-
-/**
- * Checks if the current payment is a partial payment using a gift card.
- * @param {object} data - The payment state data from the client.
- * @returns {boolean} True if it is a partial gift card payment.
- * @private
- */
-function isPartialPayment(data) {
-    return Object.hasOwn(data, 'order') && data?.paymentMethod?.type === 'giftcard';
-
 }
 
 /**
@@ -273,13 +294,14 @@ async function sendPayments(req, res, next) {
 
         const basket = await getBasket(authorization, basketid, customerid)
 
-        Logger.info('sendPayments', 'addPaymentInstrument')
-        await addPaymentInstrumentToBasket(data, authorization, basket)
-
         if (data.paymentType === 'express') {
             await addShopperDataToBasket(data, authorization, basketid, customerid)
         }
         const paymentRequest = await createPaymentRequestObject(data, adyenConfig, req)
+
+        Logger.info('sendPayments', 'addPaymentInstrument')
+        await addPaymentInstrumentToBasket(paymentRequest, authorization, basket)
+
         const response = await checkout.payments(paymentRequest, {
             idempotencyKey: uuidv4()
         })

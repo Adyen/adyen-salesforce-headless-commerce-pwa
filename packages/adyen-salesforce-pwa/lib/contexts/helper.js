@@ -12,7 +12,7 @@ export const onPaymentsSuccess = (navigate, setOrderNo, setAdyenOrder) => async 
     if (responses?.paymentsResponse?.merchantReference) {
         setOrderNo(responses?.paymentsResponse?.merchantReference)
     }
-    if (responses?.paymentsResponse?.order) {
+    if (responses?.paymentsResponse?.order?.orderData) {
         setAdyenOrder(responses?.paymentsResponse?.order)
     }
     if (responses?.paymentsResponse?.isSuccessful && responses?.paymentsResponse?.isFinal) {

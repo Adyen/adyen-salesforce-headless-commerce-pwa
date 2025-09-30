@@ -22,7 +22,10 @@ export const giftcardConfig = (props) => {
             }
         },
         onOrderCancel: async (Order) => {
-            await giftCardService.cancelOrder(Order, props?.customerId)
+            const response = await giftCardService.cancelOrder(Order, props?.customerId)
+            if (response.isFinal && response.isSuccessful) {
+                props?.setAdyenOrder(null)
+            }
         }
     }
 }

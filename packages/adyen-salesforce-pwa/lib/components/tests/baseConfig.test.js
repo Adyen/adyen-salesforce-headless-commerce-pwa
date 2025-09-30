@@ -1,15 +1,7 @@
-import {
-    baseConfig,
-    getAmount,
-    onAdditionalDetails,
-    onErrorHandler,
-    onOrderCancelHandler,
-    onSubmit
-} from '../helpers/baseConfig'
+import {baseConfig, getAmount, onAdditionalDetails, onErrorHandler, onSubmit} from '../helpers/baseConfig'
 import {AdyenPaymentsService} from '../../services/payments'
 import {AdyenPaymentsDetailsService} from '../../services/payments-details'
 import {AdyenOrderService} from '../../services/order'
-import {GiftCardService} from '../../services/giftCard'
 
 jest.mock('../../services/payments')
 jest.mock('../../services/payments-details')
@@ -143,20 +135,6 @@ describe('onErrorHandler', () => {
 
         expect(AdyenOrderService).toHaveBeenCalled()
         expect(navigate).toHaveBeenCalledWith('/canceled')
-    })
-})
-
-describe('onOrderCancelHandler', () => {
-    it('should cancel the gift card order', async () => {
-        const props = {token: 'testToken', site: 'testSite', customerId: 'testCustomer'}
-        const order = {orderNo: '123'}
-        GiftCardService.mockImplementation(() => ({
-            cancelOrder: jest.fn().mockResolvedValue({})
-        }))
-
-        await onOrderCancelHandler(order, props)
-
-        expect(GiftCardService).toHaveBeenCalled()
     })
 })
 

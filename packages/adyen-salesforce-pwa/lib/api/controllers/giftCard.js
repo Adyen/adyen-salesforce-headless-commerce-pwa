@@ -4,7 +4,12 @@ import Logger from './logger'
 import {v4 as uuidv4} from 'uuid'
 import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrentSite.mjs'
 import {filterStateData} from "./payments"
-import {getCurrentBasketForAuthorizedShopper, saveToBasket} from '../../utils/basketHelper.mjs'
+import {
+    getCurrentBasketForAuthorizedShopper,
+    removeAllPaymentInstrumentsFromBasket,
+    saveToBasket
+} from '../../utils/basketHelper.mjs'
+import {createCheckoutResponse} from '../../utils/createCheckoutResponse.mjs'
 
 /**
  * Handles the Adyen gift card balance check.
@@ -103,7 +108,7 @@ export async function cancelOrder(req, res, next) {
         const ordersApi = AdyenCheckoutConfig.getOrdersApiInstance(siteId)
         const adyenConfig = getAdyenConfigForCurrentSite(siteId)
         const basket = await getCurrentBasketForAuthorizedShopper(authorization, customerid)
-        const {orderTotal, productTotal, currency} = basket
+        const {orderTotal, productTotal, currency, c_orderNo} = basket
 
         const request = {
             ...filterStateData(data),
@@ -112,9 +117,21 @@ export async function cancelOrder(req, res, next) {
         const response = await ordersApi.cancelOrder(request, {
             idempotencyKey: uuidv4()
         })
+        const cancelOrderResponse = {
+            ...createCheckoutResponse(response, c_orderNo),
+            order: response?.order
+        }
+
+        if (cancelOrderResponse.isFinal && cancelOrderResponse.isSuccessful) {
+            await saveToBasket(authorization, basket.basketId, {
+                c_orderData: '',
+                c_giftCardCheckBalance: ''
+            })
+            await removeAllPaymentInstrumentsFromBasket(authorization, basket)
+        }
 
         Logger.info('giftCards-cancelOrder', 'success')
-        res.locals.response = response
+        res.locals.response = cancelOrderResponse
         next()
     } catch (err) {
         Logger.error('giftCards-cancelOrder', JSON.stringify(err))

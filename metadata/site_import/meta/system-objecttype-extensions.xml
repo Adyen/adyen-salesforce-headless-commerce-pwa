@@ -2,9 +2,18 @@
 <metadata xmlns="http://www.demandware.com/xml/impex/metadata/2006-10-31">
     <type-extension type-id="OrderPaymentInstrument">
         <custom-attribute-definitions>
-            <attribute-definition attribute-id="adyenPartialPaymentsOrder">
-                <display-name xml:lang="x-default">adyenPartialPaymentsOrder</display-name>
-                <description xml:lang="x-default">partial payments order data</description>
+            <attribute-definition attribute-id="adyenPaymentMethodType">
+                <display-name xml:lang="x-default">adyenPaymentMethodType</display-name>
+                <description xml:lang="x-default">paymentMethod type used by shopper for payment</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+                <field-length>0</field-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="adyenPaymentMethodBrand">
+                <display-name xml:lang="x-default">adyenPaymentMethodBrand</display-name>
+                <description xml:lang="x-default">paymentMethod brand used by shopper for payment</description>
                 <type>string</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
@@ -15,7 +24,8 @@
         <group-definitions>
             <attribute-group group-id="AdyenPayment">
                 <display-name xml:lang="x-default">AdyenPayment</display-name>
-                <attribute attribute-id="adyenPartialPaymentsOrder"/>
+                <attribute attribute-id="adyenPaymentMethodType"/>
+                <attribute attribute-id="adyenPaymentMethodBrand"/>
             </attribute-group>
         </group-definitions>
     </type-extension>

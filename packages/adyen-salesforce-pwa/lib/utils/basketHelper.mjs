@@ -3,6 +3,7 @@ import {ShopperBaskets, ShopperCustomers} from "commerce-sdk-isomorphic";
 import {AdyenError} from "../api/models/AdyenError.js";
 import {ERROR_MESSAGE, PAYMENT_METHODS} from "./constants.mjs";
 import {getCardType} from "./getCardType.mjs";
+import {convertCurrencyValueToMajorUnits} from "./parsers.mjs"
 
 /**
  * Creates and configures an instance of the ShopperBaskets API client.
@@ -73,13 +74,15 @@ export async function addPaymentInstrumentToBasket(data, authorization, basket) 
         : PAYMENT_METHODS.ADYEN_COMPONENT
     const paymentInstrumentReq = {
         body: {
-            amount: basket.orderTotal,
+            amount: convertCurrencyValueToMajorUnits(data.amount.value, data.amount.currency),
             paymentMethodId,
             paymentCard: {
                 cardType: isCardPayment
                     ? getCardType(data?.paymentMethod?.brand)
                     : data?.paymentMethod?.type
-            }
+            },
+            c_adyenPaymentMethodType: data?.paymentMethod?.type,
+            ...data?.paymentMethod?.brand && {c_adyenPaymentMethodBrand: data?.paymentMethod?.brand}
         },
         parameters: {
             basketId: basket.basketId
