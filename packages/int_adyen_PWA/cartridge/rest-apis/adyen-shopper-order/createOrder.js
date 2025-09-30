@@ -12,7 +12,10 @@ exports.createOrder = function () {
     if (basketId) {
         const order = OrderMgr.createOrder(currentBasket, orderNo)
         Transaction.commit();
-        RESTResponseMgr.createSuccess(order, 200).render();
+        const response = {
+            orderNo: order.getOrderNo()
+        }
+        RESTResponseMgr.createSuccess(response, 200).render();
     } else {
         RESTResponseMgr.createError(
             403,

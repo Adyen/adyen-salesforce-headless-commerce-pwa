@@ -257,6 +257,10 @@ async function handlePaymentError(err, req) {
     try {
         const {authorization, basketid, customerid} = req.headers
         const basket = await getBasket(authorization, basketid, customerid)
+        await saveToBasket(authorization, basket.basketId, {
+            c_orderData: '',
+            c_giftCardCheckBalance: ''
+        })
         if (basket?.paymentInstruments?.length) {
             Logger.info('removeAllPaymentInstrumentsFromBasket')
             await removeAllPaymentInstrumentsFromBasket(authorization, basket)
