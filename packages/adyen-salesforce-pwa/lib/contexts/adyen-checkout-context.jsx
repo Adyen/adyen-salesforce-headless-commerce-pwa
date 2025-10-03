@@ -59,6 +59,7 @@ const AdyenCheckoutProvider = ({
     const callPaymentMethodsOnPages = ['checkout']
 
     const {
+        dropinConfiguration: optionalDropinConfiguration,
         paymentMethodsConfiguration: additionalPaymentMethodsConfiguration,
         onError: adyenOnError,
         afterSubmit: adyenAfterSubmit,
@@ -72,7 +73,7 @@ const AdyenCheckoutProvider = ({
     useEffect(() => {
         const fetchInitialData = async () => {
             // Fetch environment
-            const adyenEnvironmentService = new AdyenEnvironmentService(authToken, site)
+            const adyenEnvironmentService = new AdyenEnvironmentService(authToken, customerId, basket?.basketId, site)
             try {
                 const data = await adyenEnvironmentService.fetchEnvironment()
                 dispatch({type: 'SET_ADYEN_ENVIRONMENT', payload: data ? data : {error: true}})
@@ -87,12 +88,9 @@ const AdyenCheckoutProvider = ({
                 callPaymentMethodsOnPages.includes(page)
             ) {
                 dispatch({type: 'SET_FETCHING_PAYMENT_METHODS', payload: true})
-                const adyenPaymentMethodsService = new AdyenPaymentMethodsService(authToken, site)
+                const adyenPaymentMethodsService = new AdyenPaymentMethodsService(authToken, customerId, basket?.basketId, site)
                 try {
-                    const data = await adyenPaymentMethodsService.fetchPaymentMethods(
-                        customerId,
-                        locale
-                    )
+                    const data = await adyenPaymentMethodsService.fetchPaymentMethods(locale)
                     dispatch({
                         type: 'SET_ADYEN_PAYMENT_METHODS',
                         payload: data ? data : {error: true}
@@ -114,7 +112,8 @@ const AdyenCheckoutProvider = ({
         page,
         adyenPaymentMethods,
         fetchingPaymentMethods,
-        locale
+        locale,
+        basket?.basketId
     ])
 
     useEffect(() => {
@@ -218,6 +217,7 @@ const AdyenCheckoutProvider = ({
             ...state,
             locale,
             navigate,
+            optionalDropinConfiguration,
             setAdyenPaymentInProgress,
             setAdyenStateData,
             setCheckoutDropin,
@@ -228,6 +228,7 @@ const AdyenCheckoutProvider = ({
             state,
             locale,
             navigate,
+            optionalDropinConfiguration,
             setAdyenPaymentInProgress,
             setAdyenStateData,
             setCheckoutDropin,

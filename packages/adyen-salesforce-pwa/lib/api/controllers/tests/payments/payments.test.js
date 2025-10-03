@@ -1,8 +1,8 @@
 import sendPayments from '../../payments'
 import {RESULT_CODES} from '../../../../utils/constants.mjs'
 import {AdyenError} from '../../../models/AdyenError'
-import * as basketHelper from '../../../../utils/basketHelper.mjs'
-import * as orderHelper from '../../../../utils/orderHelper.mjs'
+import * as basketHelper from '../../../helpers/basketHelper.js'
+import * as orderHelper from '../../../helpers/orderHelper.js'
 
 let mockPayments = jest.fn()
 
@@ -21,7 +21,7 @@ jest.mock('../../checkout-config', () => ({
     }))
 }))
 
-jest.mock('../../../../utils/basketHelper.mjs', () => ({
+jest.mock('../../../helpers/basketHelper.js', () => ({
     getBasket: jest.fn(),
     addPaymentInstrumentToBasket: jest.fn(),
     removeAllPaymentInstrumentsFromBasket: jest.fn(),
@@ -29,7 +29,7 @@ jest.mock('../../../../utils/basketHelper.mjs', () => ({
     saveToBasket: jest.fn()
 }))
 
-jest.mock('../../../../utils/orderHelper.mjs', () => ({
+jest.mock('../../../helpers/orderHelper.js', () => ({
     createOrderUsingOrderNo: jest.fn(),
     failOrderAndReopenBasket: jest.fn()
 }))

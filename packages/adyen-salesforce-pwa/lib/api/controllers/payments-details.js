@@ -1,11 +1,10 @@
-import {createCheckoutResponse} from '../../utils/createCheckoutResponse.mjs'
-import AdyenCheckoutConfig from './checkout-config'
-import Logger from './logger'
+import Logger from '../models/logger'
 import {v4 as uuidv4} from 'uuid'
 import {AdyenError} from '../models/AdyenError'
-import {getBasket, removeAllPaymentInstrumentsFromBasket, saveToBasket} from "../../utils/basketHelper.mjs";
-import {ERROR_MESSAGE} from "../../utils/constants.mjs";
-import {createOrderUsingOrderNo, failOrderAndReopenBasket} from "../../utils/orderHelper.mjs";
+import {ERROR_MESSAGE} from '../../utils/constants.mjs'
+import {createCheckoutResponse, handleFailedPayment} from '../helpers/paymentsHelper.js'
+import {createOrderUsingOrderNo} from "../helpers/orderHelper.js";
+import AdyenClientProvider from "../models/adyenClientProvider";
 
 /**
  * Handles errors that occur during the payment details submission process.
@@ -16,26 +15,7 @@ import {createOrderUsingOrderNo, failOrderAndReopenBasket} from "../../utils/ord
  */
 async function handlePaymentDetailsError(err, req) {
     Logger.error('sendPaymentDetails', err.stack)
-    try {
-        const {authorization, basketid, customerid} = req.headers
-        const basket = await getBasket(authorization, basketid, customerid)
-        await saveToBasket(authorization, basket.basketId, {
-            c_orderData: '',
-            c_giftCardCheckBalance: ''
-        })
-        if (basket?.paymentInstruments?.length) {
-            Logger.info('removeAllPaymentInstrumentsFromBasket')
-            await removeAllPaymentInstrumentsFromBasket(authorization, basket)
-        }
-        const order = await createOrderUsingOrderNo(authorization, customerid, basketid, basket.c_orderNo)
-
-        if (order?.orderNo) {
-            Logger.info('updateOrderStatus and recreate basket')
-            await failOrderAndReopenBasket(authorization, customerid, order.orderNo)
-        }
-    } catch (e) {
-        Logger.error('sendPaymentDetails - failed to handle paymentDetails error', e.stack)
-    }
+    await handleFailedPayment(req.res.locals.adyen, 'sendPaymentDetails')
 }
 
 /**
@@ -49,17 +29,17 @@ async function handlePaymentDetailsError(err, req) {
 async function sendPaymentDetails(req, res, next) {
     Logger.info('sendPaymentDetails', 'start')
     try {
-        const {body: {data}, headers: {authorization, basketid, customerid}, query: {siteId}} = req
+        const {body: {data}} = req
+        const {adyen: adyenContext} = res.locals
+        const {basket, siteId} = adyenContext
 
-        const basket = await getBasket(authorization, basketid, customerid)
-
-        const checkout = AdyenCheckoutConfig.getInstance(siteId)
+        const checkout = new AdyenClientProvider(adyenContext).getPaymentsApi()
         const response = await checkout.paymentsDetails(data, {
             idempotencyKey: uuidv4()
         })
         Logger.info('sendPaymentDetails', `resultCode ${response.resultCode}`)
         const checkoutResponse = {
-            ...createCheckoutResponse(response, basket?.c_orderNo),
+            ...createCheckoutResponse(response, adyenContext.basket?.c_orderNo),
             order: response.order
         }
         if (checkoutResponse.isFinal && !checkoutResponse.isSuccessful) {
@@ -67,12 +47,16 @@ async function sendPaymentDetails(req, res, next) {
         }
 
         if (!checkoutResponse.isFinal && checkoutResponse.isSuccessful && response.order) {
-            await saveToBasket(authorization, basket.basketId, {
+            await adyenContext.basketService.update({
                 c_orderData: JSON.stringify(response.order)
             })
         }
         if (checkoutResponse.isFinal && checkoutResponse.isSuccessful) {
-            await createOrderUsingOrderNo(authorization, customerid, basketid, basket.c_orderNo)
+            // The payment was successful. Now, we add the payment instrument
+            // and create the final order.
+            await adyenContext.basketService.addPaymentInstrument(response)
+            await createOrderUsingOrderNo(adyenContext)
+            Logger.info('sendPaymentDetails', `order created: ${checkoutResponse.merchantReference}`)
         }
         Logger.info('sendPaymentDetails', `checkoutResponse ${JSON.stringify(checkoutResponse)}`)
         res.locals.response = checkoutResponse

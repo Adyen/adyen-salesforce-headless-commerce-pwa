@@ -1,7 +1,7 @@
-import {OrderApiClient} from './orderApi'
-import {getOrderUsingOrderNo} from '../../utils/orderHelper.mjs'
+import {OrderApiClient} from '../models/orderApi'
+import {getOrderUsingOrderNo} from '../helpers/orderHelper.js'
 import {NOTIFICATION_EVENT_CODES, NOTIFICATION_SUCCESS, ORDER} from '../../utils/constants.mjs'
-import Logger from './logger'
+import Logger from '../models/logger'
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 
 const messages = {
@@ -17,13 +17,16 @@ async function authorizationWebhookHandler(req, res, next) {
             return next()
         }
         const orderNo = notification.merchantReference
+        const order = await getOrderUsingOrderNo(orderNo)
+        if (!order?.orderNo) {
+            return next()
+        }
         const orderApi = new OrderApiClient()
         if (notification.success === NOTIFICATION_SUCCESS.TRUE) {
             Logger.info(
                 notification.eventCode,
                 `Authorization for order ${orderNo} was successful.`
             )
-            const order = await getOrderUsingOrderNo(orderNo)
             const totalAmount = getCurrencyValueForApi(order.total, order.currency)
             const amount = notification.amount.value
             if (amount < totalAmount) {

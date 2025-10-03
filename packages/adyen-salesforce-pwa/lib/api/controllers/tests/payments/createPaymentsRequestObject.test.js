@@ -1,9 +1,9 @@
 import {createPaymentRequestObject} from '../../payments'
 import {RECURRING_PROCESSING_MODEL, SHOPPER_INTERACTIONS} from '../../../../utils/constants.mjs'
-import * as basketHelper from '../../../../utils/basketHelper.mjs'
+import * as basketHelper from '../../../helpers/basketHelper.js'
 
 // Mocking the util functions
-jest.mock('../../../../utils/basketHelper.mjs')
+jest.mock('../../../helpers/basketHelper.js')
 jest.mock('../../../../utils/formatAddress.mjs', () => ({
     formatAddressInAdyenFormat: jest.fn((addr) => ({...addr, formatted: true}))
 }))

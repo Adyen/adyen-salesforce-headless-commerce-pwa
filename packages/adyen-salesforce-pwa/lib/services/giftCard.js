@@ -4,17 +4,14 @@ export class GiftCardService {
     baseUrl = '/api/adyen/gift-card'
     apiClient = null
 
-    constructor(token, site) {
-        this.apiClient = new ApiClient(this.baseUrl, token, site)
+    constructor(token, customerId, basketId, site) {
+        this.apiClient = new ApiClient(this.baseUrl, token, customerId, basketId, site)
     }
 
-    async balanceCheck(request, customerId) {
+    async balanceCheck(request) {
         const res = await this.apiClient.post({
             path: '/balance-check',
-            body: JSON.stringify({data: request}),
-            headers: {
-                customerid: customerId,
-            }
+            body: JSON.stringify({data: request})
         })
         if (res.status >= 300) {
             throw new Error(res)
@@ -23,13 +20,10 @@ export class GiftCardService {
         }
     }
 
-    async createOrder(request, customerId) {
+    async createOrder(request) {
         const res = await this.apiClient.post({
             path: '/create-order',
-            body: JSON.stringify({data: request}),
-            headers: {
-                customerid: customerId,
-            }
+            body: JSON.stringify({data: request})
         })
         if (res.status >= 300) {
             throw new Error(res)
@@ -38,13 +32,10 @@ export class GiftCardService {
         }
     }
 
-    async cancelOrder(request, customerId) {
+    async cancelOrder(request) {
         const res = await this.apiClient.post({
             path: '/cancel-order',
-            body: JSON.stringify({data: request}),
-            headers: {
-                customerid: customerId,
-            }
+            body: JSON.stringify({data: request})
         })
         if (res.status >= 300) {
             throw new Error(res)

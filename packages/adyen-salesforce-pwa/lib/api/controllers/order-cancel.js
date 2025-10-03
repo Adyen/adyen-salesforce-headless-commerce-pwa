@@ -1,5 +1,5 @@
-import Logger from './logger'
-import {failOrderAndReopenBasket} from '../../utils/orderHelper.mjs'
+import Logger from '../models/logger'
+import {failOrderAndReopenBasket} from '../helpers/orderHelper.js'
 
 /**
  * An Express middleware that handles the cancellation of an order.
@@ -13,12 +13,13 @@ import {failOrderAndReopenBasket} from '../../utils/orderHelper.mjs'
 async function orderCancel(req, res, next) {
     Logger.info('orderCancel', 'start')
     try {
-        const {body: {orderNo}, headers: {authorization, customerid}} = req
-        await failOrderAndReopenBasket(authorization, customerid, orderNo)
-        Logger.info('orderCancel', `basket reopened`);
+        const {adyen: adyenContext} = res.locals
+        const {orderNo} = req.body
+        await failOrderAndReopenBasket(adyenContext, orderNo)
+        Logger.info('orderCancel', `Basket for order ${orderNo} reopened`)
         next()
     } catch (err) {
-        Logger.error('orderCancel', JSON.stringify(err))
+        Logger.error('orderCancel', err.stack)
         next(err)
     }
 }

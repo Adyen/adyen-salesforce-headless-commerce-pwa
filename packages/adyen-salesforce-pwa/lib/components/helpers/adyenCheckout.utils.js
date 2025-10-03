@@ -16,7 +16,8 @@ export const handleQueryParams = (
     checkout,
     setAdyenPaymentInProgress,
     paymentContainer,
-    paymentMethodsConfiguration
+    paymentMethodsConfiguration,
+    optionalDropinConfiguration,
 ) => {
     const redirectResult = urlParams.get('redirectResult')
     const amazonCheckoutSessionId = urlParams.get('amazonCheckoutSessionId')
@@ -42,7 +43,10 @@ export const handleQueryParams = (
         const action = JSON.parse(atob(adyenAction))
         return checkout.createFromAction(action).mount(paymentContainer.current)
     }
-    return new Dropin(checkout, {paymentMethodsConfiguration}).mount(paymentContainer.current)
+    return new Dropin(checkout, {
+        ...optionalDropinConfiguration,
+        paymentMethodsConfiguration
+    }).mount(paymentContainer.current)
 }
 
 export const createCheckoutInstance = async ({
@@ -64,7 +68,6 @@ export const createCheckoutInstance = async ({
         locale
     )
     const pmc = paymentMethodsConfiguration
-
     return AdyenCheckout({
         ...checkoutConfig,
         order: adyenOrder,

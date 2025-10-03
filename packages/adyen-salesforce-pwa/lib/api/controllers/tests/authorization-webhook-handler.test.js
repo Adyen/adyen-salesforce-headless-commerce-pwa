@@ -25,7 +25,7 @@ jest.mock('../orderApi', () => {
     }
 })
 
-jest.mock('../../../utils/orderHelper.mjs', () => {
+jest.mock('../../helpers/orderHelper.js', () => {
     return {
         getOrderUsingOrderNo: jest.fn(() => ({
             orderTotal: "25.00",

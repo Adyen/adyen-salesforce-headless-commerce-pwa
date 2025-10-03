@@ -9,8 +9,7 @@ export const baseConfig = ({
                                afterSubmit = [],
                                beforeAdditionalDetails = [],
                                afterAdditionalDetails = [],
-                               onError = (error) => {
-                                   window.location.reload()
+                               onError = () => {
                                },
                                ...props
                            }) => {
@@ -31,15 +30,13 @@ export const onSubmit = async (state, component, actions, props) => {
         if (!state.isValid) {
             throw new Error('invalid state')
         }
-        const adyenPaymentService = new AdyenPaymentsService(props?.token, props?.site)
+        const adyenPaymentService = new AdyenPaymentsService(props?.token, props?.customerId, props.basket?.basketId, props?.site)
         const paymentsResponse = await adyenPaymentService.submitPayment(
             {
                 ...state.data,
                 origin: state.data.origin ? state.data.origin : window.location.origin,
                 returnUrl: props?.returnUrl || `${window.location.href}/redirect`
-            },
-            props.basket?.basketId,
-            props?.customerId
+            }
         )
         actions.resolve(paymentsResponse)
         return {paymentsResponse: paymentsResponse}
@@ -52,11 +49,9 @@ export const onSubmit = async (state, component, actions, props) => {
 
 export const onAdditionalDetails = async (state, component, actions, props) => {
     try {
-        const adyenPaymentsDetailsService = new AdyenPaymentsDetailsService(props?.token, props?.site)
+        const adyenPaymentsDetailsService = new AdyenPaymentsDetailsService(props?.token, props?.customerId, props.basket?.basketId, props?.site)
         const paymentsDetailsResponse = await adyenPaymentsDetailsService.submitPaymentsDetails(
-            state.data,
-            props.basket?.basketId,
-            props?.customerId
+            state.data
         )
         actions.resolve(paymentsDetailsResponse)
         return {paymentsDetailsResponse: paymentsDetailsResponse}
@@ -68,8 +63,8 @@ export const onAdditionalDetails = async (state, component, actions, props) => {
 }
 
 export const onErrorHandler = async (orderNo, navigate, props) => {
-    const adyenOrderService = new AdyenOrderService(props?.token, props?.site);
-    const response = await adyenOrderService.orderCancel(orderNo, props?.customerId);
+    const adyenOrderService = new AdyenOrderService(props?.token, props?.customerId, props.basket?.basketId, props?.site);
+    const response = await adyenOrderService.orderCancel(orderNo);
     navigate(response?.headers?.location);
 }
 

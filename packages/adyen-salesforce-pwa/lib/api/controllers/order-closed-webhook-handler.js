@@ -1,6 +1,7 @@
-import {OrderApiClient} from './orderApi'
+import {OrderApiClient} from '../models/orderApi'
 import {NOTIFICATION_EVENT_CODES, NOTIFICATION_SUCCESS, ORDER} from '../../utils/constants.mjs'
-import Logger from './logger'
+import Logger from '../models/logger'
+import {getOrderUsingOrderNo} from "../helpers/orderHelper";
 
 const messages = {
     AUTH_ERROR: 'Access Denied!',
@@ -15,6 +16,10 @@ async function orderClosedWebhookHandler(req, res, next) {
             return next()
         }
         const orderNo = notification.merchantReference
+        const order = await getOrderUsingOrderNo(orderNo)
+        if (!order?.orderNo) {
+            return next()
+        }
         const orderApi = new OrderApiClient()
         if (notification.success === NOTIFICATION_SUCCESS.FALSE) {
             Logger.info(

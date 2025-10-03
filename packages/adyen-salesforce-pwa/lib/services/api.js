@@ -2,8 +2,11 @@ export class ApiClient {
     baseUrl = null
     token = null
     site = null
+    customerId = null
+    basketId = null
 
-    constructor(url, token, site) {
+
+    constructor(url, token, customerId, basketId, site) {
         if (!url) {
             throw new Error('ApiClient constructor: url is required')
         }
@@ -16,6 +19,8 @@ export class ApiClient {
         this.baseUrl = url
         this.token = token
         this.site = site
+        this.customerId = customerId
+        this.basketId = basketId
     }
 
     base(method, options) {
@@ -31,6 +36,8 @@ export class ApiClient {
             headers: {
                 'Content-Type': 'application/json',
                 authorization: `Bearer ${this.token}`,
+                customerid: this.customerId,
+                basketid: this.basketId,
                 ...options?.headers
             }
         })

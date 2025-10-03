@@ -19,6 +19,7 @@ const AdyenCheckoutComponent = (props) => {
         adyenEnvironment,
         adyenPaymentMethods,
         adyenOrder,
+        optionalDropinConfiguration,
         checkoutDropin,
         setCheckoutDropin,
         getPaymentMethodsConfiguration,
@@ -60,6 +61,7 @@ const AdyenCheckoutComponent = (props) => {
             // 2. Create a new Adyen Checkout instance
             const checkout = await createCheckoutInstance({
                 paymentMethodsConfiguration,
+                optionalDropinConfiguration,
                 adyenEnvironment,
                 adyenPaymentMethods,
                 adyenOrder,
@@ -77,7 +79,8 @@ const AdyenCheckoutComponent = (props) => {
                 checkout,
                 setAdyenPaymentInProgress,
                 paymentContainer,
-                paymentMethodsConfiguration
+                paymentMethodsConfiguration,
+                optionalDropinConfiguration
             )
             setCheckoutDropin(dropin)
         }

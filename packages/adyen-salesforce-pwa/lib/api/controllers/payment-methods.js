@@ -1,11 +1,8 @@
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 import {BLOCKED_PAYMENT_METHODS} from '../../utils/constants.mjs'
-import {ShopperCustomers} from 'commerce-sdk-isomorphic'
-import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
-import AdyenCheckoutConfig from './checkout-config'
-import Logger from './logger'
+import AdyenClientProvider from '../models/adyenClientProvider'
+import Logger from '../models/logger'
 import {v4 as uuidv4} from 'uuid'
-import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrentSite.mjs'
 import {AdyenError} from '../models/AdyenError'
 import {getApplicationInfo} from '../../utils/getApplicationInfo.mjs'
 
@@ -19,38 +16,11 @@ async function getPaymentMethods(req, res, next) {
     Logger.info('getPaymentMethods', 'start')
 
     try {
-        const {siteId} = req.query
+        const {adyen: adyenContext} = res.locals
+        const {basket, adyenConfig, customerId, siteId} = adyenContext
+        const checkout = new AdyenClientProvider(adyenContext).getPaymentsApi()
 
-        const checkout = AdyenCheckoutConfig.getInstance(siteId)
-        const adyenConfig = getAdyenConfigForCurrentSite(siteId)
-
-        const {app: appConfig} = getConfig()
-        const shopperCustomers = new ShopperCustomers({
-            ...appConfig.commerceAPI,
-            headers: {authorization: req.headers.authorization}
-        })
-
-        const customer = await shopperCustomers.getCustomer({
-            parameters: {
-                customerId: req.headers.customerid
-            }
-        })
-
-        if (!customer?.customerId) {
-            throw new AdyenError(errorMessages.UNAUTHORIZED, 401)
-        }
-
-        const {baskets} = await shopperCustomers.getCustomerBaskets({
-            parameters: {
-                customerId: customer?.customerId
-            }
-        })
-
-        if (!baskets?.length) {
-            throw new AdyenError(errorMessages.INVALID_BASKET, 404)
-        }
-
-        const [{orderTotal, productTotal, currency}] = baskets
+        const {orderTotal, productTotal, currency, customerInfo} = basket
         const {locale: shopperLocale} = req.query
         const countryCode = shopperLocale?.slice(-2)
 
@@ -65,8 +35,8 @@ async function getPaymentMethods(req, res, next) {
             }
         }
 
-        if (customer?.authType === 'registered') {
-            paymentMethodsRequest.shopperReference = customer.customerId
+        if (customerInfo?.authType === 'registered') {
+            paymentMethodsRequest.shopperReference = customerId
         }
 
         const response = await checkout.paymentMethods(paymentMethodsRequest, {

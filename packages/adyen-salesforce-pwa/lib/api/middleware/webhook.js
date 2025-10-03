@@ -1,8 +1,6 @@
 import {hmacValidator} from '@adyen/api-library'
-import Logger from './logger'
-import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrentSite.mjs'
+import Logger from '../models/logger'
 import {AdyenError} from '../models/AdyenError'
-import NotificationRequest from '@adyen/api-library/lib/src/notification/notificationRequest'
 
 const messages = {
     AUTH_ERROR: 'Access Denied!',
@@ -10,24 +8,10 @@ const messages = {
     DEFAULT_ERROR: 'Technical error!'
 }
 
-async function handleWebhook(req, res, next) {
-    try {
-        // handle webhook notification here and update order status using ORDER API from commerce SDK.
-        // check eventCode structure and types here: https://docs.adyen.com/development-resources/webhooks/webhook-types/
-        // `return next()` if notification is successfully handled.
-        // webhookSuccess middleware return correct response for the webhook.
-        // throw relevant error if notification is not successfully handled.
-        // errorHandler middleware return error response and logs the error.
-    } catch (err) {
-        return next(err)
-    }
-}
-
 function authenticate(req, res, next) {
     try {
         const authHeader = req.headers.authorization
-        const {siteId} = req.query
-        const adyenConfig = getAdyenConfigForCurrentSite(siteId)
+        const {adyenConfig} = res.locals.adyen
         if (!authHeader) {
             throw new AdyenError(messages.AUTH_ERROR, 401)
         }
@@ -54,9 +38,7 @@ function authenticate(req, res, next) {
 
 function validateHmac(req, res, next) {
     try {
-        const {siteId} = req.query
-
-        const adyenConfig = getAdyenConfigForCurrentSite(siteId)
+        const {adyenConfig} = res.locals.adyen
         if (!adyenConfig?.webhookHmacKey) {
             return next()
         }
@@ -76,10 +58,8 @@ function validateHmac(req, res, next) {
 
 function parseNotification(req, res, next) {
     try {
-        const notificationRequest = new NotificationRequest(req.body)
-        const notificationRequestItem = (notificationRequest.notificationItems || []).filter(
-            (item) => !!item
-        )
+        const notificationItems = req.body.notificationItems || []
+        const notificationRequestItem = notificationItems.filter((item) => !!item)
         if (!notificationRequestItem[0]) {
             return next(
                 new AdyenError(
@@ -96,4 +76,4 @@ function parseNotification(req, res, next) {
     }
 }
 
-export {authenticate, validateHmac, handleWebhook, parseNotification}
+export {authenticate, validateHmac, parseNotification}

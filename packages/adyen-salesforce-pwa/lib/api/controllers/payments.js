@@ -1,249 +1,16 @@
-import {formatAddressInAdyenFormat} from '../../utils/formatAddress.mjs'
-import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
-import {
-    ERROR_MESSAGE,
-    PAYMENT_METHOD_TYPES,
-    RECURRING_PROCESSING_MODEL,
-    SHOPPER_INTERACTIONS
-} from '../../utils/constants.mjs'
-import {createCheckoutResponse} from '../../utils/createCheckoutResponse.mjs'
-import AdyenCheckoutConfig from './checkout-config'
-import Logger from './logger'
+import {ERROR_MESSAGE} from '../../utils/constants.mjs'
+import AdyenClientProvider from '../models/adyenClientProvider'
+import Logger from '../models/logger'
 import {v4 as uuidv4} from 'uuid'
-import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrentSite.mjs'
 import {AdyenError} from '../models/AdyenError'
-import {getApplicationInfo} from '../../utils/getApplicationInfo.mjs'
 import {
-    addPaymentInstrumentToBasket,
-    addShopperDataToBasket,
-    getBasket,
-    removeAllPaymentInstrumentsFromBasket,
-    saveToBasket
-} from "../../utils/basketHelper.mjs";
-import {createOrderUsingOrderNo, failOrderAndReopenBasket} from "../../utils/orderHelper.mjs";
+    createCheckoutResponse,
+    createPaymentRequestObject,
+    handleFailedPayment,
+    validateBasketPayments
+} from '../helpers/paymentsHelper.js'
+import {createOrderUsingOrderNo} from "../helpers/orderHelper.js";
 
-/**
- * Validates the presence of essential parameters in the request.
- * @param {object} req - The Express request object.
- * @returns {boolean} True if all required parameters are present, false otherwise.
- */
-export const validateRequestParams = (req) => {
-    return !!(
-        req.body?.data &&
-        req.headers?.authorization &&
-        req.headers?.basketid &&
-        req.headers?.customerid
-    )
-}
-
-/**
- * Checks if the current payment is a partial payment using a gift card.
- * @param {object} data - The payment state data from the client.
- * @returns {boolean} True if it is a partial gift card payment.
- * @private
- */
-function isPartialPayment(data) {
-    return Object.hasOwn(data, 'order');
-}
-
-/**
- * Calculates the amount for a partial payment.
- * If the payment method is a gift card, it returns the minimum of the remaining amount and the card's balance.
- * Otherwise, it returns the remaining amount.
- * @param {object} data - The payment state data from the client.
- * @param {object} basket - The shopper's basket object.
- * @returns {number} The amount to be paid.
- * @private
- */
-function amountForPartialPayments(data, basket) {
-    const remainingAmountValue = JSON.parse(basket.c_orderData || '{}')?.remainingAmount?.value ?? 0
-    if (data.paymentMethod.type === PAYMENT_METHOD_TYPES.GIFT_CARD) {
-        const balanceValue = JSON.parse(basket.c_giftCardCheckBalance || '{}')?.balance?.value ?? 0
-        return Math.min(remainingAmountValue, balanceValue)
-    }
-    return remainingAmountValue
-}
-
-const VALID_STATE_DATA_FIELDS = new Set([
-    'paymentMethod',
-    'billingAddress',
-    'deliveryAddress',
-    'riskData',
-    'shopperName',
-    'dateOfBirth',
-    'telephoneNumber',
-    'shopperEmail',
-    'countryCode',
-    'socialSecurityNumber',
-    'browserInfo',
-    'installments',
-    'storePaymentMethod',
-    'conversionId',
-    'origin',
-    'returnUrl',
-    'order'
-])
-
-/**
- * Filters the state data object to include only a predefined set of valid fields.
- * @param {object} stateData - The raw state data from the client.
- * @returns {object} An object containing only the valid state data fields.
- */
-export const filterStateData = (stateData) =>
-    Object.entries(stateData).reduce((acc, [key, value]) => {
-        if (VALID_STATE_DATA_FIELDS.has(key)) {
-            acc[key] = value
-        }
-        return acc
-    }, {})
-
-/**
- * Extracts the shopper's first and last name from the basket's billing address.
- * @param {object} basket - The shopper's basket object.
- * @returns {{firstName: string, lastName: string}} An object containing the shopper's name.
- */
-export function getShopperName(basket) {
-    const {firstName, lastName} = basket.billingAddress
-    return {
-        firstName,
-        lastName
-    }
-}
-
-const OPEN_INVOICE_METHODS = new Set(['zip', 'affirm', 'clearpay'])
-const OPEN_INVOICE_PREFIXES = ['afterpay', 'klarna', 'ratepay', 'facilypay']
-
-/**
- * Checks if a given payment method type is an open invoice method.
- * @param {string} paymentMethodType - The type of the payment method (e.g., 'klarna', 'afterpay').
- * @returns {boolean} True if the payment method is an open invoice type.
- */
-export function isOpenInvoiceMethod(paymentMethodType) {
-    if (!paymentMethodType) {
-        return false
-    }
-    if (OPEN_INVOICE_METHODS.has(paymentMethodType)) {
-        return true
-    }
-    return OPEN_INVOICE_PREFIXES.some((prefix) => paymentMethodType.includes(prefix))
-}
-
-/**
- * Creates an object with additional risk data based on the items in the basket.
- * @param {object} basket - The shopper's basket object.
- * @returns {object} An object containing additional data for risk assessment.
- */
-export function getAdditionalData(basket) {
-    const additionalData = {}
-    basket.productItems.forEach((product, index) => {
-        additionalData[`riskdata.basket.item${index + 1}.itemID`] = product.itemId
-        additionalData[`riskdata.basket.item${index + 1}.productTitle`] = product.productName
-        additionalData[`riskdata.basket.item${index + 1}.amountPerItem`] = getCurrencyValueForApi(
-            product.basePrice,
-            basket.currency
-        )
-        additionalData[`riskdata.basket.item${index + 1}.quantity`] = product.quantity
-        additionalData[`riskdata.basket.item${index + 1}.currency`] = basket.currency
-    })
-    return additionalData
-}
-
-/**
- * Maps a basket item (product, shipping, or promotion) to the Adyen line item format.
- * @param {object} item - The basket item.
- * @param {string} currency - The currency code.
- * @param {number} [quantity=item.quantity] - The quantity of the item.
- * @returns {object} The item formatted as an Adyen line item.
- * @private
- */
-const mapToLineItem = (item, currency, quantity = item.quantity) => ({
-    id: item.itemId || item.priceAdjustmentId,
-    quantity,
-    description: item.itemText,
-    amountExcludingTax: getCurrencyValueForApi(item.basePrice, currency),
-    taxAmount: getCurrencyValueForApi(item.tax, currency),
-    taxPercentage: item.taxRate
-})
-
-/**
- * Transforms all items in the basket (products, shipping, promotions) into an array of Adyen line items.
- * @param {object} basket - The shopper's basket object.
- * @returns {object[]} An array of Adyen line items.
- */
-export function getLineItems(basket) {
-    const {currency, productItems, shippingItems, priceAdjustments} = basket
-
-    const productLineItems = productItems?.map((item) => mapToLineItem(item, currency)) || []
-    const shippingLineItems =
-        shippingItems?.map((item) => mapToLineItem(item, currency, 1)) || []
-    const priceAdjustmentLineItems =
-        priceAdjustments?.map((item) => mapToLineItem(item, currency)) || []
-
-    return [...productLineItems, ...shippingLineItems, ...priceAdjustmentLineItems]
-}
-
-/**
- * Constructs the complete payment request object to be sent to the Adyen /payments endpoint.
- * @param {object} data - The payment state data from the client.
- * @param {object} adyenConfig - The Adyen configuration for the current site.
- * @param {object} req - The Express request object.
- * @returns {Promise<object>} A promise that resolves to the Adyen payment request object.
- */
-export async function createPaymentRequestObject(data, adyenConfig, req) {
-    Logger.info('sendPayments', 'createPaymentRequestObject')
-    const basket = await getBasket(req.headers.authorization, req.headers.basketid, req.headers.customerid)
-    let amountValue = getCurrencyValueForApi(basket.orderTotal, basket.currency)
-    if (isPartialPayment(data)) {
-        Logger.info('sendPayments', 'partial payment')
-        amountValue = amountForPartialPayments(data, basket)
-    }
-    const paymentRequest = {
-        ...filterStateData(data),
-        billingAddress: data.billingAddress || formatAddressInAdyenFormat(basket.billingAddress),
-        deliveryAddress:
-            data.deliveryAddress ||
-            formatAddressInAdyenFormat(basket.shipments[0].shippingAddress),
-        reference: basket.c_orderNo,
-        merchantAccount: adyenConfig.merchantAccount,
-        amount: {
-            value: amountValue,
-            currency: basket.currency
-        },
-        applicationInfo: getApplicationInfo(adyenConfig.systemIntegratorName),
-        authenticationData: {
-            threeDSRequestData: {
-                nativeThreeDS: 'preferred'
-            }
-        },
-        channel: 'Web',
-        returnUrl: data.returnUrl || `${data.origin}/checkout/redirect`,
-        shopperReference: basket?.customerInfo?.customerId,
-        shopperEmail: basket?.customerInfo?.email,
-        shopperName: getShopperName(basket),
-        shopperIP: req.ip
-    }
-
-    if (isOpenInvoiceMethod(data?.paymentMethod?.type)) {
-        paymentRequest.lineItems = getLineItems(basket)
-        paymentRequest.countryCode = paymentRequest.billingAddress.country
-    }
-
-    // Add recurringProcessingModel in case shopper wants to save the card from checkout
-    if (data.storePaymentMethod) {
-        paymentRequest.recurringProcessingModel = RECURRING_PROCESSING_MODEL.CARD_ON_FILE
-    }
-
-    if (data.paymentMethod?.storedPaymentMethodId) {
-        paymentRequest.recurringProcessingModel = RECURRING_PROCESSING_MODEL.CARD_ON_FILE
-        paymentRequest.shopperInteraction = SHOPPER_INTERACTIONS.CONT_AUTH
-    } else {
-        paymentRequest.shopperInteraction = SHOPPER_INTERACTIONS.ECOMMERCE
-    }
-
-    paymentRequest.additionalData = getAdditionalData(basket)
-
-    return paymentRequest
-}
 
 /**
  * Handles errors that occur during the payment process.
@@ -254,26 +21,7 @@ export async function createPaymentRequestObject(data, adyenConfig, req) {
  */
 async function handlePaymentError(err, req) {
     Logger.error('sendPayments', err.stack)
-    try {
-        const {authorization, basketid, customerid} = req.headers
-        const basket = await getBasket(authorization, basketid, customerid)
-        await saveToBasket(authorization, basket.basketId, {
-            c_orderData: '',
-            c_giftCardCheckBalance: ''
-        })
-        if (basket?.paymentInstruments?.length) {
-            Logger.info('removeAllPaymentInstrumentsFromBasket')
-            await removeAllPaymentInstrumentsFromBasket(authorization, basket)
-        }
-        const order = await createOrderUsingOrderNo(authorization, basketid, customerid, basket.c_orderNo)
-
-        if (order?.orderNo) {
-            Logger.info('updateOrderStatus and recreate basket')
-            await failOrderAndReopenBasket(authorization, customerid, order.orderNo)
-        }
-    } catch (e) {
-        Logger.error('sendPayments - failed to handle payment error', e.stack)
-    }
+    await handleFailedPayment(req.res.locals.adyen, 'sendPayments')
 }
 
 /**
@@ -287,32 +35,28 @@ async function handlePaymentError(err, req) {
  */
 async function sendPayments(req, res, next) {
     Logger.info('sendPayments', 'start')
-    if (!validateRequestParams(req)) {
-        return next(new AdyenError(ERROR_MESSAGE.INVALID_PARAMS, 400))
-    }
-    const {body: {data}, headers: {authorization, basketid, customerid}, query: {siteId}} = req
+    const {body: {data}} = req
+    let {adyen: adyenContext} = res.locals
 
     try {
-        const adyenConfig = getAdyenConfigForCurrentSite(siteId)
-        const checkout = AdyenCheckoutConfig.getInstance(siteId)
-
-        const basket = await getBasket(authorization, basketid, customerid)
+        const checkout = new AdyenClientProvider(adyenContext).getPaymentsApi()
 
         if (data.paymentType === 'express') {
-            await addShopperDataToBasket(data, authorization, basketid, customerid)
+            await adyenContext.basketService.addShopperData(data)
         }
-        const paymentRequest = await createPaymentRequestObject(data, adyenConfig, req)
+        const paymentRequest = await createPaymentRequestObject(data, adyenContext.adyenConfig, req)
 
-        Logger.info('sendPayments', 'addPaymentInstrument')
-        await addPaymentInstrumentToBasket(paymentRequest, authorization, basket)
+        Logger.info('sendPayments', 'validateBasketPayments')
+        // Pass the entire `res.locals.adyen` context for a cleaner signature
+        await validateBasketPayments(paymentRequest, adyenContext)
 
         const response = await checkout.payments(paymentRequest, {
             idempotencyKey: uuidv4()
         })
-        Logger.info('sendPayments', `resultCode ${response.resultCode}`)
+        Logger.info('sendPayments', `resultCode ${response?.resultCode}`)
 
         const checkoutResponse = {
-            ...createCheckoutResponse(response, basket?.c_orderNo),
+            ...createCheckoutResponse(response, adyenContext.basket?.c_orderNo),
             order: response.order
         }
 
@@ -321,12 +65,16 @@ async function sendPayments(req, res, next) {
         }
 
         if (!checkoutResponse.isFinal && checkoutResponse.isSuccessful && response.order) {
-            await saveToBasket(authorization, basket.basketId, {
+            await adyenContext.basketService.update({
                 c_orderData: JSON.stringify(response.order)
             })
         }
         if (checkoutResponse.isFinal && checkoutResponse.isSuccessful) {
-            await createOrderUsingOrderNo(authorization, basketid, customerid, basket.c_orderNo)
+            // The payment was successful. Now, we add the payment instrument
+            // and create the final order.
+            await adyenContext.basketService.addPaymentInstrument(response)
+            await createOrderUsingOrderNo(adyenContext)
+            Logger.info('sendPayments', `order created: ${checkoutResponse.merchantReference}`)
         }
         Logger.info('sendPayments', `checkoutResponse ${JSON.stringify(checkoutResponse)}`)
 

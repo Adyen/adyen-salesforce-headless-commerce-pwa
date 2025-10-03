@@ -6,14 +6,15 @@ import PaymentsDetailsController from '../controllers/payments-details'
 import PaymentsController from '../controllers/payments'
 import ShippingAddressController from '../controllers/shipping-address'
 import ShippingMethodsController from '../controllers/shipping-methods'
-import {authenticate, parseNotification, validateHmac} from '../controllers/webhook'
+import {authenticate, parseNotification, validateHmac} from '../middleware/webhook'
 import {authorizationWebhookHandler} from '../controllers/authorization-webhook-handler'
-import {orderClosedWebhookHandler} from '../controllers/order-closed-webhook-handler'
 import {createErrorResponse} from '../../utils/createErrorResponse.mjs'
-import Logger from '../controllers/logger'
+import Logger from '../models/logger'
 import {appleDomainAssociation} from '../controllers/apple-domain-association'
 import OrderCancelController from '../controllers/order-cancel';
 import {balanceCheck, cancelOrder, createOrder} from "../controllers/giftCard";
+import {prepareRequestContext} from '../middleware/request-context'
+import {prepareWebhookRequestContext} from '../middleware/webhook-request-context'
 
 function SuccessHandler(req, res) {
     Logger.info('Success')
@@ -29,46 +30,52 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     app.use(bodyParser.json())
     app.set('trust proxy', true)
 
-    const environmentHandler = overrides?.environment || [EnvironmentController, SuccessHandler]
+    const environmentHandler = overrides?.environment || [prepareRequestContext, EnvironmentController, SuccessHandler]
     const paymentMethodsHandler = overrides?.paymentMethods || [
+        prepareRequestContext,
         PaymentMethodsController,
         SuccessHandler
     ]
     const paymentsDetailsHandler = overrides?.paymentsDetails || [
+        prepareRequestContext,
         PaymentsDetailsController,
         SuccessHandler
     ]
-    const paymentsHandler = overrides?.payments || [PaymentsController, SuccessHandler]
+    const paymentsHandler = overrides?.payments || [prepareRequestContext, PaymentsController, SuccessHandler]
     const webhookHandler = overrides?.webhook || [
+        prepareWebhookRequestContext,
         authenticate,
         validateHmac,
         parseNotification,
         authorizationWebhookHandler,
-        orderClosedWebhookHandler,
         SuccessHandler
     ]
     const shippingMethodsPostHandler = overrides?.setShippingMethods || [
+        prepareRequestContext,
         ShippingMethodsController.setShippingMethod,
         SuccessHandler
     ]
     const shippingMethodsGetHandler = overrides?.getShippingMethods || [
+        prepareRequestContext,
         ShippingMethodsController.getShippingMethods,
         SuccessHandler
     ]
     const shippingAddressHandler = overrides?.shippingAddress || [
+        prepareRequestContext,
         ShippingAddressController,
         SuccessHandler
     ]
     const appleDomainAssociationHandler = overrides?.appleDomainAssociation || [
         appleDomainAssociation
     ]
-
-    const orderCancelHandler = overrides?.onOrderCancel || [OrderCancelController, SuccessHandler]
-
-    const balanceCheckHandler = overrides?.balanceCheck || [balanceCheck, SuccessHandler]
-    const createOrderHandler = overrides?.createOrder || [createOrder, SuccessHandler]
-    const cancelOrderHandler = overrides?.cancelOrder || [cancelOrder, SuccessHandler]
-
+    const orderCancelHandler = overrides?.onOrderCancel || [
+        prepareRequestContext,
+        OrderCancelController,
+        SuccessHandler
+    ]
+    const balanceCheckHandler = overrides?.balanceCheck || [prepareRequestContext, balanceCheck, SuccessHandler]
+    const createOrderHandler = overrides?.createOrder || [prepareRequestContext, createOrder, SuccessHandler]
+    const cancelOrderHandler = overrides?.cancelOrder || [prepareRequestContext, cancelOrder, SuccessHandler]
 
     app.get(
         '*/checkout/redirect',

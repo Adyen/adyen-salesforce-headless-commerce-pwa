@@ -7,6 +7,7 @@ export const executeCallbacks = (callbacks, props, onError) => {
                 return {...next, ...response}
             } catch (error) {
                 arr.splice(index)
+                console.error(error)
                 onError(error)
             }
         }, {})

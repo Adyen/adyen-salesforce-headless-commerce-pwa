@@ -18,6 +18,7 @@ exports.getOrder = function () {
         if (order) {
             const grossPrice = order.getTotalGrossPrice();
             const response = {
+                orderNo: order.getOrderNo(),
                 total: grossPrice.value,
                 currency: grossPrice.currencyCode
             }

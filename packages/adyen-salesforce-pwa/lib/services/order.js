@@ -4,19 +4,16 @@ export class AdyenOrderService {
     baseUrl = '/api/adyen/order'
     apiClient = null
 
-    constructor(token, site) {
-        this.apiClient = new ApiClient(this.baseUrl, token, site)
+    constructor(token, customerId, basketId, site) {
+        this.apiClient = new ApiClient(this.baseUrl, token, customerId, basketId, site)
     }
 
-    async orderCancel(orderNo, customerId) {
+    async orderCancel(orderNo) {
         const res = await this.apiClient.post({
             path: '/cancel',
             body: JSON.stringify({
                 orderNo
-            }),
-            headers: {
-                customerid: customerId,
-            }
+            })
         })
         if (res.status >= 300) {
             throw new Error(res)

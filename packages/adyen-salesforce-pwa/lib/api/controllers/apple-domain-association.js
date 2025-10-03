@@ -1,4 +1,4 @@
-import Logger from './logger'
+import Logger from '../models/logger'
 import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrentSite.mjs'
 
 function appleDomainAssociation(req, res, next) {

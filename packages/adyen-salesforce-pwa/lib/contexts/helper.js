@@ -25,8 +25,6 @@ export const onPaymentsSuccess = (navigate, setOrderNo, setAdyenOrder) => async 
         }
     } else if (responses?.paymentsResponse?.action) {
         await handleAction(navigate)(component, responses)
-    } else {
-        return new Error(responses?.paymentsResponse)
     }
 }
 
@@ -38,7 +36,5 @@ export const onPaymentsDetailsSuccess =
             )
         } else if (responses?.paymentsDetailsResponse?.action) {
             await component.handleAction(responses?.paymentsDetailsResponse?.action)
-        } else {
-            return new Error(responses?.paymentsDetailsResponse)
         }
     }

@@ -4,18 +4,18 @@ import {AdyenPaymentMethodsService} from '../services/payment-methods'
 import {AdyenEnvironmentService} from '../services/environment'
 import {AdyenShippingMethodsService} from '../services/shipping-methods'
 
-const _fetchPaymentMethods = async (customerId, site, locale, authToken) => {
-    const adyenPaymentMethodsService = new AdyenPaymentMethodsService(authToken, site)
+const _fetchPaymentMethods = async (customerId, basketId, site, locale, authToken) => {
+    const adyenPaymentMethodsService = new AdyenPaymentMethodsService(authToken, customerId, basketId, site)
     try {
-        return await adyenPaymentMethodsService.fetchPaymentMethods(customerId, locale)
+        return await adyenPaymentMethodsService.fetchPaymentMethods(locale)
     } catch (error) {
         console.error(error)
         return null
     }
 }
 
-const _fetchEnvironment = async (site, authToken) => {
-    const adyenEnvironmentService = new AdyenEnvironmentService(authToken, site)
+const _fetchEnvironment = async (customerId, basketId, site, authToken) => {
+    const adyenEnvironmentService = new AdyenEnvironmentService(authToken, customerId, basketId, site)
     try {
         return await adyenEnvironmentService.fetchEnvironment()
     } catch (error) {
@@ -24,10 +24,10 @@ const _fetchEnvironment = async (site, authToken) => {
     }
 }
 
-const _fetchShippingMethods = async (basketId, site, authToken) => {
-    const adyenShippingMethodsService = new AdyenShippingMethodsService(authToken, site)
+const _fetchShippingMethods = async (customerId, basketId, site, authToken) => {
+    const adyenShippingMethodsService = new AdyenShippingMethodsService(authToken, customerId, basketId, site)
     try {
-        return await adyenShippingMethodsService.getShippingMethods(basketId)
+        return await adyenShippingMethodsService.getShippingMethods()
     } catch (error) {
         console.error(error)
         return null
@@ -56,14 +56,14 @@ const reducer = (state, action) => {
 }
 
 export const AdyenExpressCheckoutProvider = ({
-    children,
-    authToken,
-    customerId,
-    locale,
-    site,
-    basket,
-    navigate
-}) => {
+                                                 children,
+                                                 authToken,
+                                                 customerId,
+                                                 locale,
+                                                 site,
+                                                 basket,
+                                                 navigate
+                                             }) => {
     const [state, dispatch] = useReducer(reducer, initialState)
     const {adyenEnvironment, adyenPaymentMethods, shippingMethods} = state
     const basketId = basket?.basketId
@@ -74,24 +74,24 @@ export const AdyenExpressCheckoutProvider = ({
                 return
             }
             const [environment, paymentMethods] = await Promise.all([
-                _fetchEnvironment(site, authToken),
-                _fetchPaymentMethods(customerId, site, locale, authToken)
+                _fetchEnvironment(customerId, basketId, site, authToken),
+                _fetchPaymentMethods(customerId, basketId, site, locale, authToken)
             ])
             dispatch({type: 'SET_ADYEN_ENVIRONMENT', payload: environment || {error: true}})
             dispatch({type: 'SET_ADYEN_PAYMENT_METHODS', payload: paymentMethods || {error: true}})
         }
 
         fetchAdyenData()
-    }, [authToken, customerId, locale?.id, site?.id])
+    }, [authToken, customerId, locale?.id, site?.id, basketId])
 
     const fetchShippingMethods = useCallback(async () => {
         if (!basketId || !authToken) {
             return null
         }
-        const methods = await _fetchShippingMethods(basketId, site, authToken)
+        const methods = await _fetchShippingMethods(customerId, basketId, site, authToken)
         dispatch({type: 'SET_SHIPPING_METHODS', payload: methods || {error: true}})
         return methods
-    }, [basketId, site, authToken])
+    }, [basketId, customerId, site, authToken])
 
     useEffect(() => {
         if (basketId) {
