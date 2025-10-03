@@ -239,8 +239,6 @@ export async function validateBasketPayments(paymentRequest, adyenContext) {
 
     // The sum of payments should not exceed the basket total.
     // It can be less than the total during a partial payment flow.
-    console.log("finalAmount", finalAmount)
-    console.log("basketTotalInMinorUnits", basketTotalInMinorUnits)
     if (finalAmount > basketTotalInMinorUnits) {
         throw new AdyenError(ERROR_MESSAGE.AMOUNTS_DONT_MATCH, 400)
     }
