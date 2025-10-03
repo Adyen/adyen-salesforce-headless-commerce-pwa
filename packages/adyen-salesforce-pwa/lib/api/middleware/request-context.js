@@ -9,7 +9,6 @@ import {BasketService} from '../models/basketService.js'
  * A middleware that extracts, validates, and prepares a request context.
  * It validates the presence of essential headers and query parameters,
  * fetches the basket and Adyen configuration, and attaches them to `res.locals.adyen`.
- * This avoids repetitive code in downstream controllers.
  *
  * @param {object} req - The Express request object.
  * @param {object} res - The Express response object.
