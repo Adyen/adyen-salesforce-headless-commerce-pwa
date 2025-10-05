@@ -1,7 +1,7 @@
 import {ErrorHandler, registerAdyenEndpoints, SuccessHandler} from '../index'
-import Logger from '../../controllers/logger'
+import Logger from '../../models/logger'
 
-jest.mock('../../controllers/logger', () => ({
+jest.mock('../../models/logger', () => ({
     info: jest.fn(),
     error: jest.fn()
 }))

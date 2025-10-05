@@ -21,7 +21,7 @@ async function orderClosedWebhookHandler(req, res, next) {
             return next()
         }
         const orderApi = new OrderApiClient()
-        if (notification.success === NOTIFICATION_SUCCESS.FALSE) {
+        if (notification.success === NOTIFICATION_SUCCESS.TRUE) {
             Logger.info(
                 notification.eventCode,
                 `ORDER_CLOSED for order ${orderNo} was successful.`

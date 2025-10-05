@@ -30,7 +30,25 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     app.use(bodyParser.json())
     app.set('trust proxy', true)
 
-    const environmentHandler = overrides?.environment || [prepareRequestContext, EnvironmentController, SuccessHandler]
+    const appleDomainAssociationHandler = overrides?.appleDomainAssociation || [
+        appleDomainAssociation,
+    ]
+
+    const environmentHandler = overrides?.environment || [
+        prepareWebhookRequestContext,
+        EnvironmentController,
+        SuccessHandler
+    ]
+
+    const webhookHandler = overrides?.webhook || [
+        prepareWebhookRequestContext,
+        authenticate,
+        validateHmac,
+        parseNotification,
+        authorizationWebhookHandler,
+        SuccessHandler
+    ]
+
     const paymentMethodsHandler = overrides?.paymentMethods || [
         prepareRequestContext,
         PaymentMethodsController,
@@ -42,14 +60,7 @@ function registerAdyenEndpoints(app, runtime, overrides) {
         SuccessHandler
     ]
     const paymentsHandler = overrides?.payments || [prepareRequestContext, PaymentsController, SuccessHandler]
-    const webhookHandler = overrides?.webhook || [
-        prepareWebhookRequestContext,
-        authenticate,
-        validateHmac,
-        parseNotification,
-        authorizationWebhookHandler,
-        SuccessHandler
-    ]
+
     const shippingMethodsPostHandler = overrides?.setShippingMethods || [
         prepareRequestContext,
         ShippingMethodsController.setShippingMethod,
@@ -65,9 +76,7 @@ function registerAdyenEndpoints(app, runtime, overrides) {
         ShippingAddressController,
         SuccessHandler
     ]
-    const appleDomainAssociationHandler = overrides?.appleDomainAssociation || [
-        appleDomainAssociation
-    ]
+
     const orderCancelHandler = overrides?.onOrderCancel || [
         prepareRequestContext,
         OrderCancelController,

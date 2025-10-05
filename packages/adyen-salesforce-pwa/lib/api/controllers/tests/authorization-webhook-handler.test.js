@@ -6,11 +6,12 @@ const mockUpdateOrderConfirmationStatus = jest.fn()
 const mockUpdateOrderExportStatus = jest.fn()
 const mockUpdateOrderPaymentStatus = jest.fn()
 const mockGetOrder = jest.fn(() => ({
+    orderNo: '00007503',
     orderTotal: "25.00",
     currency: 'EUR'
 }))
 
-jest.mock('../orderApi', () => {
+jest.mock('../../models/orderApi', () => {
     return {
         OrderApiClient: jest.fn().mockImplementation(() => {
             return {
@@ -28,6 +29,7 @@ jest.mock('../orderApi', () => {
 jest.mock('../../helpers/orderHelper.js', () => {
     return {
         getOrderUsingOrderNo: jest.fn(() => ({
+            orderNo: '00007503',
             orderTotal: "25.00",
             currency: 'EUR'
         }))

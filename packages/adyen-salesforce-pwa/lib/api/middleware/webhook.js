@@ -31,7 +31,7 @@ function authenticate(req, res, next) {
             throw new AdyenError(messages.AUTH_ERROR, 401)
         }
     } catch (err) {
-        Logger.error('authenticate', JSON.stringify(err))
+        Logger.error('authenticate', err.stack)
         return next(err)
     }
 }
@@ -51,7 +51,7 @@ function validateHmac(req, res, next) {
             throw new AdyenError(messages.AUTH_ERROR, 401)
         }
     } catch (err) {
-        Logger.error('validateHmac', JSON.stringify(err))
+        Logger.error('validateHmac', err.stack)
         return next(err)
     }
 }
@@ -72,6 +72,7 @@ function parseNotification(req, res, next) {
         Logger.info('AdyenNotification', JSON.stringify(res.locals.notification))
         return next()
     } catch (err) {
+        Logger.error('parseNotification', err.stack)
         return next(err)
     }
 }

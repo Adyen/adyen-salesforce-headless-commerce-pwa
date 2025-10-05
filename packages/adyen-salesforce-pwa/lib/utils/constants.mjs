@@ -86,7 +86,8 @@ export const ERROR_MESSAGE = {
     BASKET_CHANGED: 'basket changed',
     AMOUNTS_DONT_MATCH: 'amounts do not match',
     MISSING_LIVE_PREFIX: 'missing live prefix',
-    ADYEN_CONTEXT_NOT_FOUND: 'Adyen context not found'
+    ADYEN_CONTEXT_NOT_FOUND: 'Adyen context not found',
+    NO_PAYMENT_METHODS: 'no payment methods'
 }
 
 export const ADYEN_LIVE_REGIONS = {

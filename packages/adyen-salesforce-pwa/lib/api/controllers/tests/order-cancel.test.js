@@ -1,13 +1,12 @@
 import orderCancel from '../order-cancel'
 import {AdyenError} from '../../models/AdyenError'
-import {OrderApiClient} from '../orderApi'
-import {ShopperOrders} from 'commerce-sdk-isomorphic'
-import Logger from '../logger'
-import {ORDER} from '../../../utils/constants.mjs'
+import Logger from '../../models/logger'
+import {failOrderAndReopenBasket} from '../../helpers/orderHelper.js'
+import {ERROR_MESSAGE} from '../../../utils/constants.mjs'
 
 // Mock external modules
-jest.mock('../logger')
-jest.mock('../orderApi')
+jest.mock('../../models/logger')
+jest.mock('../../models/orderApi')
 jest.mock('commerce-sdk-isomorphic')
 jest.mock('@salesforce/pwa-kit-runtime/utils/ssr-config', () => {
     return {
@@ -30,20 +29,13 @@ jest.mock('@salesforce/pwa-kit-runtime/utils/ssr-config', () => {
     }
 })
 
-// Mock the global appConfig that the controller depends on
-global.appConfig = {
-    commerceAPI: {
-        clientId: 'test-client-id',
-        organizationId: 'test-org-id',
-        shortCode: 'test-short-code',
-        siteId: 'test-site-id'
-    }
-}
+// Mock the helper function that orderCancel calls
+jest.mock('../../helpers/orderHelper.js', () => ({
+    failOrderAndReopenBasket: jest.fn()
+}))
 
 describe('orderCancel Controller', () => {
     let req, res, next
-    const mockGetOrder = jest.fn()
-    const mockUpdateOrderStatus = jest.fn()
 
     beforeEach(() => {
         jest.clearAllMocks()
@@ -51,107 +43,51 @@ describe('orderCancel Controller', () => {
         req = {
             body: {
                 orderNo: '00012345'
-            },
-            headers: {
-                authorization: 'Bearer mockToken',
-                customerid: 'customer-abc'
             }
         }
-        res = {} // res is not used in the function
+        // Mock res.locals.adyen as it would be set by prepareRequestContext
+        res = {
+            locals: {
+                adyen: {
+                    authorization: 'Bearer mockToken',
+                    customerId: 'customer-abc',
+                    siteId: 'RefArch',
+                    basket: {
+                        basketId: 'mockBasketId',
+                        c_orderNo: '00012345'
+                    },
+                    adyenConfig: {
+                        merchantAccount: 'mockMerchantAccount'
+                    },
+                    basketService: {
+                        update: jest.fn(),
+                        removeAllPaymentInstruments: jest.fn()
+                    }
+                }
+            }
+        }
         next = jest.fn()
-
-        // Set up the mock for the ShopperOrders class
-        ShopperOrders.mockImplementation(() => ({
-            getOrder: mockGetOrder
-        }))
-
-        // Set up the mock for the OrderApiClient class
-        OrderApiClient.mockImplementation(() => ({
-            updateOrderStatus: mockUpdateOrderStatus
-        }))
     })
 
     test('should successfully reopen the basket for a valid order', async () => {
-        const mockOrder = {
-            orderNo: '00012345',
-            customerInfo: {
-                customerId: 'customer-abc'
-            }
-        }
-        mockGetOrder.mockResolvedValue(mockOrder)
-        mockUpdateOrderStatus.mockResolvedValue({success: true})
+        failOrderAndReopenBasket.mockResolvedValue(undefined) // Simulate successful helper call
 
         await orderCancel(req, res, next)
 
         expect(Logger.info).toHaveBeenCalledWith('orderCancel', 'start')
-        expect(mockGetOrder).toHaveBeenCalledWith({
-            parameters: {
-                orderNo: '00012345'
-            }
-        })
-        expect(mockUpdateOrderStatus).toHaveBeenCalledWith(
-            '00012345',
-            ORDER.ORDER_STATUS_FAILED_REOPEN
-        )
-        expect(Logger.info).toHaveBeenCalledWith('orderCancel', 'basket reopened')
+        expect(failOrderAndReopenBasket).toHaveBeenCalledWith(res.locals.adyen, '00012345')
+        expect(Logger.info).toHaveBeenCalledWith('orderCancel', 'Basket for order 00012345 reopened')
         expect(next).toHaveBeenCalledWith()
         expect(next).toHaveBeenCalledTimes(1)
     })
 
-    test('should call next with an AdyenError if the order is not found', async () => {
-        mockGetOrder.mockResolvedValue(null) // Simulate order not found
+    test('should call next with an error if failOrderAndReopenBasket throws an error', async () => {
+        const mockError = new AdyenError(ERROR_MESSAGE.ORDER_NOT_FOUND, 404)
+        failOrderAndReopenBasket.mockRejectedValue(mockError)
 
         await orderCancel(req, res, next)
 
-        expect(mockUpdateOrderStatus).not.toHaveBeenCalled()
-        expect(next).toHaveBeenCalledWith(expect.any(AdyenError))
-        const receivedError = next.mock.calls[0][0]
-        expect(receivedError.message).toBe('order not found')
-        expect(receivedError.statusCode).toBe(404)
-    })
-
-    test('should call next with an AdyenError if the customer ID does not match', async () => {
-        const mockOrder = {
-            orderNo: '00012345',
-            customerInfo: {
-                customerId: 'different-customer-id' // Mismatched customer
-            }
-        }
-        mockGetOrder.mockResolvedValue(mockOrder)
-
-        await orderCancel(req, res, next)
-
-        expect(mockUpdateOrderStatus).not.toHaveBeenCalled()
-        expect(next).toHaveBeenCalledWith(expect.any(AdyenError))
-        const receivedError = next.mock.calls[0][0]
-        expect(receivedError.message).toBe('order is invalid')
-        expect(receivedError.statusCode).toBe(404)
-    })
-
-    test('should call next with an error if getOrder API call fails', async () => {
-        const apiError = new Error('API connection failed')
-        mockGetOrder.mockRejectedValue(apiError)
-
-        await orderCancel(req, res, next)
-
-        expect(mockUpdateOrderStatus).not.toHaveBeenCalled()
-        expect(next).toHaveBeenCalledWith(apiError)
-    })
-
-    test('should call next with an error if updateOrderStatus API call fails', async () => {
-        const mockOrder = {
-            orderNo: '00012345',
-            customerInfo: {
-                customerId: 'customer-abc'
-            }
-        }
-        const apiError = new Error('Failed to update status')
-        mockGetOrder.mockResolvedValue(mockOrder)
-        mockUpdateOrderStatus.mockRejectedValue(apiError)
-
-        await orderCancel(req, res, next)
-
-        expect(mockUpdateOrderStatus).toHaveBeenCalled()
-        expect(next).toHaveBeenCalledWith(apiError)
+        expect(Logger.error).toHaveBeenCalledWith('orderCancel', mockError.stack)
+        expect(next).toHaveBeenCalledWith(mockError)
     })
 })

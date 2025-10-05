@@ -1,92 +1,106 @@
 import ShippingMethods from '../shipping-methods'
-import Logger from '../logger'
-import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
-import {ShopperBaskets} from 'commerce-sdk-isomorphic'
+import Logger from '../../models/logger'
+import {createShopperBasketsClient} from '../../helpers/basketHelper.js'
 
-jest.mock('@salesforce/pwa-kit-runtime/utils/ssr-config')
-jest.mock('../logger')
-jest.mock('commerce-sdk-isomorphic')
+jest.mock('../../models/logger')
+jest.mock('../../helpers/basketHelper.js')
 
-describe('setShippingMethod', () => {
-    let req, res, next, getConfigMock, shopperBasketsInstanceMock
+describe('Shipping Methods Controller', () => {
+    let req, res, next
 
     beforeEach(() => {
+        jest.clearAllMocks()
         req = {
-            headers: {
-                authorization: 'Bearer token',
-                basketid: 'basket-id'
-            },
             body: {
                 shippingMethodId: 'method-id'
             }
         }
         res = {
-            locals: {}
-        }
-        next = jest.fn()
-        getConfigMock = jest.fn(() => ({
-            app: {
-                commerceAPI: {
-                    parameters: {
-                        siteId: 'RefArch'
+            locals: {
+                adyen: {
+                    authorization: 'Bearer mockToken',
+                    basket: {
+                        basketId: 'mockBasketId'
+                    },
+                    basketService: {
+                        setShippingMethod: jest.fn()
                     }
                 }
             }
-        }))
-        getConfig.mockImplementation(getConfigMock)
-        shopperBasketsInstanceMock = {
-            getShippingMethodsForShipment: jest.fn().mockResolvedValue({}),
-            updateShippingMethodForShipment: jest.fn().mockResolvedValue({})
         }
-        ShopperBaskets.mockImplementation(() => shopperBasketsInstanceMock)
+        next = jest.fn()
     })
 
-    it('should call the appropriate functions and set response in locals', async () => {
-        await ShippingMethods.setShippingMethod(req, res, next)
-        expect(Logger.info).toHaveBeenCalledWith('setShippingMethod', 'start')
-        expect(getConfigMock).toHaveBeenCalled()
-        expect(shopperBasketsInstanceMock.updateShippingMethodForShipment).toHaveBeenCalledWith({
-            body: {
-                id: 'method-id'
-            },
-            parameters: {
-                basketId: 'basket-id',
-                shipmentId: 'me'
-            }
+    describe('setShippingMethod', () => {
+        it('should call basketService.setShippingMethod and set response in locals', async () => {
+            const mockUpdatedBasket = {basketId: 'mockBasketId', shippingItems: [{shippingMethod: {id: 'method-id'}}]}
+            res.locals.adyen.basketService.setShippingMethod.mockResolvedValue(mockUpdatedBasket)
+
+            await ShippingMethods.setShippingMethod(req, res, next)
+
+            expect(Logger.info).toHaveBeenCalledWith('setShippingMethod', 'start')
+            expect(res.locals.adyen.basketService.setShippingMethod).toHaveBeenCalledWith(
+                'method-id'
+            )
+            expect(Logger.info).toHaveBeenCalledWith('setShippingMethod', 'success')
+            expect(res.locals.response).toEqual(mockUpdatedBasket)
+            expect(next).toHaveBeenCalledWith()
+            expect(next).toHaveBeenCalledTimes(1)
         })
-        expect(Logger.info).toHaveBeenCalledWith('setShippingMethod', 'success')
-        expect(res.locals.response).toEqual({})
-        expect(next).toHaveBeenCalled()
-    })
 
-    it('should call next with error if an error occurs', async () => {
-        const error = new Error('Test error')
-        shopperBasketsInstanceMock.updateShippingMethodForShipment.mockRejectedValue(error)
-        await ShippingMethods.setShippingMethod(req, res, next)
-        expect(Logger.error).toHaveBeenCalledWith('setShippingMethod', JSON.stringify(error))
-        expect(next).toHaveBeenCalledWith(error)
-    })
+        it('should call next with an error if basketService.setShippingMethod fails', async () => {
+            const error = new Error('Test error')
+            res.locals.adyen.basketService.setShippingMethod.mockRejectedValue(error)
 
-    it('should call get shipping methods the appropriate functions and set response in locals', async () => {
-        await ShippingMethods.getShippingMethods(req, res, next)
-        expect(Logger.info).toHaveBeenCalledWith('getShippingMethods', 'start')
-        expect(getConfigMock).toHaveBeenCalled()
-        expect(shopperBasketsInstanceMock.getShippingMethodsForShipment).toHaveBeenCalledWith({
-            parameters: {
-                basketId: 'basket-id',
-                shipmentId: 'me'
-            }
+            await ShippingMethods.setShippingMethod(req, res, next)
+
+            expect(Logger.error).toHaveBeenCalledWith('setShippingMethod', error.stack)
+            expect(next).toHaveBeenCalledWith(error)
         })
-        expect(Logger.info).toHaveBeenCalledWith('getShippingMethods', 'success')
-        expect(res.locals.response).toEqual({})
-        expect(next).toHaveBeenCalled()
     })
 
-    it('should call get shipping methods next with error if an error occurs', async () => {
-        const error = new Error('Test error')
-        shopperBasketsInstanceMock.getShippingMethodsForShipment.mockRejectedValue(error)
-        await ShippingMethods.getShippingMethods(req, res, next)
-        expect(Logger.error).toHaveBeenCalledWith('getShippingMethods', JSON.stringify(error))
-        expect(next).toHaveBeenCalledWith(error)
+    describe('getShippingMethods', () => {
+        let shopperBasketsInstanceMock
+
+        beforeEach(() => {
+            shopperBasketsInstanceMock = {
+                getShippingMethodsForShipment: jest.fn()
+            }
+            createShopperBasketsClient.mockReturnValue(shopperBasketsInstanceMock)
+        })
+
+        it('should call getShippingMethodsForShipment and set response in locals', async () => {
+            const mockShippingMethods = {
+                applicableShippingMethods: [{id: 'method-1'}, {id: 'method-2'}]
+            }
+            shopperBasketsInstanceMock.getShippingMethodsForShipment.mockResolvedValue(
+                mockShippingMethods
+            )
+
+            await ShippingMethods.getShippingMethods(req, res, next)
+
+            expect(Logger.info).toHaveBeenCalledWith('getShippingMethods', 'start')
+            expect(createShopperBasketsClient).toHaveBeenCalledWith('Bearer mockToken')
+            expect(shopperBasketsInstanceMock.getShippingMethodsForShipment).toHaveBeenCalledWith({
+                parameters: {
+                    basketId: 'mockBasketId',
+                    shipmentId: 'me'
+                }
+            })
+            expect(Logger.info).toHaveBeenCalledWith('getShippingMethods', 'success')
+            expect(res.locals.response).toEqual(mockShippingMethods)
+            expect(next).toHaveBeenCalledWith()
+            expect(next).toHaveBeenCalledTimes(1)
+        })
+
+        it('should call next with an error if getShippingMethodsForShipment fails', async () => {
+            const error = new Error('Test error')
+            shopperBasketsInstanceMock.getShippingMethodsForShipment.mockRejectedValue(error)
+
+            await ShippingMethods.getShippingMethods(req, res, next)
+
+            expect(Logger.error).toHaveBeenCalledWith('getShippingMethods', error.stack)
+            expect(next).toHaveBeenCalledWith(error)
+        })
     })
 })

@@ -6,7 +6,7 @@ import {AdyenError} from '../models/AdyenError'
 import {
     createCheckoutResponse,
     createPaymentRequestObject,
-    handleFailedPayment,
+    revertCheckoutState,
     validateBasketPayments
 } from '../helpers/paymentsHelper.js'
 import {createOrderUsingOrderNo} from "../helpers/orderHelper.js";
@@ -15,13 +15,16 @@ import {createOrderUsingOrderNo} from "../helpers/orderHelper.js";
 /**
  * Handles errors that occur during the payment process.
  * It attempts to remove payment instruments, fail the SFCC order, and recreate the basket.
- * @param {Error} err - The error that occurred.
- * @param {object} req - The Express request object.
+ * @param {object} res - The Express response object.
  * @returns {Promise<void>}
  */
-async function handlePaymentError(err, req) {
-    Logger.error('sendPayments', err.stack)
-    await handleFailedPayment(req.res.locals.adyen, 'sendPayments')
+async function handlePaymentError(res) {
+    try {
+        Logger.info('handlePaymentError', 'start')
+        await revertCheckoutState(res.locals.adyen, 'sendPayments')
+    } catch (err) {
+        Logger.error('handlePaymentError', err.stack)
+    }
 }
 
 /**
@@ -34,17 +37,20 @@ async function handlePaymentError(err, req) {
  * @returns {Promise<void>}
  */
 async function sendPayments(req, res, next) {
-    Logger.info('sendPayments', 'start')
-    const {body: {data}} = req
-    let {adyen: adyenContext} = res.locals
-
     try {
+        Logger.info('sendPayments', 'start')
+        const {body: {data}} = req
+        const {adyen: adyenContext} = res.locals
+        if (!adyenContext) {
+            throw new AdyenError(ERROR_MESSAGE.ADYEN_CONTEXT_NOT_FOUND, 500)
+
+        }
         const checkout = new AdyenClientProvider(adyenContext).getPaymentsApi()
 
         if (data.paymentType === 'express') {
             await adyenContext.basketService.addShopperData(data)
         }
-        const paymentRequest = await createPaymentRequestObject(data, adyenContext.adyenConfig, req)
+        const paymentRequest = await createPaymentRequestObject(data, adyenContext, req)
 
         Logger.info('sendPayments', 'validateBasketPayments')
         // Pass the entire `res.locals.adyen` context for a cleaner signature
@@ -81,7 +87,8 @@ async function sendPayments(req, res, next) {
         res.locals.response = checkoutResponse
         return next()
     } catch (err) {
-        await handlePaymentError(err, req)
+        Logger.error('sendPayments', err.stack)
+        await handlePaymentError(res)
         return next(err)
     }
 }

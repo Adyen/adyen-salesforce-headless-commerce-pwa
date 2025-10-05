@@ -1,158 +1,172 @@
-import {onPaymentsDetailsSuccess, onPaymentsSuccess} from '../helper'
+import {onPaymentsSuccess, onPaymentsDetailsSuccess} from '../helper'
 
-describe('onPaymentsSuccess', () => {
-    let mockActions
-
-    beforeEach(() => {
-        mockActions = {
-            resolve: jest.fn(),
-            reject: jest.fn()
-        }
-    })
-    it('when response is successful', async () => {
-        const state = {}
-        const props = {}
-        const navigate = jest.fn()
-        const setOrderNo = jest.fn()
-        const responses = {
-            paymentsResponse: {
-                isFinal: true,
-                isSuccessful: true,
-                merchantReference: 'test'
-            }
-        }
-        const component = {
-            handleAction: jest.fn()
-        }
-        await onPaymentsSuccess(navigate, setOrderNo)(state, component, mockActions, props, responses)
-        expect(navigate).toHaveBeenCalled()
-        expect(setOrderNo).toHaveBeenCalled()
-    })
-
-    it('when response is action', async () => {
-        const state = {}
-        const props = {}
-        const navigate = jest.fn()
-        const setOrderNo = jest.fn()
-        const responses = {
-            paymentsResponse: {
-                isSuccessful: false,
-                merchantReference: 'test',
-                action: {
-                    type: 'Authorised'
-                }
-            }
-        }
-        const component = {
-            handleAction: jest.fn()
-        }
-        await onPaymentsSuccess(navigate, setOrderNo)(state, component, mockActions, props, responses)
-        expect(component.handleAction).toHaveBeenCalled()
-        expect(setOrderNo).toHaveBeenCalled()
-    })
-
-    it('when response action is voucher', async () => {
-        const state = {}
-        const props = {}
-        const navigate = jest.fn()
-        const setOrderNo = jest.fn()
-        const responses = {
-            paymentsResponse: {
-                isSuccessful: false,
-                merchantReference: 'test',
-                action: {
-                    type: 'voucher'
-                }
-            }
-        }
-        const component = {
-            handleAction: jest.fn()
-        }
-        await onPaymentsSuccess(navigate, setOrderNo)(state, component, mockActions, props, responses)
-        expect(navigate).toHaveBeenCalled()
-        expect(setOrderNo).toHaveBeenCalled()
-    })
-
-    it('when response is not successful', async () => {
-        const state = {}
-        const props = {}
-        const navigate = jest.fn()
-        const setOrderNo = jest.fn()
-        const responses = {
-            paymentsResponse: {
-                isSuccessful: false,
-                merchantReference: 'test'
-            }
-        }
-        const component = {
-            handleAction: jest.fn()
-        }
-        const result = await onPaymentsSuccess(navigate, setOrderNo)(state, component, mockActions, props, responses)
-        expect(result instanceof Error).toBeTrue()
-        expect(setOrderNo).toHaveBeenCalled()
-    })
-})
-
-describe('onPaymentsDetailsSuccess', () => {
-    let mockActions
+describe('Adyen Context Helpers', () => {
+    let navigate, setOrderNo, setAdyenOrder, component
 
     beforeEach(() => {
-        mockActions = {
-            resolve: jest.fn(),
-            reject: jest.fn()
-        }
-    })
-    it('when response is successful', async () => {
-        const state = {}
-        const props = {}
-        const navigate = jest.fn()
-        const responses = {
-            paymentsDetailsResponse: {
-                isSuccessful: true,
-                merchantReference: 'test'
-            }
-        }
-        const component = {
+        navigate = jest.fn()
+        setOrderNo = jest.fn()
+        setAdyenOrder = jest.fn()
+        component = {
             handleAction: jest.fn()
         }
-        await onPaymentsDetailsSuccess(navigate)(state, component, mockActions, props, responses)
-        expect(navigate).toHaveBeenCalled()
     })
 
-    it('when response is action', async () => {
-        const state = {}
-        const props = {}
-        const navigate = jest.fn()
-        const responses = {
-            paymentsDetailsResponse: {
-                isSuccessful: false,
-                merchantReference: 'test',
-                action: {
-                    type: 'Authorised'
+    describe('onPaymentsSuccess', () => {
+        it('should set order number and navigate on successful full payment', async () => {
+            const responses = {
+                paymentsResponse: {
+                    isSuccessful: true,
+                    isFinal: true,
+                    merchantReference: 'ORDER-123'
                 }
             }
-        }
-        const component = {
-            handleAction: jest.fn()
-        }
-        await onPaymentsDetailsSuccess(navigate)(state, component, mockActions, props, responses)
-        expect(component.handleAction).toHaveBeenCalled()
+
+            const handler = onPaymentsSuccess(navigate, setOrderNo, setAdyenOrder)
+            await handler(null, component, null, null, responses)
+
+            expect(setOrderNo).toHaveBeenCalledWith('ORDER-123')
+            expect(setAdyenOrder).not.toHaveBeenCalled()
+            expect(navigate).toHaveBeenCalledWith('/checkout/confirmation/ORDER-123')
+        })
+
+        it('should set partial order data and not navigate if there is a remaining amount', async () => {
+            const responses = {
+                paymentsResponse: {
+                    isSuccessful: true,
+                    isFinal: false,
+                    merchantReference: 'ORDER-123',
+                    order: {
+                        orderData: '...',
+                        remainingAmount: {value: 5000}
+                    }
+                }
+            }
+
+            const handler = onPaymentsSuccess(navigate, setOrderNo, setAdyenOrder)
+            await handler(null, component, null, null, responses)
+
+            expect(setOrderNo).toHaveBeenCalledWith('ORDER-123')
+            expect(setAdyenOrder).toHaveBeenCalledWith(responses.paymentsResponse.order)
+            expect(navigate).not.toHaveBeenCalled()
+        })
+
+        it('should navigate on successful final partial payment (remainingAmount is zero)', async () => {
+            const responses = {
+                paymentsResponse: {
+                    isSuccessful: true,
+                    isFinal: true,
+                    merchantReference: 'ORDER-123',
+                    order: {
+                        orderData: '...',
+                        remainingAmount: {value: 0}
+                    }
+                }
+            }
+
+            const handler = onPaymentsSuccess(navigate, setOrderNo, setAdyenOrder)
+            await handler(null, component, null, null, responses)
+
+            expect(setOrderNo).toHaveBeenCalledWith('ORDER-123')
+            expect(setAdyenOrder).toHaveBeenCalledWith(responses.paymentsResponse.order)
+            expect(navigate).toHaveBeenCalledWith('/checkout/confirmation/ORDER-123')
+        })
+
+        it('should handle a redirect action', async () => {
+            const action = {type: 'redirect', url: 'https://example.com/redirect'}
+            const responses = {
+                paymentsResponse: {
+                    action: action
+                }
+            }
+
+            const handler = onPaymentsSuccess(navigate, setOrderNo, setAdyenOrder)
+            await handler(null, component, null, null, responses)
+
+            expect(component.handleAction).toHaveBeenCalledWith(action)
+            expect(navigate).not.toHaveBeenCalled()
+        })
+
+        it('should handle a voucher action by navigating', async () => {
+            const action = {type: 'voucher', reference: 'VOUCHER-ABC'}
+            const responses = {
+                paymentsResponse: {
+                    action: action,
+                    merchantReference: 'ORDER-123'
+                }
+            }
+
+            const handler = onPaymentsSuccess(navigate, setOrderNo, setAdyenOrder)
+            await handler(null, component, null, null, responses)
+
+            const encodedAction = btoa(JSON.stringify(action))
+            expect(navigate).toHaveBeenCalledWith(
+                `/checkout/confirmation/ORDER-123?adyenAction=${encodedAction}`
+            )
+            expect(component.handleAction).not.toHaveBeenCalled()
+        })
+
+        it('should do nothing if payment is not successful and there is no action', async () => {
+            const responses = {
+                paymentsResponse: {
+                    isSuccessful: false,
+                    isFinal: true
+                }
+            }
+
+            const handler = onPaymentsSuccess(navigate, setOrderNo, setAdyenOrder)
+            await handler(null, component, null, null, responses)
+
+            expect(navigate).not.toHaveBeenCalled()
+            expect(component.handleAction).not.toHaveBeenCalled()
+            expect(setOrderNo).not.toHaveBeenCalled()
+        })
     })
 
-    it('when response is not successful', async () => {
-        const state = {}
-        const props = {}
-        const navigate = jest.fn()
-        const responses = {
-            paymentsDetailsResponse: {
-                isSuccessful: false,
-                merchantReference: 'test'
+    describe('onPaymentsDetailsSuccess', () => {
+        it('should navigate to confirmation on successful payment details response', async () => {
+            const responses = {
+                paymentsDetailsResponse: {
+                    isSuccessful: true,
+                    merchantReference: 'ORDER-123'
+                }
             }
-        }
-        const component = {
-            handleAction: jest.fn()
-        }
-        const result = await onPaymentsDetailsSuccess(navigate)(state, component, mockActions, props, responses)
-        expect(result instanceof Error).toBeTrue()
+
+            const handler = onPaymentsDetailsSuccess(navigate)
+            await handler(null, component, null, null, responses)
+
+            expect(navigate).toHaveBeenCalledWith('/checkout/confirmation/ORDER-123')
+        })
+
+        it('should handle an action from the payment details response', async () => {
+            const action = {type: 'challenge', token: '...'}
+            const responses = {
+                paymentsDetailsResponse: {
+                    isSuccessful: false,
+                    action: action
+                }
+            }
+
+            const handler = onPaymentsDetailsSuccess(navigate)
+            await handler(null, component, null, null, responses)
+
+            expect(component.handleAction).toHaveBeenCalledWith(action)
+            expect(navigate).not.toHaveBeenCalled()
+        })
+
+        it('should do nothing if not successful and no action is present', async () => {
+            const responses = {
+                paymentsDetailsResponse: {
+                    isSuccessful: false,
+                    action: null
+                }
+            }
+
+            const handler = onPaymentsDetailsSuccess(navigate)
+            await handler(null, component, null, null, responses)
+
+            expect(navigate).not.toHaveBeenCalled()
+            expect(component.handleAction).not.toHaveBeenCalled()
+        })
     })
 })

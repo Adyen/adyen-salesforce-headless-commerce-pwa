@@ -31,7 +31,9 @@ const TestConsumer = () => {
 }
 
 describe('AdyenExpressCheckoutProvider', () => {
+    let consoleErrorSpy
     beforeEach(() => {
+        consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
         // Reset mocks before each test
         AdyenPaymentMethodsService.mockClear()
         AdyenEnvironmentService.mockClear()
@@ -47,6 +49,10 @@ describe('AdyenExpressCheckoutProvider', () => {
         AdyenShippingMethodsService.mockImplementation(() => ({
             getShippingMethods: jest.fn().mockResolvedValue(mockShippingMethodsResponse)
         }))
+    })
+
+    afterEach(() => {
+        consoleErrorSpy.mockRestore()
     })
 
     it('fetches environment and payment methods on mount', async () => {

@@ -247,11 +247,10 @@ export async function validateBasketPayments(paymentRequest, adyenContext) {
 /**
  * Handles the cleanup process for a failed payment.
  * It resets the basket's Adyen-related custom attributes, removes all payment instruments,
- * creates an SFCC order, and then immediately fails it to reopen the basket for the shopper.
  * @param {object} adyenContext - The request context from `res.locals.adyen`.
  * @param {string} stepName - The name of the controller step for logging purposes (e.g., 'sendPayments').
  */
-export async function handleFailedPayment(adyenContext, stepName) {
+export async function revertCheckoutState(adyenContext, stepName) {
     if (!adyenContext) {
         const errorMessage = `${ERROR_MESSAGE.ADYEN_CONTEXT_NOT_FOUND} in ${stepName}`
         throw new AdyenError(errorMessage, 500)
@@ -303,12 +302,12 @@ export const filterStateData = (stateData) =>
 /**
  * Constructs the complete payment request object to be sent to the Adyen /payments endpoint.
  * @param {object} data - The payment state data from the client.
- * @param {object} adyenConfig - The Adyen configuration for the current site.
+ * @param {object} adyenContext - The request context from `res.locals.adyen`.
  * @param {object} req - The Express request object.
  * @returns {Promise<object>} A promise that resolves to the Adyen payment request object.
  */
-export async function createPaymentRequestObject(data, adyenConfig, req) {
-    const {adyen: {basket}} = req.res.locals
+export async function createPaymentRequestObject(data, adyenContext, req) {
+    const {basket, adyenConfig} = adyenContext
     Logger.info('createPaymentRequestObject', 'start')
     let amountValue = getCurrencyValueForApi(basket.orderTotal, basket.currency)
     if (isPartialPayment(data)) {

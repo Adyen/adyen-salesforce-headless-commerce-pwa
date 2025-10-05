@@ -1,16 +1,10 @@
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
-import {BLOCKED_PAYMENT_METHODS} from '../../utils/constants.mjs'
+import {BLOCKED_PAYMENT_METHODS, ERROR_MESSAGE} from '../../utils/constants.mjs'
 import AdyenClientProvider from '../models/adyenClientProvider'
 import Logger from '../models/logger'
 import {v4 as uuidv4} from 'uuid'
 import {AdyenError} from '../models/AdyenError'
 import {getApplicationInfo} from '../../utils/getApplicationInfo.mjs'
-
-const errorMessages = {
-    UNAUTHORIZED: 'unauthorized',
-    INVALID_BASKET: 'invalid basket',
-    NO_PAYMENT_METHODS: 'no payment methods'
-}
 
 async function getPaymentMethods(req, res, next) {
     Logger.info('getPaymentMethods', 'start')
@@ -44,7 +38,7 @@ async function getPaymentMethods(req, res, next) {
         })
 
         if (!response?.paymentMethods?.length) {
-            throw new AdyenError(errorMessages.NO_PAYMENT_METHODS, 400)
+            throw new AdyenError(ERROR_MESSAGE.NO_PAYMENT_METHODS, 400)
         }
 
         Logger.info('getPaymentMethods', 'success')
