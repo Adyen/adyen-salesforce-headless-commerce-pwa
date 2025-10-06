@@ -12,7 +12,6 @@ const initialState = {
     adyenEnvironment: null,
     adyenStateData: null,
     adyenOrder: null,
-    checkoutDropin: null,
     adyenPaymentInProgress: false,
     fetchingPaymentMethods: false,
     orderNo: null
@@ -28,8 +27,6 @@ const reducer = (state, action) => {
             return {...state, adyenStateData: action.payload}
         case 'SET_ADYEN_ORDER':
             return {...state, adyenOrder: action.payload}
-        case 'SET_CHECKOUT_DROPIN':
-            return {...state, checkoutDropin: action.payload}
         case 'SET_ADYEN_PAYMENT_IN_PROGRESS':
             return {...state, adyenPaymentInProgress: action.payload}
         case 'SET_FETCHING_PAYMENT_METHODS':
@@ -130,10 +127,6 @@ const AdyenCheckoutProvider = ({
         (data) => dispatch({type: 'SET_ADYEN_STATE_DATA', payload: data}),
         [dispatch]
     )
-    const setCheckoutDropin = useCallback(
-        (data) => dispatch({type: 'SET_CHECKOUT_DROPIN', payload: data}),
-        [dispatch]
-    )
 
     const setAdyenOrder = useCallback(
         (data) => dispatch({type: 'SET_ADYEN_ORDER', payload: data}),
@@ -220,7 +213,6 @@ const AdyenCheckoutProvider = ({
             optionalDropinConfiguration,
             setAdyenPaymentInProgress,
             setAdyenStateData,
-            setCheckoutDropin,
             getPaymentMethodsConfiguration,
             getTranslations
         }),
@@ -231,7 +223,6 @@ const AdyenCheckoutProvider = ({
             optionalDropinConfiguration,
             setAdyenPaymentInProgress,
             setAdyenStateData,
-            setCheckoutDropin,
             getPaymentMethodsConfiguration,
             getTranslations
         ]

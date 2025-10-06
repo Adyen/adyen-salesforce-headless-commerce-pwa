@@ -84,7 +84,7 @@ export const createCheckoutInstance = async ({
                 setAdyenStateData(state.data)
             }
         },
-        onError() {
+        onError: () => {
             const handler = pmc.onError || pmc.card?.onError
             if (handler) handler(orderNo, navigate)
         },

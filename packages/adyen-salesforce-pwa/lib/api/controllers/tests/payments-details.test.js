@@ -65,13 +65,13 @@ describe('payments details controller', () => {
         await sendPaymentDetails(req, res, next)
 
         expect(mockPaymentsDetails).toHaveBeenCalled()
-        expect(res.locals.adyen.basketService.addPaymentInstrument).toHaveBeenCalled()
         expect(orderHelper.createOrderUsingOrderNo).toHaveBeenCalled()
         expect(res.locals.response).toEqual({
             isFinal: true,
             isSuccessful: true,
             merchantReference: 'ref123',
-            order: undefined
+            order: undefined,
+            resultCode: RESULT_CODES.AUTHORISED
         })
         expect(next).toHaveBeenCalledWith()
     })
@@ -101,7 +101,8 @@ describe('payments details controller', () => {
             isSuccessful: true,
             merchantReference: "123",
             action: mockAction,
-            order: undefined
+            order: undefined,
+            resultCode: RESULT_CODES.REDIRECT_SHOPPER
         })
         expect(next).toHaveBeenCalledWith()
     })

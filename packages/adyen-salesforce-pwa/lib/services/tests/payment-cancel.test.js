@@ -1,10 +1,10 @@
-import {AdyenOrderService} from '../order'
+import {PaymentCancelService} from '../payment-cancel'
 import {ApiClient} from '../api'
 
 jest.mock('../api')
 
-describe('AdyenOrderService', () => {
-    let orderService
+describe('PaymentCancelService', () => {
+    let paymentCancelService
     let mockPost
     const mockToken = 'test-auth-token'
     const mockCustomerId = 'customer-abc-123'
@@ -20,7 +20,7 @@ describe('AdyenOrderService', () => {
             }
         })
 
-        orderService = new AdyenOrderService(
+        paymentCancelService = new PaymentCancelService(
             mockToken,
             mockCustomerId,
             mockBasketId,
@@ -32,7 +32,7 @@ describe('AdyenOrderService', () => {
         it('should create an instance of ApiClient with the correct base URL and credentials', () => {
             expect(ApiClient).toHaveBeenCalledTimes(1)
             expect(ApiClient).toHaveBeenCalledWith(
-                '/api/adyen/order',
+                '/api/adyen/payment',
                 mockToken,
                 mockCustomerId,
                 mockBasketId,
@@ -41,17 +41,17 @@ describe('AdyenOrderService', () => {
         })
     })
 
-    describe('orderCancel', () => {
+    describe('paymentCancel', () => {
         const orderNo = '00123456'
 
         it('should return the JSON response on a successful API call', async () => {
-            const mockSuccessPayload = {success: true, message: 'Order cancelled'}
+            const mockSuccessPayload = {success: true, message: 'payment cancelled'}
             const mockApiResponse = {
                 status: 200,
                 json: jest.fn().mockResolvedValue(mockSuccessPayload)
             }
             mockPost.mockResolvedValue(mockApiResponse)
-            const result = await orderService.orderCancel(orderNo)
+            const result = await paymentCancelService.paymentCancel(orderNo)
             expect(mockPost).toHaveBeenCalledTimes(1)
             expect(mockPost).toHaveBeenCalledWith({
                 path: '/cancel',
@@ -66,7 +66,7 @@ describe('AdyenOrderService', () => {
                 statusText: 'Not Found'
             }
             mockPost.mockResolvedValue(mockErrorResponse)
-            await expect(orderService.orderCancel(orderNo)).rejects.toThrow(Error)
+            await expect(paymentCancelService.paymentCancel(orderNo)).rejects.toThrow(Error)
             expect(mockPost).toHaveBeenCalledTimes(1)
         })
 
@@ -74,10 +74,10 @@ describe('AdyenOrderService', () => {
             const networkError = new Error('Network request failed')
             mockPost.mockRejectedValue(networkError)
 
-            await expect(orderService.orderCancel(orderNo)).rejects.toThrow(
+            await expect(paymentCancelService.paymentCancel(orderNo)).rejects.toThrow(
                 'Network request failed'
             )
-            await expect(orderService.orderCancel(orderNo)).rejects.toBe(networkError)
+            await expect(paymentCancelService.paymentCancel(orderNo)).rejects.toBe(networkError)
         })
     })
 })

@@ -63,11 +63,17 @@ async function sendPayments(req, res, next) {
 
         const checkoutResponse = {
             ...createCheckoutResponse(response, adyenContext.basket?.c_orderNo),
-            order: response.order
+            order: response?.order,
+            resultCode: response?.resultCode,
         }
 
         if (checkoutResponse.isFinal && !checkoutResponse.isSuccessful) {
             throw new AdyenError(ERROR_MESSAGE.PAYMENT_NOT_SUCCESSFUL, 400, response)
+        }
+
+        // Add payment instrument if the payment was successful (even if not final, e.g., partial payment or action required)
+        if (checkoutResponse.isSuccessful) {
+            await adyenContext.basketService.addPaymentInstrument(response, paymentRequest)
         }
 
         if (!checkoutResponse.isFinal && checkoutResponse.isSuccessful && response.order) {
@@ -76,9 +82,6 @@ async function sendPayments(req, res, next) {
             })
         }
         if (checkoutResponse.isFinal && checkoutResponse.isSuccessful) {
-            // The payment was successful. Now, we add the payment instrument
-            // and create the final order.
-            await adyenContext.basketService.addPaymentInstrument(response)
             await createOrderUsingOrderNo(adyenContext)
             Logger.info('sendPayments', `order created: ${checkoutResponse.merchantReference}`)
         }

@@ -81,7 +81,8 @@ describe('payments controller', () => {
             isFinal: true,
             isSuccessful: true,
             merchantReference: 'ref123',
-            order: undefined
+            order: undefined,
+            resultCode: RESULT_CODES.AUTHORISED
         })
         expect(next).toHaveBeenCalledWith()
     })
@@ -108,7 +109,8 @@ describe('payments controller', () => {
             isSuccessful: true,
             merchantReference: "123",
             action: mockAction,
-            order: undefined
+            order: undefined,
+            resultCode: RESULT_CODES.REDIRECT_SHOPPER
         })
         expect(next).toHaveBeenCalledWith()
     })

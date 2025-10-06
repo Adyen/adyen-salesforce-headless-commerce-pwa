@@ -46,7 +46,8 @@ async function sendPaymentDetails(req, res, next) {
         Logger.info('sendPaymentDetails', `resultCode ${response.resultCode}`)
         const checkoutResponse = {
             ...createCheckoutResponse(response, adyenContext.basket?.c_orderNo),
-            order: response.order
+            order: response?.order,
+            resultCode: response?.resultCode,
         }
         if (checkoutResponse.isFinal && !checkoutResponse.isSuccessful) {
             throw new AdyenError(ERROR_MESSAGE.PAYMENTS_DETAILS_NOT_SUCCESSFUL, 400, response)
@@ -58,9 +59,7 @@ async function sendPaymentDetails(req, res, next) {
             })
         }
         if (checkoutResponse.isFinal && checkoutResponse.isSuccessful) {
-            // The payment was successful. Now, we add the payment instrument
-            // and create the final order.
-            await adyenContext.basketService.addPaymentInstrument(response)
+            // The payment is now fully authorized, so we can create the final order.
             await createOrderUsingOrderNo(adyenContext)
             Logger.info('sendPaymentDetails', `order created: ${checkoutResponse.merchantReference}`)
         }

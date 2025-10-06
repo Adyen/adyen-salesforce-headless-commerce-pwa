@@ -1,11 +1,11 @@
 import {baseConfig, getAmount, onAdditionalDetails, onErrorHandler, onSubmit} from '../helpers/baseConfig'
 import {AdyenPaymentsService} from '../../services/payments'
 import {AdyenPaymentsDetailsService} from '../../services/payments-details'
-import {AdyenOrderService} from '../../services/order'
+import {PaymentCancelService} from '../../services/payment-cancel'
 
 jest.mock('../../services/payments')
 jest.mock('../../services/payments-details')
-jest.mock('../../services/order')
+jest.mock('../../services/payment-cancel')
 jest.mock('../../services/giftCard')
 
 describe('baseConfig function', () => {
@@ -58,7 +58,6 @@ describe('onSubmit function', () => {
         const result = await onSubmit(state, component, mockActions, props)
 
         expect(result).toEqual({paymentsResponse: mockPaymentResponse})
-        expect(mockActions.resolve).toHaveBeenCalledWith(mockPaymentResponse)
         expect(mockActions.reject).not.toHaveBeenCalled()
     })
 
@@ -100,7 +99,6 @@ describe('onAdditionalDetails function', () => {
         const result = await onAdditionalDetails(state, component, mockActions, props)
 
         expect(result).toEqual({paymentsDetailsResponse: mockDetailsResponse})
-        expect(mockActions.resolve).toHaveBeenCalledWith(mockDetailsResponse)
         expect(mockActions.reject).not.toHaveBeenCalled()
     })
 
@@ -125,16 +123,16 @@ describe('onAdditionalDetails function', () => {
 describe('onErrorHandler', () => {
     it('should cancel the order and navigate', async () => {
         const navigate = jest.fn()
-        const props = {token: 'testToken', site: 'testSite', customerId: 'testCustomer'}
+        const props = {token: 'testToken', site: 'testSite', customerId: 'testCustomer', onNavigate: navigate}
         const orderNo = '12345'
-        AdyenOrderService.mockImplementation(() => ({
-            orderCancel: jest.fn().mockResolvedValue({headers: {location: '/canceled'}})
+        PaymentCancelService.mockImplementation(() => ({
+            paymentCancel: jest.fn().mockResolvedValue({})
         }))
 
         await onErrorHandler(orderNo, navigate, props)
 
-        expect(AdyenOrderService).toHaveBeenCalled()
-        expect(navigate).toHaveBeenCalledWith('/canceled')
+        expect(PaymentCancelService).toHaveBeenCalled()
+        expect(navigate).toHaveBeenCalledWith('/checkout')
     })
 })
 

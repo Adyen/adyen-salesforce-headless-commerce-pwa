@@ -1,5 +1,5 @@
 import Logger from '../models/logger'
-import {failOrderAndReopenBasket} from '../helpers/orderHelper.js'
+import {revertCheckoutState} from '../helpers/paymentsHelper.js'
 
 /**
  * An Express middleware that handles the cancellation of an order.
@@ -10,18 +10,18 @@ import {failOrderAndReopenBasket} from '../helpers/orderHelper.js'
  * @param {Function} next - The Express next middleware function.
  * @returns {Promise<void>}
  */
-async function orderCancel(req, res, next) {
-    Logger.info('orderCancel', 'start')
+async function paymentCancel(req, res, next) {
+    Logger.info('paymentCancel', 'start')
     try {
         const {adyen: adyenContext} = res.locals
         const {orderNo} = req.body
-        await failOrderAndReopenBasket(adyenContext, orderNo)
-        Logger.info('orderCancel', `Basket for order ${orderNo} reopened`)
+        await revertCheckoutState(adyenContext, 'paymentCancel')
+        res.locals.response = {}
         next()
     } catch (err) {
-        Logger.error('orderCancel', err.stack)
+        Logger.error('paymentCancel', err.stack)
         next(err)
     }
 }
 
-export default orderCancel
+export default paymentCancel

@@ -20,8 +20,6 @@ const AdyenCheckoutComponent = (props) => {
         adyenPaymentMethods,
         adyenOrder,
         optionalDropinConfiguration,
-        checkoutDropin,
-        setCheckoutDropin,
         getPaymentMethodsConfiguration,
         adyenPaymentInProgress,
         setAdyenPaymentInProgress,
@@ -33,8 +31,8 @@ const AdyenCheckoutComponent = (props) => {
     } = useAdyenCheckout()
 
     const paymentContainer = useRef(null)
-    const dropinRef = useRef(checkoutDropin)
-    dropinRef.current = checkoutDropin
+    const checkoutRef = useRef(null) // To hold the checkout instance
+    const dropinRef = useRef(null) // To hold the dropin instance
 
     useEffect(() => {
         const initializeCheckout = async () => {
@@ -42,12 +40,17 @@ const AdyenCheckoutComponent = (props) => {
             if (!adyenEnvironment || !paymentContainer.current || adyenPaymentInProgress) {
                 return
             }
-
+            // The PayPal namespace needs to be cleared before checkout is initialized.
+            // This is because there is a namespace clash between PayPal sdk from Adyen checkout and retail react app.
+            if (window?.paypal?.firstElementChild) {
+                window.paypal = undefined
+            }
             // Unmount any existing checkout instance
             if (dropinRef.current) {
                 dropinRef.current.unmount()
+                dropinRef.current = null
             }
-            window.paypal = undefined
+            checkoutRef.current = null
 
             // 1. Fetch the payment methods configuration
             const paymentMethodsConfiguration = await getPaymentMethodsConfiguration({
@@ -59,7 +62,7 @@ const AdyenCheckoutComponent = (props) => {
             })
 
             // 2. Create a new Adyen Checkout instance
-            const checkout = await createCheckoutInstance({
+            checkoutRef.current = await createCheckoutInstance({
                 paymentMethodsConfiguration,
                 optionalDropinConfiguration,
                 adyenEnvironment,
@@ -74,15 +77,14 @@ const AdyenCheckoutComponent = (props) => {
 
             // 3. Handle URL query parameters and mount the checkout component
             const urlParams = new URLSearchParams(window.location.search)
-            const dropin = handleQueryParams(
+            dropinRef.current = handleQueryParams(
                 urlParams,
-                checkout,
+                checkoutRef.current,
                 setAdyenPaymentInProgress,
                 paymentContainer,
                 paymentMethodsConfiguration,
                 optionalDropinConfiguration
             )
-            setCheckoutDropin(dropin)
         }
 
         initializeCheckout()
@@ -91,9 +93,42 @@ const AdyenCheckoutComponent = (props) => {
         return () => {
             if (dropinRef.current) {
                 dropinRef.current.unmount()
+                dropinRef.current = null
             }
+            checkoutRef.current = null
         }
-    }, [adyenEnvironment, adyenPaymentMethods, adyenOrder])
+    }, [adyenEnvironment, adyenPaymentMethods])
+
+    // This effect will run only when the adyenOrder state changes.
+    useEffect(() => {
+        if (checkoutRef.current) {
+            // When a partial payment is made (e.g., with a gift card),
+            // the checkout session must be updated with the new order details.
+            checkoutRef.current.update({order: adyenOrder})
+
+            if (dropinRef.current) {
+                dropinRef.current.unmount()
+            }
+
+            // We pass empty URLSearchParams because we are not handling a redirect here.
+            getPaymentMethodsConfiguration({
+                beforeSubmit,
+                afterSubmit,
+                beforeAdditionalDetails,
+                afterAdditionalDetails,
+                onError
+            }).then((paymentMethodsConfiguration) => {
+                dropinRef.current = handleQueryParams(
+                    new URLSearchParams(''),
+                    checkoutRef.current,
+                    setAdyenPaymentInProgress,
+                    paymentContainer,
+                    paymentMethodsConfiguration,
+                    optionalDropinConfiguration
+                )
+            })
+        }
+    }, [adyenOrder?.orderData])
 
     return (
         <>

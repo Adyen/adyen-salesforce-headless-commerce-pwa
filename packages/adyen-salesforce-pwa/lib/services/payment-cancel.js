@@ -1,14 +1,14 @@
 import {ApiClient} from './api'
 
-export class AdyenOrderService {
-    baseUrl = '/api/adyen/order'
+export class PaymentCancelService {
+    baseUrl = '/api/adyen/payment'
     apiClient = null
 
     constructor(token, customerId, basketId, site) {
         this.apiClient = new ApiClient(this.baseUrl, token, customerId, basketId, site)
     }
 
-    async orderCancel(orderNo) {
+    async paymentCancel(orderNo) {
         const res = await this.apiClient.post({
             path: '/cancel',
             body: JSON.stringify({

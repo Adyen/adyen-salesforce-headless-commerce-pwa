@@ -1,7 +1,7 @@
-import {onPaymentsSuccess, onPaymentsDetailsSuccess} from '../helper'
+import {onPaymentsDetailsSuccess, onPaymentsSuccess} from '../helper'
 
 describe('Adyen Context Helpers', () => {
-    let navigate, setOrderNo, setAdyenOrder, component
+    let navigate, setOrderNo, setAdyenOrder, component, mockActions
 
     beforeEach(() => {
         navigate = jest.fn()
@@ -9,6 +9,10 @@ describe('Adyen Context Helpers', () => {
         setAdyenOrder = jest.fn()
         component = {
             handleAction: jest.fn()
+        }
+        mockActions = {
+            resolve: jest.fn(),
+            reject: jest.fn()
         }
     })
 
@@ -23,7 +27,7 @@ describe('Adyen Context Helpers', () => {
             }
 
             const handler = onPaymentsSuccess(navigate, setOrderNo, setAdyenOrder)
-            await handler(null, component, null, null, responses)
+            await handler(null, component, mockActions, null, responses)
 
             expect(setOrderNo).toHaveBeenCalledWith('ORDER-123')
             expect(setAdyenOrder).not.toHaveBeenCalled()
@@ -44,7 +48,7 @@ describe('Adyen Context Helpers', () => {
             }
 
             const handler = onPaymentsSuccess(navigate, setOrderNo, setAdyenOrder)
-            await handler(null, component, null, null, responses)
+            await handler(null, component, mockActions, null, responses)
 
             expect(setOrderNo).toHaveBeenCalledWith('ORDER-123')
             expect(setAdyenOrder).toHaveBeenCalledWith(responses.paymentsResponse.order)
@@ -65,7 +69,7 @@ describe('Adyen Context Helpers', () => {
             }
 
             const handler = onPaymentsSuccess(navigate, setOrderNo, setAdyenOrder)
-            await handler(null, component, null, null, responses)
+            await handler(null, component, mockActions, null, responses)
 
             expect(setOrderNo).toHaveBeenCalledWith('ORDER-123')
             expect(setAdyenOrder).toHaveBeenCalledWith(responses.paymentsResponse.order)
@@ -79,12 +83,11 @@ describe('Adyen Context Helpers', () => {
                     action: action
                 }
             }
-
+            const encodedAction = btoa(JSON.stringify(action))
             const handler = onPaymentsSuccess(navigate, setOrderNo, setAdyenOrder)
-            await handler(null, component, null, null, responses)
+            await handler(null, component, mockActions, null, responses)
 
-            expect(component.handleAction).toHaveBeenCalledWith(action)
-            expect(navigate).not.toHaveBeenCalled()
+            expect(navigate).toHaveBeenCalledWith(`/checkout?adyenAction=${encodedAction}`)
         })
 
         it('should handle a voucher action by navigating', async () => {
@@ -97,7 +100,7 @@ describe('Adyen Context Helpers', () => {
             }
 
             const handler = onPaymentsSuccess(navigate, setOrderNo, setAdyenOrder)
-            await handler(null, component, null, null, responses)
+            await handler(null, component, mockActions, null, responses)
 
             const encodedAction = btoa(JSON.stringify(action))
             expect(navigate).toHaveBeenCalledWith(
@@ -115,7 +118,7 @@ describe('Adyen Context Helpers', () => {
             }
 
             const handler = onPaymentsSuccess(navigate, setOrderNo, setAdyenOrder)
-            await handler(null, component, null, null, responses)
+            await handler(null, component, mockActions, null, responses)
 
             expect(navigate).not.toHaveBeenCalled()
             expect(component.handleAction).not.toHaveBeenCalled()
@@ -133,7 +136,7 @@ describe('Adyen Context Helpers', () => {
             }
 
             const handler = onPaymentsDetailsSuccess(navigate)
-            await handler(null, component, null, null, responses)
+            await handler(null, component, mockActions, null, responses)
 
             expect(navigate).toHaveBeenCalledWith('/checkout/confirmation/ORDER-123')
         })
@@ -148,7 +151,7 @@ describe('Adyen Context Helpers', () => {
             }
 
             const handler = onPaymentsDetailsSuccess(navigate)
-            await handler(null, component, null, null, responses)
+            await handler(null, component, mockActions, null, responses)
 
             expect(component.handleAction).toHaveBeenCalledWith(action)
             expect(navigate).not.toHaveBeenCalled()
@@ -163,7 +166,7 @@ describe('Adyen Context Helpers', () => {
             }
 
             const handler = onPaymentsDetailsSuccess(navigate)
-            await handler(null, component, null, null, responses)
+            await handler(null, component, mockActions, null, responses)
 
             expect(navigate).not.toHaveBeenCalled()
             expect(component.handleAction).not.toHaveBeenCalled()

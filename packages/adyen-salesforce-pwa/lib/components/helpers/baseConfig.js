@@ -2,7 +2,7 @@ import {AdyenPaymentsService} from '../../services/payments'
 import {AdyenPaymentsDetailsService} from '../../services/payments-details'
 import {executeCallbacks} from '../../utils/executeCallbacks'
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
-import {AdyenOrderService} from "../../services/order";
+import {PaymentCancelService} from '../../services/payment-cancel'
 
 export const baseConfig = ({
                                beforeSubmit = [],
@@ -38,7 +38,6 @@ export const onSubmit = async (state, component, actions, props) => {
                 returnUrl: props?.returnUrl || `${window.location.href}/redirect`
             }
         )
-        actions.resolve(paymentsResponse)
         return {paymentsResponse: paymentsResponse}
     } catch (err) {
         actions.reject()
@@ -53,7 +52,6 @@ export const onAdditionalDetails = async (state, component, actions, props) => {
         const paymentsDetailsResponse = await adyenPaymentsDetailsService.submitPaymentsDetails(
             state.data
         )
-        actions.resolve(paymentsDetailsResponse)
         return {paymentsDetailsResponse: paymentsDetailsResponse}
     } catch (err) {
         actions.reject()
@@ -63,9 +61,16 @@ export const onAdditionalDetails = async (state, component, actions, props) => {
 }
 
 export const onErrorHandler = async (orderNo, navigate, props) => {
-    const adyenOrderService = new AdyenOrderService(props?.token, props?.customerId, props.basket?.basketId, props?.site);
-    const response = await adyenOrderService.orderCancel(orderNo);
-    navigate(response?.headers?.location);
+    try {
+        const paymentCancelService = new PaymentCancelService(props?.token, props?.customerId, props.basket?.basketId, props?.site);
+        const response = await paymentCancelService.paymentCancel(orderNo);
+        if (props?.adyenOrder) {
+            props?.setAdyenOrder(null)
+        }
+        props?.onNavigate('/checkout');
+    } catch (err) {
+        throw new Error(err)
+    }
 }
 
 export const getAmount = ({basket, adyenOrder}) => {

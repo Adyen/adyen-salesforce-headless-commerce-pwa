@@ -31,7 +31,7 @@ describe('Adyen Endpoints', () => {
             const overrides = {}
 
             registerAdyenEndpoints(app, runtime, overrides)
-            expect(app.get).toHaveBeenCalledTimes(6)
+            expect(app.get).toHaveBeenCalledTimes(7)
             expect(app.post).toHaveBeenCalledTimes(9)
             expect(app.use).toHaveBeenCalledTimes(2)
         })

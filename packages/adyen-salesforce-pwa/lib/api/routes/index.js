@@ -11,7 +11,7 @@ import {authorizationWebhookHandler} from '../controllers/authorization-webhook-
 import {createErrorResponse} from '../../utils/createErrorResponse.mjs'
 import Logger from '../models/logger'
 import {appleDomainAssociation} from '../controllers/apple-domain-association'
-import OrderCancelController from '../controllers/order-cancel';
+import PaymentCancelController from '../controllers/payment-cancel';
 import {balanceCheck, cancelOrder, createOrder} from "../controllers/giftCard";
 import {prepareRequestContext} from '../middleware/request-context'
 import {prepareWebhookRequestContext} from '../middleware/webhook-request-context'
@@ -77,9 +77,9 @@ function registerAdyenEndpoints(app, runtime, overrides) {
         SuccessHandler
     ]
 
-    const orderCancelHandler = overrides?.onOrderCancel || [
+    const paymentCancelController = overrides?.paymentCancel || [
         prepareRequestContext,
-        OrderCancelController,
+        PaymentCancelController,
         SuccessHandler
     ]
     const balanceCheckHandler = overrides?.balanceCheck || [prepareRequestContext, balanceCheck, SuccessHandler]
@@ -97,6 +97,11 @@ function registerAdyenEndpoints(app, runtime, overrides) {
         query('adyenAction').optional().escape(),
         runtime.render
     )
+    app.get(
+        '*/checkout',
+        query('adyenAction').optional().escape(),
+        runtime.render
+    )
     app.get('/api/adyen/environment', ...environmentHandler)
     app.get('/api/adyen/paymentMethods', ...paymentMethodsHandler)
     app.get('/api/adyen/shipping-methods', ...shippingMethodsGetHandler)
@@ -104,13 +109,12 @@ function registerAdyenEndpoints(app, runtime, overrides) {
         '/.well-known/apple-developer-merchantid-domain-association',
         ...appleDomainAssociationHandler
     )
-
+    app.post('/api/adyen/payment/cancel', ...paymentCancelController)
     app.post('/api/adyen/payments/details', ...paymentsDetailsHandler)
     app.post('/api/adyen/payments', ...paymentsHandler)
     app.post('/api/adyen/webhook', ...webhookHandler)
     app.post('/api/adyen/shipping-methods', ...shippingMethodsPostHandler)
     app.post('/api/adyen/shipping-address', ...shippingAddressHandler)
-    app.post('/api/adyen/order/cancel', ...orderCancelHandler)
     app.post('/api/adyen/gift-card/balance-check', ...balanceCheckHandler)
     app.post('/api/adyen/gift-card/create-order', ...createOrderHandler)
     app.post('/api/adyen/gift-card/cancel-order', ...cancelOrderHandler)

@@ -46,26 +46,29 @@ export class BasketService {
     /**
      * Adds a payment instrument to the current basket.
      * @param {object} data - The payment state data from the client.
+     * @param {object} paymentRequest - The payment request object.
      * @returns {Promise<object>} A promise that resolves to the updated basket object.
      */
-    async addPaymentInstrument(data) {
-        const isCardPayment = data?.paymentMethod?.type === 'scheme'
+    async addPaymentInstrument(data, paymentRequest) {
+        const {paymentMethod, amount} = paymentRequest
+        const isCardPayment = paymentMethod?.type === 'scheme'
         const paymentMethodId = isCardPayment
             ? PAYMENT_METHODS.CREDIT_CARD
             : PAYMENT_METHODS.ADYEN_COMPONENT
 
         const paymentInstrumentReq = {
             body: {
-                amount: convertCurrencyValueToMajorUnits(data.amount.value, data.amount.currency),
+                amount: convertCurrencyValueToMajorUnits(amount?.value, amount?.currency),
                 paymentMethodId,
                 paymentCard: {
                     cardType: isCardPayment
-                        ? getCardType(data?.paymentMethod?.brand)
-                        : data?.paymentMethod?.type
+                        ? getCardType(paymentMethod?.brand)
+                        : paymentMethod?.type
                 },
-                c_adyenPaymentMethodType: data?.paymentMethod?.type,
-                ...(data?.paymentMethod?.brand && {
-                    c_adyenPaymentMethodBrand: data?.paymentMethod?.brand
+                c_adyenPspReference: data?.pspReference,
+                c_adyenPaymentMethodType: paymentMethod?.type,
+                ...(paymentMethod?.brand && {
+                    c_adyenPaymentMethodBrand: paymentMethod?.brand
                 })
             },
             parameters: {

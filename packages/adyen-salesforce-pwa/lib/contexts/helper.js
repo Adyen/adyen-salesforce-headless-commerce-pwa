@@ -4,7 +4,9 @@ const handleAction = (navigate) => async (component, responses) => {
         const url = `/checkout/confirmation/${responses?.paymentsResponse?.merchantReference}?adyenAction=${action}`
         navigate(url)
     } else {
-        await component.handleAction(responses?.paymentsResponse?.action)
+        const action = btoa(JSON.stringify(responses?.paymentsResponse?.action))
+        const url = `/checkout?adyenAction=${action}`
+        navigate(url)
     }
 }
 
@@ -26,6 +28,7 @@ export const onPaymentsSuccess = (navigate, setOrderNo, setAdyenOrder) => async 
     } else if (responses?.paymentsResponse?.action) {
         await handleAction(navigate)(component, responses)
     }
+    actions.resolve(responses?.paymentsResponse)
 }
 
 export const onPaymentsDetailsSuccess =
@@ -37,4 +40,5 @@ export const onPaymentsDetailsSuccess =
         } else if (responses?.paymentsDetailsResponse?.action) {
             await component.handleAction(responses?.paymentsDetailsResponse?.action)
         }
+        actions.resolve(responses?.paymentsDetailsResponse)
     }

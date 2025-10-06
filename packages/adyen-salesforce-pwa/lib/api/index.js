@@ -26,7 +26,7 @@ export {default as PaymentsController} from './controllers/payments'
 export {default as PaymentMethodsController} from './controllers/payment-methods'
 export {default as PaymentsDetailsController} from './controllers/payments-details'
 export {default as EnvironmentController} from './controllers/environment'
-export {default as OrderCancelController} from './controllers/order-cancel'
+export {default as PaymentCancelController} from './controllers/payment-cancel'
 export {default as GiftCardController} from './controllers/giftCard'
 
 
