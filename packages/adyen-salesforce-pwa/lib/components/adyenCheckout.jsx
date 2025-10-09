@@ -2,7 +2,7 @@ import React, {useEffect, useRef} from 'react'
 import PropTypes from 'prop-types'
 import useAdyenCheckout from '../hooks/useAdyenCheckout'
 import '../style/adyenCheckout.css'
-import {createCheckoutInstance, handleQueryParams} from './helpers/adyenCheckout.utils'
+import {createCheckoutInstance, handleRedirects, mountCheckoutComponent} from './helpers/adyenCheckout.utils'
 
 const AdyenCheckoutComponent = (props) => {
     const {
@@ -27,7 +27,10 @@ const AdyenCheckoutComponent = (props) => {
         locale,
         setAdyenStateData,
         orderNo,
-        navigate
+        navigate,
+        adyenAction,
+        redirectResult,
+        amazonCheckoutSessionId
     } = useAdyenCheckout()
 
     const paymentContainer = useRef(null)
@@ -76,15 +79,22 @@ const AdyenCheckoutComponent = (props) => {
             })
 
             // 3. Handle URL query parameters and mount the checkout component
-            const urlParams = new URLSearchParams(window.location.search)
-            dropinRef.current = handleQueryParams(
-                urlParams,
+            const isRedirect = handleRedirects(
+                redirectResult,
+                amazonCheckoutSessionId,
                 checkoutRef.current,
-                setAdyenPaymentInProgress,
-                paymentContainer,
-                paymentMethodsConfiguration,
-                optionalDropinConfiguration
+                setAdyenPaymentInProgress
             )
+
+            if (!isRedirect) {
+                dropinRef.current = mountCheckoutComponent(
+                    adyenAction,
+                    checkoutRef.current,
+                    paymentContainer,
+                    paymentMethodsConfiguration,
+                    optionalDropinConfiguration
+                )
+            }
         }
 
         initializeCheckout()
@@ -97,7 +107,7 @@ const AdyenCheckoutComponent = (props) => {
             }
             checkoutRef.current = null
         }
-    }, [adyenEnvironment, adyenPaymentMethods])
+    }, [adyenEnvironment, adyenPaymentMethods, adyenAction, redirectResult, amazonCheckoutSessionId])
 
     // This effect will run only when the adyenOrder state changes.
     useEffect(() => {
@@ -118,10 +128,9 @@ const AdyenCheckoutComponent = (props) => {
                 afterAdditionalDetails,
                 onError
             }).then((paymentMethodsConfiguration) => {
-                dropinRef.current = handleQueryParams(
-                    new URLSearchParams(''),
+                dropinRef.current = mountCheckoutComponent(
+                    null, // No action from URL here
                     checkoutRef.current,
-                    setAdyenPaymentInProgress,
                     paymentContainer,
                     paymentMethodsConfiguration,
                     optionalDropinConfiguration

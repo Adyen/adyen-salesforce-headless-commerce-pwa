@@ -2,6 +2,7 @@ import {createShopperBasketsClient} from '../helpers/basketHelper.js'
 import {PAYMENT_METHODS} from '../../utils/constants.mjs'
 import {getCardType} from '../../utils/getCardType.mjs'
 import {convertCurrencyValueToMajorUnits} from '../../utils/parsers.mjs'
+import Logger from '../models/logger'
 
 /**
  * A service for managing basket state and interactions with the ShopperBaskets API.
@@ -45,12 +46,20 @@ export class BasketService {
 
     /**
      * Adds a payment instrument to the current basket.
-     * @param {object} data - The payment state data from the client.
-     * @param {object} paymentRequest - The payment request object.
+     * @param {object} amount - The amount included in the payment request. Should have value and currency
+     * @param {object} paymentMethod - The payment method object. Should have type and brand.
+     * @param {string} pspReference - The payment reference returned from Adyen.
      * @returns {Promise<object>} A promise that resolves to the updated basket object.
      */
-    async addPaymentInstrument(data, paymentRequest) {
-        const {paymentMethod, amount} = paymentRequest
+    async addPaymentInstrument(amount, paymentMethod, pspReference) {
+        if (!amount || !paymentMethod || !pspReference) {
+            const missing = []
+            if (!amount) missing.push('amount')
+            if (!paymentMethod) missing.push('paymentMethod')
+            if (!pspReference) missing.push('pspReference')
+            Logger.warn('addPaymentInstrument', `Payment instrument will be added with missing ${missing.join(', ')}`)
+
+        }
         const isCardPayment = paymentMethod?.type === 'scheme'
         const paymentMethodId = isCardPayment
             ? PAYMENT_METHODS.CREDIT_CARD
@@ -65,7 +74,7 @@ export class BasketService {
                         ? getCardType(paymentMethod?.brand)
                         : paymentMethod?.type
                 },
-                c_adyenPspReference: data?.pspReference,
+                c_adyenPspReference: pspReference,
                 c_adyenPaymentMethodType: paymentMethod?.type,
                 ...(paymentMethod?.brand && {
                     c_adyenPaymentMethodBrand: paymentMethod?.brand

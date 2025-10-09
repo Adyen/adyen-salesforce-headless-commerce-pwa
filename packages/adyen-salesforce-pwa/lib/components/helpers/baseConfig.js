@@ -9,19 +9,17 @@ export const baseConfig = ({
                                afterSubmit = [],
                                beforeAdditionalDetails = [],
                                afterAdditionalDetails = [],
-                               onError = () => {
-                               },
+                               onError = [],
                                ...props
                            }) => {
     return {
         amount: getAmount(props),
-        onSubmit: executeCallbacks([...beforeSubmit, onSubmit, ...afterSubmit], props, onError),
+        onSubmit: executeCallbacks([...beforeSubmit, onSubmit, ...afterSubmit], props),
         onAdditionalDetails: executeCallbacks(
             [...beforeAdditionalDetails, onAdditionalDetails, ...afterAdditionalDetails],
-            props,
-            onError
+            props
         ),
-        onError: executeCallbacks([onErrorHandler], props, onError),
+        onError: executeCallbacks([...onError, onErrorHandler], props),
     }
 }
 
@@ -60,14 +58,14 @@ export const onAdditionalDetails = async (state, component, actions, props) => {
 
 }
 
-export const onErrorHandler = async (orderNo, navigate, props) => {
+export const onErrorHandler = async (error, props) => {
     try {
         const paymentCancelService = new PaymentCancelService(props?.token, props?.customerId, props.basket?.basketId, props?.site);
-        const response = await paymentCancelService.paymentCancel(orderNo);
+        const response = await paymentCancelService.paymentCancel(props?.orderNo);
         if (props?.adyenOrder) {
             props?.setAdyenOrder(null)
         }
-        props?.onNavigate('/checkout');
+        props?.navigate('/checkout');
     } catch (err) {
         throw new Error(err)
     }

@@ -71,17 +71,21 @@ async function sendPayments(req, res, next) {
             throw new AdyenError(ERROR_MESSAGE.PAYMENT_NOT_SUCCESSFUL, 400, response)
         }
 
-        // Add payment instrument if the payment was successful (even if not final, e.g., partial payment or action required)
         if (checkoutResponse.isSuccessful) {
-            await adyenContext.basketService.addPaymentInstrument(response, paymentRequest)
+            await adyenContext.basketService.update({
+                c_amount: JSON.stringify(paymentRequest?.amount),
+                c_paymentMethod: JSON.stringify(paymentRequest?.paymentMethod)
+            })
         }
 
         if (!checkoutResponse.isFinal && checkoutResponse.isSuccessful && response.order) {
             await adyenContext.basketService.update({
                 c_orderData: JSON.stringify(response.order)
             })
+            await adyenContext.basketService.addPaymentInstrument(paymentRequest?.amount, paymentRequest?.paymentMethod, response?.pspReference)
         }
         if (checkoutResponse.isFinal && checkoutResponse.isSuccessful) {
+            await adyenContext.basketService.addPaymentInstrument(paymentRequest?.amount, paymentRequest?.paymentMethod, response?.pspReference)
             await createOrderUsingOrderNo(adyenContext)
             Logger.info('sendPayments', `order created: ${checkoutResponse.merchantReference}`)
         }

@@ -11,38 +11,43 @@ export const getCheckoutConfig = (adyenEnvironment, adyenPaymentMethods, transla
     }
 }
 
-export const handleQueryParams = (
-    urlParams,
+export const handleRedirects = (
+    redirectResult,
+    amazonCheckoutSessionId,
     checkout,
-    setAdyenPaymentInProgress,
-    paymentContainer,
-    paymentMethodsConfiguration,
-    optionalDropinConfiguration,
+    setAdyenPaymentInProgress
 ) => {
-    const redirectResult = urlParams.get('redirectResult')
-    const amazonCheckoutSessionId = urlParams.get('amazonCheckoutSessionId')
-    const adyenAction = urlParams.get('adyenAction')
-
     if (redirectResult) {
         checkout.submitDetails({data: {details: {redirectResult}}})
-        return null // No component to mount
+        return true
     }
+
     if (amazonCheckoutSessionId) {
         setAdyenPaymentInProgress(true)
         const amazonPayContainer = document.createElement('div')
-        const amazonPay = checkout
-            .create('amazonpay', {
-                amazonCheckoutSessionId,
-                showOrderButton: false
-            })
-            .mount(amazonPayContainer)
+        const amazonPay = checkout.create('amazonpay', {
+            amazonCheckoutSessionId,
+            showOrderButton: false
+        }).mount(amazonPayContainer)
         amazonPay.submit()
-        return null // No component to mount
+        return true
     }
+
+    return false
+}
+
+export const mountCheckoutComponent = (
+    adyenAction,
+    checkout,
+    paymentContainer,
+    paymentMethodsConfiguration,
+    optionalDropinConfiguration
+) => {
     if (adyenAction) {
         const action = JSON.parse(atob(adyenAction))
         return checkout.createFromAction(action).mount(paymentContainer.current)
     }
+
     return new Dropin(checkout, {
         ...optionalDropinConfiguration,
         paymentMethodsConfiguration
@@ -84,9 +89,9 @@ export const createCheckoutInstance = async ({
                 setAdyenStateData(state.data)
             }
         },
-        onError: () => {
+        onError: (error) => {
             const handler = pmc.onError || pmc.card?.onError
-            if (handler) handler(orderNo, navigate)
+            if (handler) handler(error)
         },
         onOrderCancel(order, action) {
             const handler = pmc.onOrderCancel || pmc.giftcard?.onOrderCancel

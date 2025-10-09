@@ -38,14 +38,14 @@ async function sendPaymentDetails(req, res, next) {
             throw new AdyenError(ERROR_MESSAGE.ADYEN_CONTEXT_NOT_FOUND, 500)
 
         }
-        const {basket, siteId} = adyenContext
+        const {basket, siteId, basketService} = adyenContext
         const checkout = new AdyenClientProvider(adyenContext).getPaymentsApi()
         const response = await checkout.paymentsDetails(data, {
             idempotencyKey: uuidv4()
         })
         Logger.info('sendPaymentDetails', `resultCode ${response.resultCode}`)
         const checkoutResponse = {
-            ...createCheckoutResponse(response, adyenContext.basket?.c_orderNo),
+            ...createCheckoutResponse(response, basket?.c_orderNo),
             order: response?.order,
             resultCode: response?.resultCode,
         }
@@ -54,12 +54,15 @@ async function sendPaymentDetails(req, res, next) {
         }
 
         if (!checkoutResponse.isFinal && checkoutResponse.isSuccessful && response.order) {
-            await adyenContext.basketService.update({
+            await basketService.update({
                 c_orderData: JSON.stringify(response.order)
             })
         }
         if (checkoutResponse.isFinal && checkoutResponse.isSuccessful) {
             // The payment is now fully authorized, so we can create the final order.
+            const amount = basket.c_amount ? JSON.parse(basket.c_amount) : ''
+            const paymentMethod = basket.c_paymentMethod ? JSON.parse(basket.c_paymentMethod) : ''
+            await basketService.addPaymentInstrument(amount, paymentMethod, response?.pspReference)
             await createOrderUsingOrderNo(adyenContext)
             Logger.info('sendPaymentDetails', `order created: ${checkoutResponse.merchantReference}`)
         }

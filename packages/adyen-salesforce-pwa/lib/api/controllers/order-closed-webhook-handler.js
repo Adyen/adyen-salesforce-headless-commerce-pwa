@@ -11,13 +11,14 @@ const messages = {
 
 async function orderClosedWebhookHandler(req, res, next) {
     try {
-        const notification = res.locals.notification
+        const {NotificationRequestItem: notification = {}} = res.locals.notification
         if (notification.eventCode !== NOTIFICATION_EVENT_CODES.ORDER_CLOSED) {
             return next()
         }
         const orderNo = notification.merchantReference
         const order = await getOrderUsingOrderNo(orderNo)
         if (!order?.orderNo) {
+            Logger.info(notification.eventCode, `Order ${orderNo} was not found.`)
             return next()
         }
         const orderApi = new OrderApiClient()
