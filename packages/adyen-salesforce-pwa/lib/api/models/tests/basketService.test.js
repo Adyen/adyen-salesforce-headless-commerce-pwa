@@ -71,19 +71,14 @@ describe('BasketService', () => {
 
     describe('addPaymentInstrument', () => {
         it('should correctly add a card payment instrument', async () => {
-            const paymentData = {
-                pspReference: 'mockPspReference',
-                paymentMethod: {type: 'scheme', brand: 'visa'},
-                amount: {value: 100, currency: 'USD'}
-            }
-            const paymentRequest = {
-                paymentMethod: {type: 'scheme', brand: 'visa'},
-                amount: {value: 100, currency: 'USD'}
-            }
+            const pspReference = 'mockPspReference'
+            const paymentMethod = {type: 'scheme', brand: 'visa'}
+            const amount = {value: 100, currency: 'USD'}
+
             const mockUpdatedBasket = {basketId: 'mockBasketId', paymentInstruments: [{}]}
             mockShopperBaskets.addPaymentInstrumentToBasket.mockResolvedValue(mockUpdatedBasket)
 
-            await basketService.addPaymentInstrument(paymentData, paymentRequest)
+            await basketService.addPaymentInstrument(amount, paymentMethod, pspReference)
 
             expect(mockShopperBaskets.addPaymentInstrumentToBasket).toHaveBeenCalledWith(
                 expect.objectContaining({
@@ -98,19 +93,14 @@ describe('BasketService', () => {
         })
 
         it('should correctly add a component payment instrument', async () => {
-            const paymentData = {
-                pspReference: 'mockPspReference',
-                paymentMethod: {type: 'ideal'},
-                amount: {value: 100, currency: 'EUR'}
-            }
-            const paymentRequest = {
-                paymentMethod: {type: 'ideal'},
-                amount: {value: 100, currency: 'EUR'}
-            }
+            const pspReference = 'mockPspReference'
+            const paymentMethod = {type: 'ideal'}
+            const amount = {value: 100, currency: 'EUR'}
+
             const mockUpdatedBasket = {basketId: 'mockBasketId', paymentInstruments: [{}]}
             mockShopperBaskets.addPaymentInstrumentToBasket.mockResolvedValue(mockUpdatedBasket)
 
-            await basketService.addPaymentInstrument(paymentData, paymentRequest)
+            await basketService.addPaymentInstrument(amount, paymentMethod, pspReference)
 
             expect(mockShopperBaskets.addPaymentInstrumentToBasket).toHaveBeenCalledWith(
                 expect.objectContaining({

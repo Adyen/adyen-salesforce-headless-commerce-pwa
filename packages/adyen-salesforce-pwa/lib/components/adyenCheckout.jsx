@@ -108,7 +108,6 @@ const AdyenCheckoutComponent = (props) => {
                 dropinRef.current.unmount()
                 dropinRef.current = null
             }
-            checkoutRef.current = null
         }
     }, [adyenEnvironment, adyenAction, adyenOrder?.orderData])
 

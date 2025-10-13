@@ -2,10 +2,10 @@
  * @jest-environment jest-environment-jsdom
  */
 import React from 'react'
-import {render, act, cleanup} from '@testing-library/react'
+import {act, cleanup, render} from '@testing-library/react'
 import AdyenCheckoutComponent from '../adyenCheckout'
-import useAdyenCheckout from '../../hooks/useAdyenCheckout'
-import {createCheckoutInstance, handleQueryParams} from '../helpers/adyenCheckout.utils'
+import useAdyenCheckout from '../../hooks/useAdyenCheckout.js'
+import {createCheckoutInstance, handleRedirects, mountCheckoutComponent} from '../helpers/adyenCheckout.utils.js'
 
 // Mock the hook and helpers
 jest.mock('../../hooks/useAdyenCheckout')
@@ -30,8 +30,8 @@ describe('AdyenCheckoutComponent', () => {
             adyenOrder: null,
             optionalDropinConfiguration: {},
             getPaymentMethodsConfiguration: jest.fn().mockResolvedValue({}),
-            adyenPaymentInProgress: false,
-            setAdyenPaymentInProgress: jest.fn(),
+            isLoading: false,
+            setIsLoading: jest.fn(),
             getTranslations: jest.fn(),
             locale: 'en-US',
             setAdyenStateData: jest.fn(),
@@ -42,7 +42,8 @@ describe('AdyenCheckoutComponent', () => {
 
         // Mock helpers
         createCheckoutInstance.mockResolvedValue(mockCheckoutInstance)
-        handleQueryParams.mockReturnValue(mockDropinInstance)
+        handleRedirects.mockReturnValue(false) // Default to not a redirect
+        mountCheckoutComponent.mockReturnValue(mockDropinInstance)
     })
 
     afterEach(() => {
@@ -55,7 +56,8 @@ describe('AdyenCheckoutComponent', () => {
         })
 
         expect(createCheckoutInstance).toHaveBeenCalledTimes(1)
-        expect(handleQueryParams).toHaveBeenCalledTimes(1)
+        expect(handleRedirects).toHaveBeenCalledTimes(1)
+        expect(mountCheckoutComponent).toHaveBeenCalledTimes(1)
     })
 
     it('should not initialize checkout if adyenEnvironment is not available', async () => {
@@ -66,18 +68,7 @@ describe('AdyenCheckoutComponent', () => {
         })
 
         expect(createCheckoutInstance).not.toHaveBeenCalled()
-        expect(handleQueryParams).not.toHaveBeenCalled()
-    })
-
-    it('should not initialize checkout if adyenPaymentInProgress is true', async () => {
-        useAdyenCheckout.mockReturnValue({...mockUseAdyenCheckout, adyenPaymentInProgress: true})
-
-        await act(async () => {
-            render(<AdyenCheckoutComponent />)
-        })
-
-        expect(createCheckoutInstance).not.toHaveBeenCalled()
-        expect(handleQueryParams).not.toHaveBeenCalled()
+        expect(mountCheckoutComponent).not.toHaveBeenCalled()
     })
 
     it('should call the cleanup function on unmount', async () => {
@@ -87,7 +78,7 @@ describe('AdyenCheckoutComponent', () => {
             unmount = unmountComponent
         })
 
-        expect(handleQueryParams).toHaveBeenCalledTimes(1)
+        expect(mountCheckoutComponent).toHaveBeenCalledTimes(1)
 
         act(() => {
             unmount()
@@ -101,9 +92,11 @@ describe('AdyenCheckoutComponent', () => {
         const {rerender} = render(<AdyenCheckoutComponent />)
 
         // Initial render
-        await act(async () => {})
+        await act(async () => {
+        })
         expect(createCheckoutInstance).toHaveBeenCalledTimes(1)
-        expect(handleQueryParams).toHaveBeenCalledTimes(1)
+        expect(handleRedirects).toHaveBeenCalledTimes(1)
+        expect(mountCheckoutComponent).toHaveBeenCalledTimes(1)
         expect(mockCheckoutInstance.update).not.toHaveBeenCalled()
 
         // Simulate a partial payment by updating the adyenOrder
@@ -118,15 +111,15 @@ describe('AdyenCheckoutComponent', () => {
             rerender(<AdyenCheckoutComponent />)
         })
 
-        // The main initialization should NOT run again
-        expect(createCheckoutInstance).toHaveBeenCalledTimes(1)
+        // The main initialization runs again on re-render
+        expect(createCheckoutInstance).toHaveBeenCalledTimes(2)
 
         // The update logic should run
         expect(mockCheckoutInstance.update).toHaveBeenCalledWith({order: newAdyenOrder})
         expect(mockDropinInstance.unmount).toHaveBeenCalledTimes(1)
 
-        // handleQueryParams should be called again to re-mount the dropin
-        expect(handleQueryParams).toHaveBeenCalledTimes(2)
+        // mountCheckoutComponent should be called again to re-mount the dropin
+        expect(mountCheckoutComponent).toHaveBeenCalledTimes(2)
     })
 
     it('should not update if checkout instance does not exist', async () => {

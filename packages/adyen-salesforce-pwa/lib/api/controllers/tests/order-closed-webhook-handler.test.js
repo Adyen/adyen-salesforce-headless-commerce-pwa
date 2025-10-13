@@ -23,9 +23,11 @@ describe('orderClosedWebhookHandler', () => {
         res = {
             locals: {
                 notification: {
-                    eventCode: NOTIFICATION_EVENT_CODES.ORDER_CLOSED,
-                    merchantReference: 'ORDER-123',
-                    success: NOTIFICATION_SUCCESS.TRUE
+                    NotificationRequestItem: {
+                        eventCode: NOTIFICATION_EVENT_CODES.ORDER_CLOSED,
+                        merchantReference: 'ORDER-123',
+                        success: NOTIFICATION_SUCCESS.TRUE
+                    }
                 }
             }
         }
@@ -47,7 +49,7 @@ describe('orderClosedWebhookHandler', () => {
     })
 
     it('should ignore notifications that are not ORDER_CLOSED', async () => {
-        res.locals.notification.eventCode = 'AUTHORISATION'
+        res.locals.notification.NotificationRequestItem.eventCode = 'AUTHORISATION'
 
         await orderClosedWebhookHandler(req, res, next)
 
@@ -68,7 +70,7 @@ describe('orderClosedWebhookHandler', () => {
     })
 
     it('should update order to a successful state when notification success is true', async () => {
-        res.locals.notification.success = NOTIFICATION_SUCCESS.TRUE
+        res.locals.notification.NotificationRequestItem.success = NOTIFICATION_SUCCESS.TRUE
 
         await orderClosedWebhookHandler(req, res, next)
 
@@ -94,7 +96,7 @@ describe('orderClosedWebhookHandler', () => {
     })
 
     it('should update order to a failed state when notification success is false', async () => {
-        res.locals.notification.success = NOTIFICATION_SUCCESS.FALSE
+        res.locals.notification.NotificationRequestItem.success = NOTIFICATION_SUCCESS.FALSE
 
         await orderClosedWebhookHandler(req, res, next)
 

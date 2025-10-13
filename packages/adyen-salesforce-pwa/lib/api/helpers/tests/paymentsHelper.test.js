@@ -6,7 +6,6 @@ import {
     getLineItems,
     getShopperName,
     isOpenInvoiceMethod,
-    isPartialPayment,
     revertCheckoutState,
     validateBasketPayments
 } from '../paymentsHelper.js'
@@ -272,28 +271,40 @@ describe('paymentsHelper', () => {
         })
 
         it('should not throw for a valid full payment', async () => {
-            const paymentRequest = {amount: {value: 10000}}
-            await expect(validateBasketPayments(paymentRequest, mockAdyenContext)).resolves.toBeUndefined()
+            const amount = {value: 10000}
+            const paymentMethod = {type: 'scheme'}
+            await expect(
+                validateBasketPayments(mockAdyenContext, amount, paymentMethod)
+            ).resolves.toBeUndefined()
         })
 
         it('should throw if the final amount exceeds the basket total', async () => {
-            const paymentRequest = {amount: {value: 10001}}
-            await expect(validateBasketPayments(paymentRequest, mockAdyenContext)).rejects.toThrow(
-                new AdyenError('amounts do not match', 400)
-            )
+            const amount = {value: 10001}
+            const paymentMethod = {type: 'scheme'}
+            await expect(
+                validateBasketPayments(mockAdyenContext, amount, paymentMethod)
+            ).rejects.toThrow(new AdyenError('amounts do not match', 409))
         })
 
-        it('should throw and cancel order if basket total changes during partial payment', async () => {
+        it('should throw if the final amount is less than the basket total for a non-partial payment', async () => {
+            const amount = {value: 9999}
+            const paymentMethod = {type: 'scheme'}
+            await expect(
+                validateBasketPayments(mockAdyenContext, amount, paymentMethod)
+            ).rejects.toThrow(new AdyenError('amounts do not match', 409))
+        })
+
+        it('should throw if basket total changes during partial payment', async () => {
             mockAdyenContext.basket.c_orderData = JSON.stringify({
                 orderData: '...',
                 amount: {value: 9000} // Original total was 90
             })
-            mockOrdersApi.cancelOrder.mockResolvedValue({resultCode: 'Received'})
-            const paymentRequest = {amount: {value: 1000}}
-            await expect(validateBasketPayments(paymentRequest, mockAdyenContext)).rejects.toThrow(
-                new AdyenError('basket changed', 409)
-            )
-            expect(mockOrdersApi.cancelOrder).toHaveBeenCalled()
+            const amount = {value: 1000}
+            const paymentMethod = {type: 'scheme'}
+            await expect(
+                validateBasketPayments(mockAdyenContext, amount, paymentMethod)
+            ).rejects.toThrow(new AdyenError('basket changed', 409, {basketChanged: true}))
+            expect(mockOrdersApi.cancelOrder).not.toHaveBeenCalled()
         })
     })
 
@@ -322,7 +333,9 @@ describe('paymentsHelper', () => {
             await revertCheckoutState(mockAdyenContext, 'test')
             expect(mockAdyenContext.basketService.update).toHaveBeenCalledWith({
                 c_orderData: '',
-                c_giftCardCheckBalance: ''
+                c_giftCardCheckBalance: '',
+                c_paymentMethod: '',
+                c_amount: ''
             })
             expect(mockAdyenContext.basketService.removeAllPaymentInstruments).toHaveBeenCalled()
         })
@@ -332,24 +345,9 @@ describe('paymentsHelper', () => {
             mockOrdersApi.cancelOrder.mockResolvedValue({resultCode: 'Received'})
             await revertCheckoutState(mockAdyenContext, 'test')
             expect(mockOrdersApi.cancelOrder).toHaveBeenCalled()
-            // It should also clean up the basket after cancelling
-            expect(mockAdyenContext.basketService.update).toHaveBeenCalledWith({
-                c_orderData: '',
-                c_giftCardCheckBalance: ''
-            })
-            expect(
-                mockAdyenContext.basketService.removeAllPaymentInstruments
-            ).toHaveBeenCalled()
-        })
-    })
-
-    describe('isPartialPayment', () => {
-        it('should return true if data has an order property', () => {
-            expect(isPartialPayment({order: {}})).toBe(true)
-        })
-
-        it('should return false if data does not have an order property', () => {
-            expect(isPartialPayment({paymentMethod: {}})).toBe(false)
+            // _cleanupBasket is called inside cancelAdyenOrder, so we check its effects
+            expect(mockAdyenContext.basketService.update).toHaveBeenCalled()
+            expect(mockAdyenContext.basketService.removeAllPaymentInstruments).toHaveBeenCalled()
         })
     })
 

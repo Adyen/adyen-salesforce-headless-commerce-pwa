@@ -75,6 +75,7 @@ describe('orderHelper', () => {
                 customerInfo: {customerId: 'customer-abc'}
             }
             mockGetOrder.mockResolvedValue(mockOrder)
+            mockUpdateOrderStatus.mockResolvedValue({})
 
             await failOrderAndReopenBasket(mockAdyenContext, 'order123')
 
@@ -133,7 +134,8 @@ describe('orderHelper', () => {
                 'auth',
                 'basket-abc',
                 'customer-abc',
-                'order123'
+                'order123',
+                undefined
             )
             expect(result).toEqual({orderNo: 'order123'})
         })

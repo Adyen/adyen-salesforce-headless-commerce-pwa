@@ -12,7 +12,8 @@ jest.mock('../../models/adyenClientProvider')
 
 jest.mock('../../helpers/paymentsHelper.js', () => ({
     ...jest.requireActual('../../helpers/paymentsHelper.js'),
-    revertCheckoutState: jest.fn()
+    revertCheckoutState: jest.fn(),
+    validateBasketPayments: jest.fn()
 }))
 
 jest.mock('../../helpers/orderHelper.js', () => ({
@@ -24,7 +25,9 @@ describe('payments details controller', () => {
     let req, res, next
     const mockBasket = {
         basketId: 'testBasket',
-        c_orderNo: '123'
+        c_orderNo: '123',
+        c_amount: JSON.stringify({value: 2500, currency: 'EUR'}),
+        c_paymentMethod: JSON.stringify({type: 'scheme'})
     }
 
     beforeEach(() => {
@@ -64,6 +67,7 @@ describe('payments details controller', () => {
 
         await sendPaymentDetails(req, res, next)
 
+        expect(paymentsHelper.validateBasketPayments).toHaveBeenCalled()
         expect(mockPaymentsDetails).toHaveBeenCalled()
         expect(orderHelper.createOrderUsingOrderNo).toHaveBeenCalled()
         expect(res.locals.response).toEqual({

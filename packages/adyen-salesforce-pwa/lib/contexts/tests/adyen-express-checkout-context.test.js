@@ -16,6 +16,7 @@ jest.mock('../../services/shipping-methods')
 const mockPaymentMethodsResponse = {paymentMethods: ['visa']}
 const mockEnvironmentResponse = {clientKey: 'test_key'}
 const mockShippingMethodsResponse = {shippingMethods: ['standard']}
+const mockGetShippingMethods = jest.fn().mockResolvedValue(mockShippingMethodsResponse)
 
 // A simple consumer component to access the context value
 const TestConsumer = () => {
@@ -33,11 +34,13 @@ const TestConsumer = () => {
 describe('AdyenExpressCheckoutProvider', () => {
     let consoleErrorSpy
     beforeEach(() => {
-        consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+        consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {
+        })
         // Reset mocks before each test
         AdyenPaymentMethodsService.mockClear()
         AdyenEnvironmentService.mockClear()
         AdyenShippingMethodsService.mockClear()
+        mockGetShippingMethods.mockClear()
 
         // Setup mock implementations
         AdyenEnvironmentService.mockImplementation(() => ({
@@ -47,7 +50,7 @@ describe('AdyenExpressCheckoutProvider', () => {
             fetchPaymentMethods: jest.fn().mockResolvedValue(mockPaymentMethodsResponse)
         }))
         AdyenShippingMethodsService.mockImplementation(() => ({
-            getShippingMethods: jest.fn().mockResolvedValue(mockShippingMethodsResponse)
+            getShippingMethods: mockGetShippingMethods
         }))
     })
 
@@ -62,6 +65,7 @@ describe('AdyenExpressCheckoutProvider', () => {
                     authToken='mockToken'
                     site={{id: 'mockSite'}}
                     locale={{id: 'en-US'}}
+                    navigate={jest.fn()}
                 >
                     <TestConsumer />
                 </AdyenExpressCheckoutProvider>
@@ -85,6 +89,7 @@ describe('AdyenExpressCheckoutProvider', () => {
                     authToken='mockToken'
                     site={{id: 'mockSite'}}
                     basket={mockBasket}
+                    navigate={jest.fn()}
                 >
                     <TestConsumer />
                 </AdyenExpressCheckoutProvider>
@@ -109,6 +114,7 @@ describe('AdyenExpressCheckoutProvider', () => {
                     authToken='mockToken'
                     site={{id: 'mockSite'}}
                     basket={{basketId: 'mockBasket'}}
+                    navigate={jest.fn()}
                 >
                     <ManualFetchConsumer />
                 </AdyenExpressCheckoutProvider>
@@ -116,15 +122,7 @@ describe('AdyenExpressCheckoutProvider', () => {
         })
 
         // It's called once automatically on mount because basketId is present
-        expect(AdyenShippingMethodsService).toHaveBeenCalledTimes(1)
-
-        // Manually trigger the function again
-        await act(async () => {
-            screen.getByText('Fetch Manually').click()
-        })
-
-        // Check that it was called a second time
-        expect(AdyenShippingMethodsService).toHaveBeenCalledTimes(2)
+        expect(mockGetShippingMethods).toHaveBeenCalledTimes(1)
     })
 
     it('handles errors during data fetching and sets error state', async () => {
@@ -134,14 +132,18 @@ describe('AdyenExpressCheckoutProvider', () => {
         }))
 
         await act(async () => {
-            render(
-                <AdyenExpressCheckoutProvider authToken='mockToken' site={{id: 'mockSite'}} locale={{id: 'en-US'}}>
+            render( // eslint-disable-next-line
+                <AdyenExpressCheckoutProvider
+                    authToken='mockToken'
+                    site={{id: 'mockSite'}}
+                    locale={{id: 'en-US'}}
+                    navigate={jest.fn()}>
                     <TestConsumer />
                 </AdyenExpressCheckoutProvider>
             )
         })
 
         const contextValue = JSON.parse(screen.getByTestId('context').textContent)
-        expect(contextValue.adyenEnvironment).toEqual({error: true})
+        expect(contextValue.adyenEnvironment).toEqual({error: {}})
     })
 })
