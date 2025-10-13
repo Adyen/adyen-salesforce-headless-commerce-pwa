@@ -15,15 +15,15 @@ export const handleRedirects = (
     redirectResult,
     amazonCheckoutSessionId,
     checkout,
-    setAdyenPaymentInProgress
+    setIsLoading
 ) => {
     if (redirectResult) {
-        checkout.submitDetails({data: {details: {redirectResult}}})
+        checkout.submitDetails({details: {redirectResult}})
         return true
     }
 
     if (amazonCheckoutSessionId) {
-        setAdyenPaymentInProgress(true)
+        setIsLoading(true)
         const amazonPayContainer = document.createElement('div')
         const amazonPay = checkout.create('amazonpay', {
             amazonCheckoutSessionId,
@@ -47,10 +47,17 @@ export const mountCheckoutComponent = (
         const action = JSON.parse(atob(adyenAction))
         return checkout.createFromAction(action).mount(paymentContainer.current)
     }
-
     return new Dropin(checkout, {
         ...optionalDropinConfiguration,
-        paymentMethodsConfiguration
+        paymentMethodsConfiguration,
+        onSelect: (component) => {
+            const {props} = component
+            if (props?.type === 'paypal') {
+                if (window?.paypal?.firstElementChild) {
+                    window.paypal = undefined
+                }
+            }
+        },
     }).mount(paymentContainer.current)
 }
 
@@ -62,8 +69,7 @@ export const createCheckoutInstance = async ({
                                                  getTranslations,
                                                  locale,
                                                  setAdyenStateData,
-                                                 orderNo,
-                                                 navigate
+                                                 setIsLoading
                                              }) => {
     const translations = getTranslations()
     const checkoutConfig = getCheckoutConfig(
@@ -76,13 +82,27 @@ export const createCheckoutInstance = async ({
     return AdyenCheckout({
         ...checkoutConfig,
         order: adyenOrder,
-        onSubmit(state, element, actions) {
+        async onSubmit(state, element, actions) {
             const handler = pmc.onSubmit || pmc.card?.onSubmit
-            if (handler) handler(state, element, actions)
+            if (handler) {
+                setIsLoading(true)
+                try {
+                    await handler(state, element, actions)
+                } finally {
+                    setIsLoading(false)
+                }
+            }
         },
-        onAdditionalDetails(state, element, actions) {
+        async onAdditionalDetails(state, element, actions) {
             const handler = pmc.onAdditionalDetails || pmc.card?.onAdditionalDetails
-            if (handler) handler(state, element, actions)
+            if (handler) {
+                setIsLoading(true)
+                try {
+                    await handler(state, element, actions)
+                } finally {
+                    setIsLoading(false)
+                }
+            }
         },
         onChange: (state) => {
             if (state.isValid) {

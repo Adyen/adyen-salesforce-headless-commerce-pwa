@@ -11,11 +11,11 @@ const initialState = {
     adyenEnvironment: null,
     adyenStateData: null,
     adyenOrder: null,
-    adyenPaymentInProgress: false,
+    isLoading: false,
     orderNo: null,
     adyenAction: null,
     redirectResult: null,
-    amazonCheckoutSessionId: null
+    amazonCheckoutSessionId: null,
 }
 
 const reducer = (state, action) => {
@@ -28,8 +28,8 @@ const reducer = (state, action) => {
             return {...state, adyenStateData: action.payload}
         case 'SET_ADYEN_ORDER':
             return {...state, adyenOrder: action.payload}
-        case 'SET_ADYEN_PAYMENT_IN_PROGRESS':
-            return {...state, adyenPaymentInProgress: action.payload}
+        case 'SET_IS_LOADING':
+            return {...state, isLoading: action.payload}
         case 'SET_ORDER_NO':
             return {...state, orderNo: action.payload}
         case 'SET_ADYEN_ACTION':
@@ -57,7 +57,7 @@ const AdyenCheckoutProvider = ({
                                    page
                                }) => {
     const [state, dispatch] = useReducer(reducer, initialState)
-    const {adyenOrder} = state
+    const {adyenOrder, orderNo} = state
     const callPaymentMethodsOnPages = ['checkout']
 
     const {
@@ -120,12 +120,15 @@ const AdyenCheckoutProvider = ({
 
     useEffect(() => {
         if (basket?.c_orderData) {
-            dispatch({type: 'SET_ADYEN_ORDER', payload: JSON.parse(basket.c_orderData)})
+            const c_orderData = JSON.parse(basket.c_orderData)
+            if (c_orderData?.orderData && c_orderData?.orderData !== state.adyenOrder?.orderData) {
+                dispatch({type: 'SET_ADYEN_ORDER', payload: c_orderData})
+            }
         }
     }, [basket?.c_orderData])
 
-    const setAdyenPaymentInProgress = useCallback(
-        (data) => dispatch({type: 'SET_ADYEN_PAYMENT_IN_PROGRESS', payload: data}),
+    const setIsLoading = useCallback(
+        (data) => dispatch({type: 'SET_IS_LOADING', payload: data}),
         [dispatch]
     )
     const setAdyenStateData = useCallback(
@@ -152,6 +155,7 @@ const AdyenCheckoutProvider = ({
         () => ({
             adyenPaymentMethods: state.adyenPaymentMethods,
             adyenOrder,
+            orderNo,
             isCustomerRegistered,
             token: authToken,
             site,
@@ -161,6 +165,7 @@ const AdyenCheckoutProvider = ({
             setAdyenOrder,
             setAdyenAction,
             setOrderNo,
+            setIsLoading,
             navigate,
             adyenConfig
         }),
@@ -173,7 +178,12 @@ const AdyenCheckoutProvider = ({
             basket,
             returnUrl,
             customerId,
-            setAdyenOrder, setAdyenAction, setOrderNo, navigate, adyenConfig
+            setAdyenOrder,
+            setAdyenAction,
+            setOrderNo,
+            setIsLoading,
+            navigate,
+            adyenConfig
         ]
     )
 
@@ -190,7 +200,7 @@ const AdyenCheckoutProvider = ({
             locale,
             navigate,
             optionalDropinConfiguration,
-            setAdyenPaymentInProgress,
+            setIsLoading,
             setAdyenOrder,
             setAdyenAction,
             setOrderNo,
@@ -204,7 +214,7 @@ const AdyenCheckoutProvider = ({
             locale,
             navigate,
             optionalDropinConfiguration,
-            setAdyenPaymentInProgress,
+            setIsLoading,
             setAdyenOrder,
             setAdyenAction,
             setOrderNo,

@@ -21,8 +21,6 @@ const AdyenCheckoutComponent = (props) => {
         adyenOrder,
         optionalDropinConfiguration,
         getPaymentMethodsConfiguration,
-        adyenPaymentInProgress,
-        setAdyenPaymentInProgress,
         getTranslations,
         locale,
         setAdyenStateData,
@@ -30,7 +28,9 @@ const AdyenCheckoutComponent = (props) => {
         navigate,
         adyenAction,
         redirectResult,
-        amazonCheckoutSessionId
+        amazonCheckoutSessionId,
+        isLoading,
+        setIsLoading,
     } = useAdyenCheckout()
 
     const paymentContainer = useRef(null)
@@ -40,7 +40,7 @@ const AdyenCheckoutComponent = (props) => {
     useEffect(() => {
         const initializeCheckout = async () => {
             // Guard against running initialization when not ready
-            if (!adyenEnvironment || !paymentContainer.current || adyenPaymentInProgress) {
+            if (!adyenEnvironment || !paymentContainer.current) {
                 return
             }
             // The PayPal namespace needs to be cleared before checkout is initialized.
@@ -53,7 +53,11 @@ const AdyenCheckoutComponent = (props) => {
                 dropinRef.current.unmount()
                 dropinRef.current = null
             }
-            checkoutRef.current = null
+            if (checkoutRef.current && adyenOrder?.orderData) {
+                checkoutRef.current.update({order: adyenOrder})
+            }
+
+            // checkoutRef.current = null
 
             // 1. Fetch the payment methods configuration
             const paymentMethodsConfiguration = await getPaymentMethodsConfiguration({
@@ -75,7 +79,8 @@ const AdyenCheckoutComponent = (props) => {
                 locale,
                 setAdyenStateData,
                 orderNo,
-                navigate
+                navigate,
+                setIsLoading
             })
 
             // 3. Handle URL query parameters and mount the checkout component
@@ -83,7 +88,6 @@ const AdyenCheckoutComponent = (props) => {
                 redirectResult,
                 amazonCheckoutSessionId,
                 checkoutRef.current,
-                setAdyenPaymentInProgress
             )
 
             if (!isRedirect) {
@@ -98,7 +102,6 @@ const AdyenCheckoutComponent = (props) => {
         }
 
         initializeCheckout()
-
         // Cleanup function to unmount the dropin when the component unmounts or dependencies change
         return () => {
             if (dropinRef.current) {
@@ -107,41 +110,11 @@ const AdyenCheckoutComponent = (props) => {
             }
             checkoutRef.current = null
         }
-    }, [adyenEnvironment, adyenPaymentMethods, adyenAction, redirectResult, amazonCheckoutSessionId])
-
-    // This effect will run only when the adyenOrder state changes.
-    useEffect(() => {
-        if (checkoutRef.current) {
-            // When a partial payment is made (e.g., with a gift card),
-            // the checkout session must be updated with the new order details.
-            checkoutRef.current.update({order: adyenOrder})
-
-            if (dropinRef.current) {
-                dropinRef.current.unmount()
-            }
-
-            // We pass empty URLSearchParams because we are not handling a redirect here.
-            getPaymentMethodsConfiguration({
-                beforeSubmit,
-                afterSubmit,
-                beforeAdditionalDetails,
-                afterAdditionalDetails,
-                onError
-            }).then((paymentMethodsConfiguration) => {
-                dropinRef.current = mountCheckoutComponent(
-                    null, // No action from URL here
-                    checkoutRef.current,
-                    paymentContainer,
-                    paymentMethodsConfiguration,
-                    optionalDropinConfiguration
-                )
-            })
-        }
-    }, [adyenOrder?.orderData])
+    }, [adyenEnvironment, adyenAction, adyenOrder?.orderData])
 
     return (
         <>
-            {showLoading && spinner && (
+            {(isLoading || showLoading) && spinner && (
                 <div className='adyen-checkout-spinner-container'>{spinner}</div>
             )}
             <div ref={paymentContainer}></div>

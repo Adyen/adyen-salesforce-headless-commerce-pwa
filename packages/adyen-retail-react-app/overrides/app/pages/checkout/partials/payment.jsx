@@ -20,16 +20,8 @@ import {useToast} from '@salesforce/retail-react-app/app/hooks/use-toast'
 import {useShopperBasketsMutation} from '@salesforce/commerce-sdk-react'
 import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 import {useCheckout} from '@salesforce/retail-react-app/app/pages/checkout/util/checkout-context'
-import {
-    getCreditCardIcon,
-    getMaskCreditCardNumber,
-    getPaymentInstrumentCardType
-} from '@salesforce/retail-react-app/app/utils/cc-utils'
-import {
-    ToggleCard,
-    ToggleCardEdit,
-    ToggleCardSummary
-} from '@salesforce/retail-react-app/app/components/toggle-card'
+import {getCreditCardIcon} from '@salesforce/retail-react-app/app/utils/cc-utils'
+import {ToggleCard, ToggleCardEdit} from '@salesforce/retail-react-app/app/components/toggle-card'
 import ShippingAddressSelection from '@salesforce/retail-react-app/app/pages/checkout/partials/shipping-address-selection'
 import AddressDisplay from '@salesforce/retail-react-app/app/components/address-display'
 import {PromoCode, usePromoCode} from '@salesforce/retail-react-app/app/components/promo-code'
@@ -37,6 +29,7 @@ import {API_ERROR_MESSAGE} from '@salesforce/retail-react-app/app/constants'
 import {isPickupShipment} from '@salesforce/retail-react-app/app/utils/shipment-utils'
 /* -----------------Adyen Begin ------------------------ */
 import {AdyenCheckout, useAdyenCheckout} from '@adyen/adyen-salesforce-pwa'
+import LoadingSpinner from '@salesforce/retail-react-app/app/components/loading-spinner'
 /* -----------------Adyen End ------------------------ */
 
 const Payment = () => {
@@ -61,15 +54,10 @@ const Payment = () => {
         }
     }, [isPickupOnly])
 
-    const {mutateAsync: addPaymentInstrumentToBasket} = useShopperBasketsMutation(
-        'addPaymentInstrumentToBasket'
-    )
     const {mutateAsync: updateBillingAddressForBasket} = useShopperBasketsMutation(
         'updateBillingAddressForBasket'
     )
-    const {mutateAsync: removePaymentInstrumentFromBasket} = useShopperBasketsMutation(
-        'removePaymentInstrumentFromBasket'
-    )
+
     const showToast = useToast()
     const showError = () => {
         showToast({
@@ -77,8 +65,9 @@ const Payment = () => {
             status: 'error'
         })
     }
+    const spinner = <LoadingSpinner wrapperStyles={{height: '100vh'}} />
     const {adyenPaymentMethods} = useAdyenCheckout()
-    const {step, STEPS, goToStep, goToNextStep} = useCheckout()
+    const {step, STEPS} = useCheckout()
 
     const billingAddressForm = useForm({
         mode: 'onChange',
@@ -90,29 +79,6 @@ const Payment = () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {removePromoCode, ...promoCodeProps} = usePromoCode()
 
-    const paymentMethodForm = useForm()
-
-    const onPaymentSubmit = async (formValue) => {
-        // The form gives us the expiration date as `MM/YY` - so we need to split it into
-        // month and year to submit them as individual fields.
-        const [expirationMonth, expirationYear] = formValue.expiry.split('/')
-
-        const paymentInstrument = {
-            paymentMethodId: 'CREDIT_CARD',
-            paymentCard: {
-                holder: formValue.holder,
-                maskedNumber: getMaskCreditCardNumber(formValue.number),
-                cardType: getPaymentInstrumentCardType(formValue.cardType),
-                expirationMonth: parseInt(expirationMonth),
-                expirationYear: parseInt(`20${expirationYear}`)
-            }
-        }
-
-        return addPaymentInstrumentToBasket({
-            parameters: {basketId: basket?.basketId},
-            body: paymentInstrument
-        })
-    }
     const onBillingSubmit = async () => {
         const isFormValid = await billingAddressForm.trigger()
 
@@ -130,32 +96,6 @@ const Payment = () => {
             parameters: {basketId: basket.basketId}
         })
     }
-    const onPaymentRemoval = async () => {
-        try {
-            await removePaymentInstrumentFromBasket({
-                parameters: {
-                    basketId: basket.basketId,
-                    paymentInstrumentId: appliedPayment.paymentInstrumentId
-                }
-            })
-        } catch (e) {
-            showError()
-        }
-    }
-
-    const onSubmit = paymentMethodForm.handleSubmit(async (paymentFormValues) => {
-        if (!appliedPayment) {
-            await onPaymentSubmit(paymentFormValues)
-        }
-
-        // If successful `onBillingSubmit` returns the updated basket. If the form was invalid on
-        // submit, `undefined` is returned.
-        const updatedBasket = await onBillingSubmit()
-
-        if (updatedBasket) {
-            goToNextStep()
-        }
-    })
 
     const billingAddressAriaLabel = defineMessage({
         defaultMessage: 'Billing Address Form',
@@ -166,14 +106,8 @@ const Payment = () => {
         <ToggleCard
             id="step-3"
             title={formatMessage({defaultMessage: 'Payment', id: 'checkout_payment.title.payment'})}
-            editing={step === STEPS.PAYMENT}
+            editing={step === STEPS.PAYMENT || step === STEPS.REVIEW_ORDER}
             isLoading={!adyenPaymentMethods || billingAddressForm.formState.isSubmitting}
-            disabled={appliedPayment == null}
-            onEdit={() => goToStep(STEPS.PAYMENT)}
-            editLabel={formatMessage({
-                defaultMessage: 'Edit Payment Info',
-                id: 'toggle_card.action.editPaymentInfo'
-            })}
         >
             <ToggleCardEdit>
                 <Box mt={-2} mb={4}>
@@ -181,7 +115,13 @@ const Payment = () => {
                 </Box>
 
                 <Stack spacing={6}>
-                    {adyenPaymentMethods && <AdyenCheckout beforeSubmit={[onBillingSubmit]} />}
+                    {adyenPaymentMethods && (
+                        <AdyenCheckout
+                            beforeSubmit={[onBillingSubmit]}
+                            onError={[showError]}
+                            spinner={spinner}
+                        />
+                    )}
 
                     <Divider borderColor="gray.100" />
 
@@ -226,26 +166,6 @@ const Payment = () => {
                     )}
                 </Stack>
             </ToggleCardEdit>
-
-            <ToggleCardSummary>
-                <Stack spacing={6}>
-                    {adyenPaymentMethods && <AdyenCheckout beforeSubmit={[onBillingSubmit]} />}
-
-                    <Divider borderColor="gray.100" />
-
-                    {selectedBillingAddress && (
-                        <Stack spacing={2}>
-                            <Heading as="h3" fontSize="md">
-                                <FormattedMessage
-                                    defaultMessage="Billing Address"
-                                    id="checkout_payment.heading.billing_address"
-                                />
-                            </Heading>
-                            <AddressDisplay address={selectedBillingAddress} />
-                        </Stack>
-                    )}
-                </Stack>
-            </ToggleCardSummary>
         </ToggleCard>
     )
 }

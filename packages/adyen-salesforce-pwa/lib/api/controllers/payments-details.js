@@ -2,7 +2,7 @@ import Logger from '../models/logger'
 import {v4 as uuidv4} from 'uuid'
 import {AdyenError} from '../models/AdyenError'
 import {ERROR_MESSAGE} from '../../utils/constants.mjs'
-import {createCheckoutResponse, revertCheckoutState} from '../helpers/paymentsHelper.js'
+import {createCheckoutResponse, revertCheckoutState, validateBasketPayments} from '../helpers/paymentsHelper.js'
 import {createOrderUsingOrderNo} from "../helpers/orderHelper.js";
 import AdyenClientProvider from "../models/adyenClientProvider";
 
@@ -39,6 +39,12 @@ async function sendPaymentDetails(req, res, next) {
 
         }
         const {basket, siteId, basketService} = adyenContext
+        const amount = basket.c_amount ? JSON.parse(basket.c_amount) : ''
+        const paymentMethod = basket.c_paymentMethod ? JSON.parse(basket.c_paymentMethod) : ''
+
+        Logger.info('sendPaymentDetails', 'validateBasketPayments')
+        // Validate that the basket has not changed during a partial payment flow.
+        await validateBasketPayments(adyenContext, amount, paymentMethod)
         const checkout = new AdyenClientProvider(adyenContext).getPaymentsApi()
         const response = await checkout.paymentsDetails(data, {
             idempotencyKey: uuidv4()
@@ -53,15 +59,13 @@ async function sendPaymentDetails(req, res, next) {
             throw new AdyenError(ERROR_MESSAGE.PAYMENTS_DETAILS_NOT_SUCCESSFUL, 400, response)
         }
 
-        if (!checkoutResponse.isFinal && checkoutResponse.isSuccessful && response.order) {
+        if (!checkoutResponse.isFinal && checkoutResponse.isSuccessful && response?.order?.orderData) {
             await basketService.update({
                 c_orderData: JSON.stringify(response.order)
             })
         }
         if (checkoutResponse.isFinal && checkoutResponse.isSuccessful) {
             // The payment is now fully authorized, so we can create the final order.
-            const amount = basket.c_amount ? JSON.parse(basket.c_amount) : ''
-            const paymentMethod = basket.c_paymentMethod ? JSON.parse(basket.c_paymentMethod) : ''
             await basketService.addPaymentInstrument(amount, paymentMethod, response?.pspReference)
             await createOrderUsingOrderNo(adyenContext)
             Logger.info('sendPaymentDetails', `order created: ${checkoutResponse.merchantReference}`)

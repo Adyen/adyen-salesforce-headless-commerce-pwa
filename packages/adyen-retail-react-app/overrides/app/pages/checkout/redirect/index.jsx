@@ -40,7 +40,7 @@ const AdyenCheckoutRedirectContainer = () => {
             navigate={navigate}
             page={pageTypes.REDIRECT}
         >
-            <AdyenCheckout showLoading spinner />
+            <AdyenCheckout showLoading spinner={spinner} />
         </AdyenCheckoutProvider>
     )
 }

@@ -22,7 +22,9 @@ import {getApplicationInfo} from "../../utils/getApplicationInfo.mjs";
 async function _cleanupBasket(adyenContext) {
     await adyenContext.basketService.update({
         c_orderData: '',
-        c_giftCardCheckBalance: ''
+        c_giftCardCheckBalance: '',
+        c_paymentMethod: '',
+        c_amount: ''
     })
     await adyenContext.basketService.removeAllPaymentInstruments()
 }
@@ -53,15 +55,6 @@ export async function cancelAdyenOrder(adyenContext, order) {
 
     Logger.info('cancelAdyenOrder', 'success')
     return response
-}
-
-/**
- * Checks if the current payment is a partial payment using a gift card.
- * @param {object} data - The payment state data from the client.
- * @returns {boolean} True if it is a partial gift card payment.
- */
-export function isPartialPayment(data) {
-    return Object.hasOwn(data, 'order')
 }
 
 /**
@@ -207,22 +200,26 @@ export function createCheckoutResponse(response, orderNumber) {
 /**
  * Validates that the sum of all payment instruments and the current payment request amount
  * equals the basket's total order amount.
- * @param {object} paymentRequest - The Adyen payment request object.
+ * @param {object} adyenContext - The request context from `res.locals.adyen`.
+ * @param {object} [amount] - The Adyen payment request amount.
+ * @param {object} [paymentMethod] - The Adyen payment request paymentMethod.
  * @param {object} adyenContext - The request context from `res.locals.adyen`.
  * @throws {AdyenError} If the amounts do not match.
  */
-export async function validateBasketPayments(paymentRequest, adyenContext) {
+export async function validateBasketPayments(adyenContext, amount, paymentMethod) {
     const {basket = {}} = adyenContext
     const adyenOrderData = JSON.parse(basket.c_orderData || '{}')
     const isPartialPayment = !!adyenOrderData?.orderData
+    const remainingAmountValue = adyenOrderData?.remainingAmount?.value ?? 0
+    const isGiftCardPayment = paymentMethod?.type === PAYMENT_METHOD_TYPES.GIFT_CARD
     const basketTotalInMinorUnits = getCurrencyValueForApi(basket.orderTotal, basket.currency)
 
     if (isPartialPayment) {
         const adyenOrderAmount = adyenOrderData.amount.value
         // If basket total has changed, cancel the Adyen order and throw to restart the flow.
         if (adyenOrderAmount !== basketTotalInMinorUnits) {
-            await cancelAdyenOrder(adyenContext, adyenOrderData)
-            throw new AdyenError(ERROR_MESSAGE.BASKET_CHANGED, 409)
+            // The controller will catch this and call revertCheckoutState
+            throw new AdyenError(ERROR_MESSAGE.BASKET_CHANGED, 409, {basketChanged: true})
         }
     }
 
@@ -235,12 +232,16 @@ export async function validateBasketPayments(paymentRequest, adyenContext) {
         basket.currency
     )
 
-    const finalAmount = existingInstrumentsTotalInMinorUnits + paymentRequest.amount.value
+    const finalAmount = existingInstrumentsTotalInMinorUnits + (amount?.value ?? 0)
 
-    // The sum of payments should not exceed the basket total.
-    // It can be less than the total during a partial payment flow.
-    if (finalAmount > basketTotalInMinorUnits) {
-        throw new AdyenError(ERROR_MESSAGE.AMOUNTS_DONT_MATCH, 400)
+    if (isPartialPayment && isGiftCardPayment && remainingAmountValue !== amount?.value) {
+        // For partial payments, the sum of payments should not exceed the basket total.
+        if (finalAmount > basketTotalInMinorUnits) {
+            throw new AdyenError(ERROR_MESSAGE.AMOUNTS_DONT_MATCH, 409)
+        }
+    } else if (finalAmount !== basketTotalInMinorUnits) {
+        // For a single, final payment, the amount must match the basket total exactly.
+        throw new AdyenError(ERROR_MESSAGE.AMOUNTS_DONT_MATCH, 409)
     }
 }
 
@@ -310,7 +311,7 @@ export async function createPaymentRequestObject(data, adyenContext, req) {
     const {basket, adyenConfig} = adyenContext
     Logger.info('createPaymentRequestObject', 'start')
     let amountValue = getCurrencyValueForApi(basket.orderTotal, basket.currency)
-    if (isPartialPayment(data)) {
+    if (data?.order?.orderData) {
         Logger.info('createPaymentRequestObject', 'partial payment')
         amountValue = amountForPartialPayments(data, basket)
     }
@@ -355,6 +356,11 @@ export async function createPaymentRequestObject(data, adyenContext, req) {
         paymentRequest.shopperInteraction = SHOPPER_INTERACTIONS.CONT_AUTH
     } else {
         paymentRequest.shopperInteraction = SHOPPER_INTERACTIONS.ECOMMERCE
+    }
+
+    // The order object should only be included if it contains valid orderData.
+    if (paymentRequest.order && !paymentRequest.order.orderData) {
+        delete paymentRequest.order
     }
 
     paymentRequest.additionalData = getAdditionalData(basket)

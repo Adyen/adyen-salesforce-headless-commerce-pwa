@@ -45,17 +45,16 @@ async function sendPayments(req, res, next) {
             throw new AdyenError(ERROR_MESSAGE.ADYEN_CONTEXT_NOT_FOUND, 500)
 
         }
-        const checkout = new AdyenClientProvider(adyenContext).getPaymentsApi()
 
         if (data.paymentType === 'express') {
             await adyenContext.basketService.addShopperData(data)
         }
         const paymentRequest = await createPaymentRequestObject(data, adyenContext, req)
-
         Logger.info('sendPayments', 'validateBasketPayments')
-        // Pass the entire `res.locals.adyen` context for a cleaner signature
-        await validateBasketPayments(paymentRequest, adyenContext)
+        // Validate the basket and the payment amounts.
+        await validateBasketPayments(adyenContext, paymentRequest.amount, paymentRequest.paymentMethod)
 
+        const checkout = new AdyenClientProvider(adyenContext).getPaymentsApi()
         const response = await checkout.payments(paymentRequest, {
             idempotencyKey: uuidv4()
         })
@@ -78,7 +77,7 @@ async function sendPayments(req, res, next) {
             })
         }
 
-        if (!checkoutResponse.isFinal && checkoutResponse.isSuccessful && response.order) {
+        if (!checkoutResponse.isFinal && checkoutResponse.isSuccessful && response?.order?.orderData) {
             await adyenContext.basketService.update({
                 c_orderData: JSON.stringify(response.order)
             })

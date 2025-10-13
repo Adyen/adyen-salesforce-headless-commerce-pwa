@@ -55,7 +55,7 @@ export async function failOrderAndReopenBasket(adyenContext, orderNo) {
  */
 export async function createOrderUsingOrderNo(adyenContext) {
     const {authorization, basket, customerId} = adyenContext
-    const {c_orderNo: orderNo, basketId} = basket
+    const {c_orderNo: orderNo, basketId, currency} = basket
     const shopperOrders = createShopperOrderClient(authorization)
     const order = await shopperOrders.getOrder({
         parameters: {
@@ -66,7 +66,7 @@ export async function createOrderUsingOrderNo(adyenContext) {
         throw new AdyenError(ERROR_MESSAGE.ORDER_ALREADY_EXISTS, 409)
     }
     const customOrderApi = new CustomShopperOrderApiClient()
-    return await customOrderApi.createOrder(authorization, basketId, customerId, orderNo)
+    return await customOrderApi.createOrder(authorization, basketId, customerId, orderNo, currency)
 }
 
 /**
