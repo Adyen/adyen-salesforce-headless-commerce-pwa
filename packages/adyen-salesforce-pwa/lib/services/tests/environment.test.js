@@ -11,45 +11,52 @@ jest.mock('../api', () => {
 
 describe('AdyenEnvironmentService', () => {
     let adyenService
-    let mockToken = 'mockToken'
-    let mockSite = {id: 'RefArch'}
+    const mockToken = 'mockToken'
+    const mockSite = {id: 'RefArch'}
 
     beforeEach(() => {
-        adyenService = new AdyenEnvironmentService(mockToken, mockSite)
-    })
-
-    afterEach(() => {
         jest.clearAllMocks()
+        adyenService = new AdyenEnvironmentService(mockToken, undefined, undefined, mockSite)
     })
 
-    it('should create an instance of AdyenEnvironmentService with ApiClient', () => {
-        expect(ApiClient).toHaveBeenCalledWith('/api/adyen/environment', mockToken, mockSite)
+    it('should create an instance of ApiClient with correct parameters', () => {
+        expect(ApiClient).toHaveBeenCalledWith(
+            '/api/adyen/environment',
+            mockToken,
+            undefined, // customerId
+            undefined, // basketId
+            mockSite
+        )
     })
 
-    it('should fetch environment successfully', async () => {
-        const mockResponse = {environmentData: 'some data'}
-        const mockJsonPromise = Promise.resolve(mockResponse)
-        const mockFetchPromise = Promise.resolve({
-            json: () => mockJsonPromise,
-            status: 200
+    describe('fetchEnvironment', () => {
+        it('should fetch environment successfully and return JSON', async () => {
+            const mockResponse = {ADYEN_CLIENT_KEY: 'test_key'}
+            const mockJsonPromise = Promise.resolve(mockResponse)
+            const mockFetchPromise = Promise.resolve({
+                json: () => mockJsonPromise,
+                status: 200
+            })
+
+            adyenService.apiClient.get.mockResolvedValueOnce(mockFetchPromise)
+
+            const environmentData = await adyenService.fetchEnvironment()
+
+            expect(adyenService.apiClient.get).toHaveBeenCalled()
+            expect(environmentData).toEqual(mockResponse)
         })
 
-        adyenService.apiClient.get.mockResolvedValueOnce(mockFetchPromise)
+        it('should throw an error when the API call fails', async () => {
+            const mockFetchPromise = Promise.resolve({
+                status: 500,
+                statusText: 'Internal Server Error'
+            })
 
-        const environmentData = await adyenService.fetchEnvironment()
+            adyenService.apiClient.get.mockResolvedValueOnce(mockFetchPromise)
 
-        expect(adyenService.apiClient.get).toHaveBeenCalled()
-        expect(environmentData).toEqual(mockResponse)
-    })
-
-    it('should throw an error when fetchEnvironment gets a status >= 300', async () => {
-        const mockFetchPromise = Promise.resolve({
-            status: 400,
-            statusText: 'Bad Request'
+            await expect(adyenService.fetchEnvironment()).rejects.toThrow(
+                '[object Object]'
+            )
         })
-
-        adyenService.apiClient.get.mockResolvedValueOnce(mockFetchPromise)
-
-        await expect(adyenService.fetchEnvironment()).rejects.toThrow('[object Object]')
     })
 })

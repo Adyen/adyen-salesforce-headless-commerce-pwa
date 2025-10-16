@@ -1,35 +1,45 @@
-import {AdyenShippingMethodsService} from '../shipping-methods'
+import {AdyenShippingMethodsService} from '../shipping-methods.js'
 import {ApiClient} from '../api'
 
 jest.mock('../api', () => {
     return {
         ApiClient: jest.fn().mockImplementation(() => ({
+            get: jest.fn(),
             post: jest.fn()
         }))
     }
 })
 
 describe('AdyenShippingMethodsService', () => {
-    let adyenService, apiClientMock
+    let adyenService
+    const mockToken = 'test-token'
+    const mockCustomerId = 'test-customer'
+    const mockBasketId = 'test-basket'
+    const mockSite = {id: 'RefArch'}
 
     beforeEach(() => {
-        apiClientMock = {
-            get: jest.fn().mockResolvedValue({}),
-            post: jest.fn().mockResolvedValue({})
-        }
-        ApiClient.mockImplementation(() => apiClientMock)
-        adyenService = new AdyenShippingMethodsService('token', 'site')
+        jest.clearAllMocks()
+        adyenService = new AdyenShippingMethodsService(
+            mockToken,
+            mockCustomerId,
+            mockBasketId,
+            mockSite
+        )
     })
 
     it('should create an instance with the correct properties', () => {
         expect(adyenService.baseUrl).toBe('/api/adyen/shipping-methods')
-        expect(adyenService.apiClient).toBe(apiClientMock)
+        expect(ApiClient).toHaveBeenCalledWith(
+            '/api/adyen/shipping-methods',
+            mockToken,
+            mockCustomerId,
+            mockBasketId,
+            mockSite
+        )
     })
 
     describe('getShippingMethods', () => {
         it('should call apiClient get method with correct parameters and return response', async () => {
-            const basketId = 'basket-id'
-            const expectedHeaders = {basketid: basketId}
             const mockResponse = {}
             const mockJsonPromise = Promise.resolve(mockResponse)
             const mockFetchPromise = Promise.resolve({
@@ -37,18 +47,15 @@ describe('AdyenShippingMethodsService', () => {
                 status: 200
             })
 
-            apiClientMock.get.mockResolvedValueOnce(mockFetchPromise)
+            adyenService.apiClient.get.mockResolvedValueOnce(mockFetchPromise)
 
-            const result = await adyenService.getShippingMethods(basketId)
+            const result = await adyenService.getShippingMethods()
 
-            expect(apiClientMock.get).toHaveBeenCalledWith({
-                headers: expectedHeaders
-            })
+            expect(adyenService.apiClient.get).toHaveBeenCalledWith()
             expect(result).toEqual(mockResponse)
         })
 
         it('should throw an error if response status is >= 300', async () => {
-            const basketId = 'basket-id'
             const mockFetchPromise = Promise.resolve({
                 status: 400,
                 statusText: 'Bad Request'
@@ -56,18 +63,14 @@ describe('AdyenShippingMethodsService', () => {
 
             adyenService.apiClient.get.mockResolvedValueOnce(mockFetchPromise)
 
-            await expect(adyenService.getShippingMethods(basketId)).rejects.toThrow(
-                '[object Object]'
-            )
+            await expect(adyenService.getShippingMethods()).rejects.toThrow('[object Object]')
         })
     })
 
     describe('updateShippingMethod', () => {
         it('should call apiClient post method with correct parameters and return response', async () => {
             const shippingMethodId = 'method-id'
-            const basketId = 'basket-id'
             const expectedBody = {shippingMethodId}
-            const expectedHeaders = {basketid: basketId}
             const mockResponse = {}
             const mockJsonPromise = Promise.resolve(mockResponse)
             const mockFetchPromise = Promise.resolve({
@@ -75,20 +78,18 @@ describe('AdyenShippingMethodsService', () => {
                 status: 200
             })
 
-            apiClientMock.post.mockResolvedValueOnce(mockFetchPromise)
+            adyenService.apiClient.post.mockResolvedValueOnce(mockFetchPromise)
 
-            const result = await adyenService.updateShippingMethod(shippingMethodId, basketId)
+            const result = await adyenService.updateShippingMethod(shippingMethodId)
 
-            expect(apiClientMock.post).toHaveBeenCalledWith({
-                body: JSON.stringify(expectedBody),
-                headers: expectedHeaders
+            expect(adyenService.apiClient.post).toHaveBeenCalledWith({
+                body: JSON.stringify(expectedBody)
             })
             expect(result).toEqual(mockResponse)
         })
 
         it('should throw an error if response status is >= 300', async () => {
             const shippingMethodId = 'method-id'
-            const basketId = 'basket-id'
             const mockFetchPromise = Promise.resolve({
                 status: 400,
                 statusText: 'Bad Request'
@@ -96,9 +97,9 @@ describe('AdyenShippingMethodsService', () => {
 
             adyenService.apiClient.post.mockResolvedValueOnce(mockFetchPromise)
 
-            await expect(
-                adyenService.updateShippingMethod(shippingMethodId, basketId)
-            ).rejects.toThrow('[object Object]')
+            await expect(adyenService.updateShippingMethod(shippingMethodId)).rejects.toThrow(
+                '[object Object]'
+            )
         })
     })
 })

@@ -1,110 +1,129 @@
 import {ApiClient} from '../api'
-import {ADYEN_API_BASEPATH} from '../../../__mocks__/adyenApi/constants'
+
+// Mock the global fetch API
+global.fetch = jest.fn()
 
 describe('ApiClient', () => {
+    const mockUrl = '/api/test'
+    const mockToken = 'mockToken'
+    const mockCustomerId = 'mockCustomerId'
+    const mockBasketId = 'mockBasketId'
+    const mockSite = {id: 'RefArch'}
     let apiClient
-    let mockSite = {id: 'RefArch'}
 
-    describe('constructor validation', () => {
+    beforeEach(() => {
+        jest.clearAllMocks()
+        fetch.mockResolvedValue({
+            ok: true,
+            json: () => Promise.resolve({data: 'success'})
+        })
+        apiClient = new ApiClient(mockUrl, mockToken, mockCustomerId, mockBasketId, mockSite)
+    })
+
+    describe('constructor', () => {
         it('should throw an error if url is not provided', () => {
-            expect(() => new ApiClient(null, 'mockToken', mockSite)).toThrow(
+            expect(() => new ApiClient(null, mockToken, mockCustomerId, mockBasketId, mockSite)).toThrow(
                 'ApiClient constructor: url is required'
             )
         })
 
         it('should throw an error if token is not provided', () => {
-            expect(() => new ApiClient(ADYEN_API_BASEPATH, null, mockSite)).toThrow(
+            expect(() => new ApiClient(mockUrl, null, mockCustomerId, mockBasketId, mockSite)).toThrow(
                 'ApiClient constructor: token is required'
             )
         })
 
         it('should throw an error if site is not provided', () => {
-            expect(() => new ApiClient(ADYEN_API_BASEPATH, 'mockToken', null)).toThrow(
+            expect(() => new ApiClient(mockUrl, mockToken, mockCustomerId, mockBasketId, null)).toThrow(
                 'ApiClient constructor: site object with id property is required'
             )
         })
 
-        it('should throw an error if site object is missing id property', () => {
-            const mockSiteWithoutId = {name: 'RefArch'}
-            expect(() => new ApiClient(ADYEN_API_BASEPATH, 'mockToken', mockSiteWithoutId)).toThrow(
+        it('should throw an error if site.id is not provided', () => {
+            expect(() => new ApiClient(mockUrl, mockToken, mockCustomerId, mockBasketId, {})).toThrow(
                 'ApiClient constructor: site object with id property is required'
             )
+        })
+
+        it('should instantiate correctly with all required arguments', () => {
+            expect(apiClient.baseUrl).toBe(mockUrl)
+            expect(apiClient.token).toBe(mockToken)
+            expect(apiClient.customerId).toBe(mockCustomerId)
+            expect(apiClient.basketId).toBe(mockBasketId)
+            expect(apiClient.site).toEqual(mockSite)
+        })
+
+        it('should instantiate correctly even if customerId and basketId are optional', () => {
+            const client = new ApiClient(mockUrl, mockToken, undefined, undefined, mockSite)
+            expect(client.customerId).toBeUndefined()
+            expect(client.basketId).toBeUndefined()
         })
     })
 
-    describe('with valid constructor arguments', () => {
-        beforeEach(() => {
-            apiClient = new ApiClient(ADYEN_API_BASEPATH, 'mockToken', mockSite)
-        })
+    describe('get', () => {
+        it('should make a GET request with correct URL and headers', async () => {
+            await apiClient.get()
 
-        afterEach(() => {
-            jest.restoreAllMocks()
-        })
-
-        it('should construct ApiClient with url, token, and site', () => {
-            expect(apiClient.baseUrl).toBe(ADYEN_API_BASEPATH)
-            expect(apiClient.token).toBe('mockToken')
-            expect(apiClient.site).toBe(mockSite)
-        })
-
-        it('should call fetch with correct parameters for GET request', async () => {
-            const mockResponse = {data: 'some data'}
-            const mockJsonPromise = Promise.resolve(mockResponse)
-            const mockFetchPromise = Promise.resolve({
-                json: () => mockJsonPromise,
-                ok: true
-            })
-
-            jest.spyOn(global, 'fetch').mockImplementation(() => mockFetchPromise)
-
-            const options = {
-                queryParams: {param: 'value'},
-                headers: {customHeader: 'customValue'}
-            }
-
-            await apiClient.get(options)
-
-            expect(global.fetch).toHaveBeenCalledWith(
-                `${ADYEN_API_BASEPATH}?siteId=${mockSite.id}&param=value`,
+            const expectedUrl = `${mockUrl}?siteId=${mockSite.id}`
+            expect(fetch).toHaveBeenCalledWith(
+                expectedUrl,
                 expect.objectContaining({
                     method: 'get',
-                    body: null,
                     headers: {
                         'Content-Type': 'application/json',
-                        authorization: `Bearer mockToken`,
-                        customHeader: 'customValue'
+                        authorization: `Bearer ${mockToken}`,
+                        customerid: mockCustomerId,
+                        basketid: mockBasketId
                     }
                 })
             )
         })
 
-        it('should call fetch with correct parameters for POST request', async () => {
-            const mockResponse = {success: true}
-            const mockJsonPromise = Promise.resolve(mockResponse)
-            const mockFetchPromise = Promise.resolve({
-                json: () => mockJsonPromise,
-                ok: true
-            })
+        it('should include additional query parameters', async () => {
+            await apiClient.get({queryParams: {locale: 'en-US'}})
 
-            jest.spyOn(global, 'fetch').mockImplementation(() => mockFetchPromise)
+            const expectedUrl = `${mockUrl}?siteId=${mockSite.id}&locale=en-US`
+            expect(fetch).toHaveBeenCalledWith(expectedUrl, expect.any(Object))
+        })
 
-            const options = {
-                body: JSON.stringify({key: 'value'}),
-                headers: {customHeader: 'customValue'}
-            }
+        it('should include a path in the URL', async () => {
+            await apiClient.get({path: '/sub-path'})
 
-            await apiClient.post(options)
+            const expectedUrl = `${mockUrl}/sub-path?siteId=${mockSite.id}`
+            expect(fetch).toHaveBeenCalledWith(expectedUrl, expect.any(Object))
+        })
+    })
 
-            expect(global.fetch).toHaveBeenCalledWith(
-                `${ADYEN_API_BASEPATH}?siteId=${mockSite.id}`,
+    describe('post', () => {
+        it('should make a POST request with correct URL, headers, and body', async () => {
+            const mockBody = {key: 'value'}
+            await apiClient.post({body: JSON.stringify(mockBody)})
+
+            const expectedUrl = `${mockUrl}?siteId=${mockSite.id}`
+            expect(fetch).toHaveBeenCalledWith(
+                expectedUrl,
                 expect.objectContaining({
                     method: 'post',
-                    body: JSON.stringify({key: 'value'}),
+                    body: JSON.stringify(mockBody),
                     headers: {
                         'Content-Type': 'application/json',
-                        authorization: `Bearer mockToken`,
-                        customHeader: 'customValue'
+                        authorization: `Bearer ${mockToken}`,
+                        customerid: mockCustomerId,
+                        basketid: mockBasketId
                     }
+                })
+            )
+        })
+
+        it('should merge additional headers', async () => {
+            await apiClient.post({headers: {'X-Custom-Header': 'custom-value'}})
+
+            expect(fetch).toHaveBeenCalledWith(
+                expect.any(String),
+                expect.objectContaining({
+                    headers: expect.objectContaining({
+                        'X-Custom-Header': 'custom-value'
+                    })
                 })
             )
         })
