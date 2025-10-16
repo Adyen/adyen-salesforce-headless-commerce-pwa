@@ -1,4 +1,4 @@
-export const executeCallbacks = (callbacks, props, onError) => {
+export const executeCallbacks = (callbacks, props) => {
     return async (...params) => {
         callbacks.reduce(async (data, func, index, arr) => {
             try {
@@ -7,7 +7,7 @@ export const executeCallbacks = (callbacks, props, onError) => {
                 return {...next, ...response}
             } catch (error) {
                 arr.splice(index)
-                onError(error)
+                console.error(error)
             }
         }, {})
     }

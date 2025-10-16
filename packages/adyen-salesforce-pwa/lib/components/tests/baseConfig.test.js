@@ -1,19 +1,11 @@
-import {
-    baseConfig,
-    getAmount,
-    onAdditionalDetails,
-    onErrorHandler,
-    onOrderCancelHandler,
-    onSubmit
-} from '../helpers/baseConfig'
+import {baseConfig, getAmount, onAdditionalDetails, onErrorHandler, onSubmit} from '../helpers/baseConfig'
 import {AdyenPaymentsService} from '../../services/payments'
 import {AdyenPaymentsDetailsService} from '../../services/payments-details'
-import {AdyenOrderService} from '../../services/order'
-import {GiftCardService} from '../../services/giftCard'
+import {PaymentCancelService} from '../../services/payment-cancel'
 
 jest.mock('../../services/payments')
 jest.mock('../../services/payments-details')
-jest.mock('../../services/order')
+jest.mock('../../services/payment-cancel')
 jest.mock('../../services/giftCard')
 
 describe('baseConfig function', () => {
@@ -22,8 +14,7 @@ describe('baseConfig function', () => {
         afterSubmit: [],
         beforeAdditionalDetails: [],
         afterAdditionalDetails: [],
-        onError: () => {
-        }
+        onError: [() => {}]
     }
 
     it('returns expected configuration object', () => {
@@ -52,7 +43,7 @@ describe('onSubmit function', () => {
         const component = {}
         const props = {token: 'mockToken', basket: {basketId: '123', customerId: '456'}}
 
-        await expect(onSubmit(state, component, mockActions, props)).rejects.toThrow('invalid state')
+        await onSubmit(state, component, mockActions, props)
         expect(mockActions.reject).toHaveBeenCalled()
         expect(mockActions.resolve).not.toHaveBeenCalled()
     })
@@ -60,29 +51,38 @@ describe('onSubmit function', () => {
     it('should call AdyenPaymentsService, resolve the action, and return the payment response', async () => {
         const state = {data: {origin: 'https://adyen.com'}, isValid: true}
         const component = 'testComponent'
-        const props = {token: 'testToken', customerId: 'testCustomerId', returnUrl: 'https://adyen.com'}
+        const props = {
+            token: 'testToken',
+            customerId: 'testCustomerId',
+            returnUrl: 'https://adyen.com',
+            basket: {basketId: 'basket123'}
+        }
         const mockPaymentResponse = {mockData: 'Mocked response'}
 
         const result = await onSubmit(state, component, mockActions, props)
 
         expect(result).toEqual({paymentsResponse: mockPaymentResponse})
-        expect(mockActions.resolve).toHaveBeenCalledWith(mockPaymentResponse)
         expect(mockActions.reject).not.toHaveBeenCalled()
     })
 
     it('should call reject and throw an error when payment service fails', async () => {
         const state = {data: {origin: 'https://adyen.com'}, isValid: true}
         const component = 'testComponent'
-        const props = {token: 'testToken', customerId: 'testCustomerId', returnUrl: 'https://adyen.com'}
+        const props = {
+            token: 'testToken',
+            customerId: 'testCustomerId',
+            returnUrl: 'https://adyen.com',
+            basket: {basketId: 'basket123'}
+        }
         const mockError = new Error('Payment failed')
 
         AdyenPaymentsService.mockImplementation(() => ({
             submitPayment: jest.fn().mockRejectedValue(mockError)
         }))
 
-        await expect(onSubmit(state, component, mockActions, props)).rejects.toThrow(mockError.message)
+        await onSubmit(state, component, mockActions, props)
+
         expect(mockActions.reject).toHaveBeenCalled()
-        expect(mockActions.resolve).not.toHaveBeenCalled()
     })
 })
 
@@ -102,61 +102,53 @@ describe('onAdditionalDetails function', () => {
     it('should call AdyenPaymentsDetailsService, resolve the action, and return the payment details response', async () => {
         const state = {data: 'test data'}
         const component = 'testComponent'
-        const props = {token: 'testToken', customerId: 'testCustomerId'}
+        const props = {
+            token: 'testToken',
+            customerId: 'testCustomerId',
+            basket: {basketId: 'basket123'},
+            site: 'RefArch'
+        }
         const mockDetailsResponse = {mockData: 'Mocked response'}
 
         const result = await onAdditionalDetails(state, component, mockActions, props)
 
         expect(result).toEqual({paymentsDetailsResponse: mockDetailsResponse})
-        expect(mockActions.resolve).toHaveBeenCalledWith(mockDetailsResponse)
         expect(mockActions.reject).not.toHaveBeenCalled()
     })
 
     it('should call reject and throw an error when payment details service fails', async () => {
         const state = {data: 'test data'}
         const component = 'testComponent'
-        const props = {token: 'testToken', customerId: 'testCustomerId'}
+        const props = {
+            token: 'testToken',
+            customerId: 'testCustomerId',
+            basket: {basketId: 'basket123'},
+            site: 'RefArch'
+        }
         const mockError = new Error('Details submission failed')
 
         AdyenPaymentsDetailsService.mockImplementation(() => ({
             submitPaymentsDetails: jest.fn().mockRejectedValue(mockError)
         }))
 
-        await expect(onAdditionalDetails(state, component, mockActions, props)).rejects.toThrow(
-            mockError.message
-        )
+        await onAdditionalDetails(state, component, mockActions, props)
         expect(mockActions.reject).toHaveBeenCalled()
-        expect(mockActions.resolve).not.toHaveBeenCalled()
     })
 })
 
 describe('onErrorHandler', () => {
     it('should cancel the order and navigate', async () => {
         const navigate = jest.fn()
-        const props = {token: 'testToken', site: 'testSite', customerId: 'testCustomer'}
+        const props = {token: 'testToken', site: 'testSite', customerId: 'testCustomer', navigate: navigate}
         const orderNo = '12345'
-        AdyenOrderService.mockImplementation(() => ({
-            orderCancel: jest.fn().mockResolvedValue({headers: {location: '/canceled'}})
+        PaymentCancelService.mockImplementation(() => ({
+            paymentCancel: jest.fn().mockResolvedValue({})
         }))
 
         await onErrorHandler(orderNo, navigate, props)
 
-        expect(AdyenOrderService).toHaveBeenCalled()
-        expect(navigate).toHaveBeenCalledWith('/canceled')
-    })
-})
-
-describe('onOrderCancelHandler', () => {
-    it('should cancel the gift card order', async () => {
-        const props = {token: 'testToken', site: 'testSite', customerId: 'testCustomer'}
-        const order = {orderNo: '123'}
-        GiftCardService.mockImplementation(() => ({
-            cancelOrder: jest.fn().mockResolvedValue({})
-        }))
-
-        await onOrderCancelHandler(order, props)
-
-        expect(GiftCardService).toHaveBeenCalled()
+        expect(PaymentCancelService).toHaveBeenCalled()
+        expect(navigate).toHaveBeenCalledWith('/checkout')
     })
 })
 

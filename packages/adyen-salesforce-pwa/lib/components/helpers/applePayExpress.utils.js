@@ -84,14 +84,12 @@ export const getAppleButtonConfig = (
                         ...getCustomerShippingDetails(shippingContact)
                     }
                 }
-                const adyenPaymentService = new AdyenPaymentsService(authToken, site)
+                const adyenPaymentService = new AdyenPaymentsService(authToken, basket?.customerInfo?.customerId, basket?.basketId, site)
                 const paymentsResponse = await adyenPaymentService.submitPayment(
                     {
                         ...state.data,
                         origin: state.data.origin ? state.data.origin : window.location.origin
-                    },
-                    basket?.basketId,
-                    basket?.customerInfo?.customerId
+                    }
                 )
                 if (paymentsResponse?.isFinal && paymentsResponse?.isSuccessful) {
                     const finalPriceUpdate = {
@@ -115,22 +113,20 @@ export const getAppleButtonConfig = (
         onShippingContactSelected: async (resolve, reject, event) => {
             try {
                 const {shippingContact} = event
-                const adyenShippingAddressService = new AdyenShippingAddressService(authToken, site)
+                const adyenShippingAddressService = new AdyenShippingAddressService(authToken, basket?.customerInfo?.customerId, basket?.basketId, site)
                 const customerShippingDetails = getCustomerShippingDetails(shippingContact)
                 await adyenShippingAddressService.updateShippingAddress(
-                    basket.basketId,
                     customerShippingDetails
                 )
                 const {defaultShippingMethodId, applicableShippingMethods} = await fetchShippingMethods()
                 if (!applicableShippingMethods?.length) {
                     reject()
                 } else {
-                    const adyenShippingMethodsService = new AdyenShippingMethodsService(authToken, site)
+                    const adyenShippingMethodsService = new AdyenShippingMethodsService(authToken, basket?.customerInfo?.customerId, basket?.basketId, site)
                     const response = await adyenShippingMethodsService.updateShippingMethod(
                         defaultShippingMethodId
                             ? defaultShippingMethodId
-                            : applicableShippingMethods[0].id,
-                        basket.basketId
+                            : applicableShippingMethods[0].id
                     )
                     buttonConfig.amount = {
                         value: getCurrencyValueForApi(response.orderTotal, response.currency),
@@ -168,10 +164,9 @@ export const getAppleButtonConfig = (
         onShippingMethodSelected: async (resolve, reject, event) => {
             try {
                 const {shippingMethod} = event
-                const adyenShippingMethodsService = new AdyenShippingMethodsService(authToken, site)
+                const adyenShippingMethodsService = new AdyenShippingMethodsService(authToken, basket?.customerInfo?.customerId, basket?.basketId, site)
                 const response = await adyenShippingMethodsService.updateShippingMethod(
-                    shippingMethod.identifier,
-                    basket.basketId
+                    shippingMethod.identifier
                 )
                 if (response.error) {
                     reject()

@@ -2,7 +2,7 @@
  * @jest-environment jest-environment-jsdom
  * @jest-environment-options {"url": "http://localhost:3000/", "resources": "usable"}
  */
-import {getCheckoutConfig, handleQueryParams} from '../helpers/adyenCheckout.utils'
+import {getCheckoutConfig, handleRedirects, mountCheckoutComponent} from '../helpers/adyenCheckout.utils'
 import {Dropin} from '@adyen/adyen-web/auto'
 
 jest.mock('@adyen/adyen-web/auto', () => ({
@@ -63,85 +63,91 @@ describe('getCheckoutConfig', () => {
     })
 })
 
-describe('handleQueryParams', () => {
-    let urlParamsMock
+describe('handleRedirects', () => {
     let checkoutMock
-    let setAdyenPaymentInProgressMock
-    let paymentContainerMock
-    let paymentMethodsConfigurationMock
+    let setIsLoadingMock
 
     beforeEach(() => {
         jest.clearAllMocks()
-        urlParamsMock = new URLSearchParams()
         checkoutMock = {
             submitDetails: jest.fn(),
             create: jest.fn().mockImplementation(() => ({
                 mount: jest.fn().mockImplementation(() => ({
                     submit: jest.fn()
                 }))
-            })),
-            createFromAction: jest.fn().mockImplementation(() => ({
-                mount: jest.fn()
             }))
         }
-        setAdyenPaymentInProgressMock = jest.fn()
-        paymentContainerMock = {current: document.createElement('div')}
-        paymentMethodsConfigurationMock = {card: {}}
+        setIsLoadingMock = jest.fn()
     })
 
     it('handles redirectResult', () => {
-        urlParamsMock.set('redirectResult', 'someRedirectResult')
-        handleQueryParams(
-            urlParamsMock,
-            checkoutMock,
-            setAdyenPaymentInProgressMock,
-            paymentContainerMock,
-            paymentMethodsConfigurationMock
-        )
+        const result = handleRedirects('someRedirectResult', null, checkoutMock, setIsLoadingMock)
         expect(checkoutMock.submitDetails).toHaveBeenCalledWith({
-            data: {details: {redirectResult: 'someRedirectResult'}}
+            details: {redirectResult: 'someRedirectResult'}
         })
+        expect(result).toBe(true)
     })
 
     it('handles amazonCheckoutSessionId', () => {
-        urlParamsMock.set('amazonCheckoutSessionId', 'someAmazonCheckoutSessionId')
-        handleQueryParams(
-            urlParamsMock,
-            checkoutMock,
-            setAdyenPaymentInProgressMock,
-            paymentContainerMock,
-            paymentMethodsConfigurationMock
-        )
-        expect(setAdyenPaymentInProgressMock).toHaveBeenCalledWith(true)
+        const result = handleRedirects(null, 'someAmazonCheckoutSessionId', checkoutMock, setIsLoadingMock)
+        expect(setIsLoadingMock).toHaveBeenCalledWith(true)
         expect(checkoutMock.create).toHaveBeenCalledWith('amazonpay', {
             amazonCheckoutSessionId: 'someAmazonCheckoutSessionId',
             showOrderButton: false
         })
+        expect(result).toBe(true)
+    })
+
+    it('returns false when no redirect parameters are present', () => {
+        const result = handleRedirects(null, null, checkoutMock, setIsLoadingMock)
+        expect(checkoutMock.submitDetails).not.toHaveBeenCalled()
+        expect(checkoutMock.create).not.toHaveBeenCalled()
+        expect(result).toBe(false)
+    })
+})
+
+describe('mountCheckoutComponent', () => {
+    let checkoutMock
+    let paymentContainerMock
+    let paymentMethodsConfigurationMock
+    let optionalDropinConfigurationMock
+
+    beforeEach(() => {
+        jest.clearAllMocks()
+        checkoutMock = {
+            createFromAction: jest.fn().mockImplementation(() => ({
+                mount: jest.fn()
+            }))
+        }
+        paymentContainerMock = {current: document.createElement('div')}
+        paymentMethodsConfigurationMock = {card: {}}
+        optionalDropinConfigurationMock = {showPayButton: false}
     })
 
     it('handles adyenAction', () => {
         const adyenAction = btoa(JSON.stringify({some: 'actionData'}))
-        urlParamsMock.set('adyenAction', adyenAction)
-        handleQueryParams(
-            urlParamsMock,
+        mountCheckoutComponent(
+            adyenAction,
             checkoutMock,
-            setAdyenPaymentInProgressMock,
             paymentContainerMock,
-            paymentMethodsConfigurationMock
+            paymentMethodsConfigurationMock,
+            optionalDropinConfigurationMock
         )
-        expect(checkoutMock.createFromAction).toHaveBeenCalled()
+        expect(checkoutMock.createFromAction).toHaveBeenCalledWith({some: 'actionData'})
     })
 
     it('handles default case (mounts Dropin)', () => {
-        handleQueryParams(
-            urlParamsMock,
+        mountCheckoutComponent(
+            null,
             checkoutMock,
-            setAdyenPaymentInProgressMock,
             paymentContainerMock,
-            paymentMethodsConfigurationMock
+            paymentMethodsConfigurationMock,
+            optionalDropinConfigurationMock
         )
         expect(Dropin).toHaveBeenCalledWith(checkoutMock, {
-            paymentMethodsConfiguration: paymentMethodsConfigurationMock
+            ...optionalDropinConfigurationMock,
+            paymentMethodsConfiguration: paymentMethodsConfigurationMock,
+            onSelect: expect.any(Function)
         })
         const mockDropinInstance = Dropin.mock.results[0].value
         expect(mockDropinInstance.mount).toHaveBeenCalledWith(paymentContainerMock.current)

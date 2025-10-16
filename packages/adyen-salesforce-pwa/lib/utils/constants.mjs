@@ -82,7 +82,12 @@ export const ERROR_MESSAGE = {
     UNAUTHORIZED: 'unauthorized',
     ORDER_ALREADY_EXISTS: 'order already exists',
     ORDER_NOT_FOUND: 'order not found',
-    PAYMENTS_DETAILS_NOT_SUCCESSFUL: 'payments details call not successful'
+    PAYMENTS_DETAILS_NOT_SUCCESSFUL: 'payments details call not successful',
+    BASKET_CHANGED: 'basket changed',
+    AMOUNTS_DONT_MATCH: 'amounts do not match',
+    MISSING_LIVE_PREFIX: 'missing live prefix',
+    ADYEN_CONTEXT_NOT_FOUND: 'Adyen context not found',
+    NO_PAYMENT_METHODS: 'no payment methods'
 }
 
 export const ADYEN_LIVE_REGIONS = {
