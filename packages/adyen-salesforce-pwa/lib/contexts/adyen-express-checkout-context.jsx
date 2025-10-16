@@ -1,38 +1,8 @@
 import React, {useCallback, useEffect, useMemo, useReducer} from 'react'
 import PropTypes from 'prop-types'
-import {AdyenPaymentMethodsService} from '../services/payment-methods'
-import {AdyenEnvironmentService} from '../services/environment'
-import {AdyenShippingMethodsService} from '../services/shipping-methods'
-
-const _fetchPaymentMethods = async (customerId, site, locale, authToken) => {
-    const adyenPaymentMethodsService = new AdyenPaymentMethodsService(authToken, site)
-    try {
-        return await adyenPaymentMethodsService.fetchPaymentMethods(customerId, locale)
-    } catch (error) {
-        console.error(error)
-        return null
-    }
-}
-
-const _fetchEnvironment = async (site, authToken) => {
-    const adyenEnvironmentService = new AdyenEnvironmentService(authToken, site)
-    try {
-        return await adyenEnvironmentService.fetchEnvironment()
-    } catch (error) {
-        console.error(error)
-        return null
-    }
-}
-
-const _fetchShippingMethods = async (basketId, site, authToken) => {
-    const adyenShippingMethodsService = new AdyenShippingMethodsService(authToken, site)
-    try {
-        return await adyenShippingMethodsService.getShippingMethods(basketId)
-    } catch (error) {
-        console.error(error)
-        return null
-    }
-}
+import useAdyenEnvironment from '../hooks/useAdyenEnvironment'
+import useAdyenPaymentMethods from '../hooks/useAdyenPaymentMethods'
+import useAdyenShippingMethods from '../hooks/useAdyenShippingMethods'
 
 export const AdyenExpressCheckoutContext = React.createContext({})
 
@@ -56,54 +26,73 @@ const reducer = (state, action) => {
 }
 
 export const AdyenExpressCheckoutProvider = ({
-    children,
-    authToken,
-    customerId,
-    locale,
-    site,
-    basket,
-    navigate
-}) => {
+                                                 children,
+                                                 authToken,
+                                                 customerId,
+                                                 locale,
+                                                 site,
+                                                 basket,
+                                                 navigate
+                                             }) => {
     const [state, dispatch] = useReducer(reducer, initialState)
-    const {adyenEnvironment, adyenPaymentMethods, shippingMethods} = state
     const basketId = basket?.basketId
 
-    useEffect(() => {
-        const fetchAdyenData = async () => {
-            if (!authToken) {
-                return
-            }
-            const [environment, paymentMethods] = await Promise.all([
-                _fetchEnvironment(site, authToken),
-                _fetchPaymentMethods(customerId, site, locale, authToken)
-            ])
-            dispatch({type: 'SET_ADYEN_ENVIRONMENT', payload: environment || {error: true}})
-            dispatch({type: 'SET_ADYEN_PAYMENT_METHODS', payload: paymentMethods || {error: true}})
-        }
+    const {data: adyenEnvironment, error: adyenEnvironmentError} = useAdyenEnvironment({
+        authToken,
+        customerId,
+        basketId,
+        site,
+        skip: !!state.adyenEnvironment
+    })
 
-        fetchAdyenData()
-    }, [authToken, customerId, locale?.id, site?.id])
+    useEffect(() => {
+        if (adyenEnvironment || adyenEnvironmentError) {
+            const payload = adyenEnvironment || {error: adyenEnvironmentError || true}
+            dispatch({type: 'SET_ADYEN_ENVIRONMENT', payload})
+        }
+    }, [adyenEnvironment, adyenEnvironmentError])
+
+    const {data: adyenPaymentMethods, error: adyenPaymentMethodsError} = useAdyenPaymentMethods({
+        authToken,
+        customerId,
+        basketId,
+        site,
+        locale,
+        skip: !!state.adyenPaymentMethods
+    })
+
+    useEffect(() => {
+        if (adyenPaymentMethods || adyenPaymentMethodsError) {
+            const payload = adyenPaymentMethods || {error: adyenPaymentMethodsError || true}
+            dispatch({type: 'SET_ADYEN_PAYMENT_METHODS', payload})
+        }
+    }, [adyenPaymentMethods, adyenPaymentMethodsError])
+
+    const {data: shippingMethods, error: shippingMethodsError} = useAdyenShippingMethods({
+        authToken,
+        customerId,
+        basketId,
+        site,
+        skip: !basketId
+    })
+
+    useEffect(() => {
+        if (shippingMethods || shippingMethodsError) {
+            const payload = shippingMethods || {error: shippingMethodsError || true}
+            dispatch({type: 'SET_SHIPPING_METHODS', payload})
+        }
+    }, [shippingMethods, shippingMethodsError])
 
     const fetchShippingMethods = useCallback(async () => {
-        if (!basketId || !authToken) {
-            return null
-        }
-        const methods = await _fetchShippingMethods(basketId, site, authToken)
-        dispatch({type: 'SET_SHIPPING_METHODS', payload: methods || {error: true}})
-        return methods
-    }, [basketId, site, authToken])
-
-    useEffect(() => {
-        if (basketId) {
-            fetchShippingMethods()
-        }
-    }, [basketId, fetchShippingMethods])
+        // This function can now simply return the state-managed shipping methods
+        // or be used to trigger a re-fetch if needed, though the hook handles it.
+        // For now, it just returns what's in the state.
+        return state.shippingMethods
+    }, [state.shippingMethods])
 
     const value = useMemo(
         () => ({
-            adyenEnvironment,
-            adyenPaymentMethods,
-            shippingMethods,
+            ...state,
             basket,
             locale,
             site,
@@ -112,9 +101,7 @@ export const AdyenExpressCheckoutProvider = ({
             fetchShippingMethods
         }),
         [
-            adyenEnvironment,
-            adyenPaymentMethods,
-            shippingMethods,
+            state,
             basket,
             locale,
             site,
