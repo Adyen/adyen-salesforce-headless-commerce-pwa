@@ -1,7 +1,7 @@
 import {ErrorHandler, registerAdyenEndpoints, SuccessHandler} from '../index'
-import Logger from '../../controllers/logger'
+import Logger from '../../models/logger'
 
-jest.mock('../../controllers/logger', () => ({
+jest.mock('../../models/logger', () => ({
     info: jest.fn(),
     error: jest.fn()
 }))
@@ -31,7 +31,7 @@ describe('Adyen Endpoints', () => {
             const overrides = {}
 
             registerAdyenEndpoints(app, runtime, overrides)
-            expect(app.get).toHaveBeenCalledTimes(6)
+            expect(app.get).toHaveBeenCalledTimes(7)
             expect(app.post).toHaveBeenCalledTimes(9)
             expect(app.use).toHaveBeenCalledTimes(2)
         })
