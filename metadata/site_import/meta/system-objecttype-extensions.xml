@@ -2,9 +2,27 @@
 <metadata xmlns="http://www.demandware.com/xml/impex/metadata/2006-10-31">
     <type-extension type-id="OrderPaymentInstrument">
         <custom-attribute-definitions>
-            <attribute-definition attribute-id="adyenPartialPaymentsOrder">
-                <display-name xml:lang="x-default">adyenPartialPaymentsOrder</display-name>
-                <description xml:lang="x-default">partial payments order data</description>
+            <attribute-definition attribute-id="paymentMethodType">
+                <display-name xml:lang="x-default">paymentMethodType</display-name>
+                <description xml:lang="x-default">paymentMethod type used by shopper for payment</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+                <field-length>0</field-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="paymentMethodBrand">
+                <display-name xml:lang="x-default">paymentMethodBrand</display-name>
+                <description xml:lang="x-default">paymentMethod brand used by shopper for payment</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+                <field-length>0</field-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="pspReference">
+                <display-name xml:lang="x-default">pspReference</display-name>
+                <description xml:lang="x-default">pspReference for payment</description>
                 <type>string</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
@@ -15,7 +33,9 @@
         <group-definitions>
             <attribute-group group-id="AdyenPayment">
                 <display-name xml:lang="x-default">AdyenPayment</display-name>
-                <attribute attribute-id="adyenPartialPaymentsOrder"/>
+                <attribute attribute-id="paymentMethodType"/>
+                <attribute attribute-id="paymentMethodBrand"/>
+                <attribute attribute-id="pspReference"/>
             </attribute-group>
         </group-definitions>
     </type-extension>
@@ -78,6 +98,22 @@
                 <externally-managed-flag>false</externally-managed-flag>
                 <min-length>0</min-length>
             </attribute-definition>
+            <attribute-definition attribute-id="paymentMethod">
+                <display-name xml:lang="x-default">paymentMethod</display-name>
+                <description xml:lang="x-default">PaymentMethod used in adyen payment request</description>
+                <type>text</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="amount">
+                <display-name xml:lang="x-default">amount</display-name>
+                <description xml:lang="x-default">Amount used in adyen payment request</description>
+                <type>text</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
         </custom-attribute-definitions>
         <group-definitions>
             <attribute-group group-id="AdyenPayment">
@@ -85,6 +121,8 @@
                 <attribute attribute-id="giftCardCheckBalance"/>
                 <attribute attribute-id="orderNo"/>
                 <attribute attribute-id="orderData"/>
+                <attribute attribute-id="paymentMethod"/>
+                <attribute attribute-id="amount"/>
             </attribute-group>
         </group-definitions>
     </type-extension>
