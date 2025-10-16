@@ -6,6 +6,7 @@ import '@adyen/adyen-salesforce-pwa/dist/app/adyen.css'
 import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
 import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
+import LoadingSpinner from '@salesforce/retail-react-app/app/components/loading-spinner'
 
 const AdyenCheckoutRedirectContainer = () => {
     const {data: basket} = useCurrentBasket()
@@ -28,7 +29,7 @@ const AdyenCheckoutRedirectContainer = () => {
     if (!authToken || !basket) {
         return
     }
-
+    const spinner = <LoadingSpinner wrapperStyles={{height: '100vh'}} />
     return (
         <AdyenCheckoutProvider
             authToken={authToken}
@@ -39,7 +40,7 @@ const AdyenCheckoutRedirectContainer = () => {
             navigate={navigate}
             page={pageTypes.REDIRECT}
         >
-            <AdyenCheckout showLoading />
+            <AdyenCheckout showLoading spinner={spinner} />
         </AdyenCheckoutProvider>
     )
 }

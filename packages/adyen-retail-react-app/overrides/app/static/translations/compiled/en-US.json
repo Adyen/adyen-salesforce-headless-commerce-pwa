@@ -697,12 +697,6 @@
       "value": "Add New Card"
     }
   ],
-  "checkout.button.place_order": [
-    {
-      "type": 0,
-      "value": "Place Order"
-    }
-  ],
   "checkout.message.generic_error": [
     {
       "type": 0,
