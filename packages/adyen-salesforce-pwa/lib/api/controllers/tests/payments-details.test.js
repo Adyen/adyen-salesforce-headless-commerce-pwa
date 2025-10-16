@@ -1,55 +1,64 @@
-import sendPaymentDetails from '../payments-details.js'
+import sendPaymentDetails from '../payments-details'
 import {RESULT_CODES} from '../../../utils/constants.mjs'
 import {AdyenError} from '../../models/AdyenError'
-import * as basketHelper from '../../../utils/basketHelper.mjs'
-import * as orderHelper from '../../../utils/orderHelper.mjs'
+import * as orderHelper from '../../helpers/orderHelper.js'
+import * as paymentsHelper from '../../helpers/paymentsHelper.js'
+import AdyenClientProvider from '../../models/adyenClientProvider'
 
 let mockPaymentsDetails = jest.fn()
 
-jest.mock('../checkout-config', () => ({
-    getInstance: jest.fn().mockImplementation(() => ({
-        paymentsDetails: mockPaymentsDetails
-    }))
+jest.mock('../../models/logger')
+jest.mock('../../models/adyenClientProvider')
+
+jest.mock('../../helpers/paymentsHelper.js', () => ({
+    ...jest.requireActual('../../helpers/paymentsHelper.js'),
+    revertCheckoutState: jest.fn(),
+    validateBasketPayments: jest.fn()
 }))
 
-jest.mock('../../../utils/basketHelper.mjs', () => ({
-    getBasket: jest.fn(),
-    removeAllPaymentInstrumentsFromBasket: jest.fn(),
-    saveToBasket: jest.fn()
-}))
-
-jest.mock('../../../utils/orderHelper.mjs', () => ({
+jest.mock('../../helpers/orderHelper.js', () => ({
     createOrderUsingOrderNo: jest.fn(),
     failOrderAndReopenBasket: jest.fn()
 }))
 
 describe('payments details controller', () => {
-    let req, res, next, consoleInfoSpy, consoleErrorSpy
+    let req, res, next
     const mockBasket = {
         basketId: 'testBasket',
-        c_orderNo: '123'
+        c_orderNo: '123',
+        c_amount: JSON.stringify({value: 2500, currency: 'EUR'}),
+        c_paymentMethod: JSON.stringify({type: 'scheme'})
     }
 
     beforeEach(() => {
         req = {
-            headers: {
-                authorization: 'mockToken',
-                customerid: 'testCustomer',
-                basketid: 'testBasket'
-            },
             body: {data: {details: {redirectResult: '...'}}},
             query: {siteId: 'RefArch'}
         }
-        res = {locals: {}}
+        res = {
+            locals: {
+                adyen: {
+                    basket: mockBasket,
+                    siteId: 'RefArch',
+                    basketService: {
+                        update: jest.fn(),
+                        addPaymentInstrument: jest.fn()
+                    }
+                }
+            }
+        }
         next = jest.fn()
-        consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation(() => {
-        })
-        consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {
-        })
 
+        // Reset mocks
         jest.clearAllMocks()
 
-        basketHelper.getBasket.mockResolvedValue(mockBasket)
+        // Mock AdyenClientProvider
+        AdyenClientProvider.mockImplementation(() => ({
+            getPaymentsApi: () => ({
+                paymentsDetails: mockPaymentsDetails
+            })
+        }))
+
         orderHelper.createOrderUsingOrderNo.mockResolvedValue({orderNo: '123'})
     })
 
@@ -58,24 +67,25 @@ describe('payments details controller', () => {
 
         await sendPaymentDetails(req, res, next)
 
-        expect(basketHelper.getBasket).toHaveBeenCalled()
+        expect(paymentsHelper.validateBasketPayments).toHaveBeenCalled()
         expect(mockPaymentsDetails).toHaveBeenCalled()
         expect(orderHelper.createOrderUsingOrderNo).toHaveBeenCalled()
         expect(res.locals.response).toEqual({
             isFinal: true,
             isSuccessful: true,
             merchantReference: 'ref123',
-            order: undefined
+            order: undefined,
+            resultCode: RESULT_CODES.AUTHORISED
         })
         expect(next).toHaveBeenCalledWith()
     })
 
-    it('handles payment details failure and attempts to roll back SFCC order', async () => {
+    it('handles payment details failure and attempts to revert the checkout state', async () => {
         mockPaymentsDetails.mockResolvedValue({resultCode: RESULT_CODES.ERROR, merchantReference: 'ref123'})
 
         await sendPaymentDetails(req, res, next)
 
-        expect(orderHelper.failOrderAndReopenBasket).toHaveBeenCalled()
+        expect(paymentsHelper.revertCheckoutState).toHaveBeenCalled()
         expect(next).toHaveBeenCalledWith(
             new AdyenError('payments details call not successful', 400, {
                 resultCode: 'Error',
@@ -95,7 +105,8 @@ describe('payments details controller', () => {
             isSuccessful: true,
             merchantReference: "123",
             action: mockAction,
-            order: undefined
+            order: undefined,
+            resultCode: RESULT_CODES.REDIRECT_SHOPPER
         })
         expect(next).toHaveBeenCalledWith()
     })
@@ -106,19 +117,11 @@ describe('payments details controller', () => {
 
         await sendPaymentDetails(req, res, next)
 
-        expect(basketHelper.saveToBasket).toHaveBeenCalledWith(
-            'mockToken',
-            'testBasket',
+        expect(res.locals.adyen.basketService.update).toHaveBeenCalledWith(
             {c_orderData: JSON.stringify(mockOrderData)}
         )
         expect(res.locals.response.isFinal).toBe(false)
         expect(res.locals.response.isSuccessful).toBe(true)
         expect(next).toHaveBeenCalledWith()
-    })
-
-    it('should call next with an error if getBasket fails', async () => {
-        basketHelper.getBasket.mockRejectedValue(new Error('Basket error'))
-        await sendPaymentDetails(req, res, next)
-        expect(next).toHaveBeenCalledWith(new Error('Basket error'))
     })
 })

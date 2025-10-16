@@ -1,10 +1,8 @@
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
-import AdyenCheckoutConfig from './checkout-config'
-import Logger from './logger'
+import AdyenClientProvider from '../models/adyenClientProvider'
+import Logger from '../models/logger'
 import {v4 as uuidv4} from 'uuid'
-import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrentSite.mjs'
-import {filterStateData} from "./payments"
-import {getCurrentBasketForAuthorizedShopper, saveToBasket} from '../../utils/basketHelper.mjs'
+import {cancelAdyenOrder, createCheckoutResponse, filterStateData} from '../helpers/paymentsHelper.js'
 
 /**
  * Handles the Adyen gift card balance check.
@@ -17,10 +15,10 @@ export async function balanceCheck(req, res, next) {
     Logger.info('giftCards-balanceCheck', 'start')
 
     try {
-        const {body: {data}, headers: {authorization, customerid}, query: {siteId}} = req
-        const ordersApi = AdyenCheckoutConfig.getOrdersApiInstance(siteId)
-        const adyenConfig = getAdyenConfigForCurrentSite(siteId)
-        const basket = await getCurrentBasketForAuthorizedShopper(authorization, customerid)
+        const {body: {data}} = req
+        const {adyen: adyenContext} = res.locals
+        const {basket, adyenConfig, siteId, authorization} = adyenContext
+        const ordersApi = new AdyenClientProvider(adyenContext).getOrdersApi()
         const {orderTotal, productTotal, currency, basketId, c_orderNo} = basket
         const stateData = filterStateData(data)
         const request = {
@@ -35,7 +33,7 @@ export async function balanceCheck(req, res, next) {
         const response = await ordersApi.getBalanceOfGiftCard(request, {
             idempotencyKey: uuidv4()
         })
-        await saveToBasket(authorization, basketId, {
+        await adyenContext.basketService.update({
             c_giftCardCheckBalance: JSON.stringify(response)
         })
         Logger.info('giftCards-balanceCheck', 'success')
@@ -58,10 +56,10 @@ export async function createOrder(req, res, next) {
     Logger.info('giftCards-createOrder', 'start')
 
     try {
-        const {body: {data}, headers: {authorization, customerid}, query: {siteId}} = req
-        const ordersApi = AdyenCheckoutConfig.getOrdersApiInstance(siteId)
-        const adyenConfig = getAdyenConfigForCurrentSite(siteId)
-        const basket = await getCurrentBasketForAuthorizedShopper(authorization, customerid)
+        const {body: {data}} = req
+        const {adyen: adyenContext} = res.locals
+        const {basket, adyenConfig, siteId, authorization} = adyenContext
+        const ordersApi = new AdyenClientProvider(adyenContext).getOrdersApi()
         const {orderTotal, productTotal, currency, basketId, c_orderNo} = basket
 
         const request = {
@@ -76,7 +74,7 @@ export async function createOrder(req, res, next) {
         const response = await ordersApi.orders(request, {
             idempotencyKey: uuidv4()
         })
-        await saveToBasket(authorization, basketId, {
+        await adyenContext.basketService.update({
             c_orderData: JSON.stringify(response)
         })
         Logger.info('giftCards-createOrder', 'success')
@@ -99,25 +97,25 @@ export async function cancelOrder(req, res, next) {
     Logger.info('giftCards-cancelOrder', 'start')
 
     try {
-        const {body: {data}, headers: {authorization, customerid}, query: {siteId}} = req
-        const ordersApi = AdyenCheckoutConfig.getOrdersApiInstance(siteId)
-        const adyenConfig = getAdyenConfigForCurrentSite(siteId)
-        const basket = await getCurrentBasketForAuthorizedShopper(authorization, customerid)
-        const {orderTotal, productTotal, currency} = basket
+        const {body: {data}} = req
+        const {adyen: adyenContext} = res.locals
+        const {basket} = adyenContext
+        const {c_orderNo} = basket
 
-        const request = {
-            ...filterStateData(data),
-            merchantAccount: adyenConfig.merchantAccount,
+        const response = await cancelAdyenOrder(adyenContext, data.order)
+
+        const cancelOrderResponse = {
+            ...createCheckoutResponse(response, c_orderNo),
+            order: response?.order
         }
-        const response = await ordersApi.cancelOrder(request, {
-            idempotencyKey: uuidv4()
-        })
 
         Logger.info('giftCards-cancelOrder', 'success')
-        res.locals.response = response
+        res.locals.response = cancelOrderResponse
         next()
     } catch (err) {
         Logger.error('giftCards-cancelOrder', JSON.stringify(err))
         next(err)
     }
 }
+
+export default {balanceCheck, createOrder, cancelOrder}
