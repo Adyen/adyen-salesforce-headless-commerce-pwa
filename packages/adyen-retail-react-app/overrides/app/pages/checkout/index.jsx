@@ -5,12 +5,11 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import React, {useEffect, useState} from 'react'
-import {FormattedMessage, useIntl} from 'react-intl'
+import {useIntl} from 'react-intl'
 import {
     Alert,
     AlertIcon,
     Box,
-    Button,
     Container,
     Grid,
     GridItem,
@@ -188,28 +187,28 @@ const Checkout = () => {
                 </Grid>
             </Container>
 
-            {step === 5 && (
-                <Box
-                    display={{lg: 'none'}}
-                    position="sticky"
-                    bottom="0"
-                    px={4}
-                    pt={6}
-                    pb={11}
-                    background="white"
-                    borderTop="1px solid"
-                    borderColor="gray.100"
-                >
-                    <Container variant="form">
-                        <Button w="full" onClick={submitOrder} isLoading={isLoading}>
-                            <FormattedMessage
-                                defaultMessage="Place Order"
-                                id="checkout.button.place_order"
-                            />
-                        </Button>
-                    </Container>
-                </Box>
-            )}
+            {/*{step === 5 && (*/}
+            {/*    <Box*/}
+            {/*        display={{lg: 'none'}}*/}
+            {/*        position="sticky"*/}
+            {/*        bottom="0"*/}
+            {/*        px={4}*/}
+            {/*        pt={6}*/}
+            {/*        pb={11}*/}
+            {/*        background="white"*/}
+            {/*        borderTop="1px solid"*/}
+            {/*        borderColor="gray.100"*/}
+            {/*    >*/}
+            {/*        <Container variant="form">*/}
+            {/*            <Button w="full" onClick={submitOrder} isLoading={isLoading}>*/}
+            {/*                <FormattedMessage*/}
+            {/*                    defaultMessage="Place Order"*/}
+            {/*                    id="checkout.button.place_order"*/}
+            {/*                />*/}
+            {/*            </Button>*/}
+            {/*        </Container>*/}
+            {/*    </Box>*/}
+            {/*)}*/}
         </Box>
     )
 }

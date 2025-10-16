@@ -237,9 +237,6 @@
   "cc_radio_group.button.add_new_card": {
     "defaultMessage": "Add New Card"
   },
-  "checkout.button.place_order": {
-    "defaultMessage": "Place Order"
-  },
   "checkout.message.generic_error": {
     "defaultMessage": "An unexpected error occurred during checkout."
   },
