@@ -1,6 +1,6 @@
 import {AdyenPaymentMethodsService} from '../payment-methods'
 import {ApiClient} from '../api'
-import {CUSTOMER_ID_MOCK, LOCALE_MOCK} from '../../../__mocks__/adyenApi/constants'
+import {BASKET_ID_MOCK, CUSTOMER_ID_MOCK, LOCALE_MOCK} from '../../../__mocks__/adyenApi/constants'
 
 jest.mock('../api', () => {
     return {
@@ -14,11 +14,17 @@ describe('AdyenPaymentMethodsService', () => {
     let paymentMethodsService
     let mockToken = 'mockToken'
     let mockCustomerId = CUSTOMER_ID_MOCK
+    let mockBasketId = BASKET_ID_MOCK
     let mockLocale = {id: LOCALE_MOCK}
     let mockSite = {id: 'RefArch'}
 
     beforeEach(() => {
-        paymentMethodsService = new AdyenPaymentMethodsService(mockToken, mockSite)
+        paymentMethodsService = new AdyenPaymentMethodsService(
+            mockToken,
+            mockCustomerId,
+            mockBasketId,
+            mockSite
+        )
     })
 
     afterEach(() => {
@@ -26,7 +32,13 @@ describe('AdyenPaymentMethodsService', () => {
     })
 
     it('should create an instance of AdyenPaymentMethodsService with ApiClient', () => {
-        expect(ApiClient).toHaveBeenCalledWith('/api/adyen/paymentMethods', mockToken, mockSite)
+        expect(ApiClient).toHaveBeenCalledWith(
+            '/api/adyen/paymentMethods',
+            mockToken,
+            mockCustomerId,
+            mockBasketId,
+            mockSite
+        )
     })
 
     it('should fetch payment methods successfully', async () => {
@@ -39,14 +51,10 @@ describe('AdyenPaymentMethodsService', () => {
 
         paymentMethodsService.apiClient.get.mockResolvedValueOnce(mockFetchPromise)
 
-        const paymentMethods = await paymentMethodsService.fetchPaymentMethods(
-            mockCustomerId,
-            mockLocale
-        )
+        const paymentMethods = await paymentMethodsService.fetchPaymentMethods(mockLocale)
 
         expect(paymentMethodsService.apiClient.get).toHaveBeenCalledWith({
-            queryParams: {locale: mockLocale.id},
-            headers: {customerid: mockCustomerId}
+            queryParams: {locale: mockLocale.id}
         })
         expect(paymentMethods).toEqual(mockResponse)
     })
@@ -60,7 +68,7 @@ describe('AdyenPaymentMethodsService', () => {
         paymentMethodsService.apiClient.get.mockResolvedValueOnce(mockFetchPromise)
 
         await expect(
-            paymentMethodsService.fetchPaymentMethods(mockCustomerId, mockLocale)
+            paymentMethodsService.fetchPaymentMethods(mockLocale)
         ).rejects.toThrow('[object Object]')
     })
 })
