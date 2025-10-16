@@ -3,22 +3,58 @@ const RESTResponseMgr = require('dw/system/RESTResponseMgr');
 const Logger = require('dw/system/Logger');
 const BasketMgr = require('dw/order/BasketMgr');
 const OrderMgr = require('dw/order/OrderMgr');
+const Currency = require('dw/util/Currency');
 
 exports.createOrder = function () {
-    const requestBody = request.httpParameterMap.requestBodyAsString;
-    const {customerId, basketId, orderNo} = JSON.parse(requestBody);
-    const currentBasket = BasketMgr.getCurrentBasket()
-    Transaction.begin();
-    if (basketId) {
-        const order = OrderMgr.createOrder(currentBasket, orderNo)
-        Transaction.commit();
-        RESTResponseMgr.createSuccess(order, 200).render();
-    } else {
-        RESTResponseMgr.createError(
-            403,
-            'forbidden',
-        ).render();
-        Transaction.rollback();
+    try {
+        const requestBody = request.httpParameterMap.requestBodyAsString;
+        const {customerId, basketId, orderNo, currency} = JSON.parse(requestBody);
+        if (!basketId || !orderNo || !currency) {
+            const missing = []
+            if (!basketId) missing.push('basketId')
+            if (!orderNo) missing.push('orderNo')
+            if (!currency) missing.push('currency')
+            const errorMessage = `Missing required parameters: ${missing.join(', ')}`
+            Logger.error('Error creating order: {0}', errorMessage)
+            RESTResponseMgr.createError(400, 'bad_request', errorMessage).render()
+            return
+        }
+        const newCurrency = Currency.getCurrency(currency);
+        if (!newCurrency) {
+            Logger.error('Error creating order: {0}', 'Invalid currency');
+            RESTResponseMgr.createError(400, 'bad_request', 'Invalid currency').render();
+            return;
+        }
+        session.setCurrency(newCurrency);
+
+        const currentBasket = BasketMgr.getCurrentBasket();
+        currentBasket.updateCurrency();
+        if (!currentBasket) {
+            Logger.error('Error creating order: {0}', 'Basket not found');
+            RESTResponseMgr.createError(404, 'not_found', 'Basket not found').render();
+            return;
+        }
+        if (currentBasket.UUID !== basketId) {
+            Logger.error('Error creating order: {0}', 'Current basket does not match the provided basket');
+            RESTResponseMgr.createError(400, 'bad_request', 'Invalid basket').render();
+            return;
+        }
+
+        Transaction.begin();
+        try {
+            const order = OrderMgr.createOrder(currentBasket, orderNo);
+            Transaction.commit();
+            const response = {
+                orderNo: order.getOrderNo()
+            };
+            RESTResponseMgr.createSuccess(response, 200).render();
+        } catch (e) {
+            Transaction.rollback();
+            throw e; // Re-throw to be caught by the outer catch block
+        }
+    } catch (e) {
+        Logger.error('Error creating order: {0}', e.message);
+        RESTResponseMgr.createError(500, 'internal_server_error', 'Failed to create order').render();
     }
 };
 exports.createOrder.public = true;
