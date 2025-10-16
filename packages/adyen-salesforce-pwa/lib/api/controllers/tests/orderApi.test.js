@@ -1,33 +1,17 @@
-import fetch from 'node-fetch'
 import {OrderApiClient} from '../orderApi'
-
-jest.mock('node-fetch')
 
 describe('OrderApiClient', () => {
     let orderApiClient
+    let mockCallAdminApi
 
     beforeEach(() => {
         orderApiClient = new OrderApiClient()
+        mockCallAdminApi = jest.fn()
+        orderApiClient._callAdminApi = mockCallAdminApi
     })
 
     afterEach(() => {
         jest.resetAllMocks()
-    })
-
-    describe('getAdminAuthToken', () => {
-        it('should fetch the admin auth token', async () => {
-            const tokenData = {access_token: 'testToken'}
-
-            fetch.mockResolvedValue({
-                ok: true,
-                json: jest.fn().mockResolvedValue(tokenData)
-            })
-
-            const result = await orderApiClient.getAdminAuthToken()
-
-            expect(result).toEqual(tokenData)
-            expect(fetch).toHaveBeenCalledWith(orderApiClient.tokenUrl, expect.any(Object))
-        })
     })
 
     describe('getOrder', () => {
@@ -35,28 +19,22 @@ describe('OrderApiClient', () => {
             const mockOrderNo = '123'
             const mockResponseBody = {orderId: '123', status: 'completed'}
 
-            orderApiClient.base = jest.fn().mockResolvedValue({
-                ok: true,
+            mockCallAdminApi.mockResolvedValue({
                 json: jest.fn().mockResolvedValue(mockResponseBody)
             })
 
             const result = await orderApiClient.getOrder(mockOrderNo)
 
             expect(result).toEqual(mockResponseBody)
+            expect(mockCallAdminApi).toHaveBeenCalledWith('GET', mockOrderNo)
         })
 
         it('should throw an error on unsuccessful response', async () => {
             const mockOrderNo = '456'
-            const mockResponse = {
-                ok: false,
-                status: 404,
-                statusText: 'Not Found',
-                text: jest.fn().mockResolvedValue('Order not found')
-            }
+            mockCallAdminApi.mockRejectedValue(new Error('API Error'))
 
-            orderApiClient.base = jest.fn().mockResolvedValue(mockResponse)
-
-            await expect(orderApiClient.getOrder(mockOrderNo)).rejects.toThrow('404 Not Found')
+            await expect(orderApiClient.getOrder(mockOrderNo)).rejects.toThrow('API Error')
+            expect(mockCallAdminApi).toHaveBeenCalledWith('GET', mockOrderNo)
         })
     })
 
@@ -65,30 +43,29 @@ describe('OrderApiClient', () => {
             const mockOrderNo = '123'
             const mockStatus = 'shipped'
 
-            orderApiClient.base = jest.fn().mockResolvedValue({
+            mockCallAdminApi.mockResolvedValue({
                 ok: true
             })
 
             const result = await orderApiClient.updateOrderStatus(mockOrderNo, mockStatus)
             expect(result.ok).toBe(true)
+            expect(mockCallAdminApi).toHaveBeenCalledWith('PUT', `${mockOrderNo}/status`, {
+                body: JSON.stringify({status: mockStatus})
+            })
         })
 
         it('should throw an error on unsuccessful response', async () => {
             const mockOrderNo = '456'
             const mockStatus = 'invalidStatus'
 
-            const mockResponse = {
-                ok: false,
-                status: 400,
-                statusText: 'Bad Request',
-                text: jest.fn().mockResolvedValue('Invalid status')
-            }
-
-            orderApiClient.base = jest.fn().mockResolvedValue(mockResponse)
+            mockCallAdminApi.mockRejectedValue(new Error('API Error'))
 
             await expect(orderApiClient.updateOrderStatus(mockOrderNo, mockStatus)).rejects.toThrow(
-                '400 Bad Request'
+                'API Error'
             )
+            expect(mockCallAdminApi).toHaveBeenCalledWith('PUT', `${mockOrderNo}/status`, {
+                body: JSON.stringify({status: mockStatus})
+            })
         })
     })
 
@@ -97,30 +74,29 @@ describe('OrderApiClient', () => {
             const mockOrderNo = '123'
             const mockStatus = 'paid'
 
-            orderApiClient.base = jest.fn().mockResolvedValue({
+            mockCallAdminApi.mockResolvedValue({
                 ok: true
             })
 
             const result = await orderApiClient.updateOrderPaymentStatus(mockOrderNo, mockStatus)
             expect(result.ok).toBe(true)
+            expect(mockCallAdminApi).toHaveBeenCalledWith('PUT', `${mockOrderNo}/payment-status`, {
+                body: JSON.stringify({status: mockStatus})
+            })
         })
 
         it('should throw an error on unsuccessful response', async () => {
             const mockOrderNo = '456'
             const mockStatus = 'invalidStatus'
 
-            const mockResponse = {
-                ok: false,
-                status: 400,
-                statusText: 'Bad Request',
-                text: jest.fn().mockResolvedValue('Invalid payment status')
-            }
-
-            orderApiClient.base = jest.fn().mockResolvedValue(mockResponse)
+            mockCallAdminApi.mockRejectedValue(new Error('API Error'))
 
             await expect(
                 orderApiClient.updateOrderPaymentStatus(mockOrderNo, mockStatus)
-            ).rejects.toThrow('400 Bad Request')
+            ).rejects.toThrow('API Error')
+            expect(mockCallAdminApi).toHaveBeenCalledWith('PUT', `${mockOrderNo}/payment-status`, {
+                body: JSON.stringify({status: mockStatus})
+            })
         })
     })
 
@@ -129,30 +105,29 @@ describe('OrderApiClient', () => {
             const mockOrderNo = '123'
             const mockStatus = 'exported'
 
-            orderApiClient.base = jest.fn().mockResolvedValue({
+            mockCallAdminApi.mockResolvedValue({
                 ok: true
             })
 
             const result = await orderApiClient.updateOrderExportStatus(mockOrderNo, mockStatus)
             expect(result.ok).toBe(true)
+            expect(mockCallAdminApi).toHaveBeenCalledWith('PUT', `${mockOrderNo}/export-status`, {
+                body: JSON.stringify({status: mockStatus})
+            })
         })
 
         it('should throw an error on unsuccessful response', async () => {
             const mockOrderNo = '456'
             const mockStatus = 'invalidStatus'
 
-            const mockResponse = {
-                ok: false,
-                status: 400,
-                statusText: 'Bad Request',
-                text: jest.fn().mockResolvedValue('Invalid export status')
-            }
-
-            orderApiClient.base = jest.fn().mockResolvedValue(mockResponse)
+            mockCallAdminApi.mockRejectedValue(new Error('API Error'))
 
             await expect(
                 orderApiClient.updateOrderExportStatus(mockOrderNo, mockStatus)
-            ).rejects.toThrow('400 Bad Request')
+            ).rejects.toThrow('API Error')
+            expect(mockCallAdminApi).toHaveBeenCalledWith('PUT', `${mockOrderNo}/export-status`, {
+                body: JSON.stringify({status: mockStatus})
+            })
         })
     })
 
@@ -161,7 +136,7 @@ describe('OrderApiClient', () => {
             const mockOrderNo = '123'
             const mockStatus = 'confirmed'
 
-            orderApiClient.base = jest.fn().mockResolvedValue({
+            mockCallAdminApi.mockResolvedValue({
                 ok: true
             })
 
@@ -171,24 +146,31 @@ describe('OrderApiClient', () => {
             )
 
             expect(result.ok).toBe(true)
+            expect(mockCallAdminApi).toHaveBeenCalledWith(
+                'PUT',
+                `${mockOrderNo}/confirmation-status`,
+                {
+                    body: JSON.stringify({status: mockStatus})
+                }
+            )
         })
 
         it('should throw an error on unsuccessful response', async () => {
             const mockOrderNo = '456'
             const mockStatus = 'invalidStatus'
 
-            const mockResponse = {
-                ok: false,
-                status: 400,
-                statusText: 'Bad Request',
-                text: jest.fn().mockResolvedValue('Invalid confirmation status')
-            }
-
-            orderApiClient.base = jest.fn().mockResolvedValue(mockResponse)
+            mockCallAdminApi.mockRejectedValue(new Error('API Error'))
 
             await expect(
                 orderApiClient.updateOrderConfirmationStatus(mockOrderNo, mockStatus)
-            ).rejects.toThrow('400 Bad Request')
+            ).rejects.toThrow('API Error')
+            expect(mockCallAdminApi).toHaveBeenCalledWith(
+                'PUT',
+                `${mockOrderNo}/confirmation-status`,
+                {
+                    body: JSON.stringify({status: mockStatus})
+                }
+            )
         })
     })
 
@@ -198,7 +180,7 @@ describe('OrderApiClient', () => {
             const mockPaymentInstrumentId = '456'
             const mockPspReference = '789'
 
-            orderApiClient.base = jest.fn().mockResolvedValue({
+            mockCallAdminApi.mockResolvedValue({
                 ok: true
             })
 
@@ -208,32 +190,39 @@ describe('OrderApiClient', () => {
                 mockPspReference
             )
             expect(result.ok).toBe(true)
+            expect(mockCallAdminApi).toHaveBeenCalledWith(
+                'PATCH',
+                `${mockOrderNo}/payment-instruments/${mockPaymentInstrumentId}/transaction`,
+                {
+                    body: JSON.stringify({
+                        c_externalReferenceCode: mockPspReference
+                    })
+                }
+            )
         })
 
-        it('should log an error on unsuccessful response', async () => {
+        it('should throw an error on unsuccessful response', async () => {
             const mockOrderNo = '123'
             const mockPaymentInstrumentId = '456'
             const mockPspReference = '789'
 
-            const mockResponse = {
-                ok: false,
-                status: 400,
-                statusText: 'Bad Request',
-                text: jest.fn().mockResolvedValue('Transaction update failed')
-            }
+            mockCallAdminApi.mockRejectedValue(new Error('API Error'))
 
-            orderApiClient.base = jest.fn().mockResolvedValue(mockResponse)
-
-            await orderApiClient.updateOrderPaymentTransaction(
-                mockOrderNo,
-                mockPaymentInstrumentId,
-                mockPspReference
-            )
-
-            expect(orderApiClient.base).toHaveBeenCalledWith(
+            await expect(
+                orderApiClient.updateOrderPaymentTransaction(
+                    mockOrderNo,
+                    mockPaymentInstrumentId,
+                    mockPspReference
+                )
+            ).rejects.toThrow('API Error')
+            expect(mockCallAdminApi).toHaveBeenCalledWith(
                 'PATCH',
-                expect.any(String),
-                expect.any(Object)
+                `${mockOrderNo}/payment-instruments/${mockPaymentInstrumentId}/transaction`,
+                {
+                    body: JSON.stringify({
+                        c_externalReferenceCode: mockPspReference
+                    })
+                }
             )
         })
     })

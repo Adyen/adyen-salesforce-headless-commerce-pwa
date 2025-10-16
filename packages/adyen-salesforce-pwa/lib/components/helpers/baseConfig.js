@@ -3,6 +3,7 @@ import {AdyenPaymentsDetailsService} from '../../services/payments-details'
 import {executeCallbacks} from '../../utils/executeCallbacks'
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 import {AdyenOrderService} from "../../services/order";
+import {GiftCardService} from '../../services/giftCard'
 
 export const baseConfig = ({
                                beforeSubmit = [],
@@ -22,34 +23,50 @@ export const baseConfig = ({
             props,
             onError
         ),
-        onError: executeCallbacks([onErrorHandler], props, onError)
+        onError: executeCallbacks([onErrorHandler], props, onError),
+        onOrderCancel: executeCallbacks([onOrderCancelHandler], props, onError),
     }
 }
 
-export const onSubmit = async (state, component, props) => {
-    if (!state.isValid) {
-        throw new Error('invalid state')
+export const onSubmit = async (state, component, actions, props) => {
+    try {
+        if (!state.isValid) {
+            throw new Error('invalid state')
+        }
+        const adyenPaymentService = new AdyenPaymentsService(props?.token, props?.site)
+        const paymentsResponse = await adyenPaymentService.submitPayment(
+            {
+                ...state.data,
+                origin: state.data.origin ? state.data.origin : window.location.origin,
+                returnUrl: props?.returnUrl || `${window.location.href}/redirect`
+            },
+            props.basket?.basketId,
+            props?.customerId
+        )
+        actions.resolve(paymentsResponse)
+        return {paymentsResponse: paymentsResponse}
+    } catch (err) {
+        actions.reject()
+        throw new Error(err)
     }
-    const adyenPaymentService = new AdyenPaymentsService(props?.token, props?.site)
-    const paymentsResponse = await adyenPaymentService.submitPayment(
-        {
-            ...state.data,
-            origin: state.data.origin ? state.data.origin : window.location.origin,
-            returnUrl: props?.returnUrl || `${window.location.href}/redirect`
-        },
-        props.basket?.basketId,
-        props?.customerId
-    )
-    return {paymentsResponse: paymentsResponse}
+
 }
 
-export const onAdditionalDetails = async (state, component, props) => {
-    const adyenPaymentsDetailsService = new AdyenPaymentsDetailsService(props?.token, props?.site)
-    const paymentsDetailsResponse = await adyenPaymentsDetailsService.submitPaymentsDetails(
-        state.data,
-        props?.customerId
-    )
-    return {paymentsDetailsResponse: paymentsDetailsResponse}
+export const onAdditionalDetails = async (state, component, actions, props) => {
+    try {
+        const adyenPaymentsDetailsService = new AdyenPaymentsDetailsService(props?.token, props?.site)
+        const paymentsDetailsResponse = await adyenPaymentsDetailsService.submitPaymentsDetails(
+            state.data,
+            props.basket?.basketId,
+            props?.customerId
+        )
+        actions.resolve(paymentsDetailsResponse)
+        return {paymentsDetailsResponse: paymentsDetailsResponse}
+    } catch (err) {
+        actions.reject()
+        throw new Error(err)
+    }
+
 }
 
 export const onErrorHandler = async (orderNo, navigate, props) => {
@@ -58,8 +75,16 @@ export const onErrorHandler = async (orderNo, navigate, props) => {
     navigate(response?.headers?.location);
 }
 
-export const getAmount = ({basket}) => {
+export const onOrderCancelHandler = async (Order, props) => {
+    const giftCardService = new GiftCardService(props?.token, props?.site)
+    await giftCardService.cancelOrder(Order, props?.customerId)
+}
+
+export const getAmount = ({basket, adyenOrder}) => {
     if (!basket) return null
+    if (adyenOrder) {
+        return adyenOrder.remainingAmount
+    }
     return {
         value: getCurrencyValueForApi(basket.orderTotal, basket.currency),
         currency: basket.currency

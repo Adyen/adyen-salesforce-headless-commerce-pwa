@@ -1,8 +1,8 @@
 import {hmacValidator} from '@adyen/api-library'
-import NotificationRequest from '@adyen/api-library/lib/src/notification/notificationRequest'
 import Logger from './logger'
 import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrentSite.mjs'
 import {AdyenError} from '../models/AdyenError'
+import NotificationRequest from "@adyen/api-library/lib/src/notification/notificationRequest";
 
 const messages = {
     AUTH_ERROR: 'Access Denied!',

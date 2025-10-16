@@ -1,6 +1,4 @@
-import {Client, Config} from '@adyen/api-library'
-import {PaymentsApi} from '@adyen/api-library/lib/src/services/checkout/paymentsApi'
-import {OrdersApi} from '@adyen/api-library/lib/src/services/checkout/ordersApi'
+import {CheckoutAPI, Client} from '@adyen/api-library'
 import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrentSite.mjs'
 import {ADYEN_ENVIRONMENT, ADYEN_LIVE_REGIONS} from '../../utils/constants.mjs'
 import {AdyenError} from '../models/AdyenError'
@@ -20,9 +18,8 @@ class AdyenCheckoutConfig {
 
     getClient() {
         const adyenConfig = getAdyenConfigForCurrentSite(this.siteId)
-        const config = new Config()
+        const config = {}
         config.apiKey = adyenConfig.apiKey
-        const client = new Client({config})
 
         const isLiveEnvironment = this.isLiveEnvironment(adyenConfig.environment)
 
@@ -30,19 +27,21 @@ class AdyenCheckoutConfig {
             if (!adyenConfig.liveEndpointUrlPrefix) {
                 throw new AdyenError(errorMessages.MISSING_LIVE_PREFIX, 400)
             }
-            client.setEnvironment(ADYEN_ENVIRONMENT.LIVE, adyenConfig.liveEndpointUrlPrefix)
+            config.environment = ADYEN_ENVIRONMENT.LIVE
+            config.liveEndpointUrlPrefix = adyenConfig.liveEndpointUrlPrefix
         } else {
-            client.setEnvironment(ADYEN_ENVIRONMENT.TEST)
+            config.environment = ADYEN_ENVIRONMENT.TEST
         }
 
-        return client
+        return new Client(config)
     }
 
     static getInstance(siteId) {
         if (!this.instance) {
             const adyenCheckoutConfig = new AdyenCheckoutConfig(siteId)
             const client = adyenCheckoutConfig.getClient();
-            this.instance = new PaymentsApi(client)
+            const checkoutApi = new CheckoutAPI(client)
+            this.instance = checkoutApi.PaymentsApi
         }
         return this.instance
     }
@@ -51,7 +50,8 @@ class AdyenCheckoutConfig {
         if (!this.ordersApiInstance) {
             const adyenCheckoutConfig = new AdyenCheckoutConfig(siteId)
             const client = adyenCheckoutConfig.getClient();
-            this.ordersApiInstance = new OrdersApi(client)
+            const checkoutApi = new CheckoutAPI(client)
+            this.ordersApiInstance = checkoutApi.OrdersApi
         }
         return this.ordersApiInstance
     }

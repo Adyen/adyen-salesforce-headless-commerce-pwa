@@ -1,24 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <metadata xmlns="http://www.demandware.com/xml/impex/metadata/2006-10-31">
     <type-extension type-id="OrderPaymentInstrument">
-        <attribute-definition attribute-id="adyenPartialPaymentsOrder">
-            <display-name xml:lang="x-default">adyenPartialPaymentsOrder</display-name>
-            <description xml:lang="x-default">partial payments order data</description>
-            <type>string</type>
-            <mandatory-flag>false</mandatory-flag>
-            <externally-managed-flag>false</externally-managed-flag>
-            <min-length>0</min-length>
-            <field-length>0</field-length>
-        </attribute-definition>
-        <attribute-definition attribute-id="adyenAdditionalPaymentData">
-            <display-name xml:lang="x-default">adyenAdditionalPaymentData</display-name>
-            <description xml:lang="x-default">Additional data for payment method</description>
-            <type>string</type>
-            <mandatory-flag>false</mandatory-flag>
-            <externally-managed-flag>false</externally-managed-flag>
-            <min-length>0</min-length>
-            <field-length>0</field-length>
-        </attribute-definition>
+        <custom-attribute-definitions>
+            <attribute-definition attribute-id="adyenPartialPaymentsOrder">
+                <display-name xml:lang="x-default">adyenPartialPaymentsOrder</display-name>
+                <description xml:lang="x-default">partial payments order data</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+                <field-length>0</field-length>
+            </attribute-definition>
+        </custom-attribute-definitions>
+        <group-definitions>
+            <attribute-group group-id="AdyenPayment">
+                <display-name xml:lang="x-default">AdyenPayment</display-name>
+                <attribute attribute-id="adyenPartialPaymentsOrder"/>
+            </attribute-group>
+        </group-definitions>
     </type-extension>
     <type-extension type-id="PaymentTransaction">
         <system-attribute-definitions>
@@ -54,21 +53,39 @@
         </system-attribute-definitions>
     </type-extension>
     <type-extension type-id="Basket">
-        <attribute-definition attribute-id="adyenGiftCards">
-            <display-name xml:lang="x-default">adyenGiftCards</display-name>
-            <description xml:lang="x-default">Adyen Gift Cards</description>
-            <type>text</type>
-            <mandatory-flag>false</mandatory-flag>
-            <externally-managed-flag>false</externally-managed-flag>
-            <min-length>0</min-length>
-        </attribute-definition>
-        <attribute-definition attribute-id="adyenGiftCardsOrderNo">
-            <display-name xml:lang="x-default">adyenGiftCardsOrderNo</display-name>
-            <description xml:lang="x-default">Adyen Gift Cards Order Number</description>
-            <type>text</type>
-            <mandatory-flag>false</mandatory-flag>
-            <externally-managed-flag>false</externally-managed-flag>
-            <min-length>0</min-length>
-        </attribute-definition>
+        <custom-attribute-definitions>
+            <attribute-definition attribute-id="giftCardCheckBalance">
+                <display-name xml:lang="x-default">giftCardCheckBalance</display-name>
+                <description xml:lang="x-default">Response returned from gift card check balance call</description>
+                <type>text</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="orderNo">
+                <display-name xml:lang="x-default">orderNo</display-name>
+                <description xml:lang="x-default">Order number used for creating order</description>
+                <type>text</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="orderData">
+                <display-name xml:lang="x-default">orderData</display-name>
+                <description xml:lang="x-default">Order data returned from Adyen order api</description>
+                <type>text</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+        </custom-attribute-definitions>
+        <group-definitions>
+            <attribute-group group-id="AdyenPayment">
+                <display-name xml:lang="x-default">AdyenPayment</display-name>
+                <attribute attribute-id="giftCardCheckBalance"/>
+                <attribute attribute-id="orderNo"/>
+                <attribute attribute-id="orderData"/>
+            </attribute-group>
+        </group-definitions>
     </type-extension>
 </metadata>

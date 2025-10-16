@@ -13,13 +13,13 @@ export const PAYMENT_METHOD_TYPES = {
 export const RESULT_CODES = {
     AUTHORISED: 'Authorised',
     CANCELLED: 'Cancelled',
-    CHALLENGESHOPPER: 'ChallengeShopper',
+    CHALLENGE_SHOPPER: 'ChallengeShopper',
     ERROR: 'Error',
-    IDENTIFYSHOPPER: 'IdentifyShopper',
+    IDENTIFY_SHOPPER: 'IdentifyShopper',
     PENDING: 'Pending',
-    PRESENTTOSHOPPER: 'PresentToShopper',
+    PRESENT_TO_SHOPPER: 'PresentToShopper',
     RECEIVED: 'Received',
-    REDIRECTSHOPPER: 'RedirectShopper',
+    REDIRECT_SHOPPER: 'RedirectShopper',
     REFUSED: 'Refused',
 }
 
@@ -38,6 +38,21 @@ export const RECURRING_PROCESSING_MODEL = {
     CARD_ON_FILE: 'CardOnFile',
 };
 
+export const GIFT_CARD_RESULT_CODES = {
+    NOTENOUGHBALANCE: 'NotEnoughBalance',
+    SUCCESS: 'Success',
+}
+
+export const NOTIFICATION_EVENT_CODES = {
+    AUTHORISATION: 'AUTHORISATION',
+    ORDER_CLOSED: 'ORDER_CLOSED',
+}
+
+export const NOTIFICATION_SUCCESS = {
+    TRUE: 'true',
+    FALSE: 'false',
+}
+
 export const ORDER = Object.freeze({
     ORDER_STATUS_CREATED: 'created',
     ORDER_STATUS_NEW: 'new',
@@ -55,6 +70,20 @@ export const ORDER = Object.freeze({
     CONFIRMATION_STATUS_CONFIRMED: 'confirmed',
     CONFIRMATION_STATUS_NOT_CONFIRMED: 'not_confirmed'
 })
+
+export const ERROR_MESSAGE = {
+    AMOUNT_NOT_CORRECT: 'amount not correct',
+    INVALID_ORDER: 'order is invalid',
+    INVALID_PARAMS: 'invalid request params',
+    INVALID_BASKET: 'invalid basket',
+    PAYMENT_NOT_SUCCESSFUL: 'payment was not successful',
+    INVALID_BILLING_ADDRESS: 'invalid billing address',
+    INVALID_SHIPPING_ADDRESS: 'invalid shipping address',
+    UNAUTHORIZED: 'unauthorized',
+    ORDER_ALREADY_EXISTS: 'order already exists',
+    ORDER_NOT_FOUND: 'order not found',
+    PAYMENTS_DETAILS_NOT_SUCCESSFUL: 'payments details call not successful'
+}
 
 export const ADYEN_LIVE_REGIONS = {
     LIVE_EU: 'live',

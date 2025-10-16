@@ -11,7 +11,7 @@ export class GiftCardService {
     async balanceCheck(request, customerId) {
         const res = await this.apiClient.post({
             path: '/balance-check',
-            body: JSON.stringify(request),
+            body: JSON.stringify({data: request}),
             headers: {
                 customerid: customerId,
             }
@@ -26,7 +26,7 @@ export class GiftCardService {
     async createOrder(request, customerId) {
         const res = await this.apiClient.post({
             path: '/create-order',
-            body: JSON.stringify(request),
+            body: JSON.stringify({data: request}),
             headers: {
                 customerid: customerId,
             }
@@ -41,7 +41,7 @@ export class GiftCardService {
     async cancelOrder(request, customerId) {
         const res = await this.apiClient.post({
             path: '/cancel-order',
-            body: JSON.stringify(request),
+            body: JSON.stringify({data: request}),
             headers: {
                 customerid: customerId,
             }

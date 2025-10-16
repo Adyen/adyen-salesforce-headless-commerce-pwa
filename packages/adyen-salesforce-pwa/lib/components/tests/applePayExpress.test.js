@@ -2,227 +2,98 @@
  * @jest-environment jest-environment-jsdom
  * @jest-environment-options {"url": "http://localhost:3000/", "resources": "usable"}
  */
-import {
-    getCustomerBillingDetails,
-    getCustomerShippingDetails,
-    getApplePaymentMethodConfig,
-    getAppleButtonConfig
-} from '../applePayExpress'
+import React from 'react'
+import {act, render, screen} from '@testing-library/react'
+import ApplePayExpressComponent from '../applePayExpress'
+import useAdyenExpressCheckout from '../../hooks/useAdyenExpressCheckout'
+import {getAppleButtonConfig, getApplePaymentMethodConfig} from '../helpers/applePayExpress.utils'
+import {AdyenCheckout, ApplePay} from '@adyen/adyen-web'
 
-jest.mock('../../services/payments', () => {
-    return {
-        AdyenPaymentsService: jest.fn().mockImplementation(() => ({
-            submitPayment: jest.fn().mockResolvedValue({mockData: 'Mocked response'})
-        }))
-    }
-})
+jest.mock('../../hooks/useAdyenExpressCheckout')
+jest.mock('../helpers/applePayExpress.utils')
+jest.mock('@adyen/adyen-web', () => ({
+    AdyenCheckout: jest.fn().mockResolvedValue({}),
+    ApplePay: jest.fn().mockImplementation(() => ({
+        isAvailable: jest.fn().mockResolvedValue(true),
+        mount: jest.fn(),
+        unmount: jest.fn()
+    }))
+}))
 
-describe('getAppleButtonConfig function', () => {
-    let mockGetTokenWhenReady
-    let mockAdyenPaymentsServiceSubmitPayment
+describe('ApplePayExpressComponent', () => {
+    let mockUseAdyenExpressCheckout
 
     beforeEach(() => {
-        mockGetTokenWhenReady = jest.fn().mockResolvedValue('mockToken')
-        mockAdyenPaymentsServiceSubmitPayment = jest.fn().mockResolvedValue({
-            isFinal: true,
-            isSuccessful: true,
-            merchantReference: 'mockMerchantReference'
-        })
+        mockUseAdyenExpressCheckout = {
+            adyenEnvironment: {ADYEN_ENVIRONMENT: 'test', ADYEN_CLIENT_KEY: 'test_key'},
+            adyenPaymentMethods: {paymentMethods: []},
+            basket: {basketId: 'test-basket'},
+            locale: {id: 'en-US'},
+            site: {id: 'test-site'},
+            authToken: 'test-auth-token',
+            navigate: jest.fn(),
+            shippingMethods: {applicableShippingMethods: []},
+            fetchShippingMethods: jest.fn()
+        }
+        useAdyenExpressCheckout.mockReturnValue(mockUseAdyenExpressCheckout)
+        getApplePaymentMethodConfig.mockReturnValue({})
+        getAppleButtonConfig.mockReturnValue({})
     })
 
-    it('returns expected button configuration and resolves onAuthorized event', async () => {
-        const getTokenWhenReady = mockGetTokenWhenReady
-        const site = 'mockSite'
-        const basket = {
-            orderTotal: 100,
-            currency: 'USD',
-            basketId: 'mockBasketId',
-            customerInfo: {customerId: 'mockCustomerId'}
-        }
-        const shippingMethods = [{id: 1, name: 'Standard Shipping', price: 10}]
-        const applePayConfig = {merchantName: 'Mock Merchant'}
-        const navigate = jest.fn()
-        const fetchShippingMethods = jest.fn().mockResolvedValue({
-            applicableShippingMethods: [{id: 1, name: 'Standard Shipping', price: 10}]
+    afterEach(() => {
+        jest.clearAllMocks()
+    })
+
+    it('renders spinner when showLoading is true', () => {
+        render(<ApplePayExpressComponent showLoading={true} spinner={<div>Spinner</div>} />)
+        expect(screen.getByText('Spinner')).toBeInTheDocument()
+    })
+
+    it('does not render spinner when showLoading is false', () => {
+        render(<ApplePayExpressComponent showLoading={false} spinner={<div>Spinner</div>} />)
+        expect(screen.queryByText('Spinner')).not.toBeInTheDocument()
+    })
+
+    it('initializes and mounts Apple Pay button when available', async () => {
+        await act(async () => {
+            render(<ApplePayExpressComponent />)
         })
 
-        const buttonConfig = getAppleButtonConfig(
-            getTokenWhenReady,
-            site,
-            basket,
-            shippingMethods,
-            applePayConfig,
-            navigate,
-            fetchShippingMethods
+        expect(AdyenCheckout).toHaveBeenCalled()
+        expect(getApplePaymentMethodConfig).toHaveBeenCalledWith(
+            mockUseAdyenExpressCheckout.adyenPaymentMethods
         )
+        expect(getAppleButtonConfig).toHaveBeenCalled()
+        expect(ApplePay).toHaveBeenCalled()
+        const mockApplePayInstance = ApplePay.mock.results[0].value
+        expect(mockApplePayInstance.isAvailable).toHaveBeenCalled()
+        expect(mockApplePayInstance.mount).toHaveBeenCalled()
+    })
 
-        expect(buttonConfig.showPayButton).toBeTruthy()
-        expect(buttonConfig.amount.value).toBe(10000)
-        expect(buttonConfig.amount.currency).toBe('USD')
-        expect(buttonConfig.requiredShippingContactFields).toEqual([
-            'postalAddress',
-            'name',
-            'phoneticName',
-            'email',
-            'phone'
-        ])
-        expect(buttonConfig.requiredBillingContactFields).toEqual(['postalAddress'])
-
-        const resolve = jest.fn()
-        await buttonConfig.onAuthorized(resolve, jest.fn(), {
-            payment: {
-                shippingContact: {},
-                billingContact: {},
-                token: {paymentData: 'mockPaymentData'}
-            }
+    it('does not initialize if dependencies are not met', async () => {
+        useAdyenExpressCheckout.mockReturnValue({
+            ...mockUseAdyenExpressCheckout,
+            adyenEnvironment: null
         })
-    })
-})
 
-describe('getCustomerBillingDetails function', () => {
-    it('returns expected billing details when all properties are provided', () => {
-        const billingContact = {
-            locality: 'City',
-            countryCode: 'US',
-            addressLines: ['123 Main St', 'Apt 2'],
-            postalCode: '12345',
-            administrativeArea: 'State'
-        }
-        const expectedBillingDetails = {
-            billingAddress: {
-                city: 'City',
-                country: 'US',
-                houseNumberOrName: 'Apt 2',
-                postalCode: '12345',
-                stateOrProvince: 'State',
-                street: '123 Main St'
-            }
-        }
-        expect(getCustomerBillingDetails(billingContact)).toEqual(expectedBillingDetails)
+        await act(async () => {
+            render(<ApplePayExpressComponent />)
+        })
+
+        expect(AdyenCheckout).not.toHaveBeenCalled()
     })
 
-    it('returns expected billing details when addressLines is not provided', () => {
-        const billingContact = {
-            locality: 'City',
-            countryCode: 'US',
-            postalCode: '12345',
-            administrativeArea: 'State'
+    it('does not mount if Apple Pay is not available', async () => {
+        const mockApplePayInstance = {
+            isAvailable: jest.fn().mockResolvedValue(false),
+            mount: jest.fn()
         }
-        const expectedBillingDetails = {
-            billingAddress: {
-                city: 'City',
-                country: 'US',
-                houseNumberOrName: '',
-                postalCode: '12345',
-                stateOrProvince: 'State',
-                street: undefined
-            }
-        }
-        expect(getCustomerBillingDetails(billingContact)).toEqual(expectedBillingDetails)
-    })
-})
+        ApplePay.mockImplementation(() => mockApplePayInstance)
 
-describe('getCustomerShippingDetails function', () => {
-    it('returns expected shipping details when all properties are provided', () => {
-        const shippingContact = {
-            locality: 'City',
-            countryCode: 'US',
-            addressLines: ['123 Main St', 'Apt 2'],
-            postalCode: '12345',
-            administrativeArea: 'State',
-            givenName: 'John',
-            familyName: 'Doe',
-            emailAddress: 'john.doe@example.com',
-            phoneNumber: '123-456-7890'
-        }
-        const expectedShippingDetails = {
-            deliveryAddress: {
-                city: 'City',
-                country: 'US',
-                houseNumberOrName: 'Apt 2',
-                postalCode: '12345',
-                stateOrProvince: 'State',
-                street: '123 Main St'
-            },
-            profile: {
-                firstName: 'John',
-                lastName: 'Doe',
-                email: 'john.doe@example.com',
-                phone: '123-456-7890'
-            }
-        }
-        expect(getCustomerShippingDetails(shippingContact)).toEqual(expectedShippingDetails)
-    })
+        await act(async () => {
+            render(<ApplePayExpressComponent />)
+        })
 
-    it('returns expected shipping details when addressLines is not provided', () => {
-        const shippingContact = {
-            locality: 'City',
-            countryCode: 'US',
-            postalCode: '12345',
-            administrativeArea: 'State',
-            givenName: 'John',
-            familyName: 'Doe',
-            emailAddress: 'john.doe@example.com',
-            phoneNumber: '123-456-7890'
-        }
-        const expectedShippingDetails = {
-            deliveryAddress: {
-                city: 'City',
-                country: 'US',
-                houseNumberOrName: '',
-                postalCode: '12345',
-                stateOrProvince: 'State',
-                street: undefined
-            },
-            profile: {
-                firstName: 'John',
-                lastName: 'Doe',
-                email: 'john.doe@example.com',
-                phone: '123-456-7890'
-            }
-        }
-        expect(getCustomerShippingDetails(shippingContact)).toEqual(expectedShippingDetails)
-    })
-})
-
-describe('getApplePaymentMethodConfig function', () => {
-    it('returns null if paymentMethodsResponse is undefined', () => {
-        expect(getApplePaymentMethodConfig()).toBeNull()
-    })
-
-    it('returns null if paymentMethodsResponse.paymentMethods is undefined', () => {
-        expect(getApplePaymentMethodConfig({})).toBeNull()
-    })
-
-    it('returns null if no apple pay payment method is found', () => {
-        const paymentMethodsResponse = {
-            paymentMethods: [
-                {
-                    type: 'visa',
-                    configuration: {}
-                },
-                {
-                    type: 'mastercard',
-                    configuration: {}
-                }
-            ]
-        }
-        expect(getApplePaymentMethodConfig(paymentMethodsResponse)).toBeNull()
-    })
-
-    it('returns configuration object if apple pay payment method is found', () => {
-        const paymentMethodsResponse = {
-            paymentMethods: [
-                {
-                    type: 'visa',
-                    configuration: {}
-                },
-                {
-                    type: 'applepay',
-                    configuration: {}
-                }
-            ]
-        }
-        expect(getApplePaymentMethodConfig(paymentMethodsResponse)).toEqual({})
+        expect(mockApplePayInstance.mount).not.toHaveBeenCalled()
     })
 })

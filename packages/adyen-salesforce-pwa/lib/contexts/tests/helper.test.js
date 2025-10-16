@@ -1,6 +1,14 @@
 import {onPaymentsDetailsSuccess, onPaymentsSuccess} from '../helper'
 
 describe('onPaymentsSuccess', () => {
+    let mockActions
+
+    beforeEach(() => {
+        mockActions = {
+            resolve: jest.fn(),
+            reject: jest.fn()
+        }
+    })
     it('when response is successful', async () => {
         const state = {}
         const props = {}
@@ -8,6 +16,7 @@ describe('onPaymentsSuccess', () => {
         const setOrderNo = jest.fn()
         const responses = {
             paymentsResponse: {
+                isFinal: true,
                 isSuccessful: true,
                 merchantReference: 'test'
             }
@@ -15,7 +24,7 @@ describe('onPaymentsSuccess', () => {
         const component = {
             handleAction: jest.fn()
         }
-        await onPaymentsSuccess(navigate, setOrderNo)(state, component, props, responses)
+        await onPaymentsSuccess(navigate, setOrderNo)(state, component, mockActions, props, responses)
         expect(navigate).toHaveBeenCalled()
         expect(setOrderNo).toHaveBeenCalled()
     })
@@ -37,7 +46,7 @@ describe('onPaymentsSuccess', () => {
         const component = {
             handleAction: jest.fn()
         }
-        await onPaymentsSuccess(navigate, setOrderNo)(state, component, props, responses)
+        await onPaymentsSuccess(navigate, setOrderNo)(state, component, mockActions, props, responses)
         expect(component.handleAction).toHaveBeenCalled()
         expect(setOrderNo).toHaveBeenCalled()
     })
@@ -59,7 +68,7 @@ describe('onPaymentsSuccess', () => {
         const component = {
             handleAction: jest.fn()
         }
-        await onPaymentsSuccess(navigate, setOrderNo)(state, component, props, responses)
+        await onPaymentsSuccess(navigate, setOrderNo)(state, component, mockActions, props, responses)
         expect(navigate).toHaveBeenCalled()
         expect(setOrderNo).toHaveBeenCalled()
     })
@@ -78,13 +87,21 @@ describe('onPaymentsSuccess', () => {
         const component = {
             handleAction: jest.fn()
         }
-        const result = await onPaymentsSuccess(navigate, setOrderNo)(state, component, props, responses)
+        const result = await onPaymentsSuccess(navigate, setOrderNo)(state, component, mockActions, props, responses)
         expect(result instanceof Error).toBeTrue()
         expect(setOrderNo).toHaveBeenCalled()
     })
 })
 
 describe('onPaymentsDetailsSuccess', () => {
+    let mockActions
+
+    beforeEach(() => {
+        mockActions = {
+            resolve: jest.fn(),
+            reject: jest.fn()
+        }
+    })
     it('when response is successful', async () => {
         const state = {}
         const props = {}
@@ -98,7 +115,7 @@ describe('onPaymentsDetailsSuccess', () => {
         const component = {
             handleAction: jest.fn()
         }
-        await onPaymentsDetailsSuccess(navigate)(state, component, props, responses)
+        await onPaymentsDetailsSuccess(navigate)(state, component, mockActions, props, responses)
         expect(navigate).toHaveBeenCalled()
     })
 
@@ -118,7 +135,7 @@ describe('onPaymentsDetailsSuccess', () => {
         const component = {
             handleAction: jest.fn()
         }
-        await onPaymentsDetailsSuccess(navigate)(state, component, props, responses)
+        await onPaymentsDetailsSuccess(navigate)(state, component, mockActions, props, responses)
         expect(component.handleAction).toHaveBeenCalled()
     })
 
@@ -135,7 +152,7 @@ describe('onPaymentsDetailsSuccess', () => {
         const component = {
             handleAction: jest.fn()
         }
-        const result = await onPaymentsDetailsSuccess(navigate)(state, component, props, responses)
+        const result = await onPaymentsDetailsSuccess(navigate)(state, component, mockActions, props, responses)
         expect(result instanceof Error).toBeTrue()
     })
 })

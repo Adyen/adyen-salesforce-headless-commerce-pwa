@@ -8,12 +8,21 @@ const handleAction = (navigate) => async (component, responses) => {
     }
 }
 
-export const onPaymentsSuccess = (navigate, setOrderNo) => async (state, component, props, responses) => {
+export const onPaymentsSuccess = (navigate, setOrderNo, setAdyenOrder) => async (state, component, actions, props, responses) => {
     if (responses?.paymentsResponse?.merchantReference) {
         setOrderNo(responses?.paymentsResponse?.merchantReference)
     }
-    if (responses?.paymentsResponse?.isSuccessful) {
-        navigate(`/checkout/confirmation/${responses?.paymentsResponse?.merchantReference}`)
+    if (responses?.paymentsResponse?.order) {
+        setAdyenOrder(responses?.paymentsResponse?.order)
+    }
+    if (responses?.paymentsResponse?.isSuccessful && responses?.paymentsResponse?.isFinal) {
+        if (responses?.paymentsResponse?.order) {
+            if (responses?.paymentsResponse?.order?.remainingAmount?.value <= 0) {
+                navigate(`/checkout/confirmation/${responses?.paymentsResponse?.merchantReference}`)
+            }
+        } else {
+            navigate(`/checkout/confirmation/${responses?.paymentsResponse?.merchantReference}`)
+        }
     } else if (responses?.paymentsResponse?.action) {
         await handleAction(navigate)(component, responses)
     } else {
@@ -22,7 +31,7 @@ export const onPaymentsSuccess = (navigate, setOrderNo) => async (state, compone
 }
 
 export const onPaymentsDetailsSuccess =
-    (navigate) => async (state, component, props, responses) => {
+    (navigate) => async (state, component, actions, props, responses) => {
         if (responses?.paymentsDetailsResponse?.isSuccessful) {
             navigate(
                 `/checkout/confirmation/${responses?.paymentsDetailsResponse?.merchantReference}`

@@ -33,7 +33,7 @@
   "scripts": {
     "uploadCartridge": "sgmf-scripts --uploadCartridge int_adyen_PWA",
     "transpile": "babel ./packages/int_adyen_PWA -d ./cartridges/int_adyen_PWA --copy-files --no-copy-ignored --extensions .js,.test.js,.snap",
-    "build": "npm run transpile && npm run uploadCartridge",
+    "buildCartridge": "npm run transpile && npm run uploadCartridge",
     "check-branch-name": "chmod 755 ./branching.sh && sh ./branching.sh",
     "prepare": "husky install"
   }

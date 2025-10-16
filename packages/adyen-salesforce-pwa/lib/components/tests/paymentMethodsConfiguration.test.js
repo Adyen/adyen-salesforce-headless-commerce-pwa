@@ -38,7 +38,10 @@ describe('paymentMethodsConfiguration', () => {
         klarnaConfig.mockReturnValue(mockedKlarnaConfigResult)
 
         const props = {
-            someProp: 'value'
+            token: 'mockToken',
+            site: {
+                id: 'mockSiteId'
+            }
         }
 
         const paymentMethods = [{type: 'card'}, {type: 'klarna'}]
