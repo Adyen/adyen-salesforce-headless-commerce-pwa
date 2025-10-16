@@ -1,28 +1,11 @@
 import {authenticate, parseNotification, validateHmac} from '../webhook'
 import {AdyenError} from '../../models/AdyenError'
+import Logger from '../../models/logger'
 
 let mockValidateHMAC = jest.fn()
 
-jest.mock('@salesforce/pwa-kit-runtime/utils/ssr-config', () => {
-    return {
-        getConfig: jest.fn().mockImplementation(() => {
-            return {
-                app: {
-                    sites: [
-                        {
-                            id: 'RefArch'
-                        }
-                    ],
-                    commerceAPI: {
-                        parameters: {
-                            siteId: 'RefArch'
-                        }
-                    }
-                }
-            }
-        })
-    }
-})
+jest.mock('../../models/logger')
+
 jest.mock('@adyen/api-library', () => {
     return {
         hmacValidator: jest.fn().mockImplementation(() => {
@@ -33,7 +16,7 @@ jest.mock('@adyen/api-library', () => {
     }
 })
 describe('WebhookHandler', () => {
-    let req, res, next, consoleInfoSpy, consoleErrorSpy
+    let req, res, next
 
     beforeEach(() => {
         req = {
@@ -50,34 +33,42 @@ describe('WebhookHandler', () => {
             }
         }
         res = {
-            locals: {}
+            locals: {
+                adyen: {
+                    adyenConfig: {
+                        webhookUser: 'test_user',
+                        webhookPassword: 'test_password',
+                        webhookHmacKey: '' // Default to no HMAC key
+                    }
+                }
+            }
         }
-        process.env.ADYEN_HMAC_KEY = ''
         next = jest.fn()
-        consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation(() => {})
-        consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+        jest.clearAllMocks()
     })
     describe('authenticate', () => {
         it('when valid username and password is used', () => {
-            const authorization =
-                'Basic ' +
-                btoa(process.env.ADYEN_WEBHOOK_USER + ':' + process.env.ADYEN_WEBHOOK_PASSWORD)
+            const authorization = 'Basic ' + btoa('test_user:test_password')
             req.headers.authorization = authorization
             authenticate(req, res, next)
             expect(next).toHaveBeenCalled()
         })
         it('when no authorization is passed', () => {
             authenticate(req, res, next)
-            expect(consoleErrorSpy).toHaveBeenCalledTimes(1)
-            expect(consoleErrorSpy.mock.calls[0][0]).toContain('Access Denied!')
+            expect(Logger.error).toHaveBeenCalledWith(
+                'authenticate',
+                expect.stringContaining('Access Denied!')
+            )
             expect(next).toHaveBeenCalledWith(new AdyenError('Access Denied!', 401))
         })
         it('when invalid authorization is passed', () => {
             const authorization = 'Basic ' + btoa('mockUser' + ':' + 'mockPassword')
             req.headers.authorization = authorization
             authenticate(req, res, next)
-            expect(consoleErrorSpy).toHaveBeenCalledTimes(1)
-            expect(consoleErrorSpy.mock.calls[0][0]).toContain('Access Denied!')
+            expect(Logger.error).toHaveBeenCalledWith(
+                'authenticate',
+                expect.stringContaining('Access Denied!')
+            )
             expect(next).toHaveBeenCalledWith(new AdyenError('Access Denied!', 401))
         })
     })
@@ -87,7 +78,7 @@ describe('WebhookHandler', () => {
             expect(next).toHaveBeenCalled()
         })
         it('when valid HMAC is present', () => {
-            process.env.RefArch_ADYEN_HMAC_KEY = 'test'
+            res.locals.adyen.adyenConfig.webhookHmacKey = 'test_hmac_key'
             mockValidateHMAC.mockImplementationOnce(() => {
                 return true
             })
@@ -96,22 +87,23 @@ describe('WebhookHandler', () => {
             expect(next).toHaveBeenCalled()
         })
         it('when invalid HMAC is present', () => {
-            process.env.RefArch_ADYEN_HMAC_KEY = 'test'
+            res.locals.adyen.adyenConfig.webhookHmacKey = 'test_hmac_key'
             mockValidateHMAC.mockImplementationOnce(() => {
                 return false
             })
             validateHmac(req, res, next)
             expect(mockValidateHMAC).toHaveBeenCalled()
-            expect(consoleErrorSpy).toHaveBeenCalledTimes(1)
-            expect(consoleErrorSpy.mock.calls[0][0]).toContain('Access Denied!')
+            expect(Logger.error).toHaveBeenCalledWith(
+                'validateHmac',
+                expect.stringContaining('Access Denied!')
+            )
             expect(next).toHaveBeenCalledWith(new AdyenError('Access Denied!', 401))
         })
     })
     describe('parseNotification', () => {
         it('when valid notification is present', () => {
             parseNotification(req, res, next)
-            expect(consoleInfoSpy).toHaveBeenCalledTimes(1)
-            expect(consoleInfoSpy.mock.calls[0][0]).toContain('AdyenNotification {}')
+            expect(Logger.info).toHaveBeenCalledWith('AdyenNotification', JSON.stringify({NotificationRequestItem: {}}))
             expect(next).toHaveBeenCalled()
         })
         it('when notificationRequestItem is not present', () => {
