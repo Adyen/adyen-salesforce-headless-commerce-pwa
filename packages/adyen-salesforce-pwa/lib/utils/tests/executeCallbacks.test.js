@@ -1,6 +1,16 @@
 import {executeCallbacks} from '../executeCallbacks'
 
 describe('executeCallbacks', () => {
+    let consoleErrorSpy
+
+    beforeEach(() => {
+        consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+    })
+
+    afterEach(() => {
+        consoleErrorSpy.mockRestore()
+    })
+
     it('should execute all callbacks successfully and return aggregated data', async () => {
         const callback1 = jest.fn().mockResolvedValue({data1: 'result1'})
         const callback2 = jest.fn().mockResolvedValue({data2: 'result2'})

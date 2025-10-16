@@ -11,38 +11,54 @@ export const getCheckoutConfig = (adyenEnvironment, adyenPaymentMethods, transla
     }
 }
 
-export const handleQueryParams = (
-    urlParams,
+export const handleRedirects = (
+    redirectResult,
+    amazonCheckoutSessionId,
     checkout,
-    setAdyenPaymentInProgress,
-    paymentContainer,
-    paymentMethodsConfiguration
+    setIsLoading
 ) => {
-    const redirectResult = urlParams.get('redirectResult')
-    const amazonCheckoutSessionId = urlParams.get('amazonCheckoutSessionId')
-    const adyenAction = urlParams.get('adyenAction')
-
     if (redirectResult) {
-        checkout.submitDetails({data: {details: {redirectResult}}})
-        return null // No component to mount
+        checkout.submitDetails({details: {redirectResult}})
+        return true
     }
+
     if (amazonCheckoutSessionId) {
-        setAdyenPaymentInProgress(true)
+        setIsLoading(true)
         const amazonPayContainer = document.createElement('div')
-        const amazonPay = checkout
-            .create('amazonpay', {
-                amazonCheckoutSessionId,
-                showOrderButton: false
-            })
-            .mount(amazonPayContainer)
+        const amazonPay = checkout.create('amazonpay', {
+            amazonCheckoutSessionId,
+            showOrderButton: false
+        }).mount(amazonPayContainer)
         amazonPay.submit()
-        return null // No component to mount
+        return true
     }
+
+    return false
+}
+
+export const mountCheckoutComponent = (
+    adyenAction,
+    checkout,
+    paymentContainer,
+    paymentMethodsConfiguration,
+    optionalDropinConfiguration
+) => {
     if (adyenAction) {
         const action = JSON.parse(atob(adyenAction))
         return checkout.createFromAction(action).mount(paymentContainer.current)
     }
-    return new Dropin(checkout, {paymentMethodsConfiguration}).mount(paymentContainer.current)
+    return new Dropin(checkout, {
+        ...optionalDropinConfiguration,
+        paymentMethodsConfiguration,
+        onSelect: (component) => {
+            const {props} = component
+            if (props?.type === 'paypal') {
+                if (window?.paypal?.firstElementChild) {
+                    window.paypal = undefined
+                }
+            }
+        },
+    }).mount(paymentContainer.current)
 }
 
 export const createCheckoutInstance = async ({
@@ -53,8 +69,7 @@ export const createCheckoutInstance = async ({
                                                  getTranslations,
                                                  locale,
                                                  setAdyenStateData,
-                                                 orderNo,
-                                                 navigate
+                                                 setIsLoading
                                              }) => {
     const translations = getTranslations()
     const checkoutConfig = getCheckoutConfig(
@@ -64,26 +79,39 @@ export const createCheckoutInstance = async ({
         locale
     )
     const pmc = paymentMethodsConfiguration
-
     return AdyenCheckout({
         ...checkoutConfig,
         order: adyenOrder,
-        onSubmit(state, element, actions) {
+        async onSubmit(state, element, actions) {
             const handler = pmc.onSubmit || pmc.card?.onSubmit
-            if (handler) handler(state, element, actions)
+            if (handler) {
+                setIsLoading(true)
+                try {
+                    await handler(state, element, actions)
+                } finally {
+                    setIsLoading(false)
+                }
+            }
         },
-        onAdditionalDetails(state, element, actions) {
+        async onAdditionalDetails(state, element, actions) {
             const handler = pmc.onAdditionalDetails || pmc.card?.onAdditionalDetails
-            if (handler) handler(state, element, actions)
+            if (handler) {
+                setIsLoading(true)
+                try {
+                    await handler(state, element, actions)
+                } finally {
+                    setIsLoading(false)
+                }
+            }
         },
         onChange: (state) => {
             if (state.isValid) {
                 setAdyenStateData(state.data)
             }
         },
-        onError() {
+        onError: (error) => {
             const handler = pmc.onError || pmc.card?.onError
-            if (handler) handler(orderNo, navigate)
+            if (handler) handler(error)
         },
         onOrderCancel(order, action) {
             const handler = pmc.onOrderCancel || pmc.giftcard?.onOrderCancel
