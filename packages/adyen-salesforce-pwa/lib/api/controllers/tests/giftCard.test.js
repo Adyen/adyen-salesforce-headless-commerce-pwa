@@ -1,10 +1,7 @@
-import {balanceCheck, createOrder, cancelOrder} from '../giftCard.js'
+import {balanceCheck, cancelOrder, createOrder} from '../giftCard.js'
 import AdyenClientProvider from '../../models/adyenClientProvider'
 import Logger from '../../models/logger'
-import {
-    cancelAdyenOrder as cancelAdyenOrderHelper,
-    createCheckoutResponse
-} from '../../helpers/paymentsHelper.js'
+import {cancelAdyenOrder as cancelAdyenOrderHelper, createCheckoutResponse} from '../../helpers/paymentsHelper.js'
 
 // Mock dependencies
 jest.mock('../../models/adyenClientProvider')
@@ -114,7 +111,7 @@ describe('Gift Card Controller', () => {
 
             expect(Logger.error).toHaveBeenCalledWith(
                 'giftCards-createOrder',
-                JSON.stringify(mockError)
+                mockError.stack
             )
             expect(next).toHaveBeenCalledWith(mockError)
         })
@@ -159,7 +156,7 @@ describe('Gift Card Controller', () => {
 
             expect(Logger.error).toHaveBeenCalledWith(
                 'giftCards-cancelOrder',
-                JSON.stringify(mockError)
+                mockError.stack
             )
             expect(next).toHaveBeenCalledWith(mockError)
         })

@@ -81,7 +81,7 @@ export async function createOrder(req, res, next) {
         res.locals.response = response
         next()
     } catch (err) {
-        Logger.error('giftCards-createOrder', JSON.stringify(err))
+        Logger.error('giftCards-createOrder', err.stack)
         next(err)
     }
 }
@@ -113,7 +113,7 @@ export async function cancelOrder(req, res, next) {
         res.locals.response = cancelOrderResponse
         next()
     } catch (err) {
-        Logger.error('giftCards-cancelOrder', JSON.stringify(err))
+        Logger.error('giftCards-cancelOrder', err.stack)
         next(err)
     }
 }

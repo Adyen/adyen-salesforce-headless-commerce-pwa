@@ -1,8 +1,10 @@
 import {createShopperBasketsClient} from '../helpers/basketHelper.js'
-import {PAYMENT_METHODS} from '../../utils/constants.mjs'
+import {ERROR_MESSAGE, PAYMENT_METHODS} from '../../utils/constants.mjs'
 import {getCardType} from '../../utils/getCardType.mjs'
 import {convertCurrencyValueToMajorUnits} from '../../utils/parsers.mjs'
 import Logger from '../models/logger'
+import {AdyenError} from './AdyenError'
+
 
 /**
  * A service for managing basket state and interactions with the ShopperBaskets API.
@@ -57,8 +59,9 @@ export class BasketService {
             if (!amount) missing.push('amount')
             if (!paymentMethod) missing.push('paymentMethod')
             if (!pspReference) missing.push('pspReference')
-            Logger.warn('addPaymentInstrument', `Payment instrument will be added with missing ${missing.join(', ')}`)
-
+            const errorMessage = `${ERROR_MESSAGE.ADD_PAYMENT_INSTRUMENTS}: ${missing.join(', ')}`
+            Logger.error('addPaymentInstrument', errorMessage)
+            throw new AdyenError(errorMessage)
         }
         const isCardPayment = paymentMethod?.type === 'scheme'
         const paymentMethodId = isCardPayment
