@@ -4,6 +4,7 @@ export const PAYMENT_METHODS = {
 }
 
 export const PAYMENT_METHOD_TYPES = {
+    CREDIT_CARD: 'scheme',
     GIFT_CARD: 'giftcard',
     WECHATPAY_MINI_PROGRAM: 'wechatpayMiniProgram',
     WECHATPAY_QR: 'wechatpayQR',
@@ -52,6 +53,8 @@ export const NOTIFICATION_SUCCESS = {
     TRUE: 'true',
     FALSE: 'false',
 }
+
+export const DEFAULT_SHIPMENT_ID = 'me'
 
 export const ORDER = Object.freeze({
     ORDER_STATUS_CREATED: 'created',

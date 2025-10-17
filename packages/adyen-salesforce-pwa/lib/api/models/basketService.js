@@ -1,5 +1,5 @@
 import {createShopperBasketsClient} from '../helpers/basketHelper.js'
-import {ERROR_MESSAGE, PAYMENT_METHODS} from '../../utils/constants.mjs'
+import {DEFAULT_SHIPMENT_ID, ERROR_MESSAGE, PAYMENT_METHODS} from '../../utils/constants.mjs'
 import {getCardType} from '../../utils/getCardType.mjs'
 import {convertCurrencyValueToMajorUnits} from '../../utils/parsers.mjs'
 import Logger from '../models/logger'
@@ -63,7 +63,7 @@ export class BasketService {
             Logger.error('addPaymentInstrument', errorMessage)
             throw new AdyenError(errorMessage)
         }
-        const isCardPayment = paymentMethod?.type === 'scheme'
+        const isCardPayment = paymentMethod?.type === PAYMENT_METHODS.CREDIT_CARD
         const paymentMethodId = isCardPayment
             ? PAYMENT_METHODS.CREDIT_CARD
             : PAYMENT_METHODS.ADYEN_COMPONENT
@@ -115,7 +115,7 @@ export class BasketService {
             },
             parameters: {
                 basketId: basket.basketId,
-                shipmentId: 'me'
+                shipmentId: DEFAULT_SHIPMENT_ID
             }
         })
 
@@ -196,7 +196,7 @@ export class BasketService {
             },
             parameters: {
                 basketId: this.adyenContext.basket.basketId,
-                shipmentId: 'me'
+                shipmentId: DEFAULT_SHIPMENT_ID
             }
         })
         this._updateContext(updatedBasket)
@@ -215,7 +215,7 @@ export class BasketService {
             },
             parameters: {
                 basketId: this.adyenContext.basket.basketId,
-                shipmentId: 'me'
+                shipmentId: DEFAULT_SHIPMENT_ID
             }
         })
         this._updateContext(updatedBasket)
