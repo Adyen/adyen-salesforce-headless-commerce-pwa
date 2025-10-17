@@ -87,7 +87,8 @@ export const ERROR_MESSAGE = {
     AMOUNTS_DONT_MATCH: 'amounts do not match',
     MISSING_LIVE_PREFIX: 'missing live prefix',
     ADYEN_CONTEXT_NOT_FOUND: 'Adyen context not found',
-    NO_PAYMENT_METHODS: 'no payment methods'
+    NO_PAYMENT_METHODS: 'no payment methods',
+    ADD_PAYMENT_INSTRUMENTS: 'Failed to add payment instrument due to missing parameters'
 }
 
 export const ADYEN_LIVE_REGIONS = {
