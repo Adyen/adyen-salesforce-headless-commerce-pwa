@@ -54,9 +54,7 @@ describe('AdyenEnvironmentService', () => {
 
             adyenService.apiClient.get.mockResolvedValueOnce(mockFetchPromise)
 
-            await expect(adyenService.fetchEnvironment()).rejects.toThrow(
-                '[object Object]'
-            )
+            await expect(adyenService.fetchEnvironment()).rejects.toThrow('[object Object]')
         })
     })
 })

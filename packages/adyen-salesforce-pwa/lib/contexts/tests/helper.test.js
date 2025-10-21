@@ -26,7 +26,13 @@ describe('Adyen Context Helpers', () => {
                 }
             }
 
-            await onPaymentsSuccess(null, component, mockActions, {navigate, setOrderNo, setAdyenOrder}, responses)
+            await onPaymentsSuccess(
+                null,
+                component,
+                mockActions,
+                {navigate, setOrderNo, setAdyenOrder},
+                responses
+            )
 
             expect(setOrderNo).toHaveBeenCalledWith('ORDER-123')
             expect(setAdyenOrder).not.toHaveBeenCalled()
@@ -46,7 +52,13 @@ describe('Adyen Context Helpers', () => {
                 }
             }
 
-            await onPaymentsSuccess(null, component, mockActions, {navigate, setOrderNo, setAdyenOrder}, responses)
+            await onPaymentsSuccess(
+                null,
+                component,
+                mockActions,
+                {navigate, setOrderNo, setAdyenOrder},
+                responses
+            )
             expect(setOrderNo).toHaveBeenCalledWith('ORDER-123')
             expect(setAdyenOrder).toHaveBeenCalledWith(responses.paymentsResponse.order)
             expect(navigate).not.toHaveBeenCalled()
@@ -65,7 +77,13 @@ describe('Adyen Context Helpers', () => {
                 }
             }
 
-            await onPaymentsSuccess(null, component, mockActions, {navigate, setOrderNo, setAdyenOrder}, responses)
+            await onPaymentsSuccess(
+                null,
+                component,
+                mockActions,
+                {navigate, setOrderNo, setAdyenOrder},
+                responses
+            )
             expect(setOrderNo).toHaveBeenCalledWith('ORDER-123')
             expect(setAdyenOrder).toHaveBeenCalledWith(responses.paymentsResponse.order)
             expect(navigate).toHaveBeenCalledWith('/checkout/confirmation/ORDER-123')
@@ -79,7 +97,13 @@ describe('Adyen Context Helpers', () => {
                     action: action
                 }
             }
-            await onPaymentsSuccess(null, component, mockActions, {navigate, setOrderNo, setAdyenOrder}, responses)
+            await onPaymentsSuccess(
+                null,
+                component,
+                mockActions,
+                {navigate, setOrderNo, setAdyenOrder},
+                responses
+            )
             expect(component.handleAction).toHaveBeenCalledWith(action)
         })
 
@@ -93,7 +117,13 @@ describe('Adyen Context Helpers', () => {
             }
 
             const encodedAction = btoa(JSON.stringify(action))
-            await onPaymentsSuccess(null, component, mockActions, {navigate, setOrderNo, setAdyenOrder}, responses)
+            await onPaymentsSuccess(
+                null,
+                component,
+                mockActions,
+                {navigate, setOrderNo, setAdyenOrder},
+                responses
+            )
             expect(navigate).toHaveBeenCalledWith(
                 `/checkout/confirmation/ORDER-123?adyenAction=${encodedAction}`
             )
@@ -108,7 +138,13 @@ describe('Adyen Context Helpers', () => {
                 }
             }
 
-            await onPaymentsSuccess(null, component, mockActions, {navigate, setOrderNo, setAdyenOrder}, responses)
+            await onPaymentsSuccess(
+                null,
+                component,
+                mockActions,
+                {navigate, setOrderNo, setAdyenOrder},
+                responses
+            )
             expect(navigate).not.toHaveBeenCalled()
             expect(component.handleAction).not.toHaveBeenCalled()
             expect(setOrderNo).not.toHaveBeenCalled()

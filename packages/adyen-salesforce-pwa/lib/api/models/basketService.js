@@ -1,10 +1,14 @@
 import {createShopperBasketsClient} from '../helpers/basketHelper.js'
-import {DEFAULT_SHIPMENT_ID, ERROR_MESSAGE, PAYMENT_METHOD_TYPES, PAYMENT_METHODS} from '../../utils/constants.mjs'
+import {
+    DEFAULT_SHIPMENT_ID,
+    ERROR_MESSAGE,
+    PAYMENT_METHOD_TYPES,
+    PAYMENT_METHODS
+} from '../../utils/constants.mjs'
 import {getCardType} from '../../utils/getCardType.mjs'
 import {convertCurrencyValueToMajorUnits} from '../../utils/parsers.mjs'
 import Logger from '../models/logger'
 import {AdyenError} from './AdyenError'
-
 
 /**
  * A service for managing basket state and interactions with the ShopperBaskets API.
@@ -87,9 +91,8 @@ export class BasketService {
                 basketId: this.adyenContext.basket.basketId
             }
         }
-        const updatedBasket = await this.shopperBaskets.addPaymentInstrumentToBasket(
-            paymentInstrumentReq
-        )
+        const updatedBasket =
+            await this.shopperBaskets.addPaymentInstrumentToBasket(paymentInstrumentReq)
         this._updateContext(updatedBasket)
         return updatedBasket
     }

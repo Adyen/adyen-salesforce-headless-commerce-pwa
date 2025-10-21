@@ -25,10 +25,12 @@ export const handleRedirects = (
     if (amazonCheckoutSessionId) {
         setIsLoading(true)
         const amazonPayContainer = document.createElement('div')
-        const amazonPay = checkout.create('amazonpay', {
-            amazonCheckoutSessionId,
-            showOrderButton: false
-        }).mount(amazonPayContainer)
+        const amazonPay = checkout
+            .create('amazonpay', {
+                amazonCheckoutSessionId,
+                showOrderButton: false
+            })
+            .mount(amazonPayContainer)
         amazonPay.submit()
         return true
     }
@@ -57,20 +59,20 @@ export const mountCheckoutComponent = (
                     window.paypal = undefined
                 }
             }
-        },
+        }
     }).mount(paymentContainer.current)
 }
 
 export const createCheckoutInstance = async ({
-                                                 paymentMethodsConfiguration,
-                                                 adyenEnvironment,
-                                                 adyenPaymentMethods,
-                                                 adyenOrder,
-                                                 getTranslations,
-                                                 locale,
-                                                 setAdyenStateData,
-                                                 setIsLoading
-                                             }) => {
+    paymentMethodsConfiguration,
+    adyenEnvironment,
+    adyenPaymentMethods,
+    adyenOrder,
+    getTranslations,
+    locale,
+    setAdyenStateData,
+    setIsLoading
+}) => {
     const translations = getTranslations()
     const checkoutConfig = getCheckoutConfig(
         adyenEnvironment,

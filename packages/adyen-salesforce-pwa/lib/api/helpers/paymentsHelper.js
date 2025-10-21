@@ -10,8 +10,8 @@ import {
 } from '../../utils/constants.mjs'
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 import {AdyenError} from '../models/AdyenError.js'
-import {formatAddressInAdyenFormat} from "../../utils/formatAddress.mjs";
-import {getApplicationInfo} from "../../utils/getApplicationInfo.mjs";
+import {formatAddressInAdyenFormat} from '../../utils/formatAddress.mjs'
+import {getApplicationInfo} from '../../utils/getApplicationInfo.mjs'
 
 /**
  * A private helper to reset the basket's Adyen-related custom attributes
@@ -37,7 +37,7 @@ async function _cleanupBasket(adyenContext) {
  */
 export async function cancelAdyenOrder(adyenContext, order) {
     Logger.info('cancelAdyenOrder', 'start')
-    const {siteId, adyenConfig, basket, authorization} = adyenContext
+    const {adyenConfig} = adyenContext
     const ordersApi = new AdyenClientProvider(adyenContext).getOrdersApi()
 
     const request = {
@@ -151,8 +151,7 @@ export function getLineItems(basket) {
     const {currency, productItems, shippingItems, priceAdjustments} = basket
 
     const productLineItems = productItems?.map((item) => mapToLineItem(item, currency)) || []
-    const shippingLineItems =
-        shippingItems?.map((item) => mapToLineItem(item, currency, 1)) || []
+    const shippingLineItems = shippingItems?.map((item) => mapToLineItem(item, currency, 1)) || []
     const priceAdjustmentLineItems =
         priceAdjustments?.map((item) => mapToLineItem(item, currency)) || []
 
@@ -319,8 +318,7 @@ export async function createPaymentRequestObject(data, adyenContext, req) {
         ...filterStateData(data),
         billingAddress: data.billingAddress || formatAddressInAdyenFormat(basket.billingAddress),
         deliveryAddress:
-            data.deliveryAddress ||
-            formatAddressInAdyenFormat(basket.shipments[0].shippingAddress),
+            data.deliveryAddress || formatAddressInAdyenFormat(basket.shipments[0].shippingAddress),
         reference: basket.c_orderNo,
         merchantAccount: adyenConfig.merchantAccount,
         amount: {

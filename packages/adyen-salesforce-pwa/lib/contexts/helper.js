@@ -1,9 +1,9 @@
 const handleAction = (navigate, setAdyenAction, component, response) => {
     const {action, merchantReference} = response
     const actionURI = btoa(JSON.stringify(action))
+    const url = `/checkout/confirmation/${merchantReference}?adyenAction=${actionURI}`
     switch (action.type) {
         case 'voucher':
-            const url = `/checkout/confirmation/${merchantReference}?adyenAction=${actionURI}`
             navigate(url)
             break
         case 'threeDS2':
@@ -30,10 +30,14 @@ export const onPaymentsSuccess = async (state, component, actions, props, respon
     if (responses?.paymentsResponse?.isSuccessful && responses?.paymentsResponse?.isFinal) {
         if (responses?.paymentsResponse?.order) {
             if (responses?.paymentsResponse?.order?.remainingAmount?.value <= 0) {
-                props?.navigate(`/checkout/confirmation/${responses?.paymentsResponse?.merchantReference}`)
+                props?.navigate(
+                    `/checkout/confirmation/${responses?.paymentsResponse?.merchantReference}`
+                )
             }
         } else {
-            props?.navigate(`/checkout/confirmation/${responses?.paymentsResponse?.merchantReference}`)
+            props?.navigate(
+                `/checkout/confirmation/${responses?.paymentsResponse?.merchantReference}`
+            )
         }
     } else if (responses?.paymentsResponse?.action) {
         handleAction(props?.navigate, props?.setAdyenAction, component, responses?.paymentsResponse)
@@ -41,14 +45,18 @@ export const onPaymentsSuccess = async (state, component, actions, props, respon
     actions.resolve(responses?.paymentsResponse)
 }
 
-export const onPaymentsDetailsSuccess =
-    async (state, component, actions, props, responses) => {
-        if (responses?.paymentsDetailsResponse?.isSuccessful) {
-            props?.navigate(
-                `/checkout/confirmation/${responses?.paymentsDetailsResponse?.merchantReference}`
-            )
-        } else if (responses?.paymentsDetailsResponse?.action) {
-            handleAction(props?.navigate, props?.setAdyenAction, component, responses?.paymentsDetailsResponse)
-        }
-        actions.resolve(responses?.paymentsDetailsResponse)
+export const onPaymentsDetailsSuccess = async (state, component, actions, props, responses) => {
+    if (responses?.paymentsDetailsResponse?.isSuccessful) {
+        props?.navigate(
+            `/checkout/confirmation/${responses?.paymentsDetailsResponse?.merchantReference}`
+        )
+    } else if (responses?.paymentsDetailsResponse?.action) {
+        handleAction(
+            props?.navigate,
+            props?.setAdyenAction,
+            component,
+            responses?.paymentsDetailsResponse
+        )
     }
+    actions.resolve(responses?.paymentsDetailsResponse)
+}

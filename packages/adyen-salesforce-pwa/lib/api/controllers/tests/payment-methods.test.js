@@ -84,8 +84,15 @@ describe('payment methods controller', () => {
                 }
             ],
             applicationInfo: {
-                externalPlatform: {integrator: 'mockIntegrator', name: 'SalesforceCommerceCloud', version: 'PWA'},
-                merchantApplication: {name: 'adyen-salesforce-commerce-cloud', version: APPLICATION_VERSION}
+                externalPlatform: {
+                    integrator: 'mockIntegrator',
+                    name: 'SalesforceCommerceCloud',
+                    version: 'PWA'
+                },
+                merchantApplication: {
+                    name: 'adyen-salesforce-commerce-cloud',
+                    version: APPLICATION_VERSION
+                }
             }
         })
         expect(Logger.info).toHaveBeenCalledWith('getPaymentMethods', 'start')
@@ -127,8 +134,15 @@ describe('payment methods controller', () => {
                 }
             ],
             applicationInfo: {
-                externalPlatform: {integrator: 'mockIntegrator', name: 'SalesforceCommerceCloud', version: 'PWA'},
-                merchantApplication: {name: 'adyen-salesforce-commerce-cloud', version: APPLICATION_VERSION}
+                externalPlatform: {
+                    integrator: 'mockIntegrator',
+                    name: 'SalesforceCommerceCloud',
+                    version: 'PWA'
+                },
+                merchantApplication: {
+                    name: 'adyen-salesforce-commerce-cloud',
+                    version: APPLICATION_VERSION
+                }
             }
         })
         expect(Logger.info).toHaveBeenCalledWith('getPaymentMethods', 'start')

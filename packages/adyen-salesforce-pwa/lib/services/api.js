@@ -5,7 +5,6 @@ export class ApiClient {
     customerId = null
     basketId = null
 
-
     constructor(url, token, customerId, basketId, site) {
         if (!url) {
             throw new Error('ApiClient constructor: url is required')

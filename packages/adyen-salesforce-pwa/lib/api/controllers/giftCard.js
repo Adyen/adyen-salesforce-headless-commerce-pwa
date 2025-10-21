@@ -2,7 +2,11 @@ import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 import AdyenClientProvider from '../models/adyenClientProvider'
 import Logger from '../models/logger'
 import {v4 as uuidv4} from 'uuid'
-import {cancelAdyenOrder, createCheckoutResponse, filterStateData} from '../helpers/paymentsHelper.js'
+import {
+    cancelAdyenOrder,
+    createCheckoutResponse,
+    filterStateData
+} from '../helpers/paymentsHelper.js'
 
 /**
  * Handles the Adyen gift card balance check.
@@ -15,11 +19,13 @@ export async function balanceCheck(req, res, next) {
     Logger.info('giftCards-balanceCheck', 'start')
 
     try {
-        const {body: {data}} = req
+        const {
+            body: {data}
+        } = req
         const {adyen: adyenContext} = res.locals
-        const {basket, adyenConfig, siteId, authorization} = adyenContext
+        const {basket, adyenConfig} = adyenContext
         const ordersApi = new AdyenClientProvider(adyenContext).getOrdersApi()
-        const {orderTotal, productTotal, currency, basketId, c_orderNo} = basket
+        const {orderTotal, productTotal, currency, c_orderNo} = basket
         const stateData = filterStateData(data)
         const request = {
             ...stateData,
@@ -56,11 +62,13 @@ export async function createOrder(req, res, next) {
     Logger.info('giftCards-createOrder', 'start')
 
     try {
-        const {body: {data}} = req
+        const {
+            body: {data}
+        } = req
         const {adyen: adyenContext} = res.locals
-        const {basket, adyenConfig, siteId, authorization} = adyenContext
+        const {basket, adyenConfig} = adyenContext
         const ordersApi = new AdyenClientProvider(adyenContext).getOrdersApi()
-        const {orderTotal, productTotal, currency, basketId, c_orderNo} = basket
+        const {orderTotal, productTotal, currency, c_orderNo} = basket
 
         const request = {
             ...filterStateData(data),
@@ -97,7 +105,9 @@ export async function cancelOrder(req, res, next) {
     Logger.info('giftCards-cancelOrder', 'start')
 
     try {
-        const {body: {data}} = req
+        const {
+            body: {data}
+        } = req
         const {adyen: adyenContext} = res.locals
         const {basket} = adyenContext
         const {c_orderNo} = basket

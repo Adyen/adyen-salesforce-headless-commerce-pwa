@@ -103,7 +103,10 @@ describe('WebhookHandler', () => {
     describe('parseNotification', () => {
         it('when valid notification is present', () => {
             parseNotification(req, res, next)
-            expect(Logger.info).toHaveBeenCalledWith('AdyenNotification', JSON.stringify({NotificationRequestItem: {}}))
+            expect(Logger.info).toHaveBeenCalledWith(
+                'AdyenNotification',
+                JSON.stringify({NotificationRequestItem: {}})
+            )
             expect(next).toHaveBeenCalled()
         })
         it('when notificationRequestItem is not present', () => {

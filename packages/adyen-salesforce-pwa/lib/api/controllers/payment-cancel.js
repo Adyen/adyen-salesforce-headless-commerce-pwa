@@ -14,7 +14,6 @@ async function paymentCancel(req, res, next) {
     Logger.info('paymentCancel', 'start')
     try {
         const {adyen: adyenContext} = res.locals
-        const {orderNo} = req.body
         await revertCheckoutState(adyenContext, 'paymentCancel')
         res.locals.response = {}
         next()

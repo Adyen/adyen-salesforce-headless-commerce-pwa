@@ -26,14 +26,14 @@ const reducer = (state, action) => {
 }
 
 export const AdyenExpressCheckoutProvider = ({
-                                                 children,
-                                                 authToken,
-                                                 customerId,
-                                                 locale,
-                                                 site,
-                                                 basket,
-                                                 navigate
-                                             }) => {
+    children,
+    authToken,
+    customerId,
+    locale,
+    site,
+    basket,
+    navigate
+}) => {
     const [state, dispatch] = useReducer(reducer, initialState)
     const basketId = basket?.basketId
 
@@ -84,9 +84,6 @@ export const AdyenExpressCheckoutProvider = ({
     }, [shippingMethods, shippingMethodsError])
 
     const fetchShippingMethods = useCallback(async () => {
-        // This function can now simply return the state-managed shipping methods
-        // or be used to trigger a re-fetch if needed, though the hook handles it.
-        // For now, it just returns what's in the state.
         return state.shippingMethods
     }, [state.shippingMethods])
 
@@ -100,15 +97,7 @@ export const AdyenExpressCheckoutProvider = ({
             navigate,
             fetchShippingMethods
         }),
-        [
-            state,
-            basket,
-            locale,
-            site,
-            authToken,
-            navigate,
-            fetchShippingMethods
-        ]
+        [state, basket, locale, site, authToken, navigate, fetchShippingMethods]
     )
 
     return (

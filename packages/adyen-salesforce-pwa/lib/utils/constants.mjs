@@ -21,7 +21,7 @@ export const RESULT_CODES = {
     PRESENT_TO_SHOPPER: 'PresentToShopper',
     RECEIVED: 'Received',
     REDIRECT_SHOPPER: 'RedirectShopper',
-    REFUSED: 'Refused',
+    REFUSED: 'Refused'
 }
 
 export const BLOCKED_PAYMENT_METHODS = [
@@ -32,26 +32,26 @@ export const BLOCKED_PAYMENT_METHODS = [
 
 export const SHOPPER_INTERACTIONS = {
     CONT_AUTH: 'ContAuth',
-    ECOMMERCE: 'Ecommerce',
-};
+    ECOMMERCE: 'Ecommerce'
+}
 
 export const RECURRING_PROCESSING_MODEL = {
-    CARD_ON_FILE: 'CardOnFile',
-};
+    CARD_ON_FILE: 'CardOnFile'
+}
 
 export const GIFT_CARD_RESULT_CODES = {
     NOTENOUGHBALANCE: 'NotEnoughBalance',
-    SUCCESS: 'Success',
+    SUCCESS: 'Success'
 }
 
 export const NOTIFICATION_EVENT_CODES = {
     AUTHORISATION: 'AUTHORISATION',
-    ORDER_CLOSED: 'ORDER_CLOSED',
+    ORDER_CLOSED: 'ORDER_CLOSED'
 }
 
 export const NOTIFICATION_SUCCESS = {
     TRUE: 'true',
-    FALSE: 'false',
+    FALSE: 'false'
 }
 
 export const DEFAULT_SHIPMENT_ID = 'me'

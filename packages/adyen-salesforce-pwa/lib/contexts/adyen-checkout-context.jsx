@@ -15,7 +15,7 @@ const initialState = {
     orderNo: null,
     adyenAction: null,
     redirectResult: null,
-    amazonCheckoutSessionId: null,
+    amazonCheckoutSessionId: null
 }
 
 const reducer = (state, action) => {
@@ -44,18 +44,18 @@ const reducer = (state, action) => {
 }
 
 const AdyenCheckoutProvider = ({
-                                   children,
-                                   authToken,
-                                   customerId,
-                                   isCustomerRegistered,
-                                   locale,
-                                   site,
-                                   adyenConfig,
-                                   navigate,
-                                   basket,
-                                   returnUrl,
-                                   page
-                               }) => {
+    children,
+    authToken,
+    customerId,
+    isCustomerRegistered,
+    locale,
+    site,
+    adyenConfig,
+    navigate,
+    basket,
+    returnUrl,
+    page
+}) => {
     const [state, dispatch] = useReducer(reducer, initialState)
     const {adyenOrder, orderNo} = state
     const callPaymentMethodsOnPages = ['checkout']
@@ -97,8 +97,7 @@ const AdyenCheckoutProvider = ({
         basketId: basket?.basketId,
         site,
         locale,
-        skip:
-            !!state.adyenPaymentMethods || !callPaymentMethodsOnPages.includes(page)
+        skip: !!state.adyenPaymentMethods || !callPaymentMethodsOnPages.includes(page)
     })
 
     useEffect(() => {

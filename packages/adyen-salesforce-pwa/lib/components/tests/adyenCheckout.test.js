@@ -5,7 +5,11 @@ import React from 'react'
 import {act, cleanup, render} from '@testing-library/react'
 import AdyenCheckoutComponent from '../adyenCheckout'
 import useAdyenCheckout from '../../hooks/useAdyenCheckout.js'
-import {createCheckoutInstance, handleRedirects, mountCheckoutComponent} from '../helpers/adyenCheckout.utils.js'
+import {
+    createCheckoutInstance,
+    handleRedirects,
+    mountCheckoutComponent
+} from '../helpers/adyenCheckout.utils.js'
 
 // Mock the hook and helpers
 jest.mock('../../hooks/useAdyenCheckout')
@@ -92,8 +96,7 @@ describe('AdyenCheckoutComponent', () => {
         const {rerender} = render(<AdyenCheckoutComponent />)
 
         // Initial render
-        await act(async () => {
-        })
+        await act(async () => {})
         expect(createCheckoutInstance).toHaveBeenCalledTimes(1)
         expect(handleRedirects).toHaveBeenCalledTimes(1)
         expect(mountCheckoutComponent).toHaveBeenCalledTimes(1)

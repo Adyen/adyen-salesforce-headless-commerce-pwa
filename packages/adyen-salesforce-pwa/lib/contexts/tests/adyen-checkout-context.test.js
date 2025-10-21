@@ -11,12 +11,12 @@ import {AdyenEnvironmentService} from '../../services/environment'
 // Mock the services and the component that consumes the context
 jest.mock('../../services/payment-methods')
 jest.mock('../../services/environment')
-jest.mock('../../components/adyenCheckout', () => () => <div data-testid='adyen-checkout-mock'></div>)
+jest.mock('../../components/adyenCheckout', () => <div data-testid="adyen-checkout-mock"></div>)
 
 // A simple consumer component to get the context value
 const TestConsumer = () => {
     const context = useContext(AdyenCheckoutContext)
-    return <div data-testid='context-value'>{JSON.stringify(context)}</div>
+    return <div data-testid="context-value">{JSON.stringify(context)}</div>
 }
 
 describe('AdyenCheckoutProvider', () => {

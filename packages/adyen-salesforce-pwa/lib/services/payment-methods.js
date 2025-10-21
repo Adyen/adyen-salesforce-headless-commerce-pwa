@@ -10,7 +10,7 @@ export class AdyenPaymentMethodsService {
 
     async fetchPaymentMethods(locale) {
         const res = await this.apiClient.get({
-            queryParams: {locale: locale.id},
+            queryParams: {locale: locale.id}
         })
         if (res.status >= 300) {
             throw new Error(res)

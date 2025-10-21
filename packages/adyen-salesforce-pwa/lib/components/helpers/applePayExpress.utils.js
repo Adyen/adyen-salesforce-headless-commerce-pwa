@@ -84,13 +84,16 @@ export const getAppleButtonConfig = (
                         ...getCustomerShippingDetails(shippingContact)
                     }
                 }
-                const adyenPaymentService = new AdyenPaymentsService(authToken, basket?.customerInfo?.customerId, basket?.basketId, site)
-                const paymentsResponse = await adyenPaymentService.submitPayment(
-                    {
-                        ...state.data,
-                        origin: state.data.origin ? state.data.origin : window.location.origin
-                    }
+                const adyenPaymentService = new AdyenPaymentsService(
+                    authToken,
+                    basket?.customerInfo?.customerId,
+                    basket?.basketId,
+                    site
                 )
+                const paymentsResponse = await adyenPaymentService.submitPayment({
+                    ...state.data,
+                    origin: state.data.origin ? state.data.origin : window.location.origin
+                })
                 if (paymentsResponse?.isFinal && paymentsResponse?.isSuccessful) {
                     const finalPriceUpdate = {
                         newTotal: {
@@ -108,21 +111,29 @@ export const getAppleButtonConfig = (
                 reject(err)
             }
         },
-        onSubmit: () => {
-        },
+        onSubmit: () => {},
         onShippingContactSelected: async (resolve, reject, event) => {
             try {
                 const {shippingContact} = event
-                const adyenShippingAddressService = new AdyenShippingAddressService(authToken, basket?.customerInfo?.customerId, basket?.basketId, site)
-                const customerShippingDetails = getCustomerShippingDetails(shippingContact)
-                await adyenShippingAddressService.updateShippingAddress(
-                    customerShippingDetails
+                const adyenShippingAddressService = new AdyenShippingAddressService(
+                    authToken,
+                    basket?.customerInfo?.customerId,
+                    basket?.basketId,
+                    site
                 )
-                const {defaultShippingMethodId, applicableShippingMethods} = await fetchShippingMethods()
+                const customerShippingDetails = getCustomerShippingDetails(shippingContact)
+                await adyenShippingAddressService.updateShippingAddress(customerShippingDetails)
+                const {defaultShippingMethodId, applicableShippingMethods} =
+                    await fetchShippingMethods()
                 if (!applicableShippingMethods?.length) {
                     reject()
                 } else {
-                    const adyenShippingMethodsService = new AdyenShippingMethodsService(authToken, basket?.customerInfo?.customerId, basket?.basketId, site)
+                    const adyenShippingMethodsService = new AdyenShippingMethodsService(
+                        authToken,
+                        basket?.customerInfo?.customerId,
+                        basket?.basketId,
+                        site
+                    )
                     const response = await adyenShippingMethodsService.updateShippingMethod(
                         defaultShippingMethodId
                             ? defaultShippingMethodId
@@ -164,7 +175,12 @@ export const getAppleButtonConfig = (
         onShippingMethodSelected: async (resolve, reject, event) => {
             try {
                 const {shippingMethod} = event
-                const adyenShippingMethodsService = new AdyenShippingMethodsService(authToken, basket?.customerInfo?.customerId, basket?.basketId, site)
+                const adyenShippingMethodsService = new AdyenShippingMethodsService(
+                    authToken,
+                    basket?.customerInfo?.customerId,
+                    basket?.basketId,
+                    site
+                )
                 const response = await adyenShippingMethodsService.updateShippingMethod(
                     shippingMethod.identifier
                 )

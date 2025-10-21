@@ -1,7 +1,7 @@
 import AdyenClientProvider from '../adyenClientProvider.js'
 import {AdyenError} from '../AdyenError'
 import {ADYEN_ENVIRONMENT, ERROR_MESSAGE} from '../../../utils/constants.mjs'
-import {Client, CheckoutAPI} from '@adyen/api-library'
+import {Client} from '@adyen/api-library'
 
 const mockPaymentsApi = jest.fn()
 const mockOrdersApi = jest.fn()
@@ -11,7 +11,10 @@ jest.mock('@adyen/api-library', () => {
     const mockClient = jest.fn().mockImplementation((config) => ({
         config: config
     }))
-    const mockCheckoutAPI = jest.fn(() => ({PaymentsApi: mockPaymentsApi, OrdersApi: mockOrdersApi}))
+    const mockCheckoutAPI = jest.fn(() => ({
+        PaymentsApi: mockPaymentsApi,
+        OrdersApi: mockOrdersApi
+    }))
     return {Client: mockClient, CheckoutAPI: mockCheckoutAPI}
 })
 

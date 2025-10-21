@@ -14,7 +14,7 @@ jest.mock('../../models/adyenClientProvider')
 jest.mock('../../helpers/paymentsHelper.js', () => ({
     ...jest.requireActual('../../helpers/paymentsHelper.js'),
     revertCheckoutState: jest.fn()
-}));
+}))
 
 jest.mock('../../helpers/orderHelper.js', () => ({
     createOrderUsingOrderNo: jest.fn(),
@@ -70,7 +70,10 @@ describe('payments controller', () => {
     })
 
     it('returns checkout response if request is valid and payment is AUTHORISED', async () => {
-        mockPayments.mockResolvedValue({resultCode: RESULT_CODES.AUTHORISED, merchantReference: 'ref123'})
+        mockPayments.mockResolvedValue({
+            resultCode: RESULT_CODES.AUTHORISED,
+            merchantReference: 'ref123'
+        })
 
         await sendPayments(req, res, next)
 
@@ -88,26 +91,35 @@ describe('payments controller', () => {
     })
 
     it('handles payment failure and attempts to revert the checkout state', async () => {
-        mockPayments.mockResolvedValue({resultCode: RESULT_CODES.ERROR, merchantReference: 'ref123'})
+        mockPayments.mockResolvedValue({
+            resultCode: RESULT_CODES.ERROR,
+            merchantReference: 'ref123'
+        })
 
         await sendPayments(req, res, next)
 
         expect(paymentsHelper.revertCheckoutState).toHaveBeenCalled()
         expect(next).toHaveBeenCalledWith(
-            new AdyenError('payment was not successful', 400, {resultCode: 'Error', merchantReference: 'ref123'})
+            new AdyenError('payment was not successful', 400, {
+                resultCode: 'Error',
+                merchantReference: 'ref123'
+            })
         )
     })
 
     it('handles non-final payments with an action', async () => {
         const mockAction = {type: 'redirect'}
-        mockPayments.mockResolvedValue({resultCode: RESULT_CODES.REDIRECT_SHOPPER, action: mockAction})
+        mockPayments.mockResolvedValue({
+            resultCode: RESULT_CODES.REDIRECT_SHOPPER,
+            action: mockAction
+        })
 
         await sendPayments(req, res, next)
 
         expect(res.locals.response).toEqual({
             isFinal: false,
             isSuccessful: true,
-            merchantReference: "123",
+            merchantReference: '123',
             action: mockAction,
             order: undefined,
             resultCode: RESULT_CODES.REDIRECT_SHOPPER
@@ -117,7 +129,10 @@ describe('payments controller', () => {
 
     it('saves partial payment order data to basket', async () => {
         const mockOrderData = {orderData: '...'}
-        mockPayments.mockResolvedValue({resultCode: RESULT_CODES.PRESENT_TO_SHOPPER, order: mockOrderData})
+        mockPayments.mockResolvedValue({
+            resultCode: RESULT_CODES.PRESENT_TO_SHOPPER,
+            order: mockOrderData
+        })
 
         await sendPayments(req, res, next)
 

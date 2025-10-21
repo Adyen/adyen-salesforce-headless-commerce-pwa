@@ -12,6 +12,13 @@ export const baseConfig = ({
     onError = [],
     ...props
 }) => {
+    beforeSubmit = [],
+    afterSubmit = [],
+    beforeAdditionalDetails = [],
+    afterAdditionalDetails = [],
+    onError = [],
+    ...props
+}) => {
     return {
         amount: getAmount(props),
         onSubmit: executeCallbacks([...beforeSubmit, onSubmit, ...afterSubmit], props),
@@ -19,6 +26,7 @@ export const baseConfig = ({
             [...beforeAdditionalDetails, onAdditionalDetails, ...afterAdditionalDetails],
             props
         ),
+        onError: executeCallbacks([...onError, onErrorHandler], props)
         onError: executeCallbacks([...onError, onErrorHandler], props)
     }
 }
@@ -28,6 +36,17 @@ export const onSubmit = async (state, component, actions, props) => {
         if (!state.isValid) {
             throw new Error('invalid state')
         }
+        const adyenPaymentService = new AdyenPaymentsService(
+            props?.token,
+            props?.customerId,
+            props.basket?.basketId,
+            props?.site
+        )
+        const paymentsResponse = await adyenPaymentService.submitPayment({
+            ...state.data,
+            origin: state.data.origin ? state.data.origin : window.location.origin,
+            returnUrl: props?.returnUrl || `${window.location.href}/redirect`
+        })
         const adyenPaymentService = new AdyenPaymentsService(
             props?.token,
             props?.customerId,
@@ -53,6 +72,12 @@ export const onAdditionalDetails = async (state, component, actions, props) => {
             props.basket?.basketId,
             props?.site
         )
+        const adyenPaymentsDetailsService = new AdyenPaymentsDetailsService(
+            props?.token,
+            props?.customerId,
+            props.basket?.basketId,
+            props?.site
+        )
         const paymentsDetailsResponse = await adyenPaymentsDetailsService.submitPaymentsDetails(
             state.data
         )
@@ -70,7 +95,7 @@ export const onErrorHandler = async (error, component, props) => {
             props.basket?.basketId,
             props?.site
         )
-        const response = await paymentCancelService.paymentCancel(props?.orderNo)
+        await paymentCancelService.paymentCancel(props?.orderNo)
         if (props?.adyenOrder) {
             props?.setAdyenOrder(null)
         }
