@@ -39,12 +39,12 @@ const usePaymentMethodsConfiguration = (props) => {
 
     return useCallback(
         async ({
-                   beforeSubmit = [],
-                   afterSubmit = [],
-                   beforeAdditionalDetails = [],
-                   afterAdditionalDetails = [],
-                   onError = []
-               }) => {
+            beforeSubmit = [],
+            afterSubmit = [],
+            beforeAdditionalDetails = [],
+            afterAdditionalDetails = [],
+            onError = []
+        }) => {
             return getPaymentMethodsConfig({
                 additionalPaymentMethodsConfiguration,
                 paymentMethods: adyenPaymentMethods?.paymentMethods,
@@ -68,7 +68,10 @@ const usePaymentMethodsConfiguration = (props) => {
                     ...(adyenAfterAdditionalDetails || []),
                     onPaymentsDetailsSuccess
                 ],
-                beforeAdditionalDetails: [...beforeAdditionalDetails, ...(adyenBeforeAdditionalDetails || [])]
+                beforeAdditionalDetails: [
+                    ...beforeAdditionalDetails,
+                    ...(adyenBeforeAdditionalDetails || [])
+                ]
             })
         },
         [props]

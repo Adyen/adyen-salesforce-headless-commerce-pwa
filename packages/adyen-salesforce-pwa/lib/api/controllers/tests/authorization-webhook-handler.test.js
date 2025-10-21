@@ -28,7 +28,7 @@ jest.mock('../../helpers/orderHelper.js', () => {
     }
 })
 describe('authorizationWebhookHandler', () => {
-    let req, res, next, consoleInfoSpy, consoleErrorSpy
+    let req, res, next, consoleInfoSpy
 
     beforeEach(() => {
         jest.clearAllMocks()
@@ -47,7 +47,8 @@ describe('authorizationWebhookHandler', () => {
         }
         res = {
             locals: {
-                notification: { // This is the parent object for a single notification
+                notification: {
+                    // This is the parent object for a single notification
                     NotificationRequestItem: {
                         eventCode: 'AUTHORISATION',
                         merchantAccountCode: 'YOUR_MERCHANT_ACCOUNT',
@@ -74,10 +75,7 @@ describe('authorizationWebhookHandler', () => {
             }
         }
         next = jest.fn()
-        consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation(() => {
-        })
-        consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {
-        })
+        consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation(() => {})
     })
     it('update order when success notification is received', async () => {
         await authorizationWebhookHandler(req, res, next)

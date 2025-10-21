@@ -33,9 +33,11 @@
     "build-stats": "webpack --profile --json > stats.json",
     "build-analyze": "webpack-bundle-analyzer ./stats.json",
     "test:coverage": "jest --coverage",
-    "test": "jest",
-    "lint": "eslint",
-    "lint:fix": "eslint -- --fix"
+    "test": "jest --debug",
+    "jest:clear": "jest --clearCache",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write ./lib"
   },
   "dependencies": {
     "@adyen/adyen-web": "^6.21.0",
@@ -60,6 +62,7 @@
     "@babel/core": "^7.23.3",
     "@babel/preset-env": "^7.23.3",
     "@babel/preset-react": "^7.23.3",
+    "@salesforce/pwa-kit-dev": "^3.5.1",
     "@testing-library/jest-dom": "^6.2.0",
     "@testing-library/react": "^14.1.2",
     "babel-jest": "^29.7.0",
@@ -68,6 +71,8 @@
     "cross-spawn": "^7.0.6",
     "css-loader": "^6.8.1",
     "eslint": "^8.54.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
     "eslint-plugin-react": "^7.33.2",
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^5.5.3",
@@ -75,11 +80,15 @@
     "jest-environment-jsdom": "^29.7.0",
     "jest-extended": "^4.0.2",
     "mini-css-extract-plugin": "^2.7.6",
+    "prettier": "^3.6.2",
     "style-loader": "^3.3.3",
     "url-loader": "^4.1.1",
     "webpack": "^5.89.0",
     "webpack-bundle-analyzer": "^4.10.2",
     "webpack-cli": "^5.1.4"
+  },
+  "overrides": {
+    "jest": "^29.7.0"
   },
   "files": [
     "dist",

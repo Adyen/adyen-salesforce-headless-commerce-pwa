@@ -2,23 +2,28 @@ import {baseConfig} from '../helpers/baseConfig'
 import {GiftCardService} from '../../services/giftCard'
 
 export const giftcardConfig = (props) => {
-    const giftCardService = new GiftCardService(props?.token, props?.customerId, props.basket?.basketId, props?.site)
+    const giftCardService = new GiftCardService(
+        props?.token,
+        props?.customerId,
+        props.basket?.basketId,
+        props?.site
+    )
     return {
         ...baseConfig(props),
         onBalanceCheck: async (resolve, reject, data) => {
             const response = await giftCardService.balanceCheck(data)
             if (response && !!response.error) {
-                reject(response.errorMessage);
+                reject(response.errorMessage)
             } else {
-                resolve(response);
+                resolve(response)
             }
         },
         onOrderRequest: async (resolve, reject, data) => {
             const response = await giftCardService.createOrder(data)
             if (response && !!response.error) {
-                reject(response.errorMessage);
+                reject(response.errorMessage)
             } else {
-                resolve(response);
+                resolve(response)
             }
         },
         onOrderCancel: async (Order) => {

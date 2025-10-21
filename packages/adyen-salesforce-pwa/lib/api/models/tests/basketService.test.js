@@ -84,8 +84,8 @@ describe('BasketService', () => {
                 expect.objectContaining({
                     body: expect.objectContaining({
                         paymentMethodId: PAYMENT_METHODS.CREDIT_CARD,
-                        'c_adyenPaymentMethodType': 'scheme',
-                        'c_adyenPaymentMethodBrand': 'visa'
+                        c_adyenPaymentMethodType: 'scheme',
+                        c_adyenPaymentMethodBrand: 'visa'
                     })
                 })
             )
@@ -106,7 +106,7 @@ describe('BasketService', () => {
                 expect.objectContaining({
                     body: expect.objectContaining({
                         paymentMethodId: PAYMENT_METHODS.ADYEN_COMPONENT,
-                        'c_adyenPaymentMethodType': 'ideal'
+                        c_adyenPaymentMethodType: 'ideal'
                     })
                 })
             )
@@ -127,9 +127,7 @@ describe('BasketService', () => {
                 }
             }
             const mockUpdatedBasket = {basketId: 'mockBasketId', customerInfo: {}}
-            mockShopperBaskets.updateShippingAddressForShipment.mockResolvedValue(
-                mockUpdatedBasket
-            )
+            mockShopperBaskets.updateShippingAddressForShipment.mockResolvedValue(mockUpdatedBasket)
 
             await basketService.addShopperData(shopperData)
 
@@ -146,9 +144,7 @@ describe('BasketService', () => {
     describe('removeAllPaymentInstruments', () => {
         it('should sequentially remove all payment instruments and update context', async () => {
             const finalBasketState = {basketId: 'mockBasketId', paymentInstruments: []}
-            mockShopperBaskets.removePaymentInstrumentFromBasket.mockResolvedValue(
-                finalBasketState
-            )
+            mockShopperBaskets.removePaymentInstrumentFromBasket.mockResolvedValue(finalBasketState)
 
             const result = await basketService.removeAllPaymentInstruments()
 
@@ -180,9 +176,7 @@ describe('BasketService', () => {
                 profile: {firstName: 'John', lastName: 'Doe', phone: '123'}
             }
             const mockUpdatedBasket = {basketId: 'mockBasketId', shipments: [{}]}
-            mockShopperBaskets.updateShippingAddressForShipment.mockResolvedValue(
-                mockUpdatedBasket
-            )
+            mockShopperBaskets.updateShippingAddressForShipment.mockResolvedValue(mockUpdatedBasket)
 
             const result = await basketService.updateShippingAddress(shippingData)
 
@@ -199,9 +193,7 @@ describe('BasketService', () => {
         it('should call updateShippingMethodForShipment and update the context', async () => {
             const shippingMethodId = 'ship_method_001'
             const mockUpdatedBasket = {basketId: 'mockBasketId', shippingItems: [{}]}
-            mockShopperBaskets.updateShippingMethodForShipment.mockResolvedValue(
-                mockUpdatedBasket
-            )
+            mockShopperBaskets.updateShippingMethodForShipment.mockResolvedValue(mockUpdatedBasket)
 
             const result = await basketService.setShippingMethod(shippingMethodId)
 

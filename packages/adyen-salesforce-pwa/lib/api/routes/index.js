@@ -8,12 +8,12 @@ import ShippingAddressController from '../controllers/shipping-address'
 import ShippingMethodsController from '../controllers/shipping-methods'
 import {authenticate, parseNotification, validateHmac} from '../middleware/webhook'
 import {authorizationWebhookHandler} from '../controllers/authorization-webhook-handler'
-import {orderClosedWebhookHandler} from "../controllers/order-closed-webhook-handler";
+import {orderClosedWebhookHandler} from '../controllers/order-closed-webhook-handler'
 import {createErrorResponse} from '../../utils/createErrorResponse.mjs'
 import Logger from '../models/logger'
 import {appleDomainAssociation} from '../controllers/apple-domain-association'
-import PaymentCancelController from '../controllers/payment-cancel';
-import {balanceCheck, cancelOrder, createOrder} from "../controllers/giftCard";
+import PaymentCancelController from '../controllers/payment-cancel'
+import {balanceCheck, cancelOrder, createOrder} from '../controllers/giftCard'
 import {prepareRequestContext} from '../middleware/request-context'
 import {prepareWebhookRequestContext} from '../middleware/webhook-request-context'
 
@@ -22,7 +22,7 @@ function SuccessHandler(req, res) {
     return res.status(200).json(res.locals.response)
 }
 
-function ErrorHandler(err, req, res, next) {
+function ErrorHandler(err, req, res) {
     Logger.error(err.message, err.cause)
     return res.status(err.statusCode || 500).json(createErrorResponse(err.message))
 }
@@ -32,7 +32,7 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     app.set('trust proxy', true)
 
     const appleDomainAssociationHandler = overrides?.appleDomainAssociation || [
-        appleDomainAssociation,
+        appleDomainAssociation
     ]
 
     const environmentHandler = overrides?.environment || [
@@ -61,7 +61,11 @@ function registerAdyenEndpoints(app, runtime, overrides) {
         PaymentsDetailsController,
         SuccessHandler
     ]
-    const paymentsHandler = overrides?.payments || [prepareRequestContext, PaymentsController, SuccessHandler]
+    const paymentsHandler = overrides?.payments || [
+        prepareRequestContext,
+        PaymentsController,
+        SuccessHandler
+    ]
 
     const shippingMethodsPostHandler = overrides?.setShippingMethods || [
         prepareRequestContext,
@@ -84,9 +88,21 @@ function registerAdyenEndpoints(app, runtime, overrides) {
         PaymentCancelController,
         SuccessHandler
     ]
-    const balanceCheckHandler = overrides?.balanceCheck || [prepareRequestContext, balanceCheck, SuccessHandler]
-    const createOrderHandler = overrides?.createOrder || [prepareRequestContext, createOrder, SuccessHandler]
-    const cancelOrderHandler = overrides?.cancelOrder || [prepareRequestContext, cancelOrder, SuccessHandler]
+    const balanceCheckHandler = overrides?.balanceCheck || [
+        prepareRequestContext,
+        balanceCheck,
+        SuccessHandler
+    ]
+    const createOrderHandler = overrides?.createOrder || [
+        prepareRequestContext,
+        createOrder,
+        SuccessHandler
+    ]
+    const cancelOrderHandler = overrides?.cancelOrder || [
+        prepareRequestContext,
+        cancelOrder,
+        SuccessHandler
+    ]
 
     app.get(
         '*/checkout/redirect',
@@ -99,11 +115,7 @@ function registerAdyenEndpoints(app, runtime, overrides) {
         query('adyenAction').optional().escape(),
         runtime.render
     )
-    app.get(
-        '*/checkout',
-        query('adyenAction').optional().escape(),
-        runtime.render
-    )
+    app.get('*/checkout', query('adyenAction').optional().escape(), runtime.render)
     app.get('/api/adyen/environment', ...environmentHandler)
     app.get('/api/adyen/paymentMethods', ...paymentMethodsHandler)
     app.get('/api/adyen/shipping-methods', ...shippingMethodsGetHandler)
@@ -120,7 +132,6 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     app.post('/api/adyen/gift-card/balance-check', ...balanceCheckHandler)
     app.post('/api/adyen/gift-card/create-order', ...createOrderHandler)
     app.post('/api/adyen/gift-card/cancel-order', ...cancelOrderHandler)
-
 
     app.use(overrides?.ErrorHandler || ErrorHandler)
 }

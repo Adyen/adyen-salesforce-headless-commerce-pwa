@@ -67,8 +67,8 @@ describe('AdyenPaymentsDetailsService', () => {
 
         paymentsDetailsService.apiClient.post.mockResolvedValueOnce(mockFetchPromise)
 
-        await expect(
-            paymentsDetailsService.submitPaymentsDetails(mockData)
-        ).rejects.toThrow('[object Object]')
+        await expect(paymentsDetailsService.submitPaymentsDetails(mockData)).rejects.toThrow(
+            '[object Object]'
+        )
     })
 })

@@ -31,7 +31,6 @@ export class CustomShopperOrderApiClient extends BaseApiClient {
                 currency: currency
             }),
             headers: {authorization}
-
         })
         return response.json()
     }

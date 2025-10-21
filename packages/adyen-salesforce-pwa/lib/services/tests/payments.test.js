@@ -1,5 +1,6 @@
 import {AdyenPaymentsService} from '../payments'
 import {ApiClient} from '../api'
+// eslint-disable-next-line jest/no-mocks-import
 import {CUSTOMER_ID_MOCK} from '../../../__mocks__/adyenApi/constants'
 
 jest.mock('../api', () => {
@@ -68,8 +69,8 @@ describe('AdyenPaymentsService', () => {
 
         paymentsService.apiClient.post.mockResolvedValueOnce(mockFetchPromise)
 
-        await expect(
-            paymentsService.submitPayment(mockAdyenStateData)
-        ).rejects.toThrow('[object Object]')
+        await expect(paymentsService.submitPayment(mockAdyenStateData)).rejects.toThrow(
+            '[object Object]'
+        )
     })
 })

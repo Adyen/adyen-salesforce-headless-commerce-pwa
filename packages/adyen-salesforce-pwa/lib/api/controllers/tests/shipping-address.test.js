@@ -49,13 +49,15 @@ describe('updateShippingAddress', () => {
     })
 
     it('should call basketService.updateShippingAddress and set the response in locals', async () => {
-        const mockUpdatedBasket = {basketId: 'mockBasketId', shipments: [{shippingAddress: {}}]};
-        res.locals.adyen.basketService.updateShippingAddress.mockResolvedValue(mockUpdatedBasket);
+        const mockUpdatedBasket = {basketId: 'mockBasketId', shipments: [{shippingAddress: {}}]}
+        res.locals.adyen.basketService.updateShippingAddress.mockResolvedValue(mockUpdatedBasket)
 
         await updateShippingAddress(req, res, next)
 
         expect(Logger.info).toHaveBeenCalledWith('updateShippingAddress', 'start')
-        expect(res.locals.adyen.basketService.updateShippingAddress).toHaveBeenCalledWith(req.body.data)
+        expect(res.locals.adyen.basketService.updateShippingAddress).toHaveBeenCalledWith(
+            req.body.data
+        )
         expect(Logger.info).toHaveBeenCalledWith('updateShippingAddress', 'success')
         expect(res.locals.response).toEqual(mockUpdatedBasket)
         expect(next).toHaveBeenCalledWith()

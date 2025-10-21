@@ -1,7 +1,7 @@
 import {
+    createOrderUsingOrderNo,
     createShopperOrderClient,
     failOrderAndReopenBasket,
-    createOrderUsingOrderNo,
     getOrderUsingOrderNo
 } from '../orderHelper.js'
 import {ShopperOrders} from 'commerce-sdk-isomorphic'

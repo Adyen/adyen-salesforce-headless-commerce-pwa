@@ -33,7 +33,9 @@ describe('BaseApiClient', () => {
 
     describe('constructor', () => {
         it('should throw an error if baseUrl is not provided', () => {
-            expect(() => new BaseApiClient()).toThrow('baseUrl is required to instantiate an API client.')
+            expect(() => new BaseApiClient()).toThrow(
+                'baseUrl is required to instantiate an API client.'
+            )
         })
 
         it('should instantiate correctly with a baseUrl', () => {
@@ -134,14 +136,12 @@ describe('BaseApiClient', () => {
         })
 
         it('should throw an error if the API call fails', async () => {
-            fetch
-                .mockResolvedValueOnce(mockTokenResponse)
-                .mockResolvedValueOnce({
-                    ok: false,
-                    status: 500,
-                    statusText: 'Server Error',
-                    text: async () => 'Internal error'
-                })
+            fetch.mockResolvedValueOnce(mockTokenResponse).mockResolvedValueOnce({
+                ok: false,
+                status: 500,
+                statusText: 'Server Error',
+                text: async () => 'Internal error'
+            })
 
             await expect(client._callAdminApi('GET', 'test/path')).rejects.toThrow(
                 '500 Server Error'
@@ -184,7 +184,9 @@ describe('BaseApiClient', () => {
                 text: async () => 'Endpoint not found'
             })
 
-            await expect(client._callShopperApi('GET', 'test/path')).rejects.toThrow('404 Not Found')
+            await expect(client._callShopperApi('GET', 'test/path')).rejects.toThrow(
+                '404 Not Found'
+            )
         })
     })
 })

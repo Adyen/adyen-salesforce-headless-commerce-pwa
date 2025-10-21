@@ -22,27 +22,27 @@ describe('ApiClient', () => {
 
     describe('constructor', () => {
         it('should throw an error if url is not provided', () => {
-            expect(() => new ApiClient(null, mockToken, mockCustomerId, mockBasketId, mockSite)).toThrow(
-                'ApiClient constructor: url is required'
-            )
+            expect(
+                () => new ApiClient(null, mockToken, mockCustomerId, mockBasketId, mockSite)
+            ).toThrow('ApiClient constructor: url is required')
         })
 
         it('should throw an error if token is not provided', () => {
-            expect(() => new ApiClient(mockUrl, null, mockCustomerId, mockBasketId, mockSite)).toThrow(
-                'ApiClient constructor: token is required'
-            )
+            expect(
+                () => new ApiClient(mockUrl, null, mockCustomerId, mockBasketId, mockSite)
+            ).toThrow('ApiClient constructor: token is required')
         })
 
         it('should throw an error if site is not provided', () => {
-            expect(() => new ApiClient(mockUrl, mockToken, mockCustomerId, mockBasketId, null)).toThrow(
-                'ApiClient constructor: site object with id property is required'
-            )
+            expect(
+                () => new ApiClient(mockUrl, mockToken, mockCustomerId, mockBasketId, null)
+            ).toThrow('ApiClient constructor: site object with id property is required')
         })
 
         it('should throw an error if site.id is not provided', () => {
-            expect(() => new ApiClient(mockUrl, mockToken, mockCustomerId, mockBasketId, {})).toThrow(
-                'ApiClient constructor: site object with id property is required'
-            )
+            expect(
+                () => new ApiClient(mockUrl, mockToken, mockCustomerId, mockBasketId, {})
+            ).toThrow('ApiClient constructor: site object with id property is required')
         })
 
         it('should instantiate correctly with all required arguments', () => {

@@ -33,7 +33,10 @@ describe('Shipping Methods Controller', () => {
 
     describe('setShippingMethod', () => {
         it('should call basketService.setShippingMethod and set response in locals', async () => {
-            const mockUpdatedBasket = {basketId: 'mockBasketId', shippingItems: [{shippingMethod: {id: 'method-id'}}]}
+            const mockUpdatedBasket = {
+                basketId: 'mockBasketId',
+                shippingItems: [{shippingMethod: {id: 'method-id'}}]
+            }
             res.locals.adyen.basketService.setShippingMethod.mockResolvedValue(mockUpdatedBasket)
 
             await ShippingMethods.setShippingMethod(req, res, next)

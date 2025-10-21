@@ -2,7 +2,11 @@ import React, {useEffect, useRef} from 'react'
 import PropTypes from 'prop-types'
 import useAdyenCheckout from '../hooks/useAdyenCheckout'
 import '../style/adyenCheckout.css'
-import {createCheckoutInstance, handleRedirects, mountCheckoutComponent} from './helpers/adyenCheckout.utils'
+import {
+    createCheckoutInstance,
+    handleRedirects,
+    mountCheckoutComponent
+} from './helpers/adyenCheckout.utils'
 
 const AdyenCheckoutComponent = (props) => {
     const {
@@ -30,7 +34,7 @@ const AdyenCheckoutComponent = (props) => {
         redirectResult,
         amazonCheckoutSessionId,
         isLoading,
-        setIsLoading,
+        setIsLoading
     } = useAdyenCheckout()
 
     const paymentContainer = useRef(null)
@@ -87,7 +91,7 @@ const AdyenCheckoutComponent = (props) => {
             const isRedirect = handleRedirects(
                 redirectResult,
                 amazonCheckoutSessionId,
-                checkoutRef.current,
+                checkoutRef.current
             )
 
             if (!isRedirect) {
@@ -114,7 +118,7 @@ const AdyenCheckoutComponent = (props) => {
     return (
         <>
             {(isLoading || showLoading) && spinner && (
-                <div className='adyen-checkout-spinner-container'>{spinner}</div>
+                <div className="adyen-checkout-spinner-container">{spinner}</div>
             )}
             <div ref={paymentContainer}></div>
         </>

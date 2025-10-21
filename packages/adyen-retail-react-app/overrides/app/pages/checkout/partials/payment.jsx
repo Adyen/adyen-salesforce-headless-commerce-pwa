@@ -45,7 +45,6 @@ const Payment = () => {
     }, [basket?.shipments, isPickupShipment, isPickupOnly])
 
     const selectedBillingAddress = basket?.billingAddress
-    const appliedPayment = basket?.paymentInstruments && basket?.paymentInstruments[0]
     const [billingSameAsShipping, setBillingSameAsShipping] = useState(!isPickupOnly)
 
     useEffect(() => {

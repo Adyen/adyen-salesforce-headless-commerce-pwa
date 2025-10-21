@@ -7,10 +7,10 @@ import {amazonPayConfig} from './amazonpay/config'
 import {giftcardConfig} from './giftcard/config'
 
 export const paymentMethodsConfiguration = ({
-                                                paymentMethods = [],
-                                                additionalPaymentMethodsConfiguration,
-                                                ...props
-                                            }) => {
+    paymentMethods = [],
+    additionalPaymentMethodsConfiguration,
+    ...props
+}) => {
     const defaultConfig = baseConfig(props)
     if (!paymentMethods || !paymentMethods.length) {
         return defaultConfig
@@ -35,9 +35,9 @@ export const paymentMethodsConfiguration = ({
                 : defaultConfig
             return additionalPaymentMethodsConfiguration?.[type]
                 ? [
-                    type,
-                    {...basePaymentMethodConfig, ...additionalPaymentMethodsConfiguration[type]}
-                ]
+                      type,
+                      {...basePaymentMethodConfig, ...additionalPaymentMethodsConfiguration[type]}
+                  ]
                 : [type, basePaymentMethodConfig]
         })
     )

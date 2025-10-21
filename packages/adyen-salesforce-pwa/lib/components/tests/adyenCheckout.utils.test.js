@@ -2,7 +2,11 @@
  * @jest-environment jest-environment-jsdom
  * @jest-environment-options {"url": "http://localhost:3000/", "resources": "usable"}
  */
-import {getCheckoutConfig, handleRedirects, mountCheckoutComponent} from '../helpers/adyenCheckout.utils'
+import {
+    getCheckoutConfig,
+    handleRedirects,
+    mountCheckoutComponent
+} from '../helpers/adyenCheckout.utils'
 import {Dropin} from '@adyen/adyen-web/auto'
 
 jest.mock('@adyen/adyen-web/auto', () => ({
@@ -48,7 +52,12 @@ describe('getCheckoutConfig', () => {
         }
         const locale = {id: 'en_US'}
 
-        const result = getCheckoutConfig(adyenEnvironment, adyenPaymentMethods, translations, locale)
+        const result = getCheckoutConfig(
+            adyenEnvironment,
+            adyenPaymentMethods,
+            translations,
+            locale
+        )
 
         expect(result).toEqual({
             environment: 'test',
@@ -89,7 +98,12 @@ describe('handleRedirects', () => {
     })
 
     it('handles amazonCheckoutSessionId', () => {
-        const result = handleRedirects(null, 'someAmazonCheckoutSessionId', checkoutMock, setIsLoadingMock)
+        const result = handleRedirects(
+            null,
+            'someAmazonCheckoutSessionId',
+            checkoutMock,
+            setIsLoadingMock
+        )
         expect(setIsLoadingMock).toHaveBeenCalledWith(true)
         expect(checkoutMock.create).toHaveBeenCalledWith('amazonpay', {
             amazonCheckoutSessionId: 'someAmazonCheckoutSessionId',

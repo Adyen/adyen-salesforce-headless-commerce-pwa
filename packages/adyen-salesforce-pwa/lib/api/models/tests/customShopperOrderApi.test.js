@@ -48,10 +48,7 @@ describe('CustomShopperOrderApiClient', () => {
             const basketId = 'basket_abc'
             const customerId = 'customer_xyz'
             const orderNo = '12345'
-
             const result = await client.createOrder(auth, basketId, customerId, orderNo)
-
-            const expectedUrl = `${client.baseUrl}/orders?siteId=RefArch`
             const expectedOptions = {
                 body: JSON.stringify({
                     basketId,

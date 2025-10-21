@@ -32,8 +32,7 @@ import {
     useAccessToken,
     useCustomerId,
     useCustomerType,
-    useShopperBasketsMutation,
-    useShopperOrdersMutation
+    useShopperBasketsMutation
 } from '@salesforce/commerce-sdk-react'
 import UnavailableProductConfirmationModal from '@salesforce/retail-react-app/app/components/unavailable-product-confirmation-modal'
 import {
@@ -53,13 +52,9 @@ import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
 /* -----------------Adyen End ------------------------ */
 
 const Checkout = () => {
-    const {formatMessage} = useIntl()
-    const navigate = useNavigation()
     const {step} = useCheckout()
-    const [error, setError] = useState()
+    const [error] = useState()
     const {data: basket, derivedData} = useCurrentBasket()
-    const [isLoading, setIsLoading] = useState(false)
-    const {mutateAsync: createOrder} = useShopperOrdersMutation('createOrder')
     const {passwordless = {}, social = {}} = getConfig().app.login || {}
     const idps = social?.idps
     const isSocialEnabled = !!social?.enabled
@@ -92,24 +87,6 @@ const Checkout = () => {
             removeEmptyShipments(basket)
         }
     }, [basket?.basketId])
-
-    const submitOrder = async () => {
-        setIsLoading(true)
-        try {
-            const order = await createOrder({
-                body: {basketId: basket.basketId}
-            })
-            navigate(`/checkout/confirmation/${order.orderNo}`)
-        } catch (error) {
-            const message = formatMessage({
-                id: 'checkout.message.generic_error',
-                defaultMessage: 'An unexpected error occurred during checkout.'
-            })
-            setError(message)
-        } finally {
-            setIsLoading(false)
-        }
-    }
 
     return (
         <Box background="gray.50" flex="1">
@@ -145,24 +122,6 @@ const Checkout = () => {
                                 </>
                             )}
                             <Payment />
-
-                            {/*{step === 5 && (*/}
-                            {/*    <Box pt={3} display={{base: 'none', lg: 'block'}}>*/}
-                            {/*        <Container variant="form">*/}
-                            {/*            <Button*/}
-                            {/*                w="full"*/}
-                            {/*                onClick={submitOrder}*/}
-                            {/*                isLoading={isLoading}*/}
-                            {/*                data-testid="sf-checkout-place-order-btn"*/}
-                            {/*            >*/}
-                            {/*                <FormattedMessage*/}
-                            {/*                    defaultMessage="Place Order"*/}
-                            {/*                    id="checkout.button.place_order"*/}
-                            {/*                />*/}
-                            {/*            </Button>*/}
-                            {/*        </Container>*/}
-                            {/*    </Box>*/}
-                            {/*)}*/}
                         </Stack>
                     </GridItem>
 
@@ -172,43 +131,9 @@ const Checkout = () => {
                             showTaxEstimationForm={false}
                             showCartItems={true}
                         />
-
-                        {/*{step === 5 && (*/}
-                        {/*    <Box display={{base: 'none', lg: 'block'}} pt={2}>*/}
-                        {/*        <Button w="full" onClick={submitOrder} isLoading={isLoading}>*/}
-                        {/*            <FormattedMessage*/}
-                        {/*                defaultMessage="Place Order"*/}
-                        {/*                id="checkout.button.place_order"*/}
-                        {/*            />*/}
-                        {/*        </Button>*/}
-                        {/*    </Box>*/}
-                        {/*)}*/}
                     </GridItem>
                 </Grid>
             </Container>
-
-            {/*{step === 5 && (*/}
-            {/*    <Box*/}
-            {/*        display={{lg: 'none'}}*/}
-            {/*        position="sticky"*/}
-            {/*        bottom="0"*/}
-            {/*        px={4}*/}
-            {/*        pt={6}*/}
-            {/*        pb={11}*/}
-            {/*        background="white"*/}
-            {/*        borderTop="1px solid"*/}
-            {/*        borderColor="gray.100"*/}
-            {/*    >*/}
-            {/*        <Container variant="form">*/}
-            {/*            <Button w="full" onClick={submitOrder} isLoading={isLoading}>*/}
-            {/*                <FormattedMessage*/}
-            {/*                    defaultMessage="Place Order"*/}
-            {/*                    id="checkout.button.place_order"*/}
-            {/*                />*/}
-            {/*            </Button>*/}
-            {/*        </Container>*/}
-            {/*    </Box>*/}
-            {/*)}*/}
         </Box>
     )
 }
@@ -227,6 +152,11 @@ const checkoutCustomizations = {
         },
         klarna_account: {
             useKlarnaWidget: false
+        }
+    },
+    translations: {
+        'fr-CH': {
+            'form.instruction': 'hello world'
         }
     }
 }

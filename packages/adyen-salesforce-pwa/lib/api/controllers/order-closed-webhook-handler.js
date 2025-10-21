@@ -1,7 +1,7 @@
 import {OrderApiClient} from '../models/orderApi'
 import {NOTIFICATION_EVENT_CODES, NOTIFICATION_SUCCESS, ORDER} from '../../utils/constants.mjs'
 import Logger from '../models/logger'
-import {getOrderUsingOrderNo} from "../helpers/orderHelper";
+import {getOrderUsingOrderNo} from '../helpers/orderHelper'
 
 const messages = {
     AUTH_ERROR: 'Access Denied!',
@@ -23,10 +23,7 @@ async function orderClosedWebhookHandler(req, res, next) {
         }
         const orderApi = new OrderApiClient()
         if (notification.success === NOTIFICATION_SUCCESS.TRUE) {
-            Logger.info(
-                notification.eventCode,
-                `ORDER_CLOSED for order ${orderNo} was successful.`
-            )
+            Logger.info(notification.eventCode, `ORDER_CLOSED for order ${orderNo} was successful.`)
             await orderApi.updateOrderConfirmationStatus(
                 orderNo,
                 ORDER.CONFIRMATION_STATUS_CONFIRMED

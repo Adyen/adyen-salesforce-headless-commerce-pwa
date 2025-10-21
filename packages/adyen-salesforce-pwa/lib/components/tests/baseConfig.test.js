@@ -1,4 +1,10 @@
-import {baseConfig, getAmount, onAdditionalDetails, onErrorHandler, onSubmit} from '../helpers/baseConfig'
+import {
+    baseConfig,
+    getAmount,
+    onAdditionalDetails,
+    onErrorHandler,
+    onSubmit
+} from '../helpers/baseConfig'
 import {AdyenPaymentsService} from '../../services/payments'
 import {AdyenPaymentsDetailsService} from '../../services/payments-details'
 import {PaymentCancelService} from '../../services/payment-cancel'
@@ -139,7 +145,12 @@ describe('onAdditionalDetails function', () => {
 describe('onErrorHandler', () => {
     it('should cancel the order and navigate', async () => {
         const navigate = jest.fn()
-        const props = {token: 'testToken', site: 'testSite', customerId: 'testCustomer', navigate: navigate}
+        const props = {
+            token: 'testToken',
+            site: 'testSite',
+            customerId: 'testCustomer',
+            navigate: navigate
+        }
         const orderNo = '12345'
         PaymentCancelService.mockImplementation(() => ({
             paymentCancel: jest.fn().mockResolvedValue({})

@@ -1,7 +1,10 @@
 import {balanceCheck, cancelOrder, createOrder} from '../giftCard.js'
 import AdyenClientProvider from '../../models/adyenClientProvider'
 import Logger from '../../models/logger'
-import {cancelAdyenOrder as cancelAdyenOrderHelper, createCheckoutResponse} from '../../helpers/paymentsHelper.js'
+import {
+    cancelAdyenOrder as cancelAdyenOrderHelper,
+    createCheckoutResponse
+} from '../../helpers/paymentsHelper.js'
 
 // Mock dependencies
 jest.mock('../../models/adyenClientProvider')
@@ -109,10 +112,7 @@ describe('Gift Card Controller', () => {
 
             await createOrder(req, res, next)
 
-            expect(Logger.error).toHaveBeenCalledWith(
-                'giftCards-createOrder',
-                mockError.stack
-            )
+            expect(Logger.error).toHaveBeenCalledWith('giftCards-createOrder', mockError.stack)
             expect(next).toHaveBeenCalledWith(mockError)
         })
     })
@@ -135,10 +135,7 @@ describe('Gift Card Controller', () => {
                 res.locals.adyen,
                 req.body.data.order
             )
-            expect(createCheckoutResponse).toHaveBeenCalledWith(
-                mockCancelResponse,
-                'ORDER-123'
-            )
+            expect(createCheckoutResponse).toHaveBeenCalledWith(mockCancelResponse, 'ORDER-123')
             expect(res.locals.response).toEqual(
                 expect.objectContaining({
                     resultCode: 'Received'
@@ -154,10 +151,7 @@ describe('Gift Card Controller', () => {
 
             await cancelOrder(req, res, next)
 
-            expect(Logger.error).toHaveBeenCalledWith(
-                'giftCards-cancelOrder',
-                mockError.stack
-            )
+            expect(Logger.error).toHaveBeenCalledWith('giftCards-cancelOrder', mockError.stack)
             expect(next).toHaveBeenCalledWith(mockError)
         })
     })

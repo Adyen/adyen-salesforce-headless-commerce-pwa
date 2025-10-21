@@ -5,13 +5,13 @@ import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 import {PaymentCancelService} from '../../services/payment-cancel'
 
 export const baseConfig = ({
-                               beforeSubmit = [],
-                               afterSubmit = [],
-                               beforeAdditionalDetails = [],
-                               afterAdditionalDetails = [],
-                               onError = [],
-                               ...props
-                           }) => {
+    beforeSubmit = [],
+    afterSubmit = [],
+    beforeAdditionalDetails = [],
+    afterAdditionalDetails = [],
+    onError = [],
+    ...props
+}) => {
     return {
         amount: getAmount(props),
         onSubmit: executeCallbacks([...beforeSubmit, onSubmit, ...afterSubmit], props),
@@ -19,7 +19,7 @@ export const baseConfig = ({
             [...beforeAdditionalDetails, onAdditionalDetails, ...afterAdditionalDetails],
             props
         ),
-        onError: executeCallbacks([...onError, onErrorHandler], props),
+        onError: executeCallbacks([...onError, onErrorHandler], props)
     }
 }
 
@@ -28,24 +28,31 @@ export const onSubmit = async (state, component, actions, props) => {
         if (!state.isValid) {
             throw new Error('invalid state')
         }
-        const adyenPaymentService = new AdyenPaymentsService(props?.token, props?.customerId, props.basket?.basketId, props?.site)
-        const paymentsResponse = await adyenPaymentService.submitPayment(
-            {
-                ...state.data,
-                origin: state.data.origin ? state.data.origin : window.location.origin,
-                returnUrl: props?.returnUrl || `${window.location.href}/redirect`
-            }
+        const adyenPaymentService = new AdyenPaymentsService(
+            props?.token,
+            props?.customerId,
+            props.basket?.basketId,
+            props?.site
         )
+        const paymentsResponse = await adyenPaymentService.submitPayment({
+            ...state.data,
+            origin: state.data.origin ? state.data.origin : window.location.origin,
+            returnUrl: props?.returnUrl || `${window.location.href}/redirect`
+        })
         return {paymentsResponse: paymentsResponse}
     } catch (err) {
         actions.reject()
     }
-
 }
 
 export const onAdditionalDetails = async (state, component, actions, props) => {
     try {
-        const adyenPaymentsDetailsService = new AdyenPaymentsDetailsService(props?.token, props?.customerId, props.basket?.basketId, props?.site)
+        const adyenPaymentsDetailsService = new AdyenPaymentsDetailsService(
+            props?.token,
+            props?.customerId,
+            props.basket?.basketId,
+            props?.site
+        )
         const paymentsDetailsResponse = await adyenPaymentsDetailsService.submitPaymentsDetails(
             state.data
         )
@@ -57,12 +64,17 @@ export const onAdditionalDetails = async (state, component, actions, props) => {
 
 export const onErrorHandler = async (error, component, props) => {
     try {
-        const paymentCancelService = new PaymentCancelService(props?.token, props?.customerId, props.basket?.basketId, props?.site);
-        const response = await paymentCancelService.paymentCancel(props?.orderNo);
+        const paymentCancelService = new PaymentCancelService(
+            props?.token,
+            props?.customerId,
+            props.basket?.basketId,
+            props?.site
+        )
+        await paymentCancelService.paymentCancel(props?.orderNo)
         if (props?.adyenOrder) {
             props?.setAdyenOrder(null)
         }
-        props?.navigate('/checkout');
+        props?.navigate('/checkout')
     } catch (err) {
         throw new Error(err)
     }

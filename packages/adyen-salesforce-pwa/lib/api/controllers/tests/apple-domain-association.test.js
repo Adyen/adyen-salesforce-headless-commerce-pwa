@@ -19,7 +19,7 @@ describe('appleDomainAssociation Controller', () => {
         req = {}
         res = {
             send: jest.fn(),
-            setHeader: jest.fn(),
+            setHeader: jest.fn()
         }
         next = jest.fn()
     })

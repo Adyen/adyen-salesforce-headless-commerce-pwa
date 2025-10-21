@@ -18,7 +18,7 @@ describe('getEnvironment middleware', () => {
                         clientKey: 'mockClientKey',
                         environment: 'mockEnvironment'
                     },
-                    siteId: 'RefArch',
+                    siteId: 'RefArch'
                 }
             }
         }

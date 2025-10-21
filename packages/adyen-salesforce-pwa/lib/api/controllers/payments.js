@@ -9,8 +9,7 @@ import {
     revertCheckoutState,
     validateBasketPayments
 } from '../helpers/paymentsHelper.js'
-import {createOrderUsingOrderNo} from "../helpers/orderHelper.js";
-
+import {createOrderUsingOrderNo} from '../helpers/orderHelper.js'
 
 /**
  * Handles errors that occur during the payment process.
@@ -39,11 +38,12 @@ async function handlePaymentError(res) {
 async function sendPayments(req, res, next) {
     try {
         Logger.info('sendPayments', 'start')
-        const {body: {data}} = req
+        const {
+            body: {data}
+        } = req
         const {adyen: adyenContext} = res.locals
         if (!adyenContext) {
             throw new AdyenError(ERROR_MESSAGE.ADYEN_CONTEXT_NOT_FOUND, 500)
-
         }
 
         if (data.paymentType === 'express') {
@@ -52,7 +52,11 @@ async function sendPayments(req, res, next) {
         const paymentRequest = await createPaymentRequestObject(data, adyenContext, req)
         Logger.info('sendPayments', 'validateBasketPayments')
         // Validate the basket and the payment amounts.
-        await validateBasketPayments(adyenContext, paymentRequest.amount, paymentRequest.paymentMethod)
+        await validateBasketPayments(
+            adyenContext,
+            paymentRequest.amount,
+            paymentRequest.paymentMethod
+        )
 
         const checkout = new AdyenClientProvider(adyenContext).getPaymentsApi()
         const response = await checkout.payments(paymentRequest, {
@@ -63,7 +67,7 @@ async function sendPayments(req, res, next) {
         const checkoutResponse = {
             ...createCheckoutResponse(response, adyenContext.basket?.c_orderNo),
             order: response?.order,
-            resultCode: response?.resultCode,
+            resultCode: response?.resultCode
         }
 
         if (checkoutResponse.isFinal && !checkoutResponse.isSuccessful) {
@@ -77,14 +81,26 @@ async function sendPayments(req, res, next) {
             })
         }
 
-        if (!checkoutResponse.isFinal && checkoutResponse.isSuccessful && response?.order?.orderData) {
+        if (
+            !checkoutResponse.isFinal &&
+            checkoutResponse.isSuccessful &&
+            response?.order?.orderData
+        ) {
             await adyenContext.basketService.update({
                 c_orderData: JSON.stringify(response.order)
             })
-            await adyenContext.basketService.addPaymentInstrument(paymentRequest?.amount, paymentRequest?.paymentMethod, response?.pspReference)
+            await adyenContext.basketService.addPaymentInstrument(
+                paymentRequest?.amount,
+                paymentRequest?.paymentMethod,
+                response?.pspReference
+            )
         }
         if (checkoutResponse.isFinal && checkoutResponse.isSuccessful) {
-            await adyenContext.basketService.addPaymentInstrument(paymentRequest?.amount, paymentRequest?.paymentMethod, response?.pspReference)
+            await adyenContext.basketService.addPaymentInstrument(
+                paymentRequest?.amount,
+                paymentRequest?.paymentMethod,
+                response?.pspReference
+            )
             await createOrderUsingOrderNo(adyenContext)
             Logger.info('sendPayments', `order created: ${checkoutResponse.merchantReference}`)
         }

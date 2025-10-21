@@ -4,7 +4,10 @@
  */
 import React, {useContext} from 'react'
 import {act, render, screen} from '@testing-library/react'
-import {AdyenExpressCheckoutContext, AdyenExpressCheckoutProvider} from '../adyen-express-checkout-context'
+import {
+    AdyenExpressCheckoutContext,
+    AdyenExpressCheckoutProvider
+} from '../adyen-express-checkout-context'
 import {AdyenPaymentMethodsService} from '../../services/payment-methods'
 import {AdyenEnvironmentService} from '../../services/environment'
 import {AdyenShippingMethodsService} from '../../services/shipping-methods'
@@ -25,7 +28,7 @@ const TestConsumer = () => {
     // We'll just render the stateful parts.
     const {adyenEnvironment, adyenPaymentMethods, shippingMethods} = context
     return (
-        <div data-testid='context'>
+        <div data-testid="context">
             {JSON.stringify({adyenEnvironment, adyenPaymentMethods, shippingMethods})}
         </div>
     )
@@ -34,8 +37,7 @@ const TestConsumer = () => {
 describe('AdyenExpressCheckoutProvider', () => {
     let consoleErrorSpy
     beforeEach(() => {
-        consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {
-        })
+        consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
         // Reset mocks before each test
         AdyenPaymentMethodsService.mockClear()
         AdyenEnvironmentService.mockClear()
@@ -62,7 +64,7 @@ describe('AdyenExpressCheckoutProvider', () => {
         await act(async () => {
             render(
                 <AdyenExpressCheckoutProvider
-                    authToken='mockToken'
+                    authToken="mockToken"
                     site={{id: 'mockSite'}}
                     locale={{id: 'en-US'}}
                     navigate={jest.fn()}
@@ -86,7 +88,7 @@ describe('AdyenExpressCheckoutProvider', () => {
         await act(async () => {
             render(
                 <AdyenExpressCheckoutProvider
-                    authToken='mockToken'
+                    authToken="mockToken"
                     site={{id: 'mockSite'}}
                     basket={mockBasket}
                     navigate={jest.fn()}
@@ -111,7 +113,7 @@ describe('AdyenExpressCheckoutProvider', () => {
         await act(async () => {
             render(
                 <AdyenExpressCheckoutProvider
-                    authToken='mockToken'
+                    authToken="mockToken"
                     site={{id: 'mockSite'}}
                     basket={{basketId: 'mockBasket'}}
                     navigate={jest.fn()}
@@ -132,12 +134,13 @@ describe('AdyenExpressCheckoutProvider', () => {
         }))
 
         await act(async () => {
-            render( // eslint-disable-next-line
+            render(
                 <AdyenExpressCheckoutProvider
-                    authToken='mockToken'
+                    authToken="mockToken"
                     site={{id: 'mockSite'}}
                     locale={{id: 'en-US'}}
-                    navigate={jest.fn()}>
+                    navigate={jest.fn()}
+                >
                     <TestConsumer />
                 </AdyenExpressCheckoutProvider>
             )

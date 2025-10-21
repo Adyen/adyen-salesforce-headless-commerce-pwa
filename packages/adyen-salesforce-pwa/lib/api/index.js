@@ -29,11 +29,9 @@ export {default as EnvironmentController} from './controllers/environment'
 export {default as PaymentCancelController} from './controllers/payment-cancel'
 export {default as GiftCardController} from './controllers/giftCard'
 
-
 // Webhook event handlers
 export * from './controllers/authorization-webhook-handler'
 export * from './controllers/order-closed-webhook-handler'
-
 
 // Helpers
 export * from './helpers/basketHelper.js'

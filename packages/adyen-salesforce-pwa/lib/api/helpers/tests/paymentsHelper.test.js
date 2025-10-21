@@ -9,7 +9,11 @@ import {
     revertCheckoutState,
     validateBasketPayments
 } from '../paymentsHelper.js'
-import {RECURRING_PROCESSING_MODEL, RESULT_CODES, SHOPPER_INTERACTIONS} from '../../../utils/constants.mjs'
+import {
+    RECURRING_PROCESSING_MODEL,
+    RESULT_CODES,
+    SHOPPER_INTERACTIONS
+} from '../../../utils/constants.mjs'
 import {AdyenError} from '../../models/AdyenError.js'
 
 // Mocking the util functions
@@ -375,7 +379,6 @@ describe('paymentsHelper', () => {
         })
     })
 
-
     describe('createPaymentRequestObject', () => {
         const mockBasket = {
             c_orderNo: '00012345',
@@ -440,7 +443,12 @@ describe('paymentsHelper', () => {
 
             expect(paymentRequest).toEqual({
                 ...mockData,
-                billingAddress: {street: '1 Billing St', firstName: 'John', lastName: 'Doe', formatted: true},
+                billingAddress: {
+                    street: '1 Billing St',
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    formatted: true
+                },
                 deliveryAddress: {street: '1 Shipping St', formatted: true},
                 reference: '00012345',
                 merchantAccount: 'AdyenMerchantAccount',
@@ -548,6 +556,7 @@ describe('paymentsHelper', () => {
             expect(paymentRequest.deliveryAddress).toEqual({street: 'Data Shipping St'})
             // Ensure the formatter is NOT called when address is from data
             expect(
+                // eslint-disable-next-line @typescript-eslint/no-var-requires
                 require('../../../utils/formatAddress.mjs').formatAddressInAdyenFormat
             ).not.toHaveBeenCalled()
         })

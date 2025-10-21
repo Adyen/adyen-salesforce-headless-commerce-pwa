@@ -4,8 +4,8 @@
  */
 import {
     getApplePaymentMethodConfig,
-    getCustomerShippingDetails,
-    getCustomerBillingDetails
+    getCustomerBillingDetails,
+    getCustomerShippingDetails
 } from '../helpers/applePayExpress.utils'
 
 describe('getApplePaymentMethodConfig function', () => {

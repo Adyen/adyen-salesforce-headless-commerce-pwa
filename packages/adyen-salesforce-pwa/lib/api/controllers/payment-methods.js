@@ -11,7 +11,7 @@ async function getPaymentMethods(req, res, next) {
 
     try {
         const {adyen: adyenContext} = res.locals
-        const {basket, adyenConfig, customerId, siteId} = adyenContext
+        const {basket, adyenConfig, customerId} = adyenContext
         const checkout = new AdyenClientProvider(adyenContext).getPaymentsApi()
 
         const {orderTotal, productTotal, currency, customerInfo} = basket
