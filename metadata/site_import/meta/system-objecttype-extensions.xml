@@ -100,7 +100,7 @@
             </attribute-definition>
             <attribute-definition attribute-id="paymentMethod">
                 <display-name xml:lang="x-default">paymentMethod</display-name>
-                <description xml:lang="x-default">PaymentMethod used in adyen payment request</description>
+                <description xml:lang="x-default">PaymentMethod used in Adyen payment request</description>
                 <type>text</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
@@ -108,7 +108,7 @@
             </attribute-definition>
             <attribute-definition attribute-id="amount">
                 <display-name xml:lang="x-default">amount</display-name>
-                <description xml:lang="x-default">Amount used in adyen payment request</description>
+                <description xml:lang="x-default">Amount used in Adyen payment request</description>
                 <type>text</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
