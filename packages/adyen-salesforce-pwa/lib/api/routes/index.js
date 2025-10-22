@@ -6,9 +6,12 @@ import PaymentsDetailsController from '../controllers/payments-details'
 import PaymentsController from '../controllers/payments'
 import ShippingAddressController from '../controllers/shipping-address'
 import ShippingMethodsController from '../controllers/shipping-methods'
-import {authenticate, parseNotification, validateHmac} from '../middleware/webhook'
-import {authorizationWebhookHandler} from '../controllers/authorization-webhook-handler'
-import {orderClosedWebhookHandler} from '../controllers/order-closed-webhook-handler'
+import {
+    authenticate,
+    parseNotification,
+    sendNotification,
+    validateHmac
+} from '../middleware/webhook'
 import {createErrorResponse} from '../../utils/createErrorResponse.mjs'
 import Logger from '../models/logger'
 import {appleDomainAssociation} from '../controllers/apple-domain-association'
@@ -46,8 +49,7 @@ function registerAdyenEndpoints(app, runtime, overrides) {
         authenticate,
         validateHmac,
         parseNotification,
-        authorizationWebhookHandler,
-        orderClosedWebhookHandler,
+        sendNotification,
         SuccessHandler
     ]
 
