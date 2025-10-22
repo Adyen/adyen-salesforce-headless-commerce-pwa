@@ -1,6 +1,7 @@
 import {hmacValidator} from '@adyen/api-library'
 import Logger from '../models/logger'
 import {AdyenError} from '../models/AdyenError'
+import {CustomNotifyApiClient} from '../models/customNotifyApi'
 
 const messages = {
     AUTH_ERROR: 'Access Denied!',
@@ -77,4 +78,18 @@ function parseNotification(req, res, next) {
     }
 }
 
-export {authenticate, validateHmac, parseNotification}
+async function sendNotification(req, res, next) {
+    try {
+        Logger.info('sendNotification', 'start')
+        const {NotificationRequestItem: notification = {}} = res.locals.notification
+        const customNotifyApi = new CustomNotifyApiClient()
+        await customNotifyApi.notify(notification)
+        res.locals.response = messages.AUTH_SUCCESS
+        return next()
+    } catch (err) {
+        Logger.error('sendNotification', err.stack)
+        return next(err)
+    }
+}
+
+export {authenticate, validateHmac, parseNotification, sendNotification}
