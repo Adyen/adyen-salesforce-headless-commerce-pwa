@@ -13,8 +13,9 @@ async function sendPaymentDetails(req, res, next) {
 
     try {
         const {data} = req.body
+        const {siteId} = req.query
 
-        const checkout = AdyenCheckoutConfig.getInstance()
+        const checkout = AdyenCheckoutConfig.getInstance(siteId)
         const response = await checkout.paymentsDetails(data, {
             idempotencyKey: uuidv4()
         })
