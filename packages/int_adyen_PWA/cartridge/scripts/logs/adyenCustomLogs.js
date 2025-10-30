@@ -1,20 +1,28 @@
 const Logger = require('dw/system/Logger');
 
-exports.fatal_log = function (msg, error) {
+function fatal_log(msg, error) {
     const logMsg = [msg, error?.toString(), error?.stack].join('\n').trim();
     Logger.getLogger('Adyen_fatal', 'Adyen').fatal(logMsg);
 }
 
-exports.error_log = function (msg, error) {
+function error_log(msg, error) {
     const logMsg = [msg, error?.toString(), error?.stack].join('\n').trim();
     Logger.getLogger('Adyen_error', 'Adyen').error(logMsg);
 }
 
-exports.debug_log = function (msg) {
+function debug_log(msg) {
     Logger.getLogger('Adyen_debug', 'Adyen').debug(msg);
 }
 
-exports.info_log = function (msg) {
+function info_log(msg) {
     Logger.getLogger('Adyen_info', 'Adyen').info(msg);
 }
+
+module.exports = {
+    fatal_log,
+    debug_log,
+    info_log,
+    error_log
+}
+
 

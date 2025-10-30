@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <metadata xmlns="http://www.demandware.com/xml/impex/metadata/2006-10-31">
     <custom-type type-id="adyenNotification">
-        <display-name xml:lang="x-default">Adyen Notification</display-name>
+        <display-name xml:lang="x-default">Adyen Notification Object</display-name>
         <description xml:lang="x-default">Adyen Notification Update Queue</description>
         <staging-mode>no-staging</staging-mode>
         <storage-scope>site</storage-scope>
@@ -69,7 +69,7 @@
             </attribute-definition>
             <attribute-definition attribute-id="operations">
                 <display-name xml:lang="x-default">Operations</display-name>
-                <type>string</type>
+                <type>set-of-string</type>
                 <localizable-flag>false</localizable-flag>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
@@ -163,8 +163,8 @@
                 <externally-managed-flag>false</externally-managed-flag>
                 <min-length>0</min-length>
             </attribute-definition>
-            <attribute-definition attribute-id="Adyen_log">
-                <display-name xml:lang="x-default">Adyen Log</display-name>
+            <attribute-definition attribute-id="log">
+                <display-name xml:lang="x-default">Adyen Notification data object</display-name>
                 <type>text</type>
                 <localizable-flag>false</localizable-flag>
                 <mandatory-flag>false</mandatory-flag>
@@ -194,7 +194,7 @@
                 <attribute attribute-id="value"/>
                 <attribute attribute-id="live"/>
                 <attribute attribute-id="eventDate"/>
-                <attribute attribute-id="Adyen_log"/>
+                <attribute attribute-id="log"/>
             </attribute-group>
         </group-definitions>
     </custom-type>

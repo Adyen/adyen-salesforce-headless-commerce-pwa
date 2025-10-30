@@ -6,12 +6,48 @@ const CustomObjectMgr = require('dw/object/CustomObjectMgr');
 const HookMgr = require('dw/system/HookMgr')
 
 //script includes
+const handleNotificationObject = require('*/cartridge/scripts/webhooks/handleNotificationObject');
 const AdyenLogs = require('*/cartridge/scripts/logs/adyenCustomLogs');
 
-function execute() {
-    processNotifications();
-    clearNotifications();
-    return PIPELET_NEXT;
+/**
+ * Processes a single notification custom object
+ * @param {Object} customObj - The custom object to process
+ */
+function processNotificationItem(customObj) {
+    try {
+        let handlerResult;
+        Transaction.wrap(() => {
+            handlerResult = handleNotificationObject.handle(customObj);
+        });
+
+        const order = handlerResult.Order;
+
+        // Handle failed order scenarios
+        if (!handlerResult.status || handlerResult.status === PIPELET_ERROR) {
+            // Only fail CREATED orders. If the order doesn't exist or is in a different state, skip.
+            if (order && order.status.value === dw.order.Order.ORDER_STATUS_CREATED) {
+                Transaction.wrap(() => {
+                    OrderMgr.failOrder(order, true);
+                });
+            }
+            return;
+        }
+
+        // Handle successful order processing, skipping if necessary
+        if (handlerResult.SkipOrder || handlerResult.Pending) {
+            return;
+        }
+
+        // Submit order and send confirmation email if applicable
+        if (handlerResult.SubmitOrder && HookMgr.hasHook('adyen.order.submit')) {
+            HookMgr.callHook('adyen.order.submit', 'submitOrder', order);
+        }
+    } catch (e) {
+        AdyenLogs.error_log(
+            `Failed to process notification for order ${customObj.custom.orderId}. Error: ${e.message}`,
+            e.stack,
+        );
+    }
 }
 
 /**
@@ -19,7 +55,6 @@ function execute() {
  *  to be processed and handle them to place or fail order
  */
 function processNotifications(/* pdict */) {
-    const objectsHandler = require('*/cartridge/scripts/webhooks/handleCustomObject');
     const searchQuery = CustomObjectMgr.queryCustomObjects(
         'adyenNotification',
         "custom.updateStatus = 'PROCESS'",
@@ -29,66 +64,28 @@ function processNotifications(/* pdict */) {
         `Process notifications start with count ${searchQuery.count}`,
     );
 
-    let customObj;
-    let handlerResult;
-    let order;
-    while (searchQuery.hasNext()) {
-        customObj = searchQuery.next();
-        Transaction.wrap(() => {
-            handlerResult = objectsHandler.handle(customObj);
-        });
-
-        /*
-          Sometimes order cannot be found in DWRE DB even if it exists there,
-          in that case we shouldn't reply to Adyen that all was ok in order to get a new notification
-        */
-
-        order = handlerResult.Order;
-        if (!handlerResult.status || handlerResult.status === PIPELET_ERROR) {
-            // Only CREATED orders can be failed
-            if (
-                order === null ||
-                order.status.value !== dw.order.Order.ORDER_STATUS_CREATED ||
-                handlerResult.RefusedHpp
-            ) {
-                continue;
-            }
-            // Refused payments which are made with using Adyen payment method are
-            // handled when user is redirected back from Adyen HPP.
-            // Here we shouldn't fail an order and send a notification
-            Transaction.wrap(() => {
-                OrderMgr.failOrder(order, true);
-            });
-            continue;
+    try {
+        while (searchQuery.hasNext()) {
+            const customObj = searchQuery.next();
+            processNotificationItem(customObj);
         }
-
-        if (handlerResult.SkipOrder || handlerResult.Pending) {
-            continue;
-        }
-
-        // Submitting an order -> update status and send all required email
-        if (handlerResult.SubmitOrder) {
-            const result = submitOrder(order);
-            if (result.error) {
-                AdyenLogs.error_log(
-                    `Failed to place an order: ${order.orderNo}, during notification process.`,
-                );
-            }
+    } finally {
+        AdyenLogs.info_log(
+            `Process notifications finished.`,
+        );
+        if (searchQuery) {
+            searchQuery.close();
         }
     }
-    AdyenLogs.info_log(
-        `Process notifications finished with count ${searchQuery.count}`,
-    );
-    searchQuery.close();
 
     return PIPELET_NEXT;
 }
 
 /**
- * cleanNotifications
+ * clearNotifications - search for custom objects that have been successfully processed
+ * and remove them to keep the system clean.
  */
 function clearNotifications(/* pdict */) {
-    const deleteCustomObjects = require('*/cartridge/scripts/webhooks/deleteCustomObjects');
     const searchQuery = CustomObjectMgr.queryCustomObjects(
         'adyenNotification',
         "custom.processedStatus = 'SUCCESS'",
@@ -98,12 +95,18 @@ function clearNotifications(/* pdict */) {
         `Removing Processed Custom Objects start with count ${searchQuery.count}`,
     );
 
-    let customObj;
     while (searchQuery.hasNext()) {
-        customObj = searchQuery.next();
-        Transaction.wrap(() => {
-            deleteCustomObjects.remove(customObj);
-        });
+        const customObj = searchQuery.next();
+        try {
+            Transaction.wrap(() => {
+                CustomObjectMgr.remove(customObj);
+            });
+        } catch (e) {
+            AdyenLogs.error_log(
+                `Error occurred during delete CO, merchantReference: ${customObj.custom.merchantReference}, error message: ${e.message}`,
+                e,
+            );
+        }
     }
     AdyenLogs.info_log(
         `Removing Processed Custom Objects finished with count ${searchQuery.count}`,
@@ -113,17 +116,10 @@ function clearNotifications(/* pdict */) {
     return PIPELET_NEXT;
 }
 
-/**
- * Calls adyen.order.submit that can be used to send emails to customers
- * @param order {dw.order.Order} The order object to be submitted.
- * @transactional
- * @return {Object} object If order cannot be placed, object.error is set to true.
- */
-function submitOrder(order) {
-    if (HookMgr.hasHook("adyen.order.submit")) {
-        return HookMgr.callHook("adyen.order.submit", "submitOrder", order)
-    }
-    return true
+function execute() {
+    processNotifications();
+    clearNotifications();
+    return PIPELET_NEXT;
 }
 
 module.exports = {

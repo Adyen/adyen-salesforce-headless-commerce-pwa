@@ -59,7 +59,7 @@ function validateHmac(req, res, next) {
 
 function parseNotification(req, res, next) {
     try {
-        const notificationItems = req.body.notificationItems || []
+        const {notificationItems = [], live} = req.body
         const notificationRequestItem = notificationItems.filter((item) => !!item)
         if (!notificationRequestItem[0]) {
             return next(
@@ -69,7 +69,7 @@ function parseNotification(req, res, next) {
                 )
             )
         }
-        res.locals.notification = notificationRequestItem[0]
+        res.locals.notification = {...notificationRequestItem[0], live}
         Logger.info('AdyenNotification', JSON.stringify(res.locals.notification))
         return next()
     } catch (err) {
@@ -81,9 +81,9 @@ function parseNotification(req, res, next) {
 async function sendNotification(req, res, next) {
     try {
         Logger.info('sendNotification', 'start')
-        const {NotificationRequestItem: notification = {}} = res.locals.notification
+        const {NotificationRequestItem: notification = {}, live} = res.locals.notification
         const customNotifyApi = new CustomNotifyApiClient()
-        await customNotifyApi.notify(notification)
+        await customNotifyApi.notify({...notification, live})
         res.locals.response = messages.AUTH_SUCCESS
         return next()
     } catch (err) {
