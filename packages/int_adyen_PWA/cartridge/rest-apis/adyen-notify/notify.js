@@ -1,28 +1,34 @@
-const Transaction = require('dw/system/Transaction');
 const RESTResponseMgr = require('dw/system/RESTResponseMgr');
-const handleNotify = require('*/cartridge/scripts/webhooks/handleNotify');
 const AdyenLogs = require('*/cartridge/scripts/logs/adyenCustomLogs');
+const {
+    createOrUpdateNotificationObject,
+    createLogMessage,
+} = require('*/cartridge/scripts/utils/notificationEventHelper');
 
 /**
  * Called by Adyen to update status of payments. It should always display [accepted] when finished.
  */
 exports.notify = function () {
-    AdyenLogs.info_log('notify called')
-    const requestBody = request.httpParameterMap.requestBodyAsString;
-    const req = JSON.parse(requestBody);
-    Transaction.begin();
-    const notificationResult = handleNotify.notify(req);
-    if (notificationResult?.success) {
-        Transaction.commit();
-        RESTResponseMgr.createEmptySuccess(200).render();
-    } else {
-        AdyenLogs.error_log(notificationResult?.error);
-        RESTResponseMgr.createError(
-            500, {
-                title: 'internal server error',
-            }
-        ).render();
-        Transaction.rollback();
+    try {
+        const requestBody = request.httpParameterMap.requestBodyAsString;
+        if (!requestBody) {
+            throw new Error('Adyen notification has failed. Empty request body.');
+        }
+
+        const {notificationData} = JSON.parse(requestBody);
+        if (!notificationData) {
+            throw new Error('Adyen notification has failed. No notification data provided.');
+        }
+
+        const customObj = createOrUpdateNotificationObject(notificationData);
+        const msg = createLogMessage(customObj);
+        AdyenLogs.debug_log(msg);
+
+        RESTResponseMgr.createSuccess({success: true}, 200).render();
+        AdyenLogs.info_log('Notify processed successfully');
+    } catch (e) {
+        AdyenLogs.error_log(e.message, e.stack);
+        RESTResponseMgr.createError(500, 'internal_server_error').render();
     }
 };
 exports.notify.public = true;
