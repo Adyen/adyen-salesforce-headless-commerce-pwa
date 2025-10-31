@@ -1,7 +1,8 @@
 const OrderMgr = require('dw/order/OrderMgr');
-const Order = require('dw/order/Order');
 const Currency = require('dw/util/Currency');
 const Transaction = require('dw/system/Transaction');
+const Status = require('dw/system/Status');
+const AdyenLogs = require('*/cartridge/scripts/logs/adyenCustomLogs');
 
 /**
  * Attempts to place the order
@@ -10,24 +11,17 @@ const Transaction = require('dw/system/Transaction');
  * @returns {Object} an error object
  */
 function placeOrder(order, fraudDetectionStatus) {
-    var result = {error: false};
-
+    const result = {error: false};
     try {
-        Transaction.begin();
-        var placeOrderStatus = OrderMgr.placeOrder(order);
-        if (placeOrderStatus === Status.ERROR) {
-            throw new Error();
-        }
-
-        if (fraudDetectionStatus.status === 'flag') {
-            order.setConfirmationStatus(Order.CONFIRMATION_STATUS_NOTCONFIRMED);
-        } else {
-            order.setConfirmationStatus(Order.CONFIRMATION_STATUS_CONFIRMED);
-        }
-
-        order.setExportStatus(Order.EXPORT_STATUS_READY);
-        Transaction.commit();
+        Transaction.wrap(function () {
+            const placeOrderStatus = OrderMgr.placeOrder(order);
+            AdyenLogs.info_log(`PlaceOrder called for order ${order.orderNo} with status ${JSON.stringify(placeOrderStatus.getCode())}`);
+            if (placeOrderStatus.getCode() === Status.ERROR) {
+                throw new Error(`PlaceOrder called for order ${order.orderNo} with status ${JSON.stringify(placeOrderStatus)}`);
+            }
+        });
     } catch (e) {
+        AdyenLogs.error_log('Failed to place order', e);
         Transaction.wrap(function () {
             OrderMgr.failOrder(order, true);
         });
@@ -48,6 +42,13 @@ function getCurrencyValueForApi(amount) {
     const value = Math.round(amount.multiply(10 ** digitsNumber).value); // eslint-disable-line no-restricted-properties
     return new dw.value.Money(value, currencyCode);
 }
+
+// get the divisor based on the currency code used to convert amounts of currency for the Adyen Checkout API
+function getDivisorForCurrency(amount) {
+    let fractionDigits = getFractionDigits(amount.currencyCode);
+    return Math.pow(10, fractionDigits);
+}
+
 
 // get the fraction digits based on the currency code used to convert amounts of currency for the Adyen Checkout API
 function getFractionDigits(currencyCode) {
@@ -89,5 +90,6 @@ function getFractionDigits(currencyCode) {
 
 module.exports = {
     placeOrder,
-    getCurrencyValueForApi
+    getCurrencyValueForApi,
+    getDivisorForCurrency
 };

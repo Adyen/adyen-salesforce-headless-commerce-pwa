@@ -2,8 +2,10 @@ const Transaction = require('dw/system/Transaction');
 const PaymentMgr = require('dw/order/PaymentMgr');
 const Calendar = require('dw/util/Calendar');
 const StringUtils = require('dw/util/StringUtils');
+const Money = require('dw/value/Money');
 const AdyenLogs = require('*/cartridge/scripts/logs/adyenCustomLogs');
 const constants = require('*/cartridge/scripts/utils/constants');
+const {getDivisorForCurrency} = require('*/cartridge/scripts/utils/orderHelper')
 
 /**
  * Create or update a custom object with notification data in a transaction.
@@ -93,25 +95,31 @@ function isWebhookSuccessful(customObj) {
 
 /**
  * Checks Adyen payment instruments and updates paymentTransaction if found.
- * @param {Object} paymentInstruments - The payment instruments collection
+ * @param {dw.order.Order} order - The order object
  * @param {Object} customObj - The custom object containing Adyen event log
+ * @param {string} transactionType - The transaction type where the value is one of TYPE_AUTH, TYPE_AUTH_REVERSAL, TYPE_CAPTURE or TYPE_CREDIT.
  * @returns {boolean} - True if any Adyen instrument was found
  */
-function updatePaymentTransaction(paymentInstruments, customObj) {
-    let foundAdyen = false;
+function updatePaymentTransaction(order, customObj, transactionType) {
+    const paymentInstruments = order.getPaymentInstruments();
     Object.values(paymentInstruments).forEach((pi) => {
-        const methodMatch = constants.ADYEN_METHODS.includes(pi.paymentMethod);
         const processor = PaymentMgr.getPaymentMethod(
             pi.getPaymentMethod(),
-        ).getPaymentProcessor().ID;
-        const processorMatch = constants.ADYEN_PROCESSORS.includes(processor);
-        if (methodMatch || processorMatch) {
-            foundAdyen = true;
-            pi.paymentTransaction.transactionID = customObj.custom.pspReference;
-            pi.paymentTransaction.custom.notification_data = customObj.custom.log;
+        ).getPaymentProcessor();
+        if (pi.custom.pspReference === customObj.custom.pspReference) {
+            const amount = new Money(customObj.custom.value, customObj.custom.currency);
+            const divideBy = getDivisorForCurrency(amount);
+            const transactionAmount = amount.divide(divideBy);
+            Transaction.wrap(function () {
+                pi.paymentTransaction.setTransactionID(customObj.custom.pspReference);
+                pi.paymentTransaction.setType(transactionType);
+                pi.paymentTransaction.setPaymentProcessor(processor);
+                pi.paymentTransaction.setAmount(transactionAmount);
+                pi.paymentTransaction.setAccountID(customObj.custom.merchantAccountCode);
+                pi.paymentTransaction.custom.notification_data = customObj.custom.log;
+            })
         }
     });
-    return foundAdyen;
 }
 
 module.exports = {
