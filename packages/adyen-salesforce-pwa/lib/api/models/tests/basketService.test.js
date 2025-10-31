@@ -84,8 +84,8 @@ describe('BasketService', () => {
                 expect.objectContaining({
                     body: expect.objectContaining({
                         paymentMethodId: PAYMENT_METHODS.CREDIT_CARD,
-                        c_adyenPaymentMethodType: 'scheme',
-                        c_adyenPaymentMethodBrand: 'visa'
+                        c_paymentMethodType: 'scheme',
+                        c_paymentMethodBrand: 'visa'
                     })
                 })
             )
@@ -106,7 +106,7 @@ describe('BasketService', () => {
                 expect.objectContaining({
                     body: expect.objectContaining({
                         paymentMethodId: PAYMENT_METHODS.ADYEN_COMPONENT,
-                        c_adyenPaymentMethodType: 'ideal'
+                        c_paymentMethodType: 'ideal'
                     })
                 })
             )

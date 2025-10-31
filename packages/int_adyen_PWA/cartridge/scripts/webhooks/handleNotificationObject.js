@@ -2,7 +2,7 @@ const OrderMgr = require('dw/order/OrderMgr');
 // script includes
 const AdyenLogs = require('*/cartridge/scripts/logs/adyenCustomLogs');
 const {getCurrencyValueForApi} = require('*/cartridge/scripts/utils/orderHelper');
-const {createLogMessage} = require('*/cartridge/scripts/utils/notificationObjectHelper');
+const {createLogMessage} = require('*/cartridge/scripts/utils/notificationEventHelper');
 
 /**
  * Extracts and processes the order ID from the custom object
@@ -123,8 +123,8 @@ function processEventHandler(order, customObj, result, totalAmount) {
         }
     } catch (error) {
         // Handler module doesn't exist for this event type
-        AdyenLogs.info_log(
-            `No handler module found for event code: ${customObj.custom.eventCode}`,
+        AdyenLogs.error_log(
+            `No handler module found for event code: ${customObj.custom.eventCode}`, error
         );
     }
 
@@ -178,7 +178,6 @@ function handle(customObj) {
     const totalAmount = getCurrencyValueForApi(
         order.getTotalGrossPrice(),
     ).value;
-
     const pending = processEventHandler(order, customObj, result, totalAmount);
     finalizeOrder(order, customObj);
 
