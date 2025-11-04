@@ -1,6 +1,6 @@
 import {AdyenPaymentsService} from '../../services/payments'
 import {AdyenPaymentsDetailsService} from '../../services/payments-details'
-import {executeCallbacks} from '../../utils/executeCallbacks'
+import {executeCallbacks, executeErrorCallbacks} from '../../utils/executeCallbacks'
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 import {PaymentCancelService} from '../../services/payment-cancel'
 
@@ -12,22 +12,20 @@ export const baseConfig = ({
     onError = [],
     ...props
 }) => {
-    beforeSubmit = [],
-    afterSubmit = [],
-    beforeAdditionalDetails = [],
-    afterAdditionalDetails = [],
-    onError = [],
-    ...props
-}) => {
+    const onErrorCallback = executeErrorCallbacks(onError)
     return {
         amount: getAmount(props),
-        onSubmit: executeCallbacks([...beforeSubmit, onSubmit, ...afterSubmit], props),
+        onSubmit: executeCallbacks(
+            [...beforeSubmit, onSubmit, ...afterSubmit],
+            props,
+            onErrorCallback
+        ),
         onAdditionalDetails: executeCallbacks(
             [...beforeAdditionalDetails, onAdditionalDetails, ...afterAdditionalDetails],
-            props
+            props,
+            onErrorCallback
         ),
-        onError: executeCallbacks([...onError, onErrorHandler], props)
-        onError: executeCallbacks([...onError, onErrorHandler], props)
+        onError: executeCallbacks([...onError, onErrorHandler], props, onErrorCallback)
     }
 }
 
@@ -61,6 +59,7 @@ export const onSubmit = async (state, component, actions, props) => {
         return {paymentsResponse: paymentsResponse}
     } catch (err) {
         actions.reject()
+        throw new Error(err)
     }
 }
 
@@ -84,6 +83,7 @@ export const onAdditionalDetails = async (state, component, actions, props) => {
         return {paymentsDetailsResponse: paymentsDetailsResponse}
     } catch (err) {
         actions.reject()
+        throw new Error(err)
     }
 }
 

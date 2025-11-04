@@ -40,10 +40,9 @@
     "format": "prettier --write ./lib"
   },
   "peerDependencies": {
-    "@adyen/adyen-web": "^5.66.0"
+    "@adyen/adyen-web": "^6.21.0"
   },
   "dependencies": {
-    "@adyen/adyen-web": "^6.21.0",
     "@adyen/api-library": "^29.1.0",
     "@chakra-ui/react": "^2.8.2",
     "@emotion/react": "^11.11.4",
@@ -62,7 +61,6 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "@adyen/adyen-web": "^5.66.0",
     "@babel/core": "^7.23.3",
     "@babel/preset-env": "^7.23.3",
     "@babel/preset-react": "^7.23.3",
