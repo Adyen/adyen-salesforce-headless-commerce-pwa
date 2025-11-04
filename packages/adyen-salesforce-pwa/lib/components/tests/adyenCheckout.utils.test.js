@@ -160,8 +160,7 @@ describe('mountCheckoutComponent', () => {
         )
         expect(Dropin).toHaveBeenCalledWith(checkoutMock, {
             ...optionalDropinConfigurationMock,
-            paymentMethodsConfiguration: paymentMethodsConfigurationMock,
-            onSelect: expect.any(Function)
+            paymentMethodsConfiguration: paymentMethodsConfigurationMock
         })
         const mockDropinInstance = Dropin.mock.results[0].value
         expect(mockDropinInstance.mount).toHaveBeenCalledWith(paymentContainerMock.current)

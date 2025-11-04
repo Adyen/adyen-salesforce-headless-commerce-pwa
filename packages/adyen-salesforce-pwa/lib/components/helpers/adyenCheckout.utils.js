@@ -49,17 +49,10 @@ export const mountCheckoutComponent = (
         const action = JSON.parse(atob(adyenAction))
         return checkout.createFromAction(action).mount(paymentContainer.current)
     }
+
     return new Dropin(checkout, {
         ...optionalDropinConfiguration,
-        paymentMethodsConfiguration,
-        onSelect: (component) => {
-            const {props} = component
-            if (props?.type === 'paypal') {
-                if (window?.paypal?.firstElementChild) {
-                    window.paypal = undefined
-                }
-            }
-        }
+        paymentMethodsConfiguration
     }).mount(paymentContainer.current)
 }
 
