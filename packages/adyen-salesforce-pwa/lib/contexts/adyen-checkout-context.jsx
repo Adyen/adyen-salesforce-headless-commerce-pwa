@@ -8,22 +8,23 @@ import {onPaymentsDetailsSuccess, onPaymentsSuccess} from './helper'
 export const AdyenCheckoutContext = React.createContext({})
 
 const AdyenCheckoutProvider = ({
-    children,
-    authToken,
-    customerId,
-    isCustomerRegistered,
-    locale,
-    site,
-    adyenConfig,
-    navigate,
-    basket,
-    returnUrl,
-    page
-}) => {
+                                   children,
+                                   authToken,
+                                   customerId,
+                                   isCustomerRegistered,
+                                   locale,
+                                   site,
+                                   adyenConfig,
+                                   navigate,
+                                   basket,
+                                   returnUrl,
+                                   page
+                               }) => {
     const [fetchingPaymentMethods, setFetchingPaymentMethods] = useState(false)
     const [adyenPaymentMethods, setAdyenPaymentMethods] = useState()
     const [adyenEnvironment, setAdyenEnvironment] = useState()
     const [adyenStateData, setAdyenStateData] = useState()
+    const [orderNo, setOrderNo] = useState()
     const [adyenPaymentInProgress, setAdyenPaymentInProgress] = useState()
     const callPaymentMethodsOnPages = ['checkout']
 
@@ -69,12 +70,12 @@ const AdyenCheckoutProvider = ({
     }
 
     const getPaymentMethodsConfiguration = async ({
-        beforeSubmit = [],
-        afterSubmit = [],
-        beforeAdditionalDetails = [],
-        afterAdditionalDetails = [],
-        onError
-    }) => {
+                                                      beforeSubmit = [],
+                                                      afterSubmit = [],
+                                                      beforeAdditionalDetails = [],
+                                                      afterAdditionalDetails = [],
+                                                      onError
+                                                  }) => {
         return paymentMethodsConfiguration({
             additionalPaymentMethodsConfiguration: adyenConfig?.paymentMethodsConfiguration,
             paymentMethods: adyenPaymentMethods?.paymentMethods,
@@ -108,11 +109,13 @@ const AdyenCheckoutProvider = ({
         adyenEnvironment,
         adyenPaymentMethods,
         adyenStateData,
+        orderNo,
         adyenPaymentInProgress,
         locale,
         navigate,
         setAdyenPaymentInProgress: (data) => setAdyenPaymentInProgress(data),
         setAdyenStateData: (data) => setAdyenStateData(data),
+        setOrderNo: (data) => setOrderNo(data),
         getPaymentMethodsConfiguration,
         getTranslations
     }

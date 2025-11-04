@@ -83,7 +83,7 @@ const webConfig = {
             type: 'commonjs-static'
         }
     },
-    externals: [/^@chakra-ui\/.+$/i, /^react.+$/i, 'react', 'prop-types'],
+    externals: [/^@chakra-ui\/.+$/i, /^react.+$/i, 'react', 'prop-types', '@adyen/adyen-web'],
     module: {
         rules: [
             {

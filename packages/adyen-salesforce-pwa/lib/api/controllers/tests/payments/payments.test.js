@@ -1,6 +1,6 @@
-import {PaymentsController} from '../../index'
-import {RESULT_CODES} from '../../../utils/constants.mjs'
-import {AdyenError} from '../../models/AdyenError'
+import {PaymentsController} from '../../../index'
+import {RESULT_CODES} from '../../../../utils/constants.mjs'
+import {AdyenError} from '../../../models/AdyenError'
 
 let mockPayments = jest.fn()
 let mockGetBasket = jest.fn()
@@ -49,7 +49,7 @@ jest.mock('commerce-sdk-isomorphic', () => {
         })
     }
 })
-jest.mock('../checkout-config', () => {
+jest.mock('../../checkout-config', () => {
     return {
         getInstance: jest.fn().mockImplementation(() => {
             return {
@@ -58,7 +58,7 @@ jest.mock('../checkout-config', () => {
         })
     }
 })
-jest.mock('../orderApi', () => {
+jest.mock('../../orderApi', () => {
     return {
         OrderApiClient: jest.fn().mockImplementation(() => {
             return {
@@ -114,8 +114,10 @@ describe('payments controller', () => {
             locals: {}
         }
         next = jest.fn()
-        consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation(() => {})
-        consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+        consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation(() => {
+        })
+        consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {
+        })
     })
     it('returns checkout response if request is valid', async () => {
         mockGetBasket.mockImplementationOnce(() => {

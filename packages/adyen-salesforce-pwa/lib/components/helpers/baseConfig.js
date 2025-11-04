@@ -2,17 +2,18 @@ import {AdyenPaymentsService} from '../../services/payments'
 import {AdyenPaymentsDetailsService} from '../../services/payments-details'
 import {executeCallbacks} from '../../utils/executeCallbacks'
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
+import {AdyenOrderService} from "../../services/order";
 
 export const baseConfig = ({
-    beforeSubmit = [],
-    afterSubmit = [],
-    beforeAdditionalDetails = [],
-    afterAdditionalDetails = [],
-    onError = () => {
-        window.location.reload()
-    },
-    ...props
-}) => {
+                               beforeSubmit = [],
+                               afterSubmit = [],
+                               beforeAdditionalDetails = [],
+                               afterAdditionalDetails = [],
+                               onError = () => {
+                                   window.location.reload()
+                               },
+                               ...props
+                           }) => {
     return {
         amount: getAmount(props),
         onSubmit: executeCallbacks([...beforeSubmit, onSubmit, ...afterSubmit], props, onError),
@@ -20,7 +21,8 @@ export const baseConfig = ({
             [...beforeAdditionalDetails, onAdditionalDetails, ...afterAdditionalDetails],
             props,
             onError
-        )
+        ),
+        onError: executeCallbacks([onErrorHandler], props, onError)
     }
 }
 
@@ -48,6 +50,12 @@ export const onAdditionalDetails = async (state, component, props) => {
         props?.customerId
     )
     return {paymentsDetailsResponse: paymentsDetailsResponse}
+}
+
+export const onErrorHandler = async (orderNo, navigate, props) => {
+    const adyenOrderService = new AdyenOrderService(props?.token, props?.site);
+    const response = await adyenOrderService.orderCancel(orderNo, props?.customerId);
+    navigate(response?.headers?.location);
 }
 
 export const getAmount = ({basket}) => {

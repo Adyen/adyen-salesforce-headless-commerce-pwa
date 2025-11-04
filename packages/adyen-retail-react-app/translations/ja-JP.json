@@ -14,6 +14,9 @@
   "account_addresses.button.add_address": {
     "defaultMessage": "住所の追加"
   },
+  "account_addresses.info.address_removed": {
+    "defaultMessage": "住所が削除されました"
+  },
   "account_addresses.info.address_updated": {
     "defaultMessage": "住所が更新されました"
   },
@@ -65,6 +68,15 @@
   "account_order_detail.link.back_to_history": {
     "defaultMessage": "注文履歴に戻る"
   },
+  "account_order_detail.shipping_status.not_shipped": {
+    "defaultMessage": "未出荷"
+  },
+  "account_order_detail.shipping_status.part_shipped": {
+    "defaultMessage": "一部出荷済み"
+  },
+  "account_order_detail.shipping_status.shipped": {
+    "defaultMessage": "出荷済み"
+  },
   "account_order_detail.title.order_details": {
     "defaultMessage": "注文の詳細"
   },
@@ -95,21 +107,6 @@
   },
   "account_order_history.title.order_history": {
     "defaultMessage": "注文履歴"
-  },
-  "account_payment_methods.button.add_method": {
-    "defaultMessage": "支払方法の追加"
-  },
-  "account_payment_methods.description.add_method_for_faster_checkout": {
-    "defaultMessage": "新しい支払方法を追加すると、注文手続きを素早く完了できます。"
-  },
-  "account_payment_methods.heading.no_saved_methods": {
-    "defaultMessage": "保存されている支払方法がありません"
-  },
-  "account_payment_methods.info.new_method_saved": {
-    "defaultMessage": "新しい支払方法が保存されました"
-  },
-  "account_payment_methods.title.payment_methods": {
-    "defaultMessage": "支払方法"
   },
   "account_wishlist.button.continue_shopping": {
     "defaultMessage": "買い物を続ける"
@@ -147,6 +144,21 @@
   "add_to_cart_modal.recommended_products.title.might_also_like": {
     "defaultMessage": "こちらもどうぞ"
   },
+  "auth_modal.button.close.assistive_msg": {
+    "defaultMessage": "ログインフォームを閉じる"
+  },
+  "auth_modal.check_email.button.resend_link": {
+    "defaultMessage": "リンクの再送信"
+  },
+  "auth_modal.check_email.description.check_spam_folder": {
+    "defaultMessage": "リンクが届くまで数分かかる場合があります。見つからない場合は迷惑メールフォルダーを確認してください。"
+  },
+  "auth_modal.check_email.description.just_sent": {
+    "defaultMessage": "ログインリンクを <b>{email}</b> に送信しました"
+  },
+  "auth_modal.check_email.title.check_your_email": {
+    "defaultMessage": "Eメールを確認してください"
+  },
   "auth_modal.description.now_signed_in": {
     "defaultMessage": "サインインしました。"
   },
@@ -165,11 +177,17 @@
   "auth_modal.password_reset_success.title.password_reset": {
     "defaultMessage": "パスワードのリセット"
   },
-  "card_payment_form.heading.new_payment_method": {
-    "defaultMessage": "新しい支払方法の追加"
+  "carousel.button.scroll_left.assistive_msg": {
+    "defaultMessage": "カルーセルを左へスクロール"
+  },
+  "carousel.button.scroll_right.assistive_msg": {
+    "defaultMessage": "カルーセルを右へスクロール"
   },
   "cart.info.removed_from_cart": {
     "defaultMessage": "買い物カゴから商品が削除されました"
+  },
+  "cart.product_edit_modal.modal_label": {
+    "defaultMessage": "{productName} のモーダルを編集"
   },
   "cart.recommended_products.title.may_also_like": {
     "defaultMessage": "こちらもおすすめ"
@@ -181,7 +199,7 @@
     "defaultMessage": "注文手続きに進む"
   },
   "cart_secondary_button_group.action.added_to_wishlist": {
-    "defaultMessage": "ほしい物リストに追加する"
+    "defaultMessage": "ほしい物リストに追加"
   },
   "cart_secondary_button_group.action.edit": {
     "defaultMessage": "編集"
@@ -192,9 +210,6 @@
   "cart_secondary_button_group.label.this_is_gift": {
     "defaultMessage": "これはギフトです。"
   },
-  "cart_secondary_button_group.link_learn_more": {
-    "defaultMessage": "詳細はこちら"
-  },
   "cart_skeleton.heading.order_summary": {
     "defaultMessage": "注文の概要"
   },
@@ -203,6 +218,9 @@
   },
   "cart_title.title.cart_num_of_items": {
     "defaultMessage": "買い物カゴ ({itemCount, plural, =0 {0 個の商品} one {# 個の商品} other {# 個の商品}})"
+  },
+  "category_links.button_text": {
+    "defaultMessage": "カテゴリ"
   },
   "cc_radio_group.action.remove": {
     "defaultMessage": "削除"
@@ -261,6 +279,9 @@
   "checkout_confirmation.label.shipping": {
     "defaultMessage": "配送"
   },
+  "checkout_confirmation.label.shipping.strikethrough.price": {
+    "defaultMessage": "元の価格は {originalPrice} だが、現在は {newPrice}"
+  },
   "checkout_confirmation.label.subtotal": {
     "defaultMessage": "小計"
   },
@@ -281,7 +302,7 @@
     "description": "# item(s) in order"
   },
   "checkout_confirmation.message.will_email_shortly": {
-    "defaultMessage": "確認番号と領収書が含まれる Eメールをまもなく <b>{email}</b> 宛にお送りします。"
+    "defaultMessage": "確認番号と領収書を記載した Eメールをまもなく <b>{email}</b> 宛にお送りします。"
   },
   "checkout_footer.link.privacy_policy": {
     "defaultMessage": "プライバシーポリシー"
@@ -301,6 +322,9 @@
   "checkout_footer.message.copyright": {
     "defaultMessage": "Salesforce またはその系列会社。All Rights Reserved. これはデモのみを目的とするストアです。注文を確定しても処理されません。"
   },
+  "checkout_header.link.assistive_msg.cart": {
+    "defaultMessage": "買い物カゴに戻る、商品数: {numItems}"
+  },
   "checkout_header.link.cart": {
     "defaultMessage": "買い物カゴに戻る"
   },
@@ -316,17 +340,29 @@
   "checkout_payment.heading.credit_card": {
     "defaultMessage": "クレジットカード"
   },
+  "checkout_payment.label.billing_address_form": {
+    "defaultMessage": "請求先住所フォーム"
+  },
   "checkout_payment.label.same_as_shipping": {
     "defaultMessage": "配送先住所と同じ"
   },
   "checkout_payment.title.payment": {
     "defaultMessage": "支払"
   },
+  "colorRefinements.label.hitCount": {
+    "defaultMessage": "{colorLabel} ({colorHitCount})"
+  },
   "confirmation_modal.default.action.no": {
     "defaultMessage": "いいえ"
   },
   "confirmation_modal.default.action.yes": {
     "defaultMessage": "はい"
+  },
+  "confirmation_modal.default.assistive_msg.no": {
+    "defaultMessage": "いいえ、操作をキャンセルします"
+  },
+  "confirmation_modal.default.assistive_msg.yes": {
+    "defaultMessage": "はい、操作を確認します"
   },
   "confirmation_modal.default.message.you_want_to_continue": {
     "defaultMessage": "続行しますか?"
@@ -337,14 +373,32 @@
   "confirmation_modal.remove_cart_item.action.no": {
     "defaultMessage": "いいえ、商品をキープします"
   },
+  "confirmation_modal.remove_cart_item.action.remove": {
+    "defaultMessage": "削除"
+  },
   "confirmation_modal.remove_cart_item.action.yes": {
     "defaultMessage": "はい、商品を削除します"
+  },
+  "confirmation_modal.remove_cart_item.assistive_msg.no": {
+    "defaultMessage": "いいえ、商品をキープします"
+  },
+  "confirmation_modal.remove_cart_item.assistive_msg.remove": {
+    "defaultMessage": "入手不可の商品を削除"
+  },
+  "confirmation_modal.remove_cart_item.assistive_msg.yes": {
+    "defaultMessage": "はい、商品を削除します"
+  },
+  "confirmation_modal.remove_cart_item.message.need_to_remove_due_to_unavailability": {
+    "defaultMessage": "一部の商品がオンラインで入手できなくなったため、買い物カゴから削除されます。"
   },
   "confirmation_modal.remove_cart_item.message.sure_to_remove": {
     "defaultMessage": "この商品を買い物カゴから削除しますか?"
   },
   "confirmation_modal.remove_cart_item.title.confirm_remove": {
     "defaultMessage": "商品の削除の確認"
+  },
+  "confirmation_modal.remove_cart_item.title.items_unavailable": {
+    "defaultMessage": "入手不可商品"
   },
   "confirmation_modal.remove_wishlist_item.action.no": {
     "defaultMessage": "いいえ、商品をキープします"
@@ -362,7 +416,10 @@
     "defaultMessage": "サインアウト"
   },
   "contact_info.button.already_have_account": {
-    "defaultMessage": "すでにアカウントをお持ちですか? ログイン"
+    "defaultMessage": "すでにアカウントをお持ちですか?ログイン"
+  },
+  "contact_info.button.back_to_sign_in_options": {
+    "defaultMessage": "サインインオプションに戻る"
   },
   "contact_info.button.checkout_as_guest": {
     "defaultMessage": "ゲストとして注文手続きへ進む"
@@ -370,11 +427,20 @@
   "contact_info.button.login": {
     "defaultMessage": "ログイン"
   },
+  "contact_info.button.password": {
+    "defaultMessage": "パスワード"
+  },
+  "contact_info.button.secure_link": {
+    "defaultMessage": "セキュアリンク"
+  },
   "contact_info.error.incorrect_username_or_password": {
     "defaultMessage": "ユーザー名またはパスワードが間違っています。もう一度お試しください。"
   },
   "contact_info.link.forgot_password": {
     "defaultMessage": "パスワードを忘れましたか?"
+  },
+  "contact_info.message.or_login_with": {
+    "defaultMessage": "または次でログイン"
   },
   "contact_info.title.contact_info": {
     "defaultMessage": "連絡先情報"
@@ -386,6 +452,45 @@
   "credit_card_fields.tool_tip.security_code.american_express": {
     "defaultMessage": "この 4 桁のコードはカードの表面に記載されています。",
     "description": "American Express security code help text"
+  },
+  "credit_card_fields.tool_tip.security_code_aria_label": {
+    "defaultMessage": "セキュリティコード情報"
+  },
+  "display_price.assistive_msg.current_price": {
+    "defaultMessage": "現在の価格 {currentPrice}"
+  },
+  "display_price.assistive_msg.current_price_with_range": {
+    "defaultMessage": "現在の価格 {currentPrice} から"
+  },
+  "display_price.assistive_msg.strikethrough_price": {
+    "defaultMessage": "元の価格 {listPrice}"
+  },
+  "display_price.assistive_msg.strikethrough_price_with_range": {
+    "defaultMessage": "元の価格 {listPrice} から"
+  },
+  "display_price.label.current_price_with_range": {
+    "defaultMessage": "{currentPrice} から"
+  },
+  "dnt_notification.button.accept": {
+    "defaultMessage": "許可"
+  },
+  "dnt_notification.button.assistive_msg.accept": {
+    "defaultMessage": "追跡を許可する"
+  },
+  "dnt_notification.button.assistive_msg.close": {
+    "defaultMessage": "追跡同意フォームを閉じる"
+  },
+  "dnt_notification.button.assistive_msg.decline": {
+    "defaultMessage": "追跡を拒否する"
+  },
+  "dnt_notification.button.decline": {
+    "defaultMessage": "拒否"
+  },
+  "dnt_notification.description": {
+    "defaultMessage": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur."
+  },
+  "dnt_notification.title": {
+    "defaultMessage": "追跡に関する同意"
   },
   "drawer_menu.button.account_details": {
     "defaultMessage": "アカウントの詳細"
@@ -402,8 +507,8 @@
   "drawer_menu.button.order_history": {
     "defaultMessage": "注文履歴"
   },
-  "drawer_menu.button.payment_methods": {
-    "defaultMessage": "支払方法"
+  "drawer_menu.header.assistive_msg.title": {
+    "defaultMessage": "ドロワーメニュー"
   },
   "drawer_menu.link.about_us": {
     "defaultMessage": "企業情報"
@@ -474,6 +579,12 @@
   "empty_search_results.recommended_products.title.top_sellers": {
     "defaultMessage": "売れ筋商品"
   },
+  "field.password.assistive_msg.hide_password": {
+    "defaultMessage": "パスワードを非表示"
+  },
+  "field.password.assistive_msg.show_password": {
+    "defaultMessage": "パスワードを表示"
+  },
   "footer.column.account": {
     "defaultMessage": "アカウント"
   },
@@ -499,7 +610,7 @@
     "defaultMessage": "配送"
   },
   "footer.link.signin_create_account": {
-    "defaultMessage": "アカウントにサインインまたはアカウントを作成"
+    "defaultMessage": "サインインまたはアカウントを作成"
   },
   "footer.link.site_map": {
     "defaultMessage": "サイトマップ"
@@ -510,6 +621,9 @@
   "footer.link.terms_conditions": {
     "defaultMessage": "使用条件"
   },
+  "footer.locale_selector.assistive_msg": {
+    "defaultMessage": "言語の選択"
+  },
   "footer.message.copyright": {
     "defaultMessage": "Salesforce またはその系列会社。All Rights Reserved. これはデモのみを目的とするストアです。注文を確定しても処理されません。"
   },
@@ -518,6 +632,9 @@
   },
   "footer.subscribe.description.sign_up": {
     "defaultMessage": "サインアップすると人気のお買い得商品について最新情報を入手できます"
+  },
+  "footer.subscribe.email.assistive_msg": {
+    "defaultMessage": "ニュースレターの Eメールアドレス"
   },
   "footer.subscribe.heading.first_to_know": {
     "defaultMessage": "最新情報を誰よりも早く入手"
@@ -537,17 +654,26 @@
   "global.account.link.order_history": {
     "defaultMessage": "注文履歴"
   },
-  "global.account.link.payment_methods": {
-    "defaultMessage": "支払方法"
-  },
   "global.account.link.wishlist": {
     "defaultMessage": "ほしい物リスト"
+  },
+  "global.error.create_account": {
+    "defaultMessage": "この機能は現在ご利用いただけません。この機能にアクセスするには、アカウントを作成する必要があります。"
+  },
+  "global.error.feature_unavailable": {
+    "defaultMessage": "この機能は現在ご利用いただけません。"
+  },
+  "global.error.invalid_token": {
+    "defaultMessage": "無効なトークンです。もう一度やり直してください。"
   },
   "global.error.something_went_wrong": {
     "defaultMessage": "問題が発生しました。もう一度お試しください!"
   },
   "global.info.added_to_wishlist": {
     "defaultMessage": "{quantity} {quantity, plural, one { 個の商品} other { 個の商品}}がほしい物リストに追加されました"
+  },
+  "global.info.already_in_wishlist": {
+    "defaultMessage": "商品はすでにほしい物リストに追加されています"
   },
   "global.info.removed_from_wishlist": {
     "defaultMessage": "ほしい物リストから商品が削除されました"
@@ -561,11 +687,20 @@
   "header.button.assistive_msg.menu": {
     "defaultMessage": "メニュー"
   },
+  "header.button.assistive_msg.menu.open_dialog": {
+    "defaultMessage": "ダイアログを開く"
+  },
   "header.button.assistive_msg.my_account": {
     "defaultMessage": "マイアカウント"
   },
-  "header.button.assistive_msg.my_cart": {
-    "defaultMessage": "マイ買い物カゴ"
+  "header.button.assistive_msg.my_account_menu": {
+    "defaultMessage": "アカウントメニューを開く"
+  },
+  "header.button.assistive_msg.my_cart_with_num_items": {
+    "defaultMessage": "マイ買い物カゴ、商品数: {numItems}"
+  },
+  "header.button.assistive_msg.store_locator": {
+    "defaultMessage": "店舗検索"
   },
   "header.button.assistive_msg.wishlist": {
     "defaultMessage": "ほしい物リスト"
@@ -589,7 +724,7 @@
     "defaultMessage": "適切な部門におつなげします。"
   },
   "home.description.shop_products": {
-    "defaultMessage": "このセクションにはカタログからのコンテンツが含まれています。カタログの置き換え方法に関する{docLink}。",
+    "defaultMessage": "このセクションには、カタログからのコンテンツが含まれています。カタログの置き換え方法に関する{docLink}。",
     "description": "{docLink} is a html button that links the user to https://sfdc.co/business-manager-manage-catalogs"
   },
   "home.features.description.cart_checkout": {
@@ -632,7 +767,7 @@
     "defaultMessage": "機能"
   },
   "home.heading.here_to_help": {
-    "defaultMessage": "当社にお任せください"
+    "defaultMessage": "弊社にお任せください"
   },
   "home.heading.shop_products": {
     "defaultMessage": "ショップの商品"
@@ -656,7 +791,10 @@
     "defaultMessage": "ドキュメントを読む"
   },
   "home.title.react_starter_store": {
-    "defaultMessage": "リテール用 React PWA スターターストア"
+    "defaultMessage": "リテール用 Adyen React PWA スターターストア"
+  },
+  "icons.assistive_msg.lock": {
+    "defaultMessage": "セキュア"
   },
   "item_attributes.label.promotions": {
     "defaultMessage": "プロモーション"
@@ -664,12 +802,28 @@
   "item_attributes.label.quantity": {
     "defaultMessage": "数量: {quantity}"
   },
+  "item_attributes.label.selected_options": {
+    "defaultMessage": "選択したオプション"
+  },
   "item_image.label.sale": {
     "defaultMessage": "セール",
     "description": "A sale badge placed on top of a product image"
   },
+  "item_image.label.unavailable": {
+    "defaultMessage": "入手不可",
+    "description": "A unavailable badge placed on top of a product image"
+  },
+  "item_variant.assistive_msg.quantity": {
+    "defaultMessage": "数量 {quantity}"
+  },
+  "item_variant.quantity.label": {
+    "defaultMessage": "{productName}の数量セレクター。選択された数量は {quantity} です"
+  },
   "lCPCxk": {
     "defaultMessage": "上記のすべてのオプションを選択してください"
+  },
+  "list_menu.nav.assistive_msg": {
+    "defaultMessage": "メインナビゲーション"
   },
   "locale_text.message.ar-SA": {
     "defaultMessage": "アラビア語 (サウジアラビア)"
@@ -833,6 +987,21 @@
   "login_form.action.create_account": {
     "defaultMessage": "アカウントの作成"
   },
+  "login_form.button.apple": {
+    "defaultMessage": "Apple"
+  },
+  "login_form.button.back": {
+    "defaultMessage": "サインインオプションに戻る"
+  },
+  "login_form.button.continue_securely": {
+    "defaultMessage": "安全に続行"
+  },
+  "login_form.button.google": {
+    "defaultMessage": "Google"
+  },
+  "login_form.button.password": {
+    "defaultMessage": "パスワード"
+  },
   "login_form.button.sign_in": {
     "defaultMessage": "サインイン"
   },
@@ -842,8 +1011,11 @@
   "login_form.message.dont_have_account": {
     "defaultMessage": "アカウントをお持ちではありませんか?"
   },
+  "login_form.message.or_login_with": {
+    "defaultMessage": "または次でログイン"
+  },
   "login_form.message.welcome_back": {
-    "defaultMessage": "お帰りなさい"
+    "defaultMessage": "おかえりなさい"
   },
   "login_page.error.incorrect_username_or_password": {
     "defaultMessage": "ユーザー名またはパスワードが間違っています。もう一度お試しください。"
@@ -903,11 +1075,20 @@
   "pagination.field.num_of_pages": {
     "defaultMessage": "/{numOfPages}"
   },
+  "pagination.field.page_number_select": {
+    "defaultMessage": "ページ番号を選択"
+  },
   "pagination.link.next": {
     "defaultMessage": "次へ"
   },
+  "pagination.link.next.assistive_msg": {
+    "defaultMessage": "次のページ"
+  },
   "pagination.link.prev": {
     "defaultMessage": "前へ"
+  },
+  "pagination.link.prev.assistive_msg": {
+    "defaultMessage": "前のページ"
   },
   "password_card.info.password_updated": {
     "defaultMessage": "パスワードが更新されました"
@@ -938,17 +1119,14 @@
     "defaultMessage": "大文字 1 個",
     "description": "Password requirement"
   },
-  "payment_selection.button.save_and_continue": {
-    "defaultMessage": "保存して続行"
-  },
-  "payment_selection.heading.add_new_card": {
-    "defaultMessage": "新しいカードの追加"
+  "password_reset_success.toast": {
+    "defaultMessage": "パスワードリセットの成功"
   },
   "payment_selection.heading.credit_card": {
     "defaultMessage": "クレジットカード"
   },
-  "payment_selection.message.select_payment_method": {
-    "defaultMessage": "支払方法を選択してください。"
+  "payment_selection.radio_group.assistive_msg": {
+    "defaultMessage": "支払"
   },
   "payment_selection.tooltip.secure_payment": {
     "defaultMessage": "これは SSL 暗号化によるセキュアな支払方法です。"
@@ -1002,23 +1180,80 @@
   "product_list.modal.title.filter": {
     "defaultMessage": "フィルター"
   },
+  "product_list.refinements.button.assistive_msg.add_filter": {
+    "defaultMessage": "フィルターの追加: {label}"
+  },
+  "product_list.refinements.button.assistive_msg.add_filter_with_hit_count": {
+    "defaultMessage": "フィルターの追加: {label} ({hitCount})"
+  },
+  "product_list.refinements.button.assistive_msg.remove_filter": {
+    "defaultMessage": "フィルターの削除: {label}"
+  },
+  "product_list.refinements.button.assistive_msg.remove_filter_with_hit_count": {
+    "defaultMessage": "フィルターの削除: {label} ({hitCount})"
+  },
   "product_list.select.sort_by": {
     "defaultMessage": "並べ替え順: {sortOption}"
   },
-  "product_tile.assistive_msg.wishlist": {
-    "defaultMessage": "ほしい物リスト"
+  "product_list.sort_by.label.assistive_msg": {
+    "defaultMessage": "商品の並べ替え条件"
+  },
+  "product_scroller.assistive_msg.scroll_left": {
+    "defaultMessage": "商品を左へスクロール"
+  },
+  "product_scroller.assistive_msg.scroll_right": {
+    "defaultMessage": "商品を右へスクロール"
+  },
+  "product_tile.assistive_msg.add_to_wishlist": {
+    "defaultMessage": "{product} をほしい物リストに追加"
+  },
+  "product_tile.assistive_msg.remove_from_wishlist": {
+    "defaultMessage": "{product} をほしい物リストから削除"
+  },
+  "product_tile.badge.label.new": {
+    "defaultMessage": "新規"
+  },
+  "product_tile.badge.label.sale": {
+    "defaultMessage": "セール"
+  },
+  "product_view.button.add_bundle_to_cart": {
+    "defaultMessage": "バンドルを買い物カゴに追加"
+  },
+  "product_view.button.add_bundle_to_wishlist": {
+    "defaultMessage": "バンドルをほしい物リストに追加"
+  },
+  "product_view.button.add_set_to_cart": {
+    "defaultMessage": "セットを買い物カゴに追加"
+  },
+  "product_view.button.add_set_to_wishlist": {
+    "defaultMessage": "セットをほしい物リストに追加"
   },
   "product_view.button.add_to_cart": {
     "defaultMessage": "買い物カゴに追加"
   },
   "product_view.button.add_to_wishlist": {
-    "defaultMessage": "ほしい物リストに追加する"
+    "defaultMessage": "ほしい物リストに追加"
   },
   "product_view.button.update": {
     "defaultMessage": "更新"
   },
+  "product_view.label.assistive_msg.quantity_decrement": {
+    "defaultMessage": "{productName} の数量を減らす"
+  },
+  "product_view.label.assistive_msg.quantity_increment": {
+    "defaultMessage": "{productName} の数量を増やす"
+  },
   "product_view.label.quantity": {
     "defaultMessage": "数量"
+  },
+  "product_view.label.quantity_decrement": {
+    "defaultMessage": "−"
+  },
+  "product_view.label.quantity_increment": {
+    "defaultMessage": "+"
+  },
+  "product_view.label.variant_type": {
+    "defaultMessage": "{variantType}"
   },
   "product_view.link.full_details": {
     "defaultMessage": "すべての情報を表示"
@@ -1041,8 +1276,14 @@
   "profile_card.title.my_profile": {
     "defaultMessage": "マイプロフィール"
   },
+  "profile_fields.label.profile_form": {
+    "defaultMessage": "プロフィールフォーム"
+  },
   "promo_code_fields.button.apply": {
     "defaultMessage": "適用"
+  },
+  "promo_popover.assistive_msg.info": {
+    "defaultMessage": "情報"
   },
   "promo_popover.heading.promo_applied": {
     "defaultMessage": "プロモーションが適用されました"
@@ -1069,19 +1310,10 @@
     "defaultMessage": "アカウントを作成した場合、Salesforce の<policy>プライバシーポリシー</policy>と<terms>使用条件</terms>にご同意いただいたものと見なされます。"
   },
   "register_form.message.already_have_account": {
-    "defaultMessage": "すでにアカウントをお持ちですか? "
+    "defaultMessage": "すでにアカウントをお持ちですか?"
   },
   "register_form.message.create_an_account": {
     "defaultMessage": "アカウントを作成すると、売れ筋商品、インスピレーション、コミュニティに最初にアクセスできます。"
-  },
-  "reset_password.button.back_to_sign_in": {
-    "defaultMessage": "サインインに戻る"
-  },
-  "reset_password.info.receive_email_shortly": {
-    "defaultMessage": "パスワードリセットのリンクが記載された Eメールがまもなく <b>{email}</b> に届きます。"
-  },
-  "reset_password.title.password_reset": {
-    "defaultMessage": "パスワードのリセット"
   },
   "reset_password_form.action.sign_in": {
     "defaultMessage": "サインイン"
@@ -1093,7 +1325,7 @@
     "defaultMessage": "パスワードのリセット方法を受け取るには Eメールを入力してください"
   },
   "reset_password_form.message.return_to_sign_in": {
-    "defaultMessage": "または次のリンクをクリックしてください: ",
+    "defaultMessage": "または次に戻る: ",
     "description": "Precedes link to return to sign in"
   },
   "reset_password_form.title.reset_password": {
@@ -1102,11 +1334,23 @@
   "search.action.cancel": {
     "defaultMessage": "キャンセル"
   },
+  "selected_refinements.action.assistive_msg.clear_all": {
+    "defaultMessage": "すべてのフィルターをクリア"
+  },
   "selected_refinements.action.clear_all": {
     "defaultMessage": "すべてクリア"
   },
   "shipping_address.button.continue_to_shipping": {
     "defaultMessage": "配送方法に進む"
+  },
+  "shipping_address.label.edit_button": {
+    "defaultMessage": "{address} の編集"
+  },
+  "shipping_address.label.remove_button": {
+    "defaultMessage": "{address} の削除"
+  },
+  "shipping_address.label.shipping_address_form": {
+    "defaultMessage": "配送先住所フォーム"
   },
   "shipping_address.title.shipping_address": {
     "defaultMessage": "配送先住所"
@@ -1153,8 +1397,86 @@
   "signout_confirmation_dialog.message.sure_to_sign_out": {
     "defaultMessage": "サインアウトしますか?現在のご注文を処理するには、再度サインインする必要があります。"
   },
+  "social_login_redirect.message.authenticating": {
+    "defaultMessage": "認証中..."
+  },
+  "social_login_redirect.message.redirect_link": {
+    "defaultMessage": "自動的にリダイレクトされない場合は、<link>このリンク</link>をクリックして続行してください。"
+  },
+  "store_locator.action.find": {
+    "defaultMessage": "検索"
+  },
+  "store_locator.action.select_a_country": {
+    "defaultMessage": "国を選択してください"
+  },
+  "store_locator.action.use_my_location": {
+    "defaultMessage": "現在地を使用"
+  },
+  "store_locator.action.viewMore": {
+    "defaultMessage": "もっと見る"
+  },
+  "store_locator.description.away": {
+    "defaultMessage": "の距離"
+  },
+  "store_locator.description.loading_locations": {
+    "defaultMessage": "位置情報を読み込んでいます..."
+  },
+  "store_locator.description.no_locations": {
+    "defaultMessage": "申し訳ございませんが、このエリアには店舗がありません"
+  },
+  "store_locator.description.or": {
+    "defaultMessage": "または"
+  },
+  "store_locator.description.phone": {
+    "defaultMessage": "電話:"
+  },
+  "store_locator.description.viewing_near_postal_code": {
+    "defaultMessage": "次の {postalCode} から {distance}{distanceUnit} 以内の店舗を表示しています: "
+  },
+  "store_locator.description.viewing_near_your_location": {
+    "defaultMessage": "現在地の近くの店舗を表示しています"
+  },
+  "store_locator.dropdown.germany": {
+    "defaultMessage": "ドイツ"
+  },
+  "store_locator.dropdown.united_states": {
+    "defaultMessage": "米国"
+  },
+  "store_locator.error.agree_to_share_your_location": {
+    "defaultMessage": "現在地を共有することに同意してください"
+  },
+  "store_locator.error.please_enter_a_postal_code": {
+    "defaultMessage": "郵便番号を入力してください。"
+  },
+  "store_locator.error.please_select_a_country": {
+    "defaultMessage": "国を選択してください。"
+  },
+  "store_locator.field.placeholder.enter_postal_code": {
+    "defaultMessage": "郵便番号を入力してください"
+  },
+  "store_locator.pagination.load_more": {
+    "defaultMessage": "さらに読み込む"
+  },
+  "store_locator.title": {
+    "defaultMessage": "店舗の検索"
+  },
+  "swatch_group.selected.label": {
+    "defaultMessage": "{label}: "
+  },
   "toggle_card.action.edit": {
     "defaultMessage": "編集"
+  },
+  "toggle_card.action.editContactInfo": {
+    "defaultMessage": "連絡先情報の編集"
+  },
+  "toggle_card.action.editPaymentInfo": {
+    "defaultMessage": "支払情報の編集"
+  },
+  "toggle_card.action.editShippingAddress": {
+    "defaultMessage": "配送先住所の編集"
+  },
+  "toggle_card.action.editShippingOptions": {
+    "defaultMessage": "配送オプションの編集"
   },
   "update_password_fields.button.forgot_password": {
     "defaultMessage": "パスワードを忘れましたか?"
@@ -1169,7 +1491,8 @@
     "defaultMessage": "電話番号を入力してください。"
   },
   "use_address_fields.error.please_enter_your_postal_or_zip": {
-    "defaultMessage": "{postalOrZip}を入力してください。"
+    "defaultMessage": "郵便番号を入力してください。",
+    "description": "Error message for a blank zip code (US-specific checkout)"
   },
   "use_address_fields.error.please_select_your_address": {
     "defaultMessage": "住所を入力してください。"
@@ -1181,16 +1504,20 @@
     "defaultMessage": "国を選択してください。"
   },
   "use_address_fields.error.please_select_your_state_or_province": {
-    "defaultMessage": "{stateOrProvince}を選択してください。"
+    "defaultMessage": "州を選択してください。",
+    "description": "Error message for a blank state (US-specific checkout)"
   },
   "use_address_fields.error.required": {
     "defaultMessage": "必須"
   },
   "use_address_fields.error.state_code_invalid": {
-    "defaultMessage": "2 文字の都道府県コードを入力してください。"
+    "defaultMessage": "2 文字の州コードを入力してください。"
   },
   "use_address_fields.label.address": {
     "defaultMessage": "住所"
+  },
+  "use_address_fields.label.address_form": {
+    "defaultMessage": "住所フォーム"
   },
   "use_address_fields.label.city": {
     "defaultMessage": "市区町村"
@@ -1214,10 +1541,10 @@
     "defaultMessage": "デフォルトとして設定"
   },
   "use_address_fields.label.province": {
-    "defaultMessage": "都道府県"
+    "defaultMessage": "州"
   },
   "use_address_fields.label.state": {
-    "defaultMessage": "都道府県"
+    "defaultMessage": "州"
   },
   "use_address_fields.label.zipCode": {
     "defaultMessage": "郵便番号"
@@ -1277,10 +1604,16 @@
     "defaultMessage": "パスワード"
   },
   "use_product.message.inventory_remaining": {
-    "defaultMessage": "残り {stockLevel} 点!"
+    "defaultMessage": "残り {stockLevel} 点のみ!"
+  },
+  "use_product.message.inventory_remaining_for_product": {
+    "defaultMessage": "{productName} は残り {stockLevel} 点のみ!"
   },
   "use_product.message.out_of_stock": {
     "defaultMessage": "在庫切れ"
+  },
+  "use_product.message.out_of_stock_for_product": {
+    "defaultMessage": "{productName} は在庫切れです"
   },
   "use_profile_fields.error.required_email": {
     "defaultMessage": "有効な Eメールアドレスを入力してください。"
@@ -1378,6 +1711,12 @@
   "use_update_password_fields.error.minimum_characters": {
     "defaultMessage": "パスワードには、少なくとも 8 文字を含める必要があります。"
   },
+  "use_update_password_fields.error.password_mismatch": {
+    "defaultMessage": "パスワードが一致しません。"
+  },
+  "use_update_password_fields.error.required_confirm_password": {
+    "defaultMessage": "パスワードを確認してください。"
+  },
   "use_update_password_fields.error.required_new_password": {
     "defaultMessage": "新しいパスワードを入力してください。"
   },
@@ -1390,23 +1729,47 @@
   "use_update_password_fields.error.uppercase_letter": {
     "defaultMessage": "パスワードには、少なくとも 1 個の大文字を含める必要があります。"
   },
+  "use_update_password_fields.label.confirm_new_password": {
+    "defaultMessage": "新しいパスワードの確認入力"
+  },
   "use_update_password_fields.label.current_password": {
     "defaultMessage": "現在のパスワード"
   },
   "use_update_password_fields.label.new_password": {
     "defaultMessage": "新しいパスワード:"
   },
+  "wishlist_primary_action.button.addSetToCart.label": {
+    "defaultMessage": "{productName} のセットを買い物カゴに追加"
+  },
+  "wishlist_primary_action.button.addToCart.label": {
+    "defaultMessage": "{productName} を買い物カゴに追加"
+  },
+  "wishlist_primary_action.button.add_set_to_cart": {
+    "defaultMessage": "セットを買い物カゴに追加"
+  },
   "wishlist_primary_action.button.add_to_cart": {
     "defaultMessage": "買い物カゴに追加"
   },
-  "wishlist_primary_action.button.select_options": {
-    "defaultMessage": "オプションの選択"
+  "wishlist_primary_action.button.viewFullDetails.label": {
+    "defaultMessage": "{productName} の詳細を表示"
+  },
+  "wishlist_primary_action.button.view_full_details": {
+    "defaultMessage": "すべての情報を表示"
+  },
+  "wishlist_primary_action.button.view_options": {
+    "defaultMessage": "オプションを表示"
+  },
+  "wishlist_primary_action.button.view_options.label": {
+    "defaultMessage": "{productName} のオプションを表示"
   },
   "wishlist_primary_action.info.added_to_cart": {
     "defaultMessage": "{quantity} {quantity, plural, one { 個の商品} other { 個の商品}}が買い物カゴに追加されました"
   },
   "wishlist_secondary_button_group.action.remove": {
     "defaultMessage": "削除"
+  },
+  "wishlist_secondary_button_group.info.item.remove.label": {
+    "defaultMessage": "{productName} の削除"
   },
   "wishlist_secondary_button_group.info.item_removed": {
     "defaultMessage": "ほしい物リストから商品が削除されました"
