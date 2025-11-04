@@ -47,21 +47,6 @@ const AdyenCheckoutComponent = (props) => {
             if (!adyenEnvironment || !paymentContainer.current) {
                 return
             }
-            // The PayPal namespace needs to be cleared before checkout is initialized.
-            // This is because there is a namespace clash between PayPal sdk from Adyen checkout and retail react app.
-            if (window?.paypal?.firstElementChild) {
-                window.paypal = undefined
-            }
-            // Unmount any existing checkout instance
-            if (checkoutRef.current && adyenOrder?.orderData) {
-                checkoutRef.current.update({order: adyenOrder})
-            }
-
-            // Unmount any existing dropin
-            if (dropinRef.current) {
-                dropinRef.current.unmount()
-                dropinRef.current = null
-            }
 
             // 1. Fetch the payment methods configuration
             const paymentMethodsConfiguration = await getPaymentMethodsConfiguration({
@@ -94,7 +79,7 @@ const AdyenCheckoutComponent = (props) => {
                 checkoutRef.current
             )
 
-            if (!isRedirect) {
+            if (!isRedirect && !dropinRef?.current) {
                 dropinRef.current = mountCheckoutComponent(
                     adyenAction,
                     checkoutRef.current,
