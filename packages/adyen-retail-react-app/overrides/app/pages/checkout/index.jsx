@@ -229,6 +229,7 @@ const CheckoutContainer = () => {
             authToken={authToken}
             customerId={customerId}
             isCustomerRegistered={customerTypeData?.isRegistered}
+            merchantDisplayName={`MerchantName`}
             locale={locale}
             site={site}
             basket={basket}
