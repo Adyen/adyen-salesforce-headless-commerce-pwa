@@ -59,7 +59,7 @@ export const onSubmit = async (state, component, actions, props) => {
         return {paymentsResponse: paymentsResponse}
     } catch (err) {
         actions.reject()
-        throw new Error(err)
+        throw err
     }
 }
 
@@ -83,26 +83,22 @@ export const onAdditionalDetails = async (state, component, actions, props) => {
         return {paymentsDetailsResponse: paymentsDetailsResponse}
     } catch (err) {
         actions.reject()
-        throw new Error(err)
+        throw err
     }
 }
 
 export const onErrorHandler = async (error, component, props) => {
-    try {
-        const paymentCancelService = new PaymentCancelService(
-            props?.token,
-            props?.customerId,
-            props.basket?.basketId,
-            props?.site
-        )
-        await paymentCancelService.paymentCancel(props?.orderNo)
-        if (props?.adyenOrder) {
-            props?.setAdyenOrder(null)
-        }
-        props?.navigate('/checkout')
-    } catch (err) {
-        throw new Error(err)
+    const paymentCancelService = new PaymentCancelService(
+        props?.token,
+        props?.customerId,
+        props.basket?.basketId,
+        props?.site
+    )
+    await paymentCancelService.paymentCancel(props?.orderNo)
+    if (props?.adyenOrder) {
+        props?.setAdyenOrder(null)
     }
+    props?.navigate('/checkout')
 }
 
 export const getAmount = ({basket, adyenOrder}) => {

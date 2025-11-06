@@ -49,7 +49,9 @@ describe('onSubmit function', () => {
         const component = {}
         const props = {token: 'mockToken', basket: {basketId: '123', customerId: '456'}}
 
-        await onSubmit(state, component, mockActions, props)
+        await expect(onSubmit(state, component, mockActions, props)).rejects.toThrow(
+            'invalid state'
+        )
         expect(mockActions.reject).toHaveBeenCalled()
         expect(mockActions.resolve).not.toHaveBeenCalled()
     })
@@ -86,9 +88,11 @@ describe('onSubmit function', () => {
             submitPayment: jest.fn().mockRejectedValue(mockError)
         }))
 
-        await onSubmit(state, component, mockActions, props)
-
+        await expect(onSubmit(state, component, mockActions, props)).rejects.toThrow(
+            'Payment failed'
+        )
         expect(mockActions.reject).toHaveBeenCalled()
+        expect(mockActions.resolve).not.toHaveBeenCalled()
     })
 })
 
@@ -137,8 +141,11 @@ describe('onAdditionalDetails function', () => {
             submitPaymentsDetails: jest.fn().mockRejectedValue(mockError)
         }))
 
-        await onAdditionalDetails(state, component, mockActions, props)
+        await expect(onAdditionalDetails(state, component, mockActions, props)).rejects.toThrow(
+            'Details submission failed'
+        )
         expect(mockActions.reject).toHaveBeenCalled()
+        expect(mockActions.resolve).not.toHaveBeenCalled()
     })
 })
 
