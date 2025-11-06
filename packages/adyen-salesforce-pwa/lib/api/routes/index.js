@@ -133,7 +133,7 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     app.post('/api/adyen/gift-card/create-order', ...createOrderHandler)
     app.post('/api/adyen/gift-card/cancel-order', ...cancelOrderHandler)
 
-    // app.use(overrides?.ErrorHandler || ErrorHandler)
+    app.use(overrides?.ErrorHandler || ErrorHandler)
 }
 
 export {registerAdyenEndpoints, SuccessHandler, ErrorHandler}
