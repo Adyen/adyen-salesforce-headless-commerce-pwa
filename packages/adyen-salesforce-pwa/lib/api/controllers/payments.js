@@ -1,6 +1,11 @@
 import {formatAddressInAdyenFormat} from '../../utils/formatAddress.mjs'
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
-import {ORDER, PAYMENT_METHODS, RECURRING_PROCESSING_MODEL, SHOPPER_INTERACTIONS} from '../../utils/constants.mjs'
+import {
+    ORDER,
+    PAYMENT_METHODS,
+    RECURRING_PROCESSING_MODEL,
+    SHOPPER_INTERACTIONS
+} from '../../utils/constants.mjs'
 import {createCheckoutResponse} from '../../utils/createCheckoutResponse.mjs'
 import {ShopperBaskets, ShopperOrders} from 'commerce-sdk-isomorphic'
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
@@ -101,50 +106,58 @@ export function getAdditionalData(order) {
 export function getLineItems(order) {
     const productLineItems = order?.productItems?.length
         ? order?.productItems?.map((productItem) => {
-            return {
-                id: productItem.itemId,
-                quantity: productItem.quantity,
-                description: productItem.itemText,
-                amountExcludingTax: getCurrencyValueForApi(productItem.basePrice, order.currency),
-                taxAmount: getCurrencyValueForApi(productItem.tax, order.currency),
-                taxCategory: 'None',
-                taxPercentage: productItem.taxRate
-            }
-        })
+              return {
+                  id: productItem.itemId,
+                  quantity: productItem.quantity,
+                  description: productItem.itemText,
+                  amountExcludingTax: getCurrencyValueForApi(productItem.basePrice, order.currency),
+                  taxAmount: getCurrencyValueForApi(productItem.tax, order.currency),
+                  taxCategory: 'None',
+                  taxPercentage: productItem.taxRate
+              }
+          })
         : []
     const shippingLineItems = order?.shippingItems?.length
         ? order?.shippingItems?.map((shippingItem) => {
-            return {
-                id: shippingItem.itemId,
-                quantity: 1,
-                description: shippingItem.itemText,
-                amountExcludingTax: getCurrencyValueForApi(
-                    shippingItem.basePrice,
-                    order.currency
-                ),
-                taxAmount: getCurrencyValueForApi(shippingItem.tax, order.currency),
-                taxCategory: 'None',
-                taxPercentage: shippingItem.taxRate
-            }
-        })
+              return {
+                  id: shippingItem.itemId,
+                  quantity: 1,
+                  description: shippingItem.itemText,
+                  amountExcludingTax: getCurrencyValueForApi(
+                      shippingItem.basePrice,
+                      order.currency
+                  ),
+                  taxAmount: getCurrencyValueForApi(shippingItem.tax, order.currency),
+                  taxCategory: 'None',
+                  taxPercentage: shippingItem.taxRate
+              }
+          })
         : []
     const priceAdjustmentLineItems = order?.priceAdjustments?.length
         ? order.priceAdjustments.map((priceAdjustment) => {
-            return {
-                id: priceAdjustment.priceAdjustmentId,
-                quantity: priceAdjustment.quantity,
-                description: priceAdjustment.itemText,
-                amountExcludingTax: getCurrencyValueForApi(
-                    priceAdjustment.basePrice,
-                    order.currency
-                ),
-                taxAmount: getCurrencyValueForApi(priceAdjustment.tax, order.currency),
-                taxCategory: 'None',
-                taxPercentage: priceAdjustment.taxRate
-            }
-        })
+              return {
+                  id: priceAdjustment.priceAdjustmentId,
+                  quantity: priceAdjustment.quantity,
+                  description: priceAdjustment.itemText,
+                  amountExcludingTax: getCurrencyValueForApi(
+                      priceAdjustment.basePrice,
+                      order.currency
+                  ),
+                  taxAmount: getCurrencyValueForApi(priceAdjustment.tax, order.currency),
+                  taxCategory: 'None',
+                  taxPercentage: priceAdjustment.taxRate
+              }
+          })
         : []
     return [...productLineItems, ...shippingLineItems, ...priceAdjustmentLineItems]
+}
+
+function getNativeThreeDS(adyenConfig) {
+    console.log('getNativeThreeDS', adyenConfig);
+    const nativeThreeDSValues = ['preferred', 'disabled']
+    return nativeThreeDSValues.includes(adyenConfig.nativeThreeDS)
+        ? adyenConfig.nativeThreeDS
+        : 'preferred'
 }
 
 export function createPaymentRequestObject(order, data, adyenConfig, req) {
@@ -152,8 +165,7 @@ export function createPaymentRequestObject(order, data, adyenConfig, req) {
         ...filterStateData(data),
         billingAddress: data.billingAddress || formatAddressInAdyenFormat(order.billingAddress),
         deliveryAddress:
-            data.deliveryAddress ||
-            formatAddressInAdyenFormat(order.shipments[0].shippingAddress),
+            data.deliveryAddress || formatAddressInAdyenFormat(order.shipments[0].shippingAddress),
         reference: order.orderNo,
         merchantAccount: adyenConfig.merchantAccount,
         amount: {
@@ -163,7 +175,7 @@ export function createPaymentRequestObject(order, data, adyenConfig, req) {
         applicationInfo: getApplicationInfo(adyenConfig.systemIntegratorName),
         authenticationData: {
             threeDSRequestData: {
-                nativeThreeDS: 'preferred'
+                nativeThreeDS: getNativeThreeDS(adyenConfig)
             }
         },
         channel: 'Web',
@@ -269,7 +281,7 @@ async function sendPayments(req, res, next) {
     }
 
     let order
-    let initialBasket;
+    let initialBasket
 
     try {
         const {data} = req.body
@@ -296,10 +308,10 @@ async function sendPayments(req, res, next) {
 
         if (!initialBasket?.paymentInstruments || !initialBasket?.paymentInstruments?.length) {
             Logger.info('sendPayments', 'addPaymentInstrumentToBasket')
-            const isCardPayment = data?.paymentMethod?.type === 'scheme';
+            const isCardPayment = data?.paymentMethod?.type === 'scheme'
             const paymentMethodId = isCardPayment
                 ? PAYMENT_METHODS.CREDIT_CARD
-                : PAYMENT_METHODS.ADYEN_COMPONENT;
+                : PAYMENT_METHODS.ADYEN_COMPONENT
             const paymentInstrumentReq = {
                 body: {
                     amount: initialBasket.orderTotal,
@@ -369,15 +381,15 @@ async function sendPayments(req, res, next) {
             }
         })
         if (basket?.paymentInstruments?.length) {
-            Logger.info('removeAllPaymentInstrumentsFromBasket');
+            Logger.info('removeAllPaymentInstrumentsFromBasket')
             await removeAllPaymentInstrumentsFromBasket(basket, shopperBaskets)
         }
         if (order?.orderNo) {
-            Logger.info('updateOrderStatus and recreate basket');
+            Logger.info('updateOrderStatus and recreate basket')
             const orderApi = new OrderApiClient()
             await orderApi.updateOrderStatus(order.orderNo, ORDER.ORDER_STATUS_FAILED)
             await shopperBaskets.createBasket({
-                body: initialBasket,
+                body: initialBasket
             })
         }
         next(err)
