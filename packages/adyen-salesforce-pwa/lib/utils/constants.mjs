@@ -70,4 +70,4 @@ export const ADYEN_ENVIRONMENT = {
     TEST: 'TEST'
 }
 
-export const APPLICATION_VERSION = '3.0.1'
+export const APPLICATION_VERSION = '3.0.2'
