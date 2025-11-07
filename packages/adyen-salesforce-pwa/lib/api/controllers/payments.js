@@ -153,7 +153,6 @@ export function getLineItems(order) {
 }
 
 function getNativeThreeDS(adyenConfig) {
-    console.log('getNativeThreeDS', adyenConfig);
     const nativeThreeDSValues = ['preferred', 'disabled']
     return nativeThreeDSValues.includes(adyenConfig.nativeThreeDS)
         ? adyenConfig.nativeThreeDS
