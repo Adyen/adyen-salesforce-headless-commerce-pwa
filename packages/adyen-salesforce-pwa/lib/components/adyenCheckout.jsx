@@ -94,7 +94,7 @@ const AdyenCheckoutComponent = (props) => {
                 checkoutRef.current
             )
 
-            if (!isRedirect) {
+            if (!isRedirect && !dropinRef?.current) {
                 dropinRef.current = mountCheckoutComponent(
                     adyenAction,
                     checkoutRef.current,
