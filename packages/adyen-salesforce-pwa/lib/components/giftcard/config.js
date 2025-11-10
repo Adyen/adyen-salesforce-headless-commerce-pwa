@@ -38,9 +38,17 @@ export const giftcardConfig = (props) => {
 
     const onOrderCancel = async (Order) => {
         const response = await giftCardService.cancelOrder(Order)
+        if (response && response.error) {
+            throw new Error(response.errorMessage || 'Gift card order cancellation failed')
+        }
         if (response.isFinal && response.isSuccessful) {
             props?.setAdyenOrder(null)
+        } else if (!response.isSuccessful) {
+            throw new Error(
+                response.errorMessage || 'Gift card order cancellation was not successful'
+            )
         }
+        return response
     }
 
     return {
