@@ -1,5 +1,6 @@
 import {baseConfig} from '../helpers/baseConfig'
 import {GiftCardService} from '../../services/giftCard'
+import {executeCallbacks} from '../../utils/executeCallbacks'
 
 export const giftcardConfig = (props) => {
     const giftCardService = new GiftCardService(
@@ -8,29 +9,52 @@ export const giftcardConfig = (props) => {
         props.basket?.basketId,
         props?.site
     )
-    return {
-        ...baseConfig(props),
-        onBalanceCheck: async (resolve, reject, data) => {
+
+    const onBalanceCheck = async (resolve, reject, data) => {
+        try {
             const response = await giftCardService.balanceCheck(data)
             if (response && !!response.error) {
-                reject(response.errorMessage)
+                throw new Error(response.errorMessage)
             } else {
                 resolve(response)
             }
-        },
-        onOrderRequest: async (resolve, reject, data) => {
+        } catch (err) {
+            reject(err?.message)
+        }
+    }
+
+    const onOrderRequest = async (resolve, reject, data) => {
+        try {
             const response = await giftCardService.createOrder(data)
             if (response && !!response.error) {
-                reject(response.errorMessage)
+                throw new Error(response.errorMessage)
             } else {
                 resolve(response)
             }
-        },
-        onOrderCancel: async (Order) => {
-            const response = await giftCardService.cancelOrder(Order)
-            if (response.isFinal && response.isSuccessful) {
-                props?.setAdyenOrder(null)
-            }
+        } catch (err) {
+            reject(err?.message)
         }
+    }
+
+    const onOrderCancel = async (Order) => {
+        const response = await giftCardService.cancelOrder(Order)
+        if (response && response.error) {
+            throw new Error(response.errorMessage || 'Gift card order cancellation failed')
+        }
+        if (response.isFinal && response.isSuccessful) {
+            props?.setAdyenOrder(null)
+        } else if (!response.isSuccessful) {
+            throw new Error(
+                response.errorMessage || 'Gift card order cancellation was not successful'
+            )
+        }
+        return response
+    }
+
+    return {
+        ...baseConfig(props),
+        onBalanceCheck: executeCallbacks([onBalanceCheck], props),
+        onOrderRequest: executeCallbacks([onOrderRequest], props),
+        onOrderCancel: executeCallbacks([onOrderCancel], props)
     }
 }

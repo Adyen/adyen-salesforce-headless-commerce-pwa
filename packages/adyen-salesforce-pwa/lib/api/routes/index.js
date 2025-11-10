@@ -20,12 +20,15 @@ import {balanceCheck, cancelOrder, createOrder} from '../controllers/giftCard'
 import {prepareRequestContext} from '../middleware/request-context'
 import {prepareWebhookRequestContext} from '../middleware/webhook-request-context'
 
-function SuccessHandler(req, res) {
-    Logger.info('Success')
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function SuccessHandler(req, res, next) {
+    Logger.info('Success Handler')
     return res.status(200).json(res.locals.response)
 }
 
-function ErrorHandler(err, req, res) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function ErrorHandler(err, req, res, next) {
+    Logger.info('Error Handler')
     Logger.error(err.message, err.cause)
     return res.status(err.statusCode || 500).json(createErrorResponse(err.message))
 }
@@ -35,13 +38,15 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     app.set('trust proxy', true)
 
     const appleDomainAssociationHandler = overrides?.appleDomainAssociation || [
-        appleDomainAssociation
+        appleDomainAssociation,
+        ErrorHandler
     ]
 
     const environmentHandler = overrides?.environment || [
         prepareWebhookRequestContext,
         EnvironmentController,
-        SuccessHandler
+        SuccessHandler,
+        ErrorHandler
     ]
 
     const webhookHandler = overrides?.webhook || [
@@ -56,54 +61,64 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     const paymentMethodsHandler = overrides?.paymentMethods || [
         prepareRequestContext,
         PaymentMethodsController,
-        SuccessHandler
+        SuccessHandler,
+        ErrorHandler
     ]
     const paymentsDetailsHandler = overrides?.paymentsDetails || [
         prepareRequestContext,
         PaymentsDetailsController,
-        SuccessHandler
+        SuccessHandler,
+        ErrorHandler
     ]
     const paymentsHandler = overrides?.payments || [
         prepareRequestContext,
         PaymentsController,
-        SuccessHandler
+        SuccessHandler,
+        ErrorHandler
     ]
 
     const shippingMethodsPostHandler = overrides?.setShippingMethods || [
         prepareRequestContext,
         ShippingMethodsController.setShippingMethod,
-        SuccessHandler
+        SuccessHandler,
+        ErrorHandler
     ]
     const shippingMethodsGetHandler = overrides?.getShippingMethods || [
         prepareRequestContext,
         ShippingMethodsController.getShippingMethods,
-        SuccessHandler
+        SuccessHandler,
+        ErrorHandler
     ]
     const shippingAddressHandler = overrides?.shippingAddress || [
         prepareRequestContext,
         ShippingAddressController,
-        SuccessHandler
+        SuccessHandler,
+        ErrorHandler
     ]
 
     const paymentCancelController = overrides?.paymentCancel || [
         prepareRequestContext,
         PaymentCancelController,
-        SuccessHandler
+        SuccessHandler,
+        ErrorHandler
     ]
     const balanceCheckHandler = overrides?.balanceCheck || [
         prepareRequestContext,
         balanceCheck,
-        SuccessHandler
+        SuccessHandler,
+        ErrorHandler
     ]
     const createOrderHandler = overrides?.createOrder || [
         prepareRequestContext,
         createOrder,
-        SuccessHandler
+        SuccessHandler,
+        ErrorHandler
     ]
     const cancelOrderHandler = overrides?.cancelOrder || [
         prepareRequestContext,
         cancelOrder,
-        SuccessHandler
+        SuccessHandler,
+        ErrorHandler
     ]
 
     app.get(

@@ -49,12 +49,13 @@ describe('AdyenEnvironmentService', () => {
         it('should throw an error when the API call fails', async () => {
             const mockFetchPromise = Promise.resolve({
                 status: 500,
-                statusText: 'Internal Server Error'
+                statusText: 'Internal Server Error',
+                json: jest.fn().mockResolvedValue({message: 'Server error'})
             })
 
             adyenService.apiClient.get.mockResolvedValueOnce(mockFetchPromise)
 
-            await expect(adyenService.fetchEnvironment()).rejects.toThrow('[object Object]')
+            await expect(adyenService.fetchEnvironment()).rejects.toThrow('Server error')
         })
     })
 })
