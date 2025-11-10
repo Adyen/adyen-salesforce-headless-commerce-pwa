@@ -11,7 +11,7 @@ export class LocaleData {
             heading: 'Account Details'
         },
         productDetailPage: {
-            productColor: 'Black',
+            productColor: 'Gray',
             addToCartButtonCaption: 'Add to Cart',
             proceedToCheckoutButtonCaption: 'Proceed to Checkout'
         },
@@ -26,7 +26,7 @@ export class LocaleData {
             heading: 'Détails du compte'
         },
         productDetailPage: {
-            productColor: 'Noir',
+            productColor: 'Gris',
             addToCartButtonCaption: 'Ajouter au panier',
             proceedToCheckoutButtonCaption: 'Passer au checkout'
         },
