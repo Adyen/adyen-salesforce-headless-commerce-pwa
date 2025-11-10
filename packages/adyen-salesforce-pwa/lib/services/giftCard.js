@@ -14,10 +14,12 @@ export class GiftCardService {
             body: JSON.stringify({data: request})
         })
         if (res.status >= 300) {
-            throw new Error(res)
-        } else {
-            return await res.json()
+            const errorData = await res
+                .json()
+                .catch(() => ({message: 'Gift card balance check failed'}))
+            throw new Error(errorData.message || `Balance check failed with status ${res.status}`)
         }
+        return await res.json()
     }
 
     async createOrder(request) {
@@ -26,10 +28,12 @@ export class GiftCardService {
             body: JSON.stringify({data: request})
         })
         if (res.status >= 300) {
-            throw new Error(res)
-        } else {
-            return await res.json()
+            const errorData = await res
+                .json()
+                .catch(() => ({message: 'Gift card order creation failed'}))
+            throw new Error(errorData.message || `Create order failed with status ${res.status}`)
         }
+        return await res.json()
     }
 
     async cancelOrder(request) {
@@ -38,9 +42,11 @@ export class GiftCardService {
             body: JSON.stringify({data: request})
         })
         if (res.status >= 300) {
-            throw new Error(res)
-        } else {
-            return await res.json()
+            const errorData = await res
+                .json()
+                .catch(() => ({message: 'Gift card order cancellation failed'}))
+            throw new Error(errorData.message || `Cancel order failed with status ${res.status}`)
         }
+        return await res.json()
     }
 }

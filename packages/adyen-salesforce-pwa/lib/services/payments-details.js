@@ -15,9 +15,11 @@ export class AdyenPaymentsDetailsService {
             })
         })
         if (res.status >= 300) {
-            throw new Error(res)
-        } else {
-            return await res.json()
+            const errorData = await res
+                .json()
+                .catch(() => ({message: 'Payment details submission failed'}))
+            throw new Error(errorData.message || `Payment details failed with status ${res.status}`)
         }
+        return await res.json()
     }
 }

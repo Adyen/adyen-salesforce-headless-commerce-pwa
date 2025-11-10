@@ -1,4 +1,4 @@
-export const executeCallbacks = (callbacks, props, onError) => {
+export const executeCallbacks = (callbacks, props) => {
     return async (...params) => {
         let data = {}
         for (const func of callbacks) {
@@ -6,25 +6,25 @@ export const executeCallbacks = (callbacks, props, onError) => {
                 const response = await func(...params, props, data)
                 data = {...data, ...response}
             } catch (error) {
-                if (onError) {
-                    await onError(error)
-                }
-                break
+                console.error('Error in callback execution:', error)
+                // Re-throw the error so Adyen's dropin can handle it and trigger onError
+                throw error
             }
         }
         return data
     }
 }
 
-export const executeErrorCallbacks = (callbacks) => {
-    return async (error) => {
+export const executeErrorCallbacks = (callbacks, props) => {
+    return async (...params) => {
         let data = {}
         for (const func of callbacks) {
             try {
-                const response = await func(error, data)
+                const response = await func(...params, props, data)
                 data = {...data, ...response}
-            } catch (e) {
-                console.error('Error in error callback:', e)
+            } catch (error) {
+                console.error('Error in error callback:', error)
+                // Don't re-throw - error handlers should fail gracefully
                 break
             }
         }
