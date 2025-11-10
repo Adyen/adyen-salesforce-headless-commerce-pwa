@@ -50,11 +50,14 @@ describe('GiftCardService', () => {
             const request = {paymentMethod: {type: 'giftcard'}}
             const mockFetchPromise = Promise.resolve({
                 status: 400,
-                statusText: 'Bad Request'
+                statusText: 'Bad Request',
+                json: jest.fn().mockResolvedValue({message: 'Balance check error'})
             })
             giftCardService.apiClient.post.mockResolvedValueOnce(mockFetchPromise)
 
-            await expect(giftCardService.balanceCheck(request)).rejects.toThrow('[object Object]')
+            await expect(giftCardService.balanceCheck(request)).rejects.toThrow(
+                'Balance check error'
+            )
         })
     })
 
@@ -82,11 +85,12 @@ describe('GiftCardService', () => {
             const request = {amount: {value: 100, currency: 'USD'}}
             const mockFetchPromise = Promise.resolve({
                 status: 500,
-                statusText: 'Server Error'
+                statusText: 'Server Error',
+                json: jest.fn().mockResolvedValue({message: 'Create order error'})
             })
             giftCardService.apiClient.post.mockResolvedValueOnce(mockFetchPromise)
 
-            await expect(giftCardService.createOrder(request)).rejects.toThrow('[object Object]')
+            await expect(giftCardService.createOrder(request)).rejects.toThrow('Create order error')
         })
     })
 
@@ -114,11 +118,12 @@ describe('GiftCardService', () => {
             const request = {order: {pspReference: '...'}}
             const mockFetchPromise = Promise.resolve({
                 status: 404,
-                statusText: 'Not Found'
+                statusText: 'Not Found',
+                json: jest.fn().mockResolvedValue({message: 'Cancel order error'})
             })
             giftCardService.apiClient.post.mockResolvedValueOnce(mockFetchPromise)
 
-            await expect(giftCardService.cancelOrder(request)).rejects.toThrow('[object Object]')
+            await expect(giftCardService.cancelOrder(request)).rejects.toThrow('Cancel order error')
         })
     })
 })

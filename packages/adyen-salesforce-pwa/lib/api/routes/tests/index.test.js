@@ -51,7 +51,7 @@ describe('Adyen Endpoints', () => {
 
             SuccessHandler(req, res)
 
-            expect(Logger.info).toHaveBeenCalledWith('Success')
+            expect(Logger.info).toHaveBeenCalledWith('Success Handler')
             expect(res.status).toHaveBeenCalledWith(200)
             expect(res.json).toHaveBeenCalledWith({message: 'Success response'})
         })

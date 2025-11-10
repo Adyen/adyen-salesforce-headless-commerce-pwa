@@ -13,9 +13,13 @@ export class AdyenPaymentMethodsService {
             queryParams: {locale: locale.id}
         })
         if (res.status >= 300) {
-            throw new Error(res)
-        } else {
-            return await res.json()
+            const errorData = await res
+                .json()
+                .catch(() => ({message: 'Failed to fetch payment methods'}))
+            throw new Error(
+                errorData.message || `Fetch payment methods failed with status ${res.status}`
+            )
         }
+        return await res.json()
     }
 }

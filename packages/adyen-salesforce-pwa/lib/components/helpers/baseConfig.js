@@ -12,20 +12,18 @@ export const baseConfig = ({
     onError = [],
     ...props
 }) => {
-    const onErrorCallback = executeErrorCallbacks(onError)
+    // Create error handler with props in closure
+    const errorHandler = (error, component) => onErrorHandler(error, component, props)
+
     return {
         amount: getAmount(props),
-        onSubmit: executeCallbacks(
-            [...beforeSubmit, onSubmit, ...afterSubmit],
-            props,
-            onErrorCallback
-        ),
+        onSubmit: executeCallbacks([...beforeSubmit, onSubmit, ...afterSubmit], props),
         onAdditionalDetails: executeCallbacks(
             [...beforeAdditionalDetails, onAdditionalDetails, ...afterAdditionalDetails],
-            props,
-            onErrorCallback
+            props
         ),
-        onError: executeCallbacks([...onError, onErrorHandler], props, onErrorCallback)
+        onError: executeErrorCallbacks([...onError, errorHandler], props),
+        onPaymentFailed: executeErrorCallbacks([...onError, errorHandler], props)
     }
 }
 
@@ -42,13 +40,12 @@ export const onSubmit = async (state, component, actions, props) => {
         )
         const paymentsResponse = await adyenPaymentService.submitPayment({
             ...state.data,
-            origin: state.data.origin ? state.data.origin : window.location.origin,
+            origin: state.data.origin || window.location.origin,
             returnUrl: props?.returnUrl || `${window.location.href}/redirect`
         })
         return {paymentsResponse: paymentsResponse}
     } catch (err) {
-        actions.reject()
-        throw err
+        actions.reject(err.message)
     }
 }
 
@@ -65,23 +62,28 @@ export const onAdditionalDetails = async (state, component, actions, props) => {
         )
         return {paymentsDetailsResponse: paymentsDetailsResponse}
     } catch (err) {
-        actions.reject()
-        throw err
+        actions.reject(err.message)
     }
 }
 
 export const onErrorHandler = async (error, component, props) => {
-    const paymentCancelService = new PaymentCancelService(
-        props?.token,
-        props?.customerId,
-        props.basket?.basketId,
-        props?.site
-    )
-    await paymentCancelService.paymentCancel(props?.orderNo)
-    if (props?.adyenOrder) {
-        props?.setAdyenOrder(null)
+    try {
+        const paymentCancelService = new PaymentCancelService(
+            props.token,
+            props.customerId,
+            props.basket?.basketId,
+            props.site
+        )
+        await paymentCancelService.paymentCancel(props.orderNo)
+        if (props.adyenOrder) {
+            props.setAdyenOrder(null)
+        }
+        props.navigate('/checkout')
+        return {cancelled: true}
+    } catch (err) {
+        console.error('Error during payment cancellation:', err)
+        return {cancelled: false, error: err.message}
     }
-    props?.navigate('/checkout')
 }
 
 export const getAmount = ({basket, adyenOrder}) => {

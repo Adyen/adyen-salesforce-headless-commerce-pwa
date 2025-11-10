@@ -63,13 +63,14 @@ describe('AdyenPaymentMethodsService', () => {
     it('should throw an error when fetchPaymentMethods gets a status >= 300', async () => {
         const mockFetchPromise = Promise.resolve({
             status: 400,
-            statusText: 'Bad Request'
+            statusText: 'Bad Request',
+            json: jest.fn().mockResolvedValue({message: 'Fetch payment methods error'})
         })
 
         paymentMethodsService.apiClient.get.mockResolvedValueOnce(mockFetchPromise)
 
         await expect(paymentMethodsService.fetchPaymentMethods(mockLocale)).rejects.toThrow(
-            '[object Object]'
+            'Fetch payment methods error'
         )
     })
 })

@@ -17,12 +17,15 @@ import {balanceCheck, cancelOrder, createOrder} from '../controllers/giftCard'
 import {prepareRequestContext} from '../middleware/request-context'
 import {prepareWebhookRequestContext} from '../middleware/webhook-request-context'
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function SuccessHandler(req, res, next) {
-    Logger.info('Success')
+    Logger.info('Success Handler')
     return res.status(200).json(res.locals.response)
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function ErrorHandler(err, req, res, next) {
+    Logger.info('Error Handler')
     Logger.error(err.message, err.cause)
     return res.status(err.statusCode || 500).json(createErrorResponse(err.message))
 }

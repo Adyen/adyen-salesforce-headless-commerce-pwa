@@ -44,15 +44,15 @@ describe('onSubmit function', () => {
         }))
     })
 
-    it('throws an error and calls reject for invalid state', async () => {
+    it('calls reject for invalid state and returns undefined', async () => {
         const state = {isValid: false, data: {}}
         const component = {}
         const props = {token: 'mockToken', basket: {basketId: '123', customerId: '456'}}
 
-        await expect(onSubmit(state, component, mockActions, props)).rejects.toThrow(
-            'invalid state'
-        )
-        expect(mockActions.reject).toHaveBeenCalled()
+        const result = await onSubmit(state, component, mockActions, props)
+
+        expect(result).toBeUndefined()
+        expect(mockActions.reject).toHaveBeenCalledWith('invalid state')
         expect(mockActions.resolve).not.toHaveBeenCalled()
     })
 
@@ -73,7 +73,7 @@ describe('onSubmit function', () => {
         expect(mockActions.reject).not.toHaveBeenCalled()
     })
 
-    it('should call reject and throw an error when payment service fails', async () => {
+    it('should call reject and return undefined when payment service fails', async () => {
         const state = {data: {origin: 'https://adyen.com'}, isValid: true}
         const component = 'testComponent'
         const props = {
@@ -88,10 +88,10 @@ describe('onSubmit function', () => {
             submitPayment: jest.fn().mockRejectedValue(mockError)
         }))
 
-        await expect(onSubmit(state, component, mockActions, props)).rejects.toThrow(
-            'Payment failed'
-        )
-        expect(mockActions.reject).toHaveBeenCalled()
+        const result = await onSubmit(state, component, mockActions, props)
+
+        expect(result).toBeUndefined()
+        expect(mockActions.reject).toHaveBeenCalledWith('Payment failed')
         expect(mockActions.resolve).not.toHaveBeenCalled()
     })
 })
@@ -126,7 +126,7 @@ describe('onAdditionalDetails function', () => {
         expect(mockActions.reject).not.toHaveBeenCalled()
     })
 
-    it('should call reject and throw an error when payment details service fails', async () => {
+    it('should call reject and return undefined when payment details service fails', async () => {
         const state = {data: 'test data'}
         const component = 'testComponent'
         const props = {
@@ -141,32 +141,80 @@ describe('onAdditionalDetails function', () => {
             submitPaymentsDetails: jest.fn().mockRejectedValue(mockError)
         }))
 
-        await expect(onAdditionalDetails(state, component, mockActions, props)).rejects.toThrow(
-            'Details submission failed'
-        )
-        expect(mockActions.reject).toHaveBeenCalled()
+        const result = await onAdditionalDetails(state, component, mockActions, props)
+
+        expect(result).toBeUndefined()
+        expect(mockActions.reject).toHaveBeenCalledWith('Details submission failed')
         expect(mockActions.resolve).not.toHaveBeenCalled()
     })
 })
 
 describe('onErrorHandler', () => {
-    it('should cancel the order and navigate', async () => {
+    let consoleErrorSpy
+
+    beforeEach(() => {
+        consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+    })
+
+    afterEach(() => {
+        consoleErrorSpy.mockRestore()
+    })
+
+    it('should cancel the order and navigate on success', async () => {
         const navigate = jest.fn()
         const props = {
             token: 'testToken',
             site: 'testSite',
             customerId: 'testCustomer',
-            navigate: navigate
+            navigate: navigate,
+            orderNo: '12345',
+            basket: {basketId: 'basket123'}
         }
-        const orderNo = '12345'
+        const error = new Error('Payment failed')
+        const component = {}
+
         PaymentCancelService.mockImplementation(() => ({
             paymentCancel: jest.fn().mockResolvedValue({})
         }))
 
-        await onErrorHandler(orderNo, navigate, props)
+        const result = await onErrorHandler(error, component, props)
 
-        expect(PaymentCancelService).toHaveBeenCalled()
+        expect(PaymentCancelService).toHaveBeenCalledWith(
+            props.token,
+            props.customerId,
+            props.basket.basketId,
+            props.site
+        )
         expect(navigate).toHaveBeenCalledWith('/checkout')
+        expect(result).toEqual({cancelled: true})
+        expect(consoleErrorSpy).not.toHaveBeenCalled()
+    })
+
+    it('should handle cancellation errors gracefully', async () => {
+        const navigate = jest.fn()
+        const props = {
+            token: 'testToken',
+            site: 'testSite',
+            customerId: 'testCustomer',
+            navigate: navigate,
+            orderNo: '12345',
+            basket: {basketId: 'basket123'}
+        }
+        const error = new Error('Payment failed')
+        const component = {}
+        const cancelError = new Error('Cancel failed')
+
+        PaymentCancelService.mockImplementation(() => ({
+            paymentCancel: jest.fn().mockRejectedValue(cancelError)
+        }))
+
+        const result = await onErrorHandler(error, component, props)
+
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+            'Error during payment cancellation:',
+            cancelError
+        )
+        expect(result).toEqual({cancelled: false, error: 'Cancel failed'})
     })
 })
 

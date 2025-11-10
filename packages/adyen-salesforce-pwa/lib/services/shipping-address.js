@@ -15,9 +15,13 @@ export class AdyenShippingAddressService {
             })
         })
         if (res.status >= 300) {
-            throw new Error(res)
-        } else {
-            return await res.json()
+            const errorData = await res
+                .json()
+                .catch(() => ({message: 'Failed to update shipping address'}))
+            throw new Error(
+                errorData.message || `Update shipping address failed with status ${res.status}`
+            )
         }
+        return await res.json()
     }
 }

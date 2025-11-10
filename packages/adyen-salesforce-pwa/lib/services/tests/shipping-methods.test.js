@@ -58,12 +58,15 @@ describe('AdyenShippingMethodsService', () => {
         it('should throw an error if response status is >= 300', async () => {
             const mockFetchPromise = Promise.resolve({
                 status: 400,
-                statusText: 'Bad Request'
+                statusText: 'Bad Request',
+                json: jest.fn().mockResolvedValue({message: 'Get shipping methods failed'})
             })
 
             adyenService.apiClient.get.mockResolvedValueOnce(mockFetchPromise)
 
-            await expect(adyenService.getShippingMethods()).rejects.toThrow('[object Object]')
+            await expect(adyenService.getShippingMethods()).rejects.toThrow(
+                'Get shipping methods failed'
+            )
         })
     })
 
@@ -92,13 +95,14 @@ describe('AdyenShippingMethodsService', () => {
             const shippingMethodId = 'method-id'
             const mockFetchPromise = Promise.resolve({
                 status: 400,
-                statusText: 'Bad Request'
+                statusText: 'Bad Request',
+                json: jest.fn().mockResolvedValue({message: 'Update shipping method error'})
             })
 
             adyenService.apiClient.post.mockResolvedValueOnce(mockFetchPromise)
 
             await expect(adyenService.updateShippingMethod(shippingMethodId)).rejects.toThrow(
-                '[object Object]'
+                'Update shipping method error'
             )
         })
     })
