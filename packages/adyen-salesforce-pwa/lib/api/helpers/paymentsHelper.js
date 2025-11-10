@@ -300,6 +300,22 @@ export const filterStateData = (stateData) =>
     }, {})
 
 /**
+ * Determines the Native 3DS (3D Secure) setting based on the provided Adyen configuration.
+ * If the configuration contains a valid Native 3DS value, it returns that value; otherwise,
+ * it defaults to 'preferred'.
+ *
+ * @param {Object} adyenConfig - The Adyen configuration object
+ * @param {string} [adyenConfig.nativeThreeDS] - The Native 3DS setting from Adyen configuration
+ * @returns {'preferred'|'disabled'} Returns 'preferred' or 'disabled' based on the configuration
+ */
+export function getNativeThreeDS(adyenConfig) {
+    const nativeThreeDSValues = ['preferred', 'disabled']
+    return nativeThreeDSValues.includes(adyenConfig.nativeThreeDS)
+        ? adyenConfig.nativeThreeDS
+        : 'preferred'
+}
+
+/**
  * Constructs the complete payment request object to be sent to the Adyen /payments endpoint.
  * @param {object} data - The payment state data from the client.
  * @param {object} adyenContext - The request context from `res.locals.adyen`.
@@ -328,7 +344,7 @@ export async function createPaymentRequestObject(data, adyenContext, req) {
         applicationInfo: getApplicationInfo(adyenConfig.systemIntegratorName),
         authenticationData: {
             threeDSRequestData: {
-                nativeThreeDS: 'preferred'
+                nativeThreeDS: getNativeThreeDS(adyenConfig)
             }
         },
         channel: 'Web',
