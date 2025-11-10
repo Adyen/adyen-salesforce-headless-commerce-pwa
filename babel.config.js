@@ -1,0 +1,18 @@
+/* eslint-disable */
+module.exports = function (api) {
+    api.cache(true);
+    return {
+        presets: [["@babel/preset-env"]],
+        plugins: [
+            ["@babel/plugin-transform-runtime", {helpers: false}],
+            "@babel/plugin-proposal-optional-chaining",
+            ["@babel/plugin-proposal-decorators", {legacy: true}],
+            "@babel/plugin-proposal-class-properties",
+        ],
+        exclude: ["node_modules/**"],
+        "ignore": [
+            "**/*.test.js",
+            "**/*.test.js.snap",
+        ]
+    };
+};

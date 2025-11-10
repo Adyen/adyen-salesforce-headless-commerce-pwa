@@ -53,15 +53,15 @@ const AdyenCheckoutComponent = (props) => {
                 window.paypal = undefined
             }
             // Unmount any existing checkout instance
-            if (dropinRef.current) {
-                dropinRef.current.unmount()
-                dropinRef.current = null
-            }
             if (checkoutRef.current && adyenOrder?.orderData) {
                 checkoutRef.current.update({order: adyenOrder})
             }
 
-            // checkoutRef.current = null
+            // Unmount any existing dropin
+            if (dropinRef.current) {
+                dropinRef.current.unmount()
+                dropinRef.current = null
+            }
 
             // 1. Fetch the payment methods configuration
             const paymentMethodsConfiguration = await getPaymentMethodsConfiguration({
@@ -94,7 +94,7 @@ const AdyenCheckoutComponent = (props) => {
                 checkoutRef.current
             )
 
-            if (!isRedirect) {
+            if (!isRedirect && !dropinRef?.current) {
                 dropinRef.current = mountCheckoutComponent(
                     adyenAction,
                     checkoutRef.current,
