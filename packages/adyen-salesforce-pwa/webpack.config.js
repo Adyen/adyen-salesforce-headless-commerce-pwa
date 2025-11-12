@@ -5,7 +5,6 @@ const {CleanWebpackPlugin} = require('clean-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 const scriptsConfig = {
-    devtool: 'source-map',
     target: 'node',
     resolve: {
         extensions: ['.js', '.jsx', '.ts', '.tsx', '.cjs', '.mjs', '...']
@@ -41,7 +40,6 @@ const scriptsConfig = {
 }
 
 const serverConfig = {
-    devtool: 'source-map',
     target: 'node',
     resolve: {
         extensions: ['.js', '.jsx', '.ts', '.tsx', '.cjs', '.mjs', '...']

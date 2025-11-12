@@ -325,7 +325,8 @@ AdyenCheckoutComponent.propTypes = {
 
     // Optional overrides
     dropinConfiguration: PropTypes.object,
-    paymentMethodsConfiguration: PropTypes.object
+    paymentMethodsConfiguration: PropTypes.object,
+    translations: PropTypes.object
 }
 
 export default React.memo(AdyenCheckoutComponent, (prevProps, nextProps) => {
