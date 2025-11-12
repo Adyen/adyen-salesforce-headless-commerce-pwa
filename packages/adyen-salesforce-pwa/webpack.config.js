@@ -54,7 +54,11 @@ const serverConfig = {
             type: 'commonjs-static'
         }
     },
-    externals: [/^@salesforce\/pwa-kit-runtime\/.+$/i, 'commerce-sdk-isomorphic'],
+    externals: [
+        /^@salesforce\/pwa-kit-runtime\/.+$/i,
+        'commerce-sdk-isomorphic',
+        '@adyen/api-library'
+    ],
     module: {
         rules: [
             {
@@ -68,7 +72,6 @@ const serverConfig = {
 }
 
 const webConfig = {
-    devtool: 'source-map',
     target: 'web',
     entry: './lib/index.js',
     resolve: {
