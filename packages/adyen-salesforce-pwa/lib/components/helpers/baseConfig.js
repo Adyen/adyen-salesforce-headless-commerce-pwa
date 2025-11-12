@@ -51,17 +51,7 @@ export const onSubmit = async (state, component, actions, props) => {
             origin: state.data.origin || window.location.origin,
             returnUrl: props?.returnUrl || `${window.location.href}/redirect`
         })
-        const adyenPaymentService = new AdyenPaymentsService(
-            props?.token,
-            props?.customerId,
-            props.basket?.basketId,
-            props?.site
-        )
-        const paymentsResponse = await adyenPaymentService.submitPayment({
-            ...state.data,
-            origin: state.data.origin ? state.data.origin : window.location.origin,
-            returnUrl: props?.returnUrl || `${window.location.href}/redirect`
-        })
+
         return {paymentsResponse: paymentsResponse}
     } catch (err) {
         actions.reject(err.message)
@@ -70,12 +60,6 @@ export const onSubmit = async (state, component, actions, props) => {
 
 export const onAdditionalDetails = async (state, component, actions, props) => {
     try {
-        const adyenPaymentsDetailsService = new AdyenPaymentsDetailsService(
-            props?.token,
-            props?.customerId,
-            props.basket?.basketId,
-            props?.site
-        )
         const adyenPaymentsDetailsService = new AdyenPaymentsDetailsService(
             props?.token,
             props?.customerId,
