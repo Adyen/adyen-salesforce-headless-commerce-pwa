@@ -1,24 +1,88 @@
-import React, {useEffect, useRef} from 'react'
+import React, {useEffect, useRef, useCallback, useMemo} from 'react'
 import PropTypes from 'prop-types'
 import {AdyenCheckout, ApplePay} from '@adyen/adyen-web'
 import '@adyen/adyen-web/styles/adyen.css'
-import useAdyenExpressCheckout from '../hooks/useAdyenExpressCheckout'
+import useAdyenEnvironment from '../hooks/useAdyenEnvironment'
+import useAdyenPaymentMethods from '../hooks/useAdyenPaymentMethods'
+import useAdyenShippingMethods from '../hooks/useAdyenShippingMethods'
 import {getAppleButtonConfig, getApplePaymentMethodConfig} from './helpers/applePayExpress.utils'
 
 const ApplePayExpressComponent = (props) => {
-    const {
-        adyenEnvironment,
-        adyenPaymentMethods,
-        basket,
-        locale,
-        site,
-        authToken,
-        navigate,
-        shippingMethods,
-        fetchShippingMethods
-    } = useAdyenExpressCheckout()
+    const {authToken, customerId, locale, site, basket, navigate, onError = []} = props
+
+    const basketId = basket?.basketId
     const paymentContainer = useRef(null)
     const applePayButtonRef = useRef(null)
+
+    // Fetch Adyen environment
+    const {
+        data: adyenEnvironment,
+        error: adyenEnvironmentError,
+        isLoading: isLoadingEnvironment
+    } = useAdyenEnvironment({
+        authToken,
+        customerId,
+        basketId,
+        site
+    })
+
+    // Fetch payment methods
+    const {
+        data: adyenPaymentMethods,
+        error: adyenPaymentMethodsError,
+        isLoading: isLoadingPaymentMethods
+    } = useAdyenPaymentMethods({
+        authToken,
+        customerId,
+        basketId,
+        site,
+        locale
+    })
+
+    // Fetch shipping methods
+    const {
+        data: shippingMethods,
+        error: shippingMethodsError,
+        isLoading: isLoadingShippingMethods
+    } = useAdyenShippingMethods({
+        authToken,
+        customerId,
+        basketId,
+        site,
+        skip: !basketId
+    })
+
+    // Memoize loading state
+    const isLoading = useMemo(
+        () => isLoadingEnvironment || isLoadingPaymentMethods || isLoadingShippingMethods,
+        [isLoadingEnvironment, isLoadingPaymentMethods, isLoadingShippingMethods]
+    )
+
+    const fetchShippingMethods = useCallback(async () => {
+        return shippingMethods
+    }, [shippingMethods])
+
+    // Handle errors from hooks
+    useEffect(() => {
+        if (adyenEnvironmentError) {
+            console.error('Error fetching Adyen environment:', adyenEnvironmentError)
+            onError.forEach((cb) => cb(adyenEnvironmentError))
+        }
+    }, [adyenEnvironmentError, onError])
+
+    useEffect(() => {
+        if (adyenPaymentMethodsError) {
+            console.error('Error fetching Adyen payment methods:', adyenPaymentMethodsError)
+            onError.forEach((cb) => cb(adyenPaymentMethodsError))
+        }
+    }, [adyenPaymentMethodsError, onError])
+
+    useEffect(() => {
+        if (shippingMethodsError) {
+            console.error('Error fetching shipping methods:', shippingMethodsError)
+            onError.forEach((cb) => cb(shippingMethodsError))
+        }
+    }, [shippingMethodsError, onError])
 
     useEffect(() => {
         const initializeCheckout = async () => {
@@ -71,7 +135,8 @@ const ApplePayExpressComponent = (props) => {
                     applePayButtonRef.current = applePayButton
                 }
             } catch (err) {
-                console.error(err)
+                console.error('Error initializing Apple Pay Express:', err)
+                onError.forEach((cb) => cb(err))
             }
         }
 
@@ -84,21 +149,22 @@ const ApplePayExpressComponent = (props) => {
             }
         }
     }, [
-        adyenEnvironment,
-        adyenPaymentMethods,
-        basket,
-        shippingMethods,
-        locale,
+        adyenEnvironment?.ADYEN_ENVIRONMENT,
+        adyenEnvironment?.ADYEN_CLIENT_KEY,
+        adyenPaymentMethods?.paymentMethods,
+        basket?.basketId,
+        shippingMethods?.applicableShippingMethods,
+        locale?.id,
         authToken,
-        site,
+        site?.id,
         navigate,
         fetchShippingMethods
     ])
 
-    const {showLoading, spinner} = props
+    const {spinner} = props
     return (
         <>
-            {showLoading && spinner && (
+            {isLoading && spinner && (
                 <div className="adyen-checkout-spinner-container">{spinner}</div>
             )}
             <div ref={paymentContainer}></div>
@@ -107,8 +173,24 @@ const ApplePayExpressComponent = (props) => {
 }
 
 ApplePayExpressComponent.propTypes = {
-    showLoading: PropTypes.bool,
+    authToken: PropTypes.string.isRequired,
+    customerId: PropTypes.string,
+    locale: PropTypes.object.isRequired,
+    site: PropTypes.object.isRequired,
+    basket: PropTypes.object.isRequired,
+    navigate: PropTypes.func.isRequired,
+    onError: PropTypes.arrayOf(PropTypes.func),
     spinner: PropTypes.node
 }
 
-export default ApplePayExpressComponent
+export default React.memo(ApplePayExpressComponent, (prevProps, nextProps) => {
+    // Prevent unnecessary re-renders by comparing only relevant props
+    return (
+        prevProps.authToken === nextProps.authToken &&
+        prevProps.customerId === nextProps.customerId &&
+        prevProps.locale?.id === nextProps.locale?.id &&
+        prevProps.site?.id === nextProps.site?.id &&
+        prevProps.basket?.basketId === nextProps.basket?.basketId &&
+        prevProps.navigate === nextProps.navigate
+    )
+})

@@ -4,19 +4,20 @@
 import React from 'react'
 import {act, cleanup, render} from '@testing-library/react'
 import AdyenCheckoutComponent from '../adyenCheckout'
-import useAdyenCheckout from '../../hooks/useAdyenCheckout.js'
+import useAdyenEnvironment from '../../hooks/useAdyenEnvironment'
+import useAdyenPaymentMethods from '../../hooks/useAdyenPaymentMethods'
 import {
     createCheckoutInstance,
     handleRedirects,
     mountCheckoutComponent
 } from '../helpers/adyenCheckout.utils.js'
 
-// Mock the hook and helpers
-jest.mock('../../hooks/useAdyenCheckout')
+// Mock the hooks and helpers
+jest.mock('../../hooks/useAdyenEnvironment')
+jest.mock('../../hooks/useAdyenPaymentMethods')
 jest.mock('../helpers/adyenCheckout.utils')
 
 describe('AdyenCheckoutComponent', () => {
-    let mockUseAdyenCheckout
     const mockCheckoutInstance = {
         update: jest.fn()
     }
@@ -24,25 +25,46 @@ describe('AdyenCheckoutComponent', () => {
         unmount: jest.fn()
     }
 
+    const defaultProps = {
+        authToken: 'test_token',
+        customerId: 'test_customer',
+        locale: {id: 'en-US'},
+        site: {id: 'test_site'},
+        basket: {
+            basketId: 'test_basket',
+            currency: 'USD',
+            productTotal: 100,
+            shippingTotal: 10,
+            taxTotal: 5
+        },
+        navigate: jest.fn()
+    }
+
+    const mockEnvironmentData = {
+        ADYEN_ENVIRONMENT: 'test',
+        ADYEN_CLIENT_KEY: 'test_key'
+    }
+
+    const mockPaymentMethodsData = {
+        paymentMethods: [{type: 'scheme'}],
+        applicationInfo: {}
+    }
+
     beforeEach(() => {
         jest.clearAllMocks()
 
-        // Default mock implementation for the hook
-        mockUseAdyenCheckout = {
-            adyenEnvironment: {clientKey: 'test_key', environment: 'test'},
-            adyenPaymentMethods: {paymentMethods: [{type: 'scheme'}]},
-            adyenOrder: null,
-            optionalDropinConfiguration: {},
-            getPaymentMethodsConfiguration: jest.fn().mockResolvedValue({}),
-            isLoading: false,
-            setIsLoading: jest.fn(),
-            getTranslations: jest.fn(),
-            locale: 'en-US',
-            setAdyenStateData: jest.fn(),
-            orderNo: '123',
-            navigate: jest.fn()
-        }
-        useAdyenCheckout.mockReturnValue(mockUseAdyenCheckout)
+        // Mock the hooks
+        useAdyenEnvironment.mockReturnValue({
+            data: mockEnvironmentData,
+            error: null,
+            isLoading: false
+        })
+
+        useAdyenPaymentMethods.mockReturnValue({
+            data: mockPaymentMethodsData,
+            error: null,
+            isLoading: false
+        })
 
         // Mock helpers
         createCheckoutInstance.mockResolvedValue(mockCheckoutInstance)
@@ -56,7 +78,7 @@ describe('AdyenCheckoutComponent', () => {
 
     it('should initialize checkout when environment and payment methods are available', async () => {
         await act(async () => {
-            render(<AdyenCheckoutComponent />)
+            render(<AdyenCheckoutComponent {...defaultProps} />)
         })
 
         expect(createCheckoutInstance).toHaveBeenCalledTimes(1)
@@ -65,10 +87,14 @@ describe('AdyenCheckoutComponent', () => {
     })
 
     it('should not initialize checkout if adyenEnvironment is not available', async () => {
-        useAdyenCheckout.mockReturnValue({...mockUseAdyenCheckout, adyenEnvironment: null})
+        useAdyenEnvironment.mockReturnValue({
+            data: null,
+            error: null,
+            isLoading: false
+        })
 
         await act(async () => {
-            render(<AdyenCheckoutComponent />)
+            render(<AdyenCheckoutComponent {...defaultProps} />)
         })
 
         expect(createCheckoutInstance).not.toHaveBeenCalled()
@@ -78,7 +104,7 @@ describe('AdyenCheckoutComponent', () => {
     it('should call the cleanup function on unmount', async () => {
         let unmount
         await act(async () => {
-            const {unmount: unmountComponent} = render(<AdyenCheckoutComponent />)
+            const {unmount: unmountComponent} = render(<AdyenCheckoutComponent {...defaultProps} />)
             unmount = unmountComponent
         })
 
@@ -93,25 +119,27 @@ describe('AdyenCheckoutComponent', () => {
     })
 
     it('should update the checkout and re-mount dropin when adyenOrder changes', async () => {
-        const {rerender} = render(<AdyenCheckoutComponent />)
+        // Start without order data
+        const {rerender} = render(<AdyenCheckoutComponent {...defaultProps} />)
 
         // Initial render
         await act(async () => {})
         expect(createCheckoutInstance).toHaveBeenCalledTimes(1)
         expect(handleRedirects).toHaveBeenCalledTimes(1)
         expect(mountCheckoutComponent).toHaveBeenCalledTimes(1)
-        expect(mockCheckoutInstance.update).not.toHaveBeenCalled()
 
-        // Simulate a partial payment by updating the adyenOrder
-        const newAdyenOrder = {orderData: 'new_order_data'}
-        useAdyenCheckout.mockReturnValue({
-            ...mockUseAdyenCheckout,
-            adyenOrder: newAdyenOrder
-        })
+        // Simulate a partial payment by adding adyenOrder
+        const propsWithOrder = {
+            ...defaultProps,
+            basket: {
+                ...defaultProps.basket,
+                c_orderData: JSON.stringify({orderData: 'initial_order_data'})
+            }
+        }
 
         // Re-render the component with the new props
         await act(async () => {
-            rerender(<AdyenCheckoutComponent />)
+            rerender(<AdyenCheckoutComponent {...propsWithOrder} />)
         })
 
         // The main initialization runs again on re-render
@@ -124,16 +152,26 @@ describe('AdyenCheckoutComponent', () => {
     it('should not update if checkout instance does not exist', async () => {
         createCheckoutInstance.mockResolvedValue(null) // Simulate checkout creation failure
 
-        const {rerender} = render(<AdyenCheckoutComponent />)
+        const propsWithOrder = {
+            ...defaultProps,
+            basket: {
+                ...defaultProps.basket,
+                c_orderData: JSON.stringify({orderData: 'initial_order_data'})
+            }
+        }
+        const {rerender} = render(<AdyenCheckoutComponent {...propsWithOrder} />)
 
         // Update adyenOrder
-        useAdyenCheckout.mockReturnValue({
-            ...mockUseAdyenCheckout,
-            adyenOrder: {orderData: 'new_order_data'}
-        })
+        const updatedPropsWithOrder = {
+            ...defaultProps,
+            basket: {
+                ...defaultProps.basket,
+                c_orderData: JSON.stringify({orderData: 'new_order_data'})
+            }
+        }
 
         await act(async () => {
-            rerender(<AdyenCheckoutComponent />)
+            rerender(<AdyenCheckoutComponent {...updatedPropsWithOrder} />)
         })
 
         expect(mockCheckoutInstance.update).not.toHaveBeenCalled()

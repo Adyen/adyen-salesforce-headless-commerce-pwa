@@ -4,22 +4,30 @@ import {executeCallbacks, executeErrorCallbacks} from '../../utils/executeCallba
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 import {PaymentCancelService} from '../../services/payment-cancel'
 
-export const baseConfig = ({
-    beforeSubmit = [],
-    afterSubmit = [],
-    beforeAdditionalDetails = [],
-    afterAdditionalDetails = [],
-    onError = [],
-    ...props
-}) => {
+export const baseConfig = (props) => {
+    const {
+        beforeSubmit = [],
+        afterSubmit = [],
+        beforeAdditionalDetails = [],
+        afterAdditionalDetails = [],
+        onError = []
+    } = props
     // Create error handler with props in closure
     const errorHandler = (error, component) => onErrorHandler(error, component, props)
 
     return {
         amount: getAmount(props),
-        onSubmit: executeCallbacks([...beforeSubmit, onSubmit, ...afterSubmit], props),
+        onSubmit: executeCallbacks(
+            [...beforeSubmit, onSubmit, ...afterSubmit, onPaymentsSuccess],
+            props
+        ),
         onAdditionalDetails: executeCallbacks(
-            [...beforeAdditionalDetails, onAdditionalDetails, ...afterAdditionalDetails],
+            [
+                ...beforeAdditionalDetails,
+                onAdditionalDetails,
+                ...afterAdditionalDetails,
+                onPaymentsDetailsSuccess
+            ],
             props
         ),
         onError: executeErrorCallbacks([...onError, errorHandler], props),
@@ -80,6 +88,9 @@ export const onAdditionalDetails = async (state, component, actions, props) => {
         return {paymentsDetailsResponse: paymentsDetailsResponse}
     } catch (err) {
         actions.reject(err.message)
+        if (state?.data?.details?.redirectResult || state?.data?.details?.threeDSResult) {
+            executeErrorCallbacks([...props.onError, onErrorHandler], props)(err, component)
+        }
     }
 }
 
@@ -95,7 +106,7 @@ export const onErrorHandler = async (error, component, props) => {
         if (props.adyenOrder) {
             props.setAdyenOrder(null)
         }
-        props.navigate('/checkout')
+        props.navigate(`/checkout?error=true`)
         return {cancelled: true}
     } catch (err) {
         console.error('Error during payment cancellation:', err)
@@ -112,4 +123,67 @@ export const getAmount = ({basket, adyenOrder}) => {
         value: getCurrencyValueForApi(basket.orderTotal, basket.currency),
         currency: basket.currency
     }
+}
+
+const handleAction = (navigate, setAdyenAction, component, response) => {
+    const {action, merchantReference} = response
+    const actionURI = btoa(JSON.stringify(action))
+    const url = `/checkout/confirmation/${merchantReference}?adyenAction=${actionURI}`
+    switch (action.type) {
+        case 'voucher':
+            navigate(url)
+            break
+        case 'threeDS2':
+            setAdyenAction(actionURI)
+            break
+        default:
+            component.handleAction(action)
+            break
+    }
+}
+
+export const onPaymentsSuccess = async (state, component, actions, props, responses) => {
+    if (responses?.paymentsResponse?.merchantReference) {
+        if (props?.orderNo !== responses?.paymentsResponse?.merchantReference) {
+            props?.setOrderNo(responses?.paymentsResponse?.merchantReference)
+        }
+    }
+    if (responses?.paymentsResponse?.order?.orderData) {
+        // Only update the order if it's different from the one in the state to prevent re-renders.
+        if (props.adyenOrder?.orderData !== responses?.paymentsResponse?.order?.orderData) {
+            props?.setAdyenOrder(responses?.paymentsResponse?.order)
+        }
+    }
+    if (responses?.paymentsResponse?.isSuccessful && responses?.paymentsResponse?.isFinal) {
+        if (responses?.paymentsResponse?.order) {
+            if (responses?.paymentsResponse?.order?.remainingAmount?.value <= 0) {
+                props?.navigate(
+                    `/checkout/confirmation/${responses?.paymentsResponse?.merchantReference}`
+                )
+            }
+        } else {
+            props?.navigate(
+                `/checkout/confirmation/${responses?.paymentsResponse?.merchantReference}`
+            )
+        }
+    } else if (responses?.paymentsResponse?.action) {
+        handleAction(props?.navigate, props?.setAdyenAction, component, responses?.paymentsResponse)
+    }
+    actions.resolve(responses?.paymentsResponse)
+}
+
+export const onPaymentsDetailsSuccess = async (state, component, actions, props, responses) => {
+    if (responses?.paymentsDetailsResponse?.isSuccessful) {
+        props?.navigate(
+            `/checkout/confirmation/${responses?.paymentsDetailsResponse?.merchantReference}`
+        )
+    } else if (responses?.paymentsDetailsResponse?.action) {
+        handleAction(
+            props?.navigate,
+            props?.setAdyenAction,
+            component,
+            responses?.paymentsDetailsResponse
+        )
+    }
+    actions.resolve(responses?.paymentsDetailsResponse)
 }

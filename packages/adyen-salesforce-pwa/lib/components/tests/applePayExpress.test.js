@@ -5,11 +5,15 @@
 import React from 'react'
 import {act, render, screen} from '@testing-library/react'
 import ApplePayExpressComponent from '../applePayExpress'
-import useAdyenExpressCheckout from '../../hooks/useAdyenExpressCheckout'
+import useAdyenEnvironment from '../../hooks/useAdyenEnvironment'
+import useAdyenPaymentMethods from '../../hooks/useAdyenPaymentMethods'
+import useAdyenShippingMethods from '../../hooks/useAdyenShippingMethods'
 import {getAppleButtonConfig, getApplePaymentMethodConfig} from '../helpers/applePayExpress.utils'
 import {AdyenCheckout, ApplePay} from '@adyen/adyen-web'
 
-jest.mock('../../hooks/useAdyenExpressCheckout')
+jest.mock('../../hooks/useAdyenEnvironment')
+jest.mock('../../hooks/useAdyenPaymentMethods')
+jest.mock('../../hooks/useAdyenShippingMethods')
 jest.mock('../helpers/applePayExpress.utils')
 jest.mock('@adyen/adyen-web', () => ({
     AdyenCheckout: jest.fn().mockResolvedValue({}),
@@ -21,21 +25,48 @@ jest.mock('@adyen/adyen-web', () => ({
 }))
 
 describe('ApplePayExpressComponent', () => {
-    let mockUseAdyenExpressCheckout
+    const defaultProps = {
+        authToken: 'test-auth-token',
+        customerId: 'test-customer',
+        locale: {id: 'en-US'},
+        site: {id: 'test-site'},
+        basket: {basketId: 'test-basket'},
+        navigate: jest.fn()
+    }
+
+    const mockEnvironmentData = {
+        ADYEN_ENVIRONMENT: 'test',
+        ADYEN_CLIENT_KEY: 'test_key'
+    }
+
+    const mockPaymentMethodsData = {
+        paymentMethods: [],
+        applicationInfo: {}
+    }
+
+    const mockShippingMethodsData = {
+        applicableShippingMethods: []
+    }
 
     beforeEach(() => {
-        mockUseAdyenExpressCheckout = {
-            adyenEnvironment: {ADYEN_ENVIRONMENT: 'test', ADYEN_CLIENT_KEY: 'test_key'},
-            adyenPaymentMethods: {paymentMethods: []},
-            basket: {basketId: 'test-basket'},
-            locale: {id: 'en-US'},
-            site: {id: 'test-site'},
-            authToken: 'test-auth-token',
-            navigate: jest.fn(),
-            shippingMethods: {applicableShippingMethods: []},
-            fetchShippingMethods: jest.fn()
-        }
-        useAdyenExpressCheckout.mockReturnValue(mockUseAdyenExpressCheckout)
+        useAdyenEnvironment.mockReturnValue({
+            data: mockEnvironmentData,
+            error: null,
+            isLoading: false
+        })
+
+        useAdyenPaymentMethods.mockReturnValue({
+            data: mockPaymentMethodsData,
+            error: null,
+            isLoading: false
+        })
+
+        useAdyenShippingMethods.mockReturnValue({
+            data: mockShippingMethodsData,
+            error: null,
+            isLoading: false
+        })
+
         getApplePaymentMethodConfig.mockReturnValue({})
         getAppleButtonConfig.mockReturnValue({})
     })
@@ -44,25 +75,29 @@ describe('ApplePayExpressComponent', () => {
         jest.clearAllMocks()
     })
 
-    it('renders spinner when showLoading is true', () => {
-        render(<ApplePayExpressComponent showLoading={true} spinner={<div>Spinner</div>} />)
+    it('renders spinner when hooks are loading', () => {
+        useAdyenEnvironment.mockReturnValue({
+            data: null,
+            error: null,
+            isLoading: true
+        })
+
+        render(<ApplePayExpressComponent {...defaultProps} spinner={<div>Spinner</div>} />)
         expect(screen.getByText('Spinner')).toBeInTheDocument()
     })
 
-    it('does not render spinner when showLoading is false', () => {
-        render(<ApplePayExpressComponent showLoading={false} spinner={<div>Spinner</div>} />)
+    it('does not render spinner when hooks are not loading', () => {
+        render(<ApplePayExpressComponent {...defaultProps} spinner={<div>Spinner</div>} />)
         expect(screen.queryByText('Spinner')).not.toBeInTheDocument()
     })
 
     it('initializes and mounts Apple Pay button when available', async () => {
         await act(async () => {
-            render(<ApplePayExpressComponent />)
+            render(<ApplePayExpressComponent {...defaultProps} />)
         })
 
         expect(AdyenCheckout).toHaveBeenCalled()
-        expect(getApplePaymentMethodConfig).toHaveBeenCalledWith(
-            mockUseAdyenExpressCheckout.adyenPaymentMethods
-        )
+        expect(getApplePaymentMethodConfig).toHaveBeenCalledWith(mockPaymentMethodsData)
         expect(getAppleButtonConfig).toHaveBeenCalled()
         expect(ApplePay).toHaveBeenCalled()
         const mockApplePayInstance = ApplePay.mock.results[0].value
@@ -71,13 +106,14 @@ describe('ApplePayExpressComponent', () => {
     })
 
     it('does not initialize if dependencies are not met', async () => {
-        useAdyenExpressCheckout.mockReturnValue({
-            ...mockUseAdyenExpressCheckout,
-            adyenEnvironment: null
+        useAdyenEnvironment.mockReturnValue({
+            data: null,
+            error: null,
+            isLoading: false
         })
 
         await act(async () => {
-            render(<ApplePayExpressComponent />)
+            render(<ApplePayExpressComponent {...defaultProps} />)
         })
 
         expect(AdyenCheckout).not.toHaveBeenCalled()
@@ -91,7 +127,7 @@ describe('ApplePayExpressComponent', () => {
         ApplePay.mockImplementation(() => mockApplePayInstance)
 
         await act(async () => {
-            render(<ApplePayExpressComponent />)
+            render(<ApplePayExpressComponent {...defaultProps} />)
         })
 
         expect(mockApplePayInstance.mount).not.toHaveBeenCalled()

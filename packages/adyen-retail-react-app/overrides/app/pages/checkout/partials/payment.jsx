@@ -28,13 +28,32 @@ import {PromoCode, usePromoCode} from '@salesforce/retail-react-app/app/componen
 import {API_ERROR_MESSAGE} from '@salesforce/retail-react-app/app/constants'
 import {isPickupShipment} from '@salesforce/retail-react-app/app/utils/shipment-utils'
 /* -----------------Adyen Begin ------------------------ */
-import {AdyenCheckout, useAdyenCheckout} from '@adyen/adyen-salesforce-pwa'
+import {useAccessToken, useCustomerId, useCustomerType} from '@salesforce/commerce-sdk-react'
+import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
+import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
 import LoadingSpinner from '@salesforce/retail-react-app/app/components/loading-spinner'
+import {AdyenCheckout, pageTypes} from '@adyen/adyen-salesforce-pwa'
 /* -----------------Adyen End ------------------------ */
 
 const Payment = () => {
     const {formatMessage} = useIntl()
     const {data: basket} = useCurrentBasket()
+    const customerId = useCustomerId()
+    const customerTypeData = useCustomerType()
+    const {getTokenWhenReady} = useAccessToken()
+    const navigate = useNavigation()
+    const {locale, site} = useMultiSite()
+    const [authToken, setAuthToken] = useState()
+
+    useEffect(() => {
+        const getToken = async () => {
+            const token = await getTokenWhenReady()
+            setAuthToken(token)
+        }
+
+        getToken()
+    }, [])
+
     const isPickupOnly =
         basket?.shipments?.length > 0 &&
         basket.shipments.every((shipment) => isPickupShipment(shipment))
@@ -64,8 +83,7 @@ const Payment = () => {
             status: 'error'
         })
     }
-    const spinner = <LoadingSpinner wrapperStyles={{height: '100vh'}} />
-    const {adyenPaymentMethods} = useAdyenCheckout()
+
     const {step, STEPS} = useCheckout()
 
     const billingAddressForm = useForm({
@@ -101,12 +119,27 @@ const Payment = () => {
         id: 'checkout_payment.label.billing_address_form'
     })
 
+    /**
+     * Customize Adyen Checkout
+     * - Translations
+     * - Payment Methods
+     * - Execute Callbacks
+     */
+    const paymentMethodsConfiguration = {
+        klarna: {
+            useKlarnaWidget: false
+        },
+        klarna_account: {
+            useKlarnaWidget: false
+        }
+    }
+
     return (
         <ToggleCard
             id="step-3"
             title={formatMessage({defaultMessage: 'Payment', id: 'checkout_payment.title.payment'})}
             editing={step === STEPS.PAYMENT || step === STEPS.REVIEW_ORDER}
-            isLoading={!adyenPaymentMethods || billingAddressForm.formState.isSubmitting}
+            isLoading={billingAddressForm.formState.isSubmitting}
         >
             <ToggleCardEdit>
                 <Box mt={-2} mb={4}>
@@ -114,13 +147,24 @@ const Payment = () => {
                 </Box>
 
                 <Stack spacing={6}>
-                    {adyenPaymentMethods && (
-                        <AdyenCheckout
-                            beforeSubmit={[onBillingSubmit]}
-                            onError={[showError]}
-                            spinner={spinner}
-                        />
-                    )}
+                    <AdyenCheckout
+                        // Required props
+                        authToken={authToken}
+                        site={site}
+                        locale={locale}
+                        navigate={navigate}
+                        basket={basket}
+                        // Optional
+                        page={pageTypes.CHECKOUT}
+                        customerId={customerId}
+                        isCustomerRegistered={customerTypeData.isRegistered}
+                        paymentMethodsConfiguration={paymentMethodsConfiguration}
+                        // Callbacks
+                        beforeSubmit={[onBillingSubmit]}
+                        onError={[showError]}
+                        // UI
+                        spinner={<LoadingSpinner wrapperStyles={{height: '100vh'}} />}
+                    />
 
                     <Divider borderColor="gray.100" />
 

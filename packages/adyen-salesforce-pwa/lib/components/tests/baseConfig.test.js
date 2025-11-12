@@ -185,7 +185,7 @@ describe('onErrorHandler', () => {
             props.basket.basketId,
             props.site
         )
-        expect(navigate).toHaveBeenCalledWith('/checkout')
+        expect(navigate).toHaveBeenCalledWith('/checkout?error=true')
         expect(result).toEqual({cancelled: true})
         expect(consoleErrorSpy).not.toHaveBeenCalled()
     })

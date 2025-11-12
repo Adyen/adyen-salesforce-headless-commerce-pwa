@@ -15,7 +15,6 @@ import {
     GridItem,
     Stack
 } from '@salesforce/retail-react-app/app/components/shared/ui'
-import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
 import {
     CheckoutProvider,
     useCheckout
@@ -28,12 +27,7 @@ import OrderSummary from '@salesforce/retail-react-app/app/components/order-summ
 import {useCurrentCustomer} from '@salesforce/retail-react-app/app/hooks/use-current-customer'
 import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 import CheckoutSkeleton from '@salesforce/retail-react-app/app/pages/checkout/partials/checkout-skeleton'
-import {
-    useAccessToken,
-    useCustomerId,
-    useCustomerType,
-    useShopperBasketsMutation
-} from '@salesforce/commerce-sdk-react'
+import {useShopperBasketsMutation} from '@salesforce/commerce-sdk-react'
 import UnavailableProductConfirmationModal from '@salesforce/retail-react-app/app/components/unavailable-product-confirmation-modal'
 import {
     API_ERROR_MESSAGE,
@@ -46,9 +40,6 @@ import {useMultiship} from '@salesforce/retail-react-app/app/hooks/use-multiship
 
 /* -----------------Adyen Begin ------------------------ */
 import Payment from './partials/payment'
-import {AdyenCheckoutProvider, pageTypes} from '@adyen/adyen-salesforce-pwa'
-import '@adyen/adyen-salesforce-pwa/dist/app/adyen.css'
-import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
 /* -----------------Adyen End ------------------------ */
 
 const Checkout = () => {
@@ -138,55 +129,13 @@ const Checkout = () => {
     )
 }
 
-/**
- * Customize Adyen Checkout
- * - Translations
- * - Payment Methods
- * - Execute Callbacks
- */
-
-const checkoutCustomizations = {
-    paymentMethodsConfiguration: {
-        klarna: {
-            useKlarnaWidget: false
-        },
-        klarna_account: {
-            useKlarnaWidget: false
-        }
-    },
-    translations: {
-        'fr-CH': {
-            'form.instruction': 'hello world'
-        }
-    }
-}
-
 const CheckoutContainer = () => {
-    const customerId = useCustomerId()
-    const customerTypeData = useCustomerType()
-    const {getTokenWhenReady} = useAccessToken()
-    const navigate = useNavigation()
-    const {locale, site} = useMultiSite()
     const {data: customer} = useCurrentCustomer()
     const {data: basket} = useCurrentBasket()
     const {formatMessage} = useIntl()
     const removeItemFromBasketMutation = useShopperBasketsMutation('removeItemFromBasket')
     const toast = useToast()
     const [isDeletingUnavailableItem, setIsDeletingUnavailableItem] = useState(false)
-    const [authToken, setAuthToken] = useState()
-
-    useEffect(() => {
-        const getToken = async () => {
-            const token = await getTokenWhenReady()
-            setAuthToken(token)
-        }
-
-        getToken()
-    }, [])
-
-    if (!authToken) {
-        return
-    }
 
     const handleRemoveItem = async (product) => {
         await removeItemFromBasketMutation.mutateAsync(
@@ -225,27 +174,15 @@ const CheckoutContainer = () => {
     }
 
     return (
-        <AdyenCheckoutProvider
-            authToken={authToken}
-            customerId={customerId}
-            isCustomerRegistered={customerTypeData?.isRegistered}
-            locale={locale}
-            site={site}
-            basket={basket}
-            navigate={navigate}
-            adyenConfig={checkoutCustomizations}
-            page={pageTypes.CHECKOUT}
-        >
-            <CheckoutProvider>
-                {isDeletingUnavailableItem && <LoadingSpinner wrapperStyles={{height: '100vh'}} />}
+        <CheckoutProvider>
+            {isDeletingUnavailableItem && <LoadingSpinner wrapperStyles={{height: '100vh'}} />}
 
-                <Checkout />
-                <UnavailableProductConfirmationModal
-                    productItems={basket?.productItems}
-                    handleUnavailableProducts={handleUnavailableProducts}
-                />
-            </CheckoutProvider>
-        </AdyenCheckoutProvider>
+            <Checkout />
+            <UnavailableProductConfirmationModal
+                productItems={basket?.productItems}
+                handleUnavailableProducts={handleUnavailableProducts}
+            />
+        </CheckoutProvider>
     )
 }
 
