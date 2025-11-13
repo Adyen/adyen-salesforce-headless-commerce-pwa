@@ -13,12 +13,14 @@ describe('getAdyenConfigForCurrentSite', () => {
             clientKey: 'site1_client_key',
             environment: '',
             merchantAccount: '',
+            nativeThreeDS: '',
             systemIntegratorName: '',
             webhookHmacKey: '',
             webhookPassword: '',
             webhookUser: '',
             liveEndpointUrlPrefix: '',
-            appleDomainAssociation: ''
+            appleDomainAssociation: '',
+            giftCardExpirationTime: ''
         }
 
         const result = getAdyenConfigForCurrentSite(siteId)
@@ -32,12 +34,14 @@ describe('getAdyenConfigForCurrentSite', () => {
             clientKey: '',
             environment: '',
             merchantAccount: '',
+            nativeThreeDS: '',
             systemIntegratorName: '',
             webhookHmacKey: '',
             webhookPassword: '',
             webhookUser: '',
             liveEndpointUrlPrefix: '',
-            appleDomainAssociation: ''
+            appleDomainAssociation: '',
+            giftCardExpirationTime: ''
         })
     })
 })

@@ -4,23 +4,22 @@ export class AdyenPaymentsDetailsService {
     baseUrl = '/api/adyen/payments/details'
     apiClient = null
 
-    constructor(token, site) {
-        this.apiClient = new ApiClient(this.baseUrl, token, site)
+    constructor(token, customerId, basketId, site) {
+        this.apiClient = new ApiClient(this.baseUrl, token, customerId, basketId, site)
     }
 
-    async submitPaymentsDetails(data, customerId) {
+    async submitPaymentsDetails(data) {
         const res = await this.apiClient.post({
             body: JSON.stringify({
                 data
-            }),
-            headers: {
-                customerid: customerId
-            }
+            })
         })
         if (res.status >= 300) {
-            throw new Error(res)
-        } else {
-            return await res.json()
+            const errorData = await res
+                .json()
+                .catch(() => ({message: 'Payment details submission failed'}))
+            throw new Error(errorData.message || `Payment details failed with status ${res.status}`)
         }
+        return await res.json()
     }
 }

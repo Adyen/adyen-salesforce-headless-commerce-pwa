@@ -64,14 +64,15 @@ describe('AdyenShippingAddressService', () => {
             const basketId = 'basket-id'
             const mockFetchPromise = Promise.resolve({
                 status: 400,
-                statusText: 'Bad Request'
+                statusText: 'Bad Request',
+                json: jest.fn().mockResolvedValue({message: 'Shipping address update failed'})
             })
 
             adyenService.apiClient.post.mockResolvedValueOnce(mockFetchPromise)
 
             await expect(
                 adyenService.updateShippingAddress(shippingMethodId, basketId)
-            ).rejects.toThrow('[object Object]')
+            ).rejects.toThrow('Shipping address update failed')
         })
     })
 })

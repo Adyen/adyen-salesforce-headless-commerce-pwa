@@ -68,7 +68,7 @@ module.exports = {
     ],
     // Additional parameters that configure Express app behavior.
     ssrParameters: {
-        ssrFunctionNodeVersion: '18.x',
+        ssrFunctionNodeVersion: '22.x',
         proxyConfigs: [
             {
                 host: process.env.SCAPI_URL,

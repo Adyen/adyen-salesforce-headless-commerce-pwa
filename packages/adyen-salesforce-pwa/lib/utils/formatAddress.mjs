@@ -8,4 +8,3 @@ export const formatAddressInAdyenFormat = (address) => {
         street: address?.address1 || ''
     }
 }
-

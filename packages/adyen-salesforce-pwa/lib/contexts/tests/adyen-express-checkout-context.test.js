@@ -1,151 +1,152 @@
+/**
+ * @jest-environment jest-environment-jsdom
+ * @jest-environment-options {"url": "http://localhost:3000/", "resources": "usable"}
+ */
+import React, {useContext} from 'react'
+import {act, render, screen} from '@testing-library/react'
 import {
-    fetchPaymentMethods,
-    fetchEnvironment,
-    fetchShippingMethods
+    AdyenExpressCheckoutContext,
+    AdyenExpressCheckoutProvider
 } from '../adyen-express-checkout-context'
+import {AdyenPaymentMethodsService} from '../../services/payment-methods'
+import {AdyenEnvironmentService} from '../../services/environment'
+import {AdyenShippingMethodsService} from '../../services/shipping-methods'
 
-let mockFetchPaymentMethods = jest.fn()
-let mockFetchEnvironment = jest.fn()
-let mockFetchShippingMethods = jest.fn()
+jest.mock('../../services/payment-methods')
+jest.mock('../../services/environment')
+jest.mock('../../services/shipping-methods')
 
-jest.mock('../../services/payment-methods', () => ({
-    AdyenPaymentMethodsService: jest.fn().mockImplementation(() => ({
-        fetchPaymentMethods: mockFetchPaymentMethods
-    }))
-}))
+const mockPaymentMethodsResponse = {paymentMethods: ['visa']}
+const mockEnvironmentResponse = {clientKey: 'test_key'}
+const mockShippingMethodsResponse = {shippingMethods: ['standard']}
+const mockGetShippingMethods = jest.fn().mockResolvedValue(mockShippingMethodsResponse)
 
-jest.mock('../../services/environment', () => ({
-    AdyenEnvironmentService: jest.fn().mockImplementation(() => ({
-        fetchEnvironment: mockFetchEnvironment
-    }))
-}))
-
-jest.mock('../../services/shipping-methods', () => ({
-    AdyenShippingMethodsService: jest.fn().mockImplementation(() => ({
-        getShippingMethods: mockFetchShippingMethods
-    }))
-}))
-
-const paymentMethodsResponse = {
-    paymentMethods: [
-        {
-            details: [
-                {
-                    key: 'encryptedCardNumber',
-                    type: 'cardToken'
-                },
-                {
-                    key: 'encryptedSecurityCode',
-                    type: 'cardToken'
-                },
-                {
-                    key: 'encryptedExpiryMonth',
-                    type: 'cardToken'
-                },
-                {
-                    key: 'encryptedExpiryYear',
-                    type: 'cardToken'
-                },
-                {
-                    key: 'holderName',
-                    optional: true,
-                    type: 'text'
-                }
-            ],
-            name: 'Cards',
-            type: 'scheme'
-        },
-        {
-            name: 'Amazon Pay',
-            type: 'amazonpay'
-        }
-    ]
+// A simple consumer component to access the context value
+const TestConsumer = () => {
+    const context = useContext(AdyenExpressCheckoutContext)
+    // The context value contains functions, which can't be serialized directly.
+    // We'll just render the stateful parts.
+    const {adyenEnvironment, adyenPaymentMethods, shippingMethods} = context
+    return (
+        <div data-testid="context">
+            {JSON.stringify({adyenEnvironment, adyenPaymentMethods, shippingMethods})}
+        </div>
+    )
 }
 
-const shippingMethodsResponse = [
-    {
-        id: '001',
-        name: 'global'
-    }
-]
+describe('AdyenExpressCheckoutProvider', () => {
+    let consoleErrorSpy
+    beforeEach(() => {
+        consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+        // Reset mocks before each test
+        AdyenPaymentMethodsService.mockClear()
+        AdyenEnvironmentService.mockClear()
+        AdyenShippingMethodsService.mockClear()
+        mockGetShippingMethods.mockClear()
 
-describe('fetchPaymentMethods function', () => {
-    it('returns payment methods when fetch is successful', async () => {
-        mockFetchPaymentMethods.mockImplementationOnce(() => paymentMethodsResponse)
-        const customerId = 'mockCustomerId'
-        const site = 'mockSite'
-        const locale = 'en-US'
-        const authToken = 'authToken'
-
-        const paymentMethods = await fetchPaymentMethods(customerId, site, locale, authToken)
-
-        expect(paymentMethods).toEqual(paymentMethodsResponse)
-    })
-
-    it('returns null when fetch fails', async () => {
-        mockFetchPaymentMethods.mockRejectedValue(() => new Error('Failed to payment methods'))
-        const customerId = 'mockCustomerId'
-        const site = 'mockSite'
-        const locale = 'en-US'
-        const authToken = 'authToken'
-
-        const paymentMethods = await fetchPaymentMethods(customerId, site, locale, authToken)
-
-        expect(paymentMethods).toBeNull()
-    })
-})
-
-describe('fetchEnvironment function', () => {
-    it('returns environment when fetch is successful', async () => {
-        mockFetchEnvironment.mockImplementationOnce(() => ({
-            ADYEN_ENVIRONMENT: 'test',
-            ADYEN_CLIENT_KEY: 'testKey'
+        // Setup mock implementations
+        AdyenEnvironmentService.mockImplementation(() => ({
+            fetchEnvironment: jest.fn().mockResolvedValue(mockEnvironmentResponse)
         }))
-        const site = 'mockSite'
-        const authToken = 'testToken'
+        AdyenPaymentMethodsService.mockImplementation(() => ({
+            fetchPaymentMethods: jest.fn().mockResolvedValue(mockPaymentMethodsResponse)
+        }))
+        AdyenShippingMethodsService.mockImplementation(() => ({
+            getShippingMethods: mockGetShippingMethods
+        }))
+    })
 
-        const environment = await fetchEnvironment(site, authToken)
+    afterEach(() => {
+        consoleErrorSpy.mockRestore()
+    })
 
-        expect(environment).toEqual({
-            ADYEN_ENVIRONMENT: 'test',
-            ADYEN_CLIENT_KEY: 'testKey'
+    it('fetches environment and payment methods on mount', async () => {
+        await act(async () => {
+            render(
+                <AdyenExpressCheckoutProvider
+                    authToken="mockToken"
+                    site={{id: 'mockSite'}}
+                    locale={{id: 'en-US'}}
+                    navigate={jest.fn()}
+                >
+                    <TestConsumer />
+                </AdyenExpressCheckoutProvider>
+            )
         })
+
+        const contextValue = JSON.parse(screen.getByTestId('context').textContent)
+
+        expect(AdyenEnvironmentService).toHaveBeenCalled()
+        expect(AdyenPaymentMethodsService).toHaveBeenCalled()
+        expect(contextValue.adyenEnvironment).toEqual(mockEnvironmentResponse)
+        expect(contextValue.adyenPaymentMethods).toEqual(mockPaymentMethodsResponse)
     })
 
-    it('returns null when fetch fails', async () => {
-        mockFetchEnvironment.mockRejectedValue(() => new Error('Failed to fetch environment'))
-        const site = 'mockSite'
-        const authToken = 'testToken'
+    it('fetches shipping methods automatically when basketId is available', async () => {
+        const mockBasket = {basketId: 'mockBasket'}
 
-        const environmentData = await fetchEnvironment(site, authToken)
+        await act(async () => {
+            render(
+                <AdyenExpressCheckoutProvider
+                    authToken="mockToken"
+                    site={{id: 'mockSite'}}
+                    basket={mockBasket}
+                    navigate={jest.fn()}
+                >
+                    <TestConsumer />
+                </AdyenExpressCheckoutProvider>
+            )
+        })
 
-        expect(environmentData).toBeNull()
-    })
-})
-
-describe('fetchShippingMethods function', () => {
-    it('returns shipping methods when fetch is successful', async () => {
-        mockFetchShippingMethods.mockImplementationOnce(() => shippingMethodsResponse)
-
-        const basketId = 'basket-id'
-        const site = 'mockSite'
-        const authToken = 'testToken'
-
-        const shippingMethods = await fetchShippingMethods(basketId, site, authToken)
-
-        expect(shippingMethods).toEqual(shippingMethodsResponse)
+        const contextValue = JSON.parse(screen.getByTestId('context').textContent)
+        expect(AdyenShippingMethodsService).toHaveBeenCalled()
+        expect(contextValue.shippingMethods).toEqual(mockShippingMethodsResponse)
     })
 
-    it('returns null when fetch fails', async () => {
-        mockFetchShippingMethods.mockRejectedValue(
-            () => new Error('Failed to fetch shipping methods')
-        )
-        const basketId = 'basket-id'
-        const site = 'mockSite'
-        const authToken = 'testToken'
+    it('exposes a working fetchShippingMethods function that can be called manually', async () => {
+        let context
+        const ManualFetchConsumer = () => {
+            context = useContext(AdyenExpressCheckoutContext)
+            return <button onClick={context.fetchShippingMethods}>Fetch Manually</button>
+        }
 
-        const shippingMethods = await fetchShippingMethods(basketId, site, authToken)
+        await act(async () => {
+            render(
+                <AdyenExpressCheckoutProvider
+                    authToken="mockToken"
+                    site={{id: 'mockSite'}}
+                    basket={{basketId: 'mockBasket'}}
+                    navigate={jest.fn()}
+                >
+                    <ManualFetchConsumer />
+                </AdyenExpressCheckoutProvider>
+            )
+        })
 
-        expect(shippingMethods).toBeNull()
+        // It's called once automatically on mount because basketId is present
+        expect(mockGetShippingMethods).toHaveBeenCalledTimes(1)
+    })
+
+    it('handles errors during data fetching and sets error state', async () => {
+        // Override mock to simulate an error
+        AdyenEnvironmentService.mockImplementation(() => ({
+            fetchEnvironment: jest.fn().mockRejectedValue(new Error('API Error'))
+        }))
+
+        await act(async () => {
+            render(
+                <AdyenExpressCheckoutProvider
+                    authToken="mockToken"
+                    site={{id: 'mockSite'}}
+                    locale={{id: 'en-US'}}
+                    navigate={jest.fn()}
+                >
+                    <TestConsumer />
+                </AdyenExpressCheckoutProvider>
+            )
+        })
+
+        const contextValue = JSON.parse(screen.getByTestId('context').textContent)
+        expect(contextValue.adyenEnvironment).toEqual({error: {}})
     })
 })

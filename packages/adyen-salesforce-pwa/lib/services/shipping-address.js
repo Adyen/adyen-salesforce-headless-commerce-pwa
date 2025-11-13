@@ -4,23 +4,24 @@ export class AdyenShippingAddressService {
     baseUrl = '/api/adyen/shipping-address'
     apiClient = null
 
-    constructor(token, site) {
-        this.apiClient = new ApiClient(this.baseUrl, token, site)
+    constructor(token, customerId, basketId, site) {
+        this.apiClient = new ApiClient(this.baseUrl, token, customerId, basketId, site)
     }
 
-    async updateShippingAddress(basketId, data) {
+    async updateShippingAddress(data) {
         const res = await this.apiClient.post({
             body: JSON.stringify({
                 data
-            }),
-            headers: {
-                basketid: basketId
-            }
+            })
         })
         if (res.status >= 300) {
-            throw new Error(res)
-        } else {
-            return await res.json()
+            const errorData = await res
+                .json()
+                .catch(() => ({message: 'Failed to update shipping address'}))
+            throw new Error(
+                errorData.message || `Update shipping address failed with status ${res.status}`
+            )
         }
+        return await res.json()
     }
 }

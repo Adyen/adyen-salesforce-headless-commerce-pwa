@@ -1,4 +1,4 @@
-import { PaymentData } from "../data/paymentData.js";
+import {PaymentData} from "../data/paymentData.js";
 
 export class PaymentHelper {
     constructor(page) {
@@ -27,6 +27,15 @@ export class PaymentHelper {
         this.threeDS2PasswordInput = this.threeDS2Iframe.locator("input[name='answer']")
         this.threeDS2SubmitButton = this.threeDS2Iframe.locator("button[type='submit']")
         this.threeDS2CancelButton = this.threeDS2Iframe.locator('#buttonCancel')
+
+        // Gift Card Component locators
+        this.giftCardNumberInput = this.activePaymentType
+            .frameLocator('.adyen-checkout__card__cardNumber__input iframe')
+            .locator('.input-field')
+        this.giftCardPinInput = this.activePaymentType
+            .frameLocator('.adyen-checkout__card__cvc__input iframe')
+            .locator('.input-field')
+        this.AddedGiftCards = this.page.locator('.adyen-checkout__order-payment-method')
     }
 
     async selectPaymentType(paymentType) {
@@ -61,8 +70,8 @@ export class PaymentHelper {
 
     initiatePayPalPayment = async () => {
         const payPalButton = this.page
-          .frameLocator('.adyen-checkout__paypal__button--paypal iframe.visible')
-          .locator('.paypal-button');
+            .frameLocator('.adyen-checkout__paypal__button--paypal iframe.visible')
+            .locator('.paypal-button');
 
         const [popup] = await Promise.all([
             this.page.waitForEvent('popup'),
@@ -126,5 +135,15 @@ export class PaymentHelper {
     async cancel3DS2() {
         await this.threeDS2CancelButton.waitFor({state: 'visible', timeout: 10000})
         await this.threeDS2CancelButton.click()
+    }
+
+    // Gift Card
+    async fillGiftCardInfo(cardNumber, cardCVC = undefined) {
+        await this.fillInput(this.giftCardNumberInput, cardNumber)
+        await this.fillInput(this.giftCardPinInput, cardCVC)
+    }
+
+    async addedGiftCardIsDisplayed() {
+        await this.AddedGiftCards.waitFor({state: 'visible', timeout: 10000})
     }
 }

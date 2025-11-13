@@ -4,6 +4,7 @@ import {cardConfig} from './card/config'
 import {paypalConfig} from './paypal/config'
 import {applePayConfig} from './applepay/config'
 import {amazonPayConfig} from './amazonpay/config'
+import {giftcardConfig} from './giftcard/config'
 
 export const paymentMethodsConfiguration = ({
     paymentMethods = [],
@@ -22,7 +23,8 @@ export const paymentMethodsConfiguration = ({
         klarna_paynow: klarnaConfig(props),
         paypal: paypalConfig(props),
         applepay: applePayConfig(props),
-        amazonpay: amazonPayConfig(props)
+        amazonpay: amazonPayConfig(props),
+        giftcard: giftcardConfig(props)
     }
 
     return Object.fromEntries(

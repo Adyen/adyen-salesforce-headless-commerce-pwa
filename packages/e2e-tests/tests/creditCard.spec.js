@@ -16,7 +16,7 @@ test.describe('Payments through PWA UI', () => {
 
         await scenarios.arrangeShippingAndProceedToPayment(user_US)
         const paymentPage = new PaymentHelper(page)
-        await paymentPage.selectPaymentType('Card')
+        await paymentPage.selectPaymentType('Cards')
         await paymentPage.fillCreditCardInfo(
             user_US.shopperName,
             threeDs2.cardNumber,
@@ -39,7 +39,7 @@ test.describe('Payments through PWA UI', () => {
 
         const paymentPage = new PaymentHelper(page)
         await paymentPage.fillCVCInfo(
-          storedCard.cvc
+            storedCard.cvc
         )
         await paymentPage.clickPay()
         await scenarios.verifySuccessfulOrder()

@@ -1,11 +1,16 @@
 import React, {useEffect, useState} from 'react'
-import {AdyenCheckout, AdyenCheckoutProvider, pageTypes} from '@adyen/adyen-salesforce-pwa'
+import {useIntl} from 'react-intl'
 import PropTypes from 'prop-types'
 import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 import '@adyen/adyen-salesforce-pwa/dist/app/adyen.css'
 import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
 import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
+import {useToast} from '@salesforce/retail-react-app/app/hooks/use-toast'
+import LoadingSpinner from '@salesforce/retail-react-app/app/components/loading-spinner'
+import {API_ERROR_MESSAGE} from '@salesforce/retail-react-app/app/constants'
+
+import {AdyenCheckout, pageTypes} from '@adyen/adyen-salesforce-pwa'
 
 const AdyenCheckoutRedirectContainer = () => {
     const {data: basket} = useCurrentBasket()
@@ -13,8 +18,17 @@ const AdyenCheckoutRedirectContainer = () => {
     const {getTokenWhenReady} = useAccessToken()
     const navigate = useNavigation()
     const {locale, site} = useMultiSite()
+    const {formatMessage} = useIntl()
 
     const [authToken, setAuthToken] = useState()
+    const showToast = useToast()
+
+    const showError = () => {
+        showToast({
+            title: formatMessage(API_ERROR_MESSAGE),
+            status: 'error'
+        })
+    }
 
     useEffect(() => {
         const getToken = async () => {
@@ -29,18 +43,23 @@ const AdyenCheckoutRedirectContainer = () => {
         return
     }
 
+    const spinner = <LoadingSpinner wrapperStyles={{height: '100vh'}} />
     return (
-        <AdyenCheckoutProvider
+        <AdyenCheckout
+            // Required props
             authToken={authToken}
-            customerId={customerId}
-            locale={locale}
             site={site}
-            basket={basket}
+            locale={locale}
             navigate={navigate}
+            basket={basket}
+            // Optional
             page={pageTypes.REDIRECT}
-        >
-            <AdyenCheckout showLoading />
-        </AdyenCheckoutProvider>
+            customerId={customerId}
+            // Callbacks
+            onError={[showError]}
+            // UI
+            spinner={<LoadingSpinner wrapperStyles={{height: '100vh'}} />}
+        />
     )
 }
 

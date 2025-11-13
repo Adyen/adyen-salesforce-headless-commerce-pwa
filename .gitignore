@@ -9,7 +9,10 @@ screenshots/
 playwright-report/
 Vagrantfile
 .env
+.env*
 build
 dist
 coverage
 /cartridges/
+/packages/adyen-salesforce-pwa/bundleAnalysis/
+/packages/adyen-salesforce-pwa/stats.json

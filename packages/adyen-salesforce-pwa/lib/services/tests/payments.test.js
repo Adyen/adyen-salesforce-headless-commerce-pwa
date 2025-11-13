@@ -1,5 +1,6 @@
 import {AdyenPaymentsService} from '../payments'
 import {ApiClient} from '../api'
+// eslint-disable-next-line jest/no-mocks-import
 import {CUSTOMER_ID_MOCK} from '../../../__mocks__/adyenApi/constants'
 
 jest.mock('../api', () => {
@@ -19,7 +20,12 @@ describe('AdyenPaymentsService', () => {
     let mockCustomerId = CUSTOMER_ID_MOCK
 
     beforeEach(() => {
-        paymentsService = new AdyenPaymentsService(mockToken, mockSite)
+        paymentsService = new AdyenPaymentsService(
+            mockToken,
+            mockCustomerId,
+            mockBasketId,
+            mockSite
+        )
     })
 
     afterEach(() => {
@@ -28,7 +34,13 @@ describe('AdyenPaymentsService', () => {
 
     it('should create an instance of AdyenPaymentsService with ApiClient', () => {
         expect(paymentsService).toBeInstanceOf(AdyenPaymentsService)
-        expect(ApiClient).toHaveBeenCalledWith('/api/adyen/payments', mockToken, mockSite)
+        expect(ApiClient).toHaveBeenCalledWith(
+            '/api/adyen/payments',
+            mockToken,
+            mockCustomerId,
+            mockBasketId,
+            mockSite
+        )
     })
 
     it('should submit payment successfully', async () => {
@@ -41,18 +53,10 @@ describe('AdyenPaymentsService', () => {
 
         paymentsService.apiClient.post.mockResolvedValueOnce(mockFetchPromise)
 
-        const paymentResult = await paymentsService.submitPayment(
-            mockAdyenStateData,
-            mockBasketId,
-            mockCustomerId
-        )
+        const paymentResult = await paymentsService.submitPayment(mockAdyenStateData)
 
         expect(paymentsService.apiClient.post).toHaveBeenCalledWith({
-            body: JSON.stringify({data: mockAdyenStateData}),
-            headers: {
-                customerid: mockCustomerId,
-                basketid: mockBasketId
-            }
+            body: JSON.stringify({data: mockAdyenStateData})
         })
         expect(paymentResult).toEqual(mockResponse)
     })
@@ -60,13 +64,14 @@ describe('AdyenPaymentsService', () => {
     it('should throw an error when submitPayment gets a status >= 300', async () => {
         const mockFetchPromise = Promise.resolve({
             status: 400,
-            statusText: 'Bad Request'
+            statusText: 'Bad Request',
+            json: jest.fn().mockResolvedValue({message: 'Payment submission error'})
         })
 
         paymentsService.apiClient.post.mockResolvedValueOnce(mockFetchPromise)
 
-        await expect(
-            paymentsService.submitPayment(mockAdyenStateData, mockBasketId, mockCustomerId)
-        ).rejects.toThrow('[object Object]')
+        await expect(paymentsService.submitPayment(mockAdyenStateData)).rejects.toThrow(
+            'Payment submission error'
+        )
     })
 })

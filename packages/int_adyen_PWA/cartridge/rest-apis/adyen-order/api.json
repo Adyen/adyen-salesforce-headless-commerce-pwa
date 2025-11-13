@@ -1,0 +1,9 @@
+{
+  "endpoints": [
+    {
+      "endpoint": "getOrder",
+      "schema": "schema.yaml",
+      "implementation": "getOrder"
+    }
+  ]
+}

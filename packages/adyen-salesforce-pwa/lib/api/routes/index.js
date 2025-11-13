@@ -6,19 +6,29 @@ import PaymentsDetailsController from '../controllers/payments-details'
 import PaymentsController from '../controllers/payments'
 import ShippingAddressController from '../controllers/shipping-address'
 import ShippingMethodsController from '../controllers/shipping-methods'
-import {authenticate, parseNotification, validateHmac} from '../controllers/webhook'
-import {authorizationWebhookHandler} from '../controllers/authorization-webhook-handler'
+import {
+    authenticate,
+    parseNotification,
+    sendNotification,
+    validateHmac
+} from '../middleware/webhook'
 import {createErrorResponse} from '../../utils/createErrorResponse.mjs'
-import Logger from '../controllers/logger'
+import Logger from '../models/logger'
 import {appleDomainAssociation} from '../controllers/apple-domain-association'
-import OrderCancelController from '../controllers/order-cancel';
+import PaymentCancelController from '../controllers/payment-cancel'
+import {balanceCheck, cancelOrder, createOrder} from '../controllers/giftCard'
+import {prepareRequestContext} from '../middleware/request-context'
+import {prepareWebhookRequestContext} from '../middleware/webhook-request-context'
 
-function SuccessHandler(req, res) {
-    Logger.info('Success')
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function SuccessHandler(req, res, next) {
+    Logger.info('Success Handler')
     return res.status(200).json(res.locals.response)
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function ErrorHandler(err, req, res, next) {
+    Logger.info('Error Handler')
     Logger.error(err.message, err.cause)
     return res.status(err.statusCode || 500).json(createErrorResponse(err.message))
 }
@@ -27,40 +37,89 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     app.use(bodyParser.json())
     app.set('trust proxy', true)
 
-    const environmentHandler = overrides?.environment || [EnvironmentController, SuccessHandler]
-    const paymentMethodsHandler = overrides?.paymentMethods || [
-        PaymentMethodsController,
-        SuccessHandler
+    const appleDomainAssociationHandler = overrides?.appleDomainAssociation || [
+        appleDomainAssociation,
+        ErrorHandler
     ]
-    const paymentsDetailsHandler = overrides?.paymentsDetails || [
-        PaymentsDetailsController,
-        SuccessHandler
+
+    const environmentHandler = overrides?.environment || [
+        prepareWebhookRequestContext,
+        EnvironmentController,
+        SuccessHandler,
+        ErrorHandler
     ]
-    const paymentsHandler = overrides?.payments || [PaymentsController, SuccessHandler]
+
     const webhookHandler = overrides?.webhook || [
+        prepareWebhookRequestContext,
         authenticate,
         validateHmac,
         parseNotification,
-        authorizationWebhookHandler,
+        sendNotification,
         SuccessHandler
-    ]
-    const shippingMethodsPostHandler = overrides?.setShippingMethods || [
-        ShippingMethodsController.setShippingMethod,
-        SuccessHandler
-    ]
-    const shippingMethodsGetHandler = overrides?.getShippingMethods || [
-        ShippingMethodsController.getShippingMethods,
-        SuccessHandler
-    ]
-    const shippingAddressHandler = overrides?.shippingAddress || [
-        ShippingAddressController,
-        SuccessHandler
-    ]
-    const appleDomainAssociationHandler = overrides?.appleDomainAssociation || [
-        appleDomainAssociation
     ]
 
-    const orderCancelHandler = overrides?.onOrderCancel || [OrderCancelController, SuccessHandler]
+    const paymentMethodsHandler = overrides?.paymentMethods || [
+        prepareRequestContext,
+        PaymentMethodsController,
+        SuccessHandler,
+        ErrorHandler
+    ]
+    const paymentsDetailsHandler = overrides?.paymentsDetails || [
+        prepareRequestContext,
+        PaymentsDetailsController,
+        SuccessHandler,
+        ErrorHandler
+    ]
+    const paymentsHandler = overrides?.payments || [
+        prepareRequestContext,
+        PaymentsController,
+        SuccessHandler,
+        ErrorHandler
+    ]
+
+    const shippingMethodsPostHandler = overrides?.setShippingMethods || [
+        prepareRequestContext,
+        ShippingMethodsController.setShippingMethod,
+        SuccessHandler,
+        ErrorHandler
+    ]
+    const shippingMethodsGetHandler = overrides?.getShippingMethods || [
+        prepareRequestContext,
+        ShippingMethodsController.getShippingMethods,
+        SuccessHandler,
+        ErrorHandler
+    ]
+    const shippingAddressHandler = overrides?.shippingAddress || [
+        prepareRequestContext,
+        ShippingAddressController,
+        SuccessHandler,
+        ErrorHandler
+    ]
+
+    const paymentCancelController = overrides?.paymentCancel || [
+        prepareRequestContext,
+        PaymentCancelController,
+        SuccessHandler,
+        ErrorHandler
+    ]
+    const balanceCheckHandler = overrides?.balanceCheck || [
+        prepareRequestContext,
+        balanceCheck,
+        SuccessHandler,
+        ErrorHandler
+    ]
+    const createOrderHandler = overrides?.createOrder || [
+        prepareRequestContext,
+        createOrder,
+        SuccessHandler,
+        ErrorHandler
+    ]
+    const cancelOrderHandler = overrides?.cancelOrder || [
+        prepareRequestContext,
+        cancelOrder,
+        SuccessHandler,
+        ErrorHandler
+    ]
 
     app.get(
         '*/checkout/redirect',
@@ -73,6 +132,7 @@ function registerAdyenEndpoints(app, runtime, overrides) {
         query('adyenAction').optional().escape(),
         runtime.render
     )
+    app.get('*/checkout', query('adyenAction').optional().escape(), runtime.render)
     app.get('/api/adyen/environment', ...environmentHandler)
     app.get('/api/adyen/paymentMethods', ...paymentMethodsHandler)
     app.get('/api/adyen/shipping-methods', ...shippingMethodsGetHandler)
@@ -80,15 +140,15 @@ function registerAdyenEndpoints(app, runtime, overrides) {
         '/.well-known/apple-developer-merchantid-domain-association',
         ...appleDomainAssociationHandler
     )
-
+    app.post('/api/adyen/payment/cancel', ...paymentCancelController)
     app.post('/api/adyen/payments/details', ...paymentsDetailsHandler)
     app.post('/api/adyen/payments', ...paymentsHandler)
     app.post('/api/adyen/webhook', ...webhookHandler)
     app.post('/api/adyen/shipping-methods', ...shippingMethodsPostHandler)
     app.post('/api/adyen/shipping-address', ...shippingAddressHandler)
-    app.post('/api/adyen/order/cancel', ...orderCancelHandler)
-
-    app.use(overrides?.ErrorHandler || ErrorHandler)
+    app.post('/api/adyen/gift-card/balance-check', ...balanceCheckHandler)
+    app.post('/api/adyen/gift-card/create-order', ...createOrderHandler)
+    app.post('/api/adyen/gift-card/cancel-order', ...cancelOrderHandler)
 }
 
 export {registerAdyenEndpoints, SuccessHandler, ErrorHandler}
