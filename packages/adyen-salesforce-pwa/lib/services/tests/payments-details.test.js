@@ -14,10 +14,16 @@ describe('AdyenPaymentsDetailsService', () => {
     let mockToken = 'mockTokenHere'
     let mockData = {someData: 'mockData'}
     let mockCustomerId = 'mockCustomerId'
+    let mockBasketId = 'mockBasketId'
     let mockSite = {id: 'RefArch'}
 
     beforeEach(() => {
-        paymentsDetailsService = new AdyenPaymentsDetailsService(mockToken, mockSite)
+        paymentsDetailsService = new AdyenPaymentsDetailsService(
+            mockToken,
+            mockCustomerId,
+            mockBasketId,
+            mockSite
+        )
     })
 
     afterEach(() => {
@@ -26,7 +32,13 @@ describe('AdyenPaymentsDetailsService', () => {
 
     it('should create an instance of AdyenPaymentsDetailsService with ApiClient', () => {
         expect(paymentsDetailsService).toBeInstanceOf(AdyenPaymentsDetailsService)
-        expect(ApiClient).toHaveBeenCalledWith('/api/adyen/payments/details', mockToken, mockSite)
+        expect(ApiClient).toHaveBeenCalledWith(
+            '/api/adyen/payments/details',
+            mockToken,
+            mockCustomerId,
+            mockBasketId,
+            mockSite
+        )
     })
 
     it('should submit payment details successfully', async () => {
@@ -39,16 +51,10 @@ describe('AdyenPaymentsDetailsService', () => {
 
         paymentsDetailsService.apiClient.post.mockResolvedValueOnce(mockFetchPromise)
 
-        const paymentDetailsResult = await paymentsDetailsService.submitPaymentsDetails(
-            mockData,
-            mockCustomerId
-        )
+        const paymentDetailsResult = await paymentsDetailsService.submitPaymentsDetails(mockData)
 
         expect(paymentsDetailsService.apiClient.post).toHaveBeenCalledWith({
-            body: JSON.stringify({data: mockData}),
-            headers: {
-                customerid: mockCustomerId
-            }
+            body: JSON.stringify({data: mockData})
         })
         expect(paymentDetailsResult).toEqual(mockResponse)
     })
@@ -56,13 +62,14 @@ describe('AdyenPaymentsDetailsService', () => {
     it('should throw an error when submitPaymentsDetails gets a status >= 300', async () => {
         const mockFetchPromise = Promise.resolve({
             status: 400,
-            statusText: 'Bad Request'
+            statusText: 'Bad Request',
+            json: jest.fn().mockResolvedValue({message: 'Payment details error'})
         })
 
         paymentsDetailsService.apiClient.post.mockResolvedValueOnce(mockFetchPromise)
 
-        await expect(
-            paymentsDetailsService.submitPaymentsDetails(mockData, mockCustomerId)
-        ).rejects.toThrow('[object Object]')
+        await expect(paymentsDetailsService.submitPaymentsDetails(mockData)).rejects.toThrow(
+            'Payment details error'
+        )
     })
 })

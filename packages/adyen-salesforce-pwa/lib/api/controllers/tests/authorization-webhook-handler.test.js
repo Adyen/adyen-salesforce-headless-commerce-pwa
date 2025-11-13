@@ -1,17 +1,15 @@
 import {authorizationWebhookHandler} from '../../index'
 
-let mockUpdateOrderPaymentTransaction = jest.fn()
-let mockUpdateOrderStatus = jest.fn()
-let mockUpdateOrderConfirmationStatus = jest.fn()
-let mockUpdateOrderExportStatus = jest.fn()
-let mockUpdateOrderPaymentStatus = jest.fn()
+const mockUpdateOrderStatus = jest.fn()
+const mockUpdateOrderConfirmationStatus = jest.fn()
+const mockUpdateOrderExportStatus = jest.fn()
+const mockUpdateOrderPaymentStatus = jest.fn()
 
-jest.mock('../orderApi', () => {
+jest.mock('../../models/orderApi', () => {
     return {
         OrderApiClient: jest.fn().mockImplementation(() => {
             return {
-                updateOrderPaymentTransaction: mockUpdateOrderPaymentTransaction,
-                updateOrderStatus: mockUpdateOrderStatus,
+                updateOrderStatus: mockUpdateOrderStatus, // This mock is not used in the tests
                 updateOrderConfirmationStatus: mockUpdateOrderConfirmationStatus,
                 updateOrderExportStatus: mockUpdateOrderExportStatus,
                 updateOrderPaymentStatus: mockUpdateOrderPaymentStatus
@@ -19,10 +17,27 @@ jest.mock('../orderApi', () => {
         })
     }
 })
+
+jest.mock('../../helpers/orderHelper.js', () => {
+    return {
+        getOrderUsingOrderNo: jest.fn(() => ({
+            orderNo: '00007503',
+            total: 25.0,
+            currency: 'EUR'
+        }))
+    }
+})
 describe('authorizationWebhookHandler', () => {
-    let req, res, next, consoleInfoSpy, consoleErrorSpy
+    let req, res, next, consoleInfoSpy
 
     beforeEach(() => {
+        jest.clearAllMocks()
+
+        mockUpdateOrderConfirmationStatus.mockResolvedValue({})
+        mockUpdateOrderExportStatus.mockResolvedValue({})
+        mockUpdateOrderPaymentStatus.mockResolvedValue({})
+        mockUpdateOrderStatus.mockResolvedValue({})
+
         req = {
             headers: {
                 authorization: 'mockToken',
@@ -33,32 +48,34 @@ describe('authorizationWebhookHandler', () => {
         res = {
             locals: {
                 notification: {
-                    eventCode: 'AUTHORISATION',
-                    merchantAccountCode: 'YOUR_MERCHANT_ACCOUNT',
-                    reason: '033899:1111:03/2030',
-                    amount: {
-                        currency: 'EUR',
-                        value: 2500
-                    },
-                    operations: ['CANCEL', 'CAPTURE', 'REFUND'],
-                    success: 'true',
-                    paymentMethod: 'mc',
-                    additionalData: {
-                        expiryDate: '03/2030',
-                        authCode: '033899',
-                        cardBin: '411111',
-                        cardSummary: '1111',
-                        checkoutSessionId: 'CSF46729982237A879'
-                    },
-                    merchantReference: '00007503',
-                    pspReference: 'NC6HT9CRT65ZGN82',
-                    eventDate: '2021-09-13T14:10:22+02:00'
+                    // This is the parent object for a single notification
+                    NotificationRequestItem: {
+                        eventCode: 'AUTHORISATION',
+                        merchantAccountCode: 'YOUR_MERCHANT_ACCOUNT',
+                        reason: '033899:1111:03/2030',
+                        amount: {
+                            currency: 'EUR',
+                            value: 2500
+                        },
+                        operations: ['CANCEL', 'CAPTURE', 'REFUND'],
+                        success: 'true',
+                        paymentMethod: 'mc',
+                        additionalData: {
+                            expiryDate: '03/2030',
+                            authCode: '033899',
+                            cardBin: '411111',
+                            cardSummary: '1111',
+                            checkoutSessionId: 'CSF46729982237A879'
+                        },
+                        merchantReference: '00007503',
+                        pspReference: 'NC6HT9CRT65ZGN82',
+                        eventDate: '2021-09-13T14:10:22+02:00'
+                    }
                 }
             }
         }
         next = jest.fn()
         consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation(() => {})
-        consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
     })
     it('update order when success notification is received', async () => {
         await authorizationWebhookHandler(req, res, next)
@@ -73,8 +90,18 @@ describe('authorizationWebhookHandler', () => {
         )
         expect(next).toHaveBeenCalled()
     })
+
+    it('updates order payment status to part_paid for partial payments', async () => {
+        res.locals.notification.NotificationRequestItem.amount.value = 1000 // Less than order total of 2500
+        await authorizationWebhookHandler(req, res, next)
+        expect(res.locals.response).toBe('[accepted]')
+        expect(mockUpdateOrderPaymentStatus).toHaveBeenCalledWith('00007503', 'part_paid')
+        expect(mockUpdateOrderConfirmationStatus).not.toHaveBeenCalled()
+        expect(next).toHaveBeenCalled()
+    })
+
     it('update order when failure notification is received', async () => {
-        res.locals.notification.success = 'false'
+        res.locals.notification.NotificationRequestItem.success = 'false'
         await authorizationWebhookHandler(req, res, next)
         expect(res.locals.response).toBe('[accepted]')
         expect(mockUpdateOrderConfirmationStatus).toHaveBeenCalledWith('00007503', 'not_confirmed')
@@ -88,9 +115,9 @@ describe('authorizationWebhookHandler', () => {
         expect(next).toHaveBeenCalled()
     })
     it('does not process notification if eventCode is not AUTHORISATION', async () => {
-        res.locals.notification.eventCode = 'CANCELLATION'
+        res.locals.notification.NotificationRequestItem.eventCode = 'CANCELLATION'
         await authorizationWebhookHandler(req, res, next)
-        expect(res.locals.response).toBeNil()
+        expect(res.locals.response).toBeUndefined()
         expect(next).toHaveBeenCalled()
     })
     it('return error if order update fails', async () => {
@@ -98,7 +125,7 @@ describe('authorizationWebhookHandler', () => {
             new Error('order confirmation failed')
         )
         await authorizationWebhookHandler(req, res, next)
-        expect(res.locals.response).toBeNil()
+        expect(res.locals.response).toBeUndefined()
         expect(next).toHaveBeenCalledWith(new Error('order confirmation failed'))
     })
 })

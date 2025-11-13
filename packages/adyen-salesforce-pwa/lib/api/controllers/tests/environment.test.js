@@ -1,10 +1,7 @@
 import getEnvironment from '../environment'
-import {getAdyenConfigForCurrentSite} from '../../../utils/getAdyenConfigForCurrentSite.mjs'
+import {ERROR_MESSAGE} from '../../../utils/constants.mjs'
 
-jest.mock('../../../utils/getAdyenConfigForCurrentSite.mjs', () => ({
-    getAdyenConfigForCurrentSite: jest.fn()
-}))
-
+jest.mock('../../models/logger')
 describe('getEnvironment middleware', () => {
     let req, res, next
 
@@ -15,7 +12,15 @@ describe('getEnvironment middleware', () => {
             }
         }
         res = {
-            locals: {}
+            locals: {
+                adyen: {
+                    adyenConfig: {
+                        clientKey: 'mockClientKey',
+                        environment: 'mockEnvironment'
+                    },
+                    siteId: 'RefArch'
+                }
+            }
         }
         next = jest.fn()
     })
@@ -25,19 +30,22 @@ describe('getEnvironment middleware', () => {
     })
 
     it('should set response locals with correct Adyen config', async () => {
-        const mockAdyenConfig = {
-            clientKey: 'mockClientKey',
-            environment: 'mockEnvironment'
-        }
-
-        getAdyenConfigForCurrentSite.mockReturnValueOnce(mockAdyenConfig)
         await getEnvironment(req, res, next)
 
-        expect(getAdyenConfigForCurrentSite).toHaveBeenCalled()
         expect(res.locals.response).toEqual({
             ADYEN_CLIENT_KEY: 'mockClientKey',
             ADYEN_ENVIRONMENT: 'mockEnvironment'
         })
-        expect(next).toHaveBeenCalled()
+        expect(next).toHaveBeenCalledWith()
+        expect(next).toHaveBeenCalledTimes(1)
+    })
+
+    it('should call next with an error if getAdyenConfigForCurrentSite throws an error', async () => {
+        const mockError = new Error(ERROR_MESSAGE.ADYEN_CONTEXT_NOT_FOUND)
+        res.locals = {}
+        await getEnvironment(req, res, next)
+
+        expect(res.locals.response).toBeUndefined()
+        expect(next).toHaveBeenCalledWith(mockError)
     })
 })

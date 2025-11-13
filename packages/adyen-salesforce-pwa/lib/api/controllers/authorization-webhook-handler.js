@@ -1,7 +1,8 @@
-import {OrderApiClient} from './orderApi'
-import {NotificationRequestItem} from '@adyen/api-library/lib/src/typings/notification/notificationRequestItem'
-import {ORDER} from '../../utils/constants.mjs'
-import Logger from './logger'
+import {OrderApiClient} from '../models/orderApi'
+import {getOrderUsingOrderNo} from '../helpers/orderHelper.js'
+import {NOTIFICATION_EVENT_CODES, NOTIFICATION_SUCCESS, ORDER} from '../../utils/constants.mjs'
+import Logger from '../models/logger'
+import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 
 const messages = {
     AUTH_ERROR: 'Access Denied!',
@@ -11,25 +12,35 @@ const messages = {
 
 async function authorizationWebhookHandler(req, res, next) {
     try {
-        const notification = res.locals.notification
-        const AUTHORISATION = NotificationRequestItem.EventCodeEnum.Authorisation.toString()
-        if (notification.eventCode !== AUTHORISATION) {
+        const {NotificationRequestItem: notification = {}} = res.locals.notification
+        if (notification.eventCode !== NOTIFICATION_EVENT_CODES.AUTHORISATION) {
             return next()
         }
         const orderNo = notification.merchantReference
+        const order = await getOrderUsingOrderNo(orderNo)
+        if (!order?.orderNo) {
+            Logger.info(notification.eventCode, `Order ${orderNo} was not found.`)
+            return next()
+        }
         const orderApi = new OrderApiClient()
-        if (notification.success === NotificationRequestItem.SuccessEnum.True.toString()) {
+        if (notification.success === NOTIFICATION_SUCCESS.TRUE) {
             Logger.info(
                 notification.eventCode,
                 `Authorization for order ${orderNo} was successful.`
             )
-            await orderApi.updateOrderConfirmationStatus(
-                orderNo,
-                ORDER.CONFIRMATION_STATUS_CONFIRMED
-            )
-            await orderApi.updateOrderPaymentStatus(orderNo, ORDER.PAYMENT_STATUS_PAID)
-            await orderApi.updateOrderExportStatus(orderNo, ORDER.EXPORT_STATUS_READY)
-            await orderApi.updateOrderStatus(orderNo, ORDER.ORDER_STATUS_NEW)
+            const totalAmount = getCurrencyValueForApi(order.total, order.currency)
+            const amount = notification.amount.value
+            if (amount < totalAmount) {
+                await orderApi.updateOrderPaymentStatus(orderNo, ORDER.PAYMENT_STATUS_PART_PAID)
+            } else {
+                await orderApi.updateOrderConfirmationStatus(
+                    orderNo,
+                    ORDER.CONFIRMATION_STATUS_CONFIRMED
+                )
+                await orderApi.updateOrderPaymentStatus(orderNo, ORDER.PAYMENT_STATUS_PAID)
+                await orderApi.updateOrderExportStatus(orderNo, ORDER.EXPORT_STATUS_READY)
+                await orderApi.updateOrderStatus(orderNo, ORDER.ORDER_STATUS_NEW)
+            }
         } else {
             Logger.info(
                 notification.eventCode,

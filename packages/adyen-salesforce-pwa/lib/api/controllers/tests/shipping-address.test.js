@@ -1,31 +1,13 @@
 import updateShippingAddress from '../shipping-address'
-import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
-import Logger from '../logger'
-import {ShopperBaskets} from 'commerce-sdk-isomorphic'
+import Logger from '../../models/logger'
 
-jest.mock('@salesforce/pwa-kit-runtime/utils/ssr-config', () => ({
-    getConfig: jest.fn().mockReturnValue({
-        app: {
-            commerceAPI: {
-                /* mock your commerce API config here */
-            }
-        }
-    })
-}))
-
-jest.mock('commerce-sdk-isomorphic', () => ({
-    ShopperBaskets: jest.fn().mockImplementation(() => ({
-        updateShippingAddressForShipment: jest.fn().mockResolvedValue({})
-    }))
-}))
-
-jest.mock('../logger', () => ({
+jest.mock('../../models/logger', () => ({
     info: jest.fn(),
     error: jest.fn()
 }))
 
 describe('updateShippingAddress', () => {
-    let req, res, next, shopperBasketsInstanceMock, getConfigMock
+    let req, res, next
 
     beforeEach(() => {
         req = {
@@ -50,21 +32,15 @@ describe('updateShippingAddress', () => {
                 }
             }
         }
-        res = {locals: {}}
-        getConfigMock = jest.fn(() => ({
-            app: {
-                commerceAPI: {
-                    parameters: {
-                        siteId: 'RefArch'
+        res = {
+            locals: {
+                adyen: {
+                    basketService: {
+                        updateShippingAddress: jest.fn()
                     }
                 }
             }
-        }))
-        getConfig.mockImplementation(getConfigMock)
-        shopperBasketsInstanceMock = {
-            updateShippingAddressForShipment: jest.fn().mockResolvedValue({})
         }
-        ShopperBaskets.mockImplementation(() => shopperBasketsInstanceMock)
         next = jest.fn()
     })
 
@@ -72,36 +48,30 @@ describe('updateShippingAddress', () => {
         jest.clearAllMocks()
     })
 
-    it('should call the appropriate functions and set response in locals', async () => {
+    it('should call basketService.updateShippingAddress and set the response in locals', async () => {
+        const mockUpdatedBasket = {basketId: 'mockBasketId', shipments: [{shippingAddress: {}}]}
+        res.locals.adyen.basketService.updateShippingAddress.mockResolvedValue(mockUpdatedBasket)
+
         await updateShippingAddress(req, res, next)
+
         expect(Logger.info).toHaveBeenCalledWith('updateShippingAddress', 'start')
-        expect(getConfigMock).toHaveBeenCalled()
-        expect(shopperBasketsInstanceMock.updateShippingAddressForShipment).toHaveBeenCalledWith({
-            body: {
-                address1: '123 Main St',
-                city: 'City',
-                countryCode: 'US',
-                firstName: 'John',
-                fullName: 'John Doe',
-                lastName: 'Doe',
-                phone: '1234567890',
-                postalCode: '12345',
-                stateCode: 'State'
-            },
-            parameters: {
-                basketId: 'basket123',
-                shipmentId: 'me'
-            }
-        })
+        expect(res.locals.adyen.basketService.updateShippingAddress).toHaveBeenCalledWith(
+            req.body.data
+        )
         expect(Logger.info).toHaveBeenCalledWith('updateShippingAddress', 'success')
-        expect(res.locals.response).toEqual({})
-        expect(next).toHaveBeenCalled()
+        expect(res.locals.response).toEqual(mockUpdatedBasket)
+        expect(next).toHaveBeenCalledWith()
+        expect(next).toHaveBeenCalledTimes(1)
     })
 
-    it('should call error logger and call next with error if an error occurs', async () => {
+    it('should call next with an error if basketService.updateShippingAddress fails', async () => {
         const error = new Error('Test error')
-        shopperBasketsInstanceMock.updateShippingAddressForShipment.mockRejectedValue(error)
+        res.locals.adyen.basketService.updateShippingAddress.mockRejectedValue(error)
+
         await updateShippingAddress(req, res, next)
+
+        expect(Logger.info).toHaveBeenCalledWith('updateShippingAddress', 'start')
+        expect(Logger.error).toHaveBeenCalledWith('updateShippingAddress', error.stack)
         expect(next).toHaveBeenCalledWith(error)
     })
 })

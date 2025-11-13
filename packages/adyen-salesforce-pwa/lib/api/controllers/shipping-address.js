@@ -1,42 +1,19 @@
-import {ShopperBaskets} from 'commerce-sdk-isomorphic'
-import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
-import Logger from './logger'
+import Logger from '../models/logger'
 
 async function updateShippingAddress(req, res, next) {
     Logger.info('updateShippingAddress', 'start')
 
     try {
-        const {app: appConfig} = getConfig()
-        const shopperBaskets = new ShopperBaskets({
-            ...appConfig.commerceAPI,
-            headers: {authorization: req.headers.authorization}
-        })
-
+        const {adyen: adyenContext} = res.locals
         const {data} = req.body
 
-        const basket = await shopperBaskets.updateShippingAddressForShipment({
-            body: {
-                address1: data.deliveryAddress.street,
-                city: data.deliveryAddress.city,
-                countryCode: data.deliveryAddress.country,
-                postalCode: data.deliveryAddress.postalCode,
-                stateCode: data.deliveryAddress.stateOrProvince,
-                firstName: data.profile.firstName,
-                fullName: `${data.profile.firstName} ${data.profile.lastName}`,
-                lastName: data.profile.lastName,
-                phone: data.profile.phone
-            },
-            parameters: {
-                basketId: req.headers.basketid,
-                shipmentId: 'me'
-            }
-        })
+        const updatedBasket = await adyenContext.basketService.updateShippingAddress(data)
 
         Logger.info('updateShippingAddress', 'success')
-        res.locals.response = basket
+        res.locals.response = updatedBasket
         next()
     } catch (err) {
-        Logger.error('updateShippingAddress', JSON.stringify(err))
+        Logger.error('updateShippingAddress', err.stack)
         next(err)
     }
 }

@@ -1,0 +1,43 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Adyen order api
+components:
+  securitySchemes:
+    AmOAuth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://account.demandware.com/dwsso/oauth2/access_token
+          scopes:
+            c_order_rw: Read and write access to order information
+security:
+  - AmOAuth2: [ "c_order_rw" ]
+paths:
+  /orders/{orderNo}:
+    get:
+      summary: Get an order by its order number
+      operationId: getOrder
+      parameters:
+        - in: query
+          name: siteId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - in: path
+          name: orderNo
+          required: true
+          description: The order number to retrieve.
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        "200":
+          description: Order retrieved successfully
+        "400":
+          description: Bad request, for example, a missing order number.
+        "404":
+          description: The requested order was not found.
+        "500":
+          description: An internal server error occurred.

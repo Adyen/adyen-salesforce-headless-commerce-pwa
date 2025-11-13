@@ -1,24 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <metadata xmlns="http://www.demandware.com/xml/impex/metadata/2006-10-31">
     <type-extension type-id="OrderPaymentInstrument">
-        <attribute-definition attribute-id="adyenPartialPaymentsOrder">
-            <display-name xml:lang="x-default">adyenPartialPaymentsOrder</display-name>
-            <description xml:lang="x-default">partial payments order data</description>
-            <type>string</type>
-            <mandatory-flag>false</mandatory-flag>
-            <externally-managed-flag>false</externally-managed-flag>
-            <min-length>0</min-length>
-            <field-length>0</field-length>
-        </attribute-definition>
-        <attribute-definition attribute-id="adyenAdditionalPaymentData">
-            <display-name xml:lang="x-default">adyenAdditionalPaymentData</display-name>
-            <description xml:lang="x-default">Additional data for payment method</description>
-            <type>string</type>
-            <mandatory-flag>false</mandatory-flag>
-            <externally-managed-flag>false</externally-managed-flag>
-            <min-length>0</min-length>
-            <field-length>0</field-length>
-        </attribute-definition>
+        <custom-attribute-definitions>
+            <attribute-definition attribute-id="paymentMethodType">
+                <display-name xml:lang="x-default">paymentMethodType</display-name>
+                <description xml:lang="x-default">paymentMethod type used by shopper for payment</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+                <field-length>0</field-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="paymentMethodBrand">
+                <display-name xml:lang="x-default">paymentMethodBrand</display-name>
+                <description xml:lang="x-default">paymentMethod brand used by shopper for payment</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+                <field-length>0</field-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="pspReference">
+                <display-name xml:lang="x-default">pspReference</display-name>
+                <description xml:lang="x-default">pspReference for payment</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+                <field-length>0</field-length>
+            </attribute-definition>
+        </custom-attribute-definitions>
+        <group-definitions>
+            <attribute-group group-id="AdyenPayment">
+                <display-name xml:lang="x-default">AdyenPayment</display-name>
+                <attribute attribute-id="paymentMethodType"/>
+                <attribute attribute-id="paymentMethodBrand"/>
+                <attribute attribute-id="pspReference"/>
+            </attribute-group>
+        </group-definitions>
     </type-extension>
     <type-extension type-id="PaymentTransaction">
         <system-attribute-definitions>
@@ -52,23 +71,67 @@
                 </value-definitions>
             </attribute-definition>
         </system-attribute-definitions>
+        <custom-attribute-definitions>
+            <attribute-definition attribute-id="notification_data">
+                <display-name xml:lang="x-default">Notification data received via Adyen webhook</display-name>
+                <type>text</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+        </custom-attribute-definitions>
     </type-extension>
     <type-extension type-id="Basket">
-        <attribute-definition attribute-id="adyenGiftCards">
-            <display-name xml:lang="x-default">adyenGiftCards</display-name>
-            <description xml:lang="x-default">Adyen Gift Cards</description>
-            <type>text</type>
-            <mandatory-flag>false</mandatory-flag>
-            <externally-managed-flag>false</externally-managed-flag>
-            <min-length>0</min-length>
-        </attribute-definition>
-        <attribute-definition attribute-id="adyenGiftCardsOrderNo">
-            <display-name xml:lang="x-default">adyenGiftCardsOrderNo</display-name>
-            <description xml:lang="x-default">Adyen Gift Cards Order Number</description>
-            <type>text</type>
-            <mandatory-flag>false</mandatory-flag>
-            <externally-managed-flag>false</externally-managed-flag>
-            <min-length>0</min-length>
-        </attribute-definition>
+        <custom-attribute-definitions>
+            <attribute-definition attribute-id="giftCardCheckBalance">
+                <display-name xml:lang="x-default">giftCardCheckBalance</display-name>
+                <description xml:lang="x-default">Response returned from gift card check balance call</description>
+                <type>text</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="orderNo">
+                <display-name xml:lang="x-default">orderNo</display-name>
+                <description xml:lang="x-default">Order number used for creating order</description>
+                <type>text</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="orderData">
+                <display-name xml:lang="x-default">orderData</display-name>
+                <description xml:lang="x-default">Order data returned from Adyen order api</description>
+                <type>text</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="paymentMethod">
+                <display-name xml:lang="x-default">paymentMethod</display-name>
+                <description xml:lang="x-default">PaymentMethod used in Adyen payment request</description>
+                <type>text</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="amount">
+                <display-name xml:lang="x-default">amount</display-name>
+                <description xml:lang="x-default">Amount used in Adyen payment request</description>
+                <type>text</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+        </custom-attribute-definitions>
+        <group-definitions>
+            <attribute-group group-id="AdyenPayment">
+                <display-name xml:lang="x-default">AdyenPayment</display-name>
+                <attribute attribute-id="giftCardCheckBalance"/>
+                <attribute attribute-id="orderNo"/>
+                <attribute attribute-id="orderData"/>
+                <attribute attribute-id="paymentMethod"/>
+                <attribute attribute-id="amount"/>
+            </attribute-group>
+        </group-definitions>
     </type-extension>
 </metadata>

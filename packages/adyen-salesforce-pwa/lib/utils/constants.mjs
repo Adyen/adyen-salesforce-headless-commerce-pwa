@@ -4,6 +4,7 @@ export const PAYMENT_METHODS = {
 }
 
 export const PAYMENT_METHOD_TYPES = {
+    CREDIT_CARD: 'scheme',
     GIFT_CARD: 'giftcard',
     WECHATPAY_MINI_PROGRAM: 'wechatpayMiniProgram',
     WECHATPAY_QR: 'wechatpayQR',
@@ -13,18 +14,17 @@ export const PAYMENT_METHOD_TYPES = {
 export const RESULT_CODES = {
     AUTHORISED: 'Authorised',
     CANCELLED: 'Cancelled',
-    CHALLENGESHOPPER: 'ChallengeShopper',
+    CHALLENGE_SHOPPER: 'ChallengeShopper',
     ERROR: 'Error',
-    IDENTIFYSHOPPER: 'IdentifyShopper',
+    IDENTIFY_SHOPPER: 'IdentifyShopper',
     PENDING: 'Pending',
-    PRESENTTOSHOPPER: 'PresentToShopper',
+    PRESENT_TO_SHOPPER: 'PresentToShopper',
     RECEIVED: 'Received',
-    REDIRECTSHOPPER: 'RedirectShopper',
-    REFUSED: 'Refused',
+    REDIRECT_SHOPPER: 'RedirectShopper',
+    REFUSED: 'Refused'
 }
 
 export const BLOCKED_PAYMENT_METHODS = [
-    PAYMENT_METHOD_TYPES.GIFT_CARD,
     PAYMENT_METHOD_TYPES.WECHATPAY_MINI_PROGRAM,
     PAYMENT_METHOD_TYPES.WECHATPAY_QR,
     PAYMENT_METHOD_TYPES.WECHATPAY_SDK
@@ -32,12 +32,29 @@ export const BLOCKED_PAYMENT_METHODS = [
 
 export const SHOPPER_INTERACTIONS = {
     CONT_AUTH: 'ContAuth',
-    ECOMMERCE: 'Ecommerce',
-};
+    ECOMMERCE: 'Ecommerce'
+}
 
 export const RECURRING_PROCESSING_MODEL = {
-    CARD_ON_FILE: 'CardOnFile',
-};
+    CARD_ON_FILE: 'CardOnFile'
+}
+
+export const GIFT_CARD_RESULT_CODES = {
+    NOTENOUGHBALANCE: 'NotEnoughBalance',
+    SUCCESS: 'Success'
+}
+
+export const NOTIFICATION_EVENT_CODES = {
+    AUTHORISATION: 'AUTHORISATION',
+    ORDER_CLOSED: 'ORDER_CLOSED'
+}
+
+export const NOTIFICATION_SUCCESS = {
+    TRUE: 'true',
+    FALSE: 'false'
+}
+
+export const DEFAULT_SHIPMENT_ID = 'me'
 
 export const ORDER = Object.freeze({
     ORDER_STATUS_CREATED: 'created',
@@ -57,6 +74,28 @@ export const ORDER = Object.freeze({
     CONFIRMATION_STATUS_NOT_CONFIRMED: 'not_confirmed'
 })
 
+export const ERROR_MESSAGE = {
+    AMOUNT_NOT_CORRECT: 'amount not correct',
+    INVALID_ORDER: 'order is invalid',
+    INVALID_PARAMS: 'invalid request params',
+    INVALID_BASKET: 'invalid basket',
+    PAYMENT_NOT_SUCCESSFUL: 'payment was not successful',
+    INVALID_BILLING_ADDRESS: 'invalid billing address',
+    INVALID_SHIPPING_ADDRESS: 'invalid shipping address',
+    UNAUTHORIZED: 'unauthorized',
+    ORDER_ALREADY_EXISTS: 'order already exists',
+    ORDER_NOT_FOUND: 'order not found',
+    PAYMENTS_DETAILS_NOT_SUCCESSFUL: 'payments details call not successful',
+    BASKET_CHANGED: 'basket changed',
+    AMOUNTS_DONT_MATCH: 'amounts do not match',
+    MISSING_LIVE_PREFIX: 'missing live prefix',
+    ADYEN_CONTEXT_NOT_FOUND: 'Adyen context not found',
+    NO_PAYMENT_METHODS: 'no payment methods',
+    ADD_PAYMENT_INSTRUMENTS: 'Failed to add payment instrument due to missing parameters'
+}
+
+export const DEFAULT_EXPIRATION_TIME = 30
+
 export const ADYEN_LIVE_REGIONS = {
     LIVE_EU: 'live',
     LIVE_APSE: 'live-apse',
@@ -70,4 +109,4 @@ export const ADYEN_ENVIRONMENT = {
     TEST: 'TEST'
 }
 
-export const APPLICATION_VERSION = '3.0.3'
+export const APPLICATION_VERSION = '4.0.0'

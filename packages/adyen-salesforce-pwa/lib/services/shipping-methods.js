@@ -4,36 +4,37 @@ export class AdyenShippingMethodsService {
     baseUrl = '/api/adyen/shipping-methods'
     apiClient = null
 
-    constructor(token, site) {
-        this.apiClient = new ApiClient(this.baseUrl, token, site)
+    constructor(token, customerId, basketId, site) {
+        this.apiClient = new ApiClient(this.baseUrl, token, customerId, basketId, site)
     }
 
-    async getShippingMethods(basketId) {
-        const res = await this.apiClient.get({
-            headers: {
-                basketid: basketId
-            }
-        })
+    async getShippingMethods() {
+        const res = await this.apiClient.get()
         if (res.status >= 300) {
-            throw new Error(res)
-        } else {
-            return await res.json()
+            const errorData = await res
+                .json()
+                .catch(() => ({message: 'Failed to get shipping methods'}))
+            throw new Error(
+                errorData.message || `Get shipping methods failed with status ${res.status}`
+            )
         }
+        return await res.json()
     }
 
-    async updateShippingMethod(shippingMethodId, basketId) {
+    async updateShippingMethod(shippingMethodId) {
         const res = await this.apiClient.post({
             body: JSON.stringify({
                 shippingMethodId
-            }),
-            headers: {
-                basketid: basketId
-            }
+            })
         })
         if (res.status >= 300) {
-            throw new Error(res)
-        } else {
-            return await res.json()
+            const errorData = await res
+                .json()
+                .catch(() => ({message: 'Failed to update shipping method'}))
+            throw new Error(
+                errorData.message || `Update shipping method failed with status ${res.status}`
+            )
         }
+        return await res.json()
     }
 }

@@ -1,4 +1,5 @@
 build
 coverage
 docs
-app/overrides/static
+dist
+node_modules

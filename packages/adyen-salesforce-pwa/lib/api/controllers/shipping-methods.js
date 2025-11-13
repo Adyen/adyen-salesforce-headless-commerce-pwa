@@ -1,20 +1,16 @@
-import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
-import Logger from './logger'
-import {ShopperBaskets} from 'commerce-sdk-isomorphic'
+import Logger from '../models/logger'
+import {createShopperBasketsClient} from '../helpers/basketHelper.js'
 
 async function getShippingMethods(req, res, next) {
     Logger.info('getShippingMethods', 'start')
 
     try {
-        const {app: appConfig} = getConfig()
-        const shopperBaskets = new ShopperBaskets({
-            ...appConfig.commerceAPI,
-            headers: {authorization: req.headers.authorization}
-        })
+        const {adyen: adyenContext} = res.locals
+        const shopperBaskets = createShopperBasketsClient(adyenContext.authorization)
 
         const shippingMethodsResponse = await shopperBaskets.getShippingMethodsForShipment({
             parameters: {
-                basketId: req.headers.basketid,
+                basketId: adyenContext.basket.basketId,
                 shipmentId: 'me'
             }
         })
@@ -23,36 +19,23 @@ async function getShippingMethods(req, res, next) {
         res.locals.response = shippingMethodsResponse
         next()
     } catch (err) {
-        Logger.error('getShippingMethods', JSON.stringify(err))
+        Logger.error('getShippingMethods', err.stack)
         next(err)
     }
 }
 
 async function setShippingMethod(req, res, next) {
     Logger.info('setShippingMethod', 'start')
-
     try {
-        const {app: appConfig} = getConfig()
-        const shopperBaskets = new ShopperBaskets({
-            ...appConfig.commerceAPI,
-            headers: {authorization: req.headers.authorization}
-        })
-
-        const basket = await shopperBaskets.updateShippingMethodForShipment({
-            body: {
-                id: req.body.shippingMethodId
-            },
-            parameters: {
-                basketId: req.headers.basketid,
-                shipmentId: 'me'
-            }
-        })
+        const {adyen: adyenContext} = res.locals
+        const {shippingMethodId} = req.body
+        const updatedBasket = await adyenContext.basketService.setShippingMethod(shippingMethodId)
 
         Logger.info('setShippingMethod', 'success')
-        res.locals.response = basket
+        res.locals.response = updatedBasket
         next()
     } catch (err) {
-        Logger.error('setShippingMethod', JSON.stringify(err))
+        Logger.error('setShippingMethod', err.stack)
         next(err)
     }
 }

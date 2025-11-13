@@ -4,59 +4,78 @@
  * SPDX-License-Identifier: BSD-3-Clause
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import React, {useState} from 'react'
+import React, {useEffect, useMemo, useState} from 'react'
 import PropTypes from 'prop-types'
 import {defineMessage, FormattedMessage, useIntl} from 'react-intl'
 import {
     Box,
-    Button,
     Checkbox,
-    Container,
+    Divider,
     Heading,
     Stack,
-    Text,
-    Divider
+    Text
 } from '@salesforce/retail-react-app/app/components/shared/ui'
 import {useForm} from 'react-hook-form'
 import {useToast} from '@salesforce/retail-react-app/app/hooks/use-toast'
 import {useShopperBasketsMutation} from '@salesforce/commerce-sdk-react'
 import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 import {useCheckout} from '@salesforce/retail-react-app/app/pages/checkout/util/checkout-context'
-import {
-    getPaymentInstrumentCardType,
-    getMaskCreditCardNumber,
-    getCreditCardIcon
-} from '@salesforce/retail-react-app/app/utils/cc-utils'
-import {
-    ToggleCard,
-    ToggleCardEdit,
-    ToggleCardSummary
-} from '@salesforce/retail-react-app/app/components/toggle-card'
-import PaymentForm from '@salesforce/retail-react-app/app/pages/checkout/partials/payment-form'
+import {getCreditCardIcon} from '@salesforce/retail-react-app/app/utils/cc-utils'
+import {ToggleCard, ToggleCardEdit} from '@salesforce/retail-react-app/app/components/toggle-card'
 import ShippingAddressSelection from '@salesforce/retail-react-app/app/pages/checkout/partials/shipping-address-selection'
 import AddressDisplay from '@salesforce/retail-react-app/app/components/address-display'
 import {PromoCode, usePromoCode} from '@salesforce/retail-react-app/app/components/promo-code'
 import {API_ERROR_MESSAGE} from '@salesforce/retail-react-app/app/constants'
+import {isPickupShipment} from '@salesforce/retail-react-app/app/utils/shipment-utils'
 /* -----------------Adyen Begin ------------------------ */
-import {AdyenCheckout, useAdyenCheckout} from '@adyen/adyen-salesforce-pwa'
+import {useAccessToken, useCustomerId, useCustomerType} from '@salesforce/commerce-sdk-react'
+import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
+import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
+import LoadingSpinner from '@salesforce/retail-react-app/app/components/loading-spinner'
+import {AdyenCheckout, pageTypes} from '@adyen/adyen-salesforce-pwa'
 /* -----------------Adyen End ------------------------ */
 
 const Payment = () => {
     const {formatMessage} = useIntl()
     const {data: basket} = useCurrentBasket()
-    const selectedShippingAddress = basket?.shipments && basket?.shipments[0]?.shippingAddress
+    const customerId = useCustomerId()
+    const customerTypeData = useCustomerType()
+    const {getTokenWhenReady} = useAccessToken()
+    const navigate = useNavigation()
+    const {locale, site} = useMultiSite()
+    const [authToken, setAuthToken] = useState()
+
+    useEffect(() => {
+        const getToken = async () => {
+            const token = await getTokenWhenReady()
+            setAuthToken(token)
+        }
+
+        getToken()
+    }, [])
+
+    const isPickupOnly =
+        basket?.shipments?.length > 0 &&
+        basket.shipments.every((shipment) => isPickupShipment(shipment))
+    const selectedShippingAddress = useMemo(() => {
+        if (!basket?.shipments?.length || isPickupOnly) return null
+        const deliveryShipment = basket.shipments.find((shipment) => !isPickupShipment(shipment))
+        return deliveryShipment?.shippingAddress || null
+    }, [basket?.shipments, isPickupShipment, isPickupOnly])
+
     const selectedBillingAddress = basket?.billingAddress
-    const appliedPayment = basket?.paymentInstruments && basket?.paymentInstruments[0]
-    const [billingSameAsShipping, setBillingSameAsShipping] = useState(true) // By default, have billing addr to be the same as shipping
-    const {mutateAsync: addPaymentInstrumentToBasket} = useShopperBasketsMutation(
-        'addPaymentInstrumentToBasket'
-    )
+    const [billingSameAsShipping, setBillingSameAsShipping] = useState(!isPickupOnly)
+
+    useEffect(() => {
+        if (isPickupOnly) {
+            setBillingSameAsShipping(false)
+        }
+    }, [isPickupOnly])
+
     const {mutateAsync: updateBillingAddressForBasket} = useShopperBasketsMutation(
         'updateBillingAddressForBasket'
     )
-    const {mutateAsync: removePaymentInstrumentFromBasket} = useShopperBasketsMutation(
-        'removePaymentInstrumentFromBasket'
-    )
+
     const showToast = useToast()
     const showError = () => {
         showToast({
@@ -64,8 +83,8 @@ const Payment = () => {
             status: 'error'
         })
     }
-    const {adyenPaymentMethods} = useAdyenCheckout()
-    const {step, STEPS, goToStep, goToNextStep} = useCheckout()
+
+    const {step, STEPS} = useCheckout()
 
     const billingAddressForm = useForm({
         mode: 'onChange',
@@ -77,29 +96,6 @@ const Payment = () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {removePromoCode, ...promoCodeProps} = usePromoCode()
 
-    const paymentMethodForm = useForm()
-
-    const onPaymentSubmit = async (formValue) => {
-        // The form gives us the expiration date as `MM/YY` - so we need to split it into
-        // month and year to submit them as individual fields.
-        const [expirationMonth, expirationYear] = formValue.expiry.split('/')
-
-        const paymentInstrument = {
-            paymentMethodId: 'CREDIT_CARD',
-            paymentCard: {
-                holder: formValue.holder,
-                maskedNumber: getMaskCreditCardNumber(formValue.number),
-                cardType: getPaymentInstrumentCardType(formValue.cardType),
-                expirationMonth: parseInt(expirationMonth),
-                expirationYear: parseInt(`20${expirationYear}`)
-            }
-        }
-
-        return addPaymentInstrumentToBasket({
-            parameters: {basketId: basket?.basketId},
-            body: paymentInstrument
-        })
-    }
     const onBillingSubmit = async () => {
         const isFormValid = await billingAddressForm.trigger()
 
@@ -117,50 +113,33 @@ const Payment = () => {
             parameters: {basketId: basket.basketId}
         })
     }
-    const onPaymentRemoval = async () => {
-        try {
-            await removePaymentInstrumentFromBasket({
-                parameters: {
-                    basketId: basket.basketId,
-                    paymentInstrumentId: appliedPayment.paymentInstrumentId
-                }
-            })
-        } catch (e) {
-            showError()
-        }
-    }
-
-    const onSubmit = paymentMethodForm.handleSubmit(async (paymentFormValues) => {
-        if (!appliedPayment) {
-            await onPaymentSubmit(paymentFormValues)
-        }
-
-        // If successful `onBillingSubmit` returns the updated basket. If the form was invalid on
-        // submit, `undefined` is returned.
-        const updatedBasket = await onBillingSubmit()
-
-        if (updatedBasket) {
-            goToNextStep()
-        }
-    })
 
     const billingAddressAriaLabel = defineMessage({
         defaultMessage: 'Billing Address Form',
         id: 'checkout_payment.label.billing_address_form'
     })
 
+    /**
+     * Customize Adyen Checkout
+     * - Translations
+     * - Payment Methods
+     * - Execute Callbacks
+     */
+    const paymentMethodsConfiguration = {
+        klarna: {
+            useKlarnaWidget: false
+        },
+        klarna_account: {
+            useKlarnaWidget: false
+        }
+    }
+
     return (
         <ToggleCard
             id="step-3"
             title={formatMessage({defaultMessage: 'Payment', id: 'checkout_payment.title.payment'})}
-            editing={step === STEPS.PAYMENT}
-            isLoading={!adyenPaymentMethods || billingAddressForm.formState.isSubmitting}
-            disabled={appliedPayment == null}
-            onEdit={() => goToStep(STEPS.PAYMENT)}
-            editLabel={formatMessage({
-                defaultMessage: 'Edit Payment Info',
-                id: 'toggle_card.action.editPaymentInfo'
-            })}
+            editing={step === STEPS.PAYMENT || step === STEPS.REVIEW_ORDER}
+            isLoading={billingAddressForm.formState.isSubmitting}
         >
             <ToggleCardEdit>
                 <Box mt={-2} mb={4}>
@@ -168,7 +147,24 @@ const Payment = () => {
                 </Box>
 
                 <Stack spacing={6}>
-                    {adyenPaymentMethods && <AdyenCheckout beforeSubmit={[onBillingSubmit]} />}
+                    <AdyenCheckout
+                        // Required props
+                        authToken={authToken}
+                        site={site}
+                        locale={locale}
+                        navigate={navigate}
+                        basket={basket}
+                        // Optional
+                        page={pageTypes.CHECKOUT}
+                        customerId={customerId}
+                        isCustomerRegistered={customerTypeData.isRegistered}
+                        paymentMethodsConfiguration={paymentMethodsConfiguration}
+                        // Callbacks
+                        beforeSubmit={[onBillingSubmit]}
+                        onError={[showError]}
+                        // UI
+                        spinner={<LoadingSpinner wrapperStyles={{height: '100vh'}} />}
+                    />
 
                     <Divider borderColor="gray.100" />
 
@@ -180,18 +176,20 @@ const Payment = () => {
                             />
                         </Heading>
 
-                        <Checkbox
-                            name="billingSameAsShipping"
-                            isChecked={billingSameAsShipping}
-                            onChange={(e) => setBillingSameAsShipping(e.target.checked)}
-                        >
-                            <Text fontSize="sm" color="gray.700">
-                                <FormattedMessage
-                                    defaultMessage="Same as shipping address"
-                                    id="checkout_payment.label.same_as_shipping"
-                                />
-                            </Text>
-                        </Checkbox>
+                        {!isPickupOnly && (
+                            <Checkbox
+                                name="billingSameAsShipping"
+                                isChecked={billingSameAsShipping}
+                                onChange={(e) => setBillingSameAsShipping(e.target.checked)}
+                            >
+                                <Text fontSize="sm" color="gray.700">
+                                    <FormattedMessage
+                                        defaultMessage="Same as shipping address"
+                                        id="checkout_payment.label.same_as_shipping"
+                                    />
+                                </Text>
+                            </Checkbox>
+                        )}
 
                         {billingSameAsShipping && selectedShippingAddress && (
                             <Box pl={7}>
@@ -204,41 +202,13 @@ const Payment = () => {
                         <ShippingAddressSelection
                             form={billingAddressForm}
                             selectedAddress={selectedBillingAddress}
+                            formTitleAriaLabel={billingAddressAriaLabel}
                             hideSubmitButton
+                            isBillingAddress
                         />
                     )}
                 </Stack>
             </ToggleCardEdit>
-
-            <ToggleCardSummary>
-                <Stack spacing={6}>
-                    {appliedPayment && (
-                        <Stack spacing={3}>
-                            <Heading as="h3" fontSize="md">
-                                <FormattedMessage
-                                    defaultMessage="Credit Card"
-                                    id="checkout_payment.heading.credit_card"
-                                />
-                            </Heading>
-                            <PaymentCardSummary payment={appliedPayment} />
-                        </Stack>
-                    )}
-
-                    <Divider borderColor="gray.100" />
-
-                    {selectedBillingAddress && (
-                        <Stack spacing={2}>
-                            <Heading as="h3" fontSize="md">
-                                <FormattedMessage
-                                    defaultMessage="Billing Address"
-                                    id="checkout_payment.heading.billing_address"
-                                />
-                            </Heading>
-                            <AddressDisplay address={selectedBillingAddress} />
-                        </Stack>
-                    )}
-                </Stack>
-            </ToggleCardSummary>
         </ToggleCard>
     )
 }
