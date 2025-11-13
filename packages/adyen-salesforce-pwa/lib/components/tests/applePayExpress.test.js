@@ -121,13 +121,19 @@ describe('ApplePayExpressComponent', () => {
 
     it('does not mount if Apple Pay is not available', async () => {
         const mockApplePayInstance = {
-            isAvailable: jest.fn().mockResolvedValue(false),
-            mount: jest.fn()
+            isAvailable: jest.fn().mockRejectedValue(new Error('Apple Pay not available')),
+            mount: jest.fn(),
+            unmount: jest.fn()
         }
         ApplePay.mockImplementation(() => mockApplePayInstance)
 
         await act(async () => {
             render(<ApplePayExpressComponent {...defaultProps} />)
+        })
+
+        // Wait for promise to settle
+        await act(async () => {
+            await new Promise((resolve) => setTimeout(resolve, 0))
         })
 
         expect(mockApplePayInstance.mount).not.toHaveBeenCalled()

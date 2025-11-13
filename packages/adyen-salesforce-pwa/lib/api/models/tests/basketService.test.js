@@ -127,7 +127,10 @@ describe('BasketService', () => {
                 }
             }
             const mockUpdatedBasket = {basketId: 'mockBasketId', customerInfo: {}}
+            // Mock all three sequential calls to return the updated basket
             mockShopperBaskets.updateShippingAddressForShipment.mockResolvedValue(mockUpdatedBasket)
+            mockShopperBaskets.updateBillingAddressForBasket.mockResolvedValue(mockUpdatedBasket)
+            mockShopperBaskets.updateCustomerForBasket.mockResolvedValue(mockUpdatedBasket)
 
             await basketService.addShopperData(shopperData)
 

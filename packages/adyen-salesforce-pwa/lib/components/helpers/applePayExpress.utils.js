@@ -51,7 +51,8 @@ export const getAppleButtonConfig = (
     shippingMethods,
     applePayConfig,
     navigate,
-    fetchShippingMethods
+    fetchShippingMethods,
+    onError = []
 ) => {
     let applePayAmount = basket.orderTotal
     let customerData = null
@@ -101,6 +102,7 @@ export const getAppleButtonConfig = (
                     actions.reject()
                 }
             } catch (err) {
+                onError.forEach((cb) => cb(err))
                 actions.reject(err)
             }
         },
@@ -110,8 +112,9 @@ export const getAppleButtonConfig = (
                 customerData = authorizedEvent.payment.shippingContact
                 billingData = authorizedEvent.payment.billingContact
                 actions.resolve()
-            } catch (error) {
-                actions.reject()
+            } catch (err) {
+                onError.forEach((cb) => cb(err))
+                actions.reject(err)
             }
         },
         onShippingContactSelected: async (resolve, reject, event) => {
@@ -171,6 +174,7 @@ export const getAppleButtonConfig = (
                     resolve(finalPriceUpdate)
                 }
             } catch (err) {
+                onError.forEach((cb) => cb(err))
                 reject(err)
             }
         },
@@ -204,6 +208,7 @@ export const getAppleButtonConfig = (
                     resolve(applePayShippingMethodUpdate)
                 }
             } catch (err) {
+                onError.forEach((cb) => cb(err))
                 reject(err)
             }
         }

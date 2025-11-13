@@ -104,7 +104,9 @@ export class BasketService {
      */
     async addShopperData(data) {
         const {basket, customerId} = this.adyenContext
-        const updateShippingAddressPromise = this.shopperBaskets.updateShippingAddressForShipment({
+
+        // Execute updates sequentially to ensure each operates on the latest basket state
+        let updatedBasket = await this.shopperBaskets.updateShippingAddressForShipment({
             body: {
                 address1: data.deliveryAddress.street,
                 city: data.deliveryAddress.city,
@@ -122,7 +124,7 @@ export class BasketService {
             }
         })
 
-        const updateBillingAddressPromise = this.shopperBaskets.updateBillingAddressForBasket({
+        updatedBasket = await this.shopperBaskets.updateBillingAddressForBasket({
             body: {
                 address1: data.billingAddress.street,
                 city: data.billingAddress.city,
@@ -139,16 +141,11 @@ export class BasketService {
             }
         })
 
-        const updateCustomerPromise = this.shopperBaskets.updateCustomerForBasket({
+        updatedBasket = await this.shopperBaskets.updateCustomerForBasket({
             body: {customerId, email: data.profile.email},
             parameters: {basketId: basket.basketId}
         })
 
-        const [updatedBasket] = await Promise.all([
-            updateShippingAddressPromise,
-            updateBillingAddressPromise,
-            updateCustomerPromise
-        ])
         this._updateContext(updatedBasket)
         return updatedBasket
     }

@@ -6,6 +6,7 @@ import useAdyenEnvironment from '../hooks/useAdyenEnvironment'
 import useAdyenPaymentMethods from '../hooks/useAdyenPaymentMethods'
 import useAdyenShippingMethods from '../hooks/useAdyenShippingMethods'
 import {getAppleButtonConfig, getApplePaymentMethodConfig} from './helpers/applePayExpress.utils'
+import {AdyenShippingMethodsService} from '../services/shipping-methods'
 
 const ApplePayExpressComponent = (props) => {
     const {authToken, customerId, locale, site, basket, navigate, onError = []} = props
@@ -59,8 +60,15 @@ const ApplePayExpressComponent = (props) => {
     )
 
     const fetchShippingMethods = useCallback(async () => {
-        return shippingMethods
-    }, [shippingMethods])
+        // Fetch fresh shipping methods from API after address update
+        const adyenShippingMethodsService = new AdyenShippingMethodsService(
+            authToken,
+            customerId,
+            basketId,
+            site
+        )
+        return await adyenShippingMethodsService.getShippingMethods()
+    }, [authToken, customerId, basketId, site])
 
     // Handle errors from hooks
     useEffect(() => {
@@ -123,7 +131,8 @@ const ApplePayExpressComponent = (props) => {
                     shippingMethods?.applicableShippingMethods,
                     applePaymentMethodConfig,
                     navigate,
-                    fetchShippingMethods
+                    fetchShippingMethods,
+                    onError
                 )
                 const applePayButton = new ApplePay(checkout, appleButtonConfig)
                 applePayButton
