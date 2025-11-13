@@ -126,14 +126,16 @@ const ApplePayExpressComponent = (props) => {
                     fetchShippingMethods
                 )
                 const applePayButton = new ApplePay(checkout, appleButtonConfig)
-                const isApplePayButtonAvailable = await applePayButton.isAvailable()
-                if (isApplePayButtonAvailable) {
-                    if (applePayButtonRef.current) {
-                        applePayButtonRef.current.unmount()
-                    }
-                    applePayButton.mount(paymentContainer.current)
-                    applePayButtonRef.current = applePayButton
-                }
+                applePayButton
+                    .isAvailable()
+                    .then(() => {
+                        if (applePayButtonRef.current) {
+                            applePayButtonRef.current.unmount()
+                        }
+                        applePayButton.mount(paymentContainer.current)
+                        applePayButtonRef.current = applePayButton
+                    })
+                    .catch(() => {})
             } catch (err) {
                 console.error('Error initializing Apple Pay Express:', err)
                 onError.forEach((cb) => cb(err))

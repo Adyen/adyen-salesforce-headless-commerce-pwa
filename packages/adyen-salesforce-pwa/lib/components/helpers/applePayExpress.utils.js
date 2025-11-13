@@ -54,6 +54,8 @@ export const getAppleButtonConfig = (
     fetchShippingMethods
 ) => {
     let applePayAmount = basket.orderTotal
+    let customerData = null
+    let billingData = null
     const buttonConfig = {
         showPayButton: true,
         isExpress: true,
@@ -70,20 +72,8 @@ export const getAppleButtonConfig = (
             identifier: sm.id,
             amount: `${sm.price}`
         })),
-        onAuthorized: async (resolve, reject, event) => {
+        onSubmit: async (state, component, actions) => {
             try {
-                const {shippingContact, billingContact, token} = event.payment
-                const state = {
-                    data: {
-                        paymentType: 'express',
-                        paymentMethod: {
-                            type: 'applepay',
-                            applePayToken: token.paymentData
-                        },
-                        ...getCustomerBillingDetails(billingContact),
-                        ...getCustomerShippingDetails(shippingContact)
-                    }
-                }
                 const adyenPaymentService = new AdyenPaymentsService(
                     authToken,
                     basket?.customerInfo?.customerId,
@@ -91,7 +81,10 @@ export const getAppleButtonConfig = (
                     site
                 )
                 const paymentsResponse = await adyenPaymentService.submitPayment({
+                    paymentType: 'express',
                     ...state.data,
+                    ...getCustomerBillingDetails(billingData),
+                    ...getCustomerShippingDetails(customerData),
                     origin: state.data.origin ? state.data.origin : window.location.origin
                 })
                 if (paymentsResponse?.isFinal && paymentsResponse?.isSuccessful) {
@@ -102,16 +95,25 @@ export const getAppleButtonConfig = (
                             amount: `${applePayAmount}`
                         }
                     }
-                    resolve(finalPriceUpdate)
+                    actions.resolve(finalPriceUpdate)
                     navigate(`/checkout/confirmation/${paymentsResponse?.merchantReference}`)
                 } else {
-                    reject()
+                    actions.reject()
                 }
             } catch (err) {
-                reject(err)
+                actions.reject(err)
             }
         },
-        onSubmit: () => {},
+        onAuthorized: (data, actions) => {
+            const {authorizedEvent} = data
+            try {
+                customerData = authorizedEvent.payment.shippingContact
+                billingData = authorizedEvent.payment.billingContact
+                actions.resolve()
+            } catch (error) {
+                actions.reject()
+            }
+        },
         onShippingContactSelected: async (resolve, reject, event) => {
             try {
                 const {shippingContact} = event
