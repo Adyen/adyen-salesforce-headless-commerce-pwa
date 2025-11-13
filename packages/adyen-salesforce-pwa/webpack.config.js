@@ -72,6 +72,7 @@ const serverConfig = {
 }
 
 const webConfig = {
+    devtool: 'source-map',
     target: 'web',
     entry: './lib/index.js',
     resolve: {
