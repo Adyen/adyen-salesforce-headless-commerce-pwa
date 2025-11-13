@@ -13,7 +13,11 @@ export const getAdyenConfigForCurrentSite = (currentSiteId) => {
             currentSiteId,
             ADYEN_ENV.ADYEN_APPLE_DOMAIN_ASSOCIATION
         ),
-        nativeThreeDS: setProperty(currentSiteId, ADYEN_ENV.ADYEN_NATIVE_3DS)
+        nativeThreeDS: setProperty(currentSiteId, ADYEN_ENV.ADYEN_NATIVE_3DS),
+        giftCardExpirationTime: setProperty(
+            currentSiteId,
+            ADYEN_ENV.GIFT_CARD_EXPIRATION_TIME
+        )
     }
 }
 
@@ -36,5 +40,6 @@ const ADYEN_ENV = {
     ADYEN_HMAC_KEY: 'ADYEN_HMAC_KEY',
     ADYEN_LIVE_URL_PREFIX: 'ADYEN_LIVE_URL_PREFIX',
     ADYEN_APPLE_DOMAIN_ASSOCIATION: 'ADYEN_APPLE_DOMAIN_ASSOCIATION',
-    ADYEN_NATIVE_3DS: 'ADYEN_NATIVE_3DS'
+    ADYEN_NATIVE_3DS: 'ADYEN_NATIVE_3DS',
+    GIFT_CARD_EXPIRATION_TIME: 'GIFT_CARD_EXPIRATION_TIME'
 }

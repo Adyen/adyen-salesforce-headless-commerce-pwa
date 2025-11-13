@@ -94,6 +94,8 @@ export const ERROR_MESSAGE = {
     ADD_PAYMENT_INSTRUMENTS: 'Failed to add payment instrument due to missing parameters'
 }
 
+export const DEFAULT_EXPIRATION_TIME = 30
+
 export const ADYEN_LIVE_REGIONS = {
     LIVE_EU: 'live',
     LIVE_APSE: 'live-apse',

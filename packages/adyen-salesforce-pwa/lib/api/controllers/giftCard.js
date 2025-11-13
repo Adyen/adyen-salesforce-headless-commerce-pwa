@@ -7,6 +7,7 @@ import {
     createCheckoutResponse,
     filterStateData
 } from '../helpers/paymentsHelper.js'
+import {expireAt} from '../../utils/expireAt.mjs'
 
 /**
  * Handles the Adyen gift card balance check.
@@ -74,6 +75,7 @@ export async function createOrder(req, res, next) {
             ...filterStateData(data),
             reference: c_orderNo,
             merchantAccount: adyenConfig.merchantAccount,
+            expiresAt: expireAt(adyenConfig.giftCardExpirationTime),
             amount: {
                 value: getCurrencyValueForApi(orderTotal || productTotal, currency),
                 currency: currency
