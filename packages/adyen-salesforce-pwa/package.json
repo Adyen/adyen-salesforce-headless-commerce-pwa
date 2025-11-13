@@ -33,7 +33,7 @@
         "build-stats": "webpack --profile --json > stats.json",
         "build-analyze": "webpack-bundle-analyzer ./stats.json",
         "test:coverage": "jest --coverage",
-        "test": "jest --debug",
+        "test": "jest",
         "jest:clear": "jest --clearCache",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",

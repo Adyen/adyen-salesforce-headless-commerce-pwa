@@ -1,4 +1,5 @@
-import {CheckoutAPI, Client} from '@adyen/api-library'
+import CheckoutAPI from '@adyen/api-library/lib/src/services/checkout/index.js'
+import Client from '@adyen/api-library/lib/src/client.js'
 import {ADYEN_ENVIRONMENT, ADYEN_LIVE_REGIONS, ERROR_MESSAGE} from '../../utils/constants.mjs'
 import {AdyenError} from './AdyenError'
 

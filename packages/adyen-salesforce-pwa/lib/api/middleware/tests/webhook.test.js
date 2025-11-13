@@ -6,14 +6,12 @@ let mockValidateHMAC = jest.fn()
 
 jest.mock('../../models/logger')
 
-jest.mock('@adyen/api-library', () => {
-    return {
-        hmacValidator: jest.fn().mockImplementation(() => {
-            return {
-                validateHMAC: mockValidateHMAC
-            }
-        })
-    }
+jest.mock('@adyen/api-library/lib/src/utils/hmacValidator.js', () => {
+    return jest.fn().mockImplementation(() => {
+        return {
+            validateHMAC: mockValidateHMAC
+        }
+    })
 })
 describe('WebhookHandler', () => {
     let req, res, next

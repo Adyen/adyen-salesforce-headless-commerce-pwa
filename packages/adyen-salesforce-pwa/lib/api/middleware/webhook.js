@@ -1,4 +1,4 @@
-import {hmacValidator} from '@adyen/api-library'
+import hmacValidator from '@adyen/api-library/lib/src/utils/hmacValidator.js'
 import Logger from '../models/logger'
 import {AdyenError} from '../models/AdyenError'
 import {CustomNotifyApiClient} from '../models/customNotifyApi'
