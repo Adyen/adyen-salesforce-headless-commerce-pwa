@@ -1,7 +1,6 @@
 import {baseConfig} from '../helpers/baseConfig'
 
 export const cardConfig = (props) => {
-    console.log(props)
     const isRegistered = props?.isCustomerRegistered
     return {
         ...baseConfig(props),
@@ -11,7 +10,7 @@ export const cardConfig = (props) => {
         billingAddressRequired: false,
         enableStoreDetails: isRegistered,
         clickToPayConfiguration: {
-            merchantDisplayName: props.merchantDisplayName,
+            merchantDisplayName: props?.merchantDisplayName,
             shopperEmail: props?.basket?.customerInfo?.email
         }
     }
