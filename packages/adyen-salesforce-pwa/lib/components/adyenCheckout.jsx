@@ -20,6 +20,7 @@ const AdyenCheckoutComponent = ({
     authToken,
     customerId,
     isCustomerRegistered = false,
+    merchantDisplayName = '',
     site,
     locale,
     navigate,
@@ -147,6 +148,7 @@ const AdyenCheckoutComponent = ({
             additionalPaymentMethodsConfiguration,
             paymentMethods: adyenPaymentMethods?.paymentMethods,
             isCustomerRegistered,
+            merchantDisplayName,
             token: authToken,
             site,
             basket,
@@ -168,6 +170,7 @@ const AdyenCheckoutComponent = ({
         additionalPaymentMethodsConfiguration,
         adyenPaymentMethods?.paymentMethods,
         isCustomerRegistered,
+        merchantDisplayName,
         authToken,
         site?.id,
         basket?.basketId,
@@ -308,6 +311,7 @@ AdyenCheckoutComponent.propTypes = {
     // User data
     customerId: PropTypes.string,
     isCustomerRegistered: PropTypes.bool,
+    merchantDisplayName: PropTypes.string,
 
     // Page context
     page: PropTypes.oneOf(['checkout', 'confirmation', 'redirect']),

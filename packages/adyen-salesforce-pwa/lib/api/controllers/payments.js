@@ -95,6 +95,7 @@ async function sendPayments(req, res, next) {
                 response?.pspReference
             )
         }
+
         if (checkoutResponse.isFinal && checkoutResponse.isSuccessful) {
             await adyenContext.basketService.addPaymentInstrument(
                 paymentRequest?.amount,

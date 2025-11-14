@@ -18,17 +18,26 @@ describe('cardConfig', () => {
         baseConfig.mockReturnValue(mockedBaseConfigResult)
 
         const props = {
-            isCustomerRegistered: true
+            isCustomerRegistered: true,
+            merchantDisplayName: 'Merchant name',
+            basket: {
+                customerInfo: {
+                    email: 'test@example.com'
+                }
+            }
         }
 
         const expectedConfig = {
             ...mockedBaseConfigResult,
-            _disableClickToPay: true,
             showPayButton: true,
             hasHolderName: true,
             holderNameRequired: true,
             billingAddressRequired: false,
-            enableStoreDetails: true
+            enableStoreDetails: true,
+            clickToPayConfiguration: {
+                merchantDisplayName: 'Merchant name',
+                shopperEmail: 'test@example.com'
+            }
         }
 
         const result = cardConfig(props)
@@ -45,17 +54,26 @@ describe('cardConfig', () => {
         baseConfig.mockReturnValue(mockedBaseConfigResult)
 
         const props = {
-            isCustomerRegistered: false
+            isCustomerRegistered: false,
+            merchantDisplayName: 'Merchant name',
+            basket: {
+                customerInfo: {
+                    email: 'test@example.com'
+                }
+            }
         }
 
         const expectedConfig = {
             ...mockedBaseConfigResult,
-            _disableClickToPay: true,
             showPayButton: true,
             hasHolderName: true,
             holderNameRequired: true,
             billingAddressRequired: false,
-            enableStoreDetails: false
+            enableStoreDetails: false,
+            clickToPayConfiguration: {
+                merchantDisplayName: 'Merchant name',
+                shopperEmail: 'test@example.com'
+            }
         }
 
         const result = cardConfig(props)

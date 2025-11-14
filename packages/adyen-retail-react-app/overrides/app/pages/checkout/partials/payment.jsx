@@ -158,6 +158,7 @@ const Payment = () => {
                         page={pageTypes.CHECKOUT}
                         customerId={customerId}
                         isCustomerRegistered={customerTypeData.isRegistered}
+                        merchantDisplayName={'Merchant name'}
                         paymentMethodsConfiguration={paymentMethodsConfiguration}
                         // Callbacks
                         beforeSubmit={[onBillingSubmit]}
