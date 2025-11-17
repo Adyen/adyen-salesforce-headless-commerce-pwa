@@ -37,11 +37,37 @@ export class BasketService {
     }
 
     /**
+     * Removes any existing temporary baskets for the current customer.
+     * @private
+     */
+    async removeExistingTemporaryBaskets() {
+        const {customerId} = this.adyenContext
+        try {
+            const {baskets: existingBaskets = []} = await this.shopperBaskets.getCustomerBaskets({
+                parameters: {customerId}
+            })
+            const tempBaskets = existingBaskets.filter((b) => b?.temporary === true)
+            if (tempBaskets.length) {
+                await Promise.all(
+                    tempBaskets.map((b) =>
+                        this.shopperBaskets.deleteBasket({
+                            parameters: {basketId: b.basketId}
+                        })
+                    )
+                )
+            }
+        } catch (e) {
+            Logger.error('removeExistingTemporaryBaskets', e.stack || e.message)
+        }
+    }
+
+    /**
      * Creates a new temporary basket for the current shopper and updates the context.
      * @returns {Promise<object>} The created basket.
      */
     async createTemporaryBasket() {
         const {customerId} = this.adyenContext
+        await this.removeExistingTemporaryBaskets()
         const basket = await this.shopperBaskets.createBasket({
             parameters: {
                 temporary: true
