@@ -6,6 +6,7 @@ import PaymentsDetailsController from '../controllers/payments-details'
 import PaymentsController from '../controllers/payments'
 import ShippingAddressController from '../controllers/shipping-address'
 import ShippingMethodsController from '../controllers/shipping-methods'
+import CreateTemporaryBasketController from '../controllers/create-temporary-basket'
 import {
     authenticate,
     parseNotification,
@@ -121,6 +122,12 @@ function registerAdyenEndpoints(app, runtime, overrides) {
         ErrorHandler
     ]
 
+    const createTemporaryBasketHandler = overrides?.createTemporaryBasket || [
+        CreateTemporaryBasketController,
+        SuccessHandler,
+        ErrorHandler
+    ]
+
     app.get(
         '*/checkout/redirect',
         query('redirectResult').optional().escape(),
@@ -149,6 +156,8 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     app.post('/api/adyen/gift-card/balance-check', ...balanceCheckHandler)
     app.post('/api/adyen/gift-card/create-order', ...createOrderHandler)
     app.post('/api/adyen/gift-card/cancel-order', ...cancelOrderHandler)
+
+    app.post('/api/adyen/pdp/temporary-basket', ...createTemporaryBasketHandler)
 }
 
 export {registerAdyenEndpoints, SuccessHandler, ErrorHandler}

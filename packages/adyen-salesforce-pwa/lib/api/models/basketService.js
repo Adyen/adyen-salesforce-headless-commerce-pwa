@@ -37,6 +37,26 @@ export class BasketService {
     }
 
     /**
+     * Creates a new temporary basket for the current shopper and updates the context.
+     * @returns {Promise<object>} The created basket.
+     */
+    async createTemporaryBasket() {
+        const {customerId} = this.adyenContext
+        const basket = await this.shopperBaskets.createBasket({
+            parameters: {
+                temporary: true
+            },
+            body: {
+                customerInfo: {
+                    customerId
+                }
+            }
+        })
+        this._updateContext(basket)
+        return basket
+    }
+
+    /**
      * Updates a basket with the given data.
      * @param {object} data - The data to be saved to the basket's custom attributes.
      * @returns {Promise<object>} A promise that resolves to the updated basket object.
