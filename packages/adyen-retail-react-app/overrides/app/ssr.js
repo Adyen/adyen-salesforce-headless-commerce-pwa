@@ -75,14 +75,19 @@ const {handler} = runtime.createHandler(options, (app) => {
                         'https://api.lab.amplitude.com/sdk/vardata',
                         '*.adyen.com',
                         '*.amazon.com',
-                        'https://www.sandbox.paypal.com/xoplatform/logger/api/logger?disableSetCookie=true'
+                        'https://www.sandbox.paypal.com/xoplatform/logger/api/logger?disableSetCookie=true',
+                        '*.google.com',
+                        '*.mastercard.com',
+                        '*.visa.com'
                     ],
                     'frame-src': [
                         "'self'",
                         '*.adyen.com',
                         '*.paypal.com',
                         '*.google.com',
-                        'https://sandbox.kit.cash.app'
+                        'https://sandbox.kit.cash.app',
+                        '*.mastercard.com',
+                        '*.visa.com'
                     ],
                     /* -----------------Adyen End ------------------------ */
                     // Do not upgrade insecure requests for local development

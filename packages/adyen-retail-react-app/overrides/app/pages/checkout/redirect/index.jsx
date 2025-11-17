@@ -43,7 +43,6 @@ const AdyenCheckoutRedirectContainer = () => {
         return
     }
 
-    const spinner = <LoadingSpinner wrapperStyles={{height: '100vh'}} />
     return (
         <AdyenCheckout
             // Required props
