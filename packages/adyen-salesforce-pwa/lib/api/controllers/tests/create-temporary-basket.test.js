@@ -33,7 +33,7 @@ describe('create-temporary-basket controller', () => {
     })
 
     it('creates a temporary basket and returns expected response without product', async () => {
-        const mockBasket = {basketId: 'b1', orderTotal: 0}
+        const mockBasket = {basketId: 'b1', orderTotal: 0, currency: 'USD'}
         BasketService.mockImplementation(() => ({
             createTemporaryBasket: jest.fn().mockResolvedValue(mockBasket),
             addProductToBasket: jest.fn()
@@ -45,15 +45,18 @@ describe('create-temporary-basket controller', () => {
         expect(BasketService).toHaveBeenCalled()
         expect(res.locals.response).toEqual({
             temporaryBasketCreated: true,
-            amount: 0
+            amount: {
+                value: 0,
+                currency: 'USD'
+            }
         })
         expect(Logger.info).toHaveBeenCalledWith('CreateTemporaryBasketController', 'success')
         expect(next).toHaveBeenCalled()
     })
 
     it('creates a temporary basket and adds product when provided in body', async () => {
-        const initialBasket = {basketId: 'b2', orderTotal: 0}
-        const updatedBasket = {basketId: 'b2', orderTotal: 123.45}
+        const initialBasket = {basketId: 'b2', orderTotal: 0, currency: 'EUR'}
+        const updatedBasket = {basketId: 'b2', orderTotal: 123.45, currency: 'EUR'}
         const addProductToBasket = jest.fn().mockResolvedValue(updatedBasket)
         BasketService.mockImplementation(() => ({
             createTemporaryBasket: jest.fn().mockResolvedValue(initialBasket),
@@ -71,7 +74,10 @@ describe('create-temporary-basket controller', () => {
         })
         expect(res.locals.response).toEqual({
             temporaryBasketCreated: true,
-            amount: 123.45
+            amount: {
+                value: 12345, // 123.45 * 100 (EUR has 2 decimal places)
+                currency: 'EUR'
+            }
         })
         expect(next).toHaveBeenCalled()
     })
