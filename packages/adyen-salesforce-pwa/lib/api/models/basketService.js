@@ -37,6 +37,52 @@ export class BasketService {
     }
 
     /**
+     * Removes any existing temporary baskets for the current customer.
+     * @private
+     */
+    async removeExistingTemporaryBaskets() {
+        const {customerId} = this.adyenContext
+        try {
+            const {baskets: existingBaskets = []} = await this.shopperBaskets.getCustomerBaskets({
+                parameters: {customerId}
+            })
+            const tempBaskets = existingBaskets.filter((b) => b?.temporary === true)
+            if (tempBaskets.length) {
+                await Promise.all(
+                    tempBaskets.map((b) =>
+                        this.shopperBaskets.deleteBasket({
+                            parameters: {basketId: b.basketId}
+                        })
+                    )
+                )
+            }
+        } catch (e) {
+            Logger.error('removeExistingTemporaryBaskets', e.stack || e.message)
+        }
+    }
+
+    /**
+     * Creates a new temporary basket for the current shopper and updates the context.
+     * @returns {Promise<object>} The created basket.
+     */
+    async createTemporaryBasket() {
+        const {customerId} = this.adyenContext
+        await this.removeExistingTemporaryBaskets()
+        const basket = await this.shopperBaskets.createBasket({
+            parameters: {
+                temporary: true
+            },
+            body: {
+                customerInfo: {
+                    customerId
+                }
+            }
+        })
+        this._updateContext(basket)
+        return basket
+    }
+
+    /**
      * Updates a basket with the given data.
      * @param {object} data - The data to be saved to the basket's custom attributes.
      * @returns {Promise<object>} A promise that resolves to the updated basket object.
@@ -47,6 +93,31 @@ export class BasketService {
             parameters: {basketId: this.adyenContext.basket.basketId}
         })
         this._updateContext(updatedBasket)
+        return updatedBasket
+    }
+
+    /**
+     * Adds a product item to the specified basket and returns the updated basket.
+     * @param {string} basketId
+     * @param {{productId: string, quantity: number, optionItems?: Array, inventoryId?: string}} item
+     * @returns {Promise<object>}
+     */
+    async addProductToBasket(basketId, item) {
+        if (!basketId || !item?.productId || !item?.quantity) {
+            throw new AdyenError(ERROR_MESSAGE.INVALID_PARAMS)
+        }
+        const updatedBasket = await this.shopperBaskets.addItemToBasket({
+            parameters: {basketId},
+            body: {
+                productId: item.productId,
+                quantity: item.quantity,
+                ...(item.optionItems && {optionItems: item.optionItems}),
+                ...(item.inventoryId && {inventoryId: item.inventoryId})
+            }
+        })
+        if (this.adyenContext?.basket?.basketId === basketId) {
+            this._updateContext(updatedBasket)
+        }
         return updatedBasket
     }
 
