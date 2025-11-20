@@ -6,7 +6,7 @@
  */
 import React, {Fragment, useEffect, useState} from 'react'
 import {FormattedMessage, useIntl} from 'react-intl'
-import {Flex, Button} from '@salesforce/retail-react-app/app/components/shared/ui'
+import {Flex, Button, Container} from '@salesforce/retail-react-app/app/components/shared/ui'
 import {
     AmexIcon,
     DiscoverIcon,
@@ -18,7 +18,7 @@ import Link from '@salesforce/retail-react-app/app/components/link'
 /* -----------------Adyen Begin ------------------------ */
 import '@adyen/adyen-salesforce-pwa/dist/app/adyen.css'
 import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
-import {ApplePayExpress} from '@adyen/adyen-salesforce-pwa'
+import {ApplePayExpress, PayPalExpress} from '@adyen/adyen-salesforce-pwa'
 import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
 import PropTypes from 'prop-types'
 import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
@@ -75,7 +75,7 @@ const CartCta = () => {
                     id="cart_cta.link.checkout"
                 />
             </Button>
-            <Flex justify={'center'}>
+            <Container fluid>
                 <ApplePayExpress
                     authToken={authToken}
                     customerId={customerId}
@@ -86,9 +86,21 @@ const CartCta = () => {
                     // Callbacks
                     onError={[showError]}
                     // UI
-                    spinner={<LoadingSpinner wrapperStyles={{height: '100vh'}} />}
+                    spinner={<LoadingSpinner />}
                 />
-            </Flex>
+                <PayPalExpress
+                    authToken={authToken}
+                    customerId={customerId}
+                    locale={locale}
+                    site={site}
+                    basket={basket}
+                    navigate={navigate}
+                    // Callbacks
+                    onError={[showError]}
+                    // UI
+                    spinner={<LoadingSpinner />}
+                />
+            </Container>
             <Flex justify={'center'}>
                 <VisaIcon height={8} width={10} mr={2} />
                 <MastercardIcon height={8} width={10} mr={2} />
