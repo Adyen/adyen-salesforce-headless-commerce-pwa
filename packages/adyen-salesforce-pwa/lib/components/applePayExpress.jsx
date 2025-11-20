@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useCallback, useMemo} from 'react'
 import PropTypes from 'prop-types'
 import {AdyenCheckout, ApplePay} from '@adyen/adyen-web'
-import '@adyen/adyen-web/styles/adyen.css'
+import '../style/adyenCheckout.css'
 import useAdyenEnvironment from '../hooks/useAdyenEnvironment'
 import useAdyenPaymentMethods from '../hooks/useAdyenPaymentMethods'
 import useAdyenShippingMethods from '../hooks/useAdyenShippingMethods'
@@ -175,9 +175,7 @@ const ApplePayExpressComponent = (props) => {
     const {spinner} = props
     return (
         <>
-            {isLoading && spinner && (
-                <div className="adyen-checkout-spinner-container">{spinner}</div>
-            )}
+            {isLoading && spinner && <>{spinner}</>}
             <div ref={paymentContainer}></div>
         </>
     )

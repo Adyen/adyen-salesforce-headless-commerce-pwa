@@ -290,7 +290,7 @@ const AdyenCheckoutComponent = ({
     return (
         <>
             {(isLoading || fetchingEnvironment || fetchingPaymentMethods) && spinner && (
-                <div className="adyen-checkout-spinner-container">{spinner}</div>
+                <>{spinner}</>
             )}
             <div ref={paymentContainer}></div>
         </>
