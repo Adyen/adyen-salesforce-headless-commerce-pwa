@@ -112,7 +112,7 @@ export function isOpenInvoiceMethod(paymentMethodType) {
  */
 export function getAdditionalData(basket) {
     const additionalData = {}
-    basket.productItems.forEach((product, index) => {
+    basket?.productItems?.forEach((product, index) => {
         additionalData[`riskdata.basket.item${index + 1}.itemID`] = product.itemId
         additionalData[`riskdata.basket.item${index + 1}.productTitle`] = product.productName
         additionalData[`riskdata.basket.item${index + 1}.amountPerItem`] = getCurrencyValueForApi(

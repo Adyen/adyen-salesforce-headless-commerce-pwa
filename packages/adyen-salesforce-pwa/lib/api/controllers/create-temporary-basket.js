@@ -39,12 +39,11 @@ export default async function CreateTemporaryBasketController(req, res, next) {
             basket: null
         }
 
-        res.locals.adyen = adyenContext
-
         const basketService = new BasketService(adyenContext, res)
         let basket = await basketService.createTemporaryBasket()
 
         adyenContext.basket = basket
+        res.locals.adyen = adyenContext
 
         const {product} = req.body || {}
         if (product?.productId && product?.quantity) {
