@@ -237,9 +237,6 @@
   "cc_radio_group.button.add_new_card": {
     "defaultMessage": "Add New Card"
   },
-  "checkout.message.generic_error": {
-    "defaultMessage": "An unexpected error occurred during checkout."
-  },
   "checkout_confirmation.button.create_account": {
     "defaultMessage": "Create Account"
   },
@@ -1262,7 +1259,7 @@
     "defaultMessage": "Pick Up in Store"
   },
   "product_view.label.quantity": {
-    "defaultMessage": "Quantity"
+    "defaultMessage": "Quantity:"
   },
   "product_view.label.quantity_decrement": {
     "defaultMessage": "−"
@@ -1609,9 +1606,6 @@
   },
   "toggle_card.action.editContactInfo": {
     "defaultMessage": "Edit Contact Info"
-  },
-  "toggle_card.action.editPaymentInfo": {
-    "defaultMessage": "Edit Payment Info"
   },
   "toggle_card.action.editShippingAddress": {
     "defaultMessage": "Edit Shipping Address"

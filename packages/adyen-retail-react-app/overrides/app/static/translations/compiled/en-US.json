@@ -697,12 +697,6 @@
       "value": "Add New Card"
     }
   ],
-  "checkout.message.generic_error": [
-    {
-      "type": 0,
-      "value": "An unexpected error occurred during checkout."
-    }
-  ],
   "checkout_confirmation.button.create_account": [
     {
       "type": 0,
@@ -3004,7 +2998,7 @@
   "product_view.label.quantity": [
     {
       "type": 0,
-      "value": "Quantity"
+      "value": "Quantity:"
     }
   ],
   "product_view.label.quantity_decrement": [
@@ -3857,12 +3851,6 @@
     {
       "type": 0,
       "value": "Edit Contact Info"
-    }
-  ],
-  "toggle_card.action.editPaymentInfo": [
-    {
-      "type": 0,
-      "value": "Edit Payment Info"
     }
   ],
   "toggle_card.action.editShippingAddress": [
