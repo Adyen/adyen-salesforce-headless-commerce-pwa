@@ -1,5 +1,5 @@
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
-import {ShopperBaskets} from 'commerce-sdk-isomorphic'
+import {ShopperBasketsV2} from 'commerce-sdk-isomorphic'
 import {AdyenError} from '../models/AdyenError.js'
 import {ERROR_MESSAGE} from '../../utils/constants.mjs'
 
@@ -10,7 +10,7 @@ import {ERROR_MESSAGE} from '../../utils/constants.mjs'
  */
 export function createShopperBasketsClient(authorization) {
     const {app: appConfig} = getConfig()
-    return new ShopperBaskets({
+    return new ShopperBasketsV2({
         ...appConfig.commerceAPI,
         headers: {authorization}
     })
