@@ -1,11 +1,11 @@
 import {ApiClient} from './api'
 
-export class TemporaryBasketService {
+export class AdyenTemporaryBasketService {
     baseUrl = '/api/adyen/pdp/temporary-basket'
     apiClient = null
 
-    constructor(token, customerId, basketId, site) {
-        this.apiClient = new ApiClient(this.baseUrl, token, customerId, basketId, site)
+    constructor(token, customerId, site) {
+        this.apiClient = new ApiClient(this.baseUrl, token, customerId, null, site)
     }
 
     async createTemporaryBasket(product) {

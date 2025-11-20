@@ -2,6 +2,7 @@ import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 import {AdyenPaymentsService} from '../../services/payments'
 import {AdyenShippingMethodsService} from '../../services/shipping-methods'
 import {AdyenShippingAddressService} from '../../services/shipping-address'
+import {AdyenTemporaryBasketService} from '../../services/temporary-basket'
 
 export const getApplePaymentMethodConfig = (paymentMethodsResponse) => {
     const applePayPaymentMethod = paymentMethodsResponse?.paymentMethods?.find(
@@ -52,7 +53,10 @@ export const getAppleButtonConfig = (
     applePayConfig,
     navigate,
     fetchShippingMethods,
-    onError = []
+    onError = [],
+    isExpressPdp = false,
+    product,
+    merchantDisplayName = ''
 ) => {
     let applePayAmount = basket.orderTotal
     let customerData = null
@@ -210,6 +214,32 @@ export const getAppleButtonConfig = (
             } catch (err) {
                 onError.forEach((cb) => cb(err))
                 reject(err)
+            }
+        },
+        onClick: async (resolve, reject) => {
+            if (isExpressPdp) {
+                const adyenTemporaryBasketService = new AdyenTemporaryBasketService(
+                    authToken,
+                    basket?.customerInfo?.customerId,
+                    basket?.basketId,
+                    site
+                )
+                const tempBasketResponse =
+                    await adyenTemporaryBasketService.createTemporaryBasket(product)
+                if (tempBasketResponse?.temporaryBasketCreated) {
+                    const applePayAmountUpdate = {
+                        newTotal: {
+                            type: 'final',
+                            label: merchantDisplayName,
+                            amount: tempBasketResponse.amount.value
+                        }
+                    }
+                    resolve(applePayAmountUpdate)
+                } else {
+                    reject()
+                }
+            } else {
+                resolve()
             }
         }
     }

@@ -67,7 +67,7 @@ export class BasketService {
      */
     async createTemporaryBasket() {
         const {customerId} = this.adyenContext
-        await this.removeExistingTemporaryBaskets()
+        // await this.removeExistingTemporaryBaskets()
         const basket = await this.shopperBaskets.createBasket({
             parameters: {
                 temporary: true

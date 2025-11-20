@@ -60,7 +60,7 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     ]
 
     const paymentMethodsHandler = overrides?.paymentMethods || [
-        prepareRequestContext,
+        prepareWebhookRequestContext,
         PaymentMethodsController,
         SuccessHandler,
         ErrorHandler

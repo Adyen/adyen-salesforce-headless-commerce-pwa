@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useCallback, useMemo} from 'react'
+import React, {useEffect, useRef, useCallback, useMemo, useState} from 'react'
 import PropTypes from 'prop-types'
 import {AdyenCheckout, ApplePay} from '@adyen/adyen-web'
 import '@adyen/adyen-web/styles/adyen.css'
@@ -7,11 +7,52 @@ import useAdyenPaymentMethods from '../hooks/useAdyenPaymentMethods'
 import useAdyenShippingMethods from '../hooks/useAdyenShippingMethods'
 import {getAppleButtonConfig, getApplePaymentMethodConfig} from './helpers/applePayExpress.utils'
 import {AdyenShippingMethodsService} from '../services/shipping-methods'
+import useAdyenTemporaryBasket from '../hooks/useAdyenTemporaryBasket'
 
 const ApplePayExpressComponent = (props) => {
-    const {authToken, customerId, locale, site, basket, navigate, onError = []} = props
+    const {
+        authToken,
+        customerId,
+        locale,
+        site,
+        basket,
+        navigate,
+        onError = [],
+        isExpressPdp = false,
+        product = null,
+        merchantDisplayName = ''
+    } = props
+    const {temporaryBasket, createTemporaryBasket} = useAdyenTemporaryBasket({
+        authToken,
+        customerId,
+        site,
+        isExpressPdp
+    })
+    const [shopperBasket, setShopperBasket] = useState(isExpressPdp ? temporaryBasket : basket)
+    const hasInitializedBasket = useRef(false)
 
-    const basketId = basket?.basketId
+    // Initialize temporary basket when all required data is available
+    useEffect(() => {
+        const initializeTemporaryBasket = async () => {
+            if (isExpressPdp && !hasInitializedBasket.current && product && !temporaryBasket) {
+                hasInitializedBasket.current = true
+                try {
+                    await createTemporaryBasket(product)
+                } catch (error) {
+                    hasInitializedBasket.current = false
+                }
+            }
+        }
+
+        initializeTemporaryBasket()
+    }, [isExpressPdp, product, temporaryBasket, createTemporaryBasket])
+
+    // Update shopperBasket when temporaryBasket changes
+    useEffect(() => {
+        if (isExpressPdp && temporaryBasket) {
+            setShopperBasket(temporaryBasket)
+        }
+    }, [isExpressPdp, temporaryBasket])
     const paymentContainer = useRef(null)
     const applePayButtonRef = useRef(null)
 
@@ -23,7 +64,7 @@ const ApplePayExpressComponent = (props) => {
     } = useAdyenEnvironment({
         authToken,
         customerId,
-        basketId,
+        basketId: shopperBasket?.basketId,
         site
     })
 
@@ -35,7 +76,7 @@ const ApplePayExpressComponent = (props) => {
     } = useAdyenPaymentMethods({
         authToken,
         customerId,
-        basketId,
+        basketId: shopperBasket?.basketId,
         site,
         locale
     })
@@ -48,9 +89,9 @@ const ApplePayExpressComponent = (props) => {
     } = useAdyenShippingMethods({
         authToken,
         customerId,
-        basketId,
+        basketId: shopperBasket?.basketId,
         site,
-        skip: !basketId
+        skip: !shopperBasket?.basketId
     })
 
     // Memoize loading state
@@ -64,11 +105,11 @@ const ApplePayExpressComponent = (props) => {
         const adyenShippingMethodsService = new AdyenShippingMethodsService(
             authToken,
             customerId,
-            basketId,
+            shopperBasket?.basketId,
             site
         )
         return await adyenShippingMethodsService.getShippingMethods()
-    }, [authToken, customerId, basketId, site])
+    }, [authToken, customerId, shopperBasket?.basketId, site])
 
     // Handle errors from hooks
     useEffect(() => {
@@ -97,7 +138,7 @@ const ApplePayExpressComponent = (props) => {
             const shouldInitialize = !!(
                 adyenEnvironment &&
                 adyenPaymentMethods &&
-                basket &&
+                !shopperBasket &&
                 shippingMethods &&
                 paymentContainer.current
             )
@@ -127,12 +168,15 @@ const ApplePayExpressComponent = (props) => {
                 const appleButtonConfig = getAppleButtonConfig(
                     authToken,
                     site,
-                    basket,
+                    shopperBasket,
                     shippingMethods?.applicableShippingMethods,
                     applePaymentMethodConfig,
                     navigate,
                     fetchShippingMethods,
-                    onError
+                    onError,
+                    isExpressPdp,
+                    product,
+                    merchantDisplayName
                 )
                 const applePayButton = new ApplePay(checkout, appleButtonConfig)
                 applePayButton
@@ -163,13 +207,14 @@ const ApplePayExpressComponent = (props) => {
         adyenEnvironment?.ADYEN_ENVIRONMENT,
         adyenEnvironment?.ADYEN_CLIENT_KEY,
         adyenPaymentMethods?.paymentMethods,
-        basket?.basketId,
+        shopperBasket?.basketId,
         shippingMethods?.applicableShippingMethods,
         locale?.id,
         authToken,
         site?.id,
         navigate,
-        fetchShippingMethods
+        fetchShippingMethods,
+        createTemporaryBasket
     ])
 
     const {spinner} = props
@@ -191,7 +236,10 @@ ApplePayExpressComponent.propTypes = {
     basket: PropTypes.object.isRequired,
     navigate: PropTypes.func.isRequired,
     onError: PropTypes.arrayOf(PropTypes.func),
-    spinner: PropTypes.node
+    spinner: PropTypes.node,
+    isExpressPdp: PropTypes.bool,
+    product: PropTypes.object,
+    merchantDisplayName: PropTypes.string
 }
 
 export default React.memo(ApplePayExpressComponent, (prevProps, nextProps) => {
