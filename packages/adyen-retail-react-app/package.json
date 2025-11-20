@@ -60,10 +60,11 @@
         "Android >= 4.4.4",
         "last 4 ChromeAndroid versions"
     ],
-    "resolutions": {
+    "overrides": {
         "ws": ">=8.17.1",
         "express": ">=4.20.0",
         "braces": ">=3.0.3",
-        "path-to-regexp": ">=6.3.0"
+        "path-to-regexp": ">=6.3.0",
+        "validator": "13.15.23"
     }
 }
