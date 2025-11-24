@@ -34,16 +34,20 @@ describe('create-temporary-basket controller', () => {
 
     it('creates a temporary basket and returns expected response without product', async () => {
         const mockBasket = {basketId: 'b1', orderTotal: 0, currency: 'USD'}
-        BasketService.mockImplementation(() => ({
+        const mockBasketService = {
+            removeExistingTemporaryBaskets: jest.fn(),
             createTemporaryBasket: jest.fn().mockResolvedValue(mockBasket),
             addProductToBasket: jest.fn()
-        }))
+        }
+        BasketService.mockImplementation(() => mockBasketService)
 
         await CreateTemporaryBasketController(req, res, next)
 
         expect(Logger.info).toHaveBeenCalledWith('CreateTemporaryBasketController', 'start')
         expect(BasketService).toHaveBeenCalled()
+        expect(mockBasketService.removeExistingTemporaryBaskets).toHaveBeenCalled()
         expect(res.locals.response).toEqual({
+            basketId: 'b1',
             temporaryBasketCreated: true,
             amount: {
                 value: 0,
@@ -57,25 +61,29 @@ describe('create-temporary-basket controller', () => {
     it('creates a temporary basket and adds product when provided in body', async () => {
         const initialBasket = {basketId: 'b2', orderTotal: 0, currency: 'EUR'}
         const updatedBasket = {basketId: 'b2', orderTotal: 123.45, currency: 'EUR'}
-        const addProductToBasket = jest.fn().mockResolvedValue(updatedBasket)
-        BasketService.mockImplementation(() => ({
+
+        const mockBasketService = {
+            removeExistingTemporaryBaskets: jest.fn(),
             createTemporaryBasket: jest.fn().mockResolvedValue(initialBasket),
-            addProductToBasket
-        }))
+            addProductToBasket: jest.fn().mockResolvedValue(updatedBasket)
+        }
+        BasketService.mockImplementation(() => mockBasketService)
+
         req.body = {
-            product: {productId: 'SKU123', quantity: 2}
+            product: {id: 'SKU123', quantity: 2}
         }
 
         await CreateTemporaryBasketController(req, res, next)
 
-        expect(addProductToBasket).toHaveBeenCalledWith('b2', {
-            productId: 'SKU123',
+        expect(mockBasketService.addProductToBasket).toHaveBeenCalledWith('b2', {
+            id: 'SKU123',
             quantity: 2
         })
         expect(res.locals.response).toEqual({
+            basketId: 'b2',
             temporaryBasketCreated: true,
             amount: {
-                value: 12345, // 123.45 * 100 (EUR has 2 decimal places)
+                value: 12345,
                 currency: 'EUR'
             }
         })

@@ -138,7 +138,7 @@ const ApplePayExpressComponent = (props) => {
             const shouldInitialize = !!(
                 adyenEnvironment &&
                 adyenPaymentMethods &&
-                !shopperBasket &&
+                shopperBasket &&
                 shippingMethods &&
                 paymentContainer.current
             )

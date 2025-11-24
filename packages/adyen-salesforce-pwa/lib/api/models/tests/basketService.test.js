@@ -1,10 +1,14 @@
 import {BasketService} from '../basketService.js'
 import {createShopperBasketsClient} from '../../helpers/basketHelper.js'
 import {PAYMENT_METHODS} from '../../../utils/constants.mjs'
+import {getCustomerBaskets} from '../../helpers/customerHelper'
 
 // Mock dependencies
 jest.mock('../../helpers/basketHelper.js', () => ({
     createShopperBasketsClient: jest.fn()
+}))
+jest.mock('../../helpers/customerHelper', () => ({
+    getCustomerBaskets: jest.fn()
 }))
 
 describe('BasketService', () => {
@@ -32,7 +36,6 @@ describe('BasketService', () => {
         }
 
         mockShopperBaskets = {
-            getCustomerBaskets: jest.fn(),
             deleteBasket: jest.fn(),
             createBasket: jest.fn(),
             updateBasket: jest.fn(),
@@ -73,24 +76,21 @@ describe('BasketService', () => {
         })
     })
 
-    describe('createTemporaryBasket', () => {
-        it('should remove existing temp baskets and create a new one, updating context', async () => {
-            mockShopperBaskets.getCustomerBaskets.mockResolvedValue({
+    describe('removeExistingTemporaryBaskets', () => {
+        it('should fetch and delete temporary baskets', async () => {
+            const mockBaskets = {
                 baskets: [
-                    {basketId: 'temp1', temporary: true},
-                    {basketId: 'nontemp', temporary: false},
-                    {basketId: 'temp2', temporary: true}
+                    {basketId: 'temp1', temporaryBasket: true},
+                    {basketId: 'nontemp', temporaryBasket: false},
+                    {basketId: 'temp2', temporaryBasket: true}
                 ]
-            })
+            }
+            getCustomerBaskets.mockResolvedValue(mockBaskets)
             mockShopperBaskets.deleteBasket.mockResolvedValue({})
-            const created = {basketId: 'newTemp', temporary: true, orderTotal: 0}
-            mockShopperBaskets.createBasket.mockResolvedValue(created)
 
-            const result = await basketService.createTemporaryBasket()
+            await basketService.removeExistingTemporaryBaskets()
 
-            expect(mockShopperBaskets.getCustomerBaskets).toHaveBeenCalledWith({
-                parameters: {customerId: 'mockCustomerId'}
-            })
+            expect(getCustomerBaskets).toHaveBeenCalledWith('Bearer mockToken', 'mockCustomerId')
             expect(mockShopperBaskets.deleteBasket).toHaveBeenCalledTimes(2)
             expect(mockShopperBaskets.deleteBasket).toHaveBeenCalledWith({
                 parameters: {basketId: 'temp1'}
@@ -98,22 +98,28 @@ describe('BasketService', () => {
             expect(mockShopperBaskets.deleteBasket).toHaveBeenCalledWith({
                 parameters: {basketId: 'temp2'}
             })
-            expect(mockShopperBaskets.createBasket).toHaveBeenCalledWith({
-                parameters: {temporary: true},
-                body: {customerInfo: {customerId: 'mockCustomerId'}}
-            })
-            expect(mockRes.locals.adyen.basket).toEqual(created)
-            expect(result).toEqual(created)
         })
 
-        it('should create a new temp basket when no existing temp baskets', async () => {
-            mockShopperBaskets.getCustomerBaskets.mockResolvedValue({baskets: []})
+        it('should do nothing if no temporary baskets are found', async () => {
+            getCustomerBaskets.mockResolvedValue({
+                baskets: [{basketId: 'nontemp', temporaryBasket: false}]
+            })
+            await basketService.removeExistingTemporaryBaskets()
+            expect(mockShopperBaskets.deleteBasket).not.toHaveBeenCalled()
+        })
+    })
+
+    describe('createTemporaryBasket', () => {
+        it('should create a new temp basket and update the context', async () => {
             const created = {basketId: 'newTemp', temporary: true}
             mockShopperBaskets.createBasket.mockResolvedValue(created)
 
             const result = await basketService.createTemporaryBasket()
 
-            expect(mockShopperBaskets.deleteBasket).not.toHaveBeenCalled()
+            expect(mockShopperBaskets.createBasket).toHaveBeenCalledWith({
+                parameters: {temporary: true},
+                body: {customerInfo: {customerId: 'mockCustomerId'}}
+            })
             expect(mockRes.locals.adyen.basket).toEqual(created)
             expect(result).toEqual(created)
         })
@@ -128,13 +134,18 @@ describe('BasketService', () => {
             mockShopperBaskets.addItemToBasket.mockResolvedValue(updated)
 
             const result = await basketService.addProductToBasket('mockBasketId', {
-                productId: 'SKU',
+                id: 'SKU',
                 quantity: 1
             })
 
             expect(mockShopperBaskets.addItemToBasket).toHaveBeenCalledWith({
                 parameters: {basketId: 'mockBasketId'},
-                body: [{productId: 'SKU', quantity: 1}]
+                body: [
+                    {
+                        productId: 'SKU',
+                        quantity: 1
+                    }
+                ]
             })
             expect(mockRes.locals.adyen.basket).toEqual(updated)
             expect(result).toEqual(updated)
@@ -142,13 +153,13 @@ describe('BasketService', () => {
 
         it('should throw on missing params', async () => {
             await expect(
-                basketService.addProductToBasket('', {productId: 'SKU', quantity: 1})
+                basketService.addProductToBasket('', {id: 'SKU', quantity: 1})
             ).rejects.toBeInstanceOf(Error)
             await expect(
                 basketService.addProductToBasket('id', {quantity: 1})
             ).rejects.toBeInstanceOf(Error)
             await expect(
-                basketService.addProductToBasket('id', {productId: 'SKU'})
+                basketService.addProductToBasket('id', {id: 'SKU'})
             ).rejects.toBeInstanceOf(Error)
             expect(mockShopperBaskets.addItemToBasket).not.toHaveBeenCalled()
         })
