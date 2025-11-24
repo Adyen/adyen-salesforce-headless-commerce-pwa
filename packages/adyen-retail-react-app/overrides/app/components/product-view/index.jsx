@@ -911,22 +911,24 @@ const ProductView = forwardRef(
                                     }
                                 >
                                     {renderActionButtons()}
-                                    <ApplePayExpress
-                                        authToken={authToken}
-                                        customerId={customerId}
-                                        locale={locale}
-                                        site={site}
-                                        navigate={navigate}
-                                        product={product}
-                                        isExpressPdp={true}
-                                        merchantDisplayName={'Merchant name'}
-                                        // Callbacks
-                                        onError={[showError]}
-                                        // UI
-                                        spinner={
-                                            <LoadingSpinner wrapperStyles={{height: '100vh'}} />
-                                        }
-                                    />
+                                    {product && quantity && (
+                                        <ApplePayExpress
+                                            authToken={authToken}
+                                            customerId={customerId}
+                                            locale={locale}
+                                            site={site}
+                                            navigate={navigate}
+                                            product={{...product, quantity}}
+                                            isExpressPdp={true}
+                                            merchantDisplayName={'Merchant name'}
+                                            // Callbacks
+                                            onError={[showError]}
+                                            // UI
+                                            spinner={
+                                                <LoadingSpinner wrapperStyles={{height: '100vh'}} />
+                                            }
+                                        />
+                                    )}
                                 </Box>
                             </Box>
                         </Box>
@@ -950,20 +952,22 @@ const ProductView = forwardRef(
                     boxShadow={theme.shadows.top}
                 >
                     {renderActionButtons()}
-                    <ApplePayExpress
-                        authToken={authToken}
-                        customerId={customerId}
-                        locale={locale}
-                        site={site}
-                        navigate={navigate}
-                        product={product}
-                        isExpressPdp={true}
-                        merchantDisplayName={'Merchant name'}
-                        // Callbacks
-                        onError={[showError]}
-                        // UI
-                        spinner={<LoadingSpinner wrapperStyles={{height: '100vh'}} />}
-                    />
+                    {product && quantity && (
+                        <ApplePayExpress
+                            authToken={authToken}
+                            customerId={customerId}
+                            locale={locale}
+                            site={site}
+                            navigate={navigate}
+                            product={{...product, quantity}}
+                            isExpressPdp={true}
+                            merchantDisplayName={'Merchant name'}
+                            // Callbacks
+                            onError={[showError]}
+                            // UI
+                            spinner={<LoadingSpinner wrapperStyles={{height: '100vh'}} />}
+                        />
+                    )}
                 </Box>
             </Flex>
         )

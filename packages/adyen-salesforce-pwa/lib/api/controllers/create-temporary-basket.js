@@ -4,6 +4,25 @@ import {ERROR_MESSAGE} from '../../utils/constants.mjs'
 import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrentSite.mjs'
 import {BasketService} from '../models/basketService.js'
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
+import {getCustomerBaskets} from '../helpers/customerHelper'
+
+async function removeExistingTemporaryBaskets(customerId) {
+    try {
+        const existingBaskets = await getCustomerBaskets(customerId)
+        const tempBaskets = existingBaskets.baskets?.filter((b) => b?.temporaryBasket)
+        if (tempBaskets?.length) {
+            await Promise.all(
+                tempBaskets.map((b) =>
+                    this.shopperBaskets.deleteBasket({
+                        parameters: {basketId: b.basketId}
+                    })
+                )
+            )
+        }
+    } catch (e) {
+        Logger.error('removeExistingTemporaryBaskets', e.stack || e.message)
+    }
+}
 
 /**
  * Creates a temporary basket for the current shopper.
@@ -40,14 +59,17 @@ export default async function CreateTemporaryBasketController(req, res, next) {
         }
 
         const basketService = new BasketService(adyenContext, res)
+        await basketService.removeExistingTemporaryBaskets()
         let basket = await basketService.createTemporaryBasket()
 
+        adyenContext.basketService = basketService
         adyenContext.basket = basket
+
         res.locals.adyen = adyenContext
 
         const {product} = req.body || {}
-        if (product?.productId && product?.quantity) {
-            basket = await adyenContext.basketService.addProductToBasket(basket.basketId, product)
+        if (basket?.basketId && product?.id && product?.quantity) {
+            basket = await adyenContext.basketService.addProductToBasket(basket?.basketId, product)
         }
 
         res.locals.response = {

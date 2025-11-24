@@ -9,6 +9,7 @@ import {getCardType} from '../../utils/getCardType.mjs'
 import {convertCurrencyValueToMajorUnits} from '../../utils/parsers.mjs'
 import Logger from '../models/logger'
 import {AdyenError} from './AdyenError'
+import {getCustomerBaskets} from '../helpers/customerHelper'
 
 /**
  * A service for managing basket state and interactions with the ShopperBaskets API.
@@ -38,16 +39,13 @@ export class BasketService {
 
     /**
      * Removes any existing temporary baskets for the current customer.
-     * @private
      */
     async removeExistingTemporaryBaskets() {
-        const {customerId} = this.adyenContext
         try {
-            const {baskets: existingBaskets = []} = await this.shopperBaskets.getCustomerBaskets({
-                parameters: {customerId}
-            })
-            const tempBaskets = existingBaskets.filter((b) => b?.temporary === true)
-            if (tempBaskets.length) {
+            const {authorization, customerId} = this.adyenContext
+            const existingBaskets = await getCustomerBaskets(authorization, customerId)
+            const tempBaskets = existingBaskets.baskets?.filter((b) => b?.temporaryBasket === true)
+            if (tempBaskets?.length) {
                 await Promise.all(
                     tempBaskets.map((b) =>
                         this.shopperBaskets.deleteBasket({
@@ -67,7 +65,6 @@ export class BasketService {
      */
     async createTemporaryBasket() {
         const {customerId} = this.adyenContext
-        // await this.removeExistingTemporaryBaskets()
         const basket = await this.shopperBaskets.createBasket({
             parameters: {
                 temporary: true
@@ -103,17 +100,22 @@ export class BasketService {
      * @returns {Promise<object>}
      */
     async addProductToBasket(basketId, item) {
-        if (!basketId || !item?.productId || !item?.quantity) {
+        if (!basketId || !item?.id || !item?.quantity) {
             throw new AdyenError(ERROR_MESSAGE.INVALID_PARAMS)
         }
+
+        const requestBody = {
+            productId: item.id,
+            quantity: item.quantity,
+            ...(item.optionItems && {
+                optionItems: Array.isArray(item.optionItems) ? item.optionItems : [item.optionItems]
+            }),
+            ...(item.inventoryId && {inventoryId: item.inventoryId})
+        }
+
         const updatedBasket = await this.shopperBaskets.addItemToBasket({
             parameters: {basketId},
-            body: {
-                productId: item.productId,
-                quantity: item.quantity,
-                ...(item.optionItems && {optionItems: item.optionItems}),
-                ...(item.inventoryId && {inventoryId: item.inventoryId})
-            }
+            body: [requestBody]
         })
         if (this.adyenContext?.basket?.basketId === basketId) {
             this._updateContext(updatedBasket)

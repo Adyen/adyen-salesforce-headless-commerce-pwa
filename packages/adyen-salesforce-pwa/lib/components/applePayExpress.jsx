@@ -10,6 +10,7 @@ import {AdyenShippingMethodsService} from '../services/shipping-methods'
 import useAdyenTemporaryBasket from '../hooks/useAdyenTemporaryBasket'
 
 const ApplePayExpressComponent = (props) => {
+    console.log(props)
     const {
         authToken,
         customerId,

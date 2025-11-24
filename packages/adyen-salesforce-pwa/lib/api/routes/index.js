@@ -123,6 +123,7 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     ]
 
     const createTemporaryBasketHandler = overrides?.createTemporaryBasket || [
+        prepareWebhookRequestContext,
         CreateTemporaryBasketController,
         SuccessHandler,
         ErrorHandler
