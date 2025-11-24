@@ -134,7 +134,7 @@ describe('BasketService', () => {
 
             expect(mockShopperBaskets.addItemToBasket).toHaveBeenCalledWith({
                 parameters: {basketId: 'mockBasketId'},
-                body: {productId: 'SKU', quantity: 1}
+                body: [{productId: 'SKU', quantity: 1}]
             })
             expect(mockRes.locals.adyen.basket).toEqual(updated)
             expect(result).toEqual(updated)
