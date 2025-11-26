@@ -20,6 +20,7 @@ import PaymentCancelController from '../controllers/payment-cancel'
 import {balanceCheck, cancelOrder, createOrder} from '../controllers/giftCard'
 import {prepareRequestContext} from '../middleware/request-context'
 import {prepareWebhookRequestContext} from '../middleware/webhook-request-context'
+import AddProductToBasketController from '../controllers/add-product-to-basket'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function SuccessHandler(req, res, next) {
@@ -129,6 +130,13 @@ function registerAdyenEndpoints(app, runtime, overrides) {
         ErrorHandler
     ]
 
+    const addProductsToBasketHandler = overrides?.addProductsToBasket || [
+        prepareWebhookRequestContext,
+        AddProductToBasketController,
+        SuccessHandler,
+        ErrorHandler
+    ]
+
     app.get(
         '*/checkout/redirect',
         query('redirectResult').optional().escape(),
@@ -158,7 +166,8 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     app.post('/api/adyen/gift-card/create-order', ...createOrderHandler)
     app.post('/api/adyen/gift-card/cancel-order', ...cancelOrderHandler)
 
-    app.post('/api/adyen/pdp/temporary-basket', ...createTemporaryBasketHandler)
+    app.post('/api/adyen/pdp/temporary-baskets', ...createTemporaryBasketHandler)
+    app.post('/api/adyen/pdp/temporary-baskets/:basketId/products', ...addProductsToBasketHandler)
 }
 
 export {registerAdyenEndpoints, SuccessHandler, ErrorHandler}

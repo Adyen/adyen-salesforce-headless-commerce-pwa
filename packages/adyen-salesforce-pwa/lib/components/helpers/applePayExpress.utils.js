@@ -3,6 +3,7 @@ import {AdyenPaymentsService} from '../../services/payments'
 import {AdyenShippingMethodsService} from '../../services/shipping-methods'
 import {AdyenShippingAddressService} from '../../services/shipping-address'
 import {AdyenTemporaryBasketService} from '../../services/temporary-basket'
+import {AdyenAddProductService} from '../../services/add-product'
 
 export const getApplePaymentMethodConfig = (paymentMethodsResponse) => {
     const applePayPaymentMethod = paymentMethodsResponse?.paymentMethods?.find(
@@ -55,12 +56,14 @@ export const getAppleButtonConfig = (
     fetchShippingMethods,
     onError = [],
     isExpressPdp = false,
-    product,
-    merchantDisplayName = ''
+    merchantDisplayName = '',
+    customerId,
+    product
 ) => {
     let applePayAmount = basket.orderTotal
     let customerData = null
     let billingData = null
+    let temporaryBasket = null
     const buttonConfig = {
         showPayButton: true,
         isExpress: true,
@@ -79,10 +82,11 @@ export const getAppleButtonConfig = (
         })),
         onSubmit: async (state, component, actions) => {
             try {
+                const basketData = isExpressPdp ? temporaryBasket : basket
                 const adyenPaymentService = new AdyenPaymentsService(
                     authToken,
-                    basket?.customerInfo?.customerId,
-                    basket?.basketId,
+                    basketData?.customerInfo?.customerId,
+                    basketData?.basketId,
                     site
                 )
                 const paymentsResponse = await adyenPaymentService.submitPayment({
@@ -124,23 +128,24 @@ export const getAppleButtonConfig = (
         onShippingContactSelected: async (resolve, reject, event) => {
             try {
                 const {shippingContact} = event
+                const basketData = isExpressPdp ? temporaryBasket : basket
                 const adyenShippingAddressService = new AdyenShippingAddressService(
                     authToken,
-                    basket?.customerInfo?.customerId,
-                    basket?.basketId,
+                    basketData?.customerInfo?.customerId,
+                    basketData?.basketId,
                     site
                 )
                 const customerShippingDetails = getCustomerShippingDetails(shippingContact)
                 await adyenShippingAddressService.updateShippingAddress(customerShippingDetails)
                 const {defaultShippingMethodId, applicableShippingMethods} =
-                    await fetchShippingMethods()
+                    await fetchShippingMethods(basketData?.basketId)
                 if (!applicableShippingMethods?.length) {
                     reject()
                 } else {
                     const adyenShippingMethodsService = new AdyenShippingMethodsService(
                         authToken,
-                        basket?.customerInfo?.customerId,
-                        basket?.basketId,
+                        basketData?.customerInfo?.customerId,
+                        basketData?.basketId,
                         site
                     )
                     const response = await adyenShippingMethodsService.updateShippingMethod(
@@ -185,10 +190,11 @@ export const getAppleButtonConfig = (
         onShippingMethodSelected: async (resolve, reject, event) => {
             try {
                 const {shippingMethod} = event
+                const basketData = isExpressPdp ? temporaryBasket : basket
                 const adyenShippingMethodsService = new AdyenShippingMethodsService(
                     authToken,
-                    basket?.customerInfo?.customerId,
-                    basket?.basketId,
+                    basketData?.customerInfo?.customerId,
+                    basketData?.basketId,
                     site
                 )
                 const response = await adyenShippingMethodsService.updateShippingMethod(
@@ -220,18 +226,24 @@ export const getAppleButtonConfig = (
             if (isExpressPdp) {
                 const adyenTemporaryBasketService = new AdyenTemporaryBasketService(
                     authToken,
-                    basket?.customerInfo?.customerId,
-                    basket?.basketId,
+                    customerId,
                     site
                 )
-                const tempBasketResponse =
-                    await adyenTemporaryBasketService.createTemporaryBasket(product)
-                if (tempBasketResponse?.temporaryBasketCreated) {
+                temporaryBasket = await adyenTemporaryBasketService.createTemporaryBasket()
+                if (temporaryBasket?.basketId) {
+                    const adyenAddProductService = new AdyenAddProductService(
+                        authToken,
+                        customerId,
+                        site,
+                        temporaryBasket.basketId
+                    )
+                    const updatedBasket = await adyenAddProductService.addProductToBasket(product)
+                    applePayAmount = updatedBasket.orderTotal
                     const applePayAmountUpdate = {
                         newTotal: {
                             type: 'final',
-                            label: merchantDisplayName,
-                            amount: tempBasketResponse.amount.value
+                            label: applePayConfig.merchantName,
+                            amount: updatedBasket.orderTotal
                         }
                     }
                     resolve(applePayAmountUpdate)

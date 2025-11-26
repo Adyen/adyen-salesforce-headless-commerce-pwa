@@ -1,18 +1,15 @@
 import {ApiClient} from './api'
 
 export class AdyenTemporaryBasketService {
-    baseUrl = '/api/adyen/pdp/temporary-basket'
+    baseUrl = '/api/adyen/pdp/temporary-baskets'
     apiClient = null
 
     constructor(token, customerId, site) {
         this.apiClient = new ApiClient(this.baseUrl, token, customerId, null, site)
     }
 
-    async createTemporaryBasket(product) {
-        const body = product ? {product} : {}
-        const res = await this.apiClient.post({
-            body: JSON.stringify(body)
-        })
+    async createTemporaryBasket() {
+        const res = await this.apiClient.post()
 
         if (res.status >= 300) {
             const errorData = await res

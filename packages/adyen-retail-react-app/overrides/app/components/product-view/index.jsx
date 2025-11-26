@@ -917,10 +917,11 @@ const ProductView = forwardRef(
                                             customerId={customerId}
                                             locale={locale}
                                             site={site}
+                                            currency={activeCurrency}
                                             navigate={navigate}
-                                            product={{...product, quantity}}
                                             isExpressPdp={true}
                                             merchantDisplayName={'Merchant name'}
+                                            product={{...product, quantity}}
                                             // Callbacks
                                             onError={[showError]}
                                             // UI
@@ -958,10 +959,11 @@ const ProductView = forwardRef(
                             customerId={customerId}
                             locale={locale}
                             site={site}
+                            currency={activeCurrency}
                             navigate={navigate}
-                            product={{...product, quantity}}
                             isExpressPdp={true}
                             merchantDisplayName={'Merchant name'}
+                            product={{...product, quantity}}
                             // Callbacks
                             onError={[showError]}
                             // UI

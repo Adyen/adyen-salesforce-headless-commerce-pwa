@@ -3,7 +3,6 @@ import {AdyenError} from '../models/AdyenError'
 import {ERROR_MESSAGE} from '../../utils/constants.mjs'
 import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrentSite.mjs'
 import {BasketService} from '../models/basketService.js'
-import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 
 /**
  * Creates a temporary basket for the current shopper.
@@ -47,20 +46,7 @@ export default async function CreateTemporaryBasketController(req, res, next) {
         adyenContext.basket = basket
 
         res.locals.adyen = adyenContext
-
-        const {product} = req.body || {}
-        if (basket?.basketId && product?.id && product?.quantity) {
-            basket = await adyenContext.basketService.addProductToBasket(basket?.basketId, product)
-        }
-
-        res.locals.response = {
-            basketId: basket?.basketId,
-            temporaryBasketCreated: Boolean(basket?.basketId),
-            amount: {
-                currency: basket?.currency,
-                value: getCurrencyValueForApi(basket?.orderTotal, basket?.currency)
-            }
-        }
+        res.locals.response = basket
 
         Logger.info('CreateTemporaryBasketController', 'success')
         return next()
