@@ -6,6 +6,8 @@ import PaymentsDetailsController from '../controllers/payments-details'
 import PaymentsController from '../controllers/payments'
 import ShippingAddressController from '../controllers/shipping-address'
 import ShippingMethodsController from '../controllers/shipping-methods'
+import ShopperDetailsController from '../controllers/shopper-details'
+import PaypalUpdateOrderController from '../controllers/paypal-update-order'
 import {
     authenticate,
     parseNotification,
@@ -95,6 +97,12 @@ function registerAdyenEndpoints(app, runtime, overrides) {
         SuccessHandler,
         ErrorHandler
     ]
+    const shopperDetailsHandler = overrides?.shopperDetails || [
+        prepareRequestContext,
+        ShopperDetailsController,
+        SuccessHandler,
+        ErrorHandler
+    ]
 
     const paymentCancelController = overrides?.paymentCancel || [
         prepareRequestContext,
@@ -117,6 +125,12 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     const cancelOrderHandler = overrides?.cancelOrder || [
         prepareRequestContext,
         cancelOrder,
+        SuccessHandler,
+        ErrorHandler
+    ]
+    const paypalUpdateOrderHandler = overrides?.paypalUpdateOrder || [
+        prepareRequestContext,
+        PaypalUpdateOrderController,
         SuccessHandler,
         ErrorHandler
     ]
@@ -146,6 +160,8 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     app.post('/api/adyen/webhook', ...webhookHandler)
     app.post('/api/adyen/shipping-methods', ...shippingMethodsPostHandler)
     app.post('/api/adyen/shipping-address', ...shippingAddressHandler)
+    app.post('/api/adyen/shopper-details', ...shopperDetailsHandler)
+    app.post('/api/adyen/paypal-update-order', ...paypalUpdateOrderHandler)
     app.post('/api/adyen/gift-card/balance-check', ...balanceCheckHandler)
     app.post('/api/adyen/gift-card/create-order', ...createOrderHandler)
     app.post('/api/adyen/gift-card/cancel-order', ...cancelOrderHandler)

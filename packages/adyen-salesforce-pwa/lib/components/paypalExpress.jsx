@@ -1,27 +1,98 @@
-import React, {useEffect, useRef, useMemo} from 'react'
+import React, {useEffect, useRef, useMemo, useCallback} from 'react'
 import PropTypes from 'prop-types'
 import {AdyenCheckout, PayPal} from '@adyen/adyen-web'
 import '../style/adyenCheckout.css'
 import useAdyenEnvironment from '../hooks/useAdyenEnvironment'
 import useAdyenPaymentMethods from '../hooks/useAdyenPaymentMethods'
+import {AdyenShippingMethodsService} from '../services/shipping-methods'
 import {paypalExpressConfig} from './paypal/expressConfig'
 
-const PayPalExpressComponent = (props) => {
-    const {
-        authToken,
-        customerId,
-        locale,
-        site,
-        basket,
-        navigate,
-        beforeSubmit = [],
-        afterSubmit = [],
-        beforeAdditionalDetails = [],
-        afterAdditionalDetails = [],
-        onError = [],
-        spinner
-    } = props
+/**
+ * PayPal Express Checkout Component
+ *
+ * Renders a PayPal Express button that enables fast checkout without requiring
+ * customers to enter shipping and billing information manually. The component
+ * handles the complete PayPal Express flow including:
+ * - Fetching Adyen environment configuration and payment methods
+ * - Initializing the Adyen Checkout SDK with PayPal Express configuration
+ * - Managing shipping address and shipping method updates
+ * - Processing payment authorization and submission
+ * - Handling payment details and redirects
+ *
+ * The component provides lifecycle hooks (before/after callbacks) at each stage
+ * of the payment flow for custom business logic integration.
+ *
+ * @component
+ * @param {object} props - Component properties
+ * @param {string} props.authToken - Authentication token for API requests
+ * @param {string} [props.customerId] - Customer ID for the current shopper
+ * @param {object} props.locale - Locale object with id property (e.g., {id: 'en-US'})
+ * @param {object} props.site - Site configuration object
+ * @param {object} props.basket - Shopping basket/cart object
+ * @param {Function} props.navigate - Navigation function for redirects
+ * @param {Function[]} [props.beforeSubmit] - Callbacks executed before payment submission
+ * @param {Function[]} [props.afterSubmit] - Callbacks executed after payment submission
+ * @param {Function[]} [props.beforeAdditionalDetails] - Callbacks executed before additional payment details
+ * @param {Function[]} [props.afterAdditionalDetails] - Callbacks executed after additional payment details
+ * @param {Function[]} [props.beforeAuthorized] - Callbacks executed before payment authorization
+ * @param {Function[]} [props.afterAuthorized] - Callbacks executed after payment authorization
+ * @param {Function[]} [props.beforeShippingAddressChange] - Callbacks executed before shipping address changes
+ * @param {Function[]} [props.afterShippingAddressChange] - Callbacks executed after shipping address changes
+ * @param {Function[]} [props.beforeShippingOptionsChange] - Callbacks executed before shipping method selection
+ * @param {Function[]} [props.afterShippingOptionsChange] - Callbacks executed after shipping method selection
+ * @param {Function[]} [props.onError] - Error handler callbacks
+ * @param {object} [props.configuration] - Additional PayPal configuration overrides
+ * @param {React.ReactNode} [props.spinner] - Optional loading spinner component
+ * @returns {React.ReactElement} The PayPal Express button component
+ *
+ * @example
+ * <PayPalExpressComponent
+ *   authToken={token}
+ *   locale={{id: 'en-US'}}
+ *   site={siteConfig}
+ *   basket={currentBasket}
+ *   navigate={navigate}
+ *   beforeSubmit={[validateCart]}
+ *   afterSubmit={[trackPayment]}
+ *   onError={[handleError]}
+ * />
+ */
+const PayPalExpressComponent = ({
+    // Order and payment data
+    basket,
 
+    // User data
+    authToken,
+    customerId,
+    site,
+    locale,
+    navigate,
+
+    // Callbacks - Payment flow
+    beforeSubmit = [],
+    afterSubmit = [],
+    beforeAdditionalDetails = [],
+    afterAdditionalDetails = [],
+
+    // Callbacks - Authorization
+    beforeAuthorized = [],
+    afterAuthorized = [],
+
+    // Callbacks - Shipping
+    beforeShippingAddressChange = [],
+    afterShippingAddressChange = [],
+    beforeShippingOptionsChange = [],
+    afterShippingOptionsChange = [],
+
+    // Error handling
+    onError = [],
+
+    // UI
+    spinner,
+
+    // Optional overrides
+    configuration = {}
+}) => {
     const basketId = basket?.basketId
     const paymentContainer = useRef(null)
     const paypalButtonRef = useRef(null)
@@ -57,6 +128,17 @@ const PayPalExpressComponent = (props) => {
     const hasPayPalMethod = useMemo(() => {
         return adyenPaymentMethods?.paymentMethods?.some((method) => method.type === 'paypal')
     }, [adyenPaymentMethods?.paymentMethods])
+
+    const fetchShippingMethods = useCallback(async () => {
+        // Fetch fresh shipping methods from API after address update
+        const adyenShippingMethodsService = new AdyenShippingMethodsService(
+            authToken,
+            customerId,
+            basketId,
+            site
+        )
+        return await adyenShippingMethodsService.getShippingMethods()
+    }, [authToken, customerId, basketId, site])
 
     useEffect(() => {
         if (adyenEnvironmentError) {
@@ -115,7 +197,15 @@ const PayPalExpressComponent = (props) => {
                     afterSubmit,
                     beforeAdditionalDetails,
                     afterAdditionalDetails,
-                    onError
+                    beforeAuthorized,
+                    afterAuthorized,
+                    beforeShippingAddressChange,
+                    afterShippingAddressChange,
+                    beforeShippingOptionsChange,
+                    afterShippingOptionsChange,
+                    configuration,
+                    onError,
+                    fetchShippingMethods
                 })
 
                 const paypalButton = new PayPal(checkout, expressConfig)
@@ -174,8 +264,15 @@ const PayPalExpressComponent = (props) => {
         afterSubmit,
         beforeAdditionalDetails,
         afterAdditionalDetails,
+        beforeAuthorized,
+        afterAuthorized,
+        beforeShippingAddressChange,
+        afterShippingAddressChange,
+        beforeShippingOptionsChange,
+        afterShippingOptionsChange,
         onError,
-        navigate
+        navigate,
+        fetchShippingMethods
     ])
 
     return (
@@ -197,7 +294,14 @@ PayPalExpressComponent.propTypes = {
     afterSubmit: PropTypes.arrayOf(PropTypes.func),
     beforeAdditionalDetails: PropTypes.arrayOf(PropTypes.func),
     afterAdditionalDetails: PropTypes.arrayOf(PropTypes.func),
+    beforeAuthorized: PropTypes.arrayOf(PropTypes.func),
+    afterAuthorized: PropTypes.arrayOf(PropTypes.func),
+    beforeShippingAddressChange: PropTypes.arrayOf(PropTypes.func),
+    afterShippingAddressChange: PropTypes.arrayOf(PropTypes.func),
+    beforeShippingOptionsChange: PropTypes.arrayOf(PropTypes.func),
+    afterShippingOptionsChange: PropTypes.arrayOf(PropTypes.func),
     onError: PropTypes.arrayOf(PropTypes.func),
+    configuration: PropTypes.object,
     spinner: PropTypes.node
 }
 

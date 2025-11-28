@@ -7,7 +7,8 @@ import {
     createCheckoutResponse,
     createPaymentRequestObject,
     revertCheckoutState,
-    validateBasketPayments
+    validateBasketPayments,
+    isApplePayExpress
 } from '../helpers/paymentsHelper.js'
 import {createOrderUsingOrderNo} from '../helpers/orderHelper.js'
 
@@ -46,7 +47,7 @@ async function sendPayments(req, res, next) {
             throw new AdyenError(ERROR_MESSAGE.ADYEN_CONTEXT_NOT_FOUND, 500)
         }
 
-        if (data.paymentType === 'express') {
+        if (isApplePayExpress(data)) {
             await adyenContext.basketService.addShopperData(data)
         }
         const paymentRequest = await createPaymentRequestObject(data, adyenContext, req)
@@ -57,7 +58,6 @@ async function sendPayments(req, res, next) {
             paymentRequest.amount,
             paymentRequest.paymentMethod
         )
-
         const checkout = new AdyenClientProvider(adyenContext).getPaymentsApi()
         const response = await checkout.payments(paymentRequest, {
             idempotencyKey: uuidv4()
@@ -77,7 +77,8 @@ async function sendPayments(req, res, next) {
         if (checkoutResponse.isSuccessful) {
             await adyenContext.basketService.update({
                 c_amount: JSON.stringify(paymentRequest?.amount),
-                c_paymentMethod: JSON.stringify(paymentRequest?.paymentMethod)
+                c_paymentMethod: JSON.stringify(paymentRequest?.paymentMethod),
+                c_pspReference: response?.pspReference
             })
         }
 
@@ -95,7 +96,6 @@ async function sendPayments(req, res, next) {
                 response?.pspReference
             )
         }
-
         if (checkoutResponse.isFinal && checkoutResponse.isSuccessful) {
             await adyenContext.basketService.addPaymentInstrument(
                 paymentRequest?.amount,
