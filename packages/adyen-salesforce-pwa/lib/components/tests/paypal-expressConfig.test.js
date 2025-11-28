@@ -554,7 +554,7 @@ describe('paypal/expressConfig', () => {
                     id: 'express'
                 },
                 errors: {
-                    SHIPPING_METHOD_ERROR: 'SHIPPING_METHOD_ERROR'
+                    METHOD_UNAVAILABLE: 'METHOD_UNAVAILABLE'
                 }
             }
             actions = {
@@ -605,7 +605,7 @@ describe('paypal/expressConfig', () => {
 
             await onShippingOptionsChange(data, actions, component, props)
 
-            expect(actions.reject).toHaveBeenCalledWith('SHIPPING_METHOD_ERROR')
+            expect(actions.reject).toHaveBeenCalledWith('METHOD_UNAVAILABLE')
         })
 
         it('should reject on error', async () => {
@@ -615,7 +615,7 @@ describe('paypal/expressConfig', () => {
 
             await onShippingOptionsChange(data, actions, component, props)
 
-            expect(actions.reject).toHaveBeenCalledWith('SHIPPING_METHOD_ERROR')
+            expect(actions.reject).toHaveBeenCalledWith('METHOD_UNAVAILABLE')
         })
     })
 })

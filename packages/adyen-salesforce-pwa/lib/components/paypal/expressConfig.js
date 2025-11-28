@@ -268,7 +268,7 @@ export const onShippingOptionsChange = async (data, actions, component, props) =
         const currentPaymentData = component.paymentData
         const {basket, site, token} = props
         if (!selectedShippingOption) {
-            return actions.reject(data.errors.SHIPPING_METHOD_ERROR)
+            return actions.reject(data.errors.METHOD_UNAVAILABLE)
         }
         const adyenShippingMethodsService = new AdyenShippingMethodsService(
             token,
