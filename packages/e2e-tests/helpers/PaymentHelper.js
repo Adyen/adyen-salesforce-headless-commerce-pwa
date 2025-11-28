@@ -38,13 +38,13 @@ export class PaymentHelper {
         this.AddedGiftCards = this.page.locator('.adyen-checkout__order-payment-method')
     }
 
-    async selectPaymentType(paymentType) {
-        await this.page
-            .locator(
-                `//*[contains(@class, 'adyen-checkout__payment-method__name') and contains(text(), '${paymentType}')]`
-            )
-            .click()
-    }
+  async selectPaymentType(paymentType) {
+      const paymentLocator = this.page.locator(
+        `.adyen-checkout__payment-method__name:has-text("${paymentType}")`
+      );
+      await paymentLocator.waitFor({ state: 'visible' });
+      await paymentLocator.click();
+  }
 
     /* This is the generic method to click Pay button for majority of the drop-in payment methods
     Some payment methods require a specific locator, so make sure to utilize the corresponding function */
