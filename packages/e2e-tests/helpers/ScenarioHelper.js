@@ -190,7 +190,7 @@ export class ScenarioHelper {
     }
 
     async submitLoginDetails() {
-        await this.retryClick(this.loginButton, '/oauth2/token', 'POST')
+        await this.loginButton.click()
     }
 
 
