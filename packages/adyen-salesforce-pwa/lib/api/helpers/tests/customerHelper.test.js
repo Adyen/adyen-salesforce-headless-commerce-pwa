@@ -35,7 +35,7 @@ describe('customerHelper', () => {
         it('should create a new ShopperCustomers client with correct configuration', () => {
             const authToken = 'test-auth-token'
 
-            const client = createShopperCustomerClient(authToken)
+            createShopperCustomerClient(authToken)
 
             expect(ShopperCustomers).toHaveBeenCalledWith({
                 ...mockConfig.app.commerceAPI,
