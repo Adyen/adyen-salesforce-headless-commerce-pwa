@@ -28,7 +28,7 @@ test.describe('Payments through PWA UI', () => {
         await scenarios.verifySuccessfulOrder()
     })
 
-    test.only('Tokenized payment should succeed', async ({page}) => {
+    test('Tokenized payment should succeed', async ({page}) => {
         const scenarios = new ScenarioHelper(page)
         await scenarios.visitStore()
         await scenarios.setupCart()
