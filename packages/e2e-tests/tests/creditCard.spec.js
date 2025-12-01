@@ -28,13 +28,11 @@ test.describe('Payments through PWA UI', () => {
         await scenarios.verifySuccessfulOrder()
     })
 
-    test.skip('Tokenized payment should succeed', async ({page}) => {
+    test('Tokenized payment should succeed', async ({page}) => {
         const scenarios = new ScenarioHelper(page)
-        await scenarios.login(user_US)
         await scenarios.visitStore()
-        await page.reload();
-
         await scenarios.setupCart()
+        await scenarios.login(user_US)
         await scenarios.arrangeShippingAndProceedToPaymentForLoggedInUser(user_US)
 
         const paymentPage = new PaymentHelper(page)
