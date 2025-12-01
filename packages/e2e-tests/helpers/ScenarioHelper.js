@@ -121,7 +121,7 @@ export class ScenarioHelper {
         await this.productColorRadioButton.click()
         await this.productSizeRadioButton.click()
         await this.submitAddToCartButton()
-        await this.proceedToCheckoutLink.click()
+        await this.page.goto(`/RefArch/${this.locale.lang}/checkout`)
     }
 
     async submitAddToCartButton() {
@@ -190,7 +190,7 @@ export class ScenarioHelper {
     }
 
     async submitLoginDetails() {
-        await this.retryClick(this.loginButton, '/oauth2/token', 'POST')
+        await this.loginButton.click()
     }
 
 
