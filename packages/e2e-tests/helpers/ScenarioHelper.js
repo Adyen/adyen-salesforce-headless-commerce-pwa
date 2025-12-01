@@ -114,7 +114,6 @@ export class ScenarioHelper {
         this.switchToLoginButton.click()
         await this.fillShopperDetails(user)
         await this.submitLoginDetails()
-        // await this.accountPageHeading.waitFor({state: 'visible', timeout: 30000})
     }
 
     async setupCart() {
@@ -204,6 +203,11 @@ export class ScenarioHelper {
 
     async proceedToPayment() {
         await this.continueToPaymentButton.click()
+    }
+
+    async verifyClickToPayIsRendered() {
+      const ctpSection = this.page.locator('.adyen-checkout-ctp__section')
+      await expect(ctpSection).toBeVisible()
     }
 
     async verifySuccessfulOrder() {

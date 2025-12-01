@@ -5,6 +5,7 @@ import {PaymentHelper} from '../helpers/PaymentHelper.js'
 import {CardData} from '../data/cardData.js'
 
 const user_US = new ShopperData().US
+const user_ClickToPay = new ShopperData().US_ClickToPay
 const threeDs2 = new CardData().threeDs2
 const storedCard = new CardData().storedCard
 
@@ -41,5 +42,16 @@ test.describe('Payments through PWA UI', () => {
         )
         await paymentPage.clickPay()
         await scenarios.verifySuccessfulOrder()
+    })
+
+    test('Rendering Click To Pay', async ({page}) => {
+      const scenarios = new ScenarioHelper(page)
+      await scenarios.visitStore()
+      await scenarios.setupCart()
+
+      await scenarios.arrangeShippingAndProceedToPayment(user_ClickToPay)
+      const paymentPage = new PaymentHelper(page)
+      await paymentPage.selectPaymentType('Cards')
+      await scenarios.verifyClickToPayIsRendered()
     })
 })
