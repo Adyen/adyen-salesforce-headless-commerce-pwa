@@ -4,6 +4,7 @@ import {getBasket} from '../helpers/basketHelper.js'
 import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrentSite.mjs'
 import Logger from '../models/logger.js'
 import {BasketService} from '../models/basketService.js'
+import {getCustomer} from '../helpers/customerHelper'
 
 /**
  * A middleware that extracts, validates, and prepares a request context.
@@ -35,6 +36,7 @@ export async function prepareRequestContext(req, res, next) {
 
     try {
         const basket = await getBasket(authorization, basketid, customerid)
+        const customer = await getCustomer(authorization, customerid)
         const adyenConfig = getAdyenConfigForCurrentSite(siteId)
 
         const adyenContext = {
@@ -42,7 +44,8 @@ export async function prepareRequestContext(req, res, next) {
             adyenConfig,
             siteId,
             authorization,
-            customerId: customerid
+            customerId: customerid,
+            customer
         }
 
         // Instantiate and attach the basket service to the context

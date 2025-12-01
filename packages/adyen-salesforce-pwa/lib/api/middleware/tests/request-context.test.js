@@ -8,9 +8,12 @@ import {ERROR_MESSAGE} from '../../../utils/constants.mjs'
 
 // Mock dependencies
 jest.mock('../../helpers/basketHelper.js')
+jest.mock('../../helpers/customerHelper.js')
 jest.mock('../../../utils/getAdyenConfigForCurrentSite.mjs')
 jest.mock('../../models/logger.js')
 jest.mock('../../models/basketService.js')
+
+import {getCustomer} from '../../helpers/customerHelper.js'
 
 describe('prepareRequestContext middleware', () => {
     let req, res, next
@@ -36,9 +39,11 @@ describe('prepareRequestContext middleware', () => {
 
     test('should successfully prepare context and call next', async () => {
         const mockBasket = {basketId: 'mockBasketId'}
+        const mockCustomer = {authType: 'registered', customerId: 'mockCustomerId'}
         const mockAdyenConfig = {merchantAccount: 'mockAccount'}
 
         getBasket.mockResolvedValue(mockBasket)
+        getCustomer.mockResolvedValue(mockCustomer)
         getAdyenConfigForCurrentSite.mockReturnValue(mockAdyenConfig)
 
         await prepareRequestContext(req, res, next)
@@ -50,6 +55,7 @@ describe('prepareRequestContext middleware', () => {
         expect(res.locals.adyen).toBeDefined()
         expect(res.locals.adyen.basket).toEqual(mockBasket)
         expect(res.locals.adyen.adyenConfig).toEqual(mockAdyenConfig)
+        expect(res.locals.adyen.customer).toEqual(mockCustomer)
         expect(res.locals.adyen.basketService).toBeInstanceOf(BasketService)
 
         expect(Logger.info).toHaveBeenCalledWith(
@@ -103,6 +109,7 @@ describe('prepareRequestContext middleware', () => {
     test('should call next with an error if getAdyenConfigForCurrentSite fails', async () => {
         const mockError = new Error('Failed to get config')
         getBasket.mockResolvedValue({})
+        getCustomer.mockResolvedValue({})
         getAdyenConfigForCurrentSite.mockImplementation(() => {
             throw mockError
         })
