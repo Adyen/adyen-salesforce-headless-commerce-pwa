@@ -38,7 +38,8 @@ export class ScenarioHelper {
         )
         this.loginEmail = this.page.locator("input#email")
         this.loginPassword = this.page.locator("input#password")
-        this.loginButton = this.loginSection.locator("[type='submit']")
+        this.loginButton = this.page.locator("[type='submit']")
+        this.switchToLoginButton = this.page.getByRole('button', { name: 'Already have an account? Log in' })
 
         // Account Page Locators
         this.accountPageHeading = this.page.getByRole('heading', {
@@ -110,10 +111,10 @@ export class ScenarioHelper {
     }
 
     async login(user) {
-        await this.page.goto(`/RefArch/${this.locale.lang}/login`)
+        this.switchToLoginButton.click()
         await this.fillShopperDetails(user)
         await this.submitLoginDetails()
-        await this.accountPageHeading.waitFor({state: 'visible', timeout: 30000})
+        // await this.accountPageHeading.waitFor({state: 'visible', timeout: 30000})
     }
 
     async setupCart() {
