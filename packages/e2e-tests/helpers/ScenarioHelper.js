@@ -113,7 +113,7 @@ export class ScenarioHelper {
         await this.page.goto(`/RefArch/${this.locale.lang}/login`)
         await this.fillShopperDetails(user)
         await this.submitLoginDetails()
-        // await this.accountPageHeading.waitFor({state: 'visible', timeout: 30000})
+        await this.accountPageHeading.waitFor({state: 'visible', timeout: 30000})
     }
 
     async setupCart() {
