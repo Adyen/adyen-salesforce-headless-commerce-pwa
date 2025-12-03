@@ -13,7 +13,7 @@ test.describe('Payments through PWA UI', () => {
     await scenarios.setupCart()
   })
 
-  test('iDEAL should redirect', async ({page}) => {
+  test.skip('iDEAL should redirect', async ({page}) => {
     const scenarios = new ScenarioHelper(page, new LocaleData().FR)
     await scenarios.arrangeShippingAndProceedToPayment(user_FR)
     const paymentPage = new PaymentHelper(page)

@@ -91,7 +91,8 @@ export const ERROR_MESSAGE = {
     MISSING_LIVE_PREFIX: 'missing live prefix',
     ADYEN_CONTEXT_NOT_FOUND: 'Adyen context not found',
     NO_PAYMENT_METHODS: 'no payment methods',
-    ADD_PAYMENT_INSTRUMENTS: 'Failed to add payment instrument due to missing parameters'
+    ADD_PAYMENT_INSTRUMENTS: 'Failed to add payment instrument due to missing parameters',
+    CUSTOMER_NOT_FOUND: 'customer not found'
 }
 
 export const DEFAULT_EXPIRATION_TIME = 30
@@ -109,4 +110,4 @@ export const ADYEN_ENVIRONMENT = {
     TEST: 'TEST'
 }
 
-export const APPLICATION_VERSION = '4.0.0'
+export const APPLICATION_VERSION = '4.1.0'

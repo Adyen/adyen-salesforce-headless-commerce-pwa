@@ -135,6 +135,22 @@ export class ShopperData {
         },
         password: '12qw!@QW'
     }
+    US_ClickToPay = {
+      shopperName: {
+        firstName: 'John',
+        lastName: 'Johnson'
+      },
+      telephone: '303-492-6970',
+      shopperEmail: 'test@test.com',
+      address: {
+        city: 'Boulder',
+        country: 'US',
+        stateOrProvince: 'CO',
+        postalCode: '80302',
+        street: 'Arapahoe',
+        houseNumberOrName: '1001'
+      },
+    }
     USAccountTestUser = {
         shopperName: {
             firstName: 'Shaw',

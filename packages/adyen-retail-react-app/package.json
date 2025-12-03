@@ -1,6 +1,6 @@
 {
     "name": "adyen-retail-react-app",
-    "version": "4.0.0",
+    "version": "4.1.0",
     "license": "See license in LICENSE",
     "engines": {
         "node": "^16.0.0 || ^18.0.0 || ^20.0.0 || ^22.0.0",
@@ -60,10 +60,9 @@
         "Android >= 4.4.4",
         "last 4 ChromeAndroid versions"
     ],
-    "resolutions": {
+    "overrides": {
         "ws": ">=8.17.1",
         "express": ">=4.20.0",
-        "braces": ">=3.0.3",
-        "path-to-regexp": ">=6.3.0"
+        "braces": ">=3.0.3"
     }
 }

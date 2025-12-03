@@ -78,13 +78,13 @@ export class BasketService {
                 paymentMethodId,
                 paymentCard: {
                     cardType: isCardPayment
-                        ? getCardType(paymentMethod?.brand)
+                        ? getCardType(paymentMethod?.brand || paymentMethod?.srcScheme)
                         : paymentMethod?.type
                 },
                 c_pspReference: pspReference,
                 c_paymentMethodType: paymentMethod?.type,
-                ...(paymentMethod?.brand && {
-                    c_paymentMethodBrand: paymentMethod?.brand
+                ...((paymentMethod?.brand || paymentMethod?.srcScheme) && {
+                    c_paymentMethodBrand: paymentMethod?.brand || paymentMethod?.srcScheme
                 })
             },
             parameters: {
