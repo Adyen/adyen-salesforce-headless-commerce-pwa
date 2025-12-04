@@ -22,7 +22,8 @@ module.exports = {
         defaultSite: process.env.COMMERCE_API_DEFAULT_SITE,
         // Provide aliases for your sites. These will be used in place of your site id when generating paths throughout the application.
         siteAliases: {
-            RefArch: 'RefArch'
+            RefArch: 'RefArch',
+            RefArchGlobal: 'RefArchGlobal'
         },
         // The sites for your app, which is imported from sites.js
         sites,
@@ -77,6 +78,10 @@ module.exports = {
             {
                 host: process.env.OCAPI_URL,
                 path: 'ocapi'
+            },
+            {
+                host: process.env.OCAPI_URL,
+                path: 'custom'
             }
         ]
     }

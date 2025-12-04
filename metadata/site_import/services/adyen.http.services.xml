@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns="http://www.demandware.com/xml/impex/services/2006-10-31">
+
+    <!--
+        This defines the service. The service-id MUST match the directory name
+        of your REST API implementation, plus ".http".
+        Your directory is "adyen-shopper-order", so the ID is "adyen-shopper-order.http".
+    -->
+    <service service-id="adyen-shopper-order.http">
+        <!-- This defines the operation. The operation-id MUST match the "endpoint" from your api.json -->
+        <operation operation-id="createOrder">
+            <!-- This is the internal path SFCC will use to call your implementation. -->
+            <request-path>/dw/api/v23_1/adyen-shopper-order/createOrder</request-path>
+            <request-method>POST</request-method>
+            <log-level>DEBUG</log-level>
+        </operation>
+
+        <!--
+            A credential is required for a service definition. Even though this is an
+            inbound API, we define a placeholder. The URL doesn't matter here.
+        -->
+        <service-credential-id>adyen.shopper.api.cred</service-credential-id>
+        <service-profile-id>adyen.shopper.api.profile</service-profile-id>
+    </service>
+
+    <!-- Define the placeholder credential -->
+    <service-credential service-credential-id="adyen.shopper.api.cred">
+        <url>http://localhost/</url>
+        <user-id>user</user-id>
+        <password>password</password>
+    </service-credential>
+
+    <!-- Define the placeholder profile (e.g., timeout) -->
+    <service-profile service-profile-id="adyen.shopper.api.profile">
+        <timeout-millis>5000</timeout-millis>
+        <rate-limit-enabled>false</rate-limit-enabled>
+        <cb-enabled>false</cb-enabled>
+    </service-profile>
+
+</services>
