@@ -100,7 +100,7 @@ export const getAppleButtonConfig = (
                     const finalPriceUpdate = {
                         newTotal: {
                             type: 'final',
-                            label: applePayConfig.merchantName,
+                            label: merchantDisplayName || applePayConfig.merchantName,
                             amount: `${applePayAmount}`
                         }
                     }
@@ -176,7 +176,7 @@ export const getAppleButtonConfig = (
                             })),
                         newTotal: {
                             type: 'final',
-                            label: applePayConfig.merchantName,
+                            label: merchantDisplayName || applePayConfig.merchantName,
                             amount: `${applePayAmount}`
                         }
                     }
@@ -211,7 +211,7 @@ export const getAppleButtonConfig = (
                     const applePayShippingMethodUpdate = {
                         newTotal: {
                             type: 'final',
-                            label: applePayConfig.merchantName,
+                            label: merchantDisplayName || applePayConfig.merchantName,
                             amount: `${applePayAmount}`
                         }
                     }
@@ -242,7 +242,7 @@ export const getAppleButtonConfig = (
                     const applePayAmountUpdate = {
                         newTotal: {
                             type: 'final',
-                            label: applePayConfig.merchantName,
+                            label: merchantDisplayName || applePayConfig.merchantName,
                             amount: updatedBasket.orderTotal
                         }
                     }
