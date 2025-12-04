@@ -39,10 +39,11 @@ describe('payment methods controller', () => {
                     basket: {
                         orderTotal: 100,
                         productTotal: 100,
-                        currency: 'USD',
-                        customerInfo: {
-                            authType: 'registered'
-                        }
+                        currency: 'USD'
+                    },
+                    customer: {
+                        authType: 'registered',
+                        customerId: 'testCustomer'
                     },
                     customerId: 'testCustomer'
                 }

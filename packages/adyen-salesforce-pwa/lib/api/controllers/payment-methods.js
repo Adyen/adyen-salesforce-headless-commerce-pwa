@@ -11,7 +11,7 @@ async function getPaymentMethods(req, res, next) {
 
     try {
         const {adyen: adyenContext} = res.locals
-        const {basket, adyenConfig, customerId} = adyenContext
+        const {basket, adyenConfig, customer} = adyenContext
         const checkout = new AdyenClientProvider(adyenContext).getPaymentsApi()
 
         const {locale: shopperLocale} = req.query
@@ -25,15 +25,15 @@ async function getPaymentMethods(req, res, next) {
         }
 
         if (basket) {
-            const {orderTotal, productTotal, currency, customerInfo} = basket
+            const {orderTotal, productTotal, currency} = basket
             paymentMethodsRequest.amount = {
                 value: getCurrencyValueForApi(orderTotal || productTotal, currency),
                 currency: currency
             }
+        }
 
-            if (customerInfo?.authType === 'registered') {
-                paymentMethodsRequest.shopperReference = customerId
-            }
+        if (customer?.authType === 'registered' && customer.customerId) {
+            paymentMethodsRequest.shopperReference = customer.customerId
         }
 
         const response = await checkout.paymentMethods(paymentMethodsRequest, {
