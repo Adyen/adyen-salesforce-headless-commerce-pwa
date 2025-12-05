@@ -155,7 +155,7 @@ const mapToLineItem = (item, currency, taxation, excludeTaxRate, quantity = item
 /**
  * Transforms all items in the basket (products, shipping, promotions) into an array of Adyen line items.
  * @param {object} basket - The shopper's basket object.
- * @param {boolean} paymentMethodType - The type of the payment method (e.g., 'klarna', 'afterpay').
+ * @param {string} paymentMethodType - The type of the payment method (e.g., 'klarna', 'afterpay').
  * @returns {object[]} An array of Adyen line items.
  */
 export function getLineItems(basket, paymentMethodType) {
