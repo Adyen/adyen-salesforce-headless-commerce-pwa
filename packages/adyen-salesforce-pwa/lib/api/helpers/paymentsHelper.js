@@ -15,10 +15,11 @@ import {getApplicationInfo} from '../../utils/getApplicationInfo.mjs'
 
 const OPEN_INVOICE_METHODS = new Set(['zip', 'affirm', 'clearpay'])
 const OPEN_INVOICE_PREFIXES = ['afterpay', 'klarna', 'ratepay', 'facilypay']
+const ZERO_TAX_METHODS = ['klarna']
 const GROSS_TAXATION = 'gross'
 
 function shouldExcludeTaxRate(paymentMethodType) {
-    return paymentMethodType.includes('klarna')
+    return paymentMethodType && ZERO_TAX_METHODS.some((pm) => paymentMethodType.includes(pm))
 }
 
 /**
@@ -161,15 +162,12 @@ const mapToLineItem = (item, currency, taxation, excludeTaxRate, quantity = item
 export function getLineItems(basket, paymentMethodType) {
     const {currency, productItems, shippingItems, priceAdjustments, taxation} = basket
     const excludeTaxRate = shouldExcludeTaxRate(paymentMethodType)
+    const mapItemWithContext = (item, quantity) =>
+        mapToLineItem(item, currency, taxation, excludeTaxRate, quantity)
 
-    const productLineItems =
-        productItems?.map((item) => mapToLineItem(item, currency, taxation, excludeTaxRate)) || []
-    const shippingLineItems =
-        shippingItems?.map((item) => mapToLineItem(item, currency, taxation, excludeTaxRate, 1)) ||
-        []
-    const priceAdjustmentLineItems =
-        priceAdjustments?.map((item) => mapToLineItem(item, currency, taxation, excludeTaxRate)) ||
-        []
+    const productLineItems = productItems?.map((item) => mapItemWithContext(item)) || []
+    const shippingLineItems = shippingItems?.map((item) => mapItemWithContext(item, 1)) || []
+    const priceAdjustmentLineItems = priceAdjustments?.map((item) => mapItemWithContext(item)) || []
 
     return [...productLineItems, ...shippingLineItems, ...priceAdjustmentLineItems]
 }
