@@ -8,6 +8,9 @@
   "account.logout_button.button.log_out": {
     "defaultMessage": "Log Out"
   },
+  "account.title.my_account": {
+    "defaultMessage": "My Account"
+  },
   "account_addresses.badge.default": {
     "defaultMessage": "Default"
   },
@@ -47,11 +50,23 @@
   "account_order_detail.heading.payment_method": {
     "defaultMessage": "Payment Method"
   },
+  "account_order_detail.heading.pickup_address": {
+    "defaultMessage": "Pickup Address"
+  },
+  "account_order_detail.heading.pickup_address_number": {
+    "defaultMessage": "Pickup Address {number}"
+  },
   "account_order_detail.heading.shipping_address": {
     "defaultMessage": "Shipping Address"
   },
+  "account_order_detail.heading.shipping_address_number": {
+    "defaultMessage": "Shipping Address {number}"
+  },
   "account_order_detail.heading.shipping_method": {
     "defaultMessage": "Shipping Method"
+  },
+  "account_order_detail.heading.shipping_method_number": {
+    "defaultMessage": "Shipping Method {number}"
   },
   "account_order_detail.label.order_number": {
     "defaultMessage": "Order Number: {orderNumber}"
@@ -59,8 +74,8 @@
   "account_order_detail.label.ordered_date": {
     "defaultMessage": "Ordered: {date}"
   },
-  "account_order_detail.label.pending_tracking_number": {
-    "defaultMessage": "Pending"
+  "account_order_detail.label.pickup_from_store": {
+    "defaultMessage": "Pick up from Store {storeId}"
   },
   "account_order_detail.label.tracking_number": {
     "defaultMessage": "Tracking Number"
@@ -126,6 +141,9 @@
   "action_card.action.remove": {
     "defaultMessage": "Remove"
   },
+  "add_to_cart_modal.button.select_bonus_products": {
+    "defaultMessage": "Select Bonus Products"
+  },
   "add_to_cart_modal.info.added_to_cart": {
     "defaultMessage": "{quantity} {quantity, plural, one {item} other {items}} added to cart"
   },
@@ -179,6 +197,33 @@
   },
   "bonus_product_item.label.quantity": {
     "defaultMessage": "Quantity: {quantity}"
+  },
+  "bonus_product_modal.button_select": {
+    "defaultMessage": "Select"
+  },
+  "bonus_product_modal.no_bonus_products": {
+    "defaultMessage": "No bonus products available"
+  },
+  "bonus_product_modal.no_image": {
+    "defaultMessage": "No Image"
+  },
+  "bonus_product_modal.title": {
+    "defaultMessage": "Select bonus product ({selected} of {max} selected)"
+  },
+  "bonus_product_view_modal.button.back_to_selection": {
+    "defaultMessage": "← Back to Selection"
+  },
+  "bonus_product_view_modal.button.view_cart": {
+    "defaultMessage": "View Cart"
+  },
+  "bonus_product_view_modal.modal_label": {
+    "defaultMessage": "Bonus product selection modal for {productName}"
+  },
+  "bonus_product_view_modal.title": {
+    "defaultMessage": "Select bonus product ({selected} of {max} selected)"
+  },
+  "bonus_product_view_modal.toast.item_added": {
+    "defaultMessage": "Bonus item added to cart"
   },
   "bonus_products_title.title.num_of_items": {
     "defaultMessage": "Bonus Products ({itemCount, plural, =0 {0 items} one {# item} other {# items}})"
@@ -954,6 +999,9 @@
   "locale_text.message.zh-TW": {
     "defaultMessage": "Chinese (Taiwan)"
   },
+  "login.title.sign_in": {
+    "defaultMessage": "Sign In"
+  },
   "login_form.action.create_account": {
     "defaultMessage": "Create account"
   },
@@ -989,6 +1037,18 @@
   },
   "login_page.error.incorrect_username_or_password": {
     "defaultMessage": "Incorrect username or password, please try again."
+  },
+  "multi_ship_warning_modal.action.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "multi_ship_warning_modal.action.switch_to_one_address": {
+    "defaultMessage": "Switch"
+  },
+  "multi_ship_warning_modal.message.addresses_will_be_removed": {
+    "defaultMessage": "If you switch to one address, the shipping addresses you added for the items will be removed."
+  },
+  "multi_ship_warning_modal.title.switch_to_one_address": {
+    "defaultMessage": "Switch to one address?"
   },
   "offline_banner.description.browsing_offline_mode": {
     "defaultMessage": "You're currently browsing in offline mode"
@@ -1047,6 +1107,9 @@
   },
   "page_not_found.title.page_cant_be_found": {
     "defaultMessage": "The page you're looking for can't be found."
+  },
+  "page_not_found.title.page_not_found": {
+    "defaultMessage": "Page Not Found"
   },
   "pagination.field.num_of_pages": {
     "defaultMessage": "of {numOfPages}"
@@ -1161,6 +1224,9 @@
   },
   "product_detail.recommended_products.title.recently_viewed": {
     "defaultMessage": "Recently Viewed"
+  },
+  "product_detail.title.product_details": {
+    "defaultMessage": "Product Details"
   },
   "product_item.label.quantity": {
     "defaultMessage": "Quantity:"
@@ -1342,6 +1408,12 @@
   "register_form.message.create_an_account": {
     "defaultMessage": "Create an account and get first access to the very best products, inspiration and community."
   },
+  "registration.title.create_account": {
+    "defaultMessage": "Create Account"
+  },
+  "reset_password.title.reset_password": {
+    "defaultMessage": "Reset Password"
+  },
   "reset_password_form.action.sign_in": {
     "defaultMessage": "Sign in"
   },
@@ -1360,6 +1432,24 @@
   },
   "search.action.cancel": {
     "defaultMessage": "Cancel"
+  },
+  "search.suggestions.categories": {
+    "defaultMessage": "Categories"
+  },
+  "search.suggestions.didYouMean": {
+    "defaultMessage": "Did you mean"
+  },
+  "search.suggestions.popular": {
+    "defaultMessage": "Popular Searches"
+  },
+  "search.suggestions.products": {
+    "defaultMessage": "Products"
+  },
+  "search.suggestions.recent": {
+    "defaultMessage": "Recent Searches"
+  },
+  "search.suggestions.viewAll": {
+    "defaultMessage": "View All"
   },
   "selected_refinements.action.assistive_msg.clear_all": {
     "defaultMessage": "Clear all filters"
@@ -1519,6 +1609,9 @@
   },
   "store_display.format.address_line_2": {
     "defaultMessage": "{city}, {stateCode} {postalCode}"
+  },
+  "store_display.label.store_contact_info": {
+    "defaultMessage": "Store Contact Info"
   },
   "store_display.label.store_hours": {
     "defaultMessage": "Store Hours"
