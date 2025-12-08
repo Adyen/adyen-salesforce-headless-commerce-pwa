@@ -30,22 +30,26 @@ async function paypalUpdateOrder(req, res, next) {
         }
 
         const {basket} = adyenContext
+
+        if (!basket) {
+            throw new AdyenError(ERROR_MESSAGE.BASKET_NOT_FOUND, 400)
+        }
+
         const pspReference = basket?.c_pspReference
 
         if (!pspReference) {
-            throw new AdyenError('PSP reference not found in basket', 400)
+            throw new AdyenError(ERROR_MESSAGE.PSP_REFERENCE_NOT_FOUND, 400)
         }
 
         const shopperBaskets = createShopperBasketsClient(adyenContext.authorization)
 
         const shippingMethodsResponse = await shopperBaskets.getShippingMethodsForShipment({
             parameters: {
-                basketId: adyenContext.basket.basketId,
+                basketId: basket.basketId,
                 shipmentId: 'me'
             }
         })
         const applicableShippingMethods = shippingMethodsResponse.applicableShippingMethods
-        // Build the request according to Adyen API documentation
         const paypalUpdateOrderRequest = {
             amount: {
                 currency: basket.currency,
@@ -73,8 +77,8 @@ async function paypalUpdateOrder(req, res, next) {
             }))
         }
 
-        // Add taxTotal if available
-        if (basket.taxTotal !== undefined && basket.taxTotal !== null) {
+        // Add taxTotal if available. Allow taxTotal to be 0.
+        if (basket.taxTotal === 0 || !!basket.taxTotal) {
             paypalUpdateOrderRequest.taxTotal = {
                 amount: {
                     currency: basket.currency,
