@@ -11,6 +11,11 @@ export const PAYMENT_METHOD_TYPES = {
     WECHATPAY_SDK: 'wechatpaySDK'
 }
 
+export const PAYMENT_TYPES = {
+    EXPRESS: 'express',
+    EXPRESS_PDP: 'expressPDP'
+}
+
 export const RESULT_CODES = {
     AUTHORISED: 'Authorised',
     CANCELLED: 'Cancelled',

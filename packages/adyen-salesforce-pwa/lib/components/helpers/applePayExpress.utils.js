@@ -4,6 +4,7 @@ import {AdyenShippingMethodsService} from '../../services/shipping-methods'
 import {AdyenShippingAddressService} from '../../services/shipping-address'
 import {AdyenTemporaryBasketService} from '../../services/temporary-basket'
 import {AdyenAddProductService} from '../../services/add-product'
+import {PAYMENT_TYPES} from '../../utils/constants.mjs'
 
 export const getApplePaymentMethodConfig = (paymentMethodsResponse) => {
     const applePayPaymentMethod = paymentMethodsResponse?.paymentMethods?.find(
@@ -90,7 +91,7 @@ export const getAppleButtonConfig = (
                     site
                 )
                 const paymentsResponse = await adyenPaymentService.submitPayment({
-                    paymentType: 'express',
+                    paymentType: isExpressPdp ? PAYMENT_TYPES.EXPRESS_PDP : PAYMENT_TYPES.EXPRESS,
                     ...state.data,
                     ...getCustomerBillingDetails(billingData),
                     ...getCustomerShippingDetails(customerData),

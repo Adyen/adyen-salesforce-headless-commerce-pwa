@@ -50,10 +50,11 @@ export async function failOrderAndReopenBasket(adyenContext, orderNo) {
  * Creates an SFCC order from a basket, using a pre-generated order number.
  * It first checks if an order with the given number already exists to prevent duplicates.
  * @param {object} adyenContext - The request context from `res.locals.adyen`.
+ * @param {string} paymentType - The type of payment being processed.
  * @returns {Promise<object>} A promise that resolves to the newly created order object.
  * @throws {AdyenError} If an order with the given orderNo already exists.
  */
-export async function createOrderUsingOrderNo(adyenContext) {
+export async function createOrderUsingOrderNo(adyenContext, paymentType) {
     const {authorization, basket, customerId} = adyenContext
     const {c_orderNo: orderNo, basketId, currency} = basket
     const shopperOrders = createShopperOrderClient(authorization)
@@ -66,7 +67,14 @@ export async function createOrderUsingOrderNo(adyenContext) {
         throw new AdyenError(ERROR_MESSAGE.ORDER_ALREADY_EXISTS, 409)
     }
     const customOrderApi = new CustomShopperOrderApiClient()
-    return await customOrderApi.createOrder(authorization, basketId, customerId, orderNo, currency)
+    return await customOrderApi.createOrder(
+        authorization,
+        basketId,
+        customerId,
+        orderNo,
+        currency,
+        paymentType
+    )
 }
 
 /**
