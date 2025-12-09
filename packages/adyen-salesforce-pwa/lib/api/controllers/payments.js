@@ -105,7 +105,7 @@ async function sendPayments(req, res, next) {
                 paymentRequest?.paymentMethod,
                 response?.pspReference
             )
-            await createOrderUsingOrderNo(adyenContext, data.paymentType)
+            await createOrderUsingOrderNo(adyenContext)
             Logger.info('sendPayments', `order created: ${checkoutResponse.merchantReference}`)
         }
         Logger.info('sendPayments', `checkoutResponse ${JSON.stringify(checkoutResponse)}`)

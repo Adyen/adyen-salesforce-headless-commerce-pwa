@@ -8,7 +8,7 @@ const Currency = require('dw/util/Currency');
 exports.createOrder = function () {
     try {
         const requestBody = request.httpParameterMap.requestBodyAsString;
-        const {customerId, basketId, orderNo, currency, paymentFlow} = JSON.parse(requestBody);
+        const {customerId, basketId, orderNo, currency} = JSON.parse(requestBody);
         if (!basketId || !orderNo || !currency) {
             const missing = []
             if (!basketId) missing.push('basketId')
@@ -27,18 +27,14 @@ exports.createOrder = function () {
         }
         session.setCurrency(newCurrency);
 
-        const currentBasket = paymentFlow === 'expressPDP'
-          ? BasketMgr.getTemporaryBasket(basketId)
-          : BasketMgr.getCurrentBasket();
-        if (!currentBasket) {
-            Logger.error('Error creating order: {0}', 'Basket not found');
-            RESTResponseMgr.createError(404, 'not_found', 'Basket not found').render();
-            return;
-        }
+        let currentBasket = BasketMgr.getCurrentBasket();
         if (currentBasket.UUID !== basketId) {
-            Logger.error('Error creating order: {0}', 'Current basket does not match the provided basket');
-            RESTResponseMgr.createError(400, 'bad_request', 'Invalid basket').render();
-            return;
+            currentBasket = BasketMgr.getTemporaryBasket(basketId)
+        }
+        if (!currentBasket) {
+          Logger.error('Error creating order: {0}', 'Basket not found');
+          RESTResponseMgr.createError(404, 'not_found', 'Basket not found').render();
+          return;
         }
         currentBasket.updateCurrency();
 

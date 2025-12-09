@@ -12,7 +12,6 @@ describe('TemporaryBasketService', () => {
     let temporaryBasketService
     const mockToken = 'test-token'
     const mockCustomerId = 'customer123'
-    const mockBasketId = 'basket123'
     const mockSite = {id: 'RefArch'}
     const mockBasketResponse = {
         basketId: 'basket123',
@@ -22,12 +21,7 @@ describe('TemporaryBasketService', () => {
 
     beforeEach(() => {
         jest.clearAllMocks()
-        temporaryBasketService = new TemporaryBasketService(
-            mockToken,
-            mockCustomerId,
-            mockBasketId,
-            mockSite
-        )
+        temporaryBasketService = new TemporaryBasketService(mockToken, mockCustomerId, mockSite)
     })
 
     it('should create an instance with the correct base URL', () => {
@@ -36,7 +30,7 @@ describe('TemporaryBasketService', () => {
             '/api/adyen/pdp/temporary-baskets',
             mockToken,
             mockCustomerId,
-            mockBasketId,
+            null,
             mockSite
         )
     })
