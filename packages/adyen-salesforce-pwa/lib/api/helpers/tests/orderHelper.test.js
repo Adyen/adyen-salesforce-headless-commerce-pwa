@@ -135,6 +135,7 @@ describe('orderHelper', () => {
                 'basket-abc',
                 'customer-abc',
                 'order123',
+                undefined,
                 undefined
             )
             expect(result).toEqual({orderNo: 'order123'})

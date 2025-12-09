@@ -31,14 +31,13 @@ describe('TemporaryBasketService', () => {
     })
 
     it('should create an instance with the correct base URL', () => {
-        // The constructor is called with (baseUrl, token, customerId, siteId, basketId)
-        // The actual implementation passes null for siteId
+        // The constructor is called with (baseUrl, token, customerId, basketId, site)
         expect(ApiClient).toHaveBeenCalledWith(
             '/api/adyen/pdp/temporary-baskets',
             mockToken,
             mockCustomerId,
-            null, // siteId is null in the actual implementation
-            mockBasketId
+            mockBasketId,
+            mockSite
         )
     })
 
@@ -106,10 +105,10 @@ describe('TemporaryBasketService', () => {
                 quantity
             )
 
-            expect(temporaryBasketService.apiClient.post).toHaveBeenCalledWith(
-                `/${basketId}/items`,
-                {productId, quantity}
-            )
+            expect(temporaryBasketService.apiClient.post).toHaveBeenCalledWith({
+                path: `/${basketId}/items`,
+                body: JSON.stringify({productId, quantity})
+            })
             expect(result).toEqual(mockBasketResponse)
         })
 
@@ -123,10 +122,10 @@ describe('TemporaryBasketService', () => {
 
             await temporaryBasketService.addProductToBasket(basketId, productId)
 
-            expect(temporaryBasketService.apiClient.post).toHaveBeenCalledWith(
-                `/${basketId}/items`,
-                {productId, quantity: 1}
-            )
+            expect(temporaryBasketService.apiClient.post).toHaveBeenCalledWith({
+                path: `/${basketId}/items`,
+                body: JSON.stringify({productId, quantity: 1})
+            })
         })
 
         it('should throw error when basketId is missing', async () => {
