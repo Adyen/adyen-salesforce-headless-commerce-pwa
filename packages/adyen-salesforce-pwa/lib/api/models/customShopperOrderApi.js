@@ -20,17 +20,17 @@ export class CustomShopperOrderApiClient extends BaseApiClient {
      * @param {string} customerId - The ID of the customer.
      * @param {string} orderNo - The order number to use for the new order.
      * @param {string} currency - The currency code for the new order.
-     * @param {string} paymentType - The type of payment for the new order.
+     * @param {string} paymentFlow - The type of payment for the new order.
      * @returns {Promise<object>} A promise that resolves to the created order object.
      */
-    async createOrder(authorization, basketId, customerId, orderNo, currency, paymentType) {
+    async createOrder(authorization, basketId, customerId, orderNo, currency, paymentFlow) {
         const response = await this._callShopperApi('POST', 'orders', {
             body: JSON.stringify({
                 basketId: basketId,
                 customerId: customerId,
                 orderNo: orderNo,
                 currency: currency,
-                paymentType: paymentType
+                paymentFlow: paymentFlow
             }),
             headers: {authorization}
         })

@@ -22,13 +22,6 @@ paths:
     post:
       summary: create order with order number
       operationId: createOrder
-      parameters:
-        - in: query
-          name: siteId
-          required: true
-          schema:
-            type: string
-            minLength: 1
       requestBody:
         content:
           application/json:
@@ -47,8 +40,8 @@ paths:
                 currency:
                   description: currency to use when creating order
                   type: string
-                paymentType:
-                  description: payment type to differentiate which basket to use
+                paymentFlow:
+                  description: payment flow to differentiate which basket to use
                   type: string
       responses:
         "200":

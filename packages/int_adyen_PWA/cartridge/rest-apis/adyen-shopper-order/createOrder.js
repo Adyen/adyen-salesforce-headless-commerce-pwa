@@ -8,7 +8,7 @@ const Currency = require('dw/util/Currency');
 exports.createOrder = function () {
     try {
         const requestBody = request.httpParameterMap.requestBodyAsString;
-        const {customerId, basketId, orderNo, currency, paymentType} = JSON.parse(requestBody);
+        const {customerId, basketId, orderNo, currency, paymentFlow} = JSON.parse(requestBody);
         if (!basketId || !orderNo || !currency) {
             const missing = []
             if (!basketId) missing.push('basketId')
@@ -27,7 +27,7 @@ exports.createOrder = function () {
         }
         session.setCurrency(newCurrency);
 
-        const currentBasket = paymentType === 'expressPDP'
+        const currentBasket = paymentFlow === 'expressPDP'
           ? BasketMgr.getTemporaryBasket(basketId)
           : BasketMgr.getCurrentBasket();
         if (!currentBasket) {
