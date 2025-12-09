@@ -28,9 +28,10 @@ exports.createOrder = function () {
         session.setCurrency(newCurrency);
 
         let currentBasket = BasketMgr.getCurrentBasket();
-        if (currentBasket.UUID !== basketId) {
-            currentBasket = BasketMgr.getTemporaryBasket(basketId)
+        if (!currentBasket || currentBasket.UUID !== basketId) {
+          currentBasket = BasketMgr.getTemporaryBasket(basketId);
         }
+
         if (!currentBasket) {
           Logger.error('Error creating order: {0}', 'Basket not found');
           RESTResponseMgr.createError(404, 'not_found', 'Basket not found').render();
