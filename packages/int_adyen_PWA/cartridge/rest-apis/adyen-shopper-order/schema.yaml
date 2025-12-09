@@ -1,3 +1,4 @@
+---
 openapi: 3.0.0
 info:
   version: 1.0.0
@@ -14,7 +15,8 @@ components:
           scopes:
             c_order_rw: Read and write access to order information
 security:
-  - ShopperToken: [ "c_order_rw" ]
+  - ShopperToken:
+      - c_order_rw
 paths:
   /orders:
     post:
@@ -32,24 +34,22 @@ paths:
           application/json:
             schema:
               type: object
-              properties: {
-                "basketId": {
-                  "description": "basketId to use when creating order",
-                  "type": "string",
-                },
-                "customerId": {
-                  "description": "customerId to use when creating order",
-                  "type": "string"
-                },
-                "orderNo": {
-                  "description": "orderNo to use when creating order",
-                  "type": "string"
-                },
-                "currency": {
-                  "description": "currency to use when creating order",
-                  "type": "string"
-                }
-              }
+              properties:
+                basketId:
+                  description: basketId to use when creating order
+                  type: string
+                customerId:
+                  description: customerId to use when creating order
+                  type: string
+                orderNo:
+                  description: orderNo to use when creating order
+                  type: string
+                currency:
+                  description: currency to use when creating order
+                  type: string
+                paymentType:
+                  description: payment type to differentiate which basket to use
+                  type: string
       responses:
         "200":
           description: Order created successfully.

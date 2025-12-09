@@ -35,12 +35,12 @@ exports.createOrder = function () {
             RESTResponseMgr.createError(404, 'not_found', 'Basket not found').render();
             return;
         }
-        currentBasket.updateCurrency();
         if (currentBasket.UUID !== basketId) {
             Logger.error('Error creating order: {0}', 'Current basket does not match the provided basket');
             RESTResponseMgr.createError(400, 'bad_request', 'Invalid basket').render();
             return;
         }
+        currentBasket.updateCurrency();
 
         Transaction.begin();
         try {
