@@ -25,7 +25,6 @@ const ApplePayExpressComponent = (props) => {
     const [shopperBasket, setShopperBasket] = useState(
         isExpressPdp ? {currency, orderTotal: 0} : basket
     )
-
     const paymentContainer = useRef(null)
     const applePayButtonRef = useRef(null)
 
@@ -185,8 +184,8 @@ const ApplePayExpressComponent = (props) => {
         authToken,
         site?.id,
         navigate,
-        fetchShippingMethods
-        // createTemporaryBasket
+        fetchShippingMethods,
+        product
     ])
 
     const {spinner} = props
@@ -223,6 +222,7 @@ export default React.memo(ApplePayExpressComponent, (prevProps, nextProps) => {
         prevProps.locale?.id === nextProps.locale?.id &&
         prevProps.site?.id === nextProps.site?.id &&
         prevProps.basket?.basketId === nextProps.basket?.basketId &&
-        prevProps.navigate === nextProps.navigate
+        prevProps.navigate === nextProps.navigate &&
+        prevProps.product?.quantity === nextProps.product?.quantity
     )
 })

@@ -205,6 +205,7 @@ const ProductView = forwardRef(
             controlledVariationValues,
             onVariationChange
         )
+        const [productQuantity, setProductQuantity] = useState(quantity)
         const priceData = useMemo(() => {
             return getPriceData(product, {quantity})
         }, [product, quantity])
@@ -438,6 +439,7 @@ const ProductView = forwardRef(
             quantity != selectedBundleParentQuantity * childOfBundleQuantity
         ) {
             setQuantity(selectedBundleParentQuantity * childOfBundleQuantity)
+            setProductQuantity(selectedBundleParentQuantity * childOfBundleQuantity)
         }
 
         useEffect(() => {
@@ -700,12 +702,14 @@ const ProductView = forwardRef(
                                             // Set the Quantity of product to value of input if value number
                                             if (numberValue >= 0) {
                                                 setQuantity(numberValue)
+                                                setProductQuantity(numberValue)
                                                 if (isProductABundle)
                                                     setSelectedBundleQuantity(numberValue)
                                             } else if (stringValue === '') {
                                                 // We want to allow the use to clear the input to start a new input so here we set the quantity to '' so NAN is not displayed
                                                 // User will not be able to add '' qauntity to the cart due to the add to cart button enablement rules
                                                 setQuantity(stringValue)
+                                                setProductQuantity(parseInt(stringValue, 10))
                                             }
                                         }}
                                         onBlur={(e) => {
@@ -713,6 +717,7 @@ const ProductView = forwardRef(
                                             const value = e.target.value
                                             if (parseInt(value) < 0 || value === '') {
                                                 setQuantity(minOrderQuantity)
+                                                setProductQuantity(minOrderQuantity)
                                                 if (isProductABundle)
                                                     setSelectedBundleQuantity(minOrderQuantity)
                                             }
@@ -911,7 +916,12 @@ const ProductView = forwardRef(
                                     }
                                 >
                                     {renderActionButtons()}
-                                    {product && quantity && (
+                                    {validateOrderability(
+                                        variant,
+                                        product,
+                                        productQuantity,
+                                        stockLevel
+                                    ) && (
                                         <ApplePayExpress
                                             authToken={authToken}
                                             customerId={customerId}
@@ -921,7 +931,7 @@ const ProductView = forwardRef(
                                             navigate={navigate}
                                             isExpressPdp={true}
                                             merchantDisplayName={'Merchant name'}
-                                            product={{...product, quantity}}
+                                            product={{...product, quantity: productQuantity}}
                                             // Callbacks
                                             onError={[showError]}
                                             // UI
@@ -953,7 +963,7 @@ const ProductView = forwardRef(
                     boxShadow={theme.shadows.top}
                 >
                     {renderActionButtons()}
-                    {product && quantity && (
+                    {validateOrderability(variant, product, productQuantity, stockLevel) && (
                         <ApplePayExpress
                             authToken={authToken}
                             customerId={customerId}
@@ -963,7 +973,7 @@ const ProductView = forwardRef(
                             navigate={navigate}
                             isExpressPdp={true}
                             merchantDisplayName={'Merchant name'}
-                            product={{...product, quantity}}
+                            product={{...product, quantity: productQuantity}}
                             // Callbacks
                             onError={[showError]}
                             // UI
