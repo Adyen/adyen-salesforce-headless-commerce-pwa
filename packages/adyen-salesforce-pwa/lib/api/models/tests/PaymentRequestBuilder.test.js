@@ -304,10 +304,10 @@ describe('PaymentRequestBuilder', () => {
         })
     })
 
-    describe('withProductTotalAmount', () => {
+    describe('withNetProductAmount', () => {
         it('should add amount from basket product total', () => {
             builder = new PaymentRequestBuilder(mockContext)
-            builder.withProductTotalAmount()
+            builder.withNetProductAmount()
 
             expect(builder.paymentRequest.amount).toEqual({
                 value: 9000,
@@ -317,7 +317,7 @@ describe('PaymentRequestBuilder', () => {
 
         it('should not add amount if basket is missing', () => {
             builder = new PaymentRequestBuilder({})
-            builder.withProductTotalAmount()
+            builder.withNetProductAmount()
 
             expect(builder.paymentRequest.amount).toBeUndefined()
         })

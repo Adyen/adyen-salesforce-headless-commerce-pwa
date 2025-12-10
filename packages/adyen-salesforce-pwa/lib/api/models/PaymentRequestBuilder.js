@@ -1,4 +1,4 @@
-import {RECURRING_PROCESSING_MODEL, SHOPPER_INTERACTIONS} from '../../utils/constants.mjs'
+import {RECURRING_PROCESSING_MODEL, SHOPPER_INTERACTIONS, TAXATION} from '../../utils/constants.mjs'
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 import {formatAddressInAdyenFormat} from '../../utils/formatAddress.mjs'
 import {getApplicationInfo} from '../../utils/getApplicationInfo.mjs'
@@ -171,16 +171,24 @@ export class PaymentRequestBuilder {
     }
 
     /**
-     * Sets the payment amount using product total (excluding tax).
-     * Used for express payment methods where tax is not available during the payments call.
+     * Sets the payment amount using the basket's product total.
+     * For gross taxation, subtracts merchandize tax to get the net product amount.
+     * Used for express payment methods where final tax cannot be calculated during the payments call.
      * @param {object} basket - The basket object. Uses context.basket if not provided.
      * @returns {PaymentRequestBuilder} The builder instance for chaining.
      */
-    withProductTotalAmount(basket = null) {
+    withNetProductAmount(basket = null) {
         const actualBasket = basket || this.context.basket
         if (actualBasket) {
             const currency = actualBasket.currency
-            const amountValue = getCurrencyValueForApi(actualBasket.productTotal, currency)
+            let amountValue = getCurrencyValueForApi(actualBasket.productTotal, currency)
+            if (actualBasket.taxation === TAXATION.GROSS) {
+                const merchandizeTotalTax = getCurrencyValueForApi(
+                    actualBasket.merchandizeTotalTax,
+                    currency
+                )
+                amountValue = amountValue - merchandizeTotalTax
+            }
 
             this.paymentRequest.amount = {
                 value: amountValue,

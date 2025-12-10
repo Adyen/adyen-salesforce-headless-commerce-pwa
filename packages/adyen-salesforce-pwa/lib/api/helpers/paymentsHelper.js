@@ -210,7 +210,7 @@ export async function createPaymentRequestObject(data, adyenContext, req) {
             .withDeliveryAddress()
             .withReference()
             .withMerchantAccount()
-            .withProductTotalAmount()
+            .withNetProductAmount()
             .withApplicationInfo()
             .withChannel('Web')
             .withReturnUrl()

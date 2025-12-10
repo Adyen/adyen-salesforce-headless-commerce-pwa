@@ -1,5 +1,5 @@
 import Logger from '../models/logger'
-import {ERROR_MESSAGE} from '../../utils/constants.mjs'
+import {ERROR_MESSAGE, TAXATION} from '../../utils/constants.mjs'
 import AdyenClientProvider from '../models/adyenClientProvider'
 import {v4 as uuidv4} from 'uuid'
 import {AdyenError} from '../models/AdyenError'
@@ -77,12 +77,19 @@ async function paypalUpdateOrder(req, res, next) {
             }))
         }
 
-        // Add taxTotal if available. Allow taxTotal to be 0.
+        // Add taxTotal if available (including when taxTotal is 0).
+        // For gross taxation, exclude shipping tax since it's already included in the deliveryMethod amount.
         if (basket.taxTotal === 0 || !!basket.taxTotal) {
+            let actualTaxTotal = getCurrencyValueForApi(basket.taxTotal, basket.currency)
+            if (basket.taxation === TAXATION.GROSS) {
+                actualTaxTotal =
+                    actualTaxTotal -
+                    getCurrencyValueForApi(basket.shippingTotalTax, basket.currency)
+            }
             paypalUpdateOrderRequest.taxTotal = {
                 amount: {
                     currency: basket.currency,
-                    value: getCurrencyValueForApi(basket.taxTotal, basket.currency)
+                    value: actualTaxTotal
                 }
             }
         }

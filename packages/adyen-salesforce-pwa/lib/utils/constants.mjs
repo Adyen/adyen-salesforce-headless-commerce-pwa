@@ -56,6 +56,11 @@ export const NOTIFICATION_SUCCESS = {
 
 export const DEFAULT_SHIPMENT_ID = 'me'
 
+export const TAXATION = {
+    GROSS: 'gross',
+    NET: 'net'
+}
+
 export const ORDER = Object.freeze({
     ORDER_STATUS_CREATED: 'created',
     ORDER_STATUS_NEW: 'new',
