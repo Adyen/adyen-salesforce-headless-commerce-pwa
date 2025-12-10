@@ -12,7 +12,6 @@ describe('TemporaryBasketService', () => {
     let temporaryBasketService
     const mockToken = 'test-token'
     const mockCustomerId = 'customer123'
-    const mockBasketId = 'basket123'
     const mockSite = {id: 'RefArch'}
     const mockBasketResponse = {
         basketId: 'basket123',
@@ -22,23 +21,17 @@ describe('TemporaryBasketService', () => {
 
     beforeEach(() => {
         jest.clearAllMocks()
-        temporaryBasketService = new TemporaryBasketService(
-            mockToken,
-            mockCustomerId,
-            mockBasketId,
-            mockSite
-        )
+        temporaryBasketService = new TemporaryBasketService(mockToken, mockCustomerId, mockSite)
     })
 
     it('should create an instance with the correct base URL', () => {
-        // The constructor is called with (baseUrl, token, customerId, siteId, basketId)
-        // The actual implementation passes null for siteId
+        // The constructor is called with (baseUrl, token, customerId, basketId, site)
         expect(ApiClient).toHaveBeenCalledWith(
             '/api/adyen/pdp/temporary-baskets',
             mockToken,
             mockCustomerId,
-            null, // siteId is null in the actual implementation
-            mockBasketId
+            null,
+            mockSite
         )
     })
 
@@ -106,10 +99,10 @@ describe('TemporaryBasketService', () => {
                 quantity
             )
 
-            expect(temporaryBasketService.apiClient.post).toHaveBeenCalledWith(
-                `/${basketId}/items`,
-                {productId, quantity}
-            )
+            expect(temporaryBasketService.apiClient.post).toHaveBeenCalledWith({
+                path: `/${basketId}/items`,
+                body: JSON.stringify({productId, quantity})
+            })
             expect(result).toEqual(mockBasketResponse)
         })
 
@@ -123,10 +116,10 @@ describe('TemporaryBasketService', () => {
 
             await temporaryBasketService.addProductToBasket(basketId, productId)
 
-            expect(temporaryBasketService.apiClient.post).toHaveBeenCalledWith(
-                `/${basketId}/items`,
-                {productId, quantity: 1}
-            )
+            expect(temporaryBasketService.apiClient.post).toHaveBeenCalledWith({
+                path: `/${basketId}/items`,
+                body: JSON.stringify({productId, quantity: 1})
+            })
         })
 
         it('should throw error when basketId is missing', async () => {
