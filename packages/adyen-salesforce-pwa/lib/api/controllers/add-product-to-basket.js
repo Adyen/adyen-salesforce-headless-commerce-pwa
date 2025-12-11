@@ -40,7 +40,7 @@ export default async function AddProductToBasketController(req, res, next) {
         res.locals.response = await basketService.addProductToBasket(req.params.basketId, product)
         next()
     } catch (error) {
-        Logger.error('AddProductsToBasketController', error.stack || error.message)
+        Logger.error('AddProductToBasketController', error.stack || error.message)
         next(error)
     }
 }
