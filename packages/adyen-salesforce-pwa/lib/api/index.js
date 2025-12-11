@@ -28,6 +28,8 @@ export {default as PaymentsDetailsController} from './controllers/payments-detai
 export {default as EnvironmentController} from './controllers/environment'
 export {default as PaymentCancelController} from './controllers/payment-cancel'
 export {default as GiftCardController} from './controllers/giftCard'
+export {default as CreateTemporaryBasketController} from './controllers/create-temporary-basket'
+export {default as AddProductToBasketController} from './controllers/add-product-to-basket'
 
 // Webhook event handlers
 export * from './controllers/authorization-webhook-handler'
