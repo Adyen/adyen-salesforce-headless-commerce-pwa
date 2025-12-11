@@ -2,11 +2,8 @@ import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 import AdyenClientProvider from '../models/adyenClientProvider'
 import Logger from '../models/logger'
 import {v4 as uuidv4} from 'uuid'
-import {
-    cancelAdyenOrder,
-    createCheckoutResponse,
-    filterStateData
-} from '../helpers/paymentsHelper.js'
+import {cancelAdyenOrder, createCheckoutResponse} from '../helpers/paymentsHelper.js'
+import {filterStateData} from '../utils/paymentUtils.js'
 import {expireAt} from '../../utils/expireAt.mjs'
 
 /**
