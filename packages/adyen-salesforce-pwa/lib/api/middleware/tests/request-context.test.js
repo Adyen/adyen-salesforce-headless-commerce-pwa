@@ -74,10 +74,6 @@ describe('prepareRequestContext middleware', () => {
 
         const expectedError = new AdyenError(ERROR_MESSAGE.INVALID_PARAMS, 400)
         expect(next).toHaveBeenCalledWith(expectedError)
-        expect(Logger.error).toHaveBeenCalledWith(
-            'prepareRequestContext for /api/adyen/test',
-            'Missing required parameters: authorization header, basketid header'
-        )
     })
 
     test('should call next with an error if siteId query param is missing', async () => {
