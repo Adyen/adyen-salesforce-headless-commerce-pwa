@@ -1,14 +1,16 @@
 import {
-    amountForPartialPayments,
     createCheckoutResponse,
     createPaymentRequestObject,
-    getAdditionalData,
-    getLineItems,
-    getShopperName,
-    isOpenInvoiceMethod,
     revertCheckoutState,
     validateBasketPayments
 } from '../paymentsHelper.js'
+import {
+    amountForPartialPayments,
+    getAdditionalData,
+    getLineItems,
+    getShopperName,
+    isOpenInvoiceMethod
+} from '../../utils/paymentUtils.js'
 import {
     RECURRING_PROCESSING_MODEL,
     RESULT_CODES,
@@ -339,7 +341,9 @@ describe('paymentsHelper', () => {
                 c_orderData: '',
                 c_giftCardCheckBalance: '',
                 c_paymentMethod: '',
-                c_amount: ''
+                c_amount: '',
+                c_pspReference: '',
+                c_paymentDataForReviewPage: ''
             })
             expect(mockAdyenContext.basketService.removeAllPaymentInstruments).toHaveBeenCalled()
         })
@@ -432,7 +436,14 @@ describe('paymentsHelper', () => {
         test('should create a basic payment request object correctly', async () => {
             const mockData = {
                 origin: 'https://example.com',
-                paymentMethod: {type: 'scheme'}
+                paymentMethod: {type: 'scheme'},
+                billingAddress: {
+                    street: '1 Billing St',
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    formatted: true
+                },
+                deliveryAddress: {street: '1 Shipping St', formatted: true}
             }
 
             const paymentRequest = await createPaymentRequestObject(

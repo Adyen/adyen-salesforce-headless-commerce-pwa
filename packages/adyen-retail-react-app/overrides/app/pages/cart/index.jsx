@@ -457,7 +457,7 @@ const Cart = () => {
             </Container>
 
             <Box
-                h="130px"
+                h="250px"
                 position="sticky"
                 bottom={0}
                 bg="white"
