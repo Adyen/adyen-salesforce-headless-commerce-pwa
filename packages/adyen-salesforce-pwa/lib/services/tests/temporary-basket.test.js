@@ -42,7 +42,9 @@ describe('TemporaryBasketService', () => {
 
             const result = await temporaryBasketService.createTemporaryBasket()
 
-            expect(temporaryBasketService.apiClient.post).toHaveBeenCalledWith()
+            expect(temporaryBasketService.apiClient.post).toHaveBeenCalledWith({
+                body: JSON.stringify({product: undefined})
+            })
             expect(result).toEqual(mockBasketResponse)
         })
 

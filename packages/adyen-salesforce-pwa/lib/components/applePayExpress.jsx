@@ -223,6 +223,7 @@ export default React.memo(ApplePayExpressComponent, (prevProps, nextProps) => {
         prevProps.site?.id === nextProps.site?.id &&
         prevProps.basket?.basketId === nextProps.basket?.basketId &&
         prevProps.navigate === nextProps.navigate &&
+        prevProps.product?.id === nextProps.product?.id &&
         prevProps.product?.quantity === nextProps.product?.quantity
     )
 })

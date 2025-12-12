@@ -16,12 +16,14 @@ export default async function CreateTemporaryBasketController(req, res, next) {
         Logger.info('CreateTemporaryBasketController', 'start')
         const {authorization, customerid} = req.headers
         const {siteId} = req.query
-
-        if (!authorization || !customerid || !siteId) {
+        const {product} = req.body
+        if (!authorization || !customerid || !siteId || !product?.id || !product?.quantity) {
             const missing = []
             if (!authorization) missing.push('authorization header')
             if (!customerid) missing.push('customerid header')
             if (!siteId) missing.push('siteId query param')
+            if (!product?.id) missing.push('productId body param')
+            if (!product?.quantity) missing.push('productQuantity body param')
             Logger.error(
                 'CreateTemporaryBasketController',
                 `Missing required parameters: ${missing.join(', ')}`
@@ -40,13 +42,20 @@ export default async function CreateTemporaryBasketController(req, res, next) {
 
         const basketService = new BasketService(adyenContext, res)
         await basketService.removeExistingTemporaryBaskets()
-        let basket = await basketService.createTemporaryBasket()
 
+        let basket = await basketService.createTemporaryBasket()
+        if (!basket || !basket.basketId) {
+            throw new AdyenError(ERROR_MESSAGE.BASKET_NOT_CREATED, 400)
+        }
+        basket = await basketService.addProductToBasket(basket?.basketId, product)
         adyenContext.basketService = basketService
         adyenContext.basket = basket
 
         res.locals.adyen = adyenContext
-        res.locals.response = basket
+        res.locals.response = {
+            basketId: basket.basketId,
+            orderTotal: basket.orderTotal
+        }
 
         Logger.info('CreateTemporaryBasketController', 'success')
         return next()

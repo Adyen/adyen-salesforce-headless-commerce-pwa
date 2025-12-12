@@ -3,6 +3,7 @@ import {AdyenError} from '../../models/AdyenError'
 import Logger from '../../models/logger'
 import {ERROR_MESSAGE} from '../../../utils/constants.mjs'
 import {BasketService} from '../../models/basketService.js'
+import {getAdyenConfigForCurrentSite} from '../../../utils/getAdyenConfigForCurrentSite.mjs'
 
 jest.mock('../../models/logger', () => ({
     info: jest.fn(),
@@ -10,6 +11,12 @@ jest.mock('../../models/logger', () => ({
 }))
 
 jest.mock('../../models/basketService.js')
+jest.mock('../../../utils/getAdyenConfigForCurrentSite.mjs', () => ({
+    getAdyenConfigForCurrentSite: jest.fn(() => ({
+        apiKey: 'test',
+        env: 'test'
+    }))
+}))
 
 describe('create-temporary-basket controller', () => {
     let req, res, next
@@ -24,7 +31,12 @@ describe('create-temporary-basket controller', () => {
             query: {
                 siteId: 'RefArch'
             },
-            body: {}
+            body: {
+                product: {
+                    id: 'p1',
+                    quantity: 2
+                }
+            }
         }
         res = {
             locals: {}
@@ -33,10 +45,14 @@ describe('create-temporary-basket controller', () => {
     })
 
     it('creates a temporary basket and returns expected response', async () => {
-        const mockBasket = {basketId: 'b1', orderTotal: 0, currency: 'USD'}
+        const mockBasket = {basketId: 'b1', orderTotal: 0}
         const mockBasketService = {
             removeExistingTemporaryBaskets: jest.fn(),
-            createTemporaryBasket: jest.fn().mockResolvedValue(mockBasket)
+            createTemporaryBasket: jest.fn().mockResolvedValue(mockBasket),
+            addProductToBasket: jest.fn().mockResolvedValue({
+                ...mockBasket,
+                orderTotal: 0
+            })
         }
         BasketService.mockImplementation(() => mockBasketService)
 
@@ -47,7 +63,6 @@ describe('create-temporary-basket controller', () => {
         expect(mockBasketService.removeExistingTemporaryBaskets).toHaveBeenCalled()
         expect(res.locals.response).toEqual({
             basketId: 'b1',
-            currency: 'USD',
             orderTotal: 0
         })
         expect(Logger.info).toHaveBeenCalledWith('CreateTemporaryBasketController', 'success')

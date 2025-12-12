@@ -8,8 +8,10 @@ export class AdyenTemporaryBasketService {
         this.apiClient = new ApiClient(this.baseUrl, token, customerId, null, site)
     }
 
-    async createTemporaryBasket() {
-        const res = await this.apiClient.post()
+    async createTemporaryBasket(product) {
+        const res = await this.apiClient.post({
+            body: JSON.stringify({product})
+        })
 
         if (res.status >= 300) {
             const errorData = await res

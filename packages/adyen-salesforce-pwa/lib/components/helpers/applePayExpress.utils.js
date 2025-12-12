@@ -3,7 +3,6 @@ import {AdyenPaymentsService} from '../../services/payments'
 import {AdyenShippingMethodsService} from '../../services/shipping-methods'
 import {AdyenShippingAddressService} from '../../services/shipping-address'
 import {AdyenTemporaryBasketService} from '../../services/temporary-basket'
-import {AdyenAddProductService} from '../../services/add-product'
 import {PAYMENT_TYPES} from '../../utils/constants.mjs'
 
 export const getApplePaymentMethodConfig = (paymentMethodsResponse) => {
@@ -86,7 +85,7 @@ export const getAppleButtonConfig = (
                 const basketData = isExpressPdp ? temporaryBasket : basket
                 const adyenPaymentService = new AdyenPaymentsService(
                     authToken,
-                    basketData?.customerInfo?.customerId,
+                    customerId,
                     basketData?.basketId,
                     site
                 )
@@ -132,7 +131,7 @@ export const getAppleButtonConfig = (
                 const basketData = isExpressPdp ? temporaryBasket : basket
                 const adyenShippingAddressService = new AdyenShippingAddressService(
                     authToken,
-                    basketData?.customerInfo?.customerId,
+                    customerId,
                     basketData?.basketId,
                     site
                 )
@@ -145,7 +144,7 @@ export const getAppleButtonConfig = (
                 } else {
                     const adyenShippingMethodsService = new AdyenShippingMethodsService(
                         authToken,
-                        basketData?.customerInfo?.customerId,
+                        customerId,
                         basketData?.basketId,
                         site
                     )
@@ -194,7 +193,7 @@ export const getAppleButtonConfig = (
                 const basketData = isExpressPdp ? temporaryBasket : basket
                 const adyenShippingMethodsService = new AdyenShippingMethodsService(
                     authToken,
-                    basketData?.customerInfo?.customerId,
+                    customerId,
                     basketData?.basketId,
                     site
                 )
@@ -230,21 +229,14 @@ export const getAppleButtonConfig = (
                     customerId,
                     site
                 )
-                temporaryBasket = await adyenTemporaryBasketService.createTemporaryBasket()
+                temporaryBasket = await adyenTemporaryBasketService.createTemporaryBasket(product)
                 if (temporaryBasket?.basketId) {
-                    const adyenAddProductService = new AdyenAddProductService(
-                        authToken,
-                        customerId,
-                        site,
-                        temporaryBasket.basketId
-                    )
-                    const updatedBasket = await adyenAddProductService.addProductToBasket(product)
-                    applePayAmount = updatedBasket.orderTotal
+                    applePayAmount = temporaryBasket.orderTotal
                     const applePayAmountUpdate = {
                         newTotal: {
                             type: 'final',
                             label: merchantDisplayName || applePayConfig.merchantName,
-                            amount: updatedBasket.orderTotal
+                            amount: temporaryBasket.orderTotal
                         }
                     }
                     resolve(applePayAmountUpdate)
