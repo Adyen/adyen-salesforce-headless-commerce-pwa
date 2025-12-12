@@ -3,7 +3,6 @@ import {AdyenError} from '../../models/AdyenError'
 import Logger from '../../models/logger'
 import {ERROR_MESSAGE} from '../../../utils/constants.mjs'
 import {BasketService} from '../../models/basketService.js'
-import {getAdyenConfigForCurrentSite} from '../../../utils/getAdyenConfigForCurrentSite.mjs'
 
 jest.mock('../../models/logger', () => ({
     info: jest.fn(),
