@@ -4,6 +4,7 @@ import {AdyenShopperDetailsService} from '../../services/shopper-details'
 import {AdyenShippingMethodsService} from '../../services/shipping-methods'
 import {AdyenShippingAddressService} from '../../services/shipping-address'
 import {AdyenPaypalUpdateOrderService} from '../../services/paypal-update-order'
+import {AdyenPaymentDataReviewPageService} from '../../services/payment-data-review-page'
 import {formatPayPalShopperDetails} from '../helpers/addressHelper'
 
 /**
@@ -39,23 +40,42 @@ export const paypalExpressConfig = (props = {}) => {
         configuration = {}
     } = props
 
+    const redirectShopperToReviewPage = async (state) => {
+        try {
+            const {basket, site, token} = props
+            const adyenPaymentDataReviewPageService = new AdyenPaymentDataReviewPageService(
+                token,
+                basket?.customerInfo?.customerId,
+                basket?.basketId,
+                site
+            )
+            await adyenPaymentDataReviewPageService.setPaymentData(state.data)
+            props.navigate(props.reviewPageUrl)
+        } catch (err) {
+            props.onError(err)
+        }
+    }
+
     return {
         ...baseConfig(props),
         showPayButton: true,
         isExpress: true,
+        ...(props.enableReview && {userAction: 'continue'}),
         onSubmit: executeCallbacks(
             [...beforeSubmit, onSubmit, ...afterSubmit, onPaymentsSuccess],
             props
         ),
-        onAdditionalDetails: executeCallbacks(
-            [
-                ...beforeAdditionalDetails,
-                onAdditionalDetails,
-                ...afterAdditionalDetails,
-                onPaymentsDetailsSuccess
-            ],
-            props
-        ),
+        onAdditionalDetails: props.enableReview
+            ? redirectShopperToReviewPage
+            : executeCallbacks(
+                  [
+                      ...beforeAdditionalDetails,
+                      onAdditionalDetails,
+                      ...afterAdditionalDetails,
+                      onPaymentsDetailsSuccess
+                  ],
+                  props
+              ),
         onAuthorized: executeCallbacks(
             [...beforeAuthorized, onAuthorized, ...afterAuthorized, onAuthorizedSuccess],
             props

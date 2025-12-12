@@ -99,6 +99,8 @@ const CartCta = () => {
                     onError={[showError]}
                     // UI
                     spinner={<LoadingSpinner />}
+                    enableReview={true}
+                    reviewPageUrl="/checkout/review"
                 />
             </Container>
             <Flex justify={'center'}>

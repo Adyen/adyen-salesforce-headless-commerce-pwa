@@ -89,6 +89,8 @@ const PayPalExpressComponent = ({
 
     // UI
     spinner,
+    enableReview = false,
+    reviewPageUrl = '/checkout/review',
 
     // Optional overrides
     configuration = {}
@@ -205,7 +207,9 @@ const PayPalExpressComponent = ({
                     afterShippingOptionsChange,
                     configuration,
                     onError,
-                    fetchShippingMethods
+                    fetchShippingMethods,
+                    enableReview,
+                    reviewPageUrl
                 })
 
                 const paypalButton = new PayPal(checkout, expressConfig)
@@ -272,6 +276,8 @@ const PayPalExpressComponent = ({
         afterShippingOptionsChange,
         onError,
         navigate,
+        enableReview,
+        reviewPageUrl,
         fetchShippingMethods
     ])
 

@@ -342,7 +342,8 @@ describe('paymentsHelper', () => {
                 c_giftCardCheckBalance: '',
                 c_paymentMethod: '',
                 c_amount: '',
-                c_pspReference: ''
+                c_pspReference: '',
+                c_paymentDataForReviewPage: ''
             })
             expect(mockAdyenContext.basketService.removeAllPaymentInstruments).toHaveBeenCalled()
         })

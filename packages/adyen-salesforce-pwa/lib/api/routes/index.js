@@ -8,6 +8,7 @@ import ShippingAddressController from '../controllers/shipping-address'
 import ShippingMethodsController from '../controllers/shipping-methods'
 import ShopperDetailsController from '../controllers/shopper-details'
 import PaypalUpdateOrderController from '../controllers/paypal-update-order'
+import PaymentDataReviewPageController from '../controllers/payment-data-review-page'
 import {
     authenticate,
     parseNotification,
@@ -134,6 +135,18 @@ function registerAdyenEndpoints(app, runtime, overrides) {
         SuccessHandler,
         ErrorHandler
     ]
+    const paymentDataForReviewPageGetHandler = overrides?.getPaymentDataForReviewPage || [
+        prepareRequestContext,
+        PaymentDataReviewPageController.getPaymentDataForReviewPage,
+        SuccessHandler,
+        ErrorHandler
+    ]
+    const paymentDataForReviewPagePostHandler = overrides?.setPaymentDataForReviewPage || [
+        prepareRequestContext,
+        PaymentDataReviewPageController.setPaymentDataForReviewPage,
+        SuccessHandler,
+        ErrorHandler
+    ]
 
     app.get(
         '*/checkout/redirect',
@@ -154,6 +167,7 @@ function registerAdyenEndpoints(app, runtime, overrides) {
         '/.well-known/apple-developer-merchantid-domain-association',
         ...appleDomainAssociationHandler
     )
+    app.get('/api/adyen/payment-data-for-review-page', ...paymentDataForReviewPageGetHandler)
     app.post('/api/adyen/payment/cancel', ...paymentCancelController)
     app.post('/api/adyen/payments/details', ...paymentsDetailsHandler)
     app.post('/api/adyen/payments', ...paymentsHandler)
@@ -165,6 +179,7 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     app.post('/api/adyen/gift-card/balance-check', ...balanceCheckHandler)
     app.post('/api/adyen/gift-card/create-order', ...createOrderHandler)
     app.post('/api/adyen/gift-card/cancel-order', ...cancelOrderHandler)
+    app.post('/api/adyen/payment-data-for-review-page', ...paymentDataForReviewPagePostHandler)
 }
 
 export {registerAdyenEndpoints, SuccessHandler, ErrorHandler}

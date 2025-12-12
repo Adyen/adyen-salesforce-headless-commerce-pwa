@@ -99,7 +99,8 @@ export const ERROR_MESSAGE = {
     ADD_PAYMENT_INSTRUMENTS: 'Failed to add payment instrument due to missing parameters',
     CUSTOMER_NOT_FOUND: 'customer not found',
     BASKET_NOT_FOUND: 'Basket not found in adyenContext',
-    PSP_REFERENCE_NOT_FOUND: 'PSP reference not found in basket'
+    PSP_REFERENCE_NOT_FOUND: 'PSP reference not found in basket',
+    INVALID_PAYMENT_DATA: 'Invalid payment data'
 }
 
 export const DEFAULT_EXPIRATION_TIME = 30

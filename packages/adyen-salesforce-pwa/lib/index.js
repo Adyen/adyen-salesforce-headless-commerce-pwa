@@ -3,6 +3,7 @@ export {default as AdyenExpressCheckoutProvider} from './contexts/adyen-express-
 
 export {default as useAdyenCheckout} from './hooks/useAdyenCheckout'
 export {default as useAdyenExpressCheckout} from './hooks/useAdyenExpressCheckout'
+export {default as useAdyenReviewPage} from './hooks/useAdyenReviewPage'
 
 export {default as AdyenCheckout} from './components/adyenCheckout'
 export {default as ApplePayExpress} from './components/applePayExpress'
@@ -13,3 +14,6 @@ export {default as currencyList} from './utils/currencyList.mjs'
 export {default as pageTypes} from './utils/pageTypes.mjs'
 
 export {ORDER} from './utils/constants.mjs'
+
+export {AdyenPaymentDataReviewPageService} from './services/payment-data-review-page'
+export {AdyenPaymentsDetailsService} from './services/payments-details'
