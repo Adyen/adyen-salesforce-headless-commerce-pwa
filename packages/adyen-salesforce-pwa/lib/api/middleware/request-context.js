@@ -22,10 +22,9 @@ export async function prepareRequestContext(req, res, next) {
     const {authorization, basketid, customerid} = req.headers
     const {siteId} = req.query
 
-    if (!authorization || !basketid || !customerid || !siteId) {
+    if (!authorization || !customerid || !siteId) {
         const missing = []
         if (!authorization) missing.push('authorization header')
-        if (!basketid) missing.push('basketid header')
         if (!customerid) missing.push('customerid header')
         if (!siteId) missing.push('siteId query param')
 
@@ -35,7 +34,10 @@ export async function prepareRequestContext(req, res, next) {
     }
 
     try {
-        const basket = await getBasket(authorization, basketid, customerid)
+        let basket = null
+        if (typeof basketid !== 'undefined' && basketid !== 'undefined') {
+            basket = await getBasket(authorization, basketid, customerid)
+        }
         const customer = await getCustomer(authorization, customerid)
         const adyenConfig = getAdyenConfigForCurrentSite(siteId)
 

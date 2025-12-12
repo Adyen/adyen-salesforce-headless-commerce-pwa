@@ -140,24 +140,6 @@ export class ScenarioHelper {
         }
     }
 
-    async arrangeShippingAndProceedToPaymentForLoggedInUser() {
-        const selectedShippingAddressIsVisible = await this.selectedShippingAddress.isVisible()
-        if (!selectedShippingAddressIsVisible) {
-            await this.proceedToShippingMethodsAsLoggedInUser()
-        }
-        const selectedShippingMethodIsVisible = await this.selectedShippingMethod.isVisible()
-        if (!selectedShippingMethodIsVisible) {
-            await this.chooseShippingMethod()
-            await this.proceedToPayment()
-        }
-    }
-
-    async proceedToShippingMethodsAsLoggedInUser() {
-        if (this.continueToShippingMethodButtonLoggedInUser.isVisible()) {
-            await this.continueToShippingMethodButtonLoggedInUser.click()
-        }
-    }
-
     async fillShippingDetails(user) {
         await this.emailField.click()
         await this.emailField.fill(user.shopperEmail)

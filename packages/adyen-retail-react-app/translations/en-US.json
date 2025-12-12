@@ -1325,7 +1325,7 @@
     "defaultMessage": "Pick Up in Store"
   },
   "product_view.label.quantity": {
-    "defaultMessage": "Quantity"
+    "defaultMessage": "Quantity:"
   },
   "product_view.label.quantity_decrement": {
     "defaultMessage": "−"

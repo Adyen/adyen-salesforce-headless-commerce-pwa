@@ -3,14 +3,14 @@ import {
     getBasket,
     getCurrentBasketForAuthorizedShopper
 } from '../basketHelper.js'
-import {ShopperBaskets} from 'commerce-sdk-isomorphic'
+import {ShopperBasketsV2} from 'commerce-sdk-isomorphic'
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 import {AdyenError} from '../../models/AdyenError.js'
 import {ERROR_MESSAGE} from '../../../utils/constants.mjs'
 
 // Mock dependencies
 jest.mock('commerce-sdk-isomorphic', () => ({
-    ShopperBaskets: jest.fn()
+    ShopperBasketsV2: jest.fn()
 }))
 
 jest.mock('@salesforce/pwa-kit-runtime/utils/ssr-config', () => ({
@@ -37,7 +37,7 @@ describe('basketHelper', () => {
             createShopperBasketsClient(mockAuth)
 
             expect(getConfig).toHaveBeenCalled()
-            expect(ShopperBaskets).toHaveBeenCalledWith({
+            expect(ShopperBasketsV2).toHaveBeenCalledWith({
                 ...mockConfig.app.commerceAPI,
                 headers: {authorization: mockAuth}
             })
@@ -48,7 +48,7 @@ describe('basketHelper', () => {
         const mockGetBasket = jest.fn()
 
         beforeEach(() => {
-            ShopperBaskets.mockImplementation(() => ({
+            ShopperBasketsV2.mockImplementation(() => ({
                 getBasket: mockGetBasket
             }))
         })
@@ -91,7 +91,7 @@ describe('basketHelper', () => {
         const mockGetCustomerBaskets = jest.fn()
 
         beforeEach(() => {
-            ShopperBaskets.mockImplementation(() => ({
+            ShopperBasketsV2.mockImplementation(() => ({
                 getCustomerBaskets: mockGetCustomerBaskets
             }))
         })

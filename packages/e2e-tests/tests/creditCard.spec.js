@@ -34,7 +34,6 @@ test.describe('Payments through PWA UI', () => {
         await scenarios.visitStore()
         await scenarios.setupCart()
         await scenarios.login(user_US)
-        await scenarios.arrangeShippingAndProceedToPaymentForLoggedInUser(user_US)
 
         const paymentPage = new PaymentHelper(page)
         await paymentPage.fillCVCInfo(

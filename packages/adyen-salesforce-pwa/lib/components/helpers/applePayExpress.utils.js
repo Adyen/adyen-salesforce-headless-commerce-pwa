@@ -2,6 +2,8 @@ import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 import {AdyenPaymentsService} from '../../services/payments'
 import {AdyenShippingMethodsService} from '../../services/shipping-methods'
 import {AdyenShippingAddressService} from '../../services/shipping-address'
+import {AdyenTemporaryBasketService} from '../../services/temporary-basket'
+import {PAYMENT_TYPES} from '../../utils/constants.mjs'
 
 export const getApplePaymentMethodConfig = (paymentMethodsResponse) => {
     const applePayPaymentMethod = paymentMethodsResponse?.paymentMethods?.find(
@@ -52,11 +54,16 @@ export const getAppleButtonConfig = (
     applePayConfig,
     navigate,
     fetchShippingMethods,
-    onError = []
+    onError = [],
+    isExpressPdp = false,
+    merchantDisplayName = '',
+    customerId,
+    product
 ) => {
     let applePayAmount = basket.orderTotal
     let customerData = null
     let billingData = null
+    let temporaryBasket = null
     const buttonConfig = {
         showPayButton: true,
         isExpress: true,
@@ -75,14 +82,15 @@ export const getAppleButtonConfig = (
         })),
         onSubmit: async (state, component, actions) => {
             try {
+                const basketData = isExpressPdp ? temporaryBasket : basket
                 const adyenPaymentService = new AdyenPaymentsService(
                     authToken,
-                    basket?.customerInfo?.customerId,
-                    basket?.basketId,
+                    customerId,
+                    basketData?.basketId,
                     site
                 )
                 const paymentsResponse = await adyenPaymentService.submitPayment({
-                    paymentType: 'express',
+                    paymentType: isExpressPdp ? PAYMENT_TYPES.EXPRESS_PDP : PAYMENT_TYPES.EXPRESS,
                     ...state.data,
                     ...getCustomerBillingDetails(billingData),
                     ...getCustomerShippingDetails(customerData),
@@ -92,7 +100,7 @@ export const getAppleButtonConfig = (
                     const finalPriceUpdate = {
                         newTotal: {
                             type: 'final',
-                            label: applePayConfig.merchantName,
+                            label: merchantDisplayName || applePayConfig.merchantName,
                             amount: `${applePayAmount}`
                         }
                     }
@@ -120,23 +128,24 @@ export const getAppleButtonConfig = (
         onShippingContactSelected: async (resolve, reject, event) => {
             try {
                 const {shippingContact} = event
+                const basketData = isExpressPdp ? temporaryBasket : basket
                 const adyenShippingAddressService = new AdyenShippingAddressService(
                     authToken,
-                    basket?.customerInfo?.customerId,
-                    basket?.basketId,
+                    customerId,
+                    basketData?.basketId,
                     site
                 )
                 const customerShippingDetails = getCustomerShippingDetails(shippingContact)
                 await adyenShippingAddressService.updateShippingAddress(customerShippingDetails)
                 const {defaultShippingMethodId, applicableShippingMethods} =
-                    await fetchShippingMethods()
+                    await fetchShippingMethods(basketData?.basketId)
                 if (!applicableShippingMethods?.length) {
                     reject()
                 } else {
                     const adyenShippingMethodsService = new AdyenShippingMethodsService(
                         authToken,
-                        basket?.customerInfo?.customerId,
-                        basket?.basketId,
+                        customerId,
+                        basketData?.basketId,
                         site
                     )
                     const response = await adyenShippingMethodsService.updateShippingMethod(
@@ -167,7 +176,7 @@ export const getAppleButtonConfig = (
                             })),
                         newTotal: {
                             type: 'final',
-                            label: applePayConfig.merchantName,
+                            label: merchantDisplayName || applePayConfig.merchantName,
                             amount: `${applePayAmount}`
                         }
                     }
@@ -181,10 +190,11 @@ export const getAppleButtonConfig = (
         onShippingMethodSelected: async (resolve, reject, event) => {
             try {
                 const {shippingMethod} = event
+                const basketData = isExpressPdp ? temporaryBasket : basket
                 const adyenShippingMethodsService = new AdyenShippingMethodsService(
                     authToken,
-                    basket?.customerInfo?.customerId,
-                    basket?.basketId,
+                    customerId,
+                    basketData?.basketId,
                     site
                 )
                 const response = await adyenShippingMethodsService.updateShippingMethod(
@@ -201,7 +211,7 @@ export const getAppleButtonConfig = (
                     const applePayShippingMethodUpdate = {
                         newTotal: {
                             type: 'final',
-                            label: applePayConfig.merchantName,
+                            label: merchantDisplayName || applePayConfig.merchantName,
                             amount: `${applePayAmount}`
                         }
                     }
@@ -210,6 +220,31 @@ export const getAppleButtonConfig = (
             } catch (err) {
                 onError.forEach((cb) => cb(err))
                 reject(err)
+            }
+        },
+        onClick: async (resolve, reject) => {
+            if (isExpressPdp) {
+                const adyenTemporaryBasketService = new AdyenTemporaryBasketService(
+                    authToken,
+                    customerId,
+                    site
+                )
+                temporaryBasket = await adyenTemporaryBasketService.createTemporaryBasket(product)
+                if (temporaryBasket?.basketId) {
+                    applePayAmount = temporaryBasket.orderTotal
+                    const applePayAmountUpdate = {
+                        newTotal: {
+                            type: 'final',
+                            label: merchantDisplayName || applePayConfig.merchantName,
+                            amount: temporaryBasket.orderTotal
+                        }
+                    }
+                    resolve(applePayAmountUpdate)
+                } else {
+                    reject()
+                }
+            } else {
+                resolve()
             }
         }
     }

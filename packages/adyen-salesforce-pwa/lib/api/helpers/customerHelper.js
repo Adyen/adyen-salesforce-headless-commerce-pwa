@@ -37,3 +37,12 @@ export async function getCustomer(authorization, customerId) {
 
     return customer
 }
+
+export async function getCustomerBaskets(authorization, customerId) {
+    const shopperCustomersClient = createShopperCustomerClient(authorization)
+    return await shopperCustomersClient.getCustomerBaskets({
+        parameters: {
+            customerId: customerId
+        }
+    })
+}

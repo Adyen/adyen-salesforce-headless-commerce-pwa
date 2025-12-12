@@ -11,6 +11,11 @@ export const PAYMENT_METHOD_TYPES = {
     WECHATPAY_SDK: 'wechatpaySDK'
 }
 
+export const PAYMENT_TYPES = {
+    EXPRESS: 'express',
+    EXPRESS_PDP: 'expressPDP'
+}
+
 export const RESULT_CODES = {
     AUTHORISED: 'Authorised',
     CANCELLED: 'Cancelled',
@@ -79,6 +84,7 @@ export const ERROR_MESSAGE = {
     INVALID_ORDER: 'order is invalid',
     INVALID_PARAMS: 'invalid request params',
     INVALID_BASKET: 'invalid basket',
+    BASKET_NOT_CREATED: 'basket not created',
     PAYMENT_NOT_SUCCESSFUL: 'payment was not successful',
     INVALID_BILLING_ADDRESS: 'invalid billing address',
     INVALID_SHIPPING_ADDRESS: 'invalid shipping address',

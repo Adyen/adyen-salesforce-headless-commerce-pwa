@@ -3182,7 +3182,7 @@
   "product_view.label.quantity": [
     {
       "type": 0,
-      "value": "Quantity"
+      "value": "Quantity:"
     }
   ],
   "product_view.label.quantity_decrement": [
