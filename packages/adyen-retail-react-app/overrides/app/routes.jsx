@@ -40,6 +40,11 @@ const AdyenCheckoutError = loadable(() => import('./pages/checkout/error'), {
     fallback: fallback
 })
 
+// Checkout Review page from Adyen
+const CheckoutReview = loadable(() => import('./pages/checkout/review'), {
+    fallback: fallback
+})
+
 const Cart = loadable(() => import('./pages/cart'), {
     fallback: fallback
 })
@@ -68,6 +73,11 @@ const routes = [
     {
         path: '/checkout/confirmation/:orderNo',
         component: CheckoutConfirmation
+    },
+    {
+        path: '/checkout/review',
+        component: CheckoutReview,
+        exact: true
     },
     {
         path: '/cart',
