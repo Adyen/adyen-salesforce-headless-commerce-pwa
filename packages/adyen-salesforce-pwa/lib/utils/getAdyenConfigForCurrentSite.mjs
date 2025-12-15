@@ -14,10 +14,7 @@ export const getAdyenConfigForCurrentSite = (currentSiteId) => {
             ADYEN_ENV.ADYEN_APPLE_DOMAIN_ASSOCIATION
         ),
         nativeThreeDS: setProperty(currentSiteId, ADYEN_ENV.ADYEN_NATIVE_3DS),
-        giftCardExpirationTime: setProperty(
-            currentSiteId,
-            ADYEN_ENV.GIFT_CARD_EXPIRATION_TIME
-        )
+        giftCardExpirationTime: setProperty(currentSiteId, ADYEN_ENV.GIFT_CARD_EXPIRATION_TIME)
     }
 }
 

@@ -1,4 +1,4 @@
-import {ERROR_MESSAGE} from '../../utils/constants.mjs'
+import {ERROR_MESSAGE, PAYMENT_TYPES} from '../../utils/constants.mjs'
 import AdyenClientProvider from '../models/adyenClientProvider'
 import Logger from '../models/logger'
 import {v4 as uuidv4} from 'uuid'
@@ -46,7 +46,10 @@ async function sendPayments(req, res, next) {
             throw new AdyenError(ERROR_MESSAGE.ADYEN_CONTEXT_NOT_FOUND, 500)
         }
 
-        if (data.paymentType === 'express') {
+        if (
+            data.paymentType === PAYMENT_TYPES.EXPRESS ||
+            data.paymentType === PAYMENT_TYPES.EXPRESS_PDP
+        ) {
             await adyenContext.basketService.addShopperData(data)
         }
         const paymentRequest = await createPaymentRequestObject(data, adyenContext, req)
