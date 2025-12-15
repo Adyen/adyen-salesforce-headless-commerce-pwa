@@ -1,13 +1,10 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-let updateNotifier
 
 try {
+    const packageJson = require('../../package.json')
     const mod = require('update-notifier')
-    updateNotifier = mod?.default || mod
+    const updateNotifier = mod?.default || mod
+    updateNotifier({pkg: packageJson}).notify()
 } catch (e) {
     process.exit(0)
 }
-
-const packageJson = require('../../package.json')
-
-updateNotifier({pkg: packageJson}).notify()
