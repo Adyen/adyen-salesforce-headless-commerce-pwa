@@ -30,6 +30,7 @@ export {default as EnvironmentController} from './controllers/environment'
 export {default as PaymentCancelController} from './controllers/payment-cancel'
 export {default as GiftCardController} from './controllers/giftCard'
 export {default as ShopperDetailsController} from './controllers/shopper-details'
+export {default as PaymentDataReviewPageController} from './controllers/payment-data-review-page'
 
 // Webhook event handlers
 export * from './controllers/authorization-webhook-handler'

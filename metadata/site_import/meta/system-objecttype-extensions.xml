@@ -131,6 +131,14 @@
                 <min-length>0</min-length>
                 <field-length>0</field-length>
             </attribute-definition>
+            <attribute-definition attribute-id="paymentDataForReviewPage">
+                <display-name xml:lang="x-default">paymentDataForReviewPage</display-name>
+                <description xml:lang="x-default">payment data to be used for payment details call from review page</description>
+                <type>text</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
         </custom-attribute-definitions>
         <group-definitions>
             <attribute-group group-id="AdyenPayment">
@@ -141,6 +149,7 @@
                 <attribute attribute-id="paymentMethod"/>
                 <attribute attribute-id="amount"/>
                 <attribute attribute-id="pspReference"/>
+                <attribute attribute-id="paymentDataForReviewPage"/>
             </attribute-group>
         </group-definitions>
     </type-extension>

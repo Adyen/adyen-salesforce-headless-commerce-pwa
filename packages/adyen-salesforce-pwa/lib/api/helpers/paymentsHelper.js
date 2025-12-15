@@ -18,7 +18,8 @@ async function _cleanupBasket(adyenContext) {
         c_giftCardCheckBalance: '',
         c_paymentMethod: '',
         c_amount: '',
-        c_pspReference: ''
+        c_pspReference: '',
+        c_paymentDataForReviewPage: ''
     })
     await adyenContext.basketService.removeAllPaymentInstruments()
 }
