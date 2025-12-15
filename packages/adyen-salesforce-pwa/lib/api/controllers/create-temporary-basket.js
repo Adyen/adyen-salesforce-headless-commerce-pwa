@@ -3,6 +3,7 @@ import {AdyenError} from '../models/AdyenError'
 import {ERROR_MESSAGE} from '../../utils/constants.mjs'
 import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrentSite.mjs'
 import {BasketService} from '../models/basketService.js'
+import {createTemporaryBasket, removeExistingTemporaryBaskets} from '../helpers/basketHelper'
 
 /**
  * Creates a temporary basket for the current shopper.
@@ -31,6 +32,13 @@ export default async function CreateTemporaryBasketController(req, res, next) {
             throw new AdyenError(ERROR_MESSAGE.INVALID_PARAMS, 400)
         }
 
+        await removeExistingTemporaryBaskets(authorization, customerid)
+
+        let basket = await createTemporaryBasket(customerid)
+        if (!basket || !basket.basketId) {
+            throw new AdyenError(ERROR_MESSAGE.BASKET_NOT_CREATED, 400)
+        }
+
         const adyenConfig = getAdyenConfigForCurrentSite(siteId)
         const adyenContext = {
             adyenConfig,
@@ -39,14 +47,7 @@ export default async function CreateTemporaryBasketController(req, res, next) {
             customerId: customerid,
             basket: null
         }
-
         const basketService = new BasketService(adyenContext, res)
-        await basketService.removeExistingTemporaryBaskets()
-
-        let basket = await basketService.createTemporaryBasket()
-        if (!basket || !basket.basketId) {
-            throw new AdyenError(ERROR_MESSAGE.BASKET_NOT_CREATED, 400)
-        }
         basket = await basketService.addProductToBasket(basket?.basketId, product)
         adyenContext.basketService = basketService
         adyenContext.basket = basket

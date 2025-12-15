@@ -1,12 +1,20 @@
 import {BasketService} from '../basketService.js'
-import {createShopperBasketsClient} from '../../helpers/basketHelper.js'
+import {
+    createShopperBasketsClient,
+    createTemporaryBasket,
+    removeExistingTemporaryBaskets
+} from '../../helpers/basketHelper.js'
 import {PAYMENT_METHODS} from '../../../utils/constants.mjs'
 import {getCustomerBaskets} from '../../helpers/customerHelper'
 
 // Mock dependencies
-jest.mock('../../helpers/basketHelper.js', () => ({
-    createShopperBasketsClient: jest.fn()
-}))
+jest.mock('../../helpers/basketHelper.js', () => {
+    const actual = jest.requireActual('../../helpers/basketHelper.js')
+    return {
+        ...actual,
+        createShopperBasketsClient: jest.fn()
+    }
+})
 jest.mock('../../helpers/customerHelper', () => ({
     getCustomerBaskets: jest.fn()
 }))
@@ -88,7 +96,11 @@ describe('BasketService', () => {
             getCustomerBaskets.mockResolvedValue(mockBaskets)
             mockShopperBaskets.deleteBasket.mockResolvedValue({})
 
-            await basketService.removeExistingTemporaryBaskets()
+            await removeExistingTemporaryBaskets.call(
+                {shopperBaskets: mockShopperBaskets},
+                'Bearer mockToken',
+                'mockCustomerId'
+            )
 
             expect(getCustomerBaskets).toHaveBeenCalledWith('Bearer mockToken', 'mockCustomerId')
             expect(mockShopperBaskets.deleteBasket).toHaveBeenCalledTimes(2)
@@ -104,7 +116,11 @@ describe('BasketService', () => {
             getCustomerBaskets.mockResolvedValue({
                 baskets: [{basketId: 'nontemp', temporaryBasket: false}]
             })
-            await basketService.removeExistingTemporaryBaskets()
+            await removeExistingTemporaryBaskets.call(
+                {shopperBaskets: mockShopperBaskets},
+                'Bearer mockToken',
+                'mockCustomerId'
+            )
             expect(mockShopperBaskets.deleteBasket).not.toHaveBeenCalled()
         })
     })
@@ -114,7 +130,15 @@ describe('BasketService', () => {
             const created = {basketId: 'newTemp', temporary: true}
             mockShopperBaskets.createBasket.mockResolvedValue(created)
 
-            const result = await basketService.createTemporaryBasket()
+            const result = await createTemporaryBasket.call(
+                {
+                    shopperBaskets: mockShopperBaskets,
+                    _updateContext: (basket) => {
+                        mockRes.locals.adyen.basket = basket
+                    }
+                },
+                'mockCustomerId'
+            )
 
             expect(mockShopperBaskets.createBasket).toHaveBeenCalledWith({
                 parameters: {temporary: true},

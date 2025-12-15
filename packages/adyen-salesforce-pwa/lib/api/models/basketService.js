@@ -9,7 +9,6 @@ import {getCardType} from '../../utils/getCardType.mjs'
 import {convertCurrencyValueToMajorUnits} from '../../utils/parsers.mjs'
 import Logger from '../models/logger'
 import {AdyenError} from './AdyenError'
-import {getCustomerBaskets} from '../helpers/customerHelper'
 
 /**
  * A service for managing basket state and interactions with the ShopperBaskets API.
@@ -35,48 +34,6 @@ export class BasketService {
      */
     _updateContext(updatedBasket) {
         this.res.locals.adyen.basket = updatedBasket
-    }
-
-    /**
-     * Removes any existing temporary baskets for the current customer.
-     */
-    async removeExistingTemporaryBaskets() {
-        try {
-            const {authorization, customerId} = this.adyenContext
-            const existingBaskets = await getCustomerBaskets(authorization, customerId)
-            const tempBaskets = existingBaskets.baskets?.filter((b) => b?.temporaryBasket === true)
-            if (tempBaskets?.length) {
-                await Promise.all(
-                    tempBaskets.map((b) =>
-                        this.shopperBaskets.deleteBasket({
-                            parameters: {basketId: b.basketId}
-                        })
-                    )
-                )
-            }
-        } catch (e) {
-            Logger.error('removeExistingTemporaryBaskets', e.stack || e.message)
-        }
-    }
-
-    /**
-     * Creates a new temporary basket for the current shopper and updates the context.
-     * @returns {Promise<object>} The created basket.
-     */
-    async createTemporaryBasket() {
-        const {customerId} = this.adyenContext
-        const basket = await this.shopperBaskets.createBasket({
-            parameters: {
-                temporary: true
-            },
-            body: {
-                customerInfo: {
-                    customerId
-                }
-            }
-        })
-        this._updateContext(basket)
-        return basket
     }
 
     /**

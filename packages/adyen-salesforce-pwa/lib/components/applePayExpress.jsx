@@ -22,9 +22,7 @@ const ApplePayExpressComponent = (props) => {
         merchantDisplayName = '',
         product
     } = props
-    const [shopperBasket, setShopperBasket] = useState(
-        isExpressPdp ? {currency, orderTotal: 0} : basket
-    )
+    const [shopperBasket] = useState(isExpressPdp ? {currency, orderTotal: 0} : basket)
     const paymentContainer = useRef(null)
     const applePayButtonRef = useRef(null)
 

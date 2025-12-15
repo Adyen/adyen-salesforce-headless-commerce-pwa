@@ -3,6 +3,7 @@ import {AdyenError} from '../../models/AdyenError'
 import Logger from '../../models/logger'
 import {ERROR_MESSAGE} from '../../../utils/constants.mjs'
 import {BasketService} from '../../models/basketService.js'
+import {createTemporaryBasket, removeExistingTemporaryBaskets} from '../../helpers/basketHelper'
 
 jest.mock('../../models/logger', () => ({
     info: jest.fn(),
@@ -10,6 +11,10 @@ jest.mock('../../models/logger', () => ({
 }))
 
 jest.mock('../../models/basketService.js')
+jest.mock('../../helpers/basketHelper', () => ({
+    createTemporaryBasket: jest.fn(),
+    removeExistingTemporaryBaskets: jest.fn()
+}))
 jest.mock('../../../utils/getAdyenConfigForCurrentSite.mjs', () => ({
     getAdyenConfigForCurrentSite: jest.fn(() => ({
         apiKey: 'test',
@@ -46,20 +51,21 @@ describe('create-temporary-basket controller', () => {
     it('creates a temporary basket and returns expected response', async () => {
         const mockBasket = {basketId: 'b1', orderTotal: 0}
         const mockBasketService = {
-            removeExistingTemporaryBaskets: jest.fn(),
-            createTemporaryBasket: jest.fn().mockResolvedValue(mockBasket),
             addProductToBasket: jest.fn().mockResolvedValue({
                 ...mockBasket,
                 orderTotal: 0
             })
         }
         BasketService.mockImplementation(() => mockBasketService)
+        removeExistingTemporaryBaskets.mockResolvedValue(undefined)
+        createTemporaryBasket.mockResolvedValue(mockBasket)
 
         await CreateTemporaryBasketController(req, res, next)
 
         expect(Logger.info).toHaveBeenCalledWith('CreateTemporaryBasketController', 'start')
         expect(BasketService).toHaveBeenCalled()
-        expect(mockBasketService.removeExistingTemporaryBaskets).toHaveBeenCalled()
+        expect(removeExistingTemporaryBaskets).toHaveBeenCalledWith('Bearer token', 'customer1')
+        expect(createTemporaryBasket).toHaveBeenCalledWith('customer1')
         expect(res.locals.response).toEqual({
             basketId: 'b1',
             orderTotal: 0
