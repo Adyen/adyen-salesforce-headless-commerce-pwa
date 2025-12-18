@@ -1,4 +1,4 @@
-import {ERROR_MESSAGE} from '../../utils/constants.mjs'
+import {ERROR_MESSAGE, PAYMENT_TYPES} from '../../utils/constants.mjs'
 import AdyenClientProvider from '../models/adyenClientProvider'
 import Logger from '../models/logger'
 import {v4 as uuidv4} from 'uuid'

@@ -17,6 +17,12 @@
       "value": "Log Out"
     }
   ],
+  "account.title.my_account": [
+    {
+      "type": 0,
+      "value": "My Account"
+    }
+  ],
   "account_addresses.badge.default": [
     {
       "type": 0,
@@ -99,16 +105,52 @@
       "value": "Payment Method"
     }
   ],
+  "account_order_detail.heading.pickup_address": [
+    {
+      "type": 0,
+      "value": "Pickup Address"
+    }
+  ],
+  "account_order_detail.heading.pickup_address_number": [
+    {
+      "type": 0,
+      "value": "Pickup Address "
+    },
+    {
+      "type": 1,
+      "value": "number"
+    }
+  ],
   "account_order_detail.heading.shipping_address": [
     {
       "type": 0,
       "value": "Shipping Address"
     }
   ],
+  "account_order_detail.heading.shipping_address_number": [
+    {
+      "type": 0,
+      "value": "Shipping Address "
+    },
+    {
+      "type": 1,
+      "value": "number"
+    }
+  ],
   "account_order_detail.heading.shipping_method": [
     {
       "type": 0,
       "value": "Shipping Method"
+    }
+  ],
+  "account_order_detail.heading.shipping_method_number": [
+    {
+      "type": 0,
+      "value": "Shipping Method "
+    },
+    {
+      "type": 1,
+      "value": "number"
     }
   ],
   "account_order_detail.label.order_number": [
@@ -131,10 +173,14 @@
       "value": "date"
     }
   ],
-  "account_order_detail.label.pending_tracking_number": [
+  "account_order_detail.label.pickup_from_store": [
     {
       "type": 0,
-      "value": "Pending"
+      "value": "Pick up from Store "
+    },
+    {
+      "type": 1,
+      "value": "storeId"
     }
   ],
   "account_order_detail.label.tracking_number": [
@@ -277,6 +323,12 @@
     {
       "type": 0,
       "value": "Remove"
+    }
+  ],
+  "add_to_cart_modal.button.select_bonus_products": [
+    {
+      "type": 0,
+      "value": "Select Bonus Products"
     }
   ],
   "add_to_cart_modal.info.added_to_cart": [
@@ -461,6 +513,96 @@
     {
       "type": 1,
       "value": "quantity"
+    }
+  ],
+  "bonus_product_modal.button_select": [
+    {
+      "type": 0,
+      "value": "Select"
+    }
+  ],
+  "bonus_product_modal.no_bonus_products": [
+    {
+      "type": 0,
+      "value": "No bonus products available"
+    }
+  ],
+  "bonus_product_modal.no_image": [
+    {
+      "type": 0,
+      "value": "No Image"
+    }
+  ],
+  "bonus_product_modal.title": [
+    {
+      "type": 0,
+      "value": "Select bonus product ("
+    },
+    {
+      "type": 1,
+      "value": "selected"
+    },
+    {
+      "type": 0,
+      "value": " of "
+    },
+    {
+      "type": 1,
+      "value": "max"
+    },
+    {
+      "type": 0,
+      "value": " selected)"
+    }
+  ],
+  "bonus_product_view_modal.button.back_to_selection": [
+    {
+      "type": 0,
+      "value": "← Back to Selection"
+    }
+  ],
+  "bonus_product_view_modal.button.view_cart": [
+    {
+      "type": 0,
+      "value": "View Cart"
+    }
+  ],
+  "bonus_product_view_modal.modal_label": [
+    {
+      "type": 0,
+      "value": "Bonus product selection modal for "
+    },
+    {
+      "type": 1,
+      "value": "productName"
+    }
+  ],
+  "bonus_product_view_modal.title": [
+    {
+      "type": 0,
+      "value": "Select bonus product ("
+    },
+    {
+      "type": 1,
+      "value": "selected"
+    },
+    {
+      "type": 0,
+      "value": " of "
+    },
+    {
+      "type": 1,
+      "value": "max"
+    },
+    {
+      "type": 0,
+      "value": " selected)"
+    }
+  ],
+  "bonus_product_view_modal.toast.item_added": [
+    {
+      "type": 0,
+      "value": "Bonus item added to cart"
     }
   ],
   "bonus_products_title.title.num_of_items": [
@@ -695,12 +837,6 @@
     {
       "type": 0,
       "value": "Add New Card"
-    }
-  ],
-  "checkout.message.generic_error": [
-    {
-      "type": 0,
-      "value": "An unexpected error occurred during checkout."
     }
   ],
   "checkout_confirmation.button.create_account": [
@@ -2285,6 +2421,12 @@
       "value": "Chinese (Taiwan)"
     }
   ],
+  "login.title.sign_in": [
+    {
+      "type": 0,
+      "value": "Sign In"
+    }
+  ],
   "login_form.action.create_account": [
     {
       "type": 0,
@@ -2355,6 +2497,30 @@
     {
       "type": 0,
       "value": "Incorrect username or password, please try again."
+    }
+  ],
+  "multi_ship_warning_modal.action.cancel": [
+    {
+      "type": 0,
+      "value": "Cancel"
+    }
+  ],
+  "multi_ship_warning_modal.action.switch_to_one_address": [
+    {
+      "type": 0,
+      "value": "Switch"
+    }
+  ],
+  "multi_ship_warning_modal.message.addresses_will_be_removed": [
+    {
+      "type": 0,
+      "value": "If you switch to one address, the shipping addresses you added for the items will be removed."
+    }
+  ],
+  "multi_ship_warning_modal.title.switch_to_one_address": [
+    {
+      "type": 0,
+      "value": "Switch to one address?"
     }
   ],
   "offline_banner.description.browsing_offline_mode": [
@@ -2507,6 +2673,12 @@
     {
       "type": 0,
       "value": "The page you're looking for can't be found."
+    }
+  ],
+  "page_not_found.title.page_not_found": [
+    {
+      "type": 0,
+      "value": "Page Not Found"
     }
   ],
   "pagination.field.num_of_pages": [
@@ -2727,6 +2899,12 @@
     {
       "type": 0,
       "value": "Recently Viewed"
+    }
+  ],
+  "product_detail.title.product_details": [
+    {
+      "type": 0,
+      "value": "Product Details"
     }
   ],
   "product_item.label.quantity": [
@@ -3004,7 +3182,7 @@
   "product_view.label.quantity": [
     {
       "type": 0,
-      "value": "Quantity"
+      "value": "Quantity:"
     }
   ],
   "product_view.label.quantity_decrement": [
@@ -3201,6 +3379,18 @@
       "value": "Create an account and get first access to the very best products, inspiration and community."
     }
   ],
+  "registration.title.create_account": [
+    {
+      "type": 0,
+      "value": "Create Account"
+    }
+  ],
+  "reset_password.title.reset_password": [
+    {
+      "type": 0,
+      "value": "Reset Password"
+    }
+  ],
   "reset_password_form.action.sign_in": [
     {
       "type": 0,
@@ -3235,6 +3425,42 @@
     {
       "type": 0,
       "value": "Cancel"
+    }
+  ],
+  "search.suggestions.categories": [
+    {
+      "type": 0,
+      "value": "Categories"
+    }
+  ],
+  "search.suggestions.didYouMean": [
+    {
+      "type": 0,
+      "value": "Did you mean"
+    }
+  ],
+  "search.suggestions.popular": [
+    {
+      "type": 0,
+      "value": "Popular Searches"
+    }
+  ],
+  "search.suggestions.products": [
+    {
+      "type": 0,
+      "value": "Products"
+    }
+  ],
+  "search.suggestions.recent": [
+    {
+      "type": 0,
+      "value": "Recent Searches"
+    }
+  ],
+  "search.suggestions.viewAll": [
+    {
+      "type": 0,
+      "value": "View All"
     }
   ],
   "selected_refinements.action.assistive_msg.clear_all": [
@@ -3621,6 +3847,12 @@
       "value": "postalCode"
     }
   ],
+  "store_display.label.store_contact_info": [
+    {
+      "type": 0,
+      "value": "Store Contact Info"
+    }
+  ],
   "store_display.label.store_hours": [
     {
       "type": 0,
@@ -3857,12 +4089,6 @@
     {
       "type": 0,
       "value": "Edit Contact Info"
-    }
-  ],
-  "toggle_card.action.editPaymentInfo": [
-    {
-      "type": 0,
-      "value": "Edit Payment Info"
     }
   ],
   "toggle_card.action.editShippingAddress": [

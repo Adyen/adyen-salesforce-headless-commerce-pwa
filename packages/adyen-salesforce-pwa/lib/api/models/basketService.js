@@ -51,6 +51,36 @@ export class BasketService {
     }
 
     /**
+     * Adds a product item to the specified basket and returns the updated basket.
+     * @param {string} basketId
+     * @param {{productId: string, quantity: number, optionItems?: Array, inventoryId?: string}} item
+     * @returns {Promise<object>}
+     */
+    async addProductToBasket(basketId, item) {
+        if (!basketId || !item?.id || !item?.quantity) {
+            throw new AdyenError(ERROR_MESSAGE.INVALID_PARAMS)
+        }
+
+        const requestBody = {
+            productId: item.id,
+            quantity: item.quantity,
+            ...(item.optionItems && {
+                optionItems: Array.isArray(item.optionItems) ? item.optionItems : [item.optionItems]
+            }),
+            ...(item.inventoryId && {inventoryId: item.inventoryId})
+        }
+
+        const updatedBasket = await this.shopperBaskets.addItemToBasket({
+            parameters: {basketId},
+            body: [requestBody]
+        })
+        if (this.adyenContext?.basket?.basketId === basketId) {
+            this._updateContext(updatedBasket)
+        }
+        return updatedBasket
+    }
+
+    /**
      * Adds a payment instrument to the current basket.
      * @param {object} amount - The amount included in the payment request. Should have value and currency
      * @param {object} paymentMethod - The payment method object. Should have type and brand.

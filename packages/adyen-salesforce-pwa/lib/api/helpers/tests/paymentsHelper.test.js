@@ -228,7 +228,7 @@ describe('paymentsHelper', () => {
                     }
                 ]
             }
-            const lineItems = getLineItems(basket)
+            const lineItems = getLineItems(basket, 'afterpay')
             expect(lineItems).toHaveLength(3)
             expect(lineItems).toContainEqual({
                 id: 'prod1',
@@ -506,7 +506,7 @@ describe('paymentsHelper', () => {
                     id: 'f9fe488b0b925984ffd1d5b360',
                     quantity: 1,
                     taxAmount: 150,
-                    taxPercentage: 0.05
+                    taxPercentage: 0
                 }
             ])
             expect(paymentRequest.countryCode).toBe('DE')
