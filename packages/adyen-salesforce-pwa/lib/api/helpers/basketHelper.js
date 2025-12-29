@@ -33,7 +33,6 @@ export async function getBasket(authorization, basketId, customerId) {
             basketId: basketId
         }
     })
-
     if (!basket) {
         throw new AdyenError(ERROR_MESSAGE.INVALID_BASKET, 404)
     }
@@ -72,12 +71,13 @@ export async function getCurrentBasketForAuthorizedShopper(authorization, custom
  */
 export async function removeExistingTemporaryBaskets(authorization, customerId) {
     try {
+        const shopperBaskets = createShopperBasketsClient(authorization)
         const existingBaskets = await getCustomerBaskets(authorization, customerId)
         const tempBaskets = existingBaskets.baskets?.filter((b) => b?.temporaryBasket === true)
         if (tempBaskets?.length) {
             await Promise.all(
                 tempBaskets.map((b) =>
-                    this.shopperBaskets.deleteBasket({
+                    shopperBaskets.deleteBasket({
                         parameters: {basketId: b.basketId}
                     })
                 )
@@ -89,11 +89,12 @@ export async function removeExistingTemporaryBaskets(authorization, customerId) 
 }
 
 /**
- * Creates a new temporary basket for the current shopper and updates the context.
+ * Creates a new temporary basket for the current shopper.
  * @returns {Promise<object>} The created basket.
  */
-export async function createTemporaryBasket(customerId) {
-    const basket = await this.shopperBaskets.createBasket({
+export async function createTemporaryBasket(authorization, customerId) {
+    const shopperBaskets = createShopperBasketsClient(authorization)
+    const basket = await shopperBaskets.createBasket({
         parameters: {
             temporary: true
         },
@@ -103,6 +104,5 @@ export async function createTemporaryBasket(customerId) {
             }
         }
     })
-    this._updateContext(basket)
     return basket
 }
