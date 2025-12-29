@@ -1,7 +1,7 @@
 import {query} from 'express-validator'
 import bodyParser from 'body-parser'
 import EnvironmentController from '../controllers/environment'
-import PaymentMethodsController from '../controllers/payment-methods'
+import PaymentMethodsController, {getPaymentMethodsForExpress} from '../controllers/payment-methods'
 import PaymentsDetailsController from '../controllers/payments-details'
 import PaymentsController from '../controllers/payments'
 import ShippingAddressController from '../controllers/shipping-address'
@@ -65,6 +65,12 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     const paymentMethodsHandler = overrides?.paymentMethods || [
         prepareRequestContext,
         PaymentMethodsController,
+        SuccessHandler,
+        ErrorHandler
+    ]
+    const paymentMethodsForExpressHandler = overrides?.paymentMethodsForExpress || [
+        prepareMinimalRequestContext,
+        getPaymentMethodsForExpress,
         SuccessHandler,
         ErrorHandler
     ]
@@ -170,6 +176,7 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     app.get('*/checkout', query('adyenAction').optional().escape(), runtime.render)
     app.get('/api/adyen/environment', ...environmentHandler)
     app.get('/api/adyen/paymentMethods', ...paymentMethodsHandler)
+    app.get('/api/adyen/paymentMethodsForExpress', ...paymentMethodsForExpressHandler)
     app.get('/api/adyen/shipping-methods', ...shippingMethodsGetHandler)
     app.get(
         '/.well-known/apple-developer-merchantid-domain-association',
