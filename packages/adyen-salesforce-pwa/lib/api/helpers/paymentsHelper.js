@@ -181,7 +181,7 @@ export async function revertCheckoutState(adyenContext, stepName) {
         throw new AdyenError(errorMessage, 500)
     }
     const {basket = {}} = adyenContext
-    const adyenOrderData = JSON.parse(basket.c_orderData || '{}')
+    const adyenOrderData = JSON.parse(basket?.c_orderData || '{}')
     const isPartialPayment = !!adyenOrderData?.orderData
     if (isPartialPayment) {
         await cancelAdyenOrder(adyenContext, adyenOrderData)

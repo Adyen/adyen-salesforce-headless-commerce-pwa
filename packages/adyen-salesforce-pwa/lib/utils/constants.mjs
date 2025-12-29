@@ -8,7 +8,9 @@ export const PAYMENT_METHOD_TYPES = {
     GIFT_CARD: 'giftcard',
     WECHATPAY_MINI_PROGRAM: 'wechatpayMiniProgram',
     WECHATPAY_QR: 'wechatpayQR',
-    WECHATPAY_SDK: 'wechatpaySDK'
+    WECHATPAY_SDK: 'wechatpaySDK',
+    APPLEPAY: 'applepay',
+    PAYPAL: 'paypal'
 }
 
 export const PAYMENT_TYPES = {
@@ -34,6 +36,8 @@ export const BLOCKED_PAYMENT_METHODS = [
     PAYMENT_METHOD_TYPES.WECHATPAY_QR,
     PAYMENT_METHOD_TYPES.WECHATPAY_SDK
 ]
+
+export const EXPRESS_PAYMENT_METHODS = [PAYMENT_METHOD_TYPES.APPLEPAY, PAYMENT_METHOD_TYPES.PAYPAL]
 
 export const SHOPPER_INTERACTIONS = {
     CONT_AUTH: 'ContAuth',
