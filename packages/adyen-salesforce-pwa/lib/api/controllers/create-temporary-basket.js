@@ -34,7 +34,7 @@ export default async function CreateTemporaryBasketController(req, res, next) {
 
         await removeExistingTemporaryBaskets(authorization, customerid)
 
-        let basket = await createTemporaryBasket(customerid)
+        let basket = await createTemporaryBasket(authorization, customerid)
         if (!basket || !basket.basketId) {
             throw new AdyenError(ERROR_MESSAGE.BASKET_NOT_CREATED, 400)
         }
@@ -53,10 +53,7 @@ export default async function CreateTemporaryBasketController(req, res, next) {
         adyenContext.basket = basket
 
         res.locals.adyen = adyenContext
-        res.locals.response = {
-            basketId: basket.basketId,
-            orderTotal: basket.orderTotal
-        }
+        res.locals.response = basket
 
         Logger.info('CreateTemporaryBasketController', 'success')
         return next()
