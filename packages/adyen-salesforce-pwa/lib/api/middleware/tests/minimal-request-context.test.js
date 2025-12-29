@@ -1,4 +1,4 @@
-import {prepareWebhookRequestContext} from '../webhook-request-context.js'
+import {prepareMinimalRequestContext} from '../minimal-request-context.js'
 import {getAdyenConfigForCurrentSite} from '../../../utils/getAdyenConfigForCurrentSite.mjs'
 import Logger from '../../models/logger.js'
 import {AdyenError} from '../../models/AdyenError.js'
@@ -8,7 +8,7 @@ import {ERROR_MESSAGE} from '../../../utils/constants.mjs'
 jest.mock('../../../utils/getAdyenConfigForCurrentSite.mjs')
 jest.mock('../../models/logger.js')
 
-describe('prepareWebhookRequestContext middleware', () => {
+describe('prepareMinimalRequestContext middleware', () => {
     let req, res, next
 
     beforeEach(() => {
@@ -28,13 +28,13 @@ describe('prepareWebhookRequestContext middleware', () => {
         const mockAdyenConfig = {merchantAccount: 'mockAccount'}
         getAdyenConfigForCurrentSite.mockReturnValue(mockAdyenConfig)
 
-        await prepareWebhookRequestContext(req, res, next)
+        await prepareMinimalRequestContext(req, res, next)
 
         expect(getAdyenConfigForCurrentSite).toHaveBeenCalledWith('RefArch')
         expect(res.locals.adyen).toBeDefined()
         expect(res.locals.adyen.adyenConfig).toEqual(mockAdyenConfig)
         expect(res.locals.adyen.siteId).toBe('RefArch')
-        expect(Logger.info).toHaveBeenCalledWith('prepareWebhookRequestContext', 'success')
+        expect(Logger.info).toHaveBeenCalledWith('prepareMinimalRequestContext', 'success')
         expect(next).toHaveBeenCalledWith()
         expect(next).toHaveBeenCalledTimes(1)
     })
@@ -42,7 +42,7 @@ describe('prepareWebhookRequestContext middleware', () => {
     test('should call next with an error if siteId is missing', async () => {
         req.query = {} // No siteId
 
-        await prepareWebhookRequestContext(req, res, next)
+        await prepareMinimalRequestContext(req, res, next)
 
         const expectedError = new AdyenError(ERROR_MESSAGE.INVALID_PARAMS, 400)
         expect(next).toHaveBeenCalledWith(expectedError)
@@ -55,7 +55,7 @@ describe('prepareWebhookRequestContext middleware', () => {
             throw mockError
         })
 
-        await prepareWebhookRequestContext(req, res, next)
+        await prepareMinimalRequestContext(req, res, next)
 
         expect(next).toHaveBeenCalledWith(mockError)
     })

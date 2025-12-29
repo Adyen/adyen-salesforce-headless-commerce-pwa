@@ -17,7 +17,7 @@ export * from './models/logger'
 
 // Middleware
 export * from './middleware/webhook'
-export * from './middleware/webhook-request-context'
+export * from './middleware/minimal-request-context'
 export * from './middleware/request-context'
 
 // Controllers

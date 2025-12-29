@@ -22,7 +22,7 @@ import {appleDomainAssociation} from '../controllers/apple-domain-association'
 import PaymentCancelController from '../controllers/payment-cancel'
 import {balanceCheck, cancelOrder, createOrder} from '../controllers/giftCard'
 import {prepareRequestContext} from '../middleware/request-context'
-import {prepareWebhookRequestContext} from '../middleware/webhook-request-context'
+import {prepareMinimalRequestContext} from '../middleware/minimal-request-context'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function SuccessHandler(req, res, next) {
@@ -47,14 +47,14 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     ]
 
     const environmentHandler = overrides?.environment || [
-        prepareWebhookRequestContext,
+        prepareMinimalRequestContext,
         EnvironmentController,
         SuccessHandler,
         ErrorHandler
     ]
 
     const webhookHandler = overrides?.webhook || [
-        prepareWebhookRequestContext,
+        prepareMinimalRequestContext,
         authenticate,
         validateHmac,
         parseNotification,
@@ -150,7 +150,7 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     ]
 
     const createTemporaryBasketHandler = overrides?.createTemporaryBasket || [
-        prepareWebhookRequestContext,
+        prepareMinimalRequestContext,
         CreateTemporaryBasketController,
         SuccessHandler,
         ErrorHandler

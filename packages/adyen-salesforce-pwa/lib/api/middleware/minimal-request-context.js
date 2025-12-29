@@ -4,17 +4,21 @@ import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrent
 import Logger from '../models/logger.js'
 
 /**
- * A middleware that prepares a request context specifically for Adyen webhooks.
- * It validates the presence of the `siteId` query parameter, fetches the Adyen
- * configuration, and attaches it to `res.locals.adyen`.
+ * A lightweight middleware that prepares a minimal request context for endpoints
+ * that don't require basket or customer data. It validates the presence of the
+ * `siteId` query parameter, fetches the Adyen configuration, and attaches it to
+ * `res.locals.adyen`.
+ *
+ * Use this for webhooks, temporary basket creation, or any endpoint that only
+ * needs Adyen configuration without basket/customer dependencies.
  *
  * @param {object} req - The Express request object.
  * @param {object} res - The Express response object.
  * @param {Function} next - The Express next middleware function.
  * @returns {Promise<void>}
  */
-export async function prepareWebhookRequestContext(req, res, next) {
-    Logger.info('prepareWebhookRequestContext', 'start')
+export async function prepareMinimalRequestContext(req, res, next) {
+    Logger.info('prepareMinimalRequestContext', 'start')
     const {siteId} = req.query
 
     if (!siteId) {
@@ -24,7 +28,7 @@ export async function prepareWebhookRequestContext(req, res, next) {
     try {
         const adyenConfig = getAdyenConfigForCurrentSite(siteId)
         res.locals.adyen = {adyenConfig, siteId}
-        Logger.info('prepareWebhookRequestContext', 'success')
+        Logger.info('prepareMinimalRequestContext', 'success')
         return next()
     } catch (err) {
         return next(err)
