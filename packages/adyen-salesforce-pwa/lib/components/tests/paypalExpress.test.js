@@ -318,12 +318,13 @@ describe('PayPalExpressComponent', () => {
                 expect(fetchShippingMethodsCallback).toBeDefined()
             })
 
-            const result = await fetchShippingMethodsCallback()
+            const testBasketId = 'temp-basket-123'
+            const result = await fetchShippingMethodsCallback(testBasketId)
 
             expect(AdyenShippingMethodsService).toHaveBeenCalledWith(
                 defaultProps.authToken,
                 defaultProps.customerId,
-                defaultProps.basket.basketId,
+                testBasketId,
                 defaultProps.site
             )
             expect(mockGetShippingMethods).toHaveBeenCalled()
