@@ -52,8 +52,14 @@ describe('PayPalExpressComponent', () => {
     }
 
     let mockGetShippingMethods
+    let consoleErrorSpy
+    let consoleWarnSpy
 
     beforeEach(() => {
+        // Suppress console.error and console.warn during tests
+        consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+        consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
+
         // Reset window.paypal
         delete window.paypal
 
@@ -92,6 +98,8 @@ describe('PayPalExpressComponent', () => {
 
     afterEach(() => {
         jest.clearAllMocks()
+        consoleErrorSpy.mockRestore()
+        consoleWarnSpy.mockRestore()
     })
 
     describe('Rendering', () => {
