@@ -251,4 +251,30 @@ export class BasketService {
         this._updateContext(updatedBasket)
         return updatedBasket
     }
+
+    /**
+     * Removes the shipping address from the basket's default shipment.
+     * @returns {Promise<object>} A promise that resolves to the updated basket object.
+     */
+    async removeShippingAddress() {
+        const updatedBasket = await this.shopperBaskets.updateShippingAddressForShipment({
+            body: {
+                address1: null,
+                city: null,
+                countryCode: null,
+                postalCode: null,
+                stateCode: null,
+                firstName: null,
+                fullName: null,
+                lastName: null,
+                phone: null
+            },
+            parameters: {
+                basketId: this.adyenContext.basket.basketId,
+                shipmentId: DEFAULT_SHIPMENT_ID
+            }
+        })
+        this._updateContext(updatedBasket)
+        return updatedBasket
+    }
 }

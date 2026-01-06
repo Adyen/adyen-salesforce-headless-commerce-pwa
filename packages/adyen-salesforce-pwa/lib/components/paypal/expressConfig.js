@@ -1,5 +1,6 @@
 import {baseConfig, onSubmit, onAdditionalDetails} from '../helpers/baseConfig'
-import {executeCallbacks} from '../../utils/executeCallbacks'
+import {executeCallbacks, executeErrorCallbacks} from '../../utils/executeCallbacks'
+import {PaymentCancelExpressService} from '../../services/payment-cancel-express'
 import {AdyenShopperDetailsService} from '../../services/shopper-details'
 import {AdyenShippingMethodsService} from '../../services/shipping-methods'
 import {AdyenShippingAddressService} from '../../services/shipping-address'
@@ -40,7 +41,8 @@ export const paypalExpressConfig = (props = {}) => {
         beforeShippingOptionsChange = [],
         afterShippingOptionsChange = [],
         configuration = {},
-        type = 'cart'
+        type = 'cart',
+        onError = []
     } = props
 
     const isPdp = type === 'pdp'
@@ -52,6 +54,8 @@ export const paypalExpressConfig = (props = {}) => {
     }
 
     const propsWithGetBasket = {...props, getBasket, setBasket}
+
+    const errorHandler = (error, component) => onErrorHandler(error, component, propsWithGetBasket)
 
     const redirectShopperToReviewPage = async (state) => {
         try {
@@ -119,6 +123,8 @@ export const paypalExpressConfig = (props = {}) => {
             ],
             propsWithGetBasket
         ),
+        onError: executeErrorCallbacks([...onError, errorHandler], propsWithGetBasket),
+        onPaymentFailed: executeErrorCallbacks([...onError, errorHandler], propsWithGetBasket),
         ...configuration
     }
 }
@@ -361,5 +367,38 @@ export const onShippingOptionsChange = async (data, actions, component, props) =
         component.updatePaymentData(response?.paymentData)
     } catch (err) {
         return actions.reject(data.errors.METHOD_UNAVAILABLE)
+    }
+}
+
+/**
+ * Handles errors during PayPal Express checkout.
+ * Cancels the express payment, cleans up the basket, removes shipping method and address,
+ * and redirects to checkout page with error flag.
+ *
+ * @param {Error} error - The error that occurred
+ * @param {object} component - Adyen component instance
+ * @param {object} props - Component properties
+ * @param {string} props.token - Authentication token
+ * @param {object} props.basket - Shopping basket object
+ * @param {string} props.customerId - Customer ID
+ * @param {object} props.site - Site configuration
+ * @param {Function} props.navigate - Navigation function
+ * @returns {Promise<object>} Object indicating cancellation status
+ */
+export const onErrorHandler = async (error, component, props) => {
+    try {
+        const basket = props.getBasket ? props.getBasket() : props.basket
+        const paymentCancelExpressService = new PaymentCancelExpressService(
+            props.token,
+            props.customerId,
+            basket?.basketId,
+            props.site
+        )
+        await paymentCancelExpressService.paymentCancelExpress()
+        props.navigate(`/checkout?error=true`)
+        return {cancelled: true}
+    } catch (err) {
+        console.error('Error during express payment cancellation:', err)
+        return {cancelled: false, error: err.message}
     }
 }

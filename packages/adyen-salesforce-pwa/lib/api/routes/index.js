@@ -20,6 +20,7 @@ import {createErrorResponse} from '../../utils/createErrorResponse.mjs'
 import Logger from '../models/logger'
 import {appleDomainAssociation} from '../controllers/apple-domain-association'
 import PaymentCancelController from '../controllers/payment-cancel'
+import PaymentCancelExpressController from '../controllers/payment-cancel-express'
 import {balanceCheck, cancelOrder, createOrder} from '../controllers/giftCard'
 import {prepareRequestContext} from '../middleware/request-context'
 import {prepareMinimalRequestContext} from '../middleware/minimal-request-context'
@@ -118,6 +119,12 @@ function registerAdyenEndpoints(app, runtime, overrides) {
         SuccessHandler,
         ErrorHandler
     ]
+    const paymentCancelExpressController = overrides?.paymentCancelExpress || [
+        prepareRequestContext,
+        PaymentCancelExpressController,
+        SuccessHandler,
+        ErrorHandler
+    ]
     const balanceCheckHandler = overrides?.balanceCheck || [
         prepareRequestContext,
         balanceCheck,
@@ -184,6 +191,7 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     )
     app.get('/api/adyen/payment-data-for-review-page', ...paymentDataForReviewPageGetHandler)
     app.post('/api/adyen/payment/cancel', ...paymentCancelController)
+    app.post('/api/adyen/payment/cancel/express', ...paymentCancelExpressController)
     app.post('/api/adyen/payments/details', ...paymentsDetailsHandler)
     app.post('/api/adyen/payments', ...paymentsHandler)
     app.post('/api/adyen/webhook', ...webhookHandler)
