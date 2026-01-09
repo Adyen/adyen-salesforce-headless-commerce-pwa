@@ -5,7 +5,8 @@ import {
     onAuthorized,
     onAuthorizedSuccess,
     onShippingAddressChange,
-    onShippingOptionsChange
+    onShippingOptionsChange,
+    createTemporaryBasketCallback
 } from '../paypal/expressConfig'
 import {baseConfig, onSubmit, onAdditionalDetails} from '../helpers/baseConfig'
 import {executeCallbacks} from '../../utils/executeCallbacks'
@@ -13,7 +14,10 @@ import {AdyenShopperDetailsService} from '../../services/shopper-details'
 import {AdyenShippingMethodsService} from '../../services/shipping-methods'
 import {AdyenShippingAddressService} from '../../services/shipping-address'
 import {AdyenPaypalUpdateOrderService} from '../../services/paypal-update-order'
+import {AdyenPaymentDataReviewPageService} from '../../services/payment-data-review-page'
+import {AdyenTemporaryBasketService} from '../../services/temporary-basket'
 import {formatPayPalShopperDetails} from '../helpers/addressHelper'
+import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 
 jest.mock('../helpers/baseConfig')
 jest.mock('../../utils/executeCallbacks')
@@ -21,11 +25,15 @@ jest.mock('../../services/shopper-details')
 jest.mock('../../services/shipping-methods')
 jest.mock('../../services/shipping-address')
 jest.mock('../../services/paypal-update-order')
+jest.mock('../../services/payment-data-review-page')
+jest.mock('../../services/temporary-basket')
 jest.mock('../helpers/addressHelper')
+jest.mock('../../utils/parsers.mjs')
 
 describe('paypal/expressConfig', () => {
     beforeEach(() => {
         jest.clearAllMocks()
+        getCurrencyValueForApi.mockImplementation((value) => value)
     })
 
     describe('paypalExpressConfig', () => {
@@ -41,18 +49,39 @@ describe('paypal/expressConfig', () => {
             expect(result).toHaveProperty('isExpress', true)
         })
 
-        it('should configure onSubmit with callbacks', () => {
+        it('should configure onSubmit with callbacks for cart flow', () => {
             baseConfig.mockReturnValue({})
             executeCallbacks.mockImplementation((callbacks) => callbacks)
 
             const beforeSubmit = [jest.fn()]
             const afterSubmit = [jest.fn()]
 
-            paypalExpressConfig({beforeSubmit, afterSubmit})
+            paypalExpressConfig({beforeSubmit, afterSubmit, type: 'cart', basket: {}})
 
             expect(executeCallbacks).toHaveBeenCalledWith(
                 expect.arrayContaining([
                     ...beforeSubmit,
+                    onSubmit,
+                    ...afterSubmit,
+                    onPaymentsSuccess
+                ]),
+                expect.any(Object)
+            )
+        })
+
+        it('should configure onSubmit with createTemporaryBasketCallback for PDP flow', () => {
+            baseConfig.mockReturnValue({})
+            executeCallbacks.mockImplementation((callbacks) => callbacks)
+
+            const beforeSubmit = [jest.fn()]
+            const afterSubmit = [jest.fn()]
+
+            paypalExpressConfig({beforeSubmit, afterSubmit, type: 'pdp', basket: {}})
+
+            expect(executeCallbacks).toHaveBeenCalledWith(
+                expect.arrayContaining([
+                    ...beforeSubmit,
+                    createTemporaryBasketCallback,
                     onSubmit,
                     ...afterSubmit,
                     onPaymentsSuccess
@@ -158,10 +187,24 @@ describe('paypal/expressConfig', () => {
             baseConfig.mockReturnValue({})
             executeCallbacks.mockImplementation((callbacks) => callbacks)
 
-            const result = paypalExpressConfig()
+            const result = paypalExpressConfig({})
 
             expect(result).toHaveProperty('showPayButton', true)
             expect(result).toHaveProperty('isExpress', true)
+        })
+
+        it('should set amount with orderTotal from basket', () => {
+            baseConfig.mockReturnValue({})
+            executeCallbacks.mockImplementation((callbacks) => callbacks)
+            getCurrencyValueForApi.mockReturnValue(10000)
+
+            const result = paypalExpressConfig({basket: {orderTotal: 100, currency: 'USD'}})
+
+            expect(getCurrencyValueForApi).toHaveBeenCalledWith(100, 'USD')
+            expect(result.amount).toEqual({
+                value: 10000,
+                currency: 'USD'
+            })
         })
     })
 
@@ -218,6 +261,68 @@ describe('paypal/expressConfig', () => {
             onPaymentsSuccess(state, component, actions, props, undefined)
 
             expect(actions.resolve).toHaveBeenCalledWith(undefined)
+        })
+    })
+
+    describe('createTemporaryBasketCallback', () => {
+        let state, component, actions, props, mockTemporaryBasketService
+
+        beforeEach(() => {
+            state = {}
+            component = {}
+            actions = {
+                resolve: jest.fn(),
+                reject: jest.fn()
+            }
+            props = {
+                token: 'test-token',
+                customerId: 'customer123',
+                site: {id: 'site-id'},
+                product: {id: 'product123', quantity: 2},
+                setBasket: jest.fn(),
+                onError: [jest.fn()]
+            }
+
+            mockTemporaryBasketService = {
+                createTemporaryBasket: jest.fn()
+            }
+            AdyenTemporaryBasketService.mockImplementation(() => mockTemporaryBasketService)
+        })
+
+        it('should create temporary basket and set it', async () => {
+            const mockBasket = {basketId: 'temp-basket-123', orderTotal: 100}
+            mockTemporaryBasketService.createTemporaryBasket.mockResolvedValue(mockBasket)
+
+            await createTemporaryBasketCallback(state, component, actions, props)
+
+            expect(AdyenTemporaryBasketService).toHaveBeenCalledWith('test-token', 'customer123', {
+                id: 'site-id'
+            })
+            expect(mockTemporaryBasketService.createTemporaryBasket).toHaveBeenCalledWith({
+                id: 'product123',
+                quantity: 2
+            })
+            expect(props.setBasket).toHaveBeenCalledWith(mockBasket)
+        })
+
+        it('should reject if temporary basket creation fails', async () => {
+            mockTemporaryBasketService.createTemporaryBasket.mockResolvedValue({})
+
+            await createTemporaryBasketCallback(state, component, actions, props)
+
+            expect(actions.reject).toHaveBeenCalledWith('Failed to create temporary basket')
+            expect(props.onError[0]).toHaveBeenCalled()
+        })
+
+        it('should reject on error', async () => {
+            mockTemporaryBasketService.createTemporaryBasket.mockRejectedValue(
+                new Error('Service error')
+            )
+
+            await createTemporaryBasketCallback(state, component, actions, props)
+
+            expect(actions.reject).toHaveBeenCalledWith('Service error')
+            expect(props.onError[0]).toHaveBeenCalled()
         })
     })
 
@@ -309,6 +414,12 @@ describe('paypal/expressConfig', () => {
                         customerId: 'customer123'
                     }
                 },
+                getBasket: jest.fn(() => ({
+                    basketId: 'basket123',
+                    customerInfo: {
+                        customerId: 'customer123'
+                    }
+                })),
                 site: {id: 'site-id'}
             }
 
@@ -465,6 +576,10 @@ describe('paypal/expressConfig', () => {
                     basketId: 'basket123',
                     customerInfo: {customerId: 'customer123'}
                 },
+                getBasket: jest.fn(() => ({
+                    basketId: 'basket123',
+                    customerInfo: {customerId: 'customer123'}
+                })),
                 site: {id: 'site-id'},
                 fetchShippingMethods: jest.fn()
             }
@@ -571,6 +686,10 @@ describe('paypal/expressConfig', () => {
                     basketId: 'basket123',
                     customerInfo: {customerId: 'customer123'}
                 },
+                getBasket: jest.fn(() => ({
+                    basketId: 'basket123',
+                    customerInfo: {customerId: 'customer123'}
+                })),
                 site: {id: 'site-id'}
             }
 

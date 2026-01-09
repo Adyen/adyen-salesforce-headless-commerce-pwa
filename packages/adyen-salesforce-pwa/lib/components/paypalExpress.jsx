@@ -106,8 +106,8 @@ const PayPalExpressComponent = ({
 }) => {
     const isPdp = type === 'pdp'
     const shopperBasket = useMemo(
-        () => (isPdp ? {currency, orderTotal: 0} : basket),
-        [isPdp, currency, basket]
+        () => (isPdp ? {currency, orderTotal: product?.price * (product?.quantity || 1)} : basket),
+        [isPdp, currency, basket, product]
     )
     const basketId = shopperBasket?.basketId
     const paymentContainer = useRef(null)

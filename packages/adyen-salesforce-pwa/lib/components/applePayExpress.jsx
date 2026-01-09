@@ -200,7 +200,7 @@ ApplePayExpressComponent.propTypes = {
     customerId: PropTypes.string,
     locale: PropTypes.object.isRequired,
     site: PropTypes.object.isRequired,
-    basket: PropTypes.object.isRequired,
+    basket: PropTypes.object,
     navigate: PropTypes.func.isRequired,
     onError: PropTypes.arrayOf(PropTypes.func),
     spinner: PropTypes.node,

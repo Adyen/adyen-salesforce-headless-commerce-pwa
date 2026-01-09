@@ -36,8 +36,27 @@ describe('TemporaryBasketService', () => {
     })
 
     describe('createTemporaryBasket', () => {
-        it('should create a temporary basket successfully', async () => {
-            const mockResponse = {ok: true, json: jest.fn().mockResolvedValue(mockBasketResponse)}
+        it('should create a temporary basket successfully with product', async () => {
+            const mockProduct = {id: 'product123', quantity: 2, price: 49.99}
+            const mockResponse = {
+                status: 200,
+                json: jest.fn().mockResolvedValue(mockBasketResponse)
+            }
+            temporaryBasketService.apiClient.post.mockResolvedValueOnce(mockResponse)
+
+            const result = await temporaryBasketService.createTemporaryBasket(mockProduct)
+
+            expect(temporaryBasketService.apiClient.post).toHaveBeenCalledWith({
+                body: JSON.stringify({product: mockProduct})
+            })
+            expect(result).toEqual(mockBasketResponse)
+        })
+
+        it('should create a temporary basket without product parameter', async () => {
+            const mockResponse = {
+                status: 200,
+                json: jest.fn().mockResolvedValue(mockBasketResponse)
+            }
             temporaryBasketService.apiClient.post.mockResolvedValueOnce(mockResponse)
 
             const result = await temporaryBasketService.createTemporaryBasket()
@@ -48,10 +67,9 @@ describe('TemporaryBasketService', () => {
             expect(result).toEqual(mockBasketResponse)
         })
 
-        it('should handle API errors', async () => {
+        it('should handle API errors with error message', async () => {
             const errorResponse = {message: 'Failed to create temporary basket'}
             const mockResponse = {
-                ok: false,
                 status: 400,
                 json: jest.fn().mockResolvedValue(errorResponse)
             }
@@ -62,9 +80,20 @@ describe('TemporaryBasketService', () => {
             )
         })
 
+        it('should handle API errors without error message', async () => {
+            const mockResponse = {
+                status: 500,
+                json: jest.fn().mockResolvedValue({})
+            }
+            temporaryBasketService.apiClient.post.mockResolvedValueOnce(mockResponse)
+
+            await expect(temporaryBasketService.createTemporaryBasket()).rejects.toThrow(
+                'Create temporary basket failed with status 500'
+            )
+        })
+
         it('should handle JSON parse errors', async () => {
             const mockResponse = {
-                ok: false,
                 status: 500,
                 json: jest.fn().mockRejectedValue(new Error('JSON parse error'))
             }
@@ -73,6 +102,29 @@ describe('TemporaryBasketService', () => {
             await expect(temporaryBasketService.createTemporaryBasket()).rejects.toThrow(
                 'Failed to create temporary basket'
             )
+        })
+
+        it('should handle network errors', async () => {
+            temporaryBasketService.apiClient.post.mockRejectedValue(new Error('Network error'))
+
+            await expect(temporaryBasketService.createTemporaryBasket()).rejects.toThrow(
+                'Network error'
+            )
+        })
+
+        it('should create basket with product containing quantity', async () => {
+            const mockProduct = {id: 'product456', quantity: 5, price: 29.99}
+            const expectedBasket = {...mockBasketResponse, basketId: 'basket456'}
+            const mockResponse = {status: 201, json: jest.fn().mockResolvedValue(expectedBasket)}
+            temporaryBasketService.apiClient.post.mockResolvedValueOnce(mockResponse)
+
+            const result = await temporaryBasketService.createTemporaryBasket(mockProduct)
+
+            expect(temporaryBasketService.apiClient.post).toHaveBeenCalledWith({
+                body: JSON.stringify({product: mockProduct})
+            })
+            expect(result).toEqual(expectedBasket)
+            expect(result.basketId).toBe('basket456')
         })
     })
 })

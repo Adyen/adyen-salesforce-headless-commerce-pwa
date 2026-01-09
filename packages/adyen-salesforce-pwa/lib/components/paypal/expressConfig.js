@@ -69,14 +69,13 @@ export const paypalExpressConfig = (props = {}) => {
             props.onError(err)
         }
     }
-
     return {
         ...baseConfig(propsWithGetBasket),
         showPayButton: true,
         isExpress: true,
         amount: {
-            value: getCurrencyValueForApi(100, 'GBP'),
-            currency: 'GBP'
+            value: getCurrencyValueForApi(currentBasket?.orderTotal, currentBasket?.currency),
+            currency: currentBasket?.currency
         },
         ...(props.enableReview && {userAction: 'continue'}),
         onSubmit: executeCallbacks(
