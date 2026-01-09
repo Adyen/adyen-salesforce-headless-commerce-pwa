@@ -112,11 +112,15 @@ const Cart = () => {
         },
         {
             onSuccess: (data) => {
-                if (!!basket?.basketId && basket.shipments.length > 0) {
+                if (
+                    !!basket?.basketId &&
+                    basket.shipments.length > 0 &&
+                    data.applicableShippingMethods?.length > 0
+                ) {
                     const currentShippingMethod = basket.shipments[0].shippingMethod
                     const isShippingMethodValid =
                         currentShippingMethod &&
-                        data.applicableShippingMethods?.some(
+                        data.applicableShippingMethods.some(
                             (method) => method.id === currentShippingMethod.id
                         )
 
