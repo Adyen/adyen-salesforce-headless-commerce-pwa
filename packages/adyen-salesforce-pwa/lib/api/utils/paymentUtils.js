@@ -35,7 +35,7 @@ export function getShopperName(basket) {
     }
 }
 
-const OPEN_INVOICE_METHODS = new Set(['zip', 'affirm', 'clearpay'])
+const OPEN_INVOICE_METHODS = new Set(['affirm'])
 const OPEN_INVOICE_PREFIXES = ['afterpay', 'klarna', 'ratepay', 'facilypay']
 
 /**
