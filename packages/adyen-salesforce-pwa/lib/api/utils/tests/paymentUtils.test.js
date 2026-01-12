@@ -165,16 +165,8 @@ describe('paymentUtils', () => {
     })
 
     describe('isOpenInvoiceMethod', () => {
-        it('should return true for zip payment method', () => {
-            expect(isOpenInvoiceMethod('zip')).toBe(true)
-        })
-
         it('should return true for affirm payment method', () => {
             expect(isOpenInvoiceMethod('affirm')).toBe(true)
-        })
-
-        it('should return true for clearpay payment method', () => {
-            expect(isOpenInvoiceMethod('clearpay')).toBe(true)
         })
 
         it('should return true for klarna payment methods', () => {

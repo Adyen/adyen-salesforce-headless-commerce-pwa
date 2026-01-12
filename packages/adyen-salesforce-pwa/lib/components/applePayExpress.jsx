@@ -22,7 +22,11 @@ const ApplePayExpressComponent = (props) => {
         merchantDisplayName = '',
         product
     } = props
-    const [shopperBasket] = useState(isExpressPdp ? {currency, orderTotal: 0} : basket)
+    const isPdp = isExpressPdp === true
+    const shopperBasket = useMemo(
+        () => (isPdp ? {currency, orderTotal: product?.price * (product?.quantity || 1)} : basket),
+        [isPdp, currency, basket, basket?.orderTotal, basket?.basketId, product]
+    )
     const paymentContainer = useRef(null)
     const applePayButtonRef = useRef(null)
 
@@ -218,6 +222,7 @@ export default React.memo(ApplePayExpressComponent, (prevProps, nextProps) => {
         prevProps.locale?.id === nextProps.locale?.id &&
         prevProps.site?.id === nextProps.site?.id &&
         prevProps.basket?.basketId === nextProps.basket?.basketId &&
+        prevProps.basket?.orderTotal === nextProps.basket?.orderTotal &&
         prevProps.navigate === nextProps.navigate &&
         prevProps.product?.id === nextProps.product?.id &&
         prevProps.product?.quantity === nextProps.product?.quantity
