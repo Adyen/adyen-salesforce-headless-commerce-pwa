@@ -4,6 +4,7 @@ import {AdyenCheckout, PayPal} from '@adyen/adyen-web'
 import '../style/adyenCheckout.css'
 import useAdyenEnvironment from '../hooks/useAdyenEnvironment'
 import useAdyenPaymentMethods from '../hooks/useAdyenPaymentMethods'
+import useAdyenPaymentMethodsForExpress from '../hooks/useAdyenPaymentMethodsForExpress'
 import {AdyenShippingMethodsService} from '../services/shipping-methods'
 import {paypalExpressConfig} from './paypal/expressConfig'
 
@@ -43,6 +44,9 @@ import {paypalExpressConfig} from './paypal/expressConfig'
  * @param {Function[]} [props.onError] - Error handler callbacks
  * @param {object} [props.configuration] - Additional PayPal configuration overrides
  * @param {React.ReactNode} [props.spinner] - Optional loading spinner component
+ * @param {string} [props.type='cart'] - Express checkout type: 'pdp' for product detail page or 'cart' for cart page
+ * @param {string} [props.currency] - Currency code (required when type is 'pdp')
+ * @param {object} [props.product] - Product object (required when type is 'pdp')
  * @returns {React.ReactElement} The PayPal Express button component
  *
  * @example
@@ -93,9 +97,19 @@ const PayPalExpressComponent = ({
     reviewPageUrl = '/checkout/review',
 
     // Optional overrides
-    configuration = {}
+    configuration = {},
+
+    // Express checkout type
+    type = 'cart',
+    currency,
+    product
 }) => {
-    const basketId = basket?.basketId
+    const isPdp = type === 'pdp'
+    const shopperBasket = useMemo(
+        () => (isPdp ? {currency, orderTotal: product?.price * (product?.quantity || 1)} : basket),
+        [isPdp, currency, basket, basket?.orderTotal, basket?.basketId, product]
+    )
+    const basketId = shopperBasket?.basketId
     const paymentContainer = useRef(null)
     const paypalButtonRef = useRef(null)
 
@@ -114,13 +128,21 @@ const PayPalExpressComponent = ({
         data: adyenPaymentMethods,
         error: adyenPaymentMethodsError,
         isLoading: isLoadingPaymentMethods
-    } = useAdyenPaymentMethods({
-        authToken,
-        customerId,
-        basketId,
-        site,
-        locale
-    })
+    } = isPdp
+        ? useAdyenPaymentMethodsForExpress({
+              authToken,
+              customerId,
+              site,
+              locale,
+              currency
+          })
+        : useAdyenPaymentMethods({
+              authToken,
+              customerId,
+              basketId,
+              site,
+              locale
+          })
 
     const isLoading = useMemo(
         () => isLoadingEnvironment || isLoadingPaymentMethods,
@@ -131,16 +153,19 @@ const PayPalExpressComponent = ({
         return adyenPaymentMethods?.paymentMethods?.some((method) => method.type === 'paypal')
     }, [adyenPaymentMethods?.paymentMethods])
 
-    const fetchShippingMethods = useCallback(async () => {
-        // Fetch fresh shipping methods from API after address update
-        const adyenShippingMethodsService = new AdyenShippingMethodsService(
-            authToken,
-            customerId,
-            basketId,
-            site
-        )
-        return await adyenShippingMethodsService.getShippingMethods()
-    }, [authToken, customerId, basketId, site])
+    const fetchShippingMethods = useCallback(
+        async (basketId) => {
+            // Fetch fresh shipping methods from API after address update
+            const adyenShippingMethodsService = new AdyenShippingMethodsService(
+                authToken,
+                customerId,
+                basketId,
+                site
+            )
+            return await adyenShippingMethodsService.getShippingMethods()
+        },
+        [authToken, customerId, site]
+    )
 
     useEffect(() => {
         if (adyenEnvironmentError) {
@@ -164,7 +189,7 @@ const PayPalExpressComponent = ({
             const shouldInitialize = !!(
                 adyenEnvironment &&
                 adyenPaymentMethods &&
-                basket &&
+                (isPdp ? product : basket) &&
                 hasPayPalMethod &&
                 paymentContainer.current
             )
@@ -191,7 +216,7 @@ const PayPalExpressComponent = ({
                 const expressConfig = paypalExpressConfig({
                     token: authToken,
                     customerId,
-                    basket,
+                    basket: shopperBasket,
                     site,
                     locale,
                     navigate,
@@ -209,7 +234,9 @@ const PayPalExpressComponent = ({
                     onError,
                     fetchShippingMethods,
                     enableReview,
-                    reviewPageUrl
+                    reviewPageUrl,
+                    type,
+                    product
                 })
 
                 const paypalButton = new PayPal(checkout, expressConfig)
@@ -260,6 +287,7 @@ const PayPalExpressComponent = ({
         adyenPaymentMethods?.paymentMethods,
         adyenPaymentMethods?.applicationInfo,
         basket?.basketId,
+        basket?.orderTotal,
         locale?.id,
         authToken,
         site?.id,
@@ -278,7 +306,9 @@ const PayPalExpressComponent = ({
         navigate,
         enableReview,
         reviewPageUrl,
-        fetchShippingMethods
+        fetchShippingMethods,
+        type,
+        product
     ])
 
     return (
@@ -294,7 +324,7 @@ PayPalExpressComponent.propTypes = {
     customerId: PropTypes.string,
     locale: PropTypes.object.isRequired,
     site: PropTypes.object.isRequired,
-    basket: PropTypes.object.isRequired,
+    basket: PropTypes.object,
     navigate: PropTypes.func.isRequired,
     beforeSubmit: PropTypes.arrayOf(PropTypes.func),
     afterSubmit: PropTypes.arrayOf(PropTypes.func),
@@ -308,7 +338,10 @@ PayPalExpressComponent.propTypes = {
     afterShippingOptionsChange: PropTypes.arrayOf(PropTypes.func),
     onError: PropTypes.arrayOf(PropTypes.func),
     configuration: PropTypes.object,
-    spinner: PropTypes.node
+    spinner: PropTypes.node,
+    type: PropTypes.oneOf(['pdp', 'cart']),
+    currency: PropTypes.string,
+    product: PropTypes.object
 }
 
 export default React.memo(PayPalExpressComponent, (prevProps, nextProps) => {
@@ -318,6 +351,11 @@ export default React.memo(PayPalExpressComponent, (prevProps, nextProps) => {
         prevProps.locale?.id === nextProps.locale?.id &&
         prevProps.site?.id === nextProps.site?.id &&
         prevProps.basket?.basketId === nextProps.basket?.basketId &&
-        prevProps.navigate === nextProps.navigate
+        prevProps.basket?.orderTotal === nextProps.basket?.orderTotal &&
+        prevProps.navigate === nextProps.navigate &&
+        prevProps.type === nextProps.type &&
+        prevProps.currency === nextProps.currency &&
+        prevProps.product?.id === nextProps.product?.id &&
+        prevProps.product?.quantity === nextProps.product?.quantity
     )
 })

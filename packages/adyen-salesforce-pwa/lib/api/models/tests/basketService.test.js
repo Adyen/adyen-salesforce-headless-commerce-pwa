@@ -3,8 +3,27 @@ import {createShopperBasketsClient} from '../../helpers/basketHelper.js'
 import {PAYMENT_METHODS} from '../../../utils/constants.mjs'
 
 // Mock dependencies
-jest.mock('../../helpers/basketHelper.js', () => ({
-    createShopperBasketsClient: jest.fn()
+jest.mock('../../helpers/basketHelper.js', () => {
+    const actual = jest.requireActual('../../helpers/basketHelper.js')
+    return {
+        ...actual,
+        createShopperBasketsClient: jest.fn()
+    }
+})
+jest.mock('@salesforce/pwa-kit-runtime/utils/ssr-config.server', () => ({
+    getConfig: jest.fn(() => ({
+        app: {
+            commerceAPI: {
+                proxyPath: '/mobify/proxy/api',
+                parameters: {
+                    clientId: 'test-client-id',
+                    organizationId: 'test-org-id',
+                    shortCode: 'test-short-code',
+                    siteId: 'test-site-id'
+                }
+            }
+        }
+    }))
 }))
 
 describe('BasketService', () => {
@@ -32,7 +51,10 @@ describe('BasketService', () => {
         }
 
         mockShopperBaskets = {
+            deleteBasket: jest.fn(),
+            createBasket: jest.fn(),
             updateBasket: jest.fn(),
+            addItemToBasket: jest.fn(),
             addPaymentInstrumentToBasket: jest.fn(),
             updateShippingAddressForShipment: jest.fn(),
             updateBillingAddressForBasket: jest.fn(),
@@ -66,6 +88,46 @@ describe('BasketService', () => {
             })
             expect(mockRes.locals.adyen.basket).toEqual(mockUpdatedBasket)
             expect(result).toEqual(mockUpdatedBasket)
+        })
+    })
+
+    describe('addProductToBasket', () => {
+        it('should add an item to the basket and update context when matching basketId', async () => {
+            const updated = {
+                basketId: 'mockBasketId',
+                productItems: [{productId: 'SKU', quantity: 1}]
+            }
+            mockShopperBaskets.addItemToBasket.mockResolvedValue(updated)
+
+            const result = await basketService.addProductToBasket('mockBasketId', {
+                id: 'SKU',
+                quantity: 1
+            })
+
+            expect(mockShopperBaskets.addItemToBasket).toHaveBeenCalledWith({
+                parameters: {basketId: 'mockBasketId'},
+                body: [
+                    {
+                        productId: 'SKU',
+                        quantity: 1
+                    }
+                ]
+            })
+            expect(mockRes.locals.adyen.basket).toEqual(updated)
+            expect(result).toEqual(updated)
+        })
+
+        it('should throw on missing params', async () => {
+            await expect(
+                basketService.addProductToBasket('', {id: 'SKU', quantity: 1})
+            ).rejects.toBeInstanceOf(Error)
+            await expect(
+                basketService.addProductToBasket('id', {quantity: 1})
+            ).rejects.toBeInstanceOf(Error)
+            await expect(
+                basketService.addProductToBasket('id', {id: 'SKU'})
+            ).rejects.toBeInstanceOf(Error)
+            expect(mockShopperBaskets.addItemToBasket).not.toHaveBeenCalled()
         })
     })
 

@@ -74,7 +74,8 @@ describe('Shipping Methods Controller', () => {
 
         it('should call getShippingMethodsForShipment and set response in locals', async () => {
             const mockShippingMethods = {
-                applicableShippingMethods: [{id: 'method-1'}, {id: 'method-2'}]
+                applicableShippingMethods: [{id: 'method-1'}, {id: 'method-2'}],
+                defaultShippingMethodId: 'method-1'
             }
             shopperBasketsInstanceMock.getShippingMethodsForShipment.mockResolvedValue(
                 mockShippingMethods
@@ -92,8 +93,110 @@ describe('Shipping Methods Controller', () => {
             })
             expect(Logger.info).toHaveBeenCalledWith('getShippingMethods', 'success')
             expect(res.locals.response).toEqual(mockShippingMethods)
+            expect(res.locals.response.defaultShippingMethodId).toBe('method-1')
             expect(next).toHaveBeenCalledWith()
             expect(next).toHaveBeenCalledTimes(1)
+        })
+
+        it('should set defaultShippingMethodId to first method when default is not in applicable methods', async () => {
+            const mockShippingMethods = {
+                applicableShippingMethods: [
+                    {id: 'method-1', name: 'Standard', price: 5.0},
+                    {id: 'method-2', name: 'Express', price: 10.0}
+                ],
+                defaultShippingMethodId: 'invalid-method'
+            }
+            shopperBasketsInstanceMock.getShippingMethodsForShipment.mockResolvedValue(
+                mockShippingMethods
+            )
+            res.locals.adyen.basketService.setShippingMethod.mockResolvedValue({})
+
+            await ShippingMethods.getShippingMethods(req, res, next)
+
+            expect(Logger.warn).toHaveBeenCalledWith(
+                'getShippingMethods',
+                "Default shipping method 'invalid-method' not found in applicable methods. Setting to first available method."
+            )
+            expect(res.locals.response.defaultShippingMethodId).toBe('method-1')
+            expect(res.locals.response.applicableShippingMethods).toEqual(
+                mockShippingMethods.applicableShippingMethods
+            )
+            expect(next).toHaveBeenCalledWith()
+        })
+
+        it('should keep defaultShippingMethodId when it exists in applicable methods', async () => {
+            const mockShippingMethods = {
+                applicableShippingMethods: [
+                    {id: 'method-1', name: 'Standard', price: 5.0},
+                    {id: 'method-2', name: 'Express', price: 10.0},
+                    {id: 'method-3', name: 'Overnight', price: 20.0}
+                ],
+                defaultShippingMethodId: 'method-2'
+            }
+            shopperBasketsInstanceMock.getShippingMethodsForShipment.mockResolvedValue(
+                mockShippingMethods
+            )
+
+            await ShippingMethods.getShippingMethods(req, res, next)
+
+            expect(Logger.warn).not.toHaveBeenCalled()
+            expect(res.locals.response.defaultShippingMethodId).toBe('method-2')
+            expect(res.locals.adyen.basketService.setShippingMethod).not.toHaveBeenCalled()
+            expect(next).toHaveBeenCalledWith()
+        })
+
+        it('should handle empty applicableShippingMethods array', async () => {
+            const mockShippingMethods = {
+                applicableShippingMethods: [],
+                defaultShippingMethodId: 'method-1'
+            }
+            shopperBasketsInstanceMock.getShippingMethodsForShipment.mockResolvedValue(
+                mockShippingMethods
+            )
+
+            await ShippingMethods.getShippingMethods(req, res, next)
+
+            expect(Logger.warn).not.toHaveBeenCalled()
+            expect(res.locals.response.defaultShippingMethodId).toBe('method-1')
+            expect(next).toHaveBeenCalledWith()
+        })
+
+        it('should handle missing applicableShippingMethods', async () => {
+            const mockShippingMethods = {
+                defaultShippingMethodId: 'method-1'
+            }
+            shopperBasketsInstanceMock.getShippingMethodsForShipment.mockResolvedValue(
+                mockShippingMethods
+            )
+
+            await ShippingMethods.getShippingMethods(req, res, next)
+
+            expect(Logger.warn).not.toHaveBeenCalled()
+            expect(res.locals.response.defaultShippingMethodId).toBe('method-1')
+            expect(next).toHaveBeenCalledWith()
+        })
+
+        it('should handle undefined defaultShippingMethodId', async () => {
+            const mockShippingMethods = {
+                applicableShippingMethods: [
+                    {id: 'method-1', name: 'Standard', price: 5.0},
+                    {id: 'method-2', name: 'Express', price: 10.0}
+                ],
+                defaultShippingMethodId: undefined
+            }
+            shopperBasketsInstanceMock.getShippingMethodsForShipment.mockResolvedValue(
+                mockShippingMethods
+            )
+            res.locals.adyen.basketService.setShippingMethod.mockResolvedValue({})
+
+            await ShippingMethods.getShippingMethods(req, res, next)
+
+            expect(Logger.warn).toHaveBeenCalledWith(
+                'getShippingMethods',
+                "Default shipping method 'undefined' not found in applicable methods. Setting to first available method."
+            )
+            expect(res.locals.response.defaultShippingMethodId).toBe('method-1')
+            expect(next).toHaveBeenCalledWith()
         })
 
         it('should call next with an error if getShippingMethodsForShipment fails', async () => {

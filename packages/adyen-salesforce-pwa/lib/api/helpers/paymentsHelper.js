@@ -181,7 +181,7 @@ export async function revertCheckoutState(adyenContext, stepName) {
         throw new AdyenError(errorMessage, 500)
     }
     const {basket = {}} = adyenContext
-    const adyenOrderData = JSON.parse(basket.c_orderData || '{}')
+    const adyenOrderData = JSON.parse(basket?.c_orderData || '{}')
     const isPartialPayment = !!adyenOrderData?.orderData
     if (isPartialPayment) {
         await cancelAdyenOrder(adyenContext, adyenOrderData)
@@ -189,6 +189,23 @@ export async function revertCheckoutState(adyenContext, stepName) {
     }
 
     await _cleanupBasket(adyenContext)
+}
+
+/**
+ * Handles the cleanup process for a failed express payment.
+ * It resets the basket's Adyen-related custom attributes, removes all payment instruments,
+ * removes shipping method and shipping address from the basket.
+ * @param {object} adyenContext - The request context from `res.locals.adyen`.
+ * @param {string} stepName - The name of the controller step for logging purposes (e.g., 'paymentCancelExpress').
+ */
+export async function revertCheckoutStateForExpress(adyenContext, stepName) {
+    if (!adyenContext) {
+        const errorMessage = `${ERROR_MESSAGE.ADYEN_CONTEXT_NOT_FOUND} in ${stepName}`
+        throw new AdyenError(errorMessage, 500)
+    }
+
+    await _cleanupBasket(adyenContext)
+    await adyenContext.basketService.removeShippingAddress()
 }
 
 // filterStateData and getNativeThreeDS moved to ../utils/paymentUtils.js to avoid circular dependencies

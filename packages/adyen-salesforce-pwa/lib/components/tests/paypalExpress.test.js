@@ -52,8 +52,14 @@ describe('PayPalExpressComponent', () => {
     }
 
     let mockGetShippingMethods
+    let consoleErrorSpy
+    let consoleWarnSpy
 
     beforeEach(() => {
+        // Suppress console.error and console.warn during tests
+        consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+        consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
+
         // Reset window.paypal
         delete window.paypal
 
@@ -92,6 +98,8 @@ describe('PayPalExpressComponent', () => {
 
     afterEach(() => {
         jest.clearAllMocks()
+        consoleErrorSpy.mockRestore()
+        consoleWarnSpy.mockRestore()
     })
 
     describe('Rendering', () => {
@@ -318,12 +326,13 @@ describe('PayPalExpressComponent', () => {
                 expect(fetchShippingMethodsCallback).toBeDefined()
             })
 
-            const result = await fetchShippingMethodsCallback()
+            const testBasketId = 'temp-basket-123'
+            const result = await fetchShippingMethodsCallback(testBasketId)
 
             expect(AdyenShippingMethodsService).toHaveBeenCalledWith(
                 defaultProps.authToken,
                 defaultProps.customerId,
-                defaultProps.basket.basketId,
+                testBasketId,
                 defaultProps.site
             )
             expect(mockGetShippingMethods).toHaveBeenCalled()

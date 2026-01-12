@@ -101,7 +101,7 @@ const Cart = () => {
     const modalProps = useDisclosure()
 
     /******************* Shipping Methods for basket shipment *******************/
-    // do this action only if the basket shipping method is not defined
+    // do this action only if the basket shipping method is not defined or not in applicable methods
     // we need to fetch the shippment methods to get the default value before we can add it to the basket
     useShippingMethodsForShipment(
         {
@@ -115,17 +115,26 @@ const Cart = () => {
                 if (
                     !!basket?.basketId &&
                     basket.shipments.length > 0 &&
-                    !basket.shipments[0].shippingMethod
+                    data.applicableShippingMethods?.length > 0
                 ) {
-                    updateShippingMethodForShipmentsMutation.mutate({
-                        parameters: {
-                            basketId: basket?.basketId,
-                            shipmentId: 'me'
-                        },
-                        body: {
-                            id: data.defaultShippingMethodId
-                        }
-                    })
+                    const currentShippingMethod = basket.shipments[0].shippingMethod
+                    const isShippingMethodValid =
+                        currentShippingMethod &&
+                        data.applicableShippingMethods.some(
+                            (method) => method.id === currentShippingMethod.id
+                        )
+
+                    if (!currentShippingMethod || !isShippingMethodValid) {
+                        updateShippingMethodForShipmentsMutation.mutate({
+                            parameters: {
+                                basketId: basket?.basketId,
+                                shipmentId: 'me'
+                            },
+                            body: {
+                                id: data.defaultShippingMethodId
+                            }
+                        })
+                    }
                 }
             }
         }

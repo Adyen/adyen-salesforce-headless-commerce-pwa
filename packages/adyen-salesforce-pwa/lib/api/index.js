@@ -17,7 +17,7 @@ export * from './models/logger'
 
 // Middleware
 export * from './middleware/webhook'
-export * from './middleware/webhook-request-context'
+export * from './middleware/minimal-request-context'
 export * from './middleware/request-context'
 
 // Controllers
@@ -29,6 +29,7 @@ export {default as PaymentsDetailsController} from './controllers/payments-detai
 export {default as EnvironmentController} from './controllers/environment'
 export {default as PaymentCancelController} from './controllers/payment-cancel'
 export {default as GiftCardController} from './controllers/giftCard'
+export {default as CreateTemporaryBasketController} from './controllers/create-temporary-basket'
 export {default as ShopperDetailsController} from './controllers/shopper-details'
 export {default as PaymentDataReviewPageController} from './controllers/payment-data-review-page'
 

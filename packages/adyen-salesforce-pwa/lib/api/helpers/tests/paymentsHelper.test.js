@@ -228,7 +228,7 @@ describe('paymentsHelper', () => {
                     }
                 ]
             }
-            const lineItems = getLineItems(basket)
+            const lineItems = getLineItems(basket, 'afterpay')
             expect(lineItems).toHaveLength(3)
             expect(lineItems).toContainEqual({
                 id: 'prod1',
@@ -371,9 +371,7 @@ describe('paymentsHelper', () => {
             ['klarna', true],
             ['afterpay', true],
             ['ratepay', true],
-            ['zip', true],
             ['affirm', true],
-            ['clearpay', true],
             ['scheme', false],
             ['googlepay', false],
             [null, false],

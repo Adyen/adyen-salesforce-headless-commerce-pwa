@@ -1,7 +1,9 @@
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
-import {ShopperBaskets} from 'commerce-sdk-isomorphic'
+import {ShopperBasketsV2} from 'commerce-sdk-isomorphic'
 import {AdyenError} from '../models/AdyenError.js'
 import {ERROR_MESSAGE} from '../../utils/constants.mjs'
+import {getCustomerBaskets} from './customerHelper'
+import Logger from '../models/logger'
 
 /**
  * Creates and configures an instance of the ShopperBaskets API client.
@@ -10,7 +12,7 @@ import {ERROR_MESSAGE} from '../../utils/constants.mjs'
  */
 export function createShopperBasketsClient(authorization) {
     const {app: appConfig} = getConfig()
-    return new ShopperBaskets({
+    return new ShopperBasketsV2({
         ...appConfig.commerceAPI,
         headers: {authorization}
     })
@@ -31,7 +33,6 @@ export async function getBasket(authorization, basketId, customerId) {
             basketId: basketId
         }
     })
-
     if (!basket) {
         throw new AdyenError(ERROR_MESSAGE.INVALID_BASKET, 404)
     }
@@ -63,4 +64,45 @@ export async function getCurrentBasketForAuthorizedShopper(authorization, custom
     }
 
     return baskets[0]
+}
+
+/**
+ * Removes any existing temporary baskets for the current customer.
+ */
+export async function removeExistingTemporaryBaskets(authorization, customerId) {
+    try {
+        const shopperBaskets = createShopperBasketsClient(authorization)
+        const existingBaskets = await getCustomerBaskets(authorization, customerId)
+        const tempBaskets = existingBaskets.baskets?.filter((b) => b?.temporaryBasket === true)
+        if (tempBaskets?.length) {
+            await Promise.all(
+                tempBaskets.map((b) =>
+                    shopperBaskets.deleteBasket({
+                        parameters: {basketId: b.basketId}
+                    })
+                )
+            )
+        }
+    } catch (e) {
+        Logger.error('removeExistingTemporaryBaskets', e.stack || e.message)
+    }
+}
+
+/**
+ * Creates a new temporary basket for the current shopper.
+ * @returns {Promise<object>} The created basket.
+ */
+export async function createTemporaryBasket(authorization, customerId) {
+    const shopperBaskets = createShopperBasketsClient(authorization)
+    const basket = await shopperBaskets.createBasket({
+        parameters: {
+            temporary: true
+        },
+        body: {
+            customerInfo: {
+                customerId
+            }
+        }
+    })
+    return basket
 }

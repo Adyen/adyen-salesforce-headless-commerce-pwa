@@ -8,7 +8,14 @@ export const PAYMENT_METHOD_TYPES = {
     GIFT_CARD: 'giftcard',
     WECHATPAY_MINI_PROGRAM: 'wechatpayMiniProgram',
     WECHATPAY_QR: 'wechatpayQR',
-    WECHATPAY_SDK: 'wechatpaySDK'
+    WECHATPAY_SDK: 'wechatpaySDK',
+    APPLEPAY: 'applepay',
+    PAYPAL: 'paypal'
+}
+
+export const PAYMENT_TYPES = {
+    EXPRESS: 'express',
+    EXPRESS_PDP: 'expressPDP'
 }
 
 export const RESULT_CODES = {
@@ -29,6 +36,8 @@ export const BLOCKED_PAYMENT_METHODS = [
     PAYMENT_METHOD_TYPES.WECHATPAY_QR,
     PAYMENT_METHOD_TYPES.WECHATPAY_SDK
 ]
+
+export const EXPRESS_PAYMENT_METHODS = [PAYMENT_METHOD_TYPES.APPLEPAY, PAYMENT_METHOD_TYPES.PAYPAL]
 
 export const SHOPPER_INTERACTIONS = {
     CONT_AUTH: 'ContAuth',
@@ -84,6 +93,7 @@ export const ERROR_MESSAGE = {
     INVALID_ORDER: 'order is invalid',
     INVALID_PARAMS: 'invalid request params',
     INVALID_BASKET: 'invalid basket',
+    BASKET_NOT_CREATED: 'basket not created',
     PAYMENT_NOT_SUCCESSFUL: 'payment was not successful',
     INVALID_BILLING_ADDRESS: 'invalid billing address',
     INVALID_SHIPPING_ADDRESS: 'invalid shipping address',
@@ -118,4 +128,4 @@ export const ADYEN_ENVIRONMENT = {
     TEST: 'TEST'
 }
 
-export const APPLICATION_VERSION = '4.1.0'
+export const APPLICATION_VERSION = '4.1.1'
