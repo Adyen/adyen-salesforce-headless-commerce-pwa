@@ -107,7 +107,7 @@ const PayPalExpressComponent = ({
     const isPdp = type === 'pdp'
     const shopperBasket = useMemo(
         () => (isPdp ? {currency, orderTotal: product?.price * (product?.quantity || 1)} : basket),
-        [isPdp, currency, basket, product]
+        [isPdp, currency, basket, basket?.orderTotal, basket?.basketId, product]
     )
     const basketId = shopperBasket?.basketId
     const paymentContainer = useRef(null)
@@ -287,6 +287,7 @@ const PayPalExpressComponent = ({
         adyenPaymentMethods?.paymentMethods,
         adyenPaymentMethods?.applicationInfo,
         basket?.basketId,
+        basket?.orderTotal,
         locale?.id,
         authToken,
         site?.id,
@@ -350,6 +351,7 @@ export default React.memo(PayPalExpressComponent, (prevProps, nextProps) => {
         prevProps.locale?.id === nextProps.locale?.id &&
         prevProps.site?.id === nextProps.site?.id &&
         prevProps.basket?.basketId === nextProps.basket?.basketId &&
+        prevProps.basket?.orderTotal === nextProps.basket?.orderTotal &&
         prevProps.navigate === nextProps.navigate &&
         prevProps.type === nextProps.type &&
         prevProps.currency === nextProps.currency &&

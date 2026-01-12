@@ -15,6 +15,22 @@ async function getShippingMethods(req, res, next) {
             }
         })
 
+        const {applicableShippingMethods, defaultShippingMethodId} = shippingMethodsResponse
+
+        if (applicableShippingMethods && applicableShippingMethods.length > 0) {
+            const isDefaultMethodValid = applicableShippingMethods.some(
+                (method) => method.id === defaultShippingMethodId
+            )
+
+            if (!isDefaultMethodValid) {
+                Logger.warn(
+                    'getShippingMethods',
+                    `Default shipping method '${defaultShippingMethodId}' not found in applicable methods. Setting to first available method.`
+                )
+                shippingMethodsResponse.defaultShippingMethodId = applicableShippingMethods[0].id
+            }
+        }
+
         Logger.info('getShippingMethods', 'success')
         res.locals.response = shippingMethodsResponse
         next()
