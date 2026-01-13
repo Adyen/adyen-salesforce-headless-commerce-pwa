@@ -141,12 +141,12 @@ const ApplePayExpressComponent = (props) => {
                     return
                 }
 
-                const appleButtonConfig = getAppleButtonConfig(
-                    authToken,
+                const appleButtonConfig = getAppleButtonConfig({
+                    token: authToken,
                     site,
-                    shopperBasket,
-                    shippingMethods?.applicableShippingMethods,
-                    applePaymentMethodConfig,
+                    basket: shopperBasket,
+                    shippingMethods: shippingMethods?.applicableShippingMethods,
+                    applePayConfig: applePaymentMethodConfig,
                     navigate,
                     fetchShippingMethods,
                     onError,
@@ -154,7 +154,7 @@ const ApplePayExpressComponent = (props) => {
                     merchantDisplayName,
                     customerId,
                     product
-                )
+                })
                 const applePayButton = new ApplePay(checkout, appleButtonConfig)
                 await applePayButton.isAvailable()
                 if (applePayButtonRef.current) {
