@@ -285,7 +285,7 @@ export const getAppleButtonConfig = (props = {}) => {
  */
 export const onErrorHandler = async (error, component, props) => {
     try {
-        const basket = props.getBasket ? props.getBasket() : props.basket
+        const basket = props.getBasket()
         const paymentCancelExpressService = new PaymentCancelExpressService(
             props.token,
             props.customerId,

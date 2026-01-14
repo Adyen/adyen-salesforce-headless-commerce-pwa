@@ -229,7 +229,7 @@ export const onAuthorized = async (data, actions, props) => {
             billingAddress,
             deliveryAddress
         } = data
-        const basket = props.getBasket ? props.getBasket() : props.basket
+        const basket = props.getBasket()
         const {site, token} = props
         const shopperDetails = formatPayPalShopperDetails(payer, deliveryAddress, billingAddress)
         const adyenShopperDetailsService = new AdyenShopperDetailsService(
@@ -282,7 +282,7 @@ export const onShippingAddressChange = async (data, actions, component, props) =
     try {
         const {shippingAddress} = data
         const currentPaymentData = component.paymentData
-        const basket = props.getBasket ? props.getBasket() : props.basket
+        const basket = props.getBasket()
         const {site, token, fetchShippingMethods} = props
         if (!shippingAddress) {
             return actions.reject(data.errors.ADDRESS_ERROR)
@@ -345,7 +345,7 @@ export const onShippingOptionsChange = async (data, actions, component, props) =
     try {
         const {selectedShippingOption} = data
         const currentPaymentData = component.paymentData
-        const basket = props.getBasket ? props.getBasket() : props.basket
+        const basket = props.getBasket()
         const {site, token} = props
         if (!selectedShippingOption) {
             return actions.reject(data.errors.METHOD_UNAVAILABLE)
@@ -387,7 +387,7 @@ export const onShippingOptionsChange = async (data, actions, component, props) =
  */
 export const onErrorHandler = async (error, component, props) => {
     try {
-        const basket = props.getBasket ? props.getBasket() : props.basket
+        const basket = props.getBasket()
         const paymentCancelExpressService = new PaymentCancelExpressService(
             props.token,
             props.customerId,
