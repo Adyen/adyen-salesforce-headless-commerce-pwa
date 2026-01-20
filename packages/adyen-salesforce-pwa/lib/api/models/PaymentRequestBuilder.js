@@ -322,7 +322,7 @@ export class PaymentRequestBuilder {
         const actualBasket = basket || this.context.basket
 
         if (isOpenInvoiceMethod(actualPaymentMethodType) && actualBasket) {
-            this.paymentRequest.lineItems = getLineItems(actualBasket)
+            this.paymentRequest.lineItems = getLineItems(actualBasket, actualPaymentMethodType)
             this.paymentRequest.countryCode = this.paymentRequest.billingAddress.country
         }
         return this
