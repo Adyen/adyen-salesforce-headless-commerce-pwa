@@ -9,7 +9,7 @@
         "payments",
         "components"
     ],
-    "version": "4.1.1",
+    "version": "4.2.0",
     "main": "dist/app/index.js",
     "bin": {
         "include-env": "dist/scripts/include-env.js",
@@ -37,12 +37,13 @@
         "jest:clear": "jest --clearCache",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
-        "format": "prettier --write ./lib"
+        "format": "prettier --write ./lib",
+        "postinstall": "node ./lib/scripts/update-notifier.js"
     },
     "peerDependencies": {
         "@adyen/adyen-web": "^6.21.0",
         "@adyen/api-library": "^29.1.0",
-        "commerce-sdk-isomorphic": "^3.3.0",
+        "commerce-sdk-isomorphic": "^4.2.0",
         "@salesforce/pwa-kit-runtime": "^3.5.1",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
@@ -54,6 +55,7 @@
         "express-validator": "^7.0.1",
         "minimist": "^1.2.8",
         "node-fetch": "^3.3.2",
+        "update-notifier": "^7.3.1",
         "uuid": "^9.0.1"
     },
     "devDependencies": {

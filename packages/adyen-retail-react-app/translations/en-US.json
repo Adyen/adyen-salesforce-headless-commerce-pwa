@@ -1325,7 +1325,7 @@
     "defaultMessage": "Pick Up in Store"
   },
   "product_view.label.quantity": {
-    "defaultMessage": "Quantity"
+    "defaultMessage": "Quantity:"
   },
   "product_view.label.quantity_decrement": {
     "defaultMessage": "−"
@@ -1429,6 +1429,27 @@
   },
   "reset_password_form.title.reset_password": {
     "defaultMessage": "Reset Password"
+  },
+  "review.button.place_order": {
+    "defaultMessage": "Place Order"
+  },
+  "review.heading.billing_address": {
+    "defaultMessage": "Billing Address"
+  },
+  "review.heading.contact_info": {
+    "defaultMessage": "Contact Information"
+  },
+  "review.heading.payment_method": {
+    "defaultMessage": "Payment Method"
+  },
+  "review.heading.review_order": {
+    "defaultMessage": "Review Your Order"
+  },
+  "review.heading.shipping_address": {
+    "defaultMessage": "Shipping Address"
+  },
+  "review.heading.shipping_method": {
+    "defaultMessage": "Shipping Method"
   },
   "search.action.cancel": {
     "defaultMessage": "Cancel"

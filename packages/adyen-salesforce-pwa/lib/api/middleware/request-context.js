@@ -22,12 +22,21 @@ export async function prepareRequestContext(req, res, next) {
     const {authorization, basketid, customerid} = req.headers
     const {siteId} = req.query
 
-    if (!authorization || !basketid || !customerid || !siteId) {
+    const isValidValue = (value) => {
+        return value && value !== 'undefined' && value !== 'null'
+    }
+
+    if (
+        !isValidValue(authorization) ||
+        !isValidValue(basketid) ||
+        !isValidValue(customerid) ||
+        !isValidValue(siteId)
+    ) {
         const missing = []
-        if (!authorization) missing.push('authorization header')
-        if (!basketid) missing.push('basketid header')
-        if (!customerid) missing.push('customerid header')
-        if (!siteId) missing.push('siteId query param')
+        if (!isValidValue(authorization)) missing.push('authorization header')
+        if (!isValidValue(basketid)) missing.push('basketid header')
+        if (!isValidValue(customerid)) missing.push('customerid header')
+        if (!isValidValue(siteId)) missing.push('siteId query param')
 
         const errorMessage = `Missing required parameters: ${missing.join(', ')}`
         Logger.error(`prepareRequestContext for ${route}`, errorMessage)
@@ -35,8 +44,10 @@ export async function prepareRequestContext(req, res, next) {
     }
 
     try {
-        const basket = await getBasket(authorization, basketid, customerid)
-        const customer = await getCustomer(authorization, customerid)
+        const [basket, customer] = await Promise.all([
+            getBasket(authorization, basketid.trim(), customerid.trim()),
+            getCustomer(authorization, customerid.trim())
+        ])
         const adyenConfig = getAdyenConfigForCurrentSite(siteId)
 
         const adyenContext = {

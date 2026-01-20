@@ -164,7 +164,7 @@ const Payment = () => {
                         beforeSubmit={[onBillingSubmit]}
                         onError={[showError]}
                         // UI
-                        spinner={<LoadingSpinner wrapperStyles={{height: '100vh'}} />}
+                        spinner={<LoadingSpinner />}
                     />
 
                     <Divider borderColor="gray.100" />

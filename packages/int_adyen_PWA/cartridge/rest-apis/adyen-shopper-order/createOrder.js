@@ -27,18 +27,17 @@ exports.createOrder = function () {
         }
         session.setCurrency(newCurrency);
 
-        const currentBasket = BasketMgr.getCurrentBasket();
-        currentBasket.updateCurrency();
+        let currentBasket = BasketMgr.getCurrentBasket();
+        if (!currentBasket || currentBasket.UUID !== basketId) {
+          currentBasket = BasketMgr.getTemporaryBasket(basketId);
+        }
+
         if (!currentBasket) {
-            Logger.error('Error creating order: {0}', 'Basket not found');
-            RESTResponseMgr.createError(404, 'not_found', 'Basket not found').render();
-            return;
+          Logger.error('Error creating order: {0}', 'Basket not found');
+          RESTResponseMgr.createError(404, 'not_found', 'Basket not found').render();
+          return;
         }
-        if (currentBasket.UUID !== basketId) {
-            Logger.error('Error creating order: {0}', 'Current basket does not match the provided basket');
-            RESTResponseMgr.createError(400, 'bad_request', 'Invalid basket').render();
-            return;
-        }
+        currentBasket.updateCurrency();
 
         Transaction.begin();
         try {

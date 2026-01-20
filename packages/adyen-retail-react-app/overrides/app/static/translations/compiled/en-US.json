@@ -3182,7 +3182,7 @@
   "product_view.label.quantity": [
     {
       "type": 0,
-      "value": "Quantity"
+      "value": "Quantity:"
     }
   ],
   "product_view.label.quantity_decrement": [
@@ -3419,6 +3419,48 @@
     {
       "type": 0,
       "value": "Reset Password"
+    }
+  ],
+  "review.button.place_order": [
+    {
+      "type": 0,
+      "value": "Place Order"
+    }
+  ],
+  "review.heading.billing_address": [
+    {
+      "type": 0,
+      "value": "Billing Address"
+    }
+  ],
+  "review.heading.contact_info": [
+    {
+      "type": 0,
+      "value": "Contact Information"
+    }
+  ],
+  "review.heading.payment_method": [
+    {
+      "type": 0,
+      "value": "Payment Method"
+    }
+  ],
+  "review.heading.review_order": [
+    {
+      "type": 0,
+      "value": "Review Your Order"
+    }
+  ],
+  "review.heading.shipping_address": [
+    {
+      "type": 0,
+      "value": "Shipping Address"
+    }
+  ],
+  "review.heading.shipping_method": [
+    {
+      "type": 0,
+      "value": "Shipping Method"
     }
   ],
   "search.action.cancel": [

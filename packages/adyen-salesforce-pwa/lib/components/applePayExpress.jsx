@@ -1,17 +1,33 @@
-import React, {useEffect, useRef, useCallback, useMemo} from 'react'
+import React, {useEffect, useRef, useCallback, useMemo, useState} from 'react'
 import PropTypes from 'prop-types'
 import {AdyenCheckout, ApplePay} from '@adyen/adyen-web'
-import '@adyen/adyen-web/styles/adyen.css'
+import '../style/adyenCheckout.css'
 import useAdyenEnvironment from '../hooks/useAdyenEnvironment'
 import useAdyenPaymentMethods from '../hooks/useAdyenPaymentMethods'
+import useAdyenPaymentMethodsForExpress from '../hooks/useAdyenPaymentMethodsForExpress'
 import useAdyenShippingMethods from '../hooks/useAdyenShippingMethods'
 import {getAppleButtonConfig, getApplePaymentMethodConfig} from './helpers/applePayExpress.utils'
 import {AdyenShippingMethodsService} from '../services/shipping-methods'
 
 const ApplePayExpressComponent = (props) => {
-    const {authToken, customerId, locale, site, basket, navigate, onError = []} = props
-
-    const basketId = basket?.basketId
+    const {
+        authToken,
+        customerId,
+        locale,
+        site,
+        basket,
+        navigate,
+        onError = [],
+        currency,
+        isExpressPdp = false,
+        merchantDisplayName = '',
+        product
+    } = props
+    const isPdp = isExpressPdp === true
+    const shopperBasket = useMemo(
+        () => (isPdp ? {currency, orderTotal: product?.price * (product?.quantity || 1)} : basket),
+        [isPdp, currency, basket, basket?.orderTotal, basket?.basketId, product]
+    )
     const paymentContainer = useRef(null)
     const applePayButtonRef = useRef(null)
 
@@ -23,7 +39,7 @@ const ApplePayExpressComponent = (props) => {
     } = useAdyenEnvironment({
         authToken,
         customerId,
-        basketId,
+        basketId: shopperBasket?.basketId,
         site
     })
 
@@ -32,13 +48,21 @@ const ApplePayExpressComponent = (props) => {
         data: adyenPaymentMethods,
         error: adyenPaymentMethodsError,
         isLoading: isLoadingPaymentMethods
-    } = useAdyenPaymentMethods({
-        authToken,
-        customerId,
-        basketId,
-        site,
-        locale
-    })
+    } = isPdp
+        ? useAdyenPaymentMethodsForExpress({
+              authToken,
+              customerId,
+              site,
+              locale,
+              currency
+          })
+        : useAdyenPaymentMethods({
+              authToken,
+              customerId,
+              basketId: shopperBasket?.basketId,
+              site,
+              locale
+          })
 
     // Fetch shipping methods
     const {
@@ -48,9 +72,9 @@ const ApplePayExpressComponent = (props) => {
     } = useAdyenShippingMethods({
         authToken,
         customerId,
-        basketId,
+        basketId: shopperBasket?.basketId,
         site,
-        skip: !basketId
+        skip: !shopperBasket?.basketId
     })
 
     // Memoize loading state
@@ -59,16 +83,19 @@ const ApplePayExpressComponent = (props) => {
         [isLoadingEnvironment, isLoadingPaymentMethods, isLoadingShippingMethods]
     )
 
-    const fetchShippingMethods = useCallback(async () => {
-        // Fetch fresh shipping methods from API after address update
-        const adyenShippingMethodsService = new AdyenShippingMethodsService(
-            authToken,
-            customerId,
-            basketId,
-            site
-        )
-        return await adyenShippingMethodsService.getShippingMethods()
-    }, [authToken, customerId, basketId, site])
+    const fetchShippingMethods = useCallback(
+        async (basketId) => {
+            // Fetch fresh shipping methods from API after address update
+            const adyenShippingMethodsService = new AdyenShippingMethodsService(
+                authToken,
+                customerId,
+                basketId,
+                site
+            )
+            return await adyenShippingMethodsService.getShippingMethods()
+        },
+        [authToken, customerId, site]
+    )
 
     // Handle errors from hooks
     useEffect(() => {
@@ -97,8 +124,7 @@ const ApplePayExpressComponent = (props) => {
             const shouldInitialize = !!(
                 adyenEnvironment &&
                 adyenPaymentMethods &&
-                basket &&
-                shippingMethods &&
+                shopperBasket &&
                 paymentContainer.current
             )
 
@@ -124,27 +150,27 @@ const ApplePayExpressComponent = (props) => {
                     return
                 }
 
-                const appleButtonConfig = getAppleButtonConfig(
-                    authToken,
+                const appleButtonConfig = getAppleButtonConfig({
+                    token: authToken,
                     site,
-                    basket,
-                    shippingMethods?.applicableShippingMethods,
-                    applePaymentMethodConfig,
+                    basket: shopperBasket,
+                    shippingMethods: shippingMethods?.applicableShippingMethods,
+                    applePayConfig: applePaymentMethodConfig,
                     navigate,
                     fetchShippingMethods,
-                    onError
-                )
+                    onError,
+                    isExpressPdp,
+                    merchantDisplayName,
+                    customerId,
+                    product
+                })
                 const applePayButton = new ApplePay(checkout, appleButtonConfig)
-                applePayButton
-                    .isAvailable()
-                    .then(() => {
-                        if (applePayButtonRef.current) {
-                            applePayButtonRef.current.unmount()
-                        }
-                        applePayButton.mount(paymentContainer.current)
-                        applePayButtonRef.current = applePayButton
-                    })
-                    .catch(() => {})
+                await applePayButton.isAvailable()
+                if (applePayButtonRef.current) {
+                    applePayButtonRef.current.unmount()
+                }
+                applePayButton.mount(paymentContainer.current)
+                applePayButtonRef.current = applePayButton
             } catch (err) {
                 console.error('Error initializing Apple Pay Express:', err)
                 onError.forEach((cb) => cb(err))
@@ -163,21 +189,20 @@ const ApplePayExpressComponent = (props) => {
         adyenEnvironment?.ADYEN_ENVIRONMENT,
         adyenEnvironment?.ADYEN_CLIENT_KEY,
         adyenPaymentMethods?.paymentMethods,
-        basket?.basketId,
+        shopperBasket?.basketId,
         shippingMethods?.applicableShippingMethods,
         locale?.id,
         authToken,
         site?.id,
         navigate,
-        fetchShippingMethods
+        fetchShippingMethods,
+        product
     ])
 
     const {spinner} = props
     return (
         <>
-            {isLoading && spinner && (
-                <div className="adyen-checkout-spinner-container">{spinner}</div>
-            )}
+            {isLoading && spinner && <>{spinner}</>}
             <div ref={paymentContainer}></div>
         </>
     )
@@ -188,10 +213,14 @@ ApplePayExpressComponent.propTypes = {
     customerId: PropTypes.string,
     locale: PropTypes.object.isRequired,
     site: PropTypes.object.isRequired,
-    basket: PropTypes.object.isRequired,
+    basket: PropTypes.object,
     navigate: PropTypes.func.isRequired,
     onError: PropTypes.arrayOf(PropTypes.func),
-    spinner: PropTypes.node
+    spinner: PropTypes.node,
+    isExpressPdp: PropTypes.bool,
+    currency: PropTypes.string,
+    merchantDisplayName: PropTypes.string,
+    product: PropTypes.object
 }
 
 export default React.memo(ApplePayExpressComponent, (prevProps, nextProps) => {
@@ -202,6 +231,9 @@ export default React.memo(ApplePayExpressComponent, (prevProps, nextProps) => {
         prevProps.locale?.id === nextProps.locale?.id &&
         prevProps.site?.id === nextProps.site?.id &&
         prevProps.basket?.basketId === nextProps.basket?.basketId &&
-        prevProps.navigate === nextProps.navigate
+        prevProps.basket?.orderTotal === nextProps.basket?.orderTotal &&
+        prevProps.navigate === nextProps.navigate &&
+        prevProps.product?.id === nextProps.product?.id &&
+        prevProps.product?.quantity === nextProps.product?.quantity
     )
 })

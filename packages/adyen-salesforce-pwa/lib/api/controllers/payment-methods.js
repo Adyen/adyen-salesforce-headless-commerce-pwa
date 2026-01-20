@@ -1,10 +1,15 @@
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
-import {BLOCKED_PAYMENT_METHODS, ERROR_MESSAGE} from '../../utils/constants.mjs'
+import {
+    BLOCKED_PAYMENT_METHODS,
+    ERROR_MESSAGE,
+    EXPRESS_PAYMENT_METHODS
+} from '../../utils/constants.mjs'
 import AdyenClientProvider from '../models/adyenClientProvider'
 import Logger from '../models/logger'
 import {v4 as uuidv4} from 'uuid'
 import {AdyenError} from '../models/AdyenError'
 import {getApplicationInfo} from '../../utils/getApplicationInfo.mjs'
+import currencyList from '../../utils/currencyList.mjs'
 
 async function getPaymentMethods(req, res, next) {
     Logger.info('getPaymentMethods', 'start')
@@ -14,7 +19,6 @@ async function getPaymentMethods(req, res, next) {
         const {basket, adyenConfig, customer} = adyenContext
         const checkout = new AdyenClientProvider(adyenContext).getPaymentsApi()
 
-        const {orderTotal, productTotal, currency} = basket
         const {locale: shopperLocale} = req.query
         const countryCode = shopperLocale?.slice(-2)
 
@@ -22,8 +26,12 @@ async function getPaymentMethods(req, res, next) {
             blockedPaymentMethods: BLOCKED_PAYMENT_METHODS,
             shopperLocale,
             countryCode,
-            merchantAccount: adyenConfig.merchantAccount,
-            amount: {
+            merchantAccount: adyenConfig.merchantAccount
+        }
+
+        if (basket) {
+            const {orderTotal, productTotal, currency} = basket
+            paymentMethodsRequest.amount = {
                 value: getCurrencyValueForApi(orderTotal || productTotal, currency),
                 currency: currency
             }
@@ -53,4 +61,57 @@ async function getPaymentMethods(req, res, next) {
     }
 }
 
+async function getPaymentMethodsForExpress(req, res, next) {
+    Logger.info('getPaymentMethodsForExpress', 'start')
+
+    try {
+        const {adyen: adyenContext} = res.locals
+        const {adyenConfig} = adyenContext
+        const checkout = new AdyenClientProvider(adyenContext).getPaymentsApi()
+
+        const {locale: shopperLocale, currency} = req.query
+        const countryCode = shopperLocale?.slice(-2)
+
+        // Validate currency
+        if (!currency) {
+            throw new AdyenError(ERROR_MESSAGE.INVALID_PARAMS, 400)
+        }
+
+        const isValidCurrency = currencyList.some((c) => c.Code === currency)
+        if (!isValidCurrency) {
+            throw new AdyenError(`Invalid currency code: ${currency}`, 400)
+        }
+
+        const paymentMethodsRequest = {
+            allowedPaymentMethods: EXPRESS_PAYMENT_METHODS,
+            shopperLocale,
+            countryCode,
+            merchantAccount: adyenConfig.merchantAccount,
+            amount: {
+                value: 1000, // Fixing it to some value so that payment methods are returned
+                currency: currency
+            }
+        }
+
+        const response = await checkout.paymentMethods(paymentMethodsRequest, {
+            idempotencyKey: uuidv4()
+        })
+
+        if (!response?.paymentMethods?.length) {
+            throw new AdyenError(ERROR_MESSAGE.NO_PAYMENT_METHODS, 400)
+        }
+
+        Logger.info('getPaymentMethodsForExpress', 'success')
+        res.locals.response = {
+            ...response,
+            applicationInfo: getApplicationInfo(adyenConfig.systemIntegratorName)
+        }
+        next()
+    } catch (err) {
+        Logger.error('getPaymentMethodsForExpress', JSON.stringify(err))
+        next(err)
+    }
+}
+
 export default getPaymentMethods
+export {getPaymentMethodsForExpress}
