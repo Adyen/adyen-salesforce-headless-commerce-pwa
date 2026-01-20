@@ -4,6 +4,7 @@ import {AdyenCheckout, ApplePay} from '@adyen/adyen-web'
 import '../style/adyenCheckout.css'
 import useAdyenEnvironment from '../hooks/useAdyenEnvironment'
 import useAdyenPaymentMethods from '../hooks/useAdyenPaymentMethods'
+import useAdyenPaymentMethodsForExpress from '../hooks/useAdyenPaymentMethodsForExpress'
 import useAdyenShippingMethods from '../hooks/useAdyenShippingMethods'
 import {getAppleButtonConfig, getApplePaymentMethodConfig} from './helpers/applePayExpress.utils'
 import {AdyenShippingMethodsService} from '../services/shipping-methods'
@@ -47,13 +48,21 @@ const ApplePayExpressComponent = (props) => {
         data: adyenPaymentMethods,
         error: adyenPaymentMethodsError,
         isLoading: isLoadingPaymentMethods
-    } = useAdyenPaymentMethods({
-        authToken,
-        customerId,
-        basketId: shopperBasket?.basketId,
-        site,
-        locale
-    })
+    } = isPdp
+        ? useAdyenPaymentMethodsForExpress({
+              authToken,
+              customerId,
+              site,
+              locale,
+              currency
+          })
+        : useAdyenPaymentMethods({
+              authToken,
+              customerId,
+              basketId: shopperBasket?.basketId,
+              site,
+              locale
+          })
 
     // Fetch shipping methods
     const {
@@ -141,12 +150,12 @@ const ApplePayExpressComponent = (props) => {
                     return
                 }
 
-                const appleButtonConfig = getAppleButtonConfig(
-                    authToken,
+                const appleButtonConfig = getAppleButtonConfig({
+                    token: authToken,
                     site,
-                    shopperBasket,
-                    shippingMethods?.applicableShippingMethods,
-                    applePaymentMethodConfig,
+                    basket: shopperBasket,
+                    shippingMethods: shippingMethods?.applicableShippingMethods,
+                    applePayConfig: applePaymentMethodConfig,
                     navigate,
                     fetchShippingMethods,
                     onError,
@@ -154,7 +163,7 @@ const ApplePayExpressComponent = (props) => {
                     merchantDisplayName,
                     customerId,
                     product
-                )
+                })
                 const applePayButton = new ApplePay(checkout, appleButtonConfig)
                 await applePayButton.isAvailable()
                 if (applePayButtonRef.current) {

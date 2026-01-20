@@ -504,7 +504,7 @@ describe('paymentsHelper', () => {
                     id: 'f9fe488b0b925984ffd1d5b360',
                     quantity: 1,
                     taxAmount: 150,
-                    taxPercentage: 0.05
+                    taxPercentage: 0
                 }
             ])
             expect(paymentRequest.countryCode).toBe('DE')
