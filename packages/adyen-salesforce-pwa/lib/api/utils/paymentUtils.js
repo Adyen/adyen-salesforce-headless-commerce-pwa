@@ -1,4 +1,4 @@
-import {PAYMENT_METHOD_TYPES} from '../../utils/constants.mjs'
+import {PAYMENT_METHOD_TYPES, TAXATION} from '../../utils/constants.mjs'
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 
 /**
@@ -37,6 +37,17 @@ export function getShopperName(basket) {
 
 const OPEN_INVOICE_METHODS = new Set(['affirm'])
 const OPEN_INVOICE_PREFIXES = ['afterpay', 'klarna', 'ratepay', 'facilypay']
+const ZERO_TAX_METHODS = ['klarna']
+
+/**
+ * Determines if the tax rate should be excluded (set to 0) for a given payment method.
+ * Some payment methods like Klarna require the tax rate to be excluded.
+ * @param {string} paymentMethodType - The type of the payment method.
+ * @returns {boolean} True if the tax rate should be excluded.
+ */
+export function shouldExcludeTaxRate(paymentMethodType) {
+    return paymentMethodType && ZERO_TAX_METHODS.some((pm) => paymentMethodType.includes(pm))
+}
 
 /**
  * Checks if a given payment method type is an open invoice method.
@@ -77,31 +88,39 @@ export function getAdditionalData(basket) {
  * Maps a basket item (product, shipping, or promotion) to the Adyen line item format.
  * @param {object} item - The basket item.
  * @param {string} currency - The currency code.
+ * @param {string} taxation - The taxation type (net/gross).
+ * @param {boolean} excludeTaxRate - Whether to exclude the tax rate in the line item.
  * @param {number} [quantity=item.quantity] - The quantity of the item.
  * @returns {object} The item formatted as an Adyen line item.
  * @private
  */
-const mapToLineItem = (item, currency, quantity = item.quantity) => ({
+const mapToLineItem = (item, currency, taxation, excludeTaxRate, quantity = item.quantity) => ({
     id: item.itemId || item.priceAdjustmentId,
     quantity,
     description: item.itemText,
-    amountExcludingTax: getCurrencyValueForApi(item.basePrice, currency),
+    amountExcludingTax: getCurrencyValueForApi(
+        taxation === TAXATION.GROSS ? item.basePrice - item.tax : item.basePrice,
+        currency
+    ),
     taxAmount: getCurrencyValueForApi(item.tax, currency),
-    taxPercentage: item.taxRate
+    taxPercentage: excludeTaxRate ? 0 : item.taxRate
 })
 
 /**
  * Transforms all items in the basket (products, shipping, promotions) into an array of Adyen line items.
  * @param {object} basket - The shopper's basket object.
+ * @param {string} paymentMethodType - The type of the payment method (e.g., 'klarna', 'afterpay').
  * @returns {object[]} An array of Adyen line items.
  */
-export function getLineItems(basket) {
-    const {currency, productItems, shippingItems, priceAdjustments} = basket
+export function getLineItems(basket, paymentMethodType) {
+    const {currency, productItems, shippingItems, priceAdjustments, taxation} = basket
+    const excludeTaxRate = shouldExcludeTaxRate(paymentMethodType)
+    const mapItemWithContext = (item, quantity) =>
+        mapToLineItem(item, currency, taxation, excludeTaxRate, quantity)
 
-    const productLineItems = productItems?.map((item) => mapToLineItem(item, currency)) || []
-    const shippingLineItems = shippingItems?.map((item) => mapToLineItem(item, currency, 1)) || []
-    const priceAdjustmentLineItems =
-        priceAdjustments?.map((item) => mapToLineItem(item, currency)) || []
+    const productLineItems = productItems?.map((item) => mapItemWithContext(item)) || []
+    const shippingLineItems = shippingItems?.map((item) => mapItemWithContext(item, 1)) || []
+    const priceAdjustmentLineItems = priceAdjustments?.map((item) => mapItemWithContext(item)) || []
 
     return [...productLineItems, ...shippingLineItems, ...priceAdjustmentLineItems]
 }
