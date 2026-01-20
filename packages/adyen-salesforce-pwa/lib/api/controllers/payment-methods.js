@@ -14,7 +14,6 @@ async function getPaymentMethods(req, res, next) {
         const {basket, adyenConfig, customer} = adyenContext
         const checkout = new AdyenClientProvider(adyenContext).getPaymentsApi()
 
-        const {orderTotal, productTotal, currency} = basket
         const {locale: shopperLocale} = req.query
         const countryCode = shopperLocale?.slice(-2)
 
@@ -22,8 +21,12 @@ async function getPaymentMethods(req, res, next) {
             blockedPaymentMethods: BLOCKED_PAYMENT_METHODS,
             shopperLocale,
             countryCode,
-            merchantAccount: adyenConfig.merchantAccount,
-            amount: {
+            merchantAccount: adyenConfig.merchantAccount
+        }
+
+        if (basket) {
+            const {orderTotal, productTotal, currency} = basket
+            paymentMethodsRequest.amount = {
                 value: getCurrencyValueForApi(orderTotal || productTotal, currency),
                 currency: currency
             }
