@@ -1,11 +1,14 @@
 import {query} from 'express-validator'
 import bodyParser from 'body-parser'
 import EnvironmentController from '../controllers/environment'
-import PaymentMethodsController from '../controllers/payment-methods'
+import PaymentMethodsController, {getPaymentMethodsForExpress} from '../controllers/payment-methods'
 import PaymentsDetailsController from '../controllers/payments-details'
 import PaymentsController from '../controllers/payments'
 import ShippingAddressController from '../controllers/shipping-address'
 import ShippingMethodsController from '../controllers/shipping-methods'
+import ShopperDetailsController from '../controllers/shopper-details'
+import PaypalUpdateOrderController from '../controllers/paypal-update-order'
+import PaymentDataReviewPageController from '../controllers/payment-data-review-page'
 import CreateTemporaryBasketController from '../controllers/create-temporary-basket'
 import {
     authenticate,
@@ -17,9 +20,10 @@ import {createErrorResponse} from '../../utils/createErrorResponse.mjs'
 import Logger from '../models/logger'
 import {appleDomainAssociation} from '../controllers/apple-domain-association'
 import PaymentCancelController from '../controllers/payment-cancel'
+import PaymentCancelExpressController from '../controllers/payment-cancel-express'
 import {balanceCheck, cancelOrder, createOrder} from '../controllers/giftCard'
 import {prepareRequestContext} from '../middleware/request-context'
-import {prepareWebhookRequestContext} from '../middleware/webhook-request-context'
+import {prepareMinimalRequestContext} from '../middleware/minimal-request-context'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function SuccessHandler(req, res, next) {
@@ -44,14 +48,14 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     ]
 
     const environmentHandler = overrides?.environment || [
-        prepareWebhookRequestContext,
+        prepareMinimalRequestContext,
         EnvironmentController,
         SuccessHandler,
         ErrorHandler
     ]
 
     const webhookHandler = overrides?.webhook || [
-        prepareWebhookRequestContext,
+        prepareMinimalRequestContext,
         authenticate,
         validateHmac,
         parseNotification,
@@ -62,6 +66,12 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     const paymentMethodsHandler = overrides?.paymentMethods || [
         prepareRequestContext,
         PaymentMethodsController,
+        SuccessHandler,
+        ErrorHandler
+    ]
+    const paymentMethodsForExpressHandler = overrides?.paymentMethodsForExpress || [
+        prepareMinimalRequestContext,
+        getPaymentMethodsForExpress,
         SuccessHandler,
         ErrorHandler
     ]
@@ -96,10 +106,22 @@ function registerAdyenEndpoints(app, runtime, overrides) {
         SuccessHandler,
         ErrorHandler
     ]
+    const shopperDetailsHandler = overrides?.shopperDetails || [
+        prepareRequestContext,
+        ShopperDetailsController,
+        SuccessHandler,
+        ErrorHandler
+    ]
 
     const paymentCancelController = overrides?.paymentCancel || [
         prepareRequestContext,
         PaymentCancelController,
+        SuccessHandler,
+        ErrorHandler
+    ]
+    const paymentCancelExpressController = overrides?.paymentCancelExpress || [
+        prepareRequestContext,
+        PaymentCancelExpressController,
         SuccessHandler,
         ErrorHandler
     ]
@@ -121,9 +143,27 @@ function registerAdyenEndpoints(app, runtime, overrides) {
         SuccessHandler,
         ErrorHandler
     ]
+    const paypalUpdateOrderHandler = overrides?.paypalUpdateOrder || [
+        prepareRequestContext,
+        PaypalUpdateOrderController,
+        SuccessHandler,
+        ErrorHandler
+    ]
+    const paymentDataForReviewPageGetHandler = overrides?.getPaymentDataForReviewPage || [
+        prepareRequestContext,
+        PaymentDataReviewPageController.getPaymentDataForReviewPage,
+        SuccessHandler,
+        ErrorHandler
+    ]
+    const paymentDataForReviewPagePostHandler = overrides?.setPaymentDataForReviewPage || [
+        prepareRequestContext,
+        PaymentDataReviewPageController.setPaymentDataForReviewPage,
+        SuccessHandler,
+        ErrorHandler
+    ]
 
     const createTemporaryBasketHandler = overrides?.createTemporaryBasket || [
-        prepareWebhookRequestContext,
+        prepareMinimalRequestContext,
         CreateTemporaryBasketController,
         SuccessHandler,
         ErrorHandler
@@ -143,20 +183,26 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     app.get('*/checkout', query('adyenAction').optional().escape(), runtime.render)
     app.get('/api/adyen/environment', ...environmentHandler)
     app.get('/api/adyen/paymentMethods', ...paymentMethodsHandler)
+    app.get('/api/adyen/paymentMethodsForExpress', ...paymentMethodsForExpressHandler)
     app.get('/api/adyen/shipping-methods', ...shippingMethodsGetHandler)
     app.get(
         '/.well-known/apple-developer-merchantid-domain-association',
         ...appleDomainAssociationHandler
     )
+    app.get('/api/adyen/payment-data-for-review-page', ...paymentDataForReviewPageGetHandler)
     app.post('/api/adyen/payment/cancel', ...paymentCancelController)
+    app.post('/api/adyen/payment/cancel/express', ...paymentCancelExpressController)
     app.post('/api/adyen/payments/details', ...paymentsDetailsHandler)
     app.post('/api/adyen/payments', ...paymentsHandler)
     app.post('/api/adyen/webhook', ...webhookHandler)
     app.post('/api/adyen/shipping-methods', ...shippingMethodsPostHandler)
     app.post('/api/adyen/shipping-address', ...shippingAddressHandler)
+    app.post('/api/adyen/shopper-details', ...shopperDetailsHandler)
+    app.post('/api/adyen/paypal-update-order', ...paypalUpdateOrderHandler)
     app.post('/api/adyen/gift-card/balance-check', ...balanceCheckHandler)
     app.post('/api/adyen/gift-card/create-order', ...createOrderHandler)
     app.post('/api/adyen/gift-card/cancel-order', ...cancelOrderHandler)
+    app.post('/api/adyen/payment-data-for-review-page', ...paymentDataForReviewPagePostHandler)
     app.post('/api/adyen/pdp/temporary-baskets', ...createTemporaryBasketHandler)
 }
 

@@ -12,11 +12,12 @@ export * from './models/orderApi'
 export * from './models/customShopperOrderApi'
 export * from './models/customAdminOrderApi'
 export * from './models/adyenClientProvider'
+export * from './models/PaymentRequestBuilder'
 export * from './models/logger'
 
 // Middleware
 export * from './middleware/webhook'
-export * from './middleware/webhook-request-context'
+export * from './middleware/minimal-request-context'
 export * from './middleware/request-context'
 
 // Controllers
@@ -29,6 +30,8 @@ export {default as EnvironmentController} from './controllers/environment'
 export {default as PaymentCancelController} from './controllers/payment-cancel'
 export {default as GiftCardController} from './controllers/giftCard'
 export {default as CreateTemporaryBasketController} from './controllers/create-temporary-basket'
+export {default as ShopperDetailsController} from './controllers/shopper-details'
+export {default as PaymentDataReviewPageController} from './controllers/payment-data-review-page'
 
 // Webhook event handlers
 export * from './controllers/authorization-webhook-handler'
@@ -38,3 +41,4 @@ export * from './controllers/order-closed-webhook-handler'
 export * from './helpers/basketHelper.js'
 export * from './helpers/orderHelper.js'
 export * from './helpers/paymentsHelper.js'
+export * from './utils/paymentUtils.js'

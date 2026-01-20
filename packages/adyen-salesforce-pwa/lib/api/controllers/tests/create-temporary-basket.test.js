@@ -65,11 +65,8 @@ describe('create-temporary-basket controller', () => {
         expect(Logger.info).toHaveBeenCalledWith('CreateTemporaryBasketController', 'start')
         expect(BasketService).toHaveBeenCalled()
         expect(removeExistingTemporaryBaskets).toHaveBeenCalledWith('Bearer token', 'customer1')
-        expect(createTemporaryBasket).toHaveBeenCalledWith('customer1')
-        expect(res.locals.response).toEqual({
-            basketId: 'b1',
-            orderTotal: 0
-        })
+        expect(createTemporaryBasket).toHaveBeenCalledWith('Bearer token', 'customer1')
+        expect(res.locals.response).toEqual(mockBasket)
         expect(Logger.info).toHaveBeenCalledWith('CreateTemporaryBasketController', 'success')
         expect(next).toHaveBeenCalled()
     })

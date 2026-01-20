@@ -42,6 +42,10 @@ module.exports = [
     },
     {
         id: 'RefArchGlobal',
-        l10n: defaultL10nConfig
+        l10n: {
+            ...defaultL10nConfig,
+            defaultCurrency: 'GBP',
+            defaultLocale: 'en-GB'
+        }
     }
 ]

@@ -40,10 +40,11 @@ export const onSubmit = async (state, component, actions, props) => {
         if (!state.isValid) {
             throw new Error('invalid state')
         }
+        const basket = props.getBasket ? props.getBasket() : props.basket
         const adyenPaymentService = new AdyenPaymentsService(
             props?.token,
             props?.customerId,
-            props.basket?.basketId,
+            basket?.basketId,
             props?.site
         )
         const paymentsResponse = await adyenPaymentService.submitPayment({
@@ -60,10 +61,11 @@ export const onSubmit = async (state, component, actions, props) => {
 
 export const onAdditionalDetails = async (state, component, actions, props) => {
     try {
+        const basket = props.getBasket ? props.getBasket() : props.basket
         const adyenPaymentsDetailsService = new AdyenPaymentsDetailsService(
             props?.token,
             props?.customerId,
-            props.basket?.basketId,
+            basket?.basketId,
             props?.site
         )
         const paymentsDetailsResponse = await adyenPaymentsDetailsService.submitPaymentsDetails(
@@ -80,10 +82,11 @@ export const onAdditionalDetails = async (state, component, actions, props) => {
 
 export const onErrorHandler = async (error, component, props) => {
     try {
+        const basket = props.getBasket ? props.getBasket() : props.basket
         const paymentCancelService = new PaymentCancelService(
             props.token,
             props.customerId,
-            props.basket?.basketId,
+            basket?.basketId,
             props.site
         )
         await paymentCancelService.paymentCancel(props.orderNo)

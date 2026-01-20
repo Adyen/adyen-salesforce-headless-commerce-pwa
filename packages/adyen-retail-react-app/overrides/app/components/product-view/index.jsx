@@ -52,7 +52,7 @@ import {getPriceData} from '@salesforce/retail-react-app/app/utils/product-utils
 import PromoCallout from '@salesforce/retail-react-app/app/components/product-tile/promo-callout'
 import LoadingSpinner from '@salesforce/retail-react-app/app/components/loading-spinner'
 
-import {ApplePayExpress} from '@adyen/adyen-salesforce-pwa'
+import {ApplePayExpress, PayPalExpress} from '@adyen/adyen-salesforce-pwa'
 import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
 import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
@@ -922,23 +922,45 @@ const ProductView = forwardRef(
                                         productQuantity,
                                         stockLevel
                                     ) && (
-                                        <ApplePayExpress
-                                            authToken={authToken}
-                                            customerId={customerId}
-                                            locale={locale}
-                                            site={site}
-                                            currency={activeCurrency}
-                                            navigate={navigate}
-                                            isExpressPdp={true}
-                                            merchantDisplayName={'Merchant name'}
-                                            product={{...product, quantity: productQuantity}}
-                                            // Callbacks
-                                            onError={[showError]}
-                                            // UI
-                                            spinner={
-                                                <LoadingSpinner wrapperStyles={{height: '100vh'}} />
-                                            }
-                                        />
+                                        <>
+                                            <ApplePayExpress
+                                                authToken={authToken}
+                                                customerId={customerId}
+                                                locale={locale}
+                                                site={site}
+                                                currency={activeCurrency}
+                                                navigate={navigate}
+                                                isExpressPdp={true}
+                                                merchantDisplayName={'Merchant name'}
+                                                product={{...product, quantity: productQuantity}}
+                                                // Callbacks
+                                                onError={[showError]}
+                                                // UI
+                                                spinner={
+                                                    <LoadingSpinner
+                                                        wrapperStyles={{height: '100vh'}}
+                                                    />
+                                                }
+                                            />
+                                            <PayPalExpress
+                                                authToken={authToken}
+                                                customerId={customerId}
+                                                locale={locale}
+                                                site={site}
+                                                currency={activeCurrency}
+                                                navigate={navigate}
+                                                type="pdp"
+                                                product={{...product, quantity: productQuantity}}
+                                                // Callbacks
+                                                onError={[showError]}
+                                                // UI
+                                                spinner={
+                                                    <LoadingSpinner
+                                                        wrapperStyles={{height: '100vh'}}
+                                                    />
+                                                }
+                                            />
+                                        </>
                                     )}
                                 </Box>
                             </Box>
@@ -964,21 +986,37 @@ const ProductView = forwardRef(
                 >
                     {renderActionButtons()}
                     {validateOrderability(variant, product, productQuantity, stockLevel) && (
-                        <ApplePayExpress
-                            authToken={authToken}
-                            customerId={customerId}
-                            locale={locale}
-                            site={site}
-                            currency={activeCurrency}
-                            navigate={navigate}
-                            isExpressPdp={true}
-                            merchantDisplayName={'Merchant name'}
-                            product={{...product, quantity: productQuantity}}
-                            // Callbacks
-                            onError={[showError]}
-                            // UI
-                            spinner={<LoadingSpinner wrapperStyles={{height: '100vh'}} />}
-                        />
+                        <>
+                            <ApplePayExpress
+                                authToken={authToken}
+                                customerId={customerId}
+                                locale={locale}
+                                site={site}
+                                currency={activeCurrency}
+                                navigate={navigate}
+                                isExpressPdp={true}
+                                merchantDisplayName={'Merchant name'}
+                                product={{...product, quantity: productQuantity}}
+                                // Callbacks
+                                onError={[showError]}
+                                // UI
+                                spinner={<LoadingSpinner wrapperStyles={{height: '100vh'}} />}
+                            />
+                            <PayPalExpress
+                                authToken={authToken}
+                                customerId={customerId}
+                                locale={locale}
+                                site={site}
+                                currency={activeCurrency}
+                                navigate={navigate}
+                                type="pdp"
+                                product={{...product, quantity: productQuantity}}
+                                // Callbacks
+                                onError={[showError]}
+                                // UI
+                                spinner={<LoadingSpinner wrapperStyles={{height: '100vh'}} />}
+                            />
+                        </>
                     )}
                 </Box>
             </Flex>

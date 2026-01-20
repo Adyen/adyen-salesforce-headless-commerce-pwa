@@ -8,7 +8,9 @@ export const PAYMENT_METHOD_TYPES = {
     GIFT_CARD: 'giftcard',
     WECHATPAY_MINI_PROGRAM: 'wechatpayMiniProgram',
     WECHATPAY_QR: 'wechatpayQR',
-    WECHATPAY_SDK: 'wechatpaySDK'
+    WECHATPAY_SDK: 'wechatpaySDK',
+    APPLEPAY: 'applepay',
+    PAYPAL: 'paypal'
 }
 
 export const PAYMENT_TYPES = {
@@ -35,6 +37,8 @@ export const BLOCKED_PAYMENT_METHODS = [
     PAYMENT_METHOD_TYPES.WECHATPAY_SDK
 ]
 
+export const EXPRESS_PAYMENT_METHODS = [PAYMENT_METHOD_TYPES.APPLEPAY, PAYMENT_METHOD_TYPES.PAYPAL]
+
 export const SHOPPER_INTERACTIONS = {
     CONT_AUTH: 'ContAuth',
     ECOMMERCE: 'Ecommerce'
@@ -60,6 +64,11 @@ export const NOTIFICATION_SUCCESS = {
 }
 
 export const DEFAULT_SHIPMENT_ID = 'me'
+
+export const TAXATION = {
+    GROSS: 'gross',
+    NET: 'net'
+}
 
 export const ORDER = Object.freeze({
     ORDER_STATUS_CREATED: 'created',
@@ -98,7 +107,10 @@ export const ERROR_MESSAGE = {
     ADYEN_CONTEXT_NOT_FOUND: 'Adyen context not found',
     NO_PAYMENT_METHODS: 'no payment methods',
     ADD_PAYMENT_INSTRUMENTS: 'Failed to add payment instrument due to missing parameters',
-    CUSTOMER_NOT_FOUND: 'customer not found'
+    CUSTOMER_NOT_FOUND: 'customer not found',
+    BASKET_NOT_FOUND: 'Basket not found in adyenContext',
+    PSP_REFERENCE_NOT_FOUND: 'PSP reference not found in basket',
+    INVALID_PAYMENT_DATA: 'Invalid payment data'
 }
 
 export const DEFAULT_EXPIRATION_TIME = 30

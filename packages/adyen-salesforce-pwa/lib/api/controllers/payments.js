@@ -1,4 +1,4 @@
-import {ERROR_MESSAGE, PAYMENT_TYPES} from '../../utils/constants.mjs'
+import {ERROR_MESSAGE} from '../../utils/constants.mjs'
 import AdyenClientProvider from '../models/adyenClientProvider'
 import Logger from '../models/logger'
 import {v4 as uuidv4} from 'uuid'
@@ -7,7 +7,8 @@ import {
     createCheckoutResponse,
     createPaymentRequestObject,
     revertCheckoutState,
-    validateBasketPayments
+    validateBasketPayments,
+    isApplePayExpress
 } from '../helpers/paymentsHelper.js'
 import {createOrderUsingOrderNo} from '../helpers/orderHelper.js'
 
@@ -46,10 +47,7 @@ async function sendPayments(req, res, next) {
             throw new AdyenError(ERROR_MESSAGE.ADYEN_CONTEXT_NOT_FOUND, 500)
         }
 
-        if (
-            data.paymentType === PAYMENT_TYPES.EXPRESS ||
-            data.paymentType === PAYMENT_TYPES.EXPRESS_PDP
-        ) {
+        if (isApplePayExpress(data)) {
             await adyenContext.basketService.addShopperData(data)
         }
         const paymentRequest = await createPaymentRequestObject(data, adyenContext, req)
@@ -60,7 +58,6 @@ async function sendPayments(req, res, next) {
             paymentRequest.amount,
             paymentRequest.paymentMethod
         )
-
         const checkout = new AdyenClientProvider(adyenContext).getPaymentsApi()
         const response = await checkout.payments(paymentRequest, {
             idempotencyKey: uuidv4()
@@ -80,7 +77,8 @@ async function sendPayments(req, res, next) {
         if (checkoutResponse.isSuccessful) {
             await adyenContext.basketService.update({
                 c_amount: JSON.stringify(paymentRequest?.amount),
-                c_paymentMethod: JSON.stringify(paymentRequest?.paymentMethod)
+                c_paymentMethod: JSON.stringify(paymentRequest?.paymentMethod),
+                c_pspReference: response?.pspReference
             })
         }
 
@@ -98,7 +96,6 @@ async function sendPayments(req, res, next) {
                 response?.pspReference
             )
         }
-
         if (checkoutResponse.isFinal && checkoutResponse.isSuccessful) {
             await adyenContext.basketService.addPaymentInstrument(
                 paymentRequest?.amount,

@@ -4,6 +4,8 @@ import {AdyenShippingMethodsService} from '../../services/shipping-methods'
 import {AdyenShippingAddressService} from '../../services/shipping-address'
 import {AdyenTemporaryBasketService} from '../../services/temporary-basket'
 import {PAYMENT_TYPES} from '../../utils/constants.mjs'
+import {executeErrorCallbacks} from '../../utils/executeCallbacks'
+import {PaymentCancelExpressService} from '../../services/payment-cancel-express'
 
 export const getApplePaymentMethodConfig = (paymentMethodsResponse) => {
     const applePayPaymentMethod = paymentMethodsResponse?.paymentMethods?.find(
@@ -46,24 +48,36 @@ export const getCustomerBillingDetails = (billingContact) => {
     }
 }
 
-export const getAppleButtonConfig = (
-    authToken,
-    site,
-    basket,
-    shippingMethods,
-    applePayConfig,
-    navigate,
-    fetchShippingMethods,
-    onError = [],
-    isExpressPdp = false,
-    merchantDisplayName = '',
-    customerId,
-    product
-) => {
+export const getAppleButtonConfig = (props = {}) => {
+    const {
+        token: authToken,
+        site,
+        basket,
+        shippingMethods,
+        applePayConfig,
+        navigate,
+        fetchShippingMethods,
+        onError = [],
+        isExpressPdp = false,
+        merchantDisplayName = '',
+        customerId,
+        product
+    } = props
+
     let applePayAmount = basket.orderTotal
     let customerData = null
     let billingData = null
     let temporaryBasket = null
+    let currentBasket = basket
+
+    const getBasket = () => currentBasket
+    const setBasket = (newBasket) => {
+        currentBasket = newBasket
+    }
+
+    const propsWithGetBasket = {...props, getBasket, setBasket}
+
+    const errorHandler = (error, component) => onErrorHandler(error, component, propsWithGetBasket)
     const buttonConfig = {
         showPayButton: true,
         isExpress: true,
@@ -82,7 +96,7 @@ export const getAppleButtonConfig = (
         })),
         onSubmit: async (state, component, actions) => {
             try {
-                const basketData = isExpressPdp ? temporaryBasket : basket
+                const basketData = isExpressPdp ? temporaryBasket : currentBasket
                 const adyenPaymentService = new AdyenPaymentsService(
                     authToken,
                     customerId,
@@ -128,7 +142,7 @@ export const getAppleButtonConfig = (
         onShippingContactSelected: async (resolve, reject, event) => {
             try {
                 const {shippingContact} = event
-                const basketData = isExpressPdp ? temporaryBasket : basket
+                const basketData = isExpressPdp ? temporaryBasket : currentBasket
                 const adyenShippingAddressService = new AdyenShippingAddressService(
                     authToken,
                     customerId,
@@ -190,7 +204,7 @@ export const getAppleButtonConfig = (
         onShippingMethodSelected: async (resolve, reject, event) => {
             try {
                 const {shippingMethod} = event
-                const basketData = isExpressPdp ? temporaryBasket : basket
+                const basketData = isExpressPdp ? temporaryBasket : currentBasket
                 const adyenShippingMethodsService = new AdyenShippingMethodsService(
                     authToken,
                     customerId,
@@ -231,6 +245,7 @@ export const getAppleButtonConfig = (
                 )
                 temporaryBasket = await adyenTemporaryBasketService.createTemporaryBasket(product)
                 if (temporaryBasket?.basketId) {
+                    setBasket(temporaryBasket)
                     applePayAmount = temporaryBasket.orderTotal
                     const applePayAmountUpdate = {
                         newTotal: {
@@ -246,7 +261,42 @@ export const getAppleButtonConfig = (
             } else {
                 resolve()
             }
-        }
+        },
+        onError: executeErrorCallbacks([...onError, errorHandler], propsWithGetBasket),
+        onPaymentFailed: executeErrorCallbacks([...onError, errorHandler], propsWithGetBasket)
     }
     return buttonConfig
+}
+
+/**
+ * Handles errors during Apple Pay Express checkout.
+ * Cancels the express payment, cleans up the basket, removes shipping method and address,
+ * and redirects to checkout page with error flag.
+ *
+ * @param {Error} error - The error that occurred
+ * @param {object} component - Adyen component instance
+ * @param {object} props - Component properties
+ * @param {string} props.token - Authentication token
+ * @param {object} props.basket - Shopping basket object
+ * @param {string} props.customerId - Customer ID
+ * @param {object} props.site - Site configuration
+ * @param {Function} props.navigate - Navigation function
+ * @returns {Promise<object>} Object indicating cancellation status
+ */
+export const onErrorHandler = async (error, component, props) => {
+    try {
+        const basket = props.getBasket()
+        const paymentCancelExpressService = new PaymentCancelExpressService(
+            props.token,
+            props.customerId,
+            basket?.basketId,
+            props.site
+        )
+        await paymentCancelExpressService.paymentCancelExpress()
+        props.navigate(`/checkout?error=true`)
+        return {cancelled: true}
+    } catch (err) {
+        console.error('Error during express payment cancellation:', err)
+        return {cancelled: false, error: err.message}
+    }
 }

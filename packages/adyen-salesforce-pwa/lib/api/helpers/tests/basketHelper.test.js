@@ -1,12 +1,15 @@
 import {
     createShopperBasketsClient,
     getBasket,
-    getCurrentBasketForAuthorizedShopper
+    getCurrentBasketForAuthorizedShopper,
+    removeExistingTemporaryBaskets,
+    createTemporaryBasket
 } from '../basketHelper.js'
 import {ShopperBasketsV2} from 'commerce-sdk-isomorphic'
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 import {AdyenError} from '../../models/AdyenError.js'
 import {ERROR_MESSAGE} from '../../../utils/constants.mjs'
+import {getCustomerBaskets} from '../customerHelper'
 
 // Mock dependencies
 jest.mock('commerce-sdk-isomorphic', () => ({
@@ -15,6 +18,10 @@ jest.mock('commerce-sdk-isomorphic', () => ({
 
 jest.mock('@salesforce/pwa-kit-runtime/utils/ssr-config', () => ({
     getConfig: jest.fn()
+}))
+
+jest.mock('../customerHelper', () => ({
+    getCustomerBaskets: jest.fn()
 }))
 
 describe('basketHelper', () => {
@@ -124,6 +131,72 @@ describe('basketHelper', () => {
             await expect(
                 getCurrentBasketForAuthorizedShopper('auth', 'customer-abc')
             ).rejects.toThrow(new AdyenError(ERROR_MESSAGE.INVALID_BASKET, 404))
+        })
+    })
+
+    describe('removeExistingTemporaryBaskets', () => {
+        let mockShopperBaskets
+
+        beforeEach(() => {
+            mockShopperBaskets = {
+                deleteBasket: jest.fn()
+            }
+            ShopperBasketsV2.mockImplementation(() => mockShopperBaskets)
+        })
+
+        it('should fetch and delete temporary baskets', async () => {
+            const mockBaskets = {
+                baskets: [
+                    {basketId: 'temp1', temporaryBasket: true},
+                    {basketId: 'nontemp', temporaryBasket: false},
+                    {basketId: 'temp2', temporaryBasket: true}
+                ]
+            }
+            getCustomerBaskets.mockResolvedValue(mockBaskets)
+            mockShopperBaskets.deleteBasket.mockResolvedValue({})
+
+            await removeExistingTemporaryBaskets('Bearer mockToken', 'mockCustomerId')
+
+            expect(getCustomerBaskets).toHaveBeenCalledWith('Bearer mockToken', 'mockCustomerId')
+            expect(mockShopperBaskets.deleteBasket).toHaveBeenCalledTimes(2)
+            expect(mockShopperBaskets.deleteBasket).toHaveBeenCalledWith({
+                parameters: {basketId: 'temp1'}
+            })
+            expect(mockShopperBaskets.deleteBasket).toHaveBeenCalledWith({
+                parameters: {basketId: 'temp2'}
+            })
+        })
+
+        it('should do nothing if no temporary baskets are found', async () => {
+            getCustomerBaskets.mockResolvedValue({
+                baskets: [{basketId: 'nontemp', temporaryBasket: false}]
+            })
+            await removeExistingTemporaryBaskets('Bearer mockToken', 'mockCustomerId')
+            expect(mockShopperBaskets.deleteBasket).not.toHaveBeenCalled()
+        })
+    })
+
+    describe('createTemporaryBasket', () => {
+        let mockShopperBaskets
+
+        beforeEach(() => {
+            mockShopperBaskets = {
+                createBasket: jest.fn()
+            }
+            ShopperBasketsV2.mockImplementation(() => mockShopperBaskets)
+        })
+
+        it('should create a new temporary basket', async () => {
+            const created = {basketId: 'newTemp', temporary: true}
+            mockShopperBaskets.createBasket.mockResolvedValue(created)
+
+            const result = await createTemporaryBasket('Bearer mockToken', 'mockCustomerId')
+
+            expect(mockShopperBaskets.createBasket).toHaveBeenCalledWith({
+                parameters: {temporary: true},
+                body: {customerInfo: {customerId: 'mockCustomerId'}}
+            })
+            expect(result).toEqual(created)
         })
     })
 })
