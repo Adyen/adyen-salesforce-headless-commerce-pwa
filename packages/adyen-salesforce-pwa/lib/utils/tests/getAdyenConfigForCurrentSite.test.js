@@ -18,7 +18,8 @@ describe('getAdyenConfigForCurrentSite', () => {
             webhookPassword: '',
             webhookUser: '',
             liveEndpointUrlPrefix: '',
-            appleDomainAssociation: ''
+            appleDomainAssociation: '',
+            nativeThreeDS: ''
         }
 
         const result = getAdyenConfigForCurrentSite(siteId)
@@ -37,7 +38,8 @@ describe('getAdyenConfigForCurrentSite', () => {
             webhookPassword: '',
             webhookUser: '',
             liveEndpointUrlPrefix: '',
-            appleDomainAssociation: ''
+            appleDomainAssociation: '',
+            nativeThreeDS: ''
         })
     })
 })
