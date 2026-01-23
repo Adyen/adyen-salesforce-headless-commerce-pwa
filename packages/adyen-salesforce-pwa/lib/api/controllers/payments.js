@@ -307,18 +307,20 @@ async function sendPayments(req, res, next) {
 
         if (!initialBasket?.paymentInstruments || !initialBasket?.paymentInstruments?.length) {
             Logger.info('sendPayments', 'addPaymentInstrumentToBasket')
-            const isCardPayment = data?.paymentMethod?.type === 'scheme'
-            const paymentMethodId = isCardPayment
-                ? PAYMENT_METHODS.CREDIT_CARD
-                : PAYMENT_METHODS.ADYEN_COMPONENT
+            const isSchemeType = data?.paymentMethod?.type === 'scheme'
+            const cardType = isSchemeType
+                ? getCardType(data?.paymentMethod?.brand || data?.paymentMethod?.srcScheme)
+                : null
+            const isCardPayment = isSchemeType && !!cardType
+
             const paymentInstrumentReq = {
                 body: {
                     amount: initialBasket.orderTotal,
-                    paymentMethodId,
+                    paymentMethodId: isCardPayment
+                        ? PAYMENT_METHODS.CREDIT_CARD
+                        : PAYMENT_METHODS.ADYEN_COMPONENT,
                     paymentCard: {
-                        cardType: isCardPayment
-                            ? getCardType(data?.paymentMethod?.brand)
-                            : data?.paymentMethod?.type
+                        cardType: cardType || data?.paymentMethod?.type
                     }
                 },
                 parameters: {

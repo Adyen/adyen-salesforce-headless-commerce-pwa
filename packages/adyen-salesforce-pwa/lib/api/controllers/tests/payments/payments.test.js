@@ -11,6 +11,19 @@ let mockCreateOrder = jest.fn()
 let mockUpdateOrderPaymentTransaction = jest.fn()
 let mockUpdateOrderStatus = jest.fn()
 
+jest.mock('../../../../utils/getCardType.mjs', () => ({
+    getCardType: (brand) => {
+        const cardTypeMap = {
+            visa: 'Visa',
+            mc: 'Master Card',
+            amex: 'Amex',
+            maestro: 'Maestro',
+            discover: 'Discover'
+        }
+        return cardTypeMap[brand] || ''
+    }
+}))
+
 jest.mock('@salesforce/pwa-kit-runtime/utils/ssr-config', () => {
     return {
         getConfig: jest.fn().mockImplementation(() => {
@@ -114,10 +127,8 @@ describe('payments controller', () => {
             locals: {}
         }
         next = jest.fn()
-        consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation(() => {
-        })
-        consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {
-        })
+        consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation(() => {})
+        consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
     })
     it('returns checkout response if request is valid', async () => {
         mockGetBasket.mockImplementationOnce(() => {
@@ -310,6 +321,221 @@ describe('payments controller', () => {
         expect(consoleInfoSpy.mock.calls[3][0]).toContain('sendPayments resultCode Authorised')
         expect(next).toHaveBeenCalled()
     })
+    it('uses CREDIT_CARD payment method when type is scheme and getCardType returns valid card type', async () => {
+        mockGetBasket.mockImplementationOnce(() => {
+            return {
+                orderTotal: 100
+            }
+        })
+        mockCreateOrder.mockImplementationOnce(() => {
+            return {
+                customerInfo: {
+                    customerId: 'testCustomer'
+                },
+                customerName: 'John Doe',
+                orderNo: '123',
+                orderTotal: 100,
+                currency: 'USD',
+                shipments: [
+                    {
+                        shippingAddress: {
+                            city: 'New York',
+                            countryCode: 'US',
+                            address2: 'Apt 123',
+                            postalCode: '10001',
+                            stateCode: 'NY',
+                            address1: '123 Main St'
+                        }
+                    }
+                ],
+                billingAddress: {
+                    city: 'New York',
+                    countryCode: 'US',
+                    address2: 'Apt 123',
+                    postalCode: '10001',
+                    stateCode: 'NY',
+                    address1: '123 Main St'
+                },
+                productItems: []
+            }
+        })
+        mockPayments.mockImplementationOnce(() => {
+            return {
+                resultCode: RESULT_CODES.AUTHORISED,
+                merchantReference: 'reference123'
+            }
+        })
+
+        req.body = {
+            data: {
+                paymentMethod: {
+                    type: 'scheme',
+                    brand: 'visa'
+                }
+            }
+        }
+
+        await PaymentsController(req, res, next)
+        expect(mockAddPaymentInstrumentToBasket).toHaveBeenCalledWith(
+            expect.objectContaining({
+                body: expect.objectContaining({
+                    paymentMethodId: 'CREDIT_CARD',
+                    paymentCard: expect.objectContaining({
+                        cardType: 'Visa'
+                    })
+                })
+            })
+        )
+        expect(res.locals.response).toEqual({
+            isFinal: true,
+            isSuccessful: true,
+            merchantReference: 'reference123'
+        })
+        expect(next).toHaveBeenCalled()
+    })
+    it('uses ADYEN_COMPONENT payment method when type is scheme but getCardType returns empty', async () => {
+        mockGetBasket.mockImplementationOnce(() => {
+            return {
+                orderTotal: 100
+            }
+        })
+        mockCreateOrder.mockImplementationOnce(() => {
+            return {
+                customerInfo: {
+                    customerId: 'testCustomer'
+                },
+                customerName: 'John Doe',
+                orderNo: '123',
+                orderTotal: 100,
+                currency: 'USD',
+                shipments: [
+                    {
+                        shippingAddress: {
+                            city: 'New York',
+                            countryCode: 'US',
+                            address2: 'Apt 123',
+                            postalCode: '10001',
+                            stateCode: 'NY',
+                            address1: '123 Main St'
+                        }
+                    }
+                ],
+                billingAddress: {
+                    city: 'New York',
+                    countryCode: 'US',
+                    address2: 'Apt 123',
+                    postalCode: '10001',
+                    stateCode: 'NY',
+                    address1: '123 Main St'
+                },
+                productItems: []
+            }
+        })
+        mockPayments.mockImplementationOnce(() => {
+            return {
+                resultCode: RESULT_CODES.AUTHORISED,
+                merchantReference: 'reference123'
+            }
+        })
+
+        req.body = {
+            data: {
+                paymentMethod: {
+                    type: 'scheme',
+                    brand: 'unknown_brand'
+                }
+            }
+        }
+
+        await PaymentsController(req, res, next)
+        expect(mockAddPaymentInstrumentToBasket).toHaveBeenCalledWith(
+            expect.objectContaining({
+                body: expect.objectContaining({
+                    paymentMethodId: 'AdyenComponent',
+                    paymentCard: expect.objectContaining({
+                        cardType: 'scheme'
+                    })
+                })
+            })
+        )
+        expect(res.locals.response).toEqual({
+            isFinal: true,
+            isSuccessful: true,
+            merchantReference: 'reference123'
+        })
+        expect(next).toHaveBeenCalled()
+    })
+    it('uses ADYEN_COMPONENT payment method when type is not scheme', async () => {
+        mockGetBasket.mockImplementationOnce(() => {
+            return {
+                orderTotal: 100
+            }
+        })
+        mockCreateOrder.mockImplementationOnce(() => {
+            return {
+                customerInfo: {
+                    customerId: 'testCustomer'
+                },
+                customerName: 'John Doe',
+                orderNo: '123',
+                orderTotal: 100,
+                currency: 'USD',
+                shipments: [
+                    {
+                        shippingAddress: {
+                            city: 'New York',
+                            countryCode: 'US',
+                            address2: 'Apt 123',
+                            postalCode: '10001',
+                            stateCode: 'NY',
+                            address1: '123 Main St'
+                        }
+                    }
+                ],
+                billingAddress: {
+                    city: 'New York',
+                    countryCode: 'US',
+                    address2: 'Apt 123',
+                    postalCode: '10001',
+                    stateCode: 'NY',
+                    address1: '123 Main St'
+                },
+                productItems: []
+            }
+        })
+        mockPayments.mockImplementationOnce(() => {
+            return {
+                resultCode: RESULT_CODES.AUTHORISED,
+                merchantReference: 'reference123'
+            }
+        })
+
+        req.body = {
+            data: {
+                paymentMethod: {
+                    type: 'paypal'
+                }
+            }
+        }
+
+        await PaymentsController(req, res, next)
+        expect(mockAddPaymentInstrumentToBasket).toHaveBeenCalledWith(
+            expect.objectContaining({
+                body: expect.objectContaining({
+                    paymentMethodId: 'AdyenComponent',
+                    paymentCard: expect.objectContaining({
+                        cardType: 'paypal'
+                    })
+                })
+            })
+        )
+        expect(res.locals.response).toEqual({
+            isFinal: true,
+            isSuccessful: true,
+            merchantReference: 'reference123'
+        })
+        expect(next).toHaveBeenCalled()
+    })
     it('return error if order does not belong to the customer', async () => {
         mockGetBasket.mockImplementationOnce(() => {
             return {
@@ -381,7 +607,9 @@ describe('payments controller', () => {
         expect(consoleInfoSpy.mock.calls[1][0]).toContain('sendPayments orderCreated 123')
         expect(consoleErrorSpy).toHaveBeenCalled()
         expect(consoleErrorSpy.mock.calls[0][0]).toContain('order is invalid')
-        expect(next).toHaveBeenCalledWith(new AdyenError('order is invalid', 404, expect.any(String)))
+        expect(next).toHaveBeenCalledWith(
+            new AdyenError('order is invalid', 404, expect.any(String))
+        )
     })
     it('returns checkout response even if request has no billing address and delivery address', async () => {
         mockGetBasket.mockImplementationOnce(() => {
