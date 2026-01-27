@@ -1,3 +1,4 @@
+import crypto from 'crypto'
 import {PAYMENT_METHOD_TYPES, TAXATION} from '../../utils/constants.mjs'
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 
@@ -210,4 +211,15 @@ export function getNativeThreeDS(adyenConfig) {
     return nativeThreeDSValues.includes(adyenConfig.nativeThreeDS)
         ? adyenConfig.nativeThreeDS
         : 'preferred'
+}
+
+/**
+ * Creates an idempotency key by hashing the provided data using SHA-256.
+ * This key ensures that the same request is not processed multiple times.
+ *
+ * @param {Object} data - The data to be hashed to create the idempotency key.
+ * @returns {string} The generated SHA-256 hash in hexadecimal format.
+ */
+export function createIdempotencyKey(data) {
+    return crypto.createHash('sha256').update(JSON.stringify(data)).digest('hex')
 }

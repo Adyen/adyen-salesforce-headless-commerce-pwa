@@ -1,5 +1,4 @@
 import Logger from '../models/logger'
-import {v4 as uuidv4} from 'uuid'
 import {AdyenError} from '../models/AdyenError'
 import {ERROR_MESSAGE} from '../../utils/constants.mjs'
 import {
@@ -9,6 +8,7 @@ import {
 } from '../helpers/paymentsHelper.js'
 import {createOrderUsingOrderNo} from '../helpers/orderHelper.js'
 import AdyenClientProvider from '../models/adyenClientProvider'
+import {createIdempotencyKey} from '../utils/paymentUtils'
 
 /**
  * Handles errors that occur during the payment details submission process.
@@ -52,7 +52,7 @@ async function sendPaymentDetails(req, res, next) {
         await validateBasketPayments(adyenContext, amount, paymentMethod)
         const checkout = new AdyenClientProvider(adyenContext).getPaymentsApi()
         const response = await checkout.paymentsDetails(data, {
-            idempotencyKey: uuidv4()
+            idempotencyKey: createIdempotencyKey(data)
         })
         Logger.info('sendPaymentDetails', `resultCode ${response.resultCode}`)
         const checkoutResponse = {

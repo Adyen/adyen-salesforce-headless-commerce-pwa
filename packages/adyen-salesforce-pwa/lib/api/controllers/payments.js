@@ -1,7 +1,6 @@
 import {ERROR_MESSAGE} from '../../utils/constants.mjs'
 import AdyenClientProvider from '../models/adyenClientProvider'
 import Logger from '../models/logger'
-import {v4 as uuidv4} from 'uuid'
 import {AdyenError} from '../models/AdyenError'
 import {
     createCheckoutResponse,
@@ -11,6 +10,7 @@ import {
     isApplePayExpress
 } from '../helpers/paymentsHelper.js'
 import {createOrderUsingOrderNo} from '../helpers/orderHelper.js'
+import {createIdempotencyKey} from '../utils/paymentUtils'
 
 /**
  * Handles errors that occur during the payment process.
@@ -60,7 +60,7 @@ async function sendPayments(req, res, next) {
         )
         const checkout = new AdyenClientProvider(adyenContext).getPaymentsApi()
         const response = await checkout.payments(paymentRequest, {
-            idempotencyKey: uuidv4()
+            idempotencyKey: createIdempotencyKey(paymentRequest)
         })
         Logger.info('sendPayments', `resultCode ${response?.resultCode}`)
 

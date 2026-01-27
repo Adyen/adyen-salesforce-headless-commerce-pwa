@@ -1,10 +1,10 @@
 import Logger from '../models/logger'
 import {ERROR_MESSAGE, TAXATION} from '../../utils/constants.mjs'
 import AdyenClientProvider from '../models/adyenClientProvider'
-import {v4 as uuidv4} from 'uuid'
 import {AdyenError} from '../models/AdyenError'
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 import {createShopperBasketsClient} from '../helpers/basketHelper.js'
+import {createIdempotencyKey} from '../utils/paymentUtils'
 
 /**
  * Updates shopper details in the basket.
@@ -97,7 +97,7 @@ async function paypalUpdateOrder(req, res, next) {
         const paypalUpdateOrderResponse = await utilityApi.updatesOrderForPaypalExpressCheckout(
             paypalUpdateOrderRequest,
             {
-                idempotencyKey: uuidv4()
+                idempotencyKey: createIdempotencyKey(paypalUpdateOrderRequest)
             }
         )
         Logger.info('paypalUpdateOrder', 'success')
