@@ -9,9 +9,6 @@ jest.mock('../../models/logger')
 jest.mock('../../models/adyenClientProvider')
 jest.mock('../../../utils/parsers.mjs')
 jest.mock('../../helpers/basketHelper.js')
-jest.mock('uuid', () => ({
-    v4: jest.fn(() => 'test-uuid-1234')
-}))
 
 describe('paypalUpdateOrder controller', () => {
     let req
