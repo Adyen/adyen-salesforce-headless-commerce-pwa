@@ -221,5 +221,5 @@ export function getNativeThreeDS(adyenConfig) {
  * @returns {string} The generated SHA-256 hash in hexadecimal format.
  */
 export function createIdempotencyKey(data) {
-    return crypto.createHash('sha256').update(JSON.stringify(data)).digest('hex')
+    return crypto.createHash('md5').update(JSON.stringify(data)).digest('hex')
 }
