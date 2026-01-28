@@ -214,11 +214,11 @@ export function getNativeThreeDS(adyenConfig) {
 }
 
 /**
- * Creates an idempotency key by hashing the provided data using SHA-256.
+ * Creates an idempotency key by hashing the provided data using md5.
  * This key ensures that the same request is not processed multiple times.
  *
  * @param {Object} data - The data to be hashed to create the idempotency key.
- * @returns {string} The generated SHA-256 hash in hexadecimal format.
+ * @returns {string} The generated md5 hash.
  */
 export function createIdempotencyKey(data) {
     return crypto.createHash('md5').update(JSON.stringify(data)).digest('hex')

@@ -154,8 +154,7 @@ describe('paypalUpdateOrder controller', () => {
                     }
                 },
                 {
-                    idempotencyKey:
-                        '50a1a1fe65e0dea7238d52998dd77b7f903597f1587845ac02d782f9bf2aeaea'
+                    idempotencyKey: '3ccb057cc831f6702e89044cea7322b6'
                 }
             )
 
