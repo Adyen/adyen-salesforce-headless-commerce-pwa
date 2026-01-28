@@ -1,10 +1,10 @@
-import {v4 as uuidv4} from 'uuid'
 import AdyenClientProvider from '../models/adyenClientProvider.js'
 import Logger from '../models/logger.js'
 import {ERROR_MESSAGE, PAYMENT_METHOD_TYPES, RESULT_CODES} from '../../utils/constants.mjs'
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 import {AdyenError} from '../models/AdyenError.js'
 import {PaymentRequestBuilder} from '../models/PaymentRequestBuilder.js'
+import {createIdempotencyKey} from '../utils/paymentUtils'
 
 /**
  * A private helper to reset the basket's Adyen-related custom attributes
@@ -40,7 +40,7 @@ export async function cancelAdyenOrder(adyenContext, order) {
         merchantAccount: adyenConfig.merchantAccount
     }
     const response = await ordersApi.cancelOrder(request, {
-        idempotencyKey: uuidv4()
+        idempotencyKey: createIdempotencyKey(request)
     })
 
     if (response.resultCode === 'Received') {

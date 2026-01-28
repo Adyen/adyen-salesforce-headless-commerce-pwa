@@ -1,9 +1,8 @@
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 import AdyenClientProvider from '../models/adyenClientProvider'
 import Logger from '../models/logger'
-import {v4 as uuidv4} from 'uuid'
 import {cancelAdyenOrder, createCheckoutResponse} from '../helpers/paymentsHelper.js'
-import {filterStateData} from '../utils/paymentUtils.js'
+import {createIdempotencyKey, filterStateData} from '../utils/paymentUtils.js'
 import {expireAt} from '../../utils/expireAt.mjs'
 
 /**
@@ -35,7 +34,7 @@ export async function balanceCheck(req, res, next) {
             }
         }
         const response = await ordersApi.getBalanceOfGiftCard(request, {
-            idempotencyKey: uuidv4()
+            idempotencyKey: createIdempotencyKey(request)
         })
         await adyenContext.basketService.update({
             c_giftCardCheckBalance: JSON.stringify(response)
@@ -79,7 +78,7 @@ export async function createOrder(req, res, next) {
             }
         }
         const response = await ordersApi.orders(request, {
-            idempotencyKey: uuidv4()
+            idempotencyKey: createIdempotencyKey(request)
         })
         await adyenContext.basketService.update({
             c_orderData: JSON.stringify(response)

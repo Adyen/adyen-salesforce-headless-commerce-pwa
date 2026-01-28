@@ -6,10 +6,10 @@ import {
 } from '../../utils/constants.mjs'
 import AdyenClientProvider from '../models/adyenClientProvider'
 import Logger from '../models/logger'
-import {v4 as uuidv4} from 'uuid'
 import {AdyenError} from '../models/AdyenError'
 import {getApplicationInfo} from '../../utils/getApplicationInfo.mjs'
 import currencyList from '../../utils/currencyList.mjs'
+import {createIdempotencyKey} from '../utils/paymentUtils'
 
 async function getPaymentMethods(req, res, next) {
     Logger.info('getPaymentMethods', 'start')
@@ -42,7 +42,7 @@ async function getPaymentMethods(req, res, next) {
         }
 
         const response = await checkout.paymentMethods(paymentMethodsRequest, {
-            idempotencyKey: uuidv4()
+            idempotencyKey: createIdempotencyKey(paymentMethodsRequest)
         })
 
         if (!response?.paymentMethods?.length) {
@@ -94,7 +94,7 @@ async function getPaymentMethodsForExpress(req, res, next) {
         }
 
         const response = await checkout.paymentMethods(paymentMethodsRequest, {
-            idempotencyKey: uuidv4()
+            idempotencyKey: createIdempotencyKey(paymentMethodsRequest)
         })
 
         if (!response?.paymentMethods?.length) {

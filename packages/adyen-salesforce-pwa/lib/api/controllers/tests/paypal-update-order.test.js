@@ -9,9 +9,6 @@ jest.mock('../../models/logger')
 jest.mock('../../models/adyenClientProvider')
 jest.mock('../../../utils/parsers.mjs')
 jest.mock('../../helpers/basketHelper.js')
-jest.mock('uuid', () => ({
-    v4: jest.fn(() => 'test-uuid-1234')
-}))
 
 describe('paypalUpdateOrder controller', () => {
     let req
@@ -157,7 +154,7 @@ describe('paypalUpdateOrder controller', () => {
                     }
                 },
                 {
-                    idempotencyKey: 'test-uuid-1234'
+                    idempotencyKey: '3ccb057cc831f6702e89044cea7322b6'
                 }
             )
 
