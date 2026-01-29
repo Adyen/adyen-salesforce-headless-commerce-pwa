@@ -8,10 +8,11 @@ export class PaymentCancelExpressService {
         this.apiClient = new ApiClient(this.baseUrl, token, customerId, basketId, site)
     }
 
-    async paymentCancelExpress() {
+    async paymentCancelExpress(options = {}) {
+        const {deleteTempBasket = false} = options
         const res = await this.apiClient.post({
             path: '/cancel/express',
-            body: JSON.stringify({})
+            body: JSON.stringify({deleteTempBasket})
         })
         if (res.status >= 300) {
             const errorData = await res

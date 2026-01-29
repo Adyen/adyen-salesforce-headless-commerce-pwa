@@ -78,6 +78,7 @@ export const getAppleButtonConfig = (props = {}) => {
     const propsWithGetBasket = {...props, getBasket, setBasket}
 
     const errorHandler = (error, component) => onErrorHandler(error, component, propsWithGetBasket)
+
     const buttonConfig = {
         showPayButton: true,
         isExpress: true,
@@ -286,15 +287,18 @@ export const getAppleButtonConfig = (props = {}) => {
 export const onErrorHandler = async (error, component, props) => {
     try {
         const basket = props.getBasket()
+        const isTemporaryBasket = basket?.temporaryBasket === true || props.isExpressPdp
         const paymentCancelExpressService = new PaymentCancelExpressService(
             props.token,
             props.customerId,
             basket?.basketId,
             props.site
         )
-        await paymentCancelExpressService.paymentCancelExpress()
-        props.navigate(`/checkout?error=true`)
-        return {cancelled: true}
+        await paymentCancelExpressService.paymentCancelExpress({
+            deleteTempBasket: isTemporaryBasket
+        })
+
+        return {cancelled: true, basketDeleted: isTemporaryBasket}
     } catch (err) {
         console.error('Error during express payment cancellation:', err)
         return {cancelled: false, error: err.message}
