@@ -298,6 +298,10 @@ export const onErrorHandler = async (error, component, props) => {
             deleteTempBasket: isTemporaryBasket
         })
 
+        if (!isTemporaryBasket) {
+            props.navigate(`/checkout?error=true`)
+        }
+
         return {cancelled: true, basketDeleted: isTemporaryBasket}
     } catch (err) {
         console.error('Error during express payment cancellation:', err)
