@@ -164,7 +164,8 @@ const AdyenCheckoutComponent = ({
             afterSubmit,
             beforeSubmit,
             afterAdditionalDetails,
-            beforeAdditionalDetails
+            beforeAdditionalDetails,
+            locale
         })
     }, [
         additionalPaymentMethodsConfiguration,

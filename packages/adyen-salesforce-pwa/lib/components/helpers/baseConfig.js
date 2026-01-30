@@ -47,11 +47,14 @@ export const onSubmit = async (state, component, actions, props) => {
             basket?.basketId,
             props?.site
         )
-        const paymentsResponse = await adyenPaymentService.submitPayment({
-            ...state.data,
-            origin: state.data.origin || window.location.origin,
-            returnUrl: props?.returnUrl || `${window.location.href}/redirect`
-        })
+        const paymentsResponse = await adyenPaymentService.submitPayment(
+            {
+                ...state.data,
+                origin: state.data.origin || window.location.origin,
+                returnUrl: props?.returnUrl || `${window.location.href}/redirect`
+            },
+            props.locale
+        )
 
         return {paymentsResponse: paymentsResponse}
     } catch (err) {
