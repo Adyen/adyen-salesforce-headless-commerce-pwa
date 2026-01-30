@@ -53,10 +53,11 @@ describe('AdyenPaymentsService', () => {
 
         paymentsService.apiClient.post.mockResolvedValueOnce(mockFetchPromise)
 
-        const paymentResult = await paymentsService.submitPayment(mockAdyenStateData)
+        const paymentResult = await paymentsService.submitPayment(mockAdyenStateData, {id: 'en'})
 
         expect(paymentsService.apiClient.post).toHaveBeenCalledWith({
-            body: JSON.stringify({data: mockAdyenStateData})
+            body: JSON.stringify({data: mockAdyenStateData}),
+            queryParams: {locale: 'en'}
         })
         expect(paymentResult).toEqual(mockResponse)
     })
