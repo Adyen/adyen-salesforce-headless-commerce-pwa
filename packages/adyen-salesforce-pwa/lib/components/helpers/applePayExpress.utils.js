@@ -61,7 +61,8 @@ export const getAppleButtonConfig = (props = {}) => {
         isExpressPdp = false,
         merchantDisplayName = '',
         customerId,
-        product
+        product,
+        locale
     } = props
 
     let applePayAmount = basket.orderTotal
@@ -113,7 +114,7 @@ export const getAppleButtonConfig = (props = {}) => {
                         ...getCustomerShippingDetails(customerData),
                         origin: state.data.origin ? state.data.origin : window.location.origin
                     },
-                    props.locale
+                    locale
                 )
                 if (paymentsResponse?.isFinal && paymentsResponse?.isSuccessful) {
                     const finalPriceUpdate = {

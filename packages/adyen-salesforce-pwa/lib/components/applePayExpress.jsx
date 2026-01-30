@@ -162,7 +162,8 @@ const ApplePayExpressComponent = (props) => {
                     isExpressPdp,
                     merchantDisplayName,
                     customerId,
-                    product
+                    product,
+                    locale
                 })
                 const applePayButton = new ApplePay(checkout, appleButtonConfig)
                 await applePayButton.isAvailable()
