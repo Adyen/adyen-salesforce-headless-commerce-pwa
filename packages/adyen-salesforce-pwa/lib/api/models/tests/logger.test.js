@@ -1,64 +1,93 @@
-import Logger from '../logger'
 import {APPLICATION_VERSION} from '../../../utils/constants.mjs'
+import packageJson from '../../../../package.json'
+
+jest.mock('@salesforce/pwa-kit-runtime/utils/logger-factory', () => ({
+    __esModule: true,
+    default: jest.fn()
+}))
 
 describe('Logger', () => {
-    const logTypes = {
-        info: 'INFO',
-        warn: 'WARN',
-        error: 'ERROR',
-        debug: 'DEBUG'
-    }
-    for (const type in logTypes) {
+    const logTypes = ['info', 'warn', 'error', 'debug']
+
+    for (const type of logTypes) {
         describe(`${type}`, () => {
-            let consoleSpy
-            const prefix = `ADYEN_${logTypes[type]}`
+            let Logger
+            let createLogger
+            let mockLoggerInstance
+
             const step = 'testStep'
             const message = 'testMessage'
-            beforeEach(() => {
-                consoleSpy = jest.spyOn(console, `${type}`).mockImplementation(() => {})
+
+            beforeEach(async () => {
+                jest.resetModules()
+                ;({default: createLogger} = await import(
+                    '@salesforce/pwa-kit-runtime/utils/logger-factory'
+                ))
+                mockLoggerInstance = {
+                    info: jest.fn(),
+                    warn: jest.fn(),
+                    error: jest.fn(),
+                    debug: jest.fn()
+                }
+                createLogger.mockReturnValue(mockLoggerInstance)
+
+                await jest.isolateModulesAsync(async () => {
+                    const mod = await import('../logger')
+                    Logger = mod.default
+                })
             })
-            it('creates log with correct prefix', () => {
+
+            it('creates logger instance with package name', () => {
                 Logger[`${type}`]()
-                expect(consoleSpy).toHaveBeenCalled()
-                expect(consoleSpy.mock.calls[0][0]).toContain(prefix)
+                expect(createLogger).toHaveBeenCalledWith({packageName: packageJson.name})
             })
+
             it('creates log with correct application version', () => {
                 Logger[`${type}`]()
-                expect(consoleSpy).toHaveBeenCalled()
-                expect(consoleSpy.mock.calls[0][0]).toContain(APPLICATION_VERSION)
+                expect(mockLoggerInstance[type]).toHaveBeenCalled()
+                expect(mockLoggerInstance[type].mock.calls[0][0]).toContain(APPLICATION_VERSION)
             })
+
             it('creates log with correct step', () => {
                 Logger[`${type}`](step)
-                expect(consoleSpy).toHaveBeenCalled()
-                expect(consoleSpy.mock.calls[0][0]).toContain(step)
+                expect(mockLoggerInstance[type]).toHaveBeenCalled()
+                expect(mockLoggerInstance[type].mock.calls[0][0]).toContain(step)
             })
+
             it('creates log with correct message', () => {
                 Logger[`${type}`](step, message)
-                expect(consoleSpy).toHaveBeenCalled()
-                expect(consoleSpy.mock.calls[0][0]).toContain(message)
+                expect(mockLoggerInstance[type]).toHaveBeenCalled()
+                expect(mockLoggerInstance[type].mock.calls[0][0]).toContain(message)
             })
+
             it('creates log when message is an object', () => {
-                const message = {
+                const objectMessage = {
                     prop1: 'value1',
                     prop2: {
                         prop3: 'value2'
                     }
                 }
-                Logger[`${type}`](step, message)
-                expect(consoleSpy).toHaveBeenCalled()
-                expect(consoleSpy.mock.calls[0][0]).toContain(JSON.stringify(message))
+
+                Logger[`${type}`](step, objectMessage)
+                expect(mockLoggerInstance[type]).toHaveBeenCalled()
+                expect(mockLoggerInstance[type].mock.calls[0][0]).toContain(
+                    JSON.stringify(objectMessage)
+                )
             })
+
             it('does not create log with "undefined" when step or message is not defined', () => {
                 Logger[`${type}`]()
-                expect(consoleSpy).toHaveBeenCalled()
-                expect(consoleSpy.mock.calls[0][0]).not.toContain('undefined')
+                expect(mockLoggerInstance[type]).toHaveBeenCalled()
+                expect(mockLoggerInstance[type].mock.calls[0][0]).not.toContain('undefined')
             })
+
             it('creates log with unnecessary spaces removed', () => {
-                const step = ' test  step '
-                const message = 'test    message  '
-                const log = `${prefix} ${APPLICATION_VERSION} test step test message`
-                Logger[`${type}`](step, message)
-                expect(consoleSpy).toHaveBeenCalledWith(log)
+                const spacedStep = ' test  step '
+                const spacedMessage = 'test    message  '
+                const log = `${APPLICATION_VERSION} test step test message`
+
+                Logger[`${type}`](spacedStep, spacedMessage)
+                expect(mockLoggerInstance[type]).toHaveBeenCalledWith(log)
             })
         })
     }
