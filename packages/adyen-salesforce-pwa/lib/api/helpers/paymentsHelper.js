@@ -235,6 +235,7 @@ export async function createPaymentRequestObject(data, adyenContext, req) {
             .withShopperReference()
             .withShopperIP()
             .withAdditionalData()
+            .withShopperLocale()
             .build()
     }
 

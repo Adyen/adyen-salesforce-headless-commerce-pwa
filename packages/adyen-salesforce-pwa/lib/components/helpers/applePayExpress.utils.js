@@ -61,7 +61,8 @@ export const getAppleButtonConfig = (props = {}) => {
         isExpressPdp = false,
         merchantDisplayName = '',
         customerId,
-        product
+        product,
+        locale
     } = props
 
     let applePayAmount = basket.orderTotal
@@ -103,13 +104,18 @@ export const getAppleButtonConfig = (props = {}) => {
                     basketData?.basketId,
                     site
                 )
-                const paymentsResponse = await adyenPaymentService.submitPayment({
-                    paymentType: isExpressPdp ? PAYMENT_TYPES.EXPRESS_PDP : PAYMENT_TYPES.EXPRESS,
-                    ...state.data,
-                    ...getCustomerBillingDetails(billingData),
-                    ...getCustomerShippingDetails(customerData),
-                    origin: state.data.origin ? state.data.origin : window.location.origin
-                })
+                const paymentsResponse = await adyenPaymentService.submitPayment(
+                    {
+                        paymentType: isExpressPdp
+                            ? PAYMENT_TYPES.EXPRESS_PDP
+                            : PAYMENT_TYPES.EXPRESS,
+                        ...state.data,
+                        ...getCustomerBillingDetails(billingData),
+                        ...getCustomerShippingDetails(customerData),
+                        origin: state.data.origin ? state.data.origin : window.location.origin
+                    },
+                    locale
+                )
                 if (paymentsResponse?.isFinal && paymentsResponse?.isSuccessful) {
                     const finalPriceUpdate = {
                         newTotal: {

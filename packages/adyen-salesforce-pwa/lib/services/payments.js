@@ -8,11 +8,12 @@ export class AdyenPaymentsService {
         this.apiClient = new ApiClient(this.baseUrl, token, customerId, basketId, site)
     }
 
-    async submitPayment(adyenStateData) {
+    async submitPayment(adyenStateData, locale) {
         const res = await this.apiClient.post({
             body: JSON.stringify({
                 data: adyenStateData
-            })
+            }),
+            queryParams: {locale: locale?.id}
         })
         if (res.status >= 300) {
             const errorData = await res.json().catch(() => ({message: 'Payment submission failed'}))
