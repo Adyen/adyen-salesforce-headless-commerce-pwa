@@ -39,7 +39,7 @@
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
         "format": "prettier --write ./lib",
-        "postinstall": "node node_modules/.bin/update-notifier.js"
+        "postinstall": "node node_modules/.bin/update-notifier"
     },
     "peerDependencies": {
         "@adyen/adyen-web": "^6.21.0",
