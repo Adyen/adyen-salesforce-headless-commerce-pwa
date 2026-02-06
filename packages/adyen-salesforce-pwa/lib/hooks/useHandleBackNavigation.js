@@ -47,7 +47,6 @@ const useHandleBackNavigation = ({
     enabled = true
 }) => {
     const [error, setError] = useState(null)
-    const hasDetectedRef = useRef(false)
     const isProcessingRef = useRef(false)
     const refetchBasketRef = useRef(refetchBasket)
 
@@ -56,13 +55,7 @@ const useHandleBackNavigation = ({
     }, [refetchBasket])
 
     const checkForAbandonedPayment = useCallback(async () => {
-        if (
-            hasDetectedRef.current ||
-            isProcessingRef.current ||
-            !enabled ||
-            !authToken ||
-            !basketId
-        ) {
+        if (isProcessingRef.current || !enabled || !authToken || !basketId) {
             return false
         }
 
