@@ -75,11 +75,24 @@ async function sendPayments(req, res, next) {
         }
 
         if (checkoutResponse.isSuccessful) {
-            await adyenContext.basketService.update({
+            const basketUpdate = {
                 c_amount: JSON.stringify(paymentRequest?.amount),
-                c_paymentMethod: JSON.stringify(paymentRequest?.paymentMethod),
-                c_pspReference: response?.pspReference
-            })
+                c_paymentMethod: JSON.stringify(paymentRequest?.paymentMethod)
+            }
+
+            if (response?.pspReference) {
+                basketUpdate.c_pspReference = response.pspReference
+            }
+
+            if (checkoutResponse.action) {
+                basketUpdate.c_paymentData = JSON.stringify({
+                    merchantReference: checkoutResponse.merchantReference,
+                    resultCode: response?.resultCode,
+                    timestamp: new Date().toISOString()
+                })
+            }
+
+            await adyenContext.basketService.update(basketUpdate)
         }
 
         if (
