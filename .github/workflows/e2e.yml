@@ -29,7 +29,7 @@ jobs:
               run: npm i --ignore-scripts
             - name: Link PWA to Retail app
               working-directory: ./packages/adyen-retail-react-app
-              run: npm link @adyen/adyen-salesforce-pwa
+              run: npm link @adyen/adyen-salesforce-pwa --ignore-scripts
             - name: Install Playwright dependencies
               working-directory: ./packages/e2e-tests
               run: npm i
