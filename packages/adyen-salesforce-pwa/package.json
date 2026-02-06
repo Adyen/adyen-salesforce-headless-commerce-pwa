@@ -46,8 +46,8 @@
         "@adyen/api-library": "^29.1.0",
         "commerce-sdk-isomorphic": "^4.2.0",
         "@salesforce/pwa-kit-runtime": "^3.5.1",
-        "react": "^18.3.1",
-        "react-dom": "^18.3.1",
+        "react": "^18.3.1 || ^19.0.0",
+        "react-dom": "^18.3.1 || ^19.0.0",
         "prop-types": "^15.8.1"
     },
     "dependencies": {
