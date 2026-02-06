@@ -23,7 +23,7 @@ jobs:
               run: npm run build-dev
             - name: Make PWA NPM Link
               working-directory: ./packages/adyen-salesforce-pwa
-              run: npm link
+              run: npm link --ignore-scripts
             - name: Install Retail app package dependencies
               working-directory: ./packages/adyen-retail-react-app
               run: npm i
