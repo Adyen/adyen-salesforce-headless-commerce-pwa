@@ -14,7 +14,8 @@
     "bin": {
         "include-env": "dist/scripts/include-env.js",
         "get-env": "dist/scripts/get-env.js",
-        "upload-env": "dist/scripts/upload-env.js"
+        "upload-env": "dist/scripts/upload-env.js",
+        "update-notifier": "dist/scripts/update-notifier.js"
     },
     "license": "MIT",
     "homepage": "https://docs.adyen.com/plugins/salesforce-commerce-cloud/",
@@ -38,7 +39,7 @@
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
         "format": "prettier --write ./lib",
-        "postinstall": "node ./lib/scripts/update-notifier.js"
+        "postinstall": "node dist/scripts/update-notifier.js"
     },
     "peerDependencies": {
         "@adyen/adyen-web": "^6.21.0",
