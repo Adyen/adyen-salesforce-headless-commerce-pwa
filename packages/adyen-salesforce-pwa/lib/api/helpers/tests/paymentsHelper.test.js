@@ -343,6 +343,7 @@ describe('paymentsHelper', () => {
                 c_paymentMethod: '',
                 c_amount: '',
                 c_pspReference: '',
+                c_paymentData: '',
                 c_paymentDataForReviewPage: ''
             })
             expect(mockAdyenContext.basketService.removeAllPaymentInstruments).toHaveBeenCalled()

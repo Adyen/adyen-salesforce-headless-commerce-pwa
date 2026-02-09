@@ -19,6 +19,7 @@ async function _cleanupBasket(adyenContext) {
         c_paymentMethod: '',
         c_amount: '',
         c_pspReference: '',
+        c_paymentData: '',
         c_paymentDataForReviewPage: ''
     })
     await adyenContext.basketService.removeAllPaymentInstruments()

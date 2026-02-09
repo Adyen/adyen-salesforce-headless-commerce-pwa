@@ -32,12 +32,12 @@ import {useAccessToken, useCustomerId, useCustomerType} from '@salesforce/commer
 import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
 import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
 import LoadingSpinner from '@salesforce/retail-react-app/app/components/loading-spinner'
-import {AdyenCheckout, pageTypes} from '@adyen/adyen-salesforce-pwa'
+import {AdyenCheckout, pageTypes, useHandleBackNavigation} from '@adyen/adyen-salesforce-pwa'
 /* -----------------Adyen End ------------------------ */
 
 const Payment = () => {
     const {formatMessage} = useIntl()
-    const {data: basket} = useCurrentBasket()
+    const {data: basket, refetch: refetchBasket} = useCurrentBasket()
     const customerId = useCustomerId()
     const customerTypeData = useCustomerType()
     const {getTokenWhenReady} = useAccessToken()
@@ -53,6 +53,14 @@ const Payment = () => {
 
         getToken()
     }, [])
+
+    useHandleBackNavigation({
+        authToken,
+        customerId,
+        basketId: basket?.basketId,
+        site,
+        refetchBasket
+    })
 
     const isPickupOnly =
         basket?.shipments?.length > 0 &&
