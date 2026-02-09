@@ -14,7 +14,8 @@
     "bin": {
         "include-env": "dist/scripts/include-env.js",
         "get-env": "dist/scripts/get-env.js",
-        "upload-env": "dist/scripts/upload-env.js"
+        "upload-env": "dist/scripts/upload-env.js",
+        "update-notifier": "dist/scripts/update-notifier.js"
     },
     "license": "MIT",
     "homepage": "https://docs.adyen.com/plugins/salesforce-commerce-cloud/",
@@ -38,15 +39,15 @@
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
         "format": "prettier --write ./lib",
-        "postinstall": "node ./lib/scripts/update-notifier.js"
+        "postinstall": "npx update-notifier"
     },
     "peerDependencies": {
         "@adyen/adyen-web": "^6.21.0",
         "@adyen/api-library": "^29.1.0",
         "commerce-sdk-isomorphic": "^4.2.0",
         "@salesforce/pwa-kit-runtime": "^3.5.1",
-        "react": "^18.3.1",
-        "react-dom": "^18.3.1",
+        "react": "^18.3.1 || ^19.0.0",
+        "react-dom": "^18.3.1 || ^19.0.0",
         "prop-types": "^15.8.1"
     },
     "dependencies": {
