@@ -17,25 +17,22 @@ jobs:
             - name: Setup Node.js
               uses: actions/setup-node@v4
               with:
-                  node-version: '24.x'
+                  node-version: '22.x'
                   cache: 'npm'
 
             - name: Install dependencies
               run: npm ci
 
+            - name: Run lint
+              working-directory: ./packages/adyen-salesforce-pwa
+              run: npm run lint
+
             - name: Run tests with coverage
-              run: npm test -- --coverage --watchAll=false
-              continue-on-error: true
+              working-directory: ./packages/adyen-salesforce-pwa
+              run: npm run test:coverage
 
             - name: SonarQube Scan
-              uses: SonarSource/sonarqube-scan-action@master
+              uses: SonarSource/sonarqube-scan-action@v6
               env:
                   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
                   SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-
-            - name: SonarQube Quality Gate check
-              uses: SonarSource/sonarqube-quality-gate-action@master
-              timeout-minutes: 5
-              env:
-                  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-              continue-on-error: true
