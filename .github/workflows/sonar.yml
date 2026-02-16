@@ -20,8 +20,12 @@ jobs:
                   node-version: '22.x'
                   cache: 'npm'
 
-            - name: Install dependencies
-              run: npm ci
+            - name: Install project dependencies
+              run: npm i
+
+            - name: Install PWA package dependencies
+              working-directory: ./packages/adyen-salesforce-pwa
+              run: npm i --ignore-scripts
 
             - name: Run lint
               working-directory: ./packages/adyen-salesforce-pwa
