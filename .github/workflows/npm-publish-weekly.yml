@@ -1,6 +1,8 @@
 name: Publish Weekly Package
 
 on:
+    pull_request:
+      branches: [ main, develop ]
     schedule:
         - cron: '30 6 * * 1' # Runs at 06:30 UTC (7:30 CET) every Monday
     workflow_dispatch:
