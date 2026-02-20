@@ -1,8 +1,6 @@
 name: Publish Weekly Package
 
 on:
-    pull_request:
-      branches: [ main, develop ]
     schedule:
         - cron: '30 6 * * 1' # Runs at 06:30 UTC (7:30 CET) every Monday
     workflow_dispatch:
@@ -17,7 +15,7 @@ jobs:
         steps:
             - uses: actions/checkout@v4
               with:
-                  ref: feature/sfi-1333-weekly-builds # Checkout the develop branch
+                  ref: develop # Checkout the develop branch
             
             - uses: actions/setup-node@v4
               with:
@@ -49,6 +47,6 @@ jobs:
               run: cd packages/adyen-salesforce-pwa/ && npm run build-prod
 
             - name: Publish weekly package (Dry Run)
-              run: cd packages/adyen-salesforce-pwa/ && npm publish --tag weekly --access public --dry-run
+              run: cd packages/adyen-salesforce-pwa/ && npm publish --tag weekly --access public
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # Fallback if OIDC isn't fully configured, though id-token should handle it if trusted publishing is set up.
