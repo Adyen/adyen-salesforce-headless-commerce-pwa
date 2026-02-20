@@ -25,7 +25,7 @@ jobs:
                   registry-url: 'https://registry.npmjs.org'
 
             - name: Install root dependencies
-              run: npm install
+              run: npm install --ignore-scripts
 
             - name: Copy LICENSE to adyen-salesforce-pwa package
               run: cp LICENSE packages/adyen-salesforce-pwa/
@@ -34,7 +34,7 @@ jobs:
               run: cp packages/adyen-retail-react-app/.env.example packages/adyen-salesforce-pwa/
 
             - name: Install package dependencies
-              run: cd packages/adyen-salesforce-pwa/ && npm install
+              run: cd packages/adyen-salesforce-pwa/ && npm install --ignore-scripts
 
             - name: Update version for weekly build
               run: |
