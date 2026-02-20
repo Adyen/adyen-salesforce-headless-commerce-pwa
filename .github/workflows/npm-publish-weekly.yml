@@ -1,0 +1,52 @@
+name: Publish Weekly Package
+
+on:
+    schedule:
+        - cron: '30 6 * * 1' # Runs at 06:30 UTC (7:30 CET) every Monday
+    workflow_dispatch:
+
+jobs:
+    publish-npm-weekly:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            actions: read
+            id-token: write # Required for OpenID Connect (OIDC) for trusted publishing on NPM
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  ref: develop # Checkout the develop branch
+            
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 24
+                  registry-url: 'https://registry.npmjs.org'
+
+            - name: Install root dependencies
+              run: npm install
+
+            - name: Copy LICENSE to adyen-salesforce-pwa package
+              run: cp LICENSE packages/adyen-salesforce-pwa/
+
+            - name: Copy env example file to adyen-salesforce-pwa package
+              run: cp packages/adyen-retail-react-app/.env.example packages/adyen-salesforce-pwa/
+
+            - name: Install package dependencies
+              run: cd packages/adyen-salesforce-pwa/ && npm install
+
+            - name: Update version for weekly build
+              run: |
+                  cd packages/adyen-salesforce-pwa/
+                  BASE_VERSION=$(node -p "require('./package.json').version")
+                  TIMESTAMP=$(date +%Y%m%d%H%M%S)
+                  NEW_VERSION="${BASE_VERSION}-weekly-${TIMESTAMP}"
+                  echo "Updating version to ${NEW_VERSION}"
+                  npm version ${NEW_VERSION} --no-git-tag-version
+
+            - name: Build package
+              run: cd packages/adyen-salesforce-pwa/ && npm run build-prod
+
+            - name: Publish weekly package (Dry Run)
+              run: cd packages/adyen-salesforce-pwa/ && npm publish --tag weekly --access public --dry-run
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # Fallback if OIDC isn't fully configured, though id-token should handle it if trusted publishing is set up.
