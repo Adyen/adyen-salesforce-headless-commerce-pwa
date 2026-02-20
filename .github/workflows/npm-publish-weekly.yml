@@ -15,7 +15,7 @@ jobs:
         steps:
             - uses: actions/checkout@v4
               with:
-                  ref: develop # Checkout the develop branch
+                  ref: feature/sfi-1333-weekly-builds # Checkout the develop branch
             
             - uses: actions/setup-node@v4
               with:
