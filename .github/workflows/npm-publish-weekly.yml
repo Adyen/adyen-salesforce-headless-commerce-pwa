@@ -46,7 +46,7 @@ jobs:
             - name: Build package
               run: cd packages/adyen-salesforce-pwa/ && npm run build-prod
 
-            - name: Publish weekly package (Dry Run)
+            - name: Publish weekly package
               run: cd packages/adyen-salesforce-pwa/ && npm publish --tag weekly --access public
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # Fallback if OIDC isn't fully configured, though id-token should handle it if trusted publishing is set up.
