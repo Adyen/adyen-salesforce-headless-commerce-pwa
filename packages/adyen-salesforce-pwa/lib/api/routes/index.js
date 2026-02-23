@@ -10,6 +10,7 @@ import ShopperDetailsController from '../controllers/shopper-details'
 import PaypalUpdateOrderController from '../controllers/paypal-update-order'
 import PaymentDataReviewPageController from '../controllers/payment-data-review-page'
 import CreateTemporaryBasketController from '../controllers/create-temporary-basket'
+import DonationsController from '../controllers/donations'
 import {
     authenticate,
     parseNotification,
@@ -169,6 +170,13 @@ function registerAdyenEndpoints(app, runtime, overrides) {
         ErrorHandler
     ]
 
+    const donationCampaignsHandler = overrides?.donationCampaignsHandler || [
+        prepareRequestContext,
+        DonationsController.donationCampaigns,
+        SuccessHandler,
+        ErrorHandler
+    ]
+
     app.get(
         '*/checkout/redirect',
         query('redirectResult').optional().escape(),
@@ -204,6 +212,7 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     app.post('/api/adyen/gift-card/cancel-order', ...cancelOrderHandler)
     app.post('/api/adyen/payment-data-for-review-page', ...paymentDataForReviewPagePostHandler)
     app.post('/api/adyen/pdp/temporary-baskets', ...createTemporaryBasketHandler)
+    app.get('/api/adyen/donationCampaigns', ...donationCampaignsHandler)
 }
 
 export {registerAdyenEndpoints, SuccessHandler, ErrorHandler}
