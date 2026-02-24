@@ -32,7 +32,7 @@ describe('Adyen Endpoints', () => {
 
             registerAdyenEndpoints(app, runtime, overrides)
             expect(app.get).toHaveBeenCalledTimes(10)
-            expect(app.post).toHaveBeenCalledTimes(14)
+            expect(app.post).toHaveBeenCalledTimes(15)
             expect(app.use).toHaveBeenCalledTimes(1)
         })
     })
