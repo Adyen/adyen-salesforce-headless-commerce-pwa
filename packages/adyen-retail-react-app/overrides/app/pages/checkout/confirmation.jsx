@@ -45,7 +45,7 @@ import {useCurrency} from '@salesforce/retail-react-app/app/hooks'
 import PropTypes from 'prop-types'
 
 /* -----------------Adyen Begin ------------------------ */
-import {AdyenCheckoutProvider, pageTypes} from '@adyen/adyen-salesforce-pwa'
+import {AdyenCheckoutProvider, AdyenDonations, pageTypes} from '@adyen/adyen-salesforce-pwa'
 import {
     AuthHelpers,
     useAccessToken,
@@ -60,7 +60,7 @@ import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-curre
 
 const onClient = typeof window !== 'undefined'
 
-const CheckoutConfirmation = () => {
+const CheckoutConfirmation = ({authToken, customerId, site, locale}) => {
     const {orderNo} = useParams()
     const navigate = useNavigation()
     const {data: customer} = useCurrentCustomer()
@@ -490,6 +490,19 @@ const CheckoutConfirmation = () => {
                         </Container>
                     </Box>
 
+                    {/* -----------------Adyen Donations Begin ------------------------ */}
+                    <Box layerStyle="card" rounded={[0, 0, 'base']} px={[4, 4, 6]} py={[6, 6, 8]}>
+                        <AdyenDonations
+                            authToken={authToken}
+                            customerId={customerId}
+                            site={site}
+                            locale={locale}
+                            orderNo={orderNo}
+                            onError={[(err) => console.error('Donation error:', err)]}
+                        />
+                    </Box>
+                    {/* -----------------Adyen Donations End ------------------------ */}
+
                     <Box layerStyle="card" rounded={[0, 0, 'base']} px={[4, 4, 6]} py={[6, 6, 8]}>
                         <Container variant="form">
                             <Stack spacing={6}>
@@ -596,6 +609,10 @@ const CheckoutConfirmationContainer = () => {
             page={pageTypes.CONFIRMATION}
         >
             <CheckoutConfirmation
+                authToken={authToken}
+                customerId={customerId}
+                site={site}
+                locale={locale}
                 useOrder={useOrder}
                 useProducts={useProducts}
                 useAuthHelper={useAuthHelper}
@@ -606,6 +623,10 @@ const CheckoutConfirmationContainer = () => {
 }
 
 CheckoutConfirmation.propTypes = {
+    authToken: PropTypes.string,
+    customerId: PropTypes.string,
+    site: PropTypes.object,
+    locale: PropTypes.object,
     useOrder: PropTypes.any,
     useProducts: PropTypes.any,
     useAuthHelper: PropTypes.any,
