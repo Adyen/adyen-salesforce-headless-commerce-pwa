@@ -171,8 +171,15 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     ]
 
     const donationCampaignsHandler = overrides?.donationCampaignsHandler || [
-        prepareRequestContext,
+        prepareMinimalRequestContext,
         DonationsController.donationCampaigns,
+        SuccessHandler,
+        ErrorHandler
+    ]
+
+    const donateHandler = overrides?.donate || [
+        prepareMinimalRequestContext,
+        DonationsController.donate,
         SuccessHandler,
         ErrorHandler
     ]
@@ -213,6 +220,7 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     app.post('/api/adyen/payment-data-for-review-page', ...paymentDataForReviewPagePostHandler)
     app.post('/api/adyen/pdp/temporary-baskets', ...createTemporaryBasketHandler)
     app.get('/api/adyen/donationCampaigns', ...donationCampaignsHandler)
+    app.post('/api/adyen/donations', ...donateHandler)
 }
 
 export {registerAdyenEndpoints, SuccessHandler, ErrorHandler}
