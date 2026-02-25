@@ -25,7 +25,8 @@ const mockCreate = jest.fn(() => ({
 jest.mock('@adyen/adyen-web', () => ({
     AdyenCheckout: jest.fn(() => ({
         create: mockCreate
-    }))
+    })),
+    ApplePay: jest.fn()
 }))
 
 describe('ApplePayExpressComponent', () => {
@@ -59,6 +60,7 @@ describe('ApplePayExpressComponent', () => {
 
     beforeEach(() => {
         jest.clearAllMocks()
+        jest.spyOn(console, 'error').mockImplementation(() => {})
         useAdyenEnvironment.mockReturnValue({
             data: mockEnvironmentData,
             error: null,
