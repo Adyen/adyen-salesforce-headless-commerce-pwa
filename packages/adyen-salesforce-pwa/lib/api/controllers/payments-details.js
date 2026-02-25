@@ -76,6 +76,11 @@ async function sendPaymentDetails(req, res, next) {
         if (checkoutResponse.isFinal && checkoutResponse.isSuccessful) {
             // The payment is now fully authorized, so we can create the final order.
             await basketService.addPaymentInstrument(amount, paymentMethod, response?.pspReference)
+            if (paymentMethod?.type === 'ideal') {
+                await basketService.update({
+                    c_donationToken: response.donationToken
+                })
+            }
             await createOrderUsingOrderNo(adyenContext)
             Logger.info(
                 'sendPaymentDetails',

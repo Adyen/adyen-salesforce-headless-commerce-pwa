@@ -74,13 +74,11 @@ const AdyenDonations = ({
 
         // Handle errors
         if (adyenEnvironmentError) {
-            console.error('Error fetching Adyen environment:', adyenEnvironmentError)
             onError.forEach((cb) => cb(adyenEnvironmentError))
             return
         }
 
         if (donationCampaignsError) {
-            console.error('Error fetching donation campaigns:', donationCampaignsError)
             onError.forEach((cb) => cb(donationCampaignsError))
             return
         }
@@ -111,18 +109,44 @@ const AdyenDonations = ({
 
                 if (!isMounted) return
 
-                // const donationsService = new AdyenDonationsService(
-                //     authToken,
-                //     customerId,
-                //     null,
-                //     site
-                // )
+                const donationsService = new AdyenDonationsService(
+                    authToken,
+                    customerId,
+                    null,
+                    site
+                )
 
                 const donationConfiguration = {
                     ...campaign,
                     commercialTxAmount: donationCampaignsData.orderTotal,
+                    onDonate: async (state, component) => {
+                        setIsLoading(true)
+                        try {
+                            const response = await donationsService.submitDonation({
+                                orderNo,
+                                donationCampaignId: campaign.id,
+                                donationAmount: state.data.amount
+                            })
+                            if (onDonate) {
+                                onDonate(response)
+                            }
+                            if (onComplete) {
+                                onComplete(response)
+                            }
+                            component.setStatus('success')
+                        } catch (error) {
+                            onError.forEach((cb) => cb(error))
+                            component.setStatus('error')
+                        } finally {
+                            setIsLoading(false)
+                        }
+                    },
+                    onCancel: () => {
+                        if (onCancel) {
+                            onCancel()
+                        }
+                    },
                     onError: (error, component) => {
-                        console.error('Adyen Donation Error:', error)
                         onError.forEach((cb) => cb(error))
                         setIsLoading(false)
                         if (component) {
@@ -131,11 +155,9 @@ const AdyenDonations = ({
                     }
                 }
 
-                console.log(donationConfiguration);
                 const donationComponent = new Donation(checkout, donationConfiguration)
                 donationComponentRef.current = donationComponent.mount(paymentContainer.current)
             } catch (error) {
-                console.error('Error initializing Adyen Donations Component:', error)
                 onError.forEach((cb) => cb(error))
             }
         }
@@ -148,7 +170,7 @@ const AdyenDonations = ({
                 try {
                     donationComponentRef.current.unmount()
                 } catch (e) {
-                    console.error('Error unmounting donation component:', e)
+                    // Error unmounting donation component
                 }
                 donationComponentRef.current = null
             }

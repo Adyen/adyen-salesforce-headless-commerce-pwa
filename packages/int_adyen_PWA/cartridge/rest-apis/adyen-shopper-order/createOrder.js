@@ -38,10 +38,17 @@ exports.createOrder = function () {
           return;
         }
         currentBasket.updateCurrency();
-
+        const donationToken = currentBasket.custom.donationToken;
+        const pspReference = currentBasket.custom.pspReference
         Transaction.begin();
         try {
             const order = OrderMgr.createOrder(currentBasket, orderNo);
+            if (donationToken) {
+                order.custom.donationToken = donationToken;
+            }
+            if (pspReference) {
+                order.custom.pspReference = pspReference;
+            }
             Transaction.commit();
             const response = {
                 orderNo: order.getOrderNo()

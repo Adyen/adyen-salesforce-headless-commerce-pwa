@@ -43,11 +43,26 @@ async function donationCampaigns(req, res, next) {
     }
 }
 
+function getPaymentMethodType(paymentMethod) {
+    console.log(paymentMethod)
+    if (paymentMethod?.type === 'ideal') {
+        return 'sepadirectdebit'
+    }
+    if (
+        paymentMethod?.type === 'scheme' ||
+        paymentMethod?.type.includes('apple') ||
+        paymentMethod?.type.includes('google')
+    ) {
+        return 'scheme'
+    }
+    return paymentMethod?.type
+}
+
 /**
  * Handles a donation payment request.
- * @param {object} req - The Express request object.
- * @param {object} res - The Express response object.
- * @param {Function} next - The Express next middleware function.
+ * @param {object} req - The donation request object.
+ * @param {object} res - The donation response object.
+ * @param {Function} next - The next middleware function.
  * @returns {Promise<void>}
  */
 async function donate(req, res, next) {
@@ -61,19 +76,18 @@ async function donate(req, res, next) {
         if (!data) {
             throw new AdyenError(ERROR_MESSAGE.INVALID_PARAMS, 400)
         }
+        const order = await getOrderUsingOrderNo(data.orderNo)
+        if (!order) {
+            throw new AdyenError(ERROR_MESSAGE.ORDER_NOT_FOUND, 500)
+        }
         const donationsApi = new AdyenClientProvider(adyenContext).getDonationsApi()
         const donationRequest = {
-            amount: data.amount,
-            reference: data.reference,
-            paymentMethod: data.paymentMethod,
-            donationToken: data.donationToken,
-            donationOriginalPspReference: data.donationOriginalPspReference,
-            donationCampaignId: data.donationCampaignId,
-            donationAccount: data.donationAccount,
             merchantAccount: adyenContext.adyenConfig.merchantAccount,
-            returnUrl: data.returnUrl,
-            shopperInteraction: 'Ecommerce',
-            channel: 'Web'
+            donationCampaignId: data.donationCampaignId,
+            amount: data.donationAmount,
+            reference: `${adyenContext.adyenConfig.merchantAccount}-${data.orderNo}`,
+            donationOriginalPspReference: order.c_pspReference,
+            donationToken: order.c_donationToken
         }
         const response = await donationsApi.donations(donationRequest)
         Logger.info('donate', `response: ${JSON.stringify(response)}`)

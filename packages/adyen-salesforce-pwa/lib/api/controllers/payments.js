@@ -84,6 +84,10 @@ async function sendPayments(req, res, next) {
                 basketUpdate.c_pspReference = response.pspReference
             }
 
+            if (response?.donationToken) {
+                basketUpdate.c_donationToken = response.donationToken
+            }
+
             if (checkoutResponse.action) {
                 basketUpdate.c_paymentData = JSON.stringify({
                     merchantReference: checkoutResponse.merchantReference,
