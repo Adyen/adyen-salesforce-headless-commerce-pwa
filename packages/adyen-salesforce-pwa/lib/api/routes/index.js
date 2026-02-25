@@ -25,6 +25,7 @@ import PaymentCancelExpressController from '../controllers/payment-cancel-expres
 import {balanceCheck, cancelOrder, createOrder} from '../controllers/giftCard'
 import {prepareRequestContext} from '../middleware/request-context'
 import {prepareMinimalRequestContext} from '../middleware/minimal-request-context'
+import {prepareOrderRequestContext} from '../middleware/order-request-context'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function SuccessHandler(req, res, next) {
@@ -171,14 +172,14 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     ]
 
     const donationCampaignsHandler = overrides?.donationCampaignsHandler || [
-        prepareMinimalRequestContext,
+        prepareOrderRequestContext,
         DonationsController.donationCampaigns,
         SuccessHandler,
         ErrorHandler
     ]
 
     const donateHandler = overrides?.donate || [
-        prepareMinimalRequestContext,
+        prepareOrderRequestContext,
         DonationsController.donate,
         SuccessHandler,
         ErrorHandler

@@ -11,7 +11,8 @@ export class AdyenDonationsService {
     async fetchDonationCampaigns(orderNo, locale) {
         const res = await this.apiClient.get({
             path: '/donationCampaigns',
-            queryParams: {orderNo, locale: locale?.id}
+            queryParams: {locale: locale?.id},
+            headers: {orderno: orderNo}
         })
         if (res.status >= 300) {
             const errorData = await res
@@ -27,7 +28,8 @@ export class AdyenDonationsService {
     async submitDonation(data) {
         const res = await this.apiClient.post({
             path: '/donations',
-            body: JSON.stringify({data})
+            body: JSON.stringify({data}),
+            headers: {orderno: data.orderNo}
         })
         if (res.status >= 300) {
             const errorData = await res

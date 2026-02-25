@@ -2,7 +2,6 @@ import {ERROR_MESSAGE} from '../../utils/constants.mjs'
 import AdyenClientProvider from '../models/adyenClientProvider'
 import Logger from '../models/logger'
 import {AdyenError} from '../models/AdyenError'
-import {getOrderUsingOrderNo} from '../helpers/orderHelper'
 
 /**
  * Retrieves active donation campaigns from Adyen.
@@ -14,12 +13,11 @@ import {getOrderUsingOrderNo} from '../helpers/orderHelper'
 async function donationCampaigns(req, res, next) {
     try {
         Logger.info('donationCampaigns', 'start')
-        const {orderNo} = req.query
         const {adyen: adyenContext} = res.locals
         if (!adyenContext) {
             throw new AdyenError(ERROR_MESSAGE.ADYEN_CONTEXT_NOT_FOUND, 500)
         }
-        const order = await getOrderUsingOrderNo(orderNo)
+        const {order} = adyenContext
         if (!order) {
             throw new AdyenError(ERROR_MESSAGE.ORDER_NOT_FOUND, 500)
         }
@@ -43,21 +41,6 @@ async function donationCampaigns(req, res, next) {
     }
 }
 
-function getPaymentMethodType(paymentMethod) {
-    console.log(paymentMethod)
-    if (paymentMethod?.type === 'ideal') {
-        return 'sepadirectdebit'
-    }
-    if (
-        paymentMethod?.type === 'scheme' ||
-        paymentMethod?.type.includes('apple') ||
-        paymentMethod?.type.includes('google')
-    ) {
-        return 'scheme'
-    }
-    return paymentMethod?.type
-}
-
 /**
  * Handles a donation payment request.
  * @param {object} req - The donation request object.
@@ -76,7 +59,7 @@ async function donate(req, res, next) {
         if (!data) {
             throw new AdyenError(ERROR_MESSAGE.INVALID_PARAMS, 400)
         }
-        const order = await getOrderUsingOrderNo(data.orderNo)
+        const {order} = adyenContext
         if (!order) {
             throw new AdyenError(ERROR_MESSAGE.ORDER_NOT_FOUND, 500)
         }
@@ -85,7 +68,7 @@ async function donate(req, res, next) {
             merchantAccount: adyenContext.adyenConfig.merchantAccount,
             donationCampaignId: data.donationCampaignId,
             amount: data.donationAmount,
-            reference: `${adyenContext.adyenConfig.merchantAccount}-${data.orderNo}`,
+            reference: `${adyenContext.adyenConfig.merchantAccount}-${order.orderNo}`,
             donationOriginalPspReference: order.c_pspReference,
             donationToken: order.c_donationToken
         }
