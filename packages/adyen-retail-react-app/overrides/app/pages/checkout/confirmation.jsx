@@ -491,16 +491,23 @@ const CheckoutConfirmation = ({authToken, customerId, site, locale}) => {
                     </Box>
 
                     {/* -----------------Adyen Donations Begin ------------------------ */}
-                    <Box layerStyle="card" rounded={[0, 0, 'base']} px={[4, 4, 6]} py={[6, 6, 8]}>
-                        <AdyenDonations
-                            authToken={authToken}
-                            customerId={customerId}
-                            site={site}
-                            locale={locale}
-                            orderNo={orderNo}
-                            onError={[(err) => console.error('Donation error:', err)]}
-                        />
-                    </Box>
+                    {order.c_donationToken && (
+                        <Box
+                            layerStyle="card"
+                            rounded={[0, 0, 'base']}
+                            px={[4, 4, 6]}
+                            py={[6, 6, 8]}
+                        >
+                            <AdyenDonations
+                                authToken={authToken}
+                                customerId={customerId}
+                                site={site}
+                                locale={locale}
+                                orderNo={orderNo}
+                                onError={[(err) => console.error('Donation error:', err)]}
+                            />
+                        </Box>
+                    )}
                     {/* -----------------Adyen Donations End ------------------------ */}
 
                     <Box layerStyle="card" rounded={[0, 0, 'base']} px={[4, 4, 6]} py={[6, 6, 8]}>
