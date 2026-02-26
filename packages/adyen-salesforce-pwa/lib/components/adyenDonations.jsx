@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState, useCallback} from 'react'
 import PropTypes from 'prop-types'
-import { AdyenCheckout, Donation, DonationConfiguration } from "@adyen/adyen-web";
+import {AdyenCheckout, Donation} from '@adyen/adyen-web'
 import {getCheckoutConfig} from './helpers/adyenCheckout.utils'
 import useAdyenEnvironment from '../hooks/useAdyenEnvironment'
 import useAdyenDonationCampaigns from '../hooks/useAdyenDonationCampaigns'
