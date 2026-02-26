@@ -170,7 +170,7 @@ const AdyenDonations = ({
                 try {
                     donationComponentRef.current.unmount()
                 } catch (e) {
-                    // Error unmounting donation component
+                    console.error('Error unmounting donation component:', e)
                 }
                 donationComponentRef.current = null
             }

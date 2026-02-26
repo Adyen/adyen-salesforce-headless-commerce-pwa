@@ -32,7 +32,7 @@ async function donationCampaigns(req, res, next) {
             orderTotal: order.total
         }
 
-        Logger.info('donationCampaigns', `response: ${JSON.stringify(response)}`)
+        Logger.info('donationCampaigns', 'success')
         res.locals.response = response
         return next()
     } catch (err) {
@@ -73,7 +73,7 @@ async function donate(req, res, next) {
             donationToken: order.c_donationToken
         }
         const response = await donationsApi.donations(donationRequest)
-        Logger.info('donate', `response: ${JSON.stringify(response)}`)
+        Logger.info('donate', 'success')
         res.locals.response = response
         return next()
     } catch (err) {
