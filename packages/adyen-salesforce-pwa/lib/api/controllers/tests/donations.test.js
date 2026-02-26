@@ -77,10 +77,7 @@ describe('donations controller', () => {
                 orderTotal: 100.0
             })
             expect(Logger.info).toHaveBeenCalledWith('donationCampaigns', 'start')
-            expect(Logger.info).toHaveBeenCalledWith(
-                'donationCampaigns',
-                expect.stringContaining('response:')
-            )
+            expect(Logger.info).toHaveBeenCalledWith('donationCampaigns', 'success')
             expect(next).toHaveBeenCalledWith()
         })
 
@@ -145,7 +142,7 @@ describe('donations controller', () => {
             })
             expect(res.locals.response).toEqual(mockDonationResponse)
             expect(Logger.info).toHaveBeenCalledWith('donate', 'start')
-            expect(Logger.info).toHaveBeenCalledWith('donate', expect.stringContaining('response:'))
+            expect(Logger.info).toHaveBeenCalledWith('donate', 'success')
             expect(next).toHaveBeenCalledWith()
         })
 
