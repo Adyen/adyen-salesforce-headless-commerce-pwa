@@ -28,8 +28,8 @@ const AdyenDonations = ({
     // Optional overrides
     translations
 }) => {
-    const paymentContainer = useRef(null)
-    const donationComponentRef = useRef(null)
+    const paymentContainerRefs = useRef([])
+    const donationComponentRefs = useRef([])
     const [isLoading, setIsLoading] = useState(false)
 
     const {
@@ -65,7 +65,6 @@ const AdyenDonations = ({
         if (
             !adyenEnvironment ||
             !donationCampaignsData ||
-            !paymentContainer.current ||
             fetchingEnvironment ||
             fetchingCampaigns
         ) {
@@ -88,13 +87,11 @@ const AdyenDonations = ({
             return
         }
 
-        const campaign = campaigns[0]
-
         let isMounted = true
 
-        const initializeDonationsComponent = async () => {
+        const initializeDonationsComponent = async (campaign, index) => {
             try {
-                if (donationComponentRef.current) {
+                if (donationComponentRefs.current[index]) {
                     return
                 }
 
@@ -156,24 +153,30 @@ const AdyenDonations = ({
                 }
 
                 const donationComponent = new Donation(checkout, donationConfiguration)
-                donationComponentRef.current = donationComponent.mount(paymentContainer.current)
+                donationComponentRefs.current[index] = donationComponent.mount(
+                    paymentContainerRefs.current[index]
+                )
             } catch (error) {
                 onError.forEach((cb) => cb(error))
             }
         }
 
-        initializeDonationsComponent()
+        campaigns.forEach((campaign, index) => {
+            initializeDonationsComponent(campaign, index)
+        })
 
         return () => {
             isMounted = false
-            if (donationComponentRef.current) {
-                try {
-                    donationComponentRef.current.unmount()
-                } catch (e) {
-                    console.error('Error unmounting donation component:', e)
+            donationComponentRefs.current.forEach((component, index) => {
+                if (component) {
+                    try {
+                        component.unmount()
+                    } catch (e) {
+                        console.error('Error unmounting donation component:', e)
+                    }
+                    donationComponentRefs.current[index] = null
                 }
-                donationComponentRef.current = null
-            }
+            })
         }
     }, [
         adyenEnvironment?.ADYEN_ENVIRONMENT,
@@ -181,10 +184,23 @@ const AdyenDonations = ({
         donationCampaignsData
     ])
 
+    const campaigns = donationCampaignsData?.donationCampaigns
+
     return (
         <>
             {(isLoading || fetchingEnvironment || fetchingCampaigns) && spinner && <>{spinner}</>}
-            <div ref={paymentContainer}></div>
+            {campaigns && campaigns.length > 0 && (
+                <div>
+                    {campaigns.map((campaign, index) => (
+                        <div
+                            key={campaign.id}
+                            ref={(el) => {
+                                paymentContainerRefs.current[index] = el
+                            }}
+                        />
+                    ))}
+                </div>
+            )}
         </>
     )
 }
