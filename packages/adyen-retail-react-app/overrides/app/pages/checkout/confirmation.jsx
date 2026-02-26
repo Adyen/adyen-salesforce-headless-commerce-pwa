@@ -92,8 +92,6 @@ const CheckoutConfirmation = ({authToken, customerId, site, locale}) => {
         return null
     }
 
-    console.log(order)
-
     const CardIcon = getCreditCardIcon(order.paymentInstruments[0].paymentCard?.cardType)
 
     const submitForm = async (data) => {
@@ -575,7 +573,6 @@ const CheckoutConfirmation = ({authToken, customerId, site, locale}) => {
                                         site={site}
                                         locale={locale}
                                         orderNo={orderNo}
-                                        onError={[(err) => console.error('Donation error:', err)]}
                                     />
                                 </Stack>
                             </Container>
