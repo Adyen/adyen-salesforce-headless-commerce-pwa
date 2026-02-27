@@ -11,6 +11,7 @@ import {
     getLineItems,
     getLineItemsWithoutTax,
     getAdditionalData,
+    getEnhancedSchemeData,
     amountForPartialPayments
 } from '../utils/paymentUtils.js'
 
@@ -367,6 +368,36 @@ export class PaymentRequestBuilder {
     }
 
     /**
+     * Adds enhanced scheme data (Level 2/3) to the payment request for card payments.
+     * This data is sent as additionalData and helps reduce interchange fees for B2B/commercial card transactions.
+     * @param {object} basket - The basket object. Uses context.basket if not provided.
+     * @param {string} commodityCode - The commodity code. Uses context.adyenConfig.l23CommodityCode if not provided.
+     * @returns {PaymentRequestBuilder} The builder instance for chaining.
+     */
+    withEnhancedSchemeData(basket = null, commodityCode = null) {
+        const l23Enabled = this.context.adyenConfig?.l23Enabled === 'true'
+        const locale = this.context.req?.query?.locale || ''
+        const countryCode = locale.slice(-2)
+
+        if (!l23Enabled || countryCode !== 'US') {
+            return this
+        }
+
+        const actualBasket = basket || this.context.basket
+        const actualCommodityCode = commodityCode || this.context.adyenConfig?.l23CommodityCode
+        if (actualBasket) {
+            const enhancedSchemeData = getEnhancedSchemeData(actualBasket, actualCommodityCode)
+            if (Object.keys(enhancedSchemeData).length > 0) {
+                this.paymentRequest.additionalData = {
+                    ...this.paymentRequest.additionalData,
+                    ...enhancedSchemeData
+                }
+            }
+        }
+        return this
+    }
+
+    /**
      * Adds line items without tax amounts.
      * Used for express payment methods where tax cannot be calculated during the payments call.
      * @param {object} basket - The basket object. Uses context.basket if not provided.
@@ -441,6 +472,7 @@ export class PaymentRequestBuilder {
             .withOpenInvoiceData()
             .withRecurringProcessing()
             .withAdditionalData()
+            .withEnhancedSchemeData()
             .withShopperLocale()
     }
 }

@@ -3,6 +3,7 @@ import {
     getShopperName,
     isOpenInvoiceMethod,
     getAdditionalData,
+    getEnhancedSchemeData,
     getLineItems,
     getLineItemsWithoutTax,
     filterStateData,
@@ -280,6 +281,250 @@ describe('paymentUtils', () => {
                 'riskdata.basket.item1.quantity': 1,
                 'riskdata.basket.item1.currency': 'EUR'
             })
+        })
+    })
+
+    describe('getEnhancedSchemeData', () => {
+        it('should return enhanced scheme data for product items', () => {
+            const basket = {
+                currency: 'USD',
+                customerInfo: {customerId: 'customer123'},
+                productItems: [
+                    {
+                        itemId: 'prod1',
+                        itemText: 'Product One',
+                        basePrice: 29.99,
+                        tax: 2.4,
+                        quantity: 2
+                    },
+                    {
+                        itemId: 'prod2',
+                        itemText: 'Product Two',
+                        basePrice: 49.99,
+                        tax: 4.0,
+                        quantity: 1
+                    }
+                ]
+            }
+
+            const result = getEnhancedSchemeData(basket)
+
+            expect(result['enhancedSchemeData.customerReference']).toBe('customer123')
+            expect(result['enhancedSchemeData.itemDetailLine1.unitPrice']).toBe(2999)
+            expect(result['enhancedSchemeData.itemDetailLine1.totalAmount']).toBe(2999 + 240)
+            expect(result['enhancedSchemeData.itemDetailLine1.quantity']).toBe(2)
+            expect(result['enhancedSchemeData.itemDetailLine1.unitOfMeasure']).toBe('EAC')
+            expect(result['enhancedSchemeData.itemDetailLine1.description']).toBe('Product One')
+            expect(result['enhancedSchemeData.itemDetailLine1.productCode']).toBe('prod1')
+            expect(result['enhancedSchemeData.itemDetailLine2.unitPrice']).toBe(4999)
+            expect(result['enhancedSchemeData.itemDetailLine2.totalAmount']).toBe(4999 + 400)
+            expect(result['enhancedSchemeData.itemDetailLine2.quantity']).toBe(1)
+            expect(result['enhancedSchemeData.totalTaxAmount']).toBe(240 + 400)
+        })
+
+        it('should include commodity code when provided', () => {
+            const basket = {
+                currency: 'USD',
+                customerInfo: {customerId: 'cust1'},
+                productItems: [
+                    {
+                        itemId: 'prod1',
+                        itemText: 'Product',
+                        basePrice: 10.0,
+                        tax: 0.8,
+                        quantity: 1
+                    }
+                ]
+            }
+
+            const result = getEnhancedSchemeData(basket, 'COMMOD01')
+
+            expect(result['enhancedSchemeData.itemDetailLine1.commodityCode']).toBe('COMMOD01')
+        })
+
+        it('should not include commodity code when not provided', () => {
+            const basket = {
+                currency: 'USD',
+                customerInfo: {customerId: 'cust1'},
+                productItems: [
+                    {
+                        itemId: 'prod1',
+                        itemText: 'Product',
+                        basePrice: 10.0,
+                        tax: 0.8,
+                        quantity: 1
+                    }
+                ]
+            }
+
+            const result = getEnhancedSchemeData(basket)
+
+            expect(result).not.toHaveProperty('enhancedSchemeData.itemDetailLine1.commodityCode')
+        })
+
+        it('should truncate description to 26 characters and strip non-ASCII', () => {
+            const basket = {
+                currency: 'USD',
+                customerInfo: {customerId: 'cust1'},
+                productItems: [
+                    {
+                        itemId: 'prod1',
+                        itemText: 'This is a very long product description with émojis',
+                        basePrice: 10.0,
+                        tax: 0,
+                        quantity: 1
+                    }
+                ]
+            }
+
+            const result = getEnhancedSchemeData(basket)
+
+            const desc = result['enhancedSchemeData.itemDetailLine1.description']
+            expect(desc.length).toBeLessThanOrEqual(26)
+        })
+
+        it('should truncate productCode to 12 characters', () => {
+            const basket = {
+                currency: 'USD',
+                customerInfo: {customerId: 'cust1'},
+                productItems: [
+                    {
+                        itemId: 'very-long-product-id-1234',
+                        itemText: 'Product',
+                        basePrice: 10.0,
+                        tax: 0,
+                        quantity: 1
+                    }
+                ]
+            }
+
+            const result = getEnhancedSchemeData(basket)
+
+            expect(result['enhancedSchemeData.itemDetailLine1.productCode']).toBe('very-long-pr')
+        })
+
+        it('should truncate customerReference to 25 characters', () => {
+            const basket = {
+                currency: 'USD',
+                customerInfo: {customerId: 'a-very-long-customer-id-that-exceeds-25-chars'},
+                productItems: [
+                    {
+                        itemId: 'prod1',
+                        itemText: 'Product',
+                        basePrice: 10.0,
+                        tax: 0,
+                        quantity: 1
+                    }
+                ]
+            }
+
+            const result = getEnhancedSchemeData(basket)
+
+            expect(result['enhancedSchemeData.customerReference'].length).toBeLessThanOrEqual(25)
+        })
+
+        it('should use "no-unique-ref" when customerId is missing', () => {
+            const basket = {
+                currency: 'USD',
+                productItems: [
+                    {
+                        itemId: 'prod1',
+                        itemText: 'Product',
+                        basePrice: 10.0,
+                        tax: 0,
+                        quantity: 1
+                    }
+                ]
+            }
+
+            const result = getEnhancedSchemeData(basket)
+
+            expect(result['enhancedSchemeData.customerReference']).toBe('no-unique-ref')
+        })
+
+        it('should return empty object when basket has no product items', () => {
+            const basket = {
+                currency: 'USD',
+                productItems: []
+            }
+
+            const result = getEnhancedSchemeData(basket)
+
+            expect(result).toEqual({})
+        })
+
+        it('should return empty object when basket is null', () => {
+            const result = getEnhancedSchemeData(null)
+
+            expect(result).toEqual({})
+        })
+
+        it('should return empty object when productItems is undefined', () => {
+            const basket = {currency: 'USD'}
+
+            const result = getEnhancedSchemeData(basket)
+
+            expect(result).toEqual({})
+        })
+
+        it('should handle items with zero tax', () => {
+            const basket = {
+                currency: 'USD',
+                customerInfo: {customerId: 'cust1'},
+                productItems: [
+                    {
+                        itemId: 'prod1',
+                        itemText: 'Tax Free Product',
+                        basePrice: 25.0,
+                        tax: 0,
+                        quantity: 3
+                    }
+                ]
+            }
+
+            const result = getEnhancedSchemeData(basket)
+
+            expect(result['enhancedSchemeData.itemDetailLine1.unitPrice']).toBe(2500)
+            expect(result['enhancedSchemeData.itemDetailLine1.totalAmount']).toBe(2500)
+            expect(result['enhancedSchemeData.totalTaxAmount']).toBe(0)
+        })
+
+        it('should not include description when itemText is missing', () => {
+            const basket = {
+                currency: 'USD',
+                customerInfo: {customerId: 'cust1'},
+                productItems: [
+                    {
+                        itemId: 'prod1',
+                        basePrice: 10.0,
+                        tax: 0,
+                        quantity: 1
+                    }
+                ]
+            }
+
+            const result = getEnhancedSchemeData(basket)
+
+            expect(result).not.toHaveProperty('enhancedSchemeData.itemDetailLine1.description')
+        })
+
+        it('should not include productCode when itemId is missing', () => {
+            const basket = {
+                currency: 'USD',
+                customerInfo: {customerId: 'cust1'},
+                productItems: [
+                    {
+                        itemText: 'Product',
+                        basePrice: 10.0,
+                        tax: 0,
+                        quantity: 1
+                    }
+                ]
+            }
+
+            const result = getEnhancedSchemeData(basket)
+
+            expect(result).not.toHaveProperty('enhancedSchemeData.itemDetailLine1.productCode')
         })
     })
 
