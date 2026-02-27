@@ -162,6 +162,66 @@ export function getLineItemsWithoutTax(basket) {
 }
 
 /**
+ * Builds the enhanced scheme data (Level 2/3) for card payments.
+ * This data helps reduce interchange fees for B2B/commercial card transactions.
+ * The data is sent as additionalData fields in the payment request.
+ * @param {object} basket - The shopper's basket object.
+ * @param {string} [commodityCode] - Optional commodity code from Adyen configuration.
+ * @returns {object} An object containing enhanced scheme data fields for the payment request.
+ */
+export function getEnhancedSchemeData(basket, commodityCode) {
+    if (!basket?.productItems?.length) {
+        return {}
+    }
+
+    const {currency, productItems} = basket
+    const shopperReference = basket.customerInfo?.customerId || 'no-unique-ref'
+
+    const enhancedSchemeData = productItems.reduce(
+        (acc, item, index) => {
+            const lineNumber = index + 1
+            const unitPrice = getCurrencyValueForApi(item.basePrice, currency)
+            const quantity = item.quantity
+            const taxAmount = getCurrencyValueForApi(item.tax || 0, currency)
+            const totalAmount = unitPrice + taxAmount
+
+            const currentLineItem = {
+                [`enhancedSchemeData.itemDetailLine${lineNumber}.unitPrice`]: unitPrice,
+                [`enhancedSchemeData.itemDetailLine${lineNumber}.totalAmount`]: totalAmount,
+                [`enhancedSchemeData.itemDetailLine${lineNumber}.quantity`]: quantity,
+                [`enhancedSchemeData.itemDetailLine${lineNumber}.unitOfMeasure`]: 'EAC',
+                ...(commodityCode && {
+                    [`enhancedSchemeData.itemDetailLine${lineNumber}.commodityCode`]: commodityCode
+                }),
+                ...(item.itemText && {
+                    [`enhancedSchemeData.itemDetailLine${lineNumber}.description`]: item.itemText
+                        .substring(0, 26)
+                        // eslint-disable-next-line no-control-regex
+                        .replace(/[^\x00-\x7F]/g, '')
+                }),
+                ...(item.itemId && {
+                    [`enhancedSchemeData.itemDetailLine${lineNumber}.productCode`]:
+                        item.itemId.substring(0, 12)
+                })
+            }
+
+            return {
+                ...acc,
+                ...currentLineItem,
+                'enhancedSchemeData.totalTaxAmount':
+                    acc['enhancedSchemeData.totalTaxAmount'] + taxAmount
+            }
+        },
+        {
+            'enhancedSchemeData.totalTaxAmount': 0,
+            'enhancedSchemeData.customerReference': shopperReference.substring(0, 25)
+        }
+    )
+
+    return enhancedSchemeData
+}
+
+/**
  * Valid state data fields that can be included in the payment request.
  */
 const VALID_STATE_DATA_FIELDS = new Set([

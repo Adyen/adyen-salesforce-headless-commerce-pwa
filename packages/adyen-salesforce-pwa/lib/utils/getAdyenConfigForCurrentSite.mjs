@@ -14,7 +14,9 @@ export const getAdyenConfigForCurrentSite = (currentSiteId) => {
             ADYEN_ENV.ADYEN_APPLE_DOMAIN_ASSOCIATION
         ),
         nativeThreeDS: setProperty(currentSiteId, ADYEN_ENV.ADYEN_NATIVE_3DS),
-        giftCardExpirationTime: setProperty(currentSiteId, ADYEN_ENV.GIFT_CARD_EXPIRATION_TIME)
+        giftCardExpirationTime: setProperty(currentSiteId, ADYEN_ENV.GIFT_CARD_EXPIRATION_TIME),
+        l23Enabled: setProperty(currentSiteId, ADYEN_ENV.ADYEN_L23_ENABLED),
+        l23CommodityCode: setProperty(currentSiteId, ADYEN_ENV.ADYEN_L23_COMMODITY_CODE)
     }
 }
 
@@ -38,5 +40,7 @@ const ADYEN_ENV = {
     ADYEN_LIVE_URL_PREFIX: 'ADYEN_LIVE_URL_PREFIX',
     ADYEN_APPLE_DOMAIN_ASSOCIATION: 'ADYEN_APPLE_DOMAIN_ASSOCIATION',
     ADYEN_NATIVE_3DS: 'ADYEN_NATIVE_3DS',
-    GIFT_CARD_EXPIRATION_TIME: 'GIFT_CARD_EXPIRATION_TIME'
+    GIFT_CARD_EXPIRATION_TIME: 'GIFT_CARD_EXPIRATION_TIME',
+    ADYEN_L23_ENABLED: 'ADYEN_L23_ENABLED',
+    ADYEN_L23_COMMODITY_CODE: 'ADYEN_L23_COMMODITY_CODE'
 }
