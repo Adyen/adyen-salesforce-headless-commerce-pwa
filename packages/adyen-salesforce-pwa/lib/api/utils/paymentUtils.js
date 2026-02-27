@@ -196,8 +196,7 @@ export function getEnhancedSchemeData(basket, commodityCode) {
                 ...(item.itemText && {
                     [`enhancedSchemeData.itemDetailLine${lineNumber}.description`]: item.itemText
                         .substring(0, 26)
-                        // eslint-disable-next-line no-control-regex
-                        .replace(/[^\x00-\x7F]/g, '')
+                        .replace(/[^\p{ASCII}]/gu, '')
                 }),
                 ...(item.itemId && {
                     [`enhancedSchemeData.itemDetailLine${lineNumber}.productCode`]:
