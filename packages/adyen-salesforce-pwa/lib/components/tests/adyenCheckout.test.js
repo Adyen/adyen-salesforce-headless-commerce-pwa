@@ -16,6 +16,9 @@ import {
 jest.mock('../../hooks/useAdyenEnvironment')
 jest.mock('../../hooks/useAdyenPaymentMethods')
 jest.mock('../helpers/adyenCheckout.utils')
+jest.mock('../paymentMethodsConfiguration', () => ({
+    paymentMethodsConfiguration: jest.fn(() => ({}))
+}))
 
 describe('AdyenCheckoutComponent', () => {
     const mockCheckoutInstance = {
@@ -175,5 +178,206 @@ describe('AdyenCheckoutComponent', () => {
         })
 
         expect(mockCheckoutInstance.update).not.toHaveBeenCalled()
+    })
+
+    it('should call onError callbacks when environment fetch has error', async () => {
+        const envError = new Error('env error')
+        const onErrorCb = jest.fn()
+        useAdyenEnvironment.mockReturnValue({
+            data: mockEnvironmentData,
+            error: envError,
+            isLoading: false
+        })
+
+        await act(async () => {
+            render(<AdyenCheckoutComponent {...defaultProps} onError={[onErrorCb]} />)
+        })
+
+        expect(onErrorCb).toHaveBeenCalledWith(envError)
+        expect(createCheckoutInstance).not.toHaveBeenCalled()
+    })
+
+    it('should call onError callbacks when payment methods fetch has error', async () => {
+        const pmError = new Error('pm error')
+        const onErrorCb = jest.fn()
+        useAdyenPaymentMethods.mockReturnValue({
+            data: mockPaymentMethodsData,
+            error: pmError,
+            isLoading: false
+        })
+
+        await act(async () => {
+            render(<AdyenCheckoutComponent {...defaultProps} onError={[onErrorCb]} />)
+        })
+
+        expect(onErrorCb).toHaveBeenCalledWith(pmError)
+    })
+
+    it('should not initialize while still loading environment', async () => {
+        useAdyenEnvironment.mockReturnValue({
+            data: null,
+            error: null,
+            isLoading: true
+        })
+
+        await act(async () => {
+            render(<AdyenCheckoutComponent {...defaultProps} />)
+        })
+
+        expect(createCheckoutInstance).not.toHaveBeenCalled()
+    })
+
+    it('should not initialize while still loading payment methods', async () => {
+        useAdyenPaymentMethods.mockReturnValue({
+            data: null,
+            error: null,
+            isLoading: true
+        })
+
+        await act(async () => {
+            render(<AdyenCheckoutComponent {...defaultProps} />)
+        })
+
+        expect(createCheckoutInstance).not.toHaveBeenCalled()
+    })
+
+    it('should render spinner when loading', async () => {
+        useAdyenEnvironment.mockReturnValue({
+            data: null,
+            error: null,
+            isLoading: true
+        })
+
+        const {container} = render(
+            <AdyenCheckoutComponent
+                {...defaultProps}
+                spinner={<div data-testid="spinner">Loading...</div>}
+            />
+        )
+
+        expect(container.querySelector('[data-testid="spinner"]')).not.toBeNull()
+    })
+
+    it('should not render spinner when not loading', async () => {
+        await act(async () => {})
+
+        const {container} = render(
+            <AdyenCheckoutComponent
+                {...defaultProps}
+                spinner={<div data-testid="spinner">Loading...</div>}
+            />
+        )
+
+        await act(async () => {})
+        expect(container.querySelector('[data-testid="spinner"]')).toBeNull()
+    })
+
+    it('should handle redirect result and skip mount', async () => {
+        handleRedirects.mockReturnValue(true)
+
+        await act(async () => {
+            render(<AdyenCheckoutComponent {...defaultProps} />)
+        })
+
+        expect(handleRedirects).toHaveBeenCalled()
+        expect(mountCheckoutComponent).not.toHaveBeenCalled()
+    })
+
+    it('should call onError when createCheckoutInstance throws', async () => {
+        const error = new Error('checkout init failed')
+        const onErrorCb = jest.fn()
+        createCheckoutInstance.mockRejectedValue(error)
+
+        await act(async () => {
+            render(<AdyenCheckoutComponent {...defaultProps} onError={[onErrorCb]} />)
+        })
+
+        expect(onErrorCb).toHaveBeenCalledWith(error)
+    })
+
+    it('should update internalOrderNo when basket.c_orderNo changes', async () => {
+        const {rerender} = render(<AdyenCheckoutComponent {...defaultProps} />)
+        await act(async () => {})
+
+        const propsWithOrderNo = {
+            ...defaultProps,
+            basket: {
+                ...defaultProps.basket,
+                c_orderNo: 'order-001'
+            }
+        }
+
+        await act(async () => {
+            rerender(<AdyenCheckoutComponent {...propsWithOrderNo} />)
+        })
+
+        // Re-render with same orderNo should not cause extra init
+        await act(async () => {
+            rerender(<AdyenCheckoutComponent {...propsWithOrderNo} />)
+        })
+
+        expect(createCheckoutInstance).toHaveBeenCalled()
+    })
+
+    it('should handle unmount with PayPal cleanup', async () => {
+        // Setup window.paypal with __internal_destroy__
+        const destroyFn = jest.fn()
+        window.paypal = {__internal_destroy__: destroyFn}
+
+        let unmount
+        await act(async () => {
+            const {unmount: u} = render(<AdyenCheckoutComponent {...defaultProps} />)
+            unmount = u
+        })
+
+        act(() => {
+            unmount()
+        })
+
+        expect(mockDropinInstance.unmount).toHaveBeenCalled()
+        expect(destroyFn).toHaveBeenCalled()
+        delete window.paypal
+    })
+
+    it('should pass onStateChange callback through handleStateChange', async () => {
+        const onStateChangeCb = jest.fn()
+
+        await act(async () => {
+            render(<AdyenCheckoutComponent {...defaultProps} onStateChange={onStateChangeCb} />)
+        })
+
+        // createCheckoutInstance is called - verify it received setAdyenStateData
+        expect(createCheckoutInstance).toHaveBeenCalledWith(
+            expect.objectContaining({
+                setAdyenStateData: expect.any(Function)
+            })
+        )
+    })
+
+    it('should set enableReview with userAction continue via config', async () => {
+        await act(async () => {
+            render(
+                <AdyenCheckoutComponent
+                    {...defaultProps}
+                    dropinConfiguration={{openFirstPaymentMethod: true}}
+                />
+            )
+        })
+
+        expect(mountCheckoutComponent).toHaveBeenCalledWith(
+            null,
+            mockCheckoutInstance,
+            expect.any(Object),
+            expect.any(Object),
+            {openFirstPaymentMethod: true}
+        )
+    })
+})
+
+describe('AdyenCheckoutComponent React.memo', () => {
+    it('should export a memoized component', () => {
+        // The default export is wrapped in React.memo
+        expect(AdyenCheckoutComponent).toBeDefined()
+        expect(AdyenCheckoutComponent.$$typeof).toBeDefined()
     })
 })

@@ -174,6 +174,19 @@ describe('basketHelper', () => {
             await removeExistingTemporaryBaskets('Bearer mockToken', 'mockCustomerId')
             expect(mockShopperBaskets.deleteBasket).not.toHaveBeenCalled()
         })
+
+        it('should handle errors gracefully', async () => {
+            getCustomerBaskets.mockRejectedValue(new Error('fetch failed'))
+            await expect(
+                removeExistingTemporaryBaskets('Bearer mockToken', 'mockCustomerId')
+            ).resolves.not.toThrow()
+        })
+
+        it('should handle undefined baskets array', async () => {
+            getCustomerBaskets.mockResolvedValue({})
+            await removeExistingTemporaryBaskets('Bearer mockToken', 'mockCustomerId')
+            expect(mockShopperBaskets.deleteBasket).not.toHaveBeenCalled()
+        })
     })
 
     describe('createTemporaryBasket', () => {

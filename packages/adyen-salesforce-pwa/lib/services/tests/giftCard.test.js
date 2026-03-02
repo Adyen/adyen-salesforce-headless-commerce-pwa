@@ -60,6 +60,18 @@ describe('GiftCardService', () => {
             )
         })
 
+        it('should use status-based message when error json has no message', async () => {
+            giftCardService.apiClient.post.mockResolvedValueOnce(
+                Promise.resolve({
+                    status: 503,
+                    json: jest.fn().mockResolvedValue({})
+                })
+            )
+            await expect(giftCardService.balanceCheck({})).rejects.toThrow(
+                'Balance check failed with status 503'
+            )
+        })
+
         it('should use fallback message when json parsing fails on error', async () => {
             giftCardService.apiClient.post.mockResolvedValueOnce(
                 Promise.resolve({
@@ -105,6 +117,18 @@ describe('GiftCardService', () => {
             await expect(giftCardService.createOrder(request)).rejects.toThrow('Create order error')
         })
 
+        it('should use status-based message when error json has no message', async () => {
+            giftCardService.apiClient.post.mockResolvedValueOnce(
+                Promise.resolve({
+                    status: 503,
+                    json: jest.fn().mockResolvedValue({})
+                })
+            )
+            await expect(giftCardService.createOrder({})).rejects.toThrow(
+                'Create order failed with status 503'
+            )
+        })
+
         it('should use fallback message when json parsing fails on error', async () => {
             giftCardService.apiClient.post.mockResolvedValueOnce(
                 Promise.resolve({
@@ -148,6 +172,18 @@ describe('GiftCardService', () => {
             giftCardService.apiClient.post.mockResolvedValueOnce(mockFetchPromise)
 
             await expect(giftCardService.cancelOrder(request)).rejects.toThrow('Cancel order error')
+        })
+
+        it('should use status-based message when error json has no message', async () => {
+            giftCardService.apiClient.post.mockResolvedValueOnce(
+                Promise.resolve({
+                    status: 503,
+                    json: jest.fn().mockResolvedValue({})
+                })
+            )
+            await expect(giftCardService.cancelOrder({})).rejects.toThrow(
+                'Cancel order failed with status 503'
+            )
         })
 
         it('should use fallback message when json parsing fails on error', async () => {

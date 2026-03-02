@@ -303,6 +303,53 @@ describe('getAppleButtonConfig', () => {
             expect(actions.resolve).not.toHaveBeenCalled()
         })
 
+        it('should use isExpressPdp and temporaryBasket in onSubmit when PDP express', async () => {
+            defaultProps.isExpressPdp = true
+            defaultProps.product = {id: 'prod-1', quantity: 1}
+            mockCreateTemporaryBasket.mockResolvedValue({
+                basketId: 'temp-basket-1',
+                orderTotal: 50
+            })
+            mockSubmitPayment.mockResolvedValue({
+                isFinal: true,
+                isSuccessful: true,
+                merchantReference: 'order-pdp'
+            })
+
+            const config = getAppleButtonConfig(defaultProps)
+            // First click to create temp basket
+            await config.onClick(jest.fn(), jest.fn())
+            // Authorize
+            authorizeFirst(config)
+            const actions = {resolve: jest.fn(), reject: jest.fn()}
+            await config.onSubmit({data: {origin: 'https://test.com'}}, {}, actions)
+
+            expect(mockSubmitPayment).toHaveBeenCalled()
+            expect(actions.resolve).toHaveBeenCalled()
+        })
+
+        it('should use merchantName from applePayConfig when merchantDisplayName is empty', async () => {
+            defaultProps.merchantDisplayName = ''
+            mockSubmitPayment.mockResolvedValue({
+                isFinal: true,
+                isSuccessful: true,
+                merchantReference: 'order-789'
+            })
+            const config = getAppleButtonConfig(defaultProps)
+            authorizeFirst(config)
+            const actions = {resolve: jest.fn(), reject: jest.fn()}
+
+            await config.onSubmit({data: {origin: 'https://test.com'}}, {}, actions)
+
+            expect(actions.resolve).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    newTotal: expect.objectContaining({
+                        label: 'TestMerchant'
+                    })
+                })
+            )
+        })
+
         it('should call onError callbacks and reject when submitPayment throws', async () => {
             const mockError = new Error('Payment failed')
             mockSubmitPayment.mockRejectedValue(mockError)
@@ -409,6 +456,104 @@ describe('getAppleButtonConfig', () => {
             expect(resolve).not.toHaveBeenCalled()
         })
 
+        it('should use isExpressPdp temporaryBasket in onShippingContactSelected', async () => {
+            defaultProps.isExpressPdp = true
+            defaultProps.product = {id: 'prod-1', quantity: 1}
+            mockCreateTemporaryBasket.mockResolvedValue({
+                basketId: 'temp-basket-1',
+                orderTotal: 50
+            })
+
+            const config = getAppleButtonConfig(defaultProps)
+            // Create temp basket first
+            await config.onClick(jest.fn(), jest.fn())
+
+            mockUpdateShippingAddress.mockResolvedValue({})
+            defaultProps.fetchShippingMethods.mockResolvedValue({
+                defaultShippingMethodId: 'std',
+                applicableShippingMethods: [
+                    {name: 'Standard', description: 'Std', id: 'std', price: 5.99}
+                ]
+            })
+            mockUpdateShippingMethod.mockResolvedValue({
+                orderTotal: 55.99,
+                currency: 'USD'
+            })
+
+            const resolve = jest.fn()
+            const reject = jest.fn()
+
+            await config.onShippingContactSelected(resolve, reject, {
+                shippingContact: {
+                    locality: 'City',
+                    countryCode: 'US',
+                    postalCode: '12345',
+                    administrativeArea: 'CA'
+                }
+            })
+
+            expect(resolve).toHaveBeenCalled()
+        })
+
+        it('should sort shipping methods with default first and handle b match', async () => {
+            mockUpdateShippingAddress.mockResolvedValue({})
+            defaultProps.fetchShippingMethods.mockResolvedValue({
+                defaultShippingMethodId: 'exp',
+                applicableShippingMethods: [
+                    {name: 'Standard', description: 'Std', id: 'std', price: 5.99},
+                    {name: 'Express', description: 'Fast', id: 'exp', price: 12.99},
+                    {name: 'Overnight', description: 'Next day', id: 'ovn', price: 25.99}
+                ]
+            })
+            mockUpdateShippingMethod.mockResolvedValue({
+                orderTotal: 112.99,
+                currency: 'USD'
+            })
+
+            const config = getAppleButtonConfig(defaultProps)
+            const resolve = jest.fn()
+            const reject = jest.fn()
+
+            await config.onShippingContactSelected(resolve, reject, {
+                shippingContact: {locality: 'City', countryCode: 'US'}
+            })
+
+            expect(resolve).toHaveBeenCalled()
+            const resolvedArg = resolve.mock.calls[0][0]
+            // Default method 'exp' should be sorted first
+            expect(resolvedArg.newShippingMethods[0].identifier).toBe('exp')
+        })
+
+        it('should use merchantName fallback in shipping contact resolved total', async () => {
+            defaultProps.merchantDisplayName = ''
+            mockUpdateShippingAddress.mockResolvedValue({})
+            defaultProps.fetchShippingMethods.mockResolvedValue({
+                defaultShippingMethodId: 'std',
+                applicableShippingMethods: [
+                    {name: 'Standard', description: 'Std', id: 'std', price: 5.99}
+                ]
+            })
+            mockUpdateShippingMethod.mockResolvedValue({
+                orderTotal: 105.99,
+                currency: 'USD'
+            })
+
+            const config = getAppleButtonConfig(defaultProps)
+            const resolve = jest.fn()
+
+            await config.onShippingContactSelected(resolve, jest.fn(), {
+                shippingContact: {locality: 'City', countryCode: 'US'}
+            })
+
+            expect(resolve).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    newTotal: expect.objectContaining({
+                        label: 'TestMerchant'
+                    })
+                })
+            )
+        })
+
         it('should use first shipping method when no default', async () => {
             mockUpdateShippingAddress.mockResolvedValue({})
             defaultProps.fetchShippingMethods.mockResolvedValue({
@@ -474,6 +619,57 @@ describe('getAppleButtonConfig', () => {
                     newTotal: expect.objectContaining({
                         type: 'final',
                         label: 'Test Store'
+                    })
+                })
+            )
+        })
+
+        it('should use isExpressPdp temporaryBasket in onShippingMethodSelected', async () => {
+            defaultProps.isExpressPdp = true
+            defaultProps.product = {id: 'prod-1', quantity: 1}
+            mockCreateTemporaryBasket.mockResolvedValue({
+                basketId: 'temp-basket-1',
+                orderTotal: 50
+            })
+
+            const config = getAppleButtonConfig(defaultProps)
+            // Create temp basket first
+            await config.onClick(jest.fn(), jest.fn())
+
+            mockUpdateShippingMethod.mockResolvedValue({
+                orderTotal: 62,
+                currency: 'USD'
+            })
+
+            const resolve = jest.fn()
+            const reject = jest.fn()
+
+            await config.onShippingMethodSelected(resolve, reject, {
+                shippingMethod: {identifier: 'express-id'}
+            })
+
+            expect(mockUpdateShippingMethod).toHaveBeenCalledWith('express-id')
+            expect(resolve).toHaveBeenCalled()
+        })
+
+        it('should use merchantName fallback in shipping method selected total', async () => {
+            defaultProps.merchantDisplayName = ''
+            mockUpdateShippingMethod.mockResolvedValue({
+                orderTotal: 110,
+                currency: 'USD'
+            })
+
+            const config = getAppleButtonConfig(defaultProps)
+            const resolve = jest.fn()
+
+            await config.onShippingMethodSelected(resolve, jest.fn(), {
+                shippingMethod: {identifier: 'express-id'}
+            })
+
+            expect(resolve).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    newTotal: expect.objectContaining({
+                        label: 'TestMerchant'
                     })
                 })
             )

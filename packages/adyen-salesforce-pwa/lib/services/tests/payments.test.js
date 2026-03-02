@@ -76,6 +76,18 @@ describe('AdyenPaymentsService', () => {
         )
     })
 
+    it('should use status-based message when error json has no message', async () => {
+        paymentsService.apiClient.post.mockResolvedValueOnce(
+            Promise.resolve({
+                status: 503,
+                json: jest.fn().mockResolvedValue({})
+            })
+        )
+        await expect(paymentsService.submitPayment(mockAdyenStateData)).rejects.toThrow(
+            'Payment failed with status 503'
+        )
+    })
+
     it('should use fallback message when json parsing fails on error', async () => {
         paymentsService.apiClient.post.mockResolvedValueOnce(
             Promise.resolve({

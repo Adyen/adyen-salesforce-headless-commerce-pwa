@@ -58,6 +58,18 @@ describe('AdyenEnvironmentService', () => {
             await expect(adyenService.fetchEnvironment()).rejects.toThrow('Server error')
         })
 
+        it('should use status-based message when error json has no message', async () => {
+            adyenService.apiClient.get.mockResolvedValueOnce(
+                Promise.resolve({
+                    status: 503,
+                    json: jest.fn().mockResolvedValue({})
+                })
+            )
+            await expect(adyenService.fetchEnvironment()).rejects.toThrow(
+                'Fetch environment failed with status 503'
+            )
+        })
+
         it('should use fallback message when json parsing fails on error', async () => {
             adyenService.apiClient.get.mockResolvedValueOnce(
                 Promise.resolve({

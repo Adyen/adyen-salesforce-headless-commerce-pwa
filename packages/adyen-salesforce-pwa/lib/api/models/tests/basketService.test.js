@@ -117,6 +117,67 @@ describe('BasketService', () => {
             expect(result).toEqual(updated)
         })
 
+        it('should add item with optionItems as array', async () => {
+            const updated = {basketId: 'mockBasketId', productItems: []}
+            mockShopperBaskets.addItemToBasket.mockResolvedValue(updated)
+
+            await basketService.addProductToBasket('mockBasketId', {
+                id: 'SKU',
+                quantity: 1,
+                optionItems: [{optionId: 'opt1'}]
+            })
+
+            expect(mockShopperBaskets.addItemToBasket).toHaveBeenCalledWith({
+                parameters: {basketId: 'mockBasketId'},
+                body: [{productId: 'SKU', quantity: 1, optionItems: [{optionId: 'opt1'}]}]
+            })
+        })
+
+        it('should wrap non-array optionItems in an array', async () => {
+            const updated = {basketId: 'mockBasketId', productItems: []}
+            mockShopperBaskets.addItemToBasket.mockResolvedValue(updated)
+
+            await basketService.addProductToBasket('mockBasketId', {
+                id: 'SKU',
+                quantity: 1,
+                optionItems: {optionId: 'opt1'}
+            })
+
+            expect(mockShopperBaskets.addItemToBasket).toHaveBeenCalledWith({
+                parameters: {basketId: 'mockBasketId'},
+                body: [{productId: 'SKU', quantity: 1, optionItems: [{optionId: 'opt1'}]}]
+            })
+        })
+
+        it('should include inventoryId when provided', async () => {
+            const updated = {basketId: 'mockBasketId', productItems: []}
+            mockShopperBaskets.addItemToBasket.mockResolvedValue(updated)
+
+            await basketService.addProductToBasket('mockBasketId', {
+                id: 'SKU',
+                quantity: 1,
+                inventoryId: 'inv1'
+            })
+
+            expect(mockShopperBaskets.addItemToBasket).toHaveBeenCalledWith({
+                parameters: {basketId: 'mockBasketId'},
+                body: [{productId: 'SKU', quantity: 1, inventoryId: 'inv1'}]
+            })
+        })
+
+        it('should not update context when basketId does not match', async () => {
+            const updated = {basketId: 'otherBasketId', productItems: []}
+            mockShopperBaskets.addItemToBasket.mockResolvedValue(updated)
+
+            const result = await basketService.addProductToBasket('otherBasketId', {
+                id: 'SKU',
+                quantity: 1
+            })
+
+            expect(result).toEqual(updated)
+            expect(mockRes.locals.adyen.basket).not.toEqual(updated)
+        })
+
         it('should throw on missing params', async () => {
             await expect(
                 basketService.addProductToBasket('', {id: 'SKU', quantity: 1})

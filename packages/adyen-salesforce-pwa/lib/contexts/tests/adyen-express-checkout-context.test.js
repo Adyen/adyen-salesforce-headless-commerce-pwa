@@ -127,6 +127,68 @@ describe('AdyenExpressCheckoutProvider', () => {
         expect(mockGetShippingMethods).toHaveBeenCalledTimes(1)
     })
 
+    it('handles payment methods error and sets error state', async () => {
+        AdyenPaymentMethodsService.mockImplementation(() => ({
+            fetchPaymentMethods: jest.fn().mockRejectedValue(new Error('PM Error'))
+        }))
+
+        await act(async () => {
+            render(
+                <AdyenExpressCheckoutProvider
+                    authToken="mockToken"
+                    site={{id: 'mockSite'}}
+                    locale={{id: 'en-US'}}
+                    navigate={jest.fn()}
+                >
+                    <TestConsumer />
+                </AdyenExpressCheckoutProvider>
+            )
+        })
+
+        const contextValue = JSON.parse(screen.getByTestId('context').textContent)
+        expect(contextValue.adyenPaymentMethods).toEqual({error: {}})
+    })
+
+    it('handles shipping methods error and sets error state', async () => {
+        AdyenShippingMethodsService.mockImplementation(() => ({
+            getShippingMethods: jest.fn().mockRejectedValue(new Error('Ship Error'))
+        }))
+
+        await act(async () => {
+            render(
+                <AdyenExpressCheckoutProvider
+                    authToken="mockToken"
+                    site={{id: 'mockSite'}}
+                    basket={{basketId: 'b1'}}
+                    navigate={jest.fn()}
+                >
+                    <TestConsumer />
+                </AdyenExpressCheckoutProvider>
+            )
+        })
+
+        const contextValue = JSON.parse(screen.getByTestId('context').textContent)
+        expect(contextValue.shippingMethods).toEqual({error: {}})
+    })
+
+    it('skips shipping methods fetch when basketId is not available', async () => {
+        await act(async () => {
+            render(
+                <AdyenExpressCheckoutProvider
+                    authToken="mockToken"
+                    site={{id: 'mockSite'}}
+                    locale={{id: 'en-US'}}
+                    navigate={jest.fn()}
+                >
+                    <TestConsumer />
+                </AdyenExpressCheckoutProvider>
+            )
+        })
+
+        const contextValue = JSON.parse(screen.getByTestId('context').textContent)
+        expect(contextValue.shippingMethods).toBeNull()
+    })
+
     it('handles errors during data fetching and sets error state', async () => {
         // Override mock to simulate an error
         AdyenEnvironmentService.mockImplementation(() => ({

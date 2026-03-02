@@ -75,6 +75,44 @@ describe('onSubmit function', () => {
         expect(mockActions.reject).not.toHaveBeenCalled()
     })
 
+    it('should use getBasket when provided instead of basket', async () => {
+        const state = {data: {origin: 'https://adyen.com'}, isValid: true}
+        const component = 'testComponent'
+        const mockBasket = {basketId: 'dynamic-basket'}
+        const props = {
+            token: 'testToken',
+            customerId: 'testCustomerId',
+            returnUrl: 'https://adyen.com',
+            getBasket: () => mockBasket,
+            site: 'RefArch'
+        }
+
+        const result = await onSubmit(state, component, mockActions, props)
+        expect(result).toEqual({paymentsResponse: {mockData: 'Mocked response'}})
+    })
+
+    it('should use window.location.origin when state.data.origin is falsy', async () => {
+        const originalWindow = global.window
+        global.window = {
+            location: {
+                origin: 'http://localhost',
+                href: 'http://localhost/checkout'
+            }
+        }
+        const state = {data: {}, isValid: true}
+        const component = 'testComponent'
+        const props = {
+            token: 'testToken',
+            customerId: 'testCustomerId',
+            basket: {basketId: 'basket123'},
+            site: 'RefArch'
+        }
+
+        const result = await onSubmit(state, component, mockActions, props)
+        expect(result).toEqual({paymentsResponse: {mockData: 'Mocked response'}})
+        global.window = originalWindow
+    })
+
     it('should call reject and return undefined when payment service fails', async () => {
         const state = {data: {origin: 'https://adyen.com'}, isValid: true}
         const component = 'testComponent'
@@ -126,6 +164,42 @@ describe('onAdditionalDetails function', () => {
 
         expect(result).toEqual({paymentsDetailsResponse: mockDetailsResponse})
         expect(mockActions.reject).not.toHaveBeenCalled()
+    })
+
+    it('should use getBasket when provided instead of basket', async () => {
+        const state = {data: 'test data'}
+        const component = 'testComponent'
+        const mockBasket = {basketId: 'dynamic-basket'}
+        const props = {
+            token: 'testToken',
+            customerId: 'testCustomerId',
+            getBasket: () => mockBasket,
+            site: 'RefArch'
+        }
+
+        const result = await onAdditionalDetails(state, component, mockActions, props)
+        expect(result).toEqual({paymentsDetailsResponse: {mockData: 'Mocked response'}})
+    })
+
+    it('should call error callbacks when failure includes redirectResult', async () => {
+        const state = {data: {details: {redirectResult: 'some-result'}}}
+        const component = 'testComponent'
+        const mockError = new Error('Details failed')
+        const onErrorCb = jest.fn()
+        const props = {
+            token: 'testToken',
+            customerId: 'testCustomerId',
+            basket: {basketId: 'basket123'},
+            site: 'RefArch',
+            onError: [onErrorCb]
+        }
+
+        AdyenPaymentsDetailsService.mockImplementation(() => ({
+            submitPaymentsDetails: jest.fn().mockRejectedValue(mockError)
+        }))
+
+        await onAdditionalDetails(state, component, mockActions, props)
+        expect(mockActions.reject).toHaveBeenCalledWith('Details failed')
     })
 
     it('should call reject and return undefined when payment details service fails', async () => {
@@ -190,6 +264,48 @@ describe('onErrorHandler', () => {
         expect(navigate).toHaveBeenCalledWith('/checkout?error=true')
         expect(result).toEqual({cancelled: true})
         expect(consoleErrorSpy).not.toHaveBeenCalled()
+    })
+
+    it('should clear adyenOrder when it exists', async () => {
+        const navigate = jest.fn()
+        const setAdyenOrder = jest.fn()
+        const props = {
+            token: 'testToken',
+            site: 'testSite',
+            customerId: 'testCustomer',
+            navigate: navigate,
+            orderNo: '12345',
+            basket: {basketId: 'basket123'},
+            adyenOrder: {orderData: 'some-data'},
+            setAdyenOrder
+        }
+
+        PaymentCancelService.mockImplementation(() => ({
+            paymentCancel: jest.fn().mockResolvedValue({})
+        }))
+
+        const result = await onErrorHandler(new Error('fail'), {}, props)
+        expect(setAdyenOrder).toHaveBeenCalledWith(null)
+        expect(result).toEqual({cancelled: true})
+    })
+
+    it('should use getBasket when provided', async () => {
+        const navigate = jest.fn()
+        const props = {
+            token: 'testToken',
+            site: 'testSite',
+            customerId: 'testCustomer',
+            navigate: navigate,
+            orderNo: '12345',
+            getBasket: () => ({basketId: 'dynamic-basket'})
+        }
+
+        PaymentCancelService.mockImplementation(() => ({
+            paymentCancel: jest.fn().mockResolvedValue({})
+        }))
+
+        const result = await onErrorHandler(new Error('fail'), {}, props)
+        expect(result).toEqual({cancelled: true})
     })
 
     it('should handle cancellation errors gracefully', async () => {
