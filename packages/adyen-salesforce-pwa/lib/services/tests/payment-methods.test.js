@@ -73,4 +73,16 @@ describe('AdyenPaymentMethodsService', () => {
             'Fetch payment methods error'
         )
     })
+
+    it('should use fallback message when json parsing fails on error', async () => {
+        paymentMethodsService.apiClient.get.mockResolvedValueOnce(
+            Promise.resolve({
+                status: 500,
+                json: jest.fn().mockRejectedValue(new Error('parse error'))
+            })
+        )
+        await expect(paymentMethodsService.fetchPaymentMethods(mockLocale)).rejects.toThrow(
+            'Failed to fetch payment methods'
+        )
+    })
 })

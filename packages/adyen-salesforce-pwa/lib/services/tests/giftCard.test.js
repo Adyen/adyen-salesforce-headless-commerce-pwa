@@ -59,6 +59,18 @@ describe('GiftCardService', () => {
                 'Balance check error'
             )
         })
+
+        it('should use fallback message when json parsing fails on error', async () => {
+            giftCardService.apiClient.post.mockResolvedValueOnce(
+                Promise.resolve({
+                    status: 500,
+                    json: jest.fn().mockRejectedValue(new Error('parse error'))
+                })
+            )
+            await expect(giftCardService.balanceCheck({})).rejects.toThrow(
+                'Gift card balance check failed'
+            )
+        })
     })
 
     describe('createOrder', () => {
@@ -92,6 +104,18 @@ describe('GiftCardService', () => {
 
             await expect(giftCardService.createOrder(request)).rejects.toThrow('Create order error')
         })
+
+        it('should use fallback message when json parsing fails on error', async () => {
+            giftCardService.apiClient.post.mockResolvedValueOnce(
+                Promise.resolve({
+                    status: 500,
+                    json: jest.fn().mockRejectedValue(new Error('parse error'))
+                })
+            )
+            await expect(giftCardService.createOrder({})).rejects.toThrow(
+                'Gift card order creation failed'
+            )
+        })
     })
 
     describe('cancelOrder', () => {
@@ -124,6 +148,18 @@ describe('GiftCardService', () => {
             giftCardService.apiClient.post.mockResolvedValueOnce(mockFetchPromise)
 
             await expect(giftCardService.cancelOrder(request)).rejects.toThrow('Cancel order error')
+        })
+
+        it('should use fallback message when json parsing fails on error', async () => {
+            giftCardService.apiClient.post.mockResolvedValueOnce(
+                Promise.resolve({
+                    status: 500,
+                    json: jest.fn().mockRejectedValue(new Error('parse error'))
+                })
+            )
+            await expect(giftCardService.cancelOrder({})).rejects.toThrow(
+                'Gift card order cancellation failed'
+            )
         })
     })
 })

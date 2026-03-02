@@ -1,4 +1,4 @@
-import {executeCallbacks} from '../executeCallbacks'
+import {executeCallbacks, executeErrorCallbacks} from '../executeCallbacks'
 
 describe('executeCallbacks', () => {
     let consoleErrorSpy
@@ -42,5 +42,50 @@ describe('executeCallbacks', () => {
         expect(callback2).toHaveBeenCalledWith('param1', 'param2', props, {data1: 'result1'})
         expect(callback3).not.toHaveBeenCalled()
         expect(consoleErrorSpy).toHaveBeenCalledWith('Error in callback execution:', error)
+    })
+})
+
+describe('executeErrorCallbacks', () => {
+    let consoleErrorSpy
+
+    beforeEach(() => {
+        consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+    })
+
+    afterEach(() => {
+        consoleErrorSpy.mockRestore()
+    })
+
+    it('should execute all callbacks successfully and return aggregated data', async () => {
+        const callback1 = jest.fn().mockResolvedValue({data1: 'result1'})
+        const callback2 = jest.fn().mockResolvedValue({data2: 'result2'})
+        const callbacks = [callback1, callback2]
+        const props = {prop1: 'value1'}
+
+        const execute = executeErrorCallbacks(callbacks, props)
+        const result = await execute('param1', 'param2')
+
+        expect(callback1).toHaveBeenCalledWith('param1', 'param2', props, {})
+        expect(callback2).toHaveBeenCalledWith('param1', 'param2', props, {data1: 'result1'})
+        expect(result).toEqual({data1: 'result1', data2: 'result2'})
+        expect(consoleErrorSpy).not.toHaveBeenCalled()
+    })
+
+    it('should stop on error, log it, and NOT re-throw', async () => {
+        const callback1 = jest.fn().mockResolvedValue({data1: 'result1'})
+        const error = new Error('Some error')
+        const callback2 = jest.fn().mockRejectedValue(error)
+        const callback3 = jest.fn()
+        const callbacks = [callback1, callback2, callback3]
+        const props = {prop1: 'value1'}
+
+        const execute = executeErrorCallbacks(callbacks, props)
+        const result = await execute('param1', 'param2')
+
+        expect(callback1).toHaveBeenCalledWith('param1', 'param2', props, {})
+        expect(callback2).toHaveBeenCalledWith('param1', 'param2', props, {data1: 'result1'})
+        expect(callback3).not.toHaveBeenCalled()
+        expect(consoleErrorSpy).toHaveBeenCalledWith('Error in error callback:', error)
+        expect(result).toEqual({data1: 'result1'})
     })
 })

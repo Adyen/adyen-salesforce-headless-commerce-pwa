@@ -75,4 +75,16 @@ describe('AdyenPaymentsService', () => {
             'Payment submission error'
         )
     })
+
+    it('should use fallback message when json parsing fails on error', async () => {
+        paymentsService.apiClient.post.mockResolvedValueOnce(
+            Promise.resolve({
+                status: 500,
+                json: jest.fn().mockRejectedValue(new Error('parse error'))
+            })
+        )
+        await expect(paymentsService.submitPayment(mockAdyenStateData)).rejects.toThrow(
+            'Payment submission failed'
+        )
+    })
 })

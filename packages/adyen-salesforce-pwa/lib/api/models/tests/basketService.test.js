@@ -154,6 +154,28 @@ describe('BasketService', () => {
             expect(mockRes.locals.adyen.basket).toEqual(mockUpdatedBasket)
         })
 
+        it('should throw when amount is missing', async () => {
+            await expect(
+                basketService.addPaymentInstrument(null, {type: 'scheme'}, 'psp123')
+            ).rejects.toThrow()
+        })
+
+        it('should throw when paymentMethod is missing', async () => {
+            await expect(
+                basketService.addPaymentInstrument({value: 100, currency: 'USD'}, null, 'psp123')
+            ).rejects.toThrow()
+        })
+
+        it('should throw when pspReference is missing', async () => {
+            await expect(
+                basketService.addPaymentInstrument(
+                    {value: 100, currency: 'USD'},
+                    {type: 'scheme'},
+                    null
+                )
+            ).rejects.toThrow()
+        })
+
         it('should correctly add a component payment instrument', async () => {
             const pspReference = 'mockPspReference'
             const paymentMethod = {type: 'ideal'}
@@ -247,6 +269,32 @@ describe('BasketService', () => {
 
             expect(mockShopperBaskets.updateShippingAddressForShipment).toHaveBeenCalledWith({
                 body: expect.any(Object),
+                parameters: {basketId: 'mockBasketId', shipmentId: 'me'}
+            })
+            expect(mockRes.locals.adyen.basket).toEqual(mockUpdatedBasket)
+            expect(result).toEqual(mockUpdatedBasket)
+        })
+    })
+
+    describe('removeShippingAddress', () => {
+        it('should call updateShippingAddressForShipment with null values and update context', async () => {
+            const mockUpdatedBasket = {basketId: 'mockBasketId', shipments: [{}]}
+            mockShopperBaskets.updateShippingAddressForShipment.mockResolvedValue(mockUpdatedBasket)
+
+            const result = await basketService.removeShippingAddress()
+
+            expect(mockShopperBaskets.updateShippingAddressForShipment).toHaveBeenCalledWith({
+                body: {
+                    address1: null,
+                    city: null,
+                    countryCode: null,
+                    postalCode: null,
+                    stateCode: null,
+                    firstName: null,
+                    fullName: null,
+                    lastName: null,
+                    phone: null
+                },
                 parameters: {basketId: 'mockBasketId', shipmentId: 'me'}
             })
             expect(mockRes.locals.adyen.basket).toEqual(mockUpdatedBasket)
