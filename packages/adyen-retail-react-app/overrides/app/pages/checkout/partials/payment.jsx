@@ -157,15 +157,12 @@ const Payment = () => {
                 <Stack spacing={6}>
                     <AdyenCheckout
                         // Required props
-                        authToken={authToken}
                         site={site}
                         locale={locale}
                         navigate={navigate}
                         basket={basket}
                         // Optional
                         page={pageTypes.CHECKOUT}
-                        customerId={customerId}
-                        isCustomerRegistered={customerTypeData.isRegistered}
                         merchantDisplayName={'Merchant name'}
                         paymentMethodsConfiguration={paymentMethodsConfiguration}
                         // Callbacks

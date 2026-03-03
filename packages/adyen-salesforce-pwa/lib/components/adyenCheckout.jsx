@@ -1,4 +1,5 @@
 import React, {useEffect, useRef, useMemo, useCallback, useState} from 'react'
+import {useAccessToken, useCustomerId, useCustomerType} from '@salesforce/commerce-sdk-react'
 import PropTypes from 'prop-types'
 import '../style/adyenCheckout.css'
 import {
@@ -17,12 +18,9 @@ const AdyenCheckoutComponent = ({
     returnUrl,
 
     // User data
-    authToken,
-    customerId,
-    isCustomerRegistered = false,
     merchantDisplayName = '',
-    site,
     locale,
+    site,
     navigate,
 
     // Page context
@@ -55,6 +53,12 @@ const AdyenCheckoutComponent = ({
     const [internalAdyenOrder, setInternalAdyenOrder] = useState(null)
     const [internalAdyenAction, setInternalAdyenAction] = useState(null)
     const [componentKey, setComponentKey] = useState(0)
+
+    const customerId = useCustomerId()
+    const customerTypeData = useCustomerType()
+    const isCustomerRegistered = customerTypeData.isRegistered
+    const {getTokenWhenReady} = useAccessToken()
+    const [authToken, setAuthToken] = useState()
 
     // Fetch Adyen environment configuration
     const {
