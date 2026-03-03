@@ -554,6 +554,7 @@ describe('PaymentRequestBuilder', () => {
         beforeEach(() => {
             mockContext.adyenConfig.l23Enabled = 'true'
             mockContext.req.query = {locale: 'en-US'}
+            mockContext.stateData.paymentMethod.type = 'visa' // Use non-scheme method
         })
 
         it('should merge enhanced scheme data into additionalData', () => {
