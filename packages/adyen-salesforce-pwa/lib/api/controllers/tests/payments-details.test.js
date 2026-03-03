@@ -120,6 +120,29 @@ describe('payments details controller', () => {
         expect(next).toHaveBeenCalledWith()
     })
 
+    it('throws when adyenContext is not set', async () => {
+        res.locals.adyen = undefined
+        await sendPaymentDetails(req, res, next)
+        expect(next).toHaveBeenCalledWith(expect.any(AdyenError))
+    })
+
+    it('handles basket without c_amount and c_paymentMethod', async () => {
+        res.locals.adyen.basket = {basketId: 'testBasket', c_orderNo: '123'}
+        mockPaymentsDetails.mockResolvedValue({
+            resultCode: RESULT_CODES.AUTHORISED,
+            merchantReference: 'ref123'
+        })
+
+        await sendPaymentDetails(req, res, next)
+
+        expect(paymentsHelper.validateBasketPayments).toHaveBeenCalledWith(
+            expect.anything(),
+            '',
+            ''
+        )
+        expect(next).toHaveBeenCalledWith()
+    })
+
     it('saves partial payment order data to basket', async () => {
         const mockOrderData = {orderData: '...'}
         mockPaymentsDetails.mockResolvedValue({

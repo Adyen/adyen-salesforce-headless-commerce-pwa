@@ -1,4 +1,4 @@
-import {createShopperCustomerClient, getCustomer} from '../customerHelper.js'
+import {createShopperCustomerClient, getCustomer, getCustomerBaskets} from '../customerHelper.js'
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 import {ShopperCustomers} from 'commerce-sdk-isomorphic'
 import {AdyenError} from '../../models/AdyenError.js'
@@ -88,6 +88,32 @@ describe('customerHelper', () => {
             mockClient.getCustomer.mockRejectedValue(apiError)
 
             await expect(getCustomer(authToken, customerId)).rejects.toThrow(apiError)
+        })
+    })
+
+    describe('getCustomerBaskets', () => {
+        const authToken = 'test-auth-token'
+        const customerId = 'test-customer-id'
+        let mockClient
+
+        beforeEach(() => {
+            mockClient = {
+                getCustomerBaskets: jest.fn()
+            }
+            ShopperCustomers.mockImplementation(() => mockClient)
+        })
+
+        it('should return customer baskets', async () => {
+            getConfig.mockReturnValue(mockConfig)
+            const mockBaskets = {baskets: [{basketId: 'b1'}]}
+            mockClient.getCustomerBaskets.mockResolvedValue(mockBaskets)
+
+            const result = await getCustomerBaskets(authToken, customerId)
+
+            expect(mockClient.getCustomerBaskets).toHaveBeenCalledWith({
+                parameters: {customerId}
+            })
+            expect(result).toEqual(mockBaskets)
         })
     })
 })

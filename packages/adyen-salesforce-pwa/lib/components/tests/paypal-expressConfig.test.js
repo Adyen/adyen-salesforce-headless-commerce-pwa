@@ -15,8 +15,11 @@ import {AdyenShippingMethodsService} from '../../services/shipping-methods'
 import {AdyenShippingAddressService} from '../../services/shipping-address'
 import {AdyenPaypalUpdateOrderService} from '../../services/paypal-update-order'
 import {AdyenTemporaryBasketService} from '../../services/temporary-basket'
+import {PaymentCancelExpressService} from '../../services/payment-cancel-express'
+import {AdyenPaymentDataReviewPageService} from '../../services/payment-data-review-page'
 import {formatPayPalShopperDetails} from '../helpers/addressHelper'
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
+import {onErrorHandler} from '../paypal/expressConfig'
 
 jest.mock('../helpers/baseConfig')
 jest.mock('../../utils/executeCallbacks')
@@ -24,6 +27,7 @@ jest.mock('../../services/shopper-details')
 jest.mock('../../services/shipping-methods')
 jest.mock('../../services/shipping-address')
 jest.mock('../../services/paypal-update-order')
+jest.mock('../../services/payment-cancel-express')
 jest.mock('../../services/payment-data-review-page')
 jest.mock('../../services/temporary-basket')
 jest.mock('../helpers/addressHelper')
@@ -639,6 +643,18 @@ describe('paypal/expressConfig', () => {
             expect(mockShippingMethodsService.updateShippingMethod).toHaveBeenCalledWith('method1')
         })
 
+        it('should reject if no applicable shipping methods', async () => {
+            mockShippingAddressService.updateShippingAddress.mockResolvedValue({})
+            props.fetchShippingMethods.mockResolvedValue({
+                defaultShippingMethodId: null,
+                applicableShippingMethods: []
+            })
+
+            await onShippingAddressChange(data, actions, component, props)
+
+            expect(actions.reject).toHaveBeenCalledWith('ADDRESS_ERROR')
+        })
+
         it('should reject if no shipping address provided', async () => {
             data.shippingAddress = null
 
@@ -655,6 +671,112 @@ describe('paypal/expressConfig', () => {
             await onShippingAddressChange(data, actions, component, props)
 
             expect(actions.reject).toHaveBeenCalledWith('ADDRESS_ERROR')
+        })
+    })
+
+    describe('onErrorHandler', () => {
+        let consoleErrorSpy
+
+        beforeEach(() => {
+            consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+        })
+
+        afterEach(() => {
+            consoleErrorSpy.mockRestore()
+        })
+
+        it('should cancel express payment and navigate on success', async () => {
+            const mockPaymentCancelExpress = jest.fn().mockResolvedValue({})
+            PaymentCancelExpressService.mockImplementation(() => ({
+                paymentCancelExpress: mockPaymentCancelExpress
+            }))
+
+            const props = {
+                token: 'test-token',
+                customerId: 'customer-123',
+                site: {id: 'RefArch'},
+                navigate: jest.fn(),
+                getBasket: () => ({basketId: 'basket-456'})
+            }
+
+            const result = await onErrorHandler(new Error('Payment error'), {}, props)
+
+            expect(mockPaymentCancelExpress).toHaveBeenCalled()
+            expect(props.navigate).toHaveBeenCalledWith('/checkout?error=true')
+            expect(result).toEqual({cancelled: true})
+        })
+
+        it('should handle cancellation errors gracefully', async () => {
+            const cancelError = new Error('Cancel failed')
+            PaymentCancelExpressService.mockImplementation(() => ({
+                paymentCancelExpress: jest.fn().mockRejectedValue(cancelError)
+            }))
+
+            const props = {
+                token: 'test-token',
+                customerId: 'customer-123',
+                site: {id: 'RefArch'},
+                navigate: jest.fn(),
+                getBasket: () => ({basketId: 'basket-456'})
+            }
+
+            const result = await onErrorHandler(new Error('Payment error'), {}, props)
+
+            expect(consoleErrorSpy).toHaveBeenCalled()
+            expect(result).toEqual({cancelled: false, error: 'Cancel failed'})
+        })
+    })
+
+    describe('paypalExpressConfig enableReview', () => {
+        it('should set userAction to continue when enableReview is true', () => {
+            baseConfig.mockReturnValue({})
+            executeCallbacks.mockImplementation((callbacks) => callbacks)
+
+            const result = paypalExpressConfig({enableReview: true})
+
+            expect(result).toHaveProperty('userAction', 'continue')
+        })
+
+        it('should use redirectShopperToReviewPage for onAdditionalDetails when enableReview is true', () => {
+            baseConfig.mockReturnValue({})
+            executeCallbacks.mockImplementation((callbacks) => callbacks)
+
+            const result = paypalExpressConfig({
+                enableReview: true,
+                navigate: jest.fn(),
+                reviewPageUrl: '/review'
+            })
+
+            // onAdditionalDetails should be the redirectShopperToReviewPage function, not executeCallbacks result
+            expect(typeof result.onAdditionalDetails).toBe('function')
+        })
+
+        it('should call redirectShopperToReviewPage and navigate to review page', async () => {
+            baseConfig.mockReturnValue({})
+            executeCallbacks.mockImplementation((callbacks) => callbacks)
+
+            const mockSetPaymentData = jest.fn().mockResolvedValue({})
+            AdyenPaymentDataReviewPageService.mockImplementation(() => ({
+                setPaymentData: mockSetPaymentData
+            }))
+
+            const navigate = jest.fn()
+            const result = paypalExpressConfig({
+                enableReview: true,
+                navigate,
+                reviewPageUrl: '/review',
+                site: {id: 'site-id'},
+                token: 'test-token',
+                basket: {
+                    basketId: 'basket-123',
+                    customerInfo: {customerId: 'customer-123'}
+                }
+            })
+
+            await result.onAdditionalDetails({data: {paymentData: 'test'}})
+
+            expect(mockSetPaymentData).toHaveBeenCalledWith({paymentData: 'test'})
+            expect(navigate).toHaveBeenCalledWith('/review')
         })
     })
 

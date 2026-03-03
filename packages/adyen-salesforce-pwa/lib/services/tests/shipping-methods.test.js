@@ -68,6 +68,30 @@ describe('AdyenShippingMethodsService', () => {
                 'Get shipping methods failed'
             )
         })
+
+        it('should use status-based message when error json has no message', async () => {
+            adyenService.apiClient.get.mockResolvedValueOnce(
+                Promise.resolve({
+                    status: 503,
+                    json: jest.fn().mockResolvedValue({})
+                })
+            )
+            await expect(adyenService.getShippingMethods()).rejects.toThrow(
+                'Get shipping methods failed with status 503'
+            )
+        })
+
+        it('should use fallback message when json parsing fails on error', async () => {
+            adyenService.apiClient.get.mockResolvedValueOnce(
+                Promise.resolve({
+                    status: 500,
+                    json: jest.fn().mockRejectedValue(new Error('parse error'))
+                })
+            )
+            await expect(adyenService.getShippingMethods()).rejects.toThrow(
+                'Failed to get shipping methods'
+            )
+        })
     })
 
     describe('updateShippingMethod', () => {
@@ -103,6 +127,30 @@ describe('AdyenShippingMethodsService', () => {
 
             await expect(adyenService.updateShippingMethod(shippingMethodId)).rejects.toThrow(
                 'Update shipping method error'
+            )
+        })
+
+        it('should use status-based message when error json has no message', async () => {
+            adyenService.apiClient.post.mockResolvedValueOnce(
+                Promise.resolve({
+                    status: 503,
+                    json: jest.fn().mockResolvedValue({})
+                })
+            )
+            await expect(adyenService.updateShippingMethod('id')).rejects.toThrow(
+                'Update shipping method failed with status 503'
+            )
+        })
+
+        it('should use fallback message when json parsing fails on error', async () => {
+            adyenService.apiClient.post.mockResolvedValueOnce(
+                Promise.resolve({
+                    status: 500,
+                    json: jest.fn().mockRejectedValue(new Error('parse error'))
+                })
+            )
+            await expect(adyenService.updateShippingMethod('id')).rejects.toThrow(
+                'Failed to update shipping method'
             )
         })
     })
