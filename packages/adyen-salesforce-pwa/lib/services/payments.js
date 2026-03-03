@@ -16,8 +16,16 @@ export class AdyenPaymentsService {
             queryParams: {locale: locale?.id}
         })
         if (res.status >= 300) {
-            const errorData = await res.json().catch(() => ({message: 'Payment submission failed'}))
-            throw new Error(errorData.message || `Payment failed with status ${res.status}`)
+            const errorData = await res
+                .json()
+                .catch(() => ({errorMessage: 'Payment submission failed'}))
+            const err = new Error(
+                errorData.errorMessage || `Payment failed with status ${res.status}`
+            )
+            if (errorData.newBasketId) {
+                err.newBasketId = errorData.newBasketId
+            }
+            throw err
         }
         return await res.json()
     }

@@ -1,4 +1,4 @@
-import {ERROR_MESSAGE} from '../../utils/constants.mjs'
+import {ERROR_MESSAGE, PAYMENT_METHOD_TYPES} from '../../utils/constants.mjs'
 import AdyenClientProvider from '../models/adyenClientProvider'
 import Logger from '../models/logger'
 import {AdyenError} from '../models/AdyenError'
@@ -7,36 +7,64 @@ import {
     createPaymentRequestObject,
     revertCheckoutState,
     validateBasketPayments,
-    isApplePayExpress
+    isApplePayExpress,
+    isPayPalExpress
 } from '../helpers/paymentsHelper.js'
-import {createOrderUsingOrderNo} from '../helpers/orderHelper.js'
+import {
+    createOrderUsingOrderNo,
+    failOrderAndReopenBasket,
+    updatePaymentInstrumentForOrder
+} from '../helpers/orderHelper.js'
 import {createIdempotencyKey} from '../utils/paymentUtils'
 
 /**
- * Handles errors that occur during the payment process.
- * It attempts to remove payment instruments, fail the SFCC order, and recreate the basket.
- * @param {object} res - The Express response object.
- * @returns {Promise<void>}
+ * Returns true if the payment is a standard (non-express, non-gift-card) payment
+ * for which the SFCC order should be created before calling Adyen /payments.
+ * @param {object} data - The payment state data from the client.
+ * @returns {boolean}
  */
-async function handlePaymentError(res) {
+function isStandardPayment(data) {
+    const isExpress = data?.paymentMethod?.subtype === 'express'
+    const isGiftCard = data?.paymentMethod?.type === PAYMENT_METHOD_TYPES.GIFT_CARD
+    return !isExpress && !isGiftCard
+}
+
+/**
+ * Handles errors that occur during the payment process.
+ * For standard payments where an order was already created, fails the order and reopens the basket.
+ * For other flows, reverts basket state.
+ * @param {object} res - The Express response object.
+ * @param {string|null} orderNo - The order number if an order was created before the payment call.
+ * @returns {Promise<string|null>} The new basket ID if the order was failed and basket reopened.
+ */
+async function handlePaymentError(res, orderNo) {
     try {
         Logger.info('handlePaymentError', 'start')
-        await revertCheckoutState(res.locals.adyen, 'sendPayments')
+        const adyenContext = res.locals.adyen
+        if (orderNo) {
+            return await failOrderAndReopenBasket(adyenContext, orderNo)
+        }
+        await revertCheckoutState(adyenContext, 'sendPayments')
     } catch (err) {
         Logger.error('handlePaymentError', err.stack)
     }
+    return null
 }
 
 /**
  * An Express middleware that handles the /payments request from the client.
  * It orchestrates the payment process by creating a payment request,
  * calling the Adyen API, and handling the response.
+ * For standard (non-express, non-gift-card) payments, the SFCC order is created
+ * BEFORE calling Adyen /payments to prevent orphan payments. If the payment fails,
+ * the order is failed and the basket is reopened.
  * @param {object} req - The Express request object.
  * @param {object} res - The Express response object.
  * @param {Function} next - The Express next middleware function.
  * @returns {Promise<void>}
  */
 async function sendPayments(req, res, next) {
+    let preCreatedOrderNo = null
     try {
         Logger.info('sendPayments', 'start')
         const {
@@ -52,12 +80,22 @@ async function sendPayments(req, res, next) {
         }
         const paymentRequest = await createPaymentRequestObject(data, adyenContext, req)
         Logger.info('sendPayments', 'validateBasketPayments')
-        // Validate the basket and the payment amounts.
         await validateBasketPayments(
             adyenContext,
             paymentRequest.amount,
             paymentRequest.paymentMethod
         )
+
+        if (isStandardPayment(data)) {
+            await adyenContext.basketService.addPaymentInstrument(
+                paymentRequest?.amount,
+                paymentRequest?.paymentMethod
+            )
+            await createOrderUsingOrderNo(adyenContext)
+            preCreatedOrderNo = adyenContext.basket?.c_orderNo
+            Logger.info('sendPayments', `pre-created SFCC order: ${preCreatedOrderNo}`)
+        }
+
         const checkout = new AdyenClientProvider(adyenContext).getPaymentsApi()
         const response = await checkout.payments(paymentRequest, {
             idempotencyKey: createIdempotencyKey(paymentRequest)
@@ -74,7 +112,7 @@ async function sendPayments(req, res, next) {
             throw new AdyenError(ERROR_MESSAGE.PAYMENT_NOT_SUCCESSFUL, 400, response)
         }
 
-        if (checkoutResponse.isSuccessful) {
+        if (checkoutResponse.isSuccessful && !preCreatedOrderNo) {
             const basketUpdate = {
                 c_amount: JSON.stringify(paymentRequest?.amount),
                 c_paymentMethod: JSON.stringify(paymentRequest?.paymentMethod)
@@ -109,14 +147,26 @@ async function sendPayments(req, res, next) {
                 response?.pspReference
             )
         }
+
         if (checkoutResponse.isFinal && checkoutResponse.isSuccessful) {
-            await adyenContext.basketService.addPaymentInstrument(
-                paymentRequest?.amount,
-                paymentRequest?.paymentMethod,
-                response?.pspReference
-            )
-            await createOrderUsingOrderNo(adyenContext)
-            Logger.info('sendPayments', `order created: ${checkoutResponse.merchantReference}`)
+            if (!preCreatedOrderNo) {
+                await adyenContext.basketService.addPaymentInstrument(
+                    paymentRequest?.amount,
+                    paymentRequest?.paymentMethod,
+                    response?.pspReference
+                )
+                await createOrderUsingOrderNo(adyenContext)
+            } else {
+                const pspReference = response?.pspReference || response?.order?.pspReference
+                if (pspReference) {
+                    await updatePaymentInstrumentForOrder(
+                        adyenContext,
+                        preCreatedOrderNo,
+                        pspReference
+                    )
+                }
+            }
+            Logger.info('sendPayments', `order confirmed: ${checkoutResponse.merchantReference}`)
         }
         Logger.info('sendPayments', `checkoutResponse ${JSON.stringify(checkoutResponse)}`)
 
@@ -124,7 +174,10 @@ async function sendPayments(req, res, next) {
         return next()
     } catch (err) {
         Logger.error('sendPayments', err.stack)
-        await handlePaymentError(res)
+        const newBasketId = await handlePaymentError(res, preCreatedOrderNo)
+        if (newBasketId) {
+            err.newBasketId = newBasketId
+        }
         return next(err)
     }
 }

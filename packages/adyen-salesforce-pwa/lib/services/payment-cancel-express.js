@@ -16,9 +16,9 @@ export class PaymentCancelExpressService {
         if (res.status >= 300) {
             const errorData = await res
                 .json()
-                .catch(() => ({message: 'Express payment cancellation failed'}))
+                .catch(() => ({errorMessage: 'Express payment cancellation failed'}))
             throw new Error(
-                errorData.message || `Express payment cancel failed with status ${res.status}`
+                errorData.errorMessage || `Express payment cancel failed with status ${res.status}`
             )
         }
         return await res.json()

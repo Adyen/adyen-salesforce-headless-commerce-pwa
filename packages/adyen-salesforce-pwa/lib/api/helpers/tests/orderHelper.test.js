@@ -140,12 +140,12 @@ describe('orderHelper', () => {
             expect(result).toEqual({orderNo: 'order123'})
         })
 
-        it('should throw AdyenError if the order already exists', async () => {
+        it('should return existing order without re-creating if it already exists', async () => {
             mockGetOrder.mockResolvedValue({orderNo: 'order123'}) // Order exists
 
-            await expect(createOrderUsingOrderNo(mockAdyenContext)).rejects.toThrow(
-                new AdyenError(ERROR_MESSAGE.ORDER_ALREADY_EXISTS, 409)
-            )
+            const result = await createOrderUsingOrderNo(mockAdyenContext)
+
+            expect(result).toEqual({orderNo: 'order123'})
             expect(mockCreateOrder).not.toHaveBeenCalled()
         })
     })

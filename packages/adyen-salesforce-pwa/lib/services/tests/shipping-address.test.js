@@ -65,7 +65,7 @@ describe('AdyenShippingAddressService', () => {
             const mockFetchPromise = Promise.resolve({
                 status: 400,
                 statusText: 'Bad Request',
-                json: jest.fn().mockResolvedValue({message: 'Shipping address update failed'})
+                json: jest.fn().mockResolvedValue({errorMessage: 'Shipping address update failed'})
             })
 
             adyenService.apiClient.post.mockResolvedValueOnce(mockFetchPromise)

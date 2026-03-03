@@ -50,7 +50,7 @@ describe('AdyenEnvironmentService', () => {
             const mockFetchPromise = Promise.resolve({
                 status: 500,
                 statusText: 'Internal Server Error',
-                json: jest.fn().mockResolvedValue({message: 'Server error'})
+                json: jest.fn().mockResolvedValue({errorMessage: 'Server error'})
             })
 
             adyenService.apiClient.get.mockResolvedValueOnce(mockFetchPromise)
