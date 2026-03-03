@@ -370,16 +370,17 @@ export class PaymentRequestBuilder {
     /**
      * Adds enhanced scheme data (Level 2/3) to the payment request for card payments.
      * This data is sent as additionalData and helps reduce interchange fees for B2B/commercial card transactions.
+     * @param {object} paymentMethodType - The payment method used.
      * @param {object} basket - The basket object. Uses context.basket if not provided.
      * @param {string} commodityCode - The commodity code. Uses context.adyenConfig.l23CommodityCode if not provided.
      * @returns {PaymentRequestBuilder} The builder instance for chaining.
      */
-    withEnhancedSchemeData(basket = null, commodityCode = null) {
+    withEnhancedSchemeData(paymentMethodType = null, basket = null, commodityCode = null) {
+        const actualPaymentMethodType =
+            paymentMethodType || this.context.stateData?.paymentMethod?.type
         const l23Enabled = this.context.adyenConfig?.l23Enabled === 'true'
-        const locale = this.context.req?.query?.locale || ''
-        const countryCode = locale.slice(-2)
 
-        if (!l23Enabled || countryCode !== 'US') {
+        if (!l23Enabled || actualPaymentMethodType.indexOf('scheme') > -1) {
             return this
         }
 
