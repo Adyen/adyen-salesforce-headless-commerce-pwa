@@ -7,8 +7,7 @@ import {
     createPaymentRequestObject,
     revertCheckoutState,
     validateBasketPayments,
-    isApplePayExpress,
-    isPayPalExpress
+    isApplePayExpress
 } from '../helpers/paymentsHelper.js'
 import {
     createOrderUsingOrderNo,
