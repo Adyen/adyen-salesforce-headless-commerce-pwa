@@ -9,7 +9,7 @@
         "payments",
         "components"
     ],
-    "version": "4.2.31",
+    "version": "4.2.35",
     "main": "dist/app/index.js",
     "bin": {
         "include-env": "dist/scripts/include-env.js",
@@ -46,8 +46,9 @@
         "@adyen/api-library": "^29.1.0",
         "commerce-sdk-isomorphic": "^4.2.0",
         "@salesforce/pwa-kit-runtime": "^3.5.1",
-        "react": "^18.3.1 || ^19.0.0",
-        "react-dom": "^18.3.1 || ^19.0.0",
+        "@salesforce/commerce-sdk-react": "^5.0.0",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1",
         "prop-types": "^15.8.1"
     },
     "dependencies": {

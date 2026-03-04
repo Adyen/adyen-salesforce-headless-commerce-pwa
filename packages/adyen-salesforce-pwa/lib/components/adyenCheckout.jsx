@@ -60,6 +60,15 @@ const AdyenCheckoutComponent = ({
     const {getTokenWhenReady} = useAccessToken()
     const [authToken, setAuthToken] = useState()
 
+    useEffect(() => {
+        const getToken = async () => {
+            const token = await getTokenWhenReady()
+            setAuthToken(token)
+        }
+
+        getToken()
+    }, [])
+
     // Fetch Adyen environment configuration
     const {
         data: adyenEnvironment,
@@ -304,7 +313,6 @@ const AdyenCheckoutComponent = ({
 
 AdyenCheckoutComponent.propTypes = {
     // Required props
-    authToken: PropTypes.string.isRequired,
     site: PropTypes.object.isRequired,
     locale: PropTypes.object.isRequired,
     navigate: PropTypes.func.isRequired,
@@ -314,8 +322,6 @@ AdyenCheckoutComponent.propTypes = {
     returnUrl: PropTypes.string,
 
     // User data
-    customerId: PropTypes.string,
-    isCustomerRegistered: PropTypes.bool,
     merchantDisplayName: PropTypes.string,
 
     // Page context
@@ -343,7 +349,6 @@ export default React.memo(AdyenCheckoutComponent, (prevProps, nextProps) => {
     return (
         prevProps.basket?.basketId === nextProps.basket?.basketId &&
         prevProps.basket?.c_orderData === nextProps.basket?.c_orderData &&
-        prevProps.authToken === nextProps.authToken &&
         prevProps.site?.id === nextProps.site?.id &&
         prevProps.locale?.id === nextProps.locale?.id
     )
