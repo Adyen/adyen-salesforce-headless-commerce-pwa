@@ -74,5 +74,29 @@ describe('AdyenShippingAddressService', () => {
                 adyenService.updateShippingAddress(shippingMethodId, basketId)
             ).rejects.toThrow('Shipping address update failed')
         })
+
+        it('should use status-based message when error json has no message', async () => {
+            adyenService.apiClient.post.mockResolvedValueOnce(
+                Promise.resolve({
+                    status: 503,
+                    json: jest.fn().mockResolvedValue({})
+                })
+            )
+            await expect(adyenService.updateShippingAddress({})).rejects.toThrow(
+                'Update shipping address failed with status 503'
+            )
+        })
+
+        it('should use fallback message when json parsing fails on error', async () => {
+            adyenService.apiClient.post.mockResolvedValueOnce(
+                Promise.resolve({
+                    status: 500,
+                    json: jest.fn().mockRejectedValue(new Error('parse error'))
+                })
+            )
+            await expect(adyenService.updateShippingAddress({})).rejects.toThrow(
+                'Failed to update shipping address'
+            )
+        })
     })
 })

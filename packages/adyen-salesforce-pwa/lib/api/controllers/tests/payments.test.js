@@ -127,6 +127,37 @@ describe('payments controller', () => {
         expect(next).toHaveBeenCalledWith()
     })
 
+    it('throws when adyenContext is not set', async () => {
+        res.locals.adyen = undefined
+        await sendPayments(req, res, next)
+        expect(next).toHaveBeenCalledWith(expect.any(AdyenError))
+    })
+
+    it('calls addShopperData for Apple Pay Express', async () => {
+        req.body.data = {paymentMethod: {type: 'applepay', subtype: 'express'}}
+        mockPayments.mockResolvedValue({
+            resultCode: RESULT_CODES.AUTHORISED,
+            merchantReference: 'ref123'
+        })
+
+        await sendPayments(req, res, next)
+
+        expect(res.locals.adyen.basketService.addShopperData).toHaveBeenCalled()
+        expect(next).toHaveBeenCalledWith()
+    })
+
+    it('handles successful payment without pspReference', async () => {
+        mockPayments.mockResolvedValue({
+            resultCode: RESULT_CODES.AUTHORISED,
+            merchantReference: 'ref123'
+        })
+
+        await sendPayments(req, res, next)
+
+        expect(res.locals.response.isSuccessful).toBe(true)
+        expect(next).toHaveBeenCalledWith()
+    })
+
     it('saves partial payment order data to basket', async () => {
         const mockOrderData = {orderData: '...'}
         mockPayments.mockResolvedValue({

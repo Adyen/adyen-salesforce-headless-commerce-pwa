@@ -108,6 +108,18 @@ describe('AdyenPaymentDataReviewPageService', () => {
                 'Failed to get payment data for review page'
             )
         })
+
+        it('should use status-based message when error json has no message', async () => {
+            adyenService.apiClient.get.mockResolvedValueOnce(
+                Promise.resolve({
+                    status: 503,
+                    json: jest.fn().mockResolvedValue({})
+                })
+            )
+            await expect(adyenService.getPaymentData()).rejects.toThrow(
+                'Get payment data failed with status 503'
+            )
+        })
     })
 
     describe('setPaymentData', () => {
@@ -153,6 +165,18 @@ describe('AdyenPaymentDataReviewPageService', () => {
 
             await expect(adyenService.setPaymentData(mockPaymentData)).rejects.toThrow(
                 'Failed to set payment data for review page'
+            )
+        })
+
+        it('should use status-based message when error json has no message', async () => {
+            adyenService.apiClient.post.mockResolvedValueOnce(
+                Promise.resolve({
+                    status: 503,
+                    json: jest.fn().mockResolvedValue({})
+                })
+            )
+            await expect(adyenService.setPaymentData(mockPaymentData)).rejects.toThrow(
+                'Set payment data failed with status 503'
             )
         })
     })
