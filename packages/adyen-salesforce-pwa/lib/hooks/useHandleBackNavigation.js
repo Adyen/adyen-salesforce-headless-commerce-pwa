@@ -1,4 +1,5 @@
 import {useCallback, useEffect, useRef, useState} from 'react'
+import {useLocation} from 'react-router-dom'
 import {PaymentCancelService} from '../services/payment-cancel'
 
 /**
@@ -10,7 +11,7 @@ import {PaymentCancelService} from '../services/payment-cancel'
  * @property {object} site - The site configuration object.
  * @property {string[]} [redirectParams=['redirectResult', 'sessionId']] - URL params that indicate a valid redirect return.
  * @property {boolean} [enabled=true] - Whether detection is enabled.
- * @property {function} [navigate] - React Router navigate function.
+ * @property {function} navigate - React Router navigate function.
  */
 
 /**
@@ -44,6 +45,11 @@ const useHandleBackNavigation = ({
     redirectParams = ['redirectResult', 'sessionId'],
     enabled = true
 }) => {
+    const location = useLocation()
+    const locationRef = useRef(location)
+    useEffect(() => {
+        locationRef.current = location
+    }, [location])
     const [error, setError] = useState(null)
     const isProcessingRef = useRef(false)
 
@@ -52,7 +58,7 @@ const useHandleBackNavigation = ({
             return false
         }
 
-        const urlParams = new URLSearchParams(window.location.search)
+        const urlParams = new URLSearchParams(locationRef.current.search)
         const hasRedirectParams = redirectParams.some((param) => urlParams.get(param))
 
         if (hasRedirectParams) {
@@ -83,16 +89,13 @@ const useHandleBackNavigation = ({
                 return false
             }
 
-            const cleanParams = new URLSearchParams(window.location.search)
+            const cleanParams = new URLSearchParams(locationRef.current.search)
             cleanParams.delete('orderNo')
 
-            if (navigate && cancelResponse?.newBasketId) {
+            if (cancelResponse?.newBasketId) {
                 cleanParams.set('newBasketId', cancelResponse.newBasketId)
-                navigate(`/checkout?${cleanParams.toString()}`)
-            } else {
-                const cleanUrl = `${window.location.pathname}?${cleanParams.toString()}`
-                window.location.replace(cleanUrl)
             }
+            navigate(`/checkout?${cleanParams.toString()}`)
 
             return true
         } catch (err) {

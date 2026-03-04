@@ -53,7 +53,7 @@ describe('PaymentCancelExpressService', () => {
         it('should throw an error with server message when status >= 300', async () => {
             mockPost.mockResolvedValue({
                 status: 400,
-                json: jest.fn().mockResolvedValue({message: 'Cancellation denied'})
+                json: jest.fn().mockResolvedValue({errorMessage: 'Cancellation denied'})
             })
 
             await expect(service.paymentCancelExpress()).rejects.toThrow('Cancellation denied')

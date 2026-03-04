@@ -381,6 +381,26 @@ describe('onPaymentsSuccess', () => {
     let mockActions, mockProps, mockComponent
 
     beforeEach(() => {
+        // Mock window object
+        if (typeof window === 'undefined') {
+            global.window = {}
+        }
+        Object.defineProperty(window, 'location', {
+            value: {
+                search: '',
+                pathname: '/checkout'
+            },
+            writable: true,
+            configurable: true
+        })
+        Object.defineProperty(window, 'history', {
+            value: {
+                pushState: jest.fn()
+            },
+            writable: true,
+            configurable: true
+        })
+
         mockActions = {resolve: jest.fn()}
         mockComponent = {handleAction: jest.fn()}
         mockProps = {

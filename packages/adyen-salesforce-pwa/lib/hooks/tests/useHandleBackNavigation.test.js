@@ -4,8 +4,12 @@
 import {renderHook, waitFor} from '@testing-library/react'
 import useHandleBackNavigation from '../useHandleBackNavigation'
 import {PaymentCancelService} from '../../services/payment-cancel'
+import {useLocation} from 'react-router-dom'
 
 jest.mock('../../services/payment-cancel')
+jest.mock('react-router-dom', () => ({
+    useLocation: jest.fn()
+}))
 
 describe('useHandleBackNavigation', () => {
     let mockCancelAbandonedPayment
@@ -22,13 +26,7 @@ describe('useHandleBackNavigation', () => {
             cancelAbandonedPayment: mockCancelAbandonedPayment
         }))
 
-        delete window.location
-        window.location = {
-            reload: jest.fn(),
-            replace: jest.fn(),
-            search: '',
-            pathname: '/checkout'
-        }
+        useLocation.mockReturnValue({search: ''})
     })
 
     afterEach(() => {
@@ -134,7 +132,7 @@ describe('useHandleBackNavigation', () => {
         })
 
         it('should return false if URL has redirect parameters', async () => {
-            window.location.search = '?redirectResult=abc123'
+            useLocation.mockReturnValue({search: '?redirectResult=abc123'})
 
             const {result} = renderHook(() =>
                 useHandleBackNavigation({
@@ -154,12 +152,14 @@ describe('useHandleBackNavigation', () => {
         it('should return false if cancel response indicates not cancelled', async () => {
             mockCancelAbandonedPayment.mockResolvedValue({cancelled: false})
 
+            const mockNavigate = jest.fn()
             const {result} = renderHook(() =>
                 useHandleBackNavigation({
                     authToken: mockAuthToken,
                     customerId: mockCustomerId,
                     basketId: mockBasketId,
-                    site: mockSite
+                    site: mockSite,
+                    navigate: mockNavigate
                 })
             )
 
@@ -167,19 +167,21 @@ describe('useHandleBackNavigation', () => {
 
             expect(detected).toBe(false)
             expect(mockCancelAbandonedPayment).toHaveBeenCalledWith('abandoned_session', null)
-            expect(window.location.replace).not.toHaveBeenCalled()
+            expect(mockNavigate).not.toHaveBeenCalled()
         })
 
         it('should extract orderNo from URL params', async () => {
-            window.location.search = '?orderNo=00123456'
+            useLocation.mockReturnValue({search: '?orderNo=00123456'})
             mockCancelAbandonedPayment.mockResolvedValue({cancelled: true})
 
+            const mockNavigate = jest.fn()
             const {result} = renderHook(() =>
                 useHandleBackNavigation({
                     authToken: mockAuthToken,
                     customerId: mockCustomerId,
                     basketId: mockBasketId,
-                    site: mockSite
+                    site: mockSite,
+                    navigate: mockNavigate
                 })
             )
 
@@ -188,15 +190,17 @@ describe('useHandleBackNavigation', () => {
             expect(mockCancelAbandonedPayment).toHaveBeenCalledWith('abandoned_session', '00123456')
         })
 
-        it('should detect abandoned payment and cancel it with window.location.replace', async () => {
+        it('should detect abandoned payment and cancel it via navigate', async () => {
             mockCancelAbandonedPayment.mockResolvedValue({cancelled: true})
+            const mockNavigate = jest.fn()
 
             const {result} = renderHook(() =>
                 useHandleBackNavigation({
                     authToken: mockAuthToken,
                     customerId: mockCustomerId,
                     basketId: mockBasketId,
-                    site: mockSite
+                    site: mockSite,
+                    navigate: mockNavigate
                 })
             )
 
@@ -212,7 +216,7 @@ describe('useHandleBackNavigation', () => {
                 mockBasketId,
                 mockSite
             )
-            expect(window.location.replace).toHaveBeenCalledWith('/checkout?')
+            expect(mockNavigate).toHaveBeenCalledWith('/checkout?')
         })
 
         it('should handle errors during cancellation', async () => {
@@ -245,7 +249,7 @@ describe('useHandleBackNavigation', () => {
             consoleErrorSpy.mockRestore()
         })
 
-        it('should use navigate function when provided with newBasketId', async () => {
+        it('should navigate with newBasketId when cancel response includes one', async () => {
             const mockNavigate = jest.fn()
             mockCancelAbandonedPayment.mockResolvedValue({
                 cancelled: true,
@@ -269,11 +273,10 @@ describe('useHandleBackNavigation', () => {
             })
 
             expect(mockNavigate).toHaveBeenCalledWith('/checkout?newBasketId=new-basket-789')
-            expect(window.location.replace).not.toHaveBeenCalled()
         })
 
         it('should check custom redirect parameters', async () => {
-            window.location.search = '?customParam=value'
+            useLocation.mockReturnValue({search: '?customParam=value'})
 
             const {result} = renderHook(() =>
                 useHandleBackNavigation({
@@ -295,13 +298,15 @@ describe('useHandleBackNavigation', () => {
     describe('pageshow event handling', () => {
         it('should check for abandoned payment when page is restored from bfcache', async () => {
             mockCancelAbandonedPayment.mockResolvedValue({cancelled: true})
+            const mockNavigate = jest.fn()
 
             renderHook(() =>
                 useHandleBackNavigation({
                     authToken: mockAuthToken,
                     customerId: mockCustomerId,
                     basketId: mockBasketId,
-                    site: mockSite
+                    site: mockSite,
+                    navigate: mockNavigate
                 })
             )
 
@@ -315,12 +320,14 @@ describe('useHandleBackNavigation', () => {
         })
 
         it('should not check for abandoned payment on normal page load', async () => {
+            const mockNavigate = jest.fn()
             renderHook(() =>
                 useHandleBackNavigation({
                     authToken: mockAuthToken,
                     customerId: mockCustomerId,
                     basketId: mockBasketId,
-                    site: mockSite
+                    site: mockSite,
+                    navigate: mockNavigate
                 })
             )
 
