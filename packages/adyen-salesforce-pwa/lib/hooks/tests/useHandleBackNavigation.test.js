@@ -4,12 +4,8 @@
 import {renderHook, waitFor} from '@testing-library/react'
 import useHandleBackNavigation from '../useHandleBackNavigation'
 import {PaymentCancelService} from '../../services/payment-cancel'
-import {useLocation} from 'react-router-dom'
 
 jest.mock('../../services/payment-cancel')
-jest.mock('react-router-dom', () => ({
-    useLocation: jest.fn()
-}))
 
 describe('useHandleBackNavigation', () => {
     let mockCancelAbandonedPayment
@@ -26,7 +22,7 @@ describe('useHandleBackNavigation', () => {
             cancelAbandonedPayment: mockCancelAbandonedPayment
         }))
 
-        useLocation.mockReturnValue({search: ''})
+        window.history.replaceState(null, '', '/')
     })
 
     afterEach(() => {
@@ -132,7 +128,7 @@ describe('useHandleBackNavigation', () => {
         })
 
         it('should return false if URL has redirect parameters', async () => {
-            useLocation.mockReturnValue({search: '?redirectResult=abc123'})
+            window.history.replaceState(null, '', '/?redirectResult=abc123')
 
             const {result} = renderHook(() =>
                 useHandleBackNavigation({
@@ -171,7 +167,7 @@ describe('useHandleBackNavigation', () => {
         })
 
         it('should extract orderNo from URL params', async () => {
-            useLocation.mockReturnValue({search: '?orderNo=00123456'})
+            window.history.replaceState(null, '', '/?orderNo=00123456')
             mockCancelAbandonedPayment.mockResolvedValue({cancelled: true})
 
             const mockNavigate = jest.fn()
@@ -276,7 +272,7 @@ describe('useHandleBackNavigation', () => {
         })
 
         it('should check custom redirect parameters', async () => {
-            useLocation.mockReturnValue({search: '?customParam=value'})
+            window.history.replaceState(null, '', '/?customParam=value')
 
             const {result} = renderHook(() =>
                 useHandleBackNavigation({
