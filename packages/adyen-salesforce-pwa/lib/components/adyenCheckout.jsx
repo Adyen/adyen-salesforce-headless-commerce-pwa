@@ -264,6 +264,7 @@ const AdyenCheckoutComponent = ({
                     adyenEnvironment,
                     adyenPaymentMethods,
                     adyenOrder: internalAdyenOrder,
+                    basket,
                     getTranslations: getTranslations,
                     locale,
                     setAdyenStateData: handleStateChange,
