@@ -20,6 +20,7 @@ import Logger from '../models/logger.js'
 export async function prepareMinimalRequestContext(req, res, next) {
     Logger.info('prepareMinimalRequestContext', 'start')
     const {siteId} = req.query
+    const {authorization, customerid} = req.headers
 
     if (!siteId) {
         return next(new AdyenError(ERROR_MESSAGE.INVALID_PARAMS, 400))
@@ -27,7 +28,12 @@ export async function prepareMinimalRequestContext(req, res, next) {
 
     try {
         const adyenConfig = getAdyenConfigForCurrentSite(siteId)
-        res.locals.adyen = {adyenConfig, siteId}
+        res.locals.adyen = {
+            adyenConfig,
+            siteId,
+            ...(authorization && {authorization}),
+            ...(customerid && {customerId: customerid})
+        }
         Logger.info('prepareMinimalRequestContext', 'success')
         return next()
     } catch (err) {

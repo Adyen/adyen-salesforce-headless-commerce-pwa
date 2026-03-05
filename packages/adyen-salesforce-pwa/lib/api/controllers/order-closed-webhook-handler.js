@@ -36,6 +36,14 @@ async function orderClosedWebhookHandler(req, res, next) {
                 notification.eventCode,
                 `ORDER_CLOSED for order ${orderNo} was not successful.`
             )
+            if (order.status === ORDER.ORDER_STATUS_NEW) {
+                Logger.info(
+                    notification.eventCode,
+                    `Order ${orderNo} is already in NEW status. Skipping failure update to prevent stale webhook from corrupting a successfully placed order.`
+                )
+                res.locals.response = messages.AUTH_SUCCESS
+                return next()
+            }
             await orderApi.updateOrderConfirmationStatus(
                 orderNo,
                 ORDER.CONFIRMATION_STATUS_NOT_CONFIRMED

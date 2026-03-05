@@ -14,6 +14,19 @@ export class CustomShopperOrderApiClient extends BaseApiClient {
     }
 
     /**
+     * Generates a new unique order number via the custom Adyen shopper order API.
+     * @param {string} authorization - SLAS access token for the shopper.
+     * @returns {Promise<string>} A promise that resolves to the generated order number.
+     */
+    async generateOrderNo(authorization) {
+        const response = await this._callShopperApi('GET', 'orders/order-number', {
+            headers: {authorization}
+        })
+        const data = await response.json()
+        return data.orderNo
+    }
+
+    /**
      * Creates an order from a basket using the custom Adyen order API.
      * @param {string} authorization - SLAS access token for the shopper.
      * @param {string} basketId - The ID of the basket to create an order from.

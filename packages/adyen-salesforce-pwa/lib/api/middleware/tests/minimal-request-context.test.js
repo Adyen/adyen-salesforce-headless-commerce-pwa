@@ -16,6 +16,10 @@ describe('prepareMinimalRequestContext middleware', () => {
         req = {
             query: {
                 siteId: 'RefArch'
+            },
+            headers: {
+                authorization: 'Bearer test-token',
+                customerid: 'customer123'
             }
         }
         res = {

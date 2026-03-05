@@ -51,7 +51,7 @@ describe('GiftCardService', () => {
             const mockFetchPromise = Promise.resolve({
                 status: 400,
                 statusText: 'Bad Request',
-                json: jest.fn().mockResolvedValue({message: 'Balance check error'})
+                json: jest.fn().mockResolvedValue({errorMessage: 'Balance check error'})
             })
             giftCardService.apiClient.post.mockResolvedValueOnce(mockFetchPromise)
 
@@ -110,7 +110,7 @@ describe('GiftCardService', () => {
             const mockFetchPromise = Promise.resolve({
                 status: 500,
                 statusText: 'Server Error',
-                json: jest.fn().mockResolvedValue({message: 'Create order error'})
+                json: jest.fn().mockResolvedValue({errorMessage: 'Create order error'})
             })
             giftCardService.apiClient.post.mockResolvedValueOnce(mockFetchPromise)
 
@@ -167,7 +167,7 @@ describe('GiftCardService', () => {
             const mockFetchPromise = Promise.resolve({
                 status: 404,
                 statusText: 'Not Found',
-                json: jest.fn().mockResolvedValue({message: 'Cancel order error'})
+                json: jest.fn().mockResolvedValue({errorMessage: 'Cancel order error'})
             })
             giftCardService.apiClient.post.mockResolvedValueOnce(mockFetchPromise)
 

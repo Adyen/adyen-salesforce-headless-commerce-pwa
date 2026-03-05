@@ -64,7 +64,7 @@ describe('AdyenPaymentMethodsService', () => {
         const mockFetchPromise = Promise.resolve({
             status: 400,
             statusText: 'Bad Request',
-            json: jest.fn().mockResolvedValue({message: 'Fetch payment methods error'})
+            json: jest.fn().mockResolvedValue({errorMessage: 'Fetch payment methods error'})
         })
 
         paymentMethodsService.apiClient.get.mockResolvedValueOnce(mockFetchPromise)

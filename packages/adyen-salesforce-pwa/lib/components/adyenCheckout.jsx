@@ -9,6 +9,7 @@ import {
 import {paymentMethodsConfiguration as getPaymentMethodsConfig} from './paymentMethodsConfiguration'
 import useAdyenEnvironment from '../hooks/useAdyenEnvironment'
 import useAdyenPaymentMethods from '../hooks/useAdyenPaymentMethods'
+import useAdyenOrderNumber from '../hooks/useAdyenOrderNumber'
 import PAGE_TYPES from '../utils/pageTypes.mjs'
 
 const AdyenCheckoutComponent = ({
@@ -84,14 +85,27 @@ const AdyenCheckoutComponent = ({
         skip: !callPaymentMethodsOnPages.includes(page)
     })
 
-    // Update  orderNo when basket changes
+    // Fetch a fresh order number if the basket does not already have one.
+    const {
+        orderNo: fetchedOrderNo,
+        error: orderNumberError,
+        isLoading: fetchingOrderNumber
+    } = useAdyenOrderNumber({
+        authToken,
+        customerId,
+        basketId: basket?.basketId,
+        site,
+        existingOrderNo: basket?.c_orderNo,
+        skip: page !== PAGE_TYPES.CHECKOUT
+    })
+
+    // Sync order number into internal state from either the basket or the fetch result
     useEffect(() => {
-        if (basket?.c_orderNo) {
-            if (basket?.c_orderNo && basket?.c_orderNo !== internalOrderNo) {
-                setInternalOrderNo(basket?.c_orderNo)
-            }
+        const resolvedOrderNo = basket?.c_orderNo || fetchedOrderNo
+        if (resolvedOrderNo && resolvedOrderNo !== internalOrderNo) {
+            setInternalOrderNo(resolvedOrderNo)
         }
-    }, [basket?.c_orderNo])
+    }, [basket?.c_orderNo, fetchedOrderNo])
 
     // Update internal adyen order when basket changes
     useEffect(() => {
@@ -193,7 +207,8 @@ const AdyenCheckoutComponent = ({
             !adyenEnvironment ||
             !paymentContainer.current ||
             fetchingEnvironment ||
-            fetchingPaymentMethods
+            fetchingPaymentMethods ||
+            fetchingOrderNumber
         ) {
             return
         }
@@ -208,6 +223,12 @@ const AdyenCheckoutComponent = ({
         if (adyenPaymentMethodsError) {
             console.error('Error fetching Adyen payment methods:', adyenPaymentMethodsError)
             onError.forEach((cb) => cb(adyenPaymentMethodsError))
+            return
+        }
+
+        if (orderNumberError) {
+            console.error('Error fetching order number:', orderNumberError)
+            onError.forEach((cb) => cb(orderNumberError))
             return
         }
 
@@ -283,6 +304,7 @@ const AdyenCheckoutComponent = ({
         adyenEnvironment?.ADYEN_ENVIRONMENT,
         adyenEnvironment?.ADYEN_CLIENT_KEY,
         adyenPaymentMethods?.paymentMethods,
+        fetchingOrderNumber,
         internalAdyenAction,
         internalAdyenOrder?.orderData,
         componentKey
@@ -290,9 +312,8 @@ const AdyenCheckoutComponent = ({
 
     return (
         <>
-            {(isLoading || fetchingEnvironment || fetchingPaymentMethods) && spinner && (
-                <>{spinner}</>
-            )}
+            {(isLoading || fetchingEnvironment || fetchingPaymentMethods || fetchingOrderNumber) &&
+                spinner && <>{spinner}</>}
             <div ref={paymentContainer}></div>
         </>
     )
