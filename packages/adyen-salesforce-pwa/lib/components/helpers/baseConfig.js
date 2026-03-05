@@ -59,6 +59,7 @@ export const onSubmit = async (state, component, actions, props) => {
         return {paymentsResponse: paymentsResponse}
     } catch (err) {
         actions.reject(err.message)
+        executeErrorCallbacks([...(props.onError ?? []), onErrorHandler], props)(err, component)
     }
 }
 
@@ -77,26 +78,31 @@ export const onAdditionalDetails = async (state, component, actions, props) => {
         return {paymentsDetailsResponse: paymentsDetailsResponse}
     } catch (err) {
         actions.reject(err.message)
-        if (state?.data?.details?.redirectResult || state?.data?.details?.threeDSResult) {
-            executeErrorCallbacks([...props.onError, onErrorHandler], props)(err, component)
-        }
+        executeErrorCallbacks([...(props.onError ?? []), onErrorHandler], props)(err, component)
     }
 }
 
 export const onErrorHandler = async (error, component, props) => {
     try {
+        const newBasketId = error?.newBasketId
         const basket = props.getBasket ? props.getBasket() : props.basket
-        const paymentCancelService = new PaymentCancelService(
-            props.token,
-            props.customerId,
-            basket?.basketId,
-            props.site
-        )
-        await paymentCancelService.paymentCancel(props.orderNo)
+        if (!newBasketId) {
+            const paymentCancelService = new PaymentCancelService(
+                props.token,
+                props.customerId,
+                basket?.basketId,
+                props.site
+            )
+            await paymentCancelService.paymentCancel(props.orderNo)
+        }
         if (props.adyenOrder) {
             props.setAdyenOrder(null)
         }
-        props.navigate(`/checkout?error=true`)
+        if (newBasketId) {
+            props.navigate(`/checkout?error=true&newBasketId=${newBasketId}`)
+        } else {
+            props.navigate(`/checkout?error=true`)
+        }
         return {cancelled: true}
     } catch (err) {
         console.error('Error during payment cancellation:', err)
@@ -127,6 +133,17 @@ const handleAction = (navigate, setAdyenAction, component, response) => {
             setAdyenAction(actionURI)
             break
         default:
+            // Push orderNo to history so it's readable on browser back navigation.
+            // The useHandleBackNavigation hook reads this to pass to the cancel endpoint.
+            if (merchantReference) {
+                const params = new URLSearchParams(window.location.search)
+                params.set('orderNo', merchantReference)
+                window.history.pushState(
+                    null,
+                    '',
+                    `${window.location.pathname}?${params.toString()}`
+                )
+            }
             component.handleAction(action)
             break
     }

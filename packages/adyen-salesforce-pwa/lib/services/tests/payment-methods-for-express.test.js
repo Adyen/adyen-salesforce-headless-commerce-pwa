@@ -54,7 +54,7 @@ describe('AdyenPaymentMethodsForExpressService', () => {
         it('should throw an error with server message when status >= 300', async () => {
             mockGet.mockResolvedValue({
                 status: 400,
-                json: jest.fn().mockResolvedValue({message: 'Bad request from server'})
+                json: jest.fn().mockResolvedValue({errorMessage: 'Bad request from server'})
             })
 
             await expect(

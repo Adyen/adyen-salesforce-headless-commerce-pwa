@@ -4,7 +4,47 @@ import {AdyenError} from '../models/AdyenError.js'
 import {OrderApiClient} from '../models/orderApi.js'
 import {CustomShopperOrderApiClient} from '../models/customShopperOrderApi.js'
 import {CustomAdminOrderApiClient} from '../models/customAdminOrderApi.js'
-import {ERROR_MESSAGE, ORDER} from '../../utils/constants.mjs'
+import {
+    getBasket,
+    getCurrentBasketForAuthorizedShopper,
+    createShopperBasketsClient
+} from '../helpers/basketHelper.js'
+import {getCustomerBaskets, createShopperCustomerClient} from '../helpers/customerHelper.js'
+import {BasketService} from '../models/basketService.js'
+import {
+    ERROR_MESSAGE,
+    ORDER,
+    PAYMENT_METHOD_TYPES,
+    PAYMENT_METHODS
+} from '../../utils/constants.mjs'
+import {convertCurrencyValueToMajorUnits} from '../../utils/parsers.mjs'
+import {getCardType} from '../../utils/getCardType.mjs'
+import Logger from '../models/logger.js'
+
+/**
+ * Returns the most recent order in 'New' status for the shopper, or null if none found.
+ * Used to detect redirect payments (e.g. Klarna) where the basket was already consumed
+ * into the order before the redirect, leaving no c_orderNo on the basket.
+ * @param {string} authorization - The shopper's authorization token.
+ * @param {string} customerId - The shopper's customer ID.
+ * @returns {Promise<object|null>}
+ */
+export async function getOpenOrderForShopper(authorization, customerId) {
+    try {
+        const shopperCustomers = createShopperCustomerClient(authorization)
+        const result = await shopperCustomers.getCustomerOrders({
+            parameters: {
+                customerId,
+                status: ORDER.ORDER_STATUS_NEW,
+                limit: 1
+            }
+        })
+        return result?.data?.[0] ?? null
+    } catch (err) {
+        Logger.error('getOpenOrderForShopper', err.message)
+        return null
+    }
+}
 
 /**
  * Creates and configures an instance of the ShopperOrders API client.
@@ -21,10 +61,13 @@ export function createShopperOrderClient(authorization) {
 
 /**
  * Fails an SFCC order and triggers the reopening of the associated basket.
- * It validates that the order belongs to the customer before updating its status.
+ * It validates that the order belongs to the customer, deletes all existing shopper baskets,
+ * then updates the order status to failed_with_reopen so SFCC creates a clean new basket.
+ * Resolves the new basket ID from the Location header if present, otherwise falls back to
+ * fetching the shopper's current basket. Clears c_orderNo and payment instruments on the new basket.
  * @param {object} adyenContext - The request context from `res.locals.adyen`.
  * @param {string} orderNo - The number of the order to fail.
- * @returns {Promise<void>}
+ * @returns {Promise<string|null>} The new basket ID, or null if it could not be resolved.
  * @throws {AdyenError} If the order is not found or does not belong to the customer.
  */
 export async function failOrderAndReopenBasket(adyenContext, orderNo) {
@@ -42,20 +85,63 @@ export async function failOrderAndReopenBasket(adyenContext, orderNo) {
     if (order?.customerInfo?.customerId !== customerId) {
         throw new AdyenError(ERROR_MESSAGE.INVALID_ORDER, 404)
     }
+    try {
+        const shopperBaskets = createShopperBasketsClient(authorization)
+        const {baskets} = await getCustomerBaskets(authorization, customerId)
+        if (baskets?.length) {
+            await Promise.all(
+                baskets.map((b) =>
+                    shopperBaskets.deleteBasket({parameters: {basketId: b.basketId}})
+                )
+            )
+        }
+    } catch (err) {
+        Logger.error(
+            'failOrderAndReopenBasket',
+            `Failed to delete existing baskets: ${err.message}`
+        )
+    }
+
     const orderApi = new OrderApiClient()
-    await orderApi.updateOrderStatus(order.orderNo, ORDER.ORDER_STATUS_FAILED_REOPEN)
+    const response = await orderApi.updateOrderStatus(
+        order.orderNo,
+        ORDER.ORDER_STATUS_FAILED_REOPEN
+    )
+    const location = response?.headers?.get('Location')
+    const match = location?.match(/baskets\/([^?/]+)/)
+    let newBasketId = match ? match[1] : null
+
+    try {
+        const newBasket = newBasketId
+            ? await getBasket(authorization, newBasketId, customerId)
+            : await getCurrentBasketForAuthorizedShopper(authorization, customerId)
+        newBasketId = newBasket?.basketId
+        const tempContext = {authorization, basket: newBasket}
+        const tempRes = {locals: {adyen: tempContext}}
+        const basketService = new BasketService(tempContext, tempRes)
+        await basketService.update({c_orderNo: ''})
+        if (newBasket?.paymentInstruments?.length) {
+            await basketService.removeAllPaymentInstruments()
+        }
+    } catch (err) {
+        Logger.error('failOrderAndReopenBasket', `Failed to clean up new basket: ${err.message}`)
+    }
+    return newBasketId
 }
 
 /**
  * Creates an SFCC order from a basket, using a pre-generated order number.
- * It first checks if an order with the given number already exists to prevent duplicates.
+ * If an order with the given orderNo already exists (e.g. pre-created in
+ * payments.js for a standard 3DS flow), it returns the existing order without re-creating it.
  * @param {object} adyenContext - The request context from `res.locals.adyen`.
- * @returns {Promise<object>} A promise that resolves to the newly created order object.
- * @throws {AdyenError} If an order with the given orderNo already exists.
+ * @returns {Promise<object>} A promise that resolves to the existing or newly created order object.
  */
 export async function createOrderUsingOrderNo(adyenContext) {
     const {authorization, basket, customerId} = adyenContext
     const {c_orderNo: orderNo, basketId, currency} = basket
+    if (!orderNo) {
+        throw new AdyenError(ERROR_MESSAGE.ORDER_NUMBER_NOT_FOUND, 400)
+    }
     const shopperOrders = createShopperOrderClient(authorization)
     const order = await shopperOrders.getOrder({
         parameters: {
@@ -63,7 +149,7 @@ export async function createOrderUsingOrderNo(adyenContext) {
         }
     })
     if (order?.orderNo) {
-        throw new AdyenError(ERROR_MESSAGE.ORDER_ALREADY_EXISTS, 409)
+        return order
     }
     const customOrderApi = new CustomShopperOrderApiClient()
     return await customOrderApi.createOrder(authorization, basketId, customerId, orderNo, currency)
@@ -78,4 +164,99 @@ export async function createOrderUsingOrderNo(adyenContext) {
 export async function getOrderUsingOrderNo(orderNo) {
     const customOrderApi = new CustomAdminOrderApiClient()
     return await customOrderApi.getOrder(orderNo)
+}
+
+/**
+ * Adds a payment instrument directly to an existing SFCC order.
+ * Used when the order is pre-created before the Adyen /payments call, so the basket
+ * no longer exists when the payment succeeds.
+ * @param {string} orderNo - The order number.
+ * @param {object} amount - The Adyen amount object with value and currency.
+ * @param {object} paymentMethod - The Adyen payment method object with type and optional brand.
+ * @param {string} pspReference - The Adyen PSP reference.
+ * @returns {Promise<object>} A promise that resolves to the created payment instrument object.
+ */
+export async function addPaymentInstrumentToOrder(orderNo, amount, paymentMethod, pspReference) {
+    Logger.info(
+        'addPaymentInstrumentToOrder',
+        `start — orderNo: ${orderNo}, pspReference: ${pspReference}`
+    )
+    const isCardPayment = paymentMethod?.type === PAYMENT_METHOD_TYPES.CREDIT_CARD
+    const paymentMethodId = isCardPayment
+        ? PAYMENT_METHODS.CREDIT_CARD
+        : PAYMENT_METHODS.ADYEN_COMPONENT
+
+    const body = {
+        amount: convertCurrencyValueToMajorUnits(amount?.value, amount?.currency),
+        paymentMethodId,
+        paymentCard: {
+            cardType: isCardPayment
+                ? getCardType(paymentMethod?.brand || paymentMethod?.srcScheme)
+                : paymentMethod?.type
+        },
+        ...(pspReference && {c_pspReference: pspReference}),
+        c_paymentMethodType: paymentMethod?.type,
+        ...((paymentMethod?.brand || paymentMethod?.srcScheme) && {
+            c_paymentMethodBrand: paymentMethod?.brand || paymentMethod?.srcScheme
+        })
+    }
+
+    const orderApi = new OrderApiClient()
+    const result = await orderApi.addPaymentInstrumentToOrder(orderNo, body)
+    Logger.info(
+        'addPaymentInstrumentToOrder',
+        `success — paymentInstrumentId: ${result?.paymentInstrumentId}`
+    )
+    return result
+}
+
+/**
+ * Updates the custom pspReference on the payment instrument of a pre-created SFCC order.
+ * @param {object} adyenContext - The request context from `res.locals.adyen`.
+ * @param {string} orderNo - The order number.
+ * @param {string} pspReference - The Adyen PSP reference from the /payments or /payments/details response.
+ * @returns {Promise<void>}
+ */
+export async function updatePaymentInstrumentForOrder(adyenContext, orderNo, pspReference) {
+    const {authorization} = adyenContext
+    Logger.info(
+        'updatePaymentInstrumentForOrder',
+        `start — orderNo: ${orderNo}, pspReference: ${pspReference}`
+    )
+    const shopperOrders = createShopperOrderClient(authorization)
+    const order = await shopperOrders.getOrder({
+        parameters: {
+            orderNo: orderNo
+        }
+    })
+    const firstPaymentInstrument = order?.paymentInstruments?.find(
+        (pi) => pi.c_paymentMethodType !== PAYMENT_METHOD_TYPES.GIFT_CARD
+    )
+    if (!firstPaymentInstrument?.paymentInstrumentId) {
+        Logger.info(
+            'updatePaymentInstrumentForOrder',
+            'no non-gift-card payment instrument found on order — skipping'
+        )
+        return
+    }
+    const {paymentInstrumentId, ...paymentInstrument} = firstPaymentInstrument
+    Logger.info(
+        'updatePaymentInstrumentForOrder',
+        `paymentInstrument: ${JSON.stringify(paymentInstrument)}`
+    )
+    const updatedOrder = await shopperOrders.updatePaymentInstrumentForOrder({
+        parameters: {
+            orderNo: orderNo,
+            paymentInstrumentId: paymentInstrumentId
+        },
+        body: {
+            ...paymentInstrument,
+            ...(pspReference && {c_pspReference: pspReference})
+        }
+    })
+    Logger.info('updatePaymentInstrumentForOrder', `updatedOrder: ${JSON.stringify(updatedOrder)}`)
+    Logger.info(
+        'updatePaymentInstrumentForOrder',
+        `success — paymentInstrumentId: ${paymentInstrumentId}`
+    )
 }

@@ -424,7 +424,8 @@ describe('paymentsHelper', () => {
                 c_amount: '',
                 c_pspReference: '',
                 c_paymentData: '',
-                c_paymentDataForReviewPage: ''
+                c_paymentDataForReviewPage: '',
+                c_orderNo: ''
             })
             expect(mockAdyenContext.basketService.removeAllPaymentInstruments).toHaveBeenCalled()
         })

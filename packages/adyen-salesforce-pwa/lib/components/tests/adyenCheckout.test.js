@@ -7,6 +7,7 @@ import AdyenCheckoutComponent from '../adyenCheckout'
 import useAdyenEnvironment from '../../hooks/useAdyenEnvironment'
 import useAdyenPaymentMethods from '../../hooks/useAdyenPaymentMethods'
 import {useAccessToken, useCustomerId, useCustomerType} from '@salesforce/commerce-sdk-react'
+import useAdyenOrderNumber from '../../hooks/useAdyenOrderNumber'
 import {
     createCheckoutInstance,
     handleRedirects,
@@ -17,6 +18,7 @@ import {
 jest.mock('../../hooks/useAdyenEnvironment')
 jest.mock('../../hooks/useAdyenPaymentMethods')
 jest.mock('@salesforce/commerce-sdk-react')
+jest.mock('../../hooks/useAdyenOrderNumber')
 jest.mock('../helpers/adyenCheckout.utils')
 jest.mock('../paymentMethodsConfiguration', () => ({
     paymentMethodsConfiguration: jest.fn().mockReturnValue({})
@@ -74,6 +76,12 @@ describe('AdyenCheckoutComponent', () => {
 
         useAdyenPaymentMethods.mockReturnValue({
             data: mockPaymentMethodsData,
+            error: null,
+            isLoading: false
+        })
+
+        useAdyenOrderNumber.mockReturnValue({
+            orderNo: 'order-123',
             error: null,
             isLoading: false
         })

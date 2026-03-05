@@ -16,9 +16,9 @@ export class AdyenTemporaryBasketService {
         if (res.status >= 300) {
             const errorData = await res
                 .json()
-                .catch(() => ({message: 'Failed to create temporary basket'}))
+                .catch(() => ({errorMessage: 'Failed to create temporary basket'}))
             throw new Error(
-                errorData.message || `Create temporary basket failed with status ${res.status}`
+                errorData.errorMessage || `Create temporary basket failed with status ${res.status}`
             )
         }
 

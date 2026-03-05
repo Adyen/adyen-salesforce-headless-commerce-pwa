@@ -86,7 +86,7 @@ describe('AdyenPaymentDataReviewPageService', () => {
             const mockFetchPromise = Promise.resolve({
                 status: 400,
                 statusText: 'Bad Request',
-                json: jest.fn().mockResolvedValue({message: 'Failed to get payment data'})
+                json: jest.fn().mockResolvedValue({errorMessage: 'Failed to get payment data'})
             })
 
             adyenService.apiClient.get.mockResolvedValueOnce(mockFetchPromise)
@@ -145,7 +145,7 @@ describe('AdyenPaymentDataReviewPageService', () => {
             const mockFetchPromise = Promise.resolve({
                 status: 400,
                 statusText: 'Bad Request',
-                json: jest.fn().mockResolvedValue({message: 'Invalid payment data'})
+                json: jest.fn().mockResolvedValue({errorMessage: 'Invalid payment data'})
             })
 
             adyenService.apiClient.post.mockResolvedValueOnce(mockFetchPromise)

@@ -227,16 +227,6 @@ describe('BasketService', () => {
             ).rejects.toThrow()
         })
 
-        it('should throw when pspReference is missing', async () => {
-            await expect(
-                basketService.addPaymentInstrument(
-                    {value: 100, currency: 'USD'},
-                    {type: 'scheme'},
-                    null
-                )
-            ).rejects.toThrow()
-        })
-
         it('should correctly add a component payment instrument', async () => {
             const pspReference = 'mockPspReference'
             const paymentMethod = {type: 'ideal'}

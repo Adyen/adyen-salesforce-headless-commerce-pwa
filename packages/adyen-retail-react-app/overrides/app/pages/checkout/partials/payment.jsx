@@ -32,7 +32,12 @@ import {useAccessToken, useCustomerId, useCustomerType} from '@salesforce/commer
 import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
 import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
 import LoadingSpinner from '@salesforce/retail-react-app/app/components/loading-spinner'
-import {AdyenCheckout, pageTypes, useHandleBackNavigation} from '@adyen/adyen-salesforce-pwa'
+import {
+    AdyenCheckout,
+    pageTypes,
+    useHandleBackNavigation,
+    useCheckoutErrorRecovery
+} from '@adyen/adyen-salesforce-pwa'
 /* -----------------Adyen End ------------------------ */
 
 const Payment = () => {
@@ -59,7 +64,12 @@ const Payment = () => {
         customerId,
         basketId: basket?.basketId,
         site,
-        refetchBasket
+        navigate
+    })
+
+    const {adyenCheckoutKey, isRefetchingBasket} = useCheckoutErrorRecovery({
+        refetchBasket,
+        navigate
     })
 
     const isPickupOnly =
@@ -155,22 +165,27 @@ const Payment = () => {
                 </Box>
 
                 <Stack spacing={6}>
-                    <AdyenCheckout
-                        // Required props
-                        site={site}
-                        locale={locale}
-                        navigate={navigate}
-                        basket={basket}
-                        // Optional
-                        page={pageTypes.CHECKOUT}
-                        merchantDisplayName={'Merchant name'}
-                        paymentMethodsConfiguration={paymentMethodsConfiguration}
-                        // Callbacks
-                        beforeSubmit={[onBillingSubmit]}
-                        onError={[showError]}
-                        // UI
-                        spinner={<LoadingSpinner />}
-                    />
+                    {isRefetchingBasket ? (
+                        <LoadingSpinner />
+                    ) : (
+                        <AdyenCheckout
+                            key={adyenCheckoutKey}
+                            // Required props
+                            site={site}
+                            locale={locale}
+                            navigate={navigate}
+                            basket={basket}
+                            // Optional
+                            page={pageTypes.CHECKOUT}
+                            merchantDisplayName={'Merchant name'}
+                            paymentMethodsConfiguration={paymentMethodsConfiguration}
+                            // Callbacks
+                            beforeSubmit={[onBillingSubmit]}
+                            onError={[showError]}
+                            // UI
+                            spinner={<LoadingSpinner />}
+                        />
+                    )}
 
                     <Divider borderColor="gray.100" />
 

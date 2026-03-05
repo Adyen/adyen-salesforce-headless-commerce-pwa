@@ -1,4 +1,5 @@
 import {useCallback, useEffect, useRef, useState} from 'react'
+import {useLocation} from 'react-router-dom'
 import {PaymentCancelService} from '../services/payment-cancel'
 
 /**
@@ -8,10 +9,9 @@ import {PaymentCancelService} from '../services/payment-cancel'
  * @property {string} customerId - The customer ID.
  * @property {string} basketId - The basket ID.
  * @property {object} site - The site configuration object.
- * @property {function} refetchBasket - Function to refetch the basket data.
- * @property {string[]} [paymentDataFields=['c_paymentData', 'c_pspReference']] - Basket fields that indicate active payment data.
  * @property {string[]} [redirectParams=['redirectResult', 'sessionId']] - URL params that indicate a valid redirect return.
  * @property {boolean} [enabled=true] - Whether detection is enabled.
+ * @property {function} navigate - React Router navigate function.
  */
 
 /**
@@ -33,7 +33,7 @@ import {PaymentCancelService} from '../services/payment-cancel'
  *   customerId,
  *   basketId: basket?.basketId,
  *   site,
- *   refetchBasket
+ *   navigate
  * })
  */
 const useHandleBackNavigation = ({
@@ -41,46 +41,35 @@ const useHandleBackNavigation = ({
     customerId,
     basketId,
     site,
-    refetchBasket,
-    paymentDataFields = ['c_paymentData', 'c_pspReference'],
+    navigate,
     redirectParams = ['redirectResult', 'sessionId'],
     enabled = true
 }) => {
+    const location = useLocation()
+    const locationRef = useRef(location)
+    useEffect(() => {
+        locationRef.current = location
+    }, [location])
     const [error, setError] = useState(null)
     const isProcessingRef = useRef(false)
-    const refetchBasketRef = useRef(refetchBasket)
-
-    useEffect(() => {
-        refetchBasketRef.current = refetchBasket
-    }, [refetchBasket])
 
     const checkForAbandonedPayment = useCallback(async () => {
         if (isProcessingRef.current || !enabled || !authToken || !basketId) {
             return false
         }
 
-        const urlParams = new URLSearchParams(window.location.search)
+        const urlParams = new URLSearchParams(locationRef.current.search)
         const hasRedirectParams = redirectParams.some((param) => urlParams.get(param))
 
         if (hasRedirectParams) {
             return false
         }
 
+        // Read orderNo pushed to history before redirect (e.g. Klarna) so the server
+        // can directly fail that order without needing to look it up.
+        const orderNo = urlParams.get('orderNo')
+
         try {
-            const refetchResult = await refetchBasketRef.current()
-
-            const freshBasket = refetchResult?.data?.baskets?.[0]
-
-            if (!freshBasket || refetchResult?.data?.total === 0) {
-                return false
-            }
-
-            const hasPaymentData = paymentDataFields.some((field) => freshBasket[field])
-
-            if (!hasPaymentData) {
-                return false
-            }
-
             isProcessingRef.current = true
             setError(null)
 
@@ -91,9 +80,22 @@ const useHandleBackNavigation = ({
                 site
             )
 
-            await paymentCancelService.cancelAbandonedPayment('abandoned_session')
+            const cancelResponse = await paymentCancelService.cancelAbandonedPayment(
+                'abandoned_session',
+                orderNo
+            )
 
-            window.location.reload()
+            if (cancelResponse?.cancelled === false) {
+                return false
+            }
+
+            const cleanParams = new URLSearchParams(locationRef.current.search)
+            cleanParams.delete('orderNo')
+
+            if (cancelResponse?.newBasketId) {
+                cleanParams.set('newBasketId', cancelResponse.newBasketId)
+            }
+            navigate(`/checkout?${cleanParams.toString()}`)
 
             return true
         } catch (err) {
@@ -103,7 +105,22 @@ const useHandleBackNavigation = ({
         } finally {
             isProcessingRef.current = false
         }
-    }, [enabled, authToken, customerId, basketId, site, paymentDataFields, redirectParams])
+    }, [enabled, authToken, customerId, basketId, site, navigate, redirectParams])
+
+    // Check once when basketId first becomes available to handle SPA back navigation (React Router).
+    const checkForAbandonedPaymentRef = useRef(checkForAbandonedPayment)
+    useEffect(() => {
+        checkForAbandonedPaymentRef.current = checkForAbandonedPayment
+    }, [checkForAbandonedPayment])
+
+    const hasMountCheckedRef = useRef(false)
+    useEffect(() => {
+        if (!enabled || !basketId || hasMountCheckedRef.current) {
+            return
+        }
+        hasMountCheckedRef.current = true
+        checkForAbandonedPaymentRef.current()
+    }, [basketId, enabled])
 
     useEffect(() => {
         if (!enabled || !basketId) {
