@@ -10,11 +10,13 @@ import useAdyenPaymentMethods from '../../hooks/useAdyenPaymentMethods'
 import {AdyenCheckout, PayPal} from '@adyen/adyen-web'
 import {paypalExpressConfig} from '../paypal/expressConfig'
 import {AdyenShippingMethodsService} from '../../services/shipping-methods'
+import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 
 jest.mock('../../hooks/useAdyenEnvironment')
 jest.mock('../../hooks/useAdyenPaymentMethods')
 jest.mock('../paypal/expressConfig')
 jest.mock('../../services/shipping-methods')
+jest.mock('@salesforce/commerce-sdk-react')
 jest.mock('@adyen/adyen-web', () => ({
     AdyenCheckout: jest.fn().mockResolvedValue({}),
     PayPal: jest.fn().mockImplementation(() => ({
@@ -26,8 +28,6 @@ jest.mock('@adyen/adyen-web', () => ({
 
 describe('PayPalExpressComponent', () => {
     const defaultProps = {
-        authToken: 'test-auth-token',
-        customerId: 'test-customer',
         locale: {id: 'en-US'},
         site: {id: 'test-site'},
         basket: {basketId: 'test-basket'},
@@ -62,6 +62,12 @@ describe('PayPalExpressComponent', () => {
 
         // Reset window.paypal
         delete window.paypal
+
+        // Mock commerce-sdk-react hooks
+        useCustomerId.mockReturnValue('test-customer')
+        useAccessToken.mockReturnValue({
+            getTokenWhenReady: jest.fn().mockResolvedValue('test-auth-token')
+        })
 
         // Mock hooks
         useAdyenEnvironment.mockReturnValue({
@@ -178,8 +184,8 @@ describe('PayPalExpressComponent', () => {
             await waitFor(() => {
                 expect(paypalExpressConfig).toHaveBeenCalledWith(
                     expect.objectContaining({
-                        token: defaultProps.authToken,
-                        customerId: defaultProps.customerId,
+                        token: 'test-auth-token',
+                        customerId: 'test-customer',
                         basket: defaultProps.basket,
                         site: defaultProps.site,
                         locale: defaultProps.locale,
@@ -330,8 +336,8 @@ describe('PayPalExpressComponent', () => {
             const result = await fetchShippingMethodsCallback(testBasketId)
 
             expect(AdyenShippingMethodsService).toHaveBeenCalledWith(
-                defaultProps.authToken,
-                defaultProps.customerId,
+                'test-auth-token',
+                'test-customer',
                 testBasketId,
                 defaultProps.site
             )

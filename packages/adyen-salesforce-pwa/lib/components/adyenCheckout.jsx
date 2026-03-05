@@ -1,4 +1,5 @@
 import React, {useEffect, useRef, useMemo, useCallback, useState} from 'react'
+import {useAccessToken, useCustomerId, useCustomerType} from '@salesforce/commerce-sdk-react'
 import PropTypes from 'prop-types'
 import '../style/adyenCheckout.css'
 import {
@@ -18,12 +19,9 @@ const AdyenCheckoutComponent = ({
     returnUrl,
 
     // User data
-    authToken,
-    customerId,
-    isCustomerRegistered = false,
     merchantDisplayName = '',
-    site,
     locale,
+    site,
     navigate,
 
     // Page context
@@ -56,6 +54,21 @@ const AdyenCheckoutComponent = ({
     const [internalAdyenOrder, setInternalAdyenOrder] = useState(null)
     const [internalAdyenAction, setInternalAdyenAction] = useState(null)
     const [componentKey, setComponentKey] = useState(0)
+
+    const customerId = useCustomerId()
+    const customerTypeData = useCustomerType()
+    const isCustomerRegistered = customerTypeData.isRegistered
+    const {getTokenWhenReady} = useAccessToken()
+    const [authToken, setAuthToken] = useState()
+
+    useEffect(() => {
+        const getToken = async () => {
+            const token = await getTokenWhenReady()
+            setAuthToken(token)
+        }
+
+        getToken()
+    }, [])
 
     // Fetch Adyen environment configuration
     const {
@@ -251,6 +264,7 @@ const AdyenCheckoutComponent = ({
                     adyenEnvironment,
                     adyenPaymentMethods,
                     adyenOrder: internalAdyenOrder,
+                    basket,
                     getTranslations: getTranslations,
                     locale,
                     setAdyenStateData: handleStateChange,
@@ -321,7 +335,6 @@ const AdyenCheckoutComponent = ({
 
 AdyenCheckoutComponent.propTypes = {
     // Required props
-    authToken: PropTypes.string.isRequired,
     site: PropTypes.object.isRequired,
     locale: PropTypes.object.isRequired,
     navigate: PropTypes.func.isRequired,
@@ -331,8 +344,6 @@ AdyenCheckoutComponent.propTypes = {
     returnUrl: PropTypes.string,
 
     // User data
-    customerId: PropTypes.string,
-    isCustomerRegistered: PropTypes.bool,
     merchantDisplayName: PropTypes.string,
 
     // Page context
@@ -360,7 +371,6 @@ export default React.memo(AdyenCheckoutComponent, (prevProps, nextProps) => {
     return (
         prevProps.basket?.basketId === nextProps.basket?.basketId &&
         prevProps.basket?.c_orderData === nextProps.basket?.c_orderData &&
-        prevProps.authToken === nextProps.authToken &&
         prevProps.site?.id === nextProps.site?.id &&
         prevProps.locale?.id === nextProps.locale?.id
     )

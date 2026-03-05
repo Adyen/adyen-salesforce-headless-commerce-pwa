@@ -1,3 +1,5 @@
+import packageJson from '../../package.json' with {type: 'json'}
+
 export const PAYMENT_METHODS = {
     ADYEN_COMPONENT: 'AdyenComponent',
     CREDIT_CARD: 'CREDIT_CARD'
@@ -129,4 +131,4 @@ export const ADYEN_ENVIRONMENT = {
     TEST: 'TEST'
 }
 
-export const APPLICATION_VERSION = '4.2.0'
+export const APPLICATION_VERSION = packageJson.version
