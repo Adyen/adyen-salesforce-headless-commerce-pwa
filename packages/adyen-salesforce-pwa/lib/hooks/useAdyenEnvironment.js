@@ -1,5 +1,6 @@
-import {useEffect, useState} from 'react'
+import {useQuery} from '@tanstack/react-query'
 import {AdyenEnvironmentService} from '../services/environment'
+import {adyenKeys} from '../utils/queryKeys'
 
 /**
  * A hook for fetching and managing the Adyen environment data.
@@ -14,40 +15,25 @@ import {AdyenEnvironmentService} from '../services/environment'
  * @returns {{isLoading: boolean, data: object|null, error: object|null}}
  */
 const useAdyenEnvironment = ({authToken, customerId, basketId, site, skip = false}) => {
-    const [isLoading, setIsLoading] = useState(!skip)
-    const [data, setData] = useState(null)
-    const [error, setError] = useState(null)
-
-    useEffect(() => {
-        const fetchEnvironment = async () => {
-            if (skip || !authToken) {
-                setIsLoading(false)
-                return
-            }
-
-            setIsLoading(true)
-            setError(null)
-
+    const query = useQuery({
+        queryKey: adyenKeys.environment(basketId, site?.id),
+        queryFn: async () => {
             const adyenEnvironmentService = new AdyenEnvironmentService(
                 authToken,
                 customerId,
                 basketId,
                 site
             )
-            try {
-                const result = await adyenEnvironmentService.fetchEnvironment()
-                setData(result)
-            } catch (err) {
-                setError(err)
-            } finally {
-                setIsLoading(false)
-            }
-        }
+            return adyenEnvironmentService.fetchEnvironment()
+        },
+        enabled: !skip && !!authToken
+    })
 
-        fetchEnvironment()
-    }, [authToken, customerId, basketId, site?.id, skip])
-
-    return {isLoading, data, error}
+    return {
+        isLoading: query.isLoading,
+        data: query.data,
+        error: query.error
+    }
 }
 
 export default useAdyenEnvironment

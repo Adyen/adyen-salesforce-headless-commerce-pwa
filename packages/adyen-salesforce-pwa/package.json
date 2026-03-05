@@ -42,6 +42,7 @@
     },
     "peerDependencies": {
         "@adyen/adyen-web": "^6.32.0",
+        "@tanstack/react-query": "^5.0.0",
         "@adyen/api-library": "^29.1.0",
         "commerce-sdk-isomorphic": "^4.2.0",
         "@salesforce/pwa-kit-runtime": "^3.5.1",

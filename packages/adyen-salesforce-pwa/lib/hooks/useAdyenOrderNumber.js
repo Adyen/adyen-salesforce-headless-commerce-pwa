@@ -1,5 +1,6 @@
-import {useEffect, useState} from 'react'
+import {useQuery} from '@tanstack/react-query'
 import {AdyenOrderNumberService} from '../services/order-number'
+import {adyenKeys} from '../utils/queryKeys'
 
 /**
  * A hook that ensures the basket has an order number before the payment dropin initializes.
@@ -24,40 +25,26 @@ const useAdyenOrderNumber = ({
     existingOrderNo,
     skip = false
 }) => {
-    const [isLoading, setIsLoading] = useState(!skip)
-    const [orderNo, setOrderNo] = useState(existingOrderNo || null)
-    const [error, setError] = useState(null)
-
-    useEffect(() => {
-        const fetchOrderNumber = async () => {
-            if (skip || !authToken) {
-                setIsLoading(false)
-                return
-            }
-
-            setIsLoading(true)
-            setError(null)
-
+    const query = useQuery({
+        queryKey: adyenKeys.orderNumber(basketId, site?.id),
+        queryFn: async () => {
             const orderNumberService = new AdyenOrderNumberService(
                 authToken,
                 customerId,
                 basketId,
                 site
             )
-            try {
-                const result = await orderNumberService.fetchOrderNumber()
-                setOrderNo(result.orderNo)
-            } catch (err) {
-                setError(err)
-            } finally {
-                setIsLoading(false)
-            }
-        }
+            return orderNumberService.fetchOrderNumber()
+        },
+        enabled: !skip && !!authToken,
+        initialData: existingOrderNo ? {orderNo: existingOrderNo} : undefined
+    })
 
-        fetchOrderNumber()
-    }, [authToken, customerId, basketId, site?.id, skip])
-
-    return {isLoading, orderNo, error}
+    return {
+        isLoading: query.isLoading,
+        orderNo: query.data?.orderNo || null,
+        error: query.error
+    }
 }
 
 export default useAdyenOrderNumber
