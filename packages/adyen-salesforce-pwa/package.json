@@ -38,8 +38,7 @@
         "jest:clear": "jest --clearCache",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
-        "format": "prettier --write ./lib",
-        "postinstall": "node dist/scripts/update-notifier.js"
+        "format": "prettier --write ./lib"
     },
     "peerDependencies": {
         "@adyen/adyen-web": "^6.21.0",
