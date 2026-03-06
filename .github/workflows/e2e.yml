@@ -21,15 +21,15 @@ jobs:
             - name: Build PWA
               working-directory: ./packages/adyen-salesforce-pwa
               run: npm run build-prod
-            - name: Make PWA NPM Link
+            - name: Pack PWA
               working-directory: ./packages/adyen-salesforce-pwa
-              run: npm link
+              run: npm pack
             - name: Install Retail app package dependencies
               working-directory: ./packages/adyen-retail-react-app
               run: npm i
-            - name: Link PWA to Retail app
+            - name: Install PWA in Retail app
               working-directory: ./packages/adyen-retail-react-app
-              run: npm link @adyen/adyen-salesforce-pwa
+              run: npm i ../adyen-salesforce-pwa/adyen-adyen-salesforce-pwa-*.tgz
             - name: Build Retail app
               working-directory: ./packages/adyen-retail-react-app
               run: npm run build
@@ -52,19 +52,19 @@ jobs:
               run: npm i
             - name: Install PWA package dependencies
               working-directory: ./packages/adyen-salesforce-pwa
-              run: npm i --ignore-scripts
+              run: npm i
             - name: Build PWA
               working-directory: ./packages/adyen-salesforce-pwa
               run: npm run build-dev
-            - name: Make PWA NPM Link
+            - name: Pack PWA
               working-directory: ./packages/adyen-salesforce-pwa
-              run: npm link --ignore-scripts
+              run: npm pack
             - name: Install Retail app package dependencies
               working-directory: ./packages/adyen-retail-react-app
-              run: npm i --ignore-scripts
-            - name: Link PWA to Retail app
+              run: npm i
+            - name: Install PWA in Retail app
               working-directory: ./packages/adyen-retail-react-app
-              run: npm link @adyen/adyen-salesforce-pwa --ignore-scripts
+              run: npm i ../adyen-salesforce-pwa/adyen-adyen-salesforce-pwa-*.tgz
             - name: Install Playwright dependencies
               working-directory: ./packages/e2e-tests
               run: npm i
