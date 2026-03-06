@@ -17,7 +17,7 @@ jobs:
               run: npm i
             - name: Install PWA package dependencies
               working-directory: ./packages/adyen-salesforce-pwa
-              run: npm i --ignore-scripts
+              run: npm i
             - name: Build PWA
               working-directory: ./packages/adyen-salesforce-pwa
               run: npm run build-prod
@@ -26,10 +26,10 @@ jobs:
               run: npm pack
             - name: Install Retail app package dependencies
               working-directory: ./packages/adyen-retail-react-app
-              run: npm i
+              run: npm i --no-cache
             - name: Install PWA in Retail app
               working-directory: ./packages/adyen-retail-react-app
-              run: npm i ../adyen-salesforce-pwa/adyen-adyen-salesforce-pwa-*.tgz
+              run: npm i ../adyen-salesforce-pwa/adyen-adyen-salesforce-pwa-$(node -p "require('../adyen-salesforce-pwa/package.json').version").tgz --no-cache
             - name: Create .env file
               working-directory: ./packages/adyen-retail-react-app
               run: |
@@ -73,7 +73,7 @@ jobs:
               run: npm i
             - name: Install PWA package dependencies
               working-directory: ./packages/adyen-salesforce-pwa
-              run: npm i --ignore-scripts
+              run: npm i
             - name: Build PWA
               working-directory: ./packages/adyen-salesforce-pwa
               run: npm run build-dev
@@ -85,7 +85,7 @@ jobs:
               run: npm i
             - name: Install PWA in Retail app
               working-directory: ./packages/adyen-retail-react-app
-              run: npm i ../adyen-salesforce-pwa/adyen-adyen-salesforce-pwa-*.tgz
+              run: npm i ../adyen-salesforce-pwa/adyen-adyen-salesforce-pwa-$(node -p "require('../adyen-salesforce-pwa/package.json').version").tgz
             - name: Install Playwright dependencies
               working-directory: ./packages/e2e-tests
               run: npm i
