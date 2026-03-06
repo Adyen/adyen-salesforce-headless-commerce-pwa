@@ -3,16 +3,51 @@ on:
     pull_request:
         branches: [main, develop]
 jobs:
-    build-and-test:
-        timeout-minutes: 10
+    deploy-storefront:
+        timeout-minutes: 30
         runs-on:
             group: larger-runners
             labels: ubuntu-latest-8-cores
         steps:
-            - uses: actions/checkout@v3
-            - uses: actions/setup-node@v3
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
               with:
-                  node-version: 18
+                  node-version: 22
+            - name: Install project dependencies
+              run: npm i
+            - name: Install PWA package dependencies
+              working-directory: ./packages/adyen-salesforce-pwa
+              run: npm i
+            - name: Build PWA
+              working-directory: ./packages/adyen-salesforce-pwa
+              run: npm run build-prod
+            - name: Make PWA NPM Link
+              working-directory: ./packages/adyen-salesforce-pwa
+              run: npm link
+            - name: Install Retail app package dependencies
+              working-directory: ./packages/adyen-retail-react-app
+              run: npm i
+            - name: Link PWA to Retail app
+              working-directory: ./packages/adyen-retail-react-app
+              run: npm link @adyen/adyen-salesforce-pwa
+            - name: Build Retail app
+              working-directory: ./packages/adyen-retail-react-app
+              run: npm run build
+            - name: Deploy to storefront
+              working-directory: ./packages/adyen-retail-react-app
+              run: npx pwa-kit-dev push --target adyen-salesforce-pwa
+
+    e2e-tests:
+        timeout-minutes: 10
+        needs: deploy-storefront
+        runs-on:
+            group: larger-runners
+            labels: ubuntu-latest-8-cores
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 22
             - name: Install project dependencies
               run: npm i
             - name: Install PWA package dependencies
