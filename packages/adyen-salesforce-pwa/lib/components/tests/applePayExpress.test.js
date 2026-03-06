@@ -11,12 +11,14 @@ import useAdyenPaymentMethodsForExpress from '../../hooks/useAdyenPaymentMethods
 import useAdyenShippingMethods from '../../hooks/useAdyenShippingMethods'
 import {getAppleButtonConfig, getApplePaymentMethodConfig} from '../helpers/applePayExpress.utils'
 import {AdyenCheckout} from '@adyen/adyen-web'
+import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 
 jest.mock('../../hooks/useAdyenEnvironment')
 jest.mock('../../hooks/useAdyenPaymentMethods')
 jest.mock('../../hooks/useAdyenPaymentMethodsForExpress')
 jest.mock('../../hooks/useAdyenShippingMethods')
 jest.mock('../helpers/applePayExpress.utils')
+jest.mock('@salesforce/commerce-sdk-react')
 
 const mockMount = jest.fn()
 const mockCreate = jest.fn(() => ({
@@ -30,8 +32,6 @@ jest.mock('@adyen/adyen-web', () => ({
 
 describe('ApplePayExpressComponent', () => {
     const defaultProps = {
-        authToken: 'test-auth-token',
-        customerId: 'test-customer',
         locale: {id: 'en-US'},
         site: {id: 'test-site'},
         basket: {basketId: 'test-basket'},
@@ -59,6 +59,10 @@ describe('ApplePayExpressComponent', () => {
 
     beforeEach(() => {
         jest.clearAllMocks()
+        useCustomerId.mockReturnValue('test-customer')
+        useAccessToken.mockReturnValue({
+            getTokenWhenReady: jest.fn().mockResolvedValue('test-auth-token')
+        })
         useAdyenEnvironment.mockReturnValue({
             data: mockEnvironmentData,
             error: null,
@@ -133,8 +137,8 @@ describe('ApplePayExpressComponent', () => {
             render(<ApplePayExpressComponent {...defaultProps} />)
 
             expect(useAdyenPaymentMethods).toHaveBeenCalledWith({
-                authToken: defaultProps.authToken,
-                customerId: defaultProps.customerId,
+                authToken: undefined,
+                customerId: 'test-customer',
                 basketId: defaultProps.basket.basketId,
                 site: defaultProps.site,
                 locale: defaultProps.locale
@@ -188,8 +192,8 @@ describe('ApplePayExpressComponent', () => {
             render(<ApplePayExpressComponent {...pdpProps} />)
 
             expect(useAdyenPaymentMethodsForExpress).toHaveBeenCalledWith({
-                authToken: pdpProps.authToken,
-                customerId: pdpProps.customerId,
+                authToken: undefined,
+                customerId: 'test-customer',
                 site: pdpProps.site,
                 locale: pdpProps.locale,
                 currency: pdpProps.currency

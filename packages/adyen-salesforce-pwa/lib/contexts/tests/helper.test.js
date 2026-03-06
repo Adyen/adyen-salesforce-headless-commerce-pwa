@@ -89,6 +89,72 @@ describe('Adyen Context Helpers', () => {
             expect(navigate).toHaveBeenCalledWith('/checkout/confirmation/ORDER-123')
         })
 
+        it('should handle a threeDS2 action by setting adyen action', async () => {
+            const setAdyenAction = jest.fn()
+            const action = {type: 'threeDS2', token: '...'}
+            const responses = {
+                paymentsResponse: {
+                    action: action,
+                    merchantReference: 'ORDER-123'
+                }
+            }
+
+            await onPaymentsSuccess(
+                null,
+                component,
+                mockActions,
+                {navigate, setOrderNo, setAdyenOrder, setAdyenAction},
+                responses
+            )
+            const encodedAction = btoa(JSON.stringify(action))
+            expect(setAdyenAction).toHaveBeenCalledWith(encodedAction)
+            expect(navigate).not.toHaveBeenCalled()
+        })
+
+        it('should not set orderNo if it already matches merchantReference', async () => {
+            const responses = {
+                paymentsResponse: {
+                    isSuccessful: true,
+                    isFinal: true,
+                    merchantReference: 'ORDER-123'
+                }
+            }
+
+            await onPaymentsSuccess(
+                null,
+                component,
+                mockActions,
+                {navigate, setOrderNo, setAdyenOrder, orderNo: 'ORDER-123'},
+                responses
+            )
+            expect(setOrderNo).not.toHaveBeenCalled()
+        })
+
+        it('should not set adyenOrder if orderData already matches', async () => {
+            const responses = {
+                paymentsResponse: {
+                    isSuccessful: true,
+                    isFinal: false,
+                    merchantReference: 'ORDER-123',
+                    order: {orderData: 'same-data', remainingAmount: {value: 5000}}
+                }
+            }
+
+            await onPaymentsSuccess(
+                null,
+                component,
+                mockActions,
+                {
+                    navigate,
+                    setOrderNo,
+                    setAdyenOrder,
+                    adyenOrder: {orderData: 'same-data'}
+                },
+                responses
+            )
+            expect(setAdyenOrder).not.toHaveBeenCalled()
+        })
+
         it('should handle a redirect action', async () => {
             const action = {type: 'redirect', url: 'https://example.com/redirect'}
             const responses = {

@@ -53,7 +53,6 @@ import PromoCallout from '@salesforce/retail-react-app/app/components/product-ti
 import LoadingSpinner from '@salesforce/retail-react-app/app/components/loading-spinner'
 
 import {ApplePayExpress, PayPalExpress} from '@adyen/adyen-salesforce-pwa'
-import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
 import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
 
@@ -162,11 +161,8 @@ const ProductView = forwardRef(
         },
         ref
     ) => {
-        const customerId = useCustomerId()
-        const {getTokenWhenReady} = useAccessToken()
         const navigate = useNavigation()
         const {locale, site} = useMultiSite()
-        const [authToken, setAuthToken] = useState()
 
         const {currency: activeCurrency} = useCurrency()
         const showToast = useToast()
@@ -441,15 +437,6 @@ const ProductView = forwardRef(
             setQuantity(selectedBundleParentQuantity * childOfBundleQuantity)
             setProductQuantity(selectedBundleParentQuantity * childOfBundleQuantity)
         }
-
-        useEffect(() => {
-            const getToken = async () => {
-                const token = await getTokenWhenReady()
-                setAuthToken(token)
-            }
-
-            getToken()
-        }, [])
 
         useEffect(() => {
             if (isAddToCartModalOpen) {
@@ -924,8 +911,6 @@ const ProductView = forwardRef(
                                     ) && (
                                         <>
                                             <ApplePayExpress
-                                                authToken={authToken}
-                                                customerId={customerId}
                                                 locale={locale}
                                                 site={site}
                                                 currency={activeCurrency}
@@ -943,8 +928,6 @@ const ProductView = forwardRef(
                                                 }
                                             />
                                             <PayPalExpress
-                                                authToken={authToken}
-                                                customerId={customerId}
                                                 locale={locale}
                                                 site={site}
                                                 currency={activeCurrency}
@@ -988,8 +971,6 @@ const ProductView = forwardRef(
                     {validateOrderability(variant, product, productQuantity, stockLevel) && (
                         <>
                             <ApplePayExpress
-                                authToken={authToken}
-                                customerId={customerId}
                                 locale={locale}
                                 site={site}
                                 currency={activeCurrency}
@@ -1003,8 +984,6 @@ const ProductView = forwardRef(
                                 spinner={<LoadingSpinner wrapperStyles={{height: '100vh'}} />}
                             />
                             <PayPalExpress
-                                authToken={authToken}
-                                customerId={customerId}
                                 locale={locale}
                                 site={site}
                                 currency={activeCurrency}

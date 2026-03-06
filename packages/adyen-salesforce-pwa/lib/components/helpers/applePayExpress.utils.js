@@ -3,6 +3,7 @@ import {AdyenPaymentsService} from '../../services/payments'
 import {AdyenShippingMethodsService} from '../../services/shipping-methods'
 import {AdyenShippingAddressService} from '../../services/shipping-address'
 import {AdyenTemporaryBasketService} from '../../services/temporary-basket'
+import {AdyenOrderNumberService} from '../../services/order-number'
 import {PAYMENT_TYPES} from '../../utils/constants.mjs'
 import {executeErrorCallbacks} from '../../utils/executeCallbacks'
 import {PaymentCancelExpressService} from '../../services/payment-cancel-express'
@@ -45,6 +46,39 @@ export const getCustomerBillingDetails = (billingContact) => {
             stateOrProvince: billingContact.administrativeArea,
             street: billingContact.addressLines?.[0]
         }
+    }
+}
+
+/**
+ * Generates an order number and stores it on the current basket before payment submission.
+ * Applies to both PDP and cart express flows.
+ * The server-side payments controller reads c_orderNo from the basket as the Adyen reference.
+ *
+ * @param {object} state - Current payment state
+ * @param {object} component - Adyen component instance
+ * @param {object} actions - Action handlers (resolve, reject)
+ * @param {object} props - Component properties
+ * @param {object} basketData - The basket to generate an order number for (temporary or current)
+ * @returns {Promise<void>}
+ */
+export const generateOrderNumber = async (state, component, actions, props, basketData) => {
+    try {
+        const {token, site} = props
+        const adyenOrderNumberService = new AdyenOrderNumberService(
+            token,
+            basketData?.customerInfo?.customerId,
+            basketData?.basketId,
+            site
+        )
+        const {orderNo} = await adyenOrderNumberService.fetchOrderNumber()
+        if (!orderNo) {
+            throw new Error('Failed to generate order number')
+        }
+        props.setBasket({...basketData, c_orderNo: orderNo})
+    } catch (err) {
+        const {onError = []} = props
+        onError.forEach((cb) => cb(err))
+        actions.reject(err.message)
     }
 }
 
@@ -98,6 +132,7 @@ export const getAppleButtonConfig = (props = {}) => {
         onSubmit: async (state, component, actions) => {
             try {
                 const basketData = isExpressPdp ? temporaryBasket : currentBasket
+                await generateOrderNumber(state, component, actions, propsWithGetBasket, basketData)
                 const adyenPaymentService = new AdyenPaymentsService(
                     authToken,
                     customerId,

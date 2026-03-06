@@ -5,6 +5,7 @@ import Client from '@adyen/api-library/lib/src/client.js'
 
 const mockPaymentsApi = {name: 'PaymentsApi'}
 const mockOrdersApi = {name: 'OrdersApi'}
+const mockUtilityApi = {name: 'UtilityApi'}
 
 jest.mock('@adyen/api-library/lib/src/client.js', () => {
     return jest.fn().mockImplementation((config) => ({
@@ -15,7 +16,8 @@ jest.mock('@adyen/api-library/lib/src/client.js', () => {
 jest.mock('@adyen/api-library/lib/src/services/checkout/index.js', () => {
     return jest.fn().mockImplementation(() => ({
         PaymentsApi: mockPaymentsApi,
-        OrdersApi: mockOrdersApi
+        OrdersApi: mockOrdersApi,
+        UtilityApi: mockUtilityApi
     }))
 })
 
@@ -50,6 +52,11 @@ describe('AdyenClientProvider', () => {
         expect(() => new AdyenClientProvider(mockAdyenContext)).toThrow(
             new AdyenError(ERROR_MESSAGE.MISSING_LIVE_PREFIX, 400)
         )
+    })
+
+    it('should provide the UtilityApi', () => {
+        const provider = new AdyenClientProvider(mockAdyenContext)
+        expect(provider.getUtilityApi()).toBeDefined()
     })
 
     it('should correctly instantiate and provide APIs for LIVE environment', () => {

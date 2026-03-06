@@ -95,30 +95,20 @@ describe('basketHelper', () => {
     })
 
     describe('getCurrentBasketForAuthorizedShopper', () => {
-        const mockGetCustomerBaskets = jest.fn()
-
-        beforeEach(() => {
-            ShopperBasketsV2.mockImplementation(() => ({
-                getCustomerBaskets: mockGetCustomerBaskets
-            }))
-        })
-
         it('should return the first basket if found', async () => {
             const mockBaskets = {
                 baskets: [{basketId: 'basket1'}, {basketId: 'basket2'}]
             }
-            mockGetCustomerBaskets.mockResolvedValue(mockBaskets)
+            getCustomerBaskets.mockResolvedValue(mockBaskets)
 
             const result = await getCurrentBasketForAuthorizedShopper('auth', 'customer-abc')
 
-            expect(mockGetCustomerBaskets).toHaveBeenCalledWith({
-                parameters: {customerId: 'customer-abc'}
-            })
+            expect(getCustomerBaskets).toHaveBeenCalledWith('auth', 'customer-abc')
             expect(result).toEqual({basketId: 'basket1'})
         })
 
         it('should throw AdyenError if no baskets property is returned', async () => {
-            mockGetCustomerBaskets.mockResolvedValue({})
+            getCustomerBaskets.mockResolvedValue({})
 
             await expect(
                 getCurrentBasketForAuthorizedShopper('auth', 'customer-abc')
@@ -126,7 +116,7 @@ describe('basketHelper', () => {
         })
 
         it('should throw AdyenError if the baskets array is empty', async () => {
-            mockGetCustomerBaskets.mockResolvedValue({baskets: []})
+            getCustomerBaskets.mockResolvedValue({baskets: []})
 
             await expect(
                 getCurrentBasketForAuthorizedShopper('auth', 'customer-abc')
@@ -171,6 +161,19 @@ describe('basketHelper', () => {
             getCustomerBaskets.mockResolvedValue({
                 baskets: [{basketId: 'nontemp', temporaryBasket: false}]
             })
+            await removeExistingTemporaryBaskets('Bearer mockToken', 'mockCustomerId')
+            expect(mockShopperBaskets.deleteBasket).not.toHaveBeenCalled()
+        })
+
+        it('should handle errors gracefully', async () => {
+            getCustomerBaskets.mockRejectedValue(new Error('fetch failed'))
+            await expect(
+                removeExistingTemporaryBaskets('Bearer mockToken', 'mockCustomerId')
+            ).resolves.not.toThrow()
+        })
+
+        it('should handle undefined baskets array', async () => {
+            getCustomerBaskets.mockResolvedValue({})
             await removeExistingTemporaryBaskets('Bearer mockToken', 'mockCustomerId')
             expect(mockShopperBaskets.deleteBasket).not.toHaveBeenCalled()
         })

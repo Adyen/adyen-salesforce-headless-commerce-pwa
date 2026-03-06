@@ -64,13 +64,37 @@ describe('AdyenPaymentMethodsService', () => {
         const mockFetchPromise = Promise.resolve({
             status: 400,
             statusText: 'Bad Request',
-            json: jest.fn().mockResolvedValue({message: 'Fetch payment methods error'})
+            json: jest.fn().mockResolvedValue({errorMessage: 'Fetch payment methods error'})
         })
 
         paymentMethodsService.apiClient.get.mockResolvedValueOnce(mockFetchPromise)
 
         await expect(paymentMethodsService.fetchPaymentMethods(mockLocale)).rejects.toThrow(
             'Fetch payment methods error'
+        )
+    })
+
+    it('should use status-based message when error json has no message', async () => {
+        paymentMethodsService.apiClient.get.mockResolvedValueOnce(
+            Promise.resolve({
+                status: 503,
+                json: jest.fn().mockResolvedValue({})
+            })
+        )
+        await expect(paymentMethodsService.fetchPaymentMethods(mockLocale)).rejects.toThrow(
+            'Fetch payment methods failed with status 503'
+        )
+    })
+
+    it('should use fallback message when json parsing fails on error', async () => {
+        paymentMethodsService.apiClient.get.mockResolvedValueOnce(
+            Promise.resolve({
+                status: 500,
+                json: jest.fn().mockRejectedValue(new Error('parse error'))
+            })
+        )
+        await expect(paymentMethodsService.fetchPaymentMethods(mockLocale)).rejects.toThrow(
+            'Failed to fetch payment methods'
         )
     })
 })

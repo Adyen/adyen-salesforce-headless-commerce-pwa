@@ -2,7 +2,7 @@ import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 import {ShopperBasketsV2} from 'commerce-sdk-isomorphic'
 import {AdyenError} from '../models/AdyenError.js'
 import {ERROR_MESSAGE} from '../../utils/constants.mjs'
-import {getCustomerBaskets} from './customerHelper'
+import {getCustomerBaskets} from './customerHelper.js'
 import Logger from '../models/logger'
 
 /**
@@ -52,12 +52,7 @@ export async function getBasket(authorization, basketId, customerId) {
  * @throws {AdyenError} If no baskets are found for the customer.
  */
 export async function getCurrentBasketForAuthorizedShopper(authorization, customerId) {
-    const shopperBaskets = createShopperBasketsClient(authorization)
-    const {baskets} = await shopperBaskets.getCustomerBaskets({
-        parameters: {
-            customerId: customerId
-        }
-    })
+    const {baskets} = await getCustomerBaskets(authorization, customerId)
 
     if (!baskets?.length) {
         throw new AdyenError(ERROR_MESSAGE.INVALID_BASKET, 404)

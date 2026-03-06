@@ -1,10 +1,17 @@
-import {authenticate, parseNotification, validateHmac} from '../webhook'
+import {authenticate, parseNotification, sendNotification, validateHmac} from '../webhook'
 import {AdyenError} from '../../models/AdyenError'
 import Logger from '../../models/logger'
 
 let mockValidateHMAC = jest.fn()
 
 jest.mock('../../models/logger')
+
+const mockNotify = jest.fn()
+jest.mock('../../models/customNotifyApi', () => ({
+    CustomNotifyApiClient: jest.fn().mockImplementation(() => ({
+        notify: mockNotify
+    }))
+}))
 
 jest.mock('@adyen/api-library/lib/src/utils/hmacValidator.js', () => {
     return jest.fn().mockImplementation(() => {
@@ -126,6 +133,32 @@ describe('WebhookHandler', () => {
                     400
                 )
             )
+        })
+    })
+
+    describe('sendNotification', () => {
+        it('should send notification and set response', async () => {
+            mockNotify.mockResolvedValue({})
+            res.locals.notification = {
+                NotificationRequestItem: {eventCode: 'AUTHORISATION'},
+                live: 'false'
+            }
+
+            await sendNotification(req, res, next)
+            expect(res.locals.response).toBe('[accepted]')
+            expect(next).toHaveBeenCalledWith()
+        })
+
+        it('should handle errors during sendNotification', async () => {
+            const err = new Error('notify failed')
+            mockNotify.mockRejectedValue(err)
+            res.locals.notification = {
+                NotificationRequestItem: {eventCode: 'AUTHORISATION'},
+                live: 'false'
+            }
+
+            await sendNotification(req, res, next)
+            expect(next).toHaveBeenCalledWith(err)
         })
     })
 })

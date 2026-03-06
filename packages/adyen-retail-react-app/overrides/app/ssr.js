@@ -99,14 +99,15 @@ const {handler} = runtime.createHandler(options, (app) => {
     )
 
     // Handle the redirect from SLAS as to avoid error
-    app.get('/callback?*', (req, res) => {
+    app.get('/callback', (req, res) => {
         res.send()
     })
     app.get('/robots.txt', runtime.serveStaticFile('static/robots.txt'))
 
     app.get('/favicon.ico', runtime.serveStaticFile('static/ico/favicon.ico'))
 
-    app.get('/worker.js(.map)?', runtime.serveServiceWorker)
+    app.get('/worker.js', runtime.serveServiceWorker)
+    app.get('/worker.js.map', runtime.serveServiceWorker)
     /* -----------------Adyen Begin ------------------------ */
     /**
      * Adyen API Endpoints

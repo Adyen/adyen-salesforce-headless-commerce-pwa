@@ -2,7 +2,10 @@ import {
     createCheckoutResponse,
     createPaymentRequestObject,
     revertCheckoutState,
-    validateBasketPayments
+    revertCheckoutStateForExpress,
+    validateBasketPayments,
+    isApplePayExpress,
+    isPayPalExpress
 } from '../paymentsHelper.js'
 import {
     amountForPartialPayments,
@@ -312,6 +315,83 @@ describe('paymentsHelper', () => {
             ).rejects.toThrow(new AdyenError('basket changed', 409, {basketChanged: true}))
             expect(mockOrdersApi.cancelOrder).not.toHaveBeenCalled()
         })
+
+        it('should throw on currency mismatch', async () => {
+            const amount = {value: 10000, currency: 'EUR'}
+            const paymentMethod = {type: 'scheme'}
+            await expect(
+                validateBasketPayments(mockAdyenContext, amount, paymentMethod)
+            ).rejects.toThrow('Currency mismatch between payment and basket')
+        })
+
+        it('should return early for express payments without throwing', async () => {
+            const amount = {value: 5000}
+            const paymentMethod = {type: 'applepay', subtype: 'express'}
+            await expect(
+                validateBasketPayments(mockAdyenContext, amount, paymentMethod)
+            ).resolves.toBeUndefined()
+        })
+
+        it('should throw for invalid order data structure in partial payment', async () => {
+            mockAdyenContext.basket.c_orderData = JSON.stringify({
+                orderData: '...'
+                // Missing amount.value
+            })
+            const amount = {value: 1000}
+            const paymentMethod = {type: 'scheme'}
+            await expect(
+                validateBasketPayments(mockAdyenContext, amount, paymentMethod)
+            ).rejects.toThrow('Invalid order data structure')
+        })
+
+        it('should throw if gift card amount exceeds remaining amount in partial payment', async () => {
+            mockAdyenContext.basket.c_orderData = JSON.stringify({
+                orderData: '...',
+                amount: {value: 10000},
+                remainingAmount: {value: 3000}
+            })
+            const amount = {value: 5000}
+            const paymentMethod = {type: 'giftcard'}
+            await expect(
+                validateBasketPayments(mockAdyenContext, amount, paymentMethod)
+            ).rejects.toThrow('amounts do not match')
+        })
+
+        it('should not throw for valid partial gift card payment', async () => {
+            mockAdyenContext.basket.c_orderData = JSON.stringify({
+                orderData: '...',
+                amount: {value: 10000},
+                remainingAmount: {value: 5000}
+            })
+            const amount = {value: 3000}
+            const paymentMethod = {type: 'giftcard'}
+            await expect(
+                validateBasketPayments(mockAdyenContext, amount, paymentMethod)
+            ).resolves.toBeUndefined()
+        })
+
+        it('should throw if total payments exceed basket total for partial gift card', async () => {
+            mockAdyenContext.basket.paymentInstruments = [{amount: 90}]
+            mockAdyenContext.basket.c_orderData = JSON.stringify({
+                orderData: '...',
+                amount: {value: 10000},
+                remainingAmount: {value: 5000}
+            })
+            const amount = {value: 2000}
+            const paymentMethod = {type: 'giftcard'}
+            await expect(
+                validateBasketPayments(mockAdyenContext, amount, paymentMethod)
+            ).rejects.toThrow('amounts do not match')
+        })
+
+        it('should handle existing payment instruments in total calculation', async () => {
+            mockAdyenContext.basket.paymentInstruments = [{amount: 50}]
+            const amount = {value: 5000}
+            const paymentMethod = {type: 'scheme'}
+            await expect(
+                validateBasketPayments(mockAdyenContext, amount, paymentMethod)
+            ).resolves.toBeUndefined()
+        })
     })
 
     describe('revertCheckoutState', () => {
@@ -344,7 +424,8 @@ describe('paymentsHelper', () => {
                 c_amount: '',
                 c_pspReference: '',
                 c_paymentData: '',
-                c_paymentDataForReviewPage: ''
+                c_paymentDataForReviewPage: '',
+                c_orderNo: ''
             })
             expect(mockAdyenContext.basketService.removeAllPaymentInstruments).toHaveBeenCalled()
         })
@@ -584,6 +665,122 @@ describe('paymentsHelper', () => {
             )
 
             expect(paymentRequest.returnUrl).toBe('https://custom.return/url')
+        })
+
+        test('should handle PayPal Express payment request', async () => {
+            const mockData = {
+                paymentMethod: {type: 'paypal', subtype: 'express'},
+                origin: 'https://example.com'
+            }
+
+            const paymentRequest = await createPaymentRequestObject(
+                mockData,
+                mockAdyenContext,
+                mockReq
+            )
+
+            expect(paymentRequest).toBeDefined()
+            expect(paymentRequest.merchantAccount).toBe('AdyenMerchantAccount')
+        })
+
+        test('should handle partial payment request', async () => {
+            const contextWithOrder = {
+                ...mockAdyenContext,
+                basket: {
+                    ...mockBasket,
+                    c_orderData: JSON.stringify({
+                        orderData: 'someOrderData',
+                        remainingAmount: {value: 5000, currency: 'USD'}
+                    })
+                }
+            }
+            const mockData = {
+                paymentMethod: {type: 'scheme'},
+                origin: 'https://example.com'
+            }
+
+            const paymentRequest = await createPaymentRequestObject(
+                mockData,
+                contextWithOrder,
+                mockReq
+            )
+
+            expect(paymentRequest).toBeDefined()
+        })
+    })
+
+    describe('revertCheckoutStateForExpress', () => {
+        it('should throw an error if adyenContext is not provided', async () => {
+            await expect(revertCheckoutStateForExpress(null, 'test')).rejects.toThrow(
+                'Adyen context not found in test'
+            )
+        })
+
+        it('should cleanup basket and remove shipping address', async () => {
+            const mockAdyenContext = {
+                basket: {},
+                basketService: {
+                    update: jest.fn(),
+                    removeAllPaymentInstruments: jest.fn(),
+                    removeShippingAddress: jest.fn()
+                }
+            }
+            await revertCheckoutStateForExpress(mockAdyenContext, 'test')
+            expect(mockAdyenContext.basketService.update).toHaveBeenCalled()
+            expect(mockAdyenContext.basketService.removeAllPaymentInstruments).toHaveBeenCalled()
+            expect(mockAdyenContext.basketService.removeShippingAddress).toHaveBeenCalled()
+        })
+    })
+
+    describe('isApplePayExpress', () => {
+        it('should return true for apple pay express', () => {
+            expect(isApplePayExpress({paymentMethod: {type: 'applepay', subtype: 'express'}})).toBe(
+                true
+            )
+        })
+        it('should return false for non-express apple pay', () => {
+            expect(isApplePayExpress({paymentMethod: {type: 'applepay'}})).toBe(false)
+        })
+        it('should return false for other payment methods', () => {
+            expect(isApplePayExpress({paymentMethod: {type: 'scheme'}})).toBe(false)
+        })
+    })
+
+    describe('isPayPalExpress', () => {
+        it('should return true for paypal express', () => {
+            expect(isPayPalExpress({paymentMethod: {type: 'paypal', subtype: 'express'}})).toBe(
+                true
+            )
+        })
+        it('should return false for non-express paypal', () => {
+            expect(isPayPalExpress({paymentMethod: {type: 'paypal'}})).toBe(false)
+        })
+        it('should return false for other payment methods', () => {
+            expect(isPayPalExpress({paymentMethod: {type: 'scheme'}})).toBe(false)
+        })
+    })
+
+    describe('createCheckoutResponse - additional branches', () => {
+        it('should handle order with remaining amount > 0', () => {
+            const response = {
+                resultCode: 'Authorised',
+                order: {remainingAmount: {value: 500}},
+                merchantReference: 'ref'
+            }
+            const result = createCheckoutResponse(response, 'order1')
+            expect(result.isFinal).toBe(false)
+            expect(result.isSuccessful).toBe(true)
+        })
+
+        it('should handle order with remaining amount = 0', () => {
+            const response = {
+                resultCode: 'Authorised',
+                order: {remainingAmount: {value: 0}},
+                merchantReference: 'ref'
+            }
+            const result = createCheckoutResponse(response, 'order1')
+            expect(result.isFinal).toBe(true)
+            expect(result.isSuccessful).toBe(true)
         })
     })
 })

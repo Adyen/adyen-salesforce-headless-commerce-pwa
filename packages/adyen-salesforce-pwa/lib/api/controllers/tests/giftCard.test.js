@@ -79,6 +79,23 @@ describe('Gift Card Controller', () => {
             expect(Logger.info).toHaveBeenCalledWith('giftCards-balanceCheck', 'success')
         })
 
+        it('should use productTotal when orderTotal is falsy', async () => {
+            res.locals.adyen.basket.orderTotal = 0
+            res.locals.adyen.basket.productTotal = 50
+            const mockBalanceResponse = {balance: {value: 5000, currency: 'USD'}}
+            mockOrdersApi.getBalanceOfGiftCard.mockResolvedValue(mockBalanceResponse)
+
+            await balanceCheck(req, res, next)
+
+            expect(mockOrdersApi.getBalanceOfGiftCard).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    amount: expect.objectContaining({value: 5000})
+                }),
+                expect.any(Object)
+            )
+            expect(next).toHaveBeenCalledWith()
+        })
+
         it('should handle errors during balance check', async () => {
             const mockError = new Error('API Error')
             mockOrdersApi.getBalanceOfGiftCard.mockRejectedValue(mockError)
@@ -104,6 +121,23 @@ describe('Gift Card Controller', () => {
             expect(res.locals.response).toEqual(mockOrderResponse)
             expect(next).toHaveBeenCalledWith()
             expect(Logger.info).toHaveBeenCalledWith('giftCards-createOrder', 'success')
+        })
+
+        it('should use productTotal when orderTotal is falsy', async () => {
+            res.locals.adyen.basket.orderTotal = 0
+            res.locals.adyen.basket.productTotal = 50
+            const mockOrderResponse = {orderData: '...', pspReference: 'PSP123'}
+            mockOrdersApi.orders.mockResolvedValue(mockOrderResponse)
+
+            await createOrder(req, res, next)
+
+            expect(mockOrdersApi.orders).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    amount: expect.objectContaining({value: 5000})
+                }),
+                expect.any(Object)
+            )
+            expect(next).toHaveBeenCalledWith()
         })
 
         it('should handle errors during order creation', async () => {

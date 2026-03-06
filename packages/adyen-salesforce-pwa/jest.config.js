@@ -10,6 +10,12 @@ module.exports = {
     moduleFileExtensions: ['js', 'jsx', 'mjs', 'cjs'],
     coverageThreshold: {
         global: {
+            branches: 85,
+            functions: 85,
+            lines: 85,
+            statements: 85
+        },
+        './lib/**/*.{js,jsx,mjs,cjs}': {
             branches: 70,
             functions: 70,
             lines: 70,

@@ -4,11 +4,14 @@
 import {renderHook, waitFor} from '@testing-library/react'
 import useHandleBackNavigation from '../useHandleBackNavigation'
 import {PaymentCancelService} from '../../services/payment-cancel'
+import {useLocation} from 'react-router-dom'
 
 jest.mock('../../services/payment-cancel')
+jest.mock('react-router-dom', () => ({
+    useLocation: jest.fn()
+}))
 
 describe('useHandleBackNavigation', () => {
-    let mockRefetchBasket
     let mockCancelAbandonedPayment
     const mockAuthToken = 'test-auth-token'
     const mockCustomerId = 'customer-123'
@@ -17,15 +20,13 @@ describe('useHandleBackNavigation', () => {
 
     beforeEach(() => {
         jest.clearAllMocks()
-        mockRefetchBasket = jest.fn()
         mockCancelAbandonedPayment = jest.fn()
 
         PaymentCancelService.mockImplementation(() => ({
             cancelAbandonedPayment: mockCancelAbandonedPayment
         }))
 
-        delete window.location
-        window.location = {reload: jest.fn(), search: ''}
+        useLocation.mockReturnValue({search: ''})
     })
 
     afterEach(() => {
@@ -39,9 +40,7 @@ describe('useHandleBackNavigation', () => {
                     authToken: mockAuthToken,
                     customerId: mockCustomerId,
                     basketId: mockBasketId,
-                    site: mockSite,
-                    basket: {},
-                    refetchBasket: mockRefetchBasket
+                    site: mockSite
                 })
             )
 
@@ -57,9 +56,7 @@ describe('useHandleBackNavigation', () => {
                     authToken: mockAuthToken,
                     customerId: mockCustomerId,
                     basketId: mockBasketId,
-                    site: mockSite,
-                    basket: {},
-                    refetchBasket: mockRefetchBasket
+                    site: mockSite
                 })
             )
 
@@ -74,9 +71,7 @@ describe('useHandleBackNavigation', () => {
                     authToken: mockAuthToken,
                     customerId: mockCustomerId,
                     basketId: mockBasketId,
-                    site: mockSite,
-                    basket: {},
-                    refetchBasket: mockRefetchBasket
+                    site: mockSite
                 })
             )
 
@@ -94,8 +89,6 @@ describe('useHandleBackNavigation', () => {
                     customerId: mockCustomerId,
                     basketId: mockBasketId,
                     site: mockSite,
-                    basket: {},
-                    refetchBasket: mockRefetchBasket,
                     enabled: false
                 })
             )
@@ -103,7 +96,7 @@ describe('useHandleBackNavigation', () => {
             const detected = await result.current.checkForAbandonedPayment()
 
             expect(detected).toBe(false)
-            expect(mockRefetchBasket).not.toHaveBeenCalled()
+            expect(mockCancelAbandonedPayment).not.toHaveBeenCalled()
         })
 
         it('should return false if authToken is missing', async () => {
@@ -112,16 +105,14 @@ describe('useHandleBackNavigation', () => {
                     authToken: null,
                     customerId: mockCustomerId,
                     basketId: mockBasketId,
-                    site: mockSite,
-                    basket: {},
-                    refetchBasket: mockRefetchBasket
+                    site: mockSite
                 })
             )
 
             const detected = await result.current.checkForAbandonedPayment()
 
             expect(detected).toBe(false)
-            expect(mockRefetchBasket).not.toHaveBeenCalled()
+            expect(mockCancelAbandonedPayment).not.toHaveBeenCalled()
         })
 
         it('should return false if basketId is missing', async () => {
@@ -130,99 +121,78 @@ describe('useHandleBackNavigation', () => {
                     authToken: mockAuthToken,
                     customerId: mockCustomerId,
                     basketId: null,
-                    site: mockSite,
-                    basket: {},
-                    refetchBasket: mockRefetchBasket
+                    site: mockSite
                 })
             )
 
             const detected = await result.current.checkForAbandonedPayment()
 
             expect(detected).toBe(false)
-            expect(mockRefetchBasket).not.toHaveBeenCalled()
+            expect(mockCancelAbandonedPayment).not.toHaveBeenCalled()
         })
 
         it('should return false if URL has redirect parameters', async () => {
-            window.location.search = '?redirectResult=abc123'
+            useLocation.mockReturnValue({search: '?redirectResult=abc123'})
 
             const {result} = renderHook(() =>
                 useHandleBackNavigation({
                     authToken: mockAuthToken,
                     customerId: mockCustomerId,
                     basketId: mockBasketId,
-                    site: mockSite,
-                    basket: {},
-                    refetchBasket: mockRefetchBasket
+                    site: mockSite
                 })
             )
 
             const detected = await result.current.checkForAbandonedPayment()
 
             expect(detected).toBe(false)
-            expect(mockRefetchBasket).not.toHaveBeenCalled()
-        })
-
-        it('should return false if basket refetch returns no data', async () => {
-            mockRefetchBasket.mockResolvedValue({data: {baskets: [], total: 0}})
-
-            const {result} = renderHook(() =>
-                useHandleBackNavigation({
-                    authToken: mockAuthToken,
-                    customerId: mockCustomerId,
-                    basketId: mockBasketId,
-                    site: mockSite,
-                    basket: {},
-                    refetchBasket: mockRefetchBasket
-                })
-            )
-
-            const detected = await result.current.checkForAbandonedPayment()
-
-            expect(detected).toBe(false)
-            expect(mockRefetchBasket).toHaveBeenCalledTimes(1)
             expect(mockCancelAbandonedPayment).not.toHaveBeenCalled()
         })
 
-        it('should return false if basket has no payment data', async () => {
-            mockRefetchBasket.mockResolvedValue({
-                data: {
-                    baskets: [{basketId: mockBasketId}],
-                    total: 1
-                }
-            })
+        it('should return false if cancel response indicates not cancelled', async () => {
+            mockCancelAbandonedPayment.mockResolvedValue({cancelled: false})
 
+            const mockNavigate = jest.fn()
             const {result} = renderHook(() =>
                 useHandleBackNavigation({
                     authToken: mockAuthToken,
                     customerId: mockCustomerId,
                     basketId: mockBasketId,
                     site: mockSite,
-                    basket: {},
-                    refetchBasket: mockRefetchBasket
+                    navigate: mockNavigate
                 })
             )
 
             const detected = await result.current.checkForAbandonedPayment()
 
             expect(detected).toBe(false)
-            expect(mockRefetchBasket).toHaveBeenCalledTimes(1)
-            expect(mockCancelAbandonedPayment).not.toHaveBeenCalled()
+            expect(mockCancelAbandonedPayment).toHaveBeenCalledWith('abandoned_session', null)
+            expect(mockNavigate).not.toHaveBeenCalled()
         })
 
-        it('should detect abandoned payment and cancel it', async () => {
-            mockRefetchBasket.mockResolvedValue({
-                data: {
-                    baskets: [
-                        {
-                            basketId: mockBasketId,
-                            c_paymentData: '{"merchantReference":"00123"}',
-                            c_pspReference: 'psp-ref-123'
-                        }
-                    ],
-                    total: 1
-                }
-            })
-            mockCancelAbandonedPayment.mockResolvedValue({success: true})
+        it('should extract orderNo from URL params', async () => {
+            useLocation.mockReturnValue({search: '?orderNo=00123456'})
+            mockCancelAbandonedPayment.mockResolvedValue({cancelled: true})
+
+            const mockNavigate = jest.fn()
+            const {result} = renderHook(() =>
+                useHandleBackNavigation({
+                    authToken: mockAuthToken,
+                    customerId: mockCustomerId,
+                    basketId: mockBasketId,
+                    site: mockSite,
+                    navigate: mockNavigate
+                })
+            )
+
+            await result.current.checkForAbandonedPayment()
+
+            expect(mockCancelAbandonedPayment).toHaveBeenCalledWith('abandoned_session', '00123456')
+        })
+
+        it('should detect abandoned payment and cancel it via navigate', async () => {
+            mockCancelAbandonedPayment.mockResolvedValue({cancelled: true})
+            const mockNavigate = jest.fn()
 
             const {result} = renderHook(() =>
                 useHandleBackNavigation({
@@ -230,40 +200,27 @@ describe('useHandleBackNavigation', () => {
                     customerId: mockCustomerId,
                     basketId: mockBasketId,
                     site: mockSite,
-                    basket: {},
-                    refetchBasket: mockRefetchBasket
+                    navigate: mockNavigate
                 })
             )
 
             result.current.checkForAbandonedPayment()
 
             await waitFor(() => {
-                expect(mockCancelAbandonedPayment).toHaveBeenCalledWith('abandoned_session')
+                expect(mockCancelAbandonedPayment).toHaveBeenCalledWith('abandoned_session', null)
             })
 
-            expect(mockRefetchBasket).toHaveBeenCalledTimes(1)
             expect(PaymentCancelService).toHaveBeenCalledWith(
                 mockAuthToken,
                 mockCustomerId,
                 mockBasketId,
                 mockSite
             )
-            expect(window.location.reload).toHaveBeenCalled()
+            expect(mockNavigate).toHaveBeenCalledWith('/checkout?')
         })
 
         it('should handle errors during cancellation', async () => {
             const mockError = new Error('Cancellation failed')
-            mockRefetchBasket.mockResolvedValue({
-                data: {
-                    baskets: [
-                        {
-                            basketId: mockBasketId,
-                            c_paymentData: '{"merchantReference":"00123"}'
-                        }
-                    ],
-                    total: 1
-                }
-            })
             mockCancelAbandonedPayment.mockRejectedValue(mockError)
 
             const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation()
@@ -273,9 +230,7 @@ describe('useHandleBackNavigation', () => {
                     authToken: mockAuthToken,
                     customerId: mockCustomerId,
                     basketId: mockBasketId,
-                    site: mockSite,
-                    basket: {},
-                    refetchBasket: mockRefetchBasket
+                    site: mockSite
                 })
             )
 
@@ -294,19 +249,12 @@ describe('useHandleBackNavigation', () => {
             consoleErrorSpy.mockRestore()
         })
 
-        it('should check custom payment data fields', async () => {
-            mockRefetchBasket.mockResolvedValue({
-                data: {
-                    baskets: [
-                        {
-                            basketId: mockBasketId,
-                            c_customPaymentField: 'custom-data'
-                        }
-                    ],
-                    total: 1
-                }
+        it('should navigate with newBasketId when cancel response includes one', async () => {
+            const mockNavigate = jest.fn()
+            mockCancelAbandonedPayment.mockResolvedValue({
+                cancelled: true,
+                newBasketId: 'new-basket-789'
             })
-            mockCancelAbandonedPayment.mockResolvedValue({success: true})
 
             const {result} = renderHook(() =>
                 useHandleBackNavigation({
@@ -314,9 +262,7 @@ describe('useHandleBackNavigation', () => {
                     customerId: mockCustomerId,
                     basketId: mockBasketId,
                     site: mockSite,
-                    basket: {},
-                    refetchBasket: mockRefetchBasket,
-                    paymentDataFields: ['c_customPaymentField']
+                    navigate: mockNavigate
                 })
             )
 
@@ -326,11 +272,11 @@ describe('useHandleBackNavigation', () => {
                 expect(mockCancelAbandonedPayment).toHaveBeenCalled()
             })
 
-            expect(mockRefetchBasket).toHaveBeenCalledTimes(1)
+            expect(mockNavigate).toHaveBeenCalledWith('/checkout?newBasketId=new-basket-789')
         })
 
         it('should check custom redirect parameters', async () => {
-            window.location.search = '?customParam=value'
+            useLocation.mockReturnValue({search: '?customParam=value'})
 
             const {result} = renderHook(() =>
                 useHandleBackNavigation({
@@ -338,8 +284,6 @@ describe('useHandleBackNavigation', () => {
                     customerId: mockCustomerId,
                     basketId: mockBasketId,
                     site: mockSite,
-                    basket: {},
-                    refetchBasket: mockRefetchBasket,
                     redirectParams: ['customParam']
                 })
             )
@@ -347,24 +291,14 @@ describe('useHandleBackNavigation', () => {
             const detected = await result.current.checkForAbandonedPayment()
 
             expect(detected).toBe(false)
-            expect(mockRefetchBasket).not.toHaveBeenCalled()
+            expect(mockCancelAbandonedPayment).not.toHaveBeenCalled()
         })
     })
 
     describe('pageshow event handling', () => {
         it('should check for abandoned payment when page is restored from bfcache', async () => {
-            mockRefetchBasket.mockResolvedValue({
-                data: {
-                    baskets: [
-                        {
-                            basketId: mockBasketId,
-                            c_paymentData: '{"merchantReference":"00123"}'
-                        }
-                    ],
-                    total: 1
-                }
-            })
-            mockCancelAbandonedPayment.mockResolvedValue({success: true})
+            mockCancelAbandonedPayment.mockResolvedValue({cancelled: true})
+            const mockNavigate = jest.fn()
 
             renderHook(() =>
                 useHandleBackNavigation({
@@ -372,8 +306,7 @@ describe('useHandleBackNavigation', () => {
                     customerId: mockCustomerId,
                     basketId: mockBasketId,
                     site: mockSite,
-                    basket: {},
-                    refetchBasket: mockRefetchBasket
+                    navigate: mockNavigate
                 })
             )
 
@@ -382,21 +315,23 @@ describe('useHandleBackNavigation', () => {
             window.dispatchEvent(pageshowEvent)
 
             await waitFor(() => {
-                expect(mockRefetchBasket).toHaveBeenCalled()
+                expect(mockCancelAbandonedPayment).toHaveBeenCalled()
             })
         })
 
         it('should not check for abandoned payment on normal page load', async () => {
+            const mockNavigate = jest.fn()
             renderHook(() =>
                 useHandleBackNavigation({
                     authToken: mockAuthToken,
                     customerId: mockCustomerId,
                     basketId: mockBasketId,
                     site: mockSite,
-                    basket: {},
-                    refetchBasket: mockRefetchBasket
+                    navigate: mockNavigate
                 })
             )
+
+            mockCancelAbandonedPayment.mockClear()
 
             const pageshowEvent = new Event('pageshow')
             pageshowEvent.persisted = false
@@ -404,7 +339,7 @@ describe('useHandleBackNavigation', () => {
 
             await new Promise((resolve) => setTimeout(resolve, 50))
 
-            expect(mockRefetchBasket).not.toHaveBeenCalled()
+            expect(mockCancelAbandonedPayment).not.toHaveBeenCalled()
         })
     })
 })

@@ -68,7 +68,7 @@ describe('TemporaryBasketService', () => {
         })
 
         it('should handle API errors with error message', async () => {
-            const errorResponse = {message: 'Failed to create temporary basket'}
+            const errorResponse = {errorMessage: 'Failed to create temporary basket'}
             const mockResponse = {
                 status: 400,
                 json: jest.fn().mockResolvedValue(errorResponse)

@@ -7,6 +7,7 @@ import {AdyenShippingAddressService} from '../../services/shipping-address'
 import {AdyenPaypalUpdateOrderService} from '../../services/paypal-update-order'
 import {AdyenPaymentDataReviewPageService} from '../../services/payment-data-review-page'
 import {AdyenTemporaryBasketService} from '../../services/temporary-basket'
+import {AdyenOrderNumberService} from '../../services/order-number'
 import {formatPayPalShopperDetails} from '../helpers/addressHelper'
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 
@@ -86,6 +87,7 @@ export const paypalExpressConfig = (props = {}) => {
             [
                 ...beforeSubmit,
                 ...(isPdp ? [createTemporaryBasketCallback] : []),
+                generateOrderNumberCallback,
                 onSubmit,
                 ...afterSubmit,
                 onPaymentsSuccess
@@ -126,6 +128,38 @@ export const paypalExpressConfig = (props = {}) => {
         onError: executeErrorCallbacks([...onError, errorHandler], propsWithGetBasket),
         onPaymentFailed: executeErrorCallbacks([...onError, errorHandler], propsWithGetBasket),
         ...configuration
+    }
+}
+
+/**
+ * Generates an order number and stores it on the current basket before payment submission.
+ * Must run after createTemporaryBasketCallback (for PDP) so the basket exists.
+ * The server-side payments controller reads c_orderNo from the basket as the Adyen reference.
+ *
+ * @param {object} state - Current payment state
+ * @param {object} component - Adyen component instance
+ * @param {object} actions - Action handlers (resolve, reject)
+ * @param {object} props - Component properties
+ * @returns {Promise<void>}
+ */
+export const generateOrderNumberCallback = async (state, component, actions, props) => {
+    try {
+        const basket = props.getBasket()
+        const {token, site} = props
+        const adyenOrderNumberService = new AdyenOrderNumberService(
+            token,
+            basket?.customerInfo?.customerId,
+            basket?.basketId,
+            site
+        )
+        const {orderNo} = await adyenOrderNumberService.fetchOrderNumber()
+        if (!orderNo) {
+            throw new Error('Failed to generate order number')
+        }
+        props.setBasket({...basket, c_orderNo: orderNo})
+    } catch (err) {
+        props.onError?.forEach((cb) => cb(err))
+        actions.reject(err.message)
     }
 }
 
