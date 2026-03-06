@@ -381,7 +381,7 @@ export class PaymentRequestBuilder {
         const l23Enabled = this.context.adyenConfig?.l23Enabled === 'true'
         const locale = this.context.req?.query?.locale
 
-        if (!l23Enabled || locale !== 'en-US' || actualPaymentMethodType?.indexOf('scheme') > -1) {
+        if (!l23Enabled || locale !== 'en-US' || actualPaymentMethodType !== 'scheme') {
             return this
         }
 
