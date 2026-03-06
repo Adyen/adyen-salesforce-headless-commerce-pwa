@@ -17,7 +17,7 @@ jobs:
               run: npm i
             - name: Install PWA package dependencies
               working-directory: ./packages/adyen-salesforce-pwa
-              run: npm i
+              run: npm i --ignore-scripts
             - name: Build PWA
               working-directory: ./packages/adyen-salesforce-pwa
               run: npm run build-prod
@@ -52,7 +52,7 @@ jobs:
               run: npm i
             - name: Install PWA package dependencies
               working-directory: ./packages/adyen-salesforce-pwa
-              run: npm i
+              run: npm i --ignore-scripts
             - name: Build PWA
               working-directory: ./packages/adyen-salesforce-pwa
               run: npm run build-dev
