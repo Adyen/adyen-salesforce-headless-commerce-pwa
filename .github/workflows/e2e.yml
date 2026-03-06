@@ -22,6 +22,10 @@ env:
   PROJECT_ID: ${{ secrets.PROJECT_ID }}
   COMMERCE_API_CLIENT_ID_PRIVATE: ${{ secrets.COMMERCE_API_CLIENT_ID_PRIVATE }}
   COMMERCE_API_CLIENT_SECRET: ${{ secrets.COMMERCE_API_CLIENT_SECRET }}
+  MRT_PROJECT_SLUG: ${{ secrets.MRT_PROJECT_SLUG }}
+  MRT_DEPLOY_TARGET: ${{ secrets.MRT_DEPLOY_TARGET }}
+  MRT_USER: ${{ secrets.MRT_USER }}
+  MRT_API_KEY: ${{ secrets.MRT_API_KEY }}
 jobs:
   deploy-storefront:
     timeout-minutes: 30
@@ -52,7 +56,7 @@ jobs:
         run: npm i ../adyen-salesforce-pwa/adyen-adyen-salesforce-pwa-$(node -p "require('../adyen-salesforce-pwa/package.json').version").tgz --no-cache
       - name: Build and deploy to storefront
         working-directory: ./packages/adyen-retail-react-app
-        run: npm run push -- -s ${{ secrets.MRT_PROJECT_SLUG }} -t ${{ secrets.MRT_DEPLOY_TARGET }} --user ${{ secrets.MRT_USER }} --key ${{ secrets.MRT_API_KEY }}
+        run: npm run push -- -s "$MRT_PROJECT_SLUG" -t "$MRT_DEPLOY_TARGET" --user "$MRT_USER" --key "$MRT_API_KEY"
   e2e-tests:
     timeout-minutes: 10
     needs: deploy-storefront
