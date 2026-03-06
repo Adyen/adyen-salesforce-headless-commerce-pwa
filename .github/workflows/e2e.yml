@@ -54,9 +54,12 @@ jobs:
                 COMMERCE_API_CLIENT_ID_PRIVATE: ${{ secrets.COMMERCE_API_CLIENT_ID_PRIVATE }}
                 COMMERCE_API_CLIENT_SECRET: ${{ secrets.COMMERCE_API_CLIENT_SECRET }}
                 EOF
+            - name: Save credentials
+              working-directory: ./packages/adyen-retail-react-app
+              run: npm run save-credentials --user ${{ secrets.MRT_USER }} --key ${{ secrets.MRT_API_KEY }}
             - name: Build and deploy to storefront
               working-directory: ./packages/adyen-retail-react-app
-              run: npm run push:env
+              run: npm run push:env --target adyen-salesforce-pwa
 
     e2e-tests:
         timeout-minutes: 10
