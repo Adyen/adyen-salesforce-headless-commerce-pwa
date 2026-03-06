@@ -293,14 +293,14 @@ describe('paymentUtils', () => {
                     {
                         itemId: 'prod1',
                         itemText: 'Product One',
-                        basePrice: 29.99,
+                        priceAfterItemDiscount: 29.99,
                         tax: 2.4,
                         quantity: 2
                     },
                     {
                         itemId: 'prod2',
                         itemText: 'Product Two',
-                        basePrice: 49.99,
+                        priceAfterItemDiscount: 49.99,
                         tax: 4.0,
                         quantity: 1
                     }
@@ -311,13 +311,13 @@ describe('paymentUtils', () => {
 
             expect(result['enhancedSchemeData.customerReference']).toBe('customer123')
             expect(result['enhancedSchemeData.itemDetailLine1.unitPrice']).toBe(2999)
-            expect(result['enhancedSchemeData.itemDetailLine1.totalAmount']).toBe(2999 + 240)
+            expect(result['enhancedSchemeData.itemDetailLine1.totalAmount']).toBe(2999 * 2 + 240)
             expect(result['enhancedSchemeData.itemDetailLine1.quantity']).toBe(2)
             expect(result['enhancedSchemeData.itemDetailLine1.unitOfMeasure']).toBe('EAC')
             expect(result['enhancedSchemeData.itemDetailLine1.description']).toBe('Product One')
             expect(result['enhancedSchemeData.itemDetailLine1.productCode']).toBe('prod1')
             expect(result['enhancedSchemeData.itemDetailLine2.unitPrice']).toBe(4999)
-            expect(result['enhancedSchemeData.itemDetailLine2.totalAmount']).toBe(4999 + 400)
+            expect(result['enhancedSchemeData.itemDetailLine2.totalAmount']).toBe(4999 * 1 + 400)
             expect(result['enhancedSchemeData.itemDetailLine2.quantity']).toBe(1)
             expect(result['enhancedSchemeData.totalTaxAmount']).toBe(240 + 400)
         })
@@ -330,7 +330,7 @@ describe('paymentUtils', () => {
                     {
                         itemId: 'prod1',
                         itemText: 'Product',
-                        basePrice: 10.0,
+                        priceAfterItemDiscount: 10.0,
                         tax: 0.8,
                         quantity: 1
                     }
@@ -350,7 +350,7 @@ describe('paymentUtils', () => {
                     {
                         itemId: 'prod1',
                         itemText: 'Product',
-                        basePrice: 10.0,
+                        priceAfterItemDiscount: 10.0,
                         tax: 0.8,
                         quantity: 1
                     }
@@ -370,7 +370,7 @@ describe('paymentUtils', () => {
                     {
                         itemId: 'prod1',
                         itemText: 'This is a very long product description with émojis',
-                        basePrice: 10.0,
+                        priceAfterItemDiscount: 10.0,
                         tax: 0,
                         quantity: 1
                     }
@@ -391,7 +391,7 @@ describe('paymentUtils', () => {
                     {
                         itemId: 'very-long-product-id-1234',
                         itemText: 'Product',
-                        basePrice: 10.0,
+                        priceAfterItemDiscount: 10.0,
                         tax: 0,
                         quantity: 1
                     }
@@ -411,7 +411,7 @@ describe('paymentUtils', () => {
                     {
                         itemId: 'prod1',
                         itemText: 'Product',
-                        basePrice: 10.0,
+                        priceAfterItemDiscount: 10.0,
                         tax: 0,
                         quantity: 1
                     }
@@ -423,23 +423,21 @@ describe('paymentUtils', () => {
             expect(result['enhancedSchemeData.customerReference'].length).toBeLessThanOrEqual(25)
         })
 
-        it('should use "no-unique-ref" when customerId is missing', () => {
+        it('should throw when customerId is missing', () => {
             const basket = {
                 currency: 'USD',
                 productItems: [
                     {
                         itemId: 'prod1',
                         itemText: 'Product',
-                        basePrice: 10.0,
+                        priceAfterItemDiscount: 10.0,
                         tax: 0,
                         quantity: 1
                     }
                 ]
             }
 
-            const result = getEnhancedSchemeData(basket)
-
-            expect(result['enhancedSchemeData.customerReference']).toBe('no-unique-ref')
+            expect(() => getEnhancedSchemeData(basket)).toThrow(TypeError)
         })
 
         it('should return empty object when basket has no product items', () => {
@@ -475,7 +473,7 @@ describe('paymentUtils', () => {
                     {
                         itemId: 'prod1',
                         itemText: 'Tax Free Product',
-                        basePrice: 25.0,
+                        priceAfterItemDiscount: 25.0,
                         tax: 0,
                         quantity: 3
                     }
@@ -485,7 +483,7 @@ describe('paymentUtils', () => {
             const result = getEnhancedSchemeData(basket)
 
             expect(result['enhancedSchemeData.itemDetailLine1.unitPrice']).toBe(2500)
-            expect(result['enhancedSchemeData.itemDetailLine1.totalAmount']).toBe(2500)
+            expect(result['enhancedSchemeData.itemDetailLine1.totalAmount']).toBe(2500 * 3)
             expect(result['enhancedSchemeData.totalTaxAmount']).toBe(0)
         })
 
@@ -496,7 +494,7 @@ describe('paymentUtils', () => {
                 productItems: [
                     {
                         itemId: 'prod1',
-                        basePrice: 10.0,
+                        priceAfterItemDiscount: 10.0,
                         tax: 0,
                         quantity: 1
                     }
@@ -515,7 +513,7 @@ describe('paymentUtils', () => {
                 productItems: [
                     {
                         itemText: 'Product',
-                        basePrice: 10.0,
+                        priceAfterItemDiscount: 10.0,
                         tax: 0,
                         quantity: 1
                     }
