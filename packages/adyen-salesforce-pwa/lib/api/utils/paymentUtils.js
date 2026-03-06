@@ -175,15 +175,15 @@ export function getEnhancedSchemeData(basket, commodityCode) {
     }
 
     const {currency, productItems} = basket
-    const shopperReference = basket.customerInfo?.customerId || 'no-unique-ref'
+    const shopperReference = basket.customerInfo?.customerId
 
-    const enhancedSchemeData = productItems.reduce(
+    return productItems.reduce(
         (acc, item, index) => {
             const lineNumber = index + 1
-            const unitPrice = getCurrencyValueForApi(item.basePrice, currency)
+            const unitPrice = getCurrencyValueForApi(item.priceAfterItemDiscount, currency)
             const quantity = item.quantity
             const taxAmount = getCurrencyValueForApi(item.tax || 0, currency)
-            const totalAmount = unitPrice + taxAmount
+            const totalAmount = unitPrice * quantity + taxAmount
 
             const currentLineItem = {
                 [`enhancedSchemeData.itemDetailLine${lineNumber}.unitPrice`]: unitPrice,
@@ -216,8 +216,6 @@ export function getEnhancedSchemeData(basket, commodityCode) {
             'enhancedSchemeData.customerReference': shopperReference.substring(0, 25)
         }
     )
-
-    return enhancedSchemeData
 }
 
 /**
