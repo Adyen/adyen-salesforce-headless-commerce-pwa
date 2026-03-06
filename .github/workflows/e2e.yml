@@ -59,7 +59,7 @@ jobs:
               run: npm run save-credentials -- --user ${{ secrets.MRT_USER }} --key ${{ secrets.MRT_API_KEY }}
             - name: Build and deploy to storefront
               working-directory: ./packages/adyen-retail-react-app
-              run: npm run push:env --projectSlug adyen-salesforce-pwa --target test
+              run: npm run push:env -- --projectSlug ${{ secrets.MRT_PROJECT_SLUG }} --target ${{ secrets.MRT_DEPLOY_TARGET }}
 
     e2e-tests:
         timeout-minutes: 10
