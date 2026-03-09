@@ -15,9 +15,6 @@ jobs:
           node-version: 18
       - name: Install project dependencies
         run: npm i
-      - name: Install Retail app package dependencies
-        working-directory: ./packages/adyen-retail-react-app
-        run: npm i
       - name: Install PWA package dependencies
         working-directory: ./packages/adyen-salesforce-pwa
         run: npm i
@@ -27,6 +24,9 @@ jobs:
       - name: Make PWA NPM Link
         working-directory: ./packages/adyen-salesforce-pwa
         run: npm link
+      - name: Install Retail app package dependencies
+        working-directory: ./packages/adyen-retail-react-app
+        run: npm i
       - name: Link PWA to Retail app
         working-directory: ./packages/adyen-retail-react-app
         run: npm link @adyen/adyen-salesforce-pwa
