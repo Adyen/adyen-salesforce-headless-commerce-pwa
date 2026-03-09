@@ -48,13 +48,19 @@ jobs:
         run: zip -r $GITHUB_WORKSPACE/site_import.zip site_import
       - name: Upload metadata
         working-directory: ./metadata
+        env:
+          PWA_CLIENT_ID: ${{ secrets.PWA_CLIENT_ID }}
+          PWA_CLIENT_SECRET: ${{ secrets.PWA_CLIENT_SECRET }}
+          PWA_HOSTNAME: ${{ secrets.PWA_HOSTNAME }}
         run: |
-           sfcc-ci client:auth '${{ secrets.PWA_CLIENT_ID }}' '${{ secrets.PWA_CLIENT_SECRET }}'
-           sfcc-ci instance:upload "$GITHUB_WORKSPACE/site_import.zip" -i "${{ secrets.PWA_HOSTNAME }}"
+           sfcc-ci client:auth "$PWA_CLIENT_ID" "$PWA_CLIENT_SECRET"
+           sfcc-ci instance:upload "$GITHUB_WORKSPACE/site_import.zip" -i "$PWA_HOSTNAME"
       - name: Import metadata
         working-directory: ./metadata
+        env:
+          PWA_HOSTNAME: ${{ secrets.PWA_HOSTNAME }}
         run: |
-           sfcc-ci instance:import site_import.zip -i "${{ secrets.PWA_HOSTNAME }}" -s
+           sfcc-ci instance:import site_import.zip -i "$PWA_HOSTNAME" -s
       - name: Install PWA package dependencies
         working-directory: ./packages/adyen-salesforce-pwa
         run: npm i --ignore-scripts
