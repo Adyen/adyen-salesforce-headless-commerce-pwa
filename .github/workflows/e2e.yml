@@ -17,19 +17,19 @@ jobs:
               run: npm i
             - name: Install PWA package dependencies
               working-directory: ./packages/adyen-salesforce-pwa
-              run: npm i --ignore-scripts
+              run: npm i
             - name: Build PWA
               working-directory: ./packages/adyen-salesforce-pwa
               run: npm run build-dev
             - name: Make PWA NPM Link
               working-directory: ./packages/adyen-salesforce-pwa
-              run: npm link --ignore-scripts
+              run: npm link
             - name: Install Retail app package dependencies
               working-directory: ./packages/adyen-retail-react-app
-              run: npm i --ignore-scripts
+              run: npm i
             - name: Link PWA to Retail app
               working-directory: ./packages/adyen-retail-react-app
-              run: npm link @adyen/adyen-salesforce-pwa --ignore-scripts
+              run: npm link @adyen/adyen-salesforce-pwa
             - name: Install Playwright dependencies
               working-directory: ./packages/e2e-tests
               run: npm i

@@ -1,5 +1,4 @@
 import {useCallback, useEffect, useRef, useState} from 'react'
-import {useLocation} from 'react-router-dom'
 import {PaymentCancelService} from '../services/payment-cancel'
 
 /**
@@ -45,11 +44,6 @@ const useHandleBackNavigation = ({
     redirectParams = ['redirectResult', 'sessionId'],
     enabled = true
 }) => {
-    const location = useLocation()
-    const locationRef = useRef(location)
-    useEffect(() => {
-        locationRef.current = location
-    }, [location])
     const [error, setError] = useState(null)
     const isProcessingRef = useRef(false)
 
@@ -58,17 +52,14 @@ const useHandleBackNavigation = ({
             return false
         }
 
-        const urlParams = new URLSearchParams(locationRef.current.search)
+        const urlParams = new URLSearchParams(window.location.search)
         const hasRedirectParams = redirectParams.some((param) => urlParams.get(param))
 
         if (hasRedirectParams) {
             return false
         }
 
-        // Read orderNo pushed to history before redirect (e.g. Klarna) so the server
-        // can directly fail that order without needing to look it up.
         const orderNo = urlParams.get('orderNo')
-
         try {
             isProcessingRef.current = true
             setError(null)
@@ -79,7 +70,6 @@ const useHandleBackNavigation = ({
                 basketId,
                 site
             )
-
             const cancelResponse = await paymentCancelService.cancelAbandonedPayment(
                 'abandoned_session',
                 orderNo
@@ -89,7 +79,7 @@ const useHandleBackNavigation = ({
                 return false
             }
 
-            const cleanParams = new URLSearchParams(locationRef.current.search)
+            const cleanParams = new URLSearchParams(window.location.search)
             cleanParams.delete('orderNo')
 
             if (cancelResponse?.newBasketId) {
@@ -107,7 +97,6 @@ const useHandleBackNavigation = ({
         }
     }, [enabled, authToken, customerId, basketId, site, navigate, redirectParams])
 
-    // Check once when basketId first becomes available to handle SPA back navigation (React Router).
     const checkForAbandonedPaymentRef = useRef(checkForAbandonedPayment)
     useEffect(() => {
         checkForAbandonedPaymentRef.current = checkForAbandonedPayment

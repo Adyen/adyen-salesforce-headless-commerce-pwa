@@ -120,7 +120,7 @@ async function sendPaymentDetails(req, res, next) {
             }
             Logger.info('sendPaymentDetails', `order exists: ${checkoutResponse.merchantReference}`)
         }
-        Logger.info('sendPaymentDetails', `checkoutResponse ${JSON.stringify(checkoutResponse)}`)
+        Logger.info('sendPaymentDetails', `checkoutResponse ${checkoutResponse?.resultCode}`)
         res.locals.response = checkoutResponse
         return next()
     } catch (err) {
