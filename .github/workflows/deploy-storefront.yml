@@ -53,8 +53,6 @@ jobs:
            sfcc-ci instance:upload "$GITHUB_WORKSPACE/site_import.zip" -i "${{ secrets.PWA_HOSTNAME }}"
       - name: Import metadata
         working-directory: ./metadata
-        env:
-          DEBUG: sfcc-ci
         run: |
            sfcc-ci instance:import site_import.zip -i "${{ secrets.PWA_HOSTNAME }}" -s
       - name: Install PWA package dependencies
