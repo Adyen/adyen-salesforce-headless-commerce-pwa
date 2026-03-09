@@ -24,7 +24,7 @@ import {adyenKeys} from '../utils/queryKeys'
  * }}
  */
 const useAdyenReviewPage = ({authToken, customerId, basketId, site, skip = false}) => {
-    const queryClient = useQueryClient()
+    useQueryClient()
 
     const query = useQuery({
         queryKey: adyenKeys.paymentData(basketId, site?.id),
