@@ -32,17 +32,22 @@ jobs:
       - name: Install project dependencies
         run: npm i --ignore-scripts
       - name: Create dw.json file
+        env:
+          PWA_USERNAME: ${{ secrets.PWA_USERNAME }}
+          PWA_PASSWORD: ${{ secrets.PWA_PASSWORD }}
+          PWA_HOSTNAME: ${{ secrets.PWA_HOSTNAME }}
+          PWA_CODE_VERSION: ${{ secrets.PWA_CODE_VERSION }}
         run: |
           echo '{
-            "username": "${{ secrets.PWA_USERNAME }}",
-            "password": "${{ secrets.PWA_PASSWORD }}",
-            "hostname": "${{ secrets.PWA_HOSTNAME }}",
-            "code-version": "${{ secrets.PWA_CODE_VERSION }}"
+            "username": "'"$PWA_USERNAME"'",
+            "password": "'"$PWA_PASSWORD"'",
+            "hostname": "'"$PWA_HOSTNAME"'",
+            "code-version": "'"$PWA_CODE_VERSION"'"
           }' >> dw.json
       - name: Build and upload int_adyen_PWA cartridge
         run: npm run buildCartridge
       - name: Install Salesforce CLI
-        run: npm install -g sfcc-ci
+        run: npm install -g sfcc-ci --ignore-scripts
       - name: Zip site_import
         working-directory: ./metadata
         run: zip -r $GITHUB_WORKSPACE/site_import.zip site_import
