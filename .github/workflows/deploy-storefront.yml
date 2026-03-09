@@ -44,15 +44,15 @@ jobs:
       - name: Install Salesforce CLI
         run: npm install -g sfcc-ci
       - name: Zip site_import
-        working-directory: adyen-salesforce-headless-commerce-pwa/metadata
+        working-directory: ./metadata
         run: zip -r $GITHUB_WORKSPACE/site_import.zip site_import
       - name: Upload metadata
-        working-directory: adyen-salesforce-headless-commerce-pwa/metadata
+        working-directory: ./metadata
         run: |
            sfcc-ci client:auth '${{ secrets.PWA_CLIENT_ID }}' '${{ secrets.PWA_CLIENT_SECRET }}'
            sfcc-ci instance:upload "$GITHUB_WORKSPACE/site_import.zip" -i "${{ secrets.PWA_HOSTNAME }}"
       - name: Import metadata
-        working-directory: adyen-salesforce-headless-commerce-pwa/metadata
+        working-directory: ./metadata
         run: |
            sfcc-ci instance:import site_import.zip -i "${{ secrets.PWA_HOSTNAME }}" -s
       - name: Install PWA package dependencies
