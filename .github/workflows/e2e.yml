@@ -38,10 +38,10 @@ jobs:
         with:
           node-version: 22
       - name: Install project dependencies
-        run: npm i
+        run: npm i --ignore-scripts
       - name: Install PWA package dependencies
         working-directory: ./packages/adyen-salesforce-pwa
-        run: npm i
+        run: npm i --ignore-scripts
       - name: Build PWA
         working-directory: ./packages/adyen-salesforce-pwa
         run: npm run build-prod
@@ -50,7 +50,7 @@ jobs:
         run: npm pack
       - name: Install Retail app package dependencies
         working-directory: ./packages/adyen-retail-react-app
-        run: npm i --no-cache
+        run: npm i --no-cache --ignore-scripts
       - name: Install PWA in Retail app
         working-directory: ./packages/adyen-retail-react-app
         run: npm i ../adyen-salesforce-pwa/adyen-adyen-salesforce-pwa-$(node -p "require('../adyen-salesforce-pwa/package.json').version").tgz --no-cache
@@ -69,10 +69,10 @@ jobs:
         with:
           node-version: 22
       - name: Install project dependencies
-        run: npm i
+        run: npm i --ignore-scripts
       - name: Install PWA package dependencies
         working-directory: ./packages/adyen-salesforce-pwa
-        run: npm i
+        run: npm i --ignore-scripts
       - name: Build PWA
         working-directory: ./packages/adyen-salesforce-pwa
         run: npm run build-dev
@@ -81,13 +81,13 @@ jobs:
         run: npm pack
       - name: Install Retail app package dependencies
         working-directory: ./packages/adyen-retail-react-app
-        run: npm i
+        run: npm i --ignore-scripts
       - name: Install PWA in Retail app
         working-directory: ./packages/adyen-retail-react-app
         run: npm i ../adyen-salesforce-pwa/adyen-adyen-salesforce-pwa-$(node -p "require('../adyen-salesforce-pwa/package.json').version").tgz
       - name: Install Playwright dependencies
         working-directory: ./packages/e2e-tests
-        run: npm i
+        run: npm i --ignore-scripts
       - name: Install Playwright Browsers
         working-directory: ./packages/e2e-tests
         run: npx playwright install --with-deps
