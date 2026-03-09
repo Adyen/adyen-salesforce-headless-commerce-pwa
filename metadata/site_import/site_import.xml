@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<import>
-    <import-file name="meta/custom-objecttype-definitions.xml"/>
-    <import-file name="meta/system-objecttype-extensions.xml"/>
-    <import-file name="jobs.xml"/>
-    <import-file name="sites/RefArch/payment-methods.xml"/>
-    <import-file name="sites/RefArch/payment-processors.xml"/>
-</import>
