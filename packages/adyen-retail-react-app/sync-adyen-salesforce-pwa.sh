@@ -14,7 +14,7 @@ echo -e "${BLUE}--- Starting @adyen/adyen-salesforce-pwa Package Update ---${NC}
 
 # 1. Build
 echo -e "${BLUE}[1/4] Building adyen-salesforce-pwa Package...${NC}"
-cd $PACKAGE_DIR || { echo -e "${RED}Failed to enter package directory${NC}"; exit 1; }
+cd "$PACKAGE_DIR" || { echo -e "${RED}Failed to enter package directory${NC}"; exit 1; }
 rm -rf dist
 npm run build-prod || { echo -e "${RED}Build failed!${NC}"; exit 1; }
 
