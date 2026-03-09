@@ -1,0 +1,61 @@
+name: Deploy Storefront
+on:
+  pull_request:
+    branches: [main, develop]
+env:
+  COMMERCE_API_CLIENT_ID: ${{ secrets.COMMERCE_API_CLIENT_ID }}
+  COMMERCE_API_ORG_ID: ${{ secrets.COMMERCE_API_ORG_ID }}
+  COMMERCE_API_SHORT_CODE: ${{ secrets.COMMERCE_API_SHORT_CODE }}
+  COMMERCE_API_SITE_ID: ${{ secrets.COMMERCE_API_SITE_ID }}
+  COMMERCE_API_DEFAULT_SITE: ${{ secrets.COMMERCE_API_DEFAULT_SITE }}
+  SCAPI_URL: ${{ secrets.SCAPI_URL }}
+  OCAPI_URL: ${{ secrets.OCAPI_URL }}
+  ENVIRONMENT_ID: ${{ secrets.ENVIRONMENT_ID }}
+  PROJECT_ID: ${{ secrets.PROJECT_ID }}
+  COMMERCE_API_CLIENT_ID_PRIVATE: ${{ secrets.COMMERCE_API_CLIENT_ID_PRIVATE }}
+  COMMERCE_API_CLIENT_SECRET: ${{ secrets.COMMERCE_API_CLIENT_SECRET }}
+  MRT_PROJECT_SLUG: ${{ secrets.MRT_PROJECT_SLUG }}
+  MRT_DEPLOY_TARGET: ${{ secrets.MRT_DEPLOY_TARGET }}
+  MRT_USER: ${{ secrets.MRT_USER }}
+  MRT_API_KEY: ${{ secrets.MRT_API_KEY }}
+jobs:
+  deploy-storefront:
+    timeout-minutes: 30
+    runs-on:
+      group: larger-runners
+      labels: ubuntu-latest-8-cores
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install project dependencies
+        run: npm i --ignore-scripts
+      - name: Create dw.json file
+        run: |
+          echo '{
+            "username": "${{ secrets.SFCC_USERNAME }}",
+            "password": "${{ secrets.SFCC_PASSWORD }}",
+            "hostname": "${{ secrets.SFCC_HOSTNAME }}",
+            "code-version": "${{ secrets.CODE_VERSION }}"
+          }' >> dw.json
+      - name: Build and upload int_adyen_PWA cartridge
+        run: npm run buildCartridge
+      - name: Install PWA package dependencies
+        working-directory: ./packages/adyen-salesforce-pwa
+        run: npm i --ignore-scripts
+      - name: Build PWA
+        working-directory: ./packages/adyen-salesforce-pwa
+        run: npm run build-prod
+      - name: Pack PWA
+        working-directory: ./packages/adyen-salesforce-pwa
+        run: npm pack
+      - name: Install Retail app package dependencies
+        working-directory: ./packages/adyen-retail-react-app
+        run: npm i --no-cache --ignore-scripts
+      - name: Install PWA in Retail app
+        working-directory: ./packages/adyen-retail-react-app
+        run: npm i ../adyen-salesforce-pwa/adyen-adyen-salesforce-pwa-$(node -p "require('../adyen-salesforce-pwa/package.json').version").tgz --no-cache
+      - name: Build and deploy to storefront
+        working-directory: ./packages/adyen-retail-react-app
+        run: npm run push -- -s "$MRT_PROJECT_SLUG" -t "$MRT_DEPLOY_TARGET" --user "$MRT_USER" --key "$MRT_API_KEY"
