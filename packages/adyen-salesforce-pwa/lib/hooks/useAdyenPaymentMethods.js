@@ -43,9 +43,9 @@ const useAdyenPaymentMethods = ({
     })
 
     return {
-        isLoading: query.isLoading,
-        data: query.data,
-        error: query.error
+        isLoading: query.isLoading && query.fetchStatus !== 'idle',
+        data: query.data ?? null,
+        error: query.error ?? null
     }
 }
 

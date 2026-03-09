@@ -26,7 +26,7 @@ const useAdyenOrderNumber = ({
     skip = false
 }) => {
     const query = useQuery({
-        queryKey: adyenKeys.orderNumber(basketId, site?.id),
+        queryKey: [...adyenKeys.orderNumber(basketId, site?.id), authToken],
         queryFn: async () => {
             const orderNumberService = new AdyenOrderNumberService(
                 authToken,
@@ -41,9 +41,9 @@ const useAdyenOrderNumber = ({
     })
 
     return {
-        isLoading: query.isLoading,
+        isLoading: query.isLoading && query.fetchStatus !== 'idle',
         orderNo: query.data?.orderNo || null,
-        error: query.error
+        error: query.error ?? null
     }
 }
 

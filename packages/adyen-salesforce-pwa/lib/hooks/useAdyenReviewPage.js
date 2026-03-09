@@ -1,4 +1,4 @@
-import {useCallback} from 'react'
+import {useCallback, useState} from 'react'
 import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query'
 import {AdyenPaymentDataReviewPageService} from '../services/payment-data-review-page'
 import {AdyenPaymentsDetailsService} from '../services/payments-details'
@@ -25,6 +25,7 @@ import {adyenKeys} from '../utils/queryKeys'
  */
 const useAdyenReviewPage = ({authToken, customerId, basketId, site, skip = false}) => {
     useQueryClient()
+    const [mutationError, setMutationError] = useState(null)
 
     const query = useQuery({
         queryKey: adyenKeys.paymentData(basketId, site?.id),
@@ -49,10 +50,6 @@ const useAdyenReviewPage = ({authToken, customerId, basketId, site, skip = false
                 site
             )
             return paymentsDetailsService.submitPaymentsDetails(data)
-        },
-        onError: (err) => {
-            // Let the error bubble up to the caller
-            throw err
         }
     })
 
@@ -68,16 +65,21 @@ const useAdyenReviewPage = ({authToken, customerId, basketId, site, skip = false
                 throw new Error('No payment data available')
             }
 
-            return mutation.mutateAsync(dataToSubmit)
+            try {
+                return await mutation.mutateAsync(dataToSubmit)
+            } catch (err) {
+                setMutationError(err)
+                throw err
+            }
         },
         [mutation, query.data]
     )
 
     return {
-        isLoading: query.isLoading,
-        isSubmitting: mutation.isPending,
-        paymentData: query.data,
-        error: query.error || mutation.error,
+        isLoading: query.isLoading && query.fetchStatus !== 'idle',
+        isSubmitting: mutation.isLoading,
+        paymentData: query.data ?? null,
+        error: query.error ?? mutationError ?? null,
         submitPaymentDetails,
         refetch: query.refetch
     }

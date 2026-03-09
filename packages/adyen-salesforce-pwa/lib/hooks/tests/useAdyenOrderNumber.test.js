@@ -1,7 +1,9 @@
 /**
  * @jest-environment jsdom
  */
+import React from 'react'
 import {renderHook, waitFor} from '@testing-library/react'
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
 import useAdyenOrderNumber from '../useAdyenOrderNumber'
 import {AdyenOrderNumberService} from '../../services/order-number'
 
@@ -15,6 +17,16 @@ describe('useAdyenOrderNumber', () => {
 
     let mockFetchOrderNumber
 
+    const createWrapper = () => {
+        const queryClient = new QueryClient({
+            defaultOptions: {queries: {retry: false}}
+        })
+        // eslint-disable-next-line react/display-name, react/prop-types
+        return ({children}) => (
+            <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        )
+    }
+
     beforeEach(() => {
         jest.clearAllMocks()
         mockFetchOrderNumber = jest.fn().mockResolvedValue({orderNo: 'ORDER-12345'})
@@ -25,13 +37,15 @@ describe('useAdyenOrderNumber', () => {
     })
 
     it('should initialize with loading state', () => {
-        const {result} = renderHook(() =>
-            useAdyenOrderNumber({
-                authToken: mockAuthToken,
-                customerId: mockCustomerId,
-                basketId: mockBasketId,
-                site: mockSite
-            })
+        const {result} = renderHook(
+            () =>
+                useAdyenOrderNumber({
+                    authToken: mockAuthToken,
+                    customerId: mockCustomerId,
+                    basketId: mockBasketId,
+                    site: mockSite
+                }),
+            {wrapper: createWrapper()}
         )
 
         expect(result.current.isLoading).toBe(true)
@@ -40,13 +54,15 @@ describe('useAdyenOrderNumber', () => {
     })
 
     it('should fetch order number on mount', async () => {
-        const {result} = renderHook(() =>
-            useAdyenOrderNumber({
-                authToken: mockAuthToken,
-                customerId: mockCustomerId,
-                basketId: mockBasketId,
-                site: mockSite
-            })
+        const {result} = renderHook(
+            () =>
+                useAdyenOrderNumber({
+                    authToken: mockAuthToken,
+                    customerId: mockCustomerId,
+                    basketId: mockBasketId,
+                    site: mockSite
+                }),
+            {wrapper: createWrapper()}
         )
 
         await waitFor(() => {
@@ -62,28 +78,32 @@ describe('useAdyenOrderNumber', () => {
     })
 
     it('should use existing order number if provided', () => {
-        const {result} = renderHook(() =>
-            useAdyenOrderNumber({
-                authToken: mockAuthToken,
-                customerId: mockCustomerId,
-                basketId: mockBasketId,
-                site: mockSite,
-                existingOrderNo: 'EXISTING-ORDER'
-            })
+        const {result} = renderHook(
+            () =>
+                useAdyenOrderNumber({
+                    authToken: mockAuthToken,
+                    customerId: mockCustomerId,
+                    basketId: mockBasketId,
+                    site: mockSite,
+                    existingOrderNo: 'EXISTING-ORDER'
+                }),
+            {wrapper: createWrapper()}
         )
 
         expect(result.current.orderNo).toBe('EXISTING-ORDER')
     })
 
     it('should skip fetch when skip is true', () => {
-        const {result} = renderHook(() =>
-            useAdyenOrderNumber({
-                authToken: mockAuthToken,
-                customerId: mockCustomerId,
-                basketId: mockBasketId,
-                site: mockSite,
-                skip: true
-            })
+        const {result} = renderHook(
+            () =>
+                useAdyenOrderNumber({
+                    authToken: mockAuthToken,
+                    customerId: mockCustomerId,
+                    basketId: mockBasketId,
+                    site: mockSite,
+                    skip: true
+                }),
+            {wrapper: createWrapper()}
         )
 
         expect(result.current.isLoading).toBe(false)
@@ -91,13 +111,15 @@ describe('useAdyenOrderNumber', () => {
     })
 
     it('should skip fetch when authToken is missing', async () => {
-        const {result} = renderHook(() =>
-            useAdyenOrderNumber({
-                authToken: null,
-                customerId: mockCustomerId,
-                basketId: mockBasketId,
-                site: mockSite
-            })
+        const {result} = renderHook(
+            () =>
+                useAdyenOrderNumber({
+                    authToken: null,
+                    customerId: mockCustomerId,
+                    basketId: mockBasketId,
+                    site: mockSite
+                }),
+            {wrapper: createWrapper()}
         )
 
         await waitFor(() => {
@@ -111,13 +133,15 @@ describe('useAdyenOrderNumber', () => {
         const mockError = new Error('Fetch failed')
         mockFetchOrderNumber.mockRejectedValue(mockError)
 
-        const {result} = renderHook(() =>
-            useAdyenOrderNumber({
-                authToken: mockAuthToken,
-                customerId: mockCustomerId,
-                basketId: mockBasketId,
-                site: mockSite
-            })
+        const {result} = renderHook(
+            () =>
+                useAdyenOrderNumber({
+                    authToken: mockAuthToken,
+                    customerId: mockCustomerId,
+                    basketId: mockBasketId,
+                    site: mockSite
+                }),
+            {wrapper: createWrapper()}
         )
 
         await waitFor(() => {
@@ -129,13 +153,15 @@ describe('useAdyenOrderNumber', () => {
     })
 
     it('should create service with correct parameters', async () => {
-        renderHook(() =>
-            useAdyenOrderNumber({
-                authToken: mockAuthToken,
-                customerId: mockCustomerId,
-                basketId: mockBasketId,
-                site: mockSite
-            })
+        renderHook(
+            () =>
+                useAdyenOrderNumber({
+                    authToken: mockAuthToken,
+                    customerId: mockCustomerId,
+                    basketId: mockBasketId,
+                    site: mockSite
+                }),
+            {wrapper: createWrapper()}
         )
 
         await waitFor(() => {
@@ -157,7 +183,7 @@ describe('useAdyenOrderNumber', () => {
                     basketId: mockBasketId,
                     site: mockSite
                 }),
-            {initialProps: {authToken: mockAuthToken}}
+            {initialProps: {authToken: mockAuthToken}, wrapper: createWrapper()}
         )
 
         await waitFor(() => {
