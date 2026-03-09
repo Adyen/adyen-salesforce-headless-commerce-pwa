@@ -70,7 +70,7 @@ function parseNotification(req, res, next) {
             )
         }
         res.locals.notification = {...notificationRequestItem[0], live}
-        Logger.info('AdyenNotification', JSON.stringify(res.locals.notification))
+        Logger.info('AdyenNotification', 'parseNotification')
         return next()
     } catch (err) {
         Logger.error('parseNotification', err.stack)

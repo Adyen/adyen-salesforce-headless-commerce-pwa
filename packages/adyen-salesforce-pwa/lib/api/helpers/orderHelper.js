@@ -177,10 +177,7 @@ export async function getOrderUsingOrderNo(orderNo) {
  * @returns {Promise<object>} A promise that resolves to the created payment instrument object.
  */
 export async function addPaymentInstrumentToOrder(orderNo, amount, paymentMethod, pspReference) {
-    Logger.info(
-        'addPaymentInstrumentToOrder',
-        `start — orderNo: ${orderNo}, pspReference: ${pspReference}`
-    )
+    Logger.info('addPaymentInstrumentToOrder', `start — orderNo: ${orderNo}`)
     const isCardPayment = paymentMethod?.type === PAYMENT_METHOD_TYPES.CREDIT_CARD
     const paymentMethodId = isCardPayment
         ? PAYMENT_METHODS.CREDIT_CARD
@@ -219,10 +216,7 @@ export async function addPaymentInstrumentToOrder(orderNo, amount, paymentMethod
  */
 export async function updatePaymentInstrumentForOrder(adyenContext, orderNo, pspReference) {
     const {authorization} = adyenContext
-    Logger.info(
-        'updatePaymentInstrumentForOrder',
-        `start — orderNo: ${orderNo}, pspReference: ${pspReference}`
-    )
+    Logger.info('updatePaymentInstrumentForOrder', `start  — orderNo: ${orderNo}`)
     const shopperOrders = createShopperOrderClient(authorization)
     const order = await shopperOrders.getOrder({
         parameters: {
@@ -240,11 +234,7 @@ export async function updatePaymentInstrumentForOrder(adyenContext, orderNo, psp
         return
     }
     const {paymentInstrumentId, ...paymentInstrument} = firstPaymentInstrument
-    Logger.info(
-        'updatePaymentInstrumentForOrder',
-        `paymentInstrument: ${JSON.stringify(paymentInstrument)}`
-    )
-    const updatedOrder = await shopperOrders.updatePaymentInstrumentForOrder({
+    await shopperOrders.updatePaymentInstrumentForOrder({
         parameters: {
             orderNo: orderNo,
             paymentInstrumentId: paymentInstrumentId
@@ -254,7 +244,6 @@ export async function updatePaymentInstrumentForOrder(adyenContext, orderNo, psp
             ...(pspReference && {c_pspReference: pspReference})
         }
     })
-    Logger.info('updatePaymentInstrumentForOrder', `updatedOrder: ${JSON.stringify(updatedOrder)}`)
     Logger.info(
         'updatePaymentInstrumentForOrder',
         `success — paymentInstrumentId: ${paymentInstrumentId}`
