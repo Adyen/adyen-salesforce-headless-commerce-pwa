@@ -34,10 +34,10 @@ jobs:
       - name: Create dw.json file
         run: |
           echo '{
-            "username": "${{ secrets.SFCC_USERNAME }}",
-            "password": "${{ secrets.SFCC_PASSWORD }}",
-            "hostname": "${{ secrets.SFCC_HOSTNAME }}",
-            "code-version": "${{ secrets.CODE_VERSION }}"
+            "username": "${{ secrets.PWA_USERNAME }}",
+            "password": "${{ secrets.PWA_PASSWORD }}",
+            "hostname": "${{ secrets.PWA_HOSTNAME }}",
+            "code-version": "${{ secrets.PWA_CODE_VERSION }}"
           }' >> dw.json
       - name: Build and upload int_adyen_PWA cartridge
         run: npm run buildCartridge
