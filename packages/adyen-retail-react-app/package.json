@@ -69,6 +69,6 @@
         "@salesforce/commerce-sdk-react": "4.3.0"
     },
     "dependencies": {
-        "@adyen/adyen-salesforce-pwa": "file:adyen-adyen-salesforce-pwa-4.2.0.tgz"
+        "@adyen/adyen-salesforce-pwa": "file:../adyen-salesforce-pwa"
     }
 }

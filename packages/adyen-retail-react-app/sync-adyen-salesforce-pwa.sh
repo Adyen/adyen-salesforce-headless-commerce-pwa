@@ -27,7 +27,7 @@ echo -e "${GREEN}Created: $TARBALL_NAME${NC}"
 echo -e "${BLUE}[3/4] Installing in Adyen Retail React App...${NC}"
 mv "$TARBALL_NAME" "$APP_DIR/"
 cd "$APP_DIR" || exit
-npm install "./$TARBALL_NAME" --ignore-scripts || { echo -e "${RED}Install failed!${NC}"; exit 1; }
+npm install "./$TARBALL_NAME" --ignore-scripts --no-save || { echo -e "${RED}Install failed!${NC}"; exit 1; }
 
 # 4. Cleanup
 echo -e "${BLUE}[4/4] Cleaning up...${NC}"
