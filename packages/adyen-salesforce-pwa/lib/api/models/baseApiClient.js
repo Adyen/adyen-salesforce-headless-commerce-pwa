@@ -1,5 +1,5 @@
 import fetch from 'node-fetch'
-
+import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 /**
  * A base class for creating Salesforce Commerce API clients.
  * It handles admin token authentication, caching, and provides a protected method for making API calls.
@@ -8,6 +8,7 @@ export class BaseApiClient {
     #tokenUrl =
         'https://account.demandware.com/dwsso/oauth2/access_token?grant_type=client_credentials'
     #baseUrl
+    #ssrConfig
     #accessToken = null
     #tokenExpiry = 0
 
@@ -20,6 +21,7 @@ export class BaseApiClient {
         if (!baseUrl) {
             throw new Error('baseUrl is required to instantiate an API client.')
         }
+        this.#ssrConfig = getConfig()
         this.#baseUrl = baseUrl
     }
 
@@ -76,7 +78,8 @@ export class BaseApiClient {
      */
     async _callAdminApi(method, path, options) {
         const token = await this.#getAdminAuthToken()
-        const url = `${this.#baseUrl}/${path}?siteId=${process.env.COMMERCE_API_SITE_ID}`
+        const siteId = this.#ssrConfig.app.commerceAPI.parameters.siteId
+        const url = `${this.#baseUrl}/${path}?siteId=${siteId}`
 
         const response = await fetch(url, {
             method: method,
@@ -108,7 +111,8 @@ export class BaseApiClient {
      * @protected
      */
     async _callShopperApi(method, path, options) {
-        const url = `${this.#baseUrl}/${path}?siteId=${process.env.COMMERCE_API_SITE_ID}`
+        const siteId = this.#ssrConfig.app.commerceAPI.parameters.siteId
+        const url = `${this.#baseUrl}/${path}?siteId=${siteId}`
 
         const response = await fetch(url, {
             method: method,
