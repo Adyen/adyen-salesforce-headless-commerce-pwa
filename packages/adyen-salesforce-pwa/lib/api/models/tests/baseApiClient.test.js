@@ -200,5 +200,71 @@ describe('BaseApiClient', () => {
                 '404 Not Found'
             )
         })
+
+        it('should never fetch an admin token', async () => {
+            fetch.mockResolvedValueOnce(mockApiResponse)
+
+            await client._callShopperApi('GET', 'test/path')
+
+            expect(fetch).toHaveBeenCalledTimes(1)
+            expect(fetch).not.toHaveBeenCalledWith(
+                expect.stringContaining('oauth2/access_token'),
+                expect.any(Object)
+            )
+        })
+
+        it('should send null body when no options are provided', async () => {
+            fetch.mockResolvedValueOnce(mockApiResponse)
+
+            await client._callShopperApi('GET', 'test/path')
+
+            expect(fetch).toHaveBeenCalledWith(
+                `${baseUrl}/test/path?siteId=RefArch`,
+                expect.objectContaining({body: null})
+            )
+        })
+
+        it('should include Content-Type application/json header by default', async () => {
+            fetch.mockResolvedValueOnce(mockApiResponse)
+
+            await client._callShopperApi('GET', 'test/path')
+
+            expect(fetch).toHaveBeenCalledWith(
+                expect.any(String),
+                expect.objectContaining({
+                    headers: expect.objectContaining({
+                        'Content-Type': 'application/json'
+                    })
+                })
+            )
+        })
+
+        it('should merge custom headers with the default Content-Type header', async () => {
+            fetch.mockResolvedValueOnce(mockApiResponse)
+            const customHeaders = {authorization: 'Bearer shopper_token', 'x-custom': 'value'}
+
+            await client._callShopperApi('GET', 'test/path', {headers: customHeaders})
+
+            expect(fetch).toHaveBeenCalledWith(
+                expect.any(String),
+                expect.objectContaining({
+                    headers: expect.objectContaining({
+                        'Content-Type': 'application/json',
+                        ...customHeaders
+                    })
+                })
+            )
+        })
+
+        it('should append siteId from config to the URL', async () => {
+            fetch.mockResolvedValueOnce(mockApiResponse)
+
+            await client._callShopperApi('GET', 'orders/123')
+
+            expect(fetch).toHaveBeenCalledWith(
+                `${baseUrl}/orders/123?siteId=RefArch`,
+                expect.any(Object)
+            )
+        })
     })
 })
