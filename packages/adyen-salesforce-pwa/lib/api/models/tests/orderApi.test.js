@@ -1,5 +1,17 @@
 import {OrderApiClient} from '../orderApi'
 
+jest.mock('@salesforce/pwa-kit-runtime/utils/ssr-config', () => ({
+    getConfig: jest.fn(() => ({
+        app: {
+            commerceAPI: {
+                parameters: {
+                    siteId: 'RefArch'
+                }
+            }
+        }
+    }))
+}))
+
 describe('OrderApiClient', () => {
     let orderApiClient
     let mockCallAdminApi
