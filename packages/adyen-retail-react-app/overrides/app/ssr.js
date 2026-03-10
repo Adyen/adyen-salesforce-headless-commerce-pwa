@@ -123,6 +123,7 @@ const {handler} = runtime.createHandler(options, (app) => {
      * @param app - express app used to register the routes
      * @param runtime - express runtime used to render pages after sanitizing the query params
      * @param overrides (optional) - an object that provides the option for using different endpoint handlers
+     * @param options (optional) - plugin-level configuration options sourced from app config (default.js)
      *
      * @example
      * const overrides = {
@@ -136,7 +137,8 @@ const {handler} = runtime.createHandler(options, (app) => {
      *  ]
      * }
      */
-    registerAdyenEndpoints(app, runtime)
+    const adyenOptions = getConfig()?.app?.adyenAPI || {}
+    registerAdyenEndpoints(app, runtime, {}, adyenOptions)
     /* -----------------Adyen End ------------------------ */
     app.get('*', runtime.render)
 })

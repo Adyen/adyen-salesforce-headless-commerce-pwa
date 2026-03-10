@@ -1,5 +1,7 @@
-export const getAdyenConfigForCurrentSite = (currentSiteId) => {
-    return {
+const ALLOWED_OPTIONS = new Set(['nativeThreeDS'])
+
+export const getAdyenConfigForCurrentSite = (currentSiteId, options = {}) => {
+    const configFromEnv = {
         apiKey: setProperty(currentSiteId, ADYEN_ENV.ADYEN_API_KEY),
         clientKey: setProperty(currentSiteId, ADYEN_ENV.ADYEN_CLIENT_KEY),
         environment: setProperty(currentSiteId, ADYEN_ENV.ADYEN_ENVIRONMENT),
@@ -18,6 +20,12 @@ export const getAdyenConfigForCurrentSite = (currentSiteId) => {
         l23Enabled: setProperty(currentSiteId, ADYEN_ENV.ADYEN_L23_ENABLED),
         l23CommodityCode: setProperty(currentSiteId, ADYEN_ENV.ADYEN_L23_COMMODITY_CODE)
     }
+
+    const allowedOverrides = Object.fromEntries(
+        Object.entries(options).filter(([key]) => ALLOWED_OPTIONS.has(key))
+    )
+
+    return {...configFromEnv, ...allowedOverrides}
 }
 
 export const setProperty = (currentSiteId, property) => {

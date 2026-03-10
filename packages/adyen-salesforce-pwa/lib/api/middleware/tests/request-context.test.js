@@ -1,4 +1,4 @@
-import {prepareRequestContext} from '../request-context.js'
+import {prepareRequestContext, createRequestContext} from '../request-context.js'
 import {getBasket} from '../../helpers/basketHelper.js'
 import {getAdyenConfigForCurrentSite} from '../../../utils/getAdyenConfigForCurrentSite.mjs'
 import Logger from '../../models/logger.js'
@@ -122,5 +122,62 @@ describe('prepareRequestContext middleware', () => {
             'prepareRequestContext for /api/adyen/test',
             mockError.stack
         )
+    })
+})
+
+describe('createRequestContext factory', () => {
+    let req, res, next
+
+    beforeEach(() => {
+        jest.clearAllMocks()
+        req = {
+            originalUrl: '/api/adyen/test',
+            headers: {
+                authorization: 'Bearer mockToken',
+                basketid: 'mockBasketId',
+                customerid: 'mockCustomerId'
+            },
+            query: {
+                siteId: 'RefArch'
+            }
+        }
+        res = {
+            locals: {}
+        }
+        next = jest.fn()
+    })
+
+    test('should pass options to getAdyenConfigForCurrentSite', async () => {
+        const mockBasket = {basketId: 'mockBasketId'}
+        const mockCustomer = {customerId: 'mockCustomerId'}
+        const mockAdyenConfig = {merchantAccount: 'mockAccount', nativeThreeDS: 'disabled'}
+        const options = {nativeThreeDS: 'disabled'}
+
+        getBasket.mockResolvedValue(mockBasket)
+        getCustomer.mockResolvedValue(mockCustomer)
+        getAdyenConfigForCurrentSite.mockReturnValue(mockAdyenConfig)
+
+        const middleware = createRequestContext(options)
+        await middleware(req, res, next)
+
+        expect(getAdyenConfigForCurrentSite).toHaveBeenCalledWith('RefArch', options)
+        expect(res.locals.adyen.adyenConfig).toEqual(mockAdyenConfig)
+        expect(next).toHaveBeenCalledWith()
+    })
+
+    test('should use empty options by default (backward compatibility)', async () => {
+        const mockBasket = {basketId: 'mockBasketId'}
+        const mockCustomer = {customerId: 'mockCustomerId'}
+        const mockAdyenConfig = {merchantAccount: 'mockAccount'}
+
+        getBasket.mockResolvedValue(mockBasket)
+        getCustomer.mockResolvedValue(mockCustomer)
+        getAdyenConfigForCurrentSite.mockReturnValue(mockAdyenConfig)
+
+        const middleware = createRequestContext()
+        await middleware(req, res, next)
+
+        expect(getAdyenConfigForCurrentSite).toHaveBeenCalledWith('RefArch', {})
+        expect(next).toHaveBeenCalledWith()
     })
 })

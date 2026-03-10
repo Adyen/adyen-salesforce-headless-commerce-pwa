@@ -13,7 +13,6 @@ describe('getAdyenConfigForCurrentSite', () => {
             clientKey: 'site1_client_key',
             environment: '',
             merchantAccount: '',
-            nativeThreeDS: '',
             systemIntegratorName: '',
             webhookHmacKey: '',
             webhookPassword: '',
@@ -36,7 +35,6 @@ describe('getAdyenConfigForCurrentSite', () => {
             clientKey: '',
             environment: '',
             merchantAccount: '',
-            nativeThreeDS: '',
             systemIntegratorName: '',
             webhookHmacKey: '',
             webhookPassword: '',
@@ -47,6 +45,41 @@ describe('getAdyenConfigForCurrentSite', () => {
             l23Enabled: '',
             l23CommodityCode: ''
         })
+    })
+
+    it('does not include nativeThreeDS when no options are provided', () => {
+        const result = getAdyenConfigForCurrentSite('site1')
+        expect(result).not.toHaveProperty('nativeThreeDS')
+    })
+})
+
+describe('getAdyenConfigForCurrentSite with options', () => {
+    it('sets nativeThreeDS from options (sourced from default.js adyenAPI config)', () => {
+        const result = getAdyenConfigForCurrentSite('site1', {nativeThreeDS: 'disabled'})
+
+        expect(result.nativeThreeDS).toBe('disabled')
+    })
+
+    it('sets nativeThreeDS to preferred when options specifies preferred', () => {
+        const result = getAdyenConfigForCurrentSite('site1', {nativeThreeDS: 'preferred'})
+
+        expect(result.nativeThreeDS).toBe('preferred')
+    })
+
+    it('ignores unknown option keys (only allows ALLOWED_OPTIONS)', () => {
+        const result = getAdyenConfigForCurrentSite(undefined, {
+            unknownKey: 'value',
+            nativeThreeDS: 'disabled'
+        })
+
+        expect(result.nativeThreeDS).toBe('disabled')
+        expect(result).not.toHaveProperty('unknownKey')
+    })
+
+    it('does not set nativeThreeDS when options is empty', () => {
+        const result = getAdyenConfigForCurrentSite('site1', {})
+
+        expect(result).not.toHaveProperty('nativeThreeDS')
     })
 })
 
