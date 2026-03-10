@@ -8,7 +8,6 @@ export class BaseApiClient {
     #tokenUrl =
         'https://account.demandware.com/dwsso/oauth2/access_token?grant_type=client_credentials'
     #baseUrl
-    #ssrConfig
     #accessToken = null
     #tokenExpiry = 0
 
@@ -21,8 +20,26 @@ export class BaseApiClient {
         if (!baseUrl) {
             throw new Error('baseUrl is required to instantiate an API client.')
         }
-        this.#ssrConfig = getConfig()
         this.#baseUrl = baseUrl
+    }
+
+    /**
+     * Builds a sanitized URL for the given path, appending the siteId query parameter.
+     * The path is sanitized to prevent path traversal and URL injection attacks.
+     * Any query string embedded in path is discarded; siteId is always the sole query parameter.
+     * @param {string} path - The API endpoint path.
+     * @returns {string} The fully constructed URL.
+     * @private
+     */
+    #buildUrl(path) {
+        const siteId = getConfig().app.commerceAPI.parameters.siteId
+        const sanitizedPath = path
+            .split('?')[0]
+            .split('/')
+            .filter((segment) => segment !== '' && segment !== '..')
+            .map(encodeURIComponent)
+            .join('/')
+        return `${this.#baseUrl}/${sanitizedPath}?siteId=${encodeURIComponent(siteId)}`
     }
 
     /**
@@ -78,8 +95,7 @@ export class BaseApiClient {
      */
     async _callAdminApi(method, path, options) {
         const token = await this.#getAdminAuthToken()
-        const siteId = this.#ssrConfig.app.commerceAPI.parameters.siteId
-        const url = `${this.#baseUrl}/${path}?siteId=${siteId}`
+        const url = this.#buildUrl(path)
 
         const response = await fetch(url, {
             method: method,
@@ -111,8 +127,7 @@ export class BaseApiClient {
      * @protected
      */
     async _callShopperApi(method, path, options) {
-        const siteId = this.#ssrConfig.app.commerceAPI.parameters.siteId
-        const url = `${this.#baseUrl}/${path}?siteId=${siteId}`
+        const url = this.#buildUrl(path)
 
         const response = await fetch(url, {
             method: method,

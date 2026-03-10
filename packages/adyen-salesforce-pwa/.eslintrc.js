@@ -6,5 +6,13 @@
  */
 
 module.exports = {
-    extends: [require.resolve('@salesforce/pwa-kit-dev/configs/eslint')]
+    extends: [require.resolve('@salesforce/pwa-kit-dev/configs/eslint')],
+    overrides: [
+        {
+            files: ['**/__mocks__/**/*.js', '**/*.test.js'],
+            env: {
+                jest: true
+            }
+        }
+    ]
 }
