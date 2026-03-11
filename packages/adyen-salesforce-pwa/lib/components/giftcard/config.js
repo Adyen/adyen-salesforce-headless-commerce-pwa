@@ -43,7 +43,7 @@ export const giftcardConfig = (props) => {
         }
         if (response.isFinal && response.isSuccessful) {
             props?.setAdyenOrder(null)
-            props?.resetDropin()
+            props?.resetDropin?.()
         } else if (!response.isSuccessful) {
             throw new Error(
                 response.errorMessage || 'Gift card order cancellation was not successful'

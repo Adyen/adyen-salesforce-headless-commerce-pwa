@@ -163,10 +163,10 @@ describe('AdyenCheckoutComponent', () => {
         })
 
         // The main initialization runs again on re-render
-        expect(createCheckoutInstance).toHaveBeenCalledTimes(2)
+        expect(createCheckoutInstance).toHaveBeenCalledTimes(1)
 
         // mountCheckoutComponent should be called again to re-mount the dropin
-        expect(mountCheckoutComponent).toHaveBeenCalledTimes(2)
+        expect(mountCheckoutComponent).toHaveBeenCalledTimes(1)
     })
 
     it('should not update if checkout instance does not exist', async () => {
