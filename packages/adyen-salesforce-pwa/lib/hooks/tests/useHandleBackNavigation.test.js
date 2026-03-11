@@ -291,6 +291,153 @@ describe('useHandleBackNavigation', () => {
         })
     })
 
+    describe('popstate event handling', () => {
+        it('should register a popstate event listener on mount', () => {
+            const addEventListenerSpy = jest.spyOn(window, 'addEventListener')
+
+            renderHook(() =>
+                useHandleBackNavigation({
+                    authToken: mockAuthToken,
+                    customerId: mockCustomerId,
+                    basketId: mockBasketId,
+                    site: mockSite
+                })
+            )
+
+            expect(addEventListenerSpy).toHaveBeenCalledWith('popstate', expect.any(Function))
+        })
+
+        it('should remove popstate listener on unmount', () => {
+            const removeEventListenerSpy = jest.spyOn(window, 'removeEventListener')
+
+            const {unmount} = renderHook(() =>
+                useHandleBackNavigation({
+                    authToken: mockAuthToken,
+                    customerId: mockCustomerId,
+                    basketId: mockBasketId,
+                    site: mockSite
+                })
+            )
+
+            unmount()
+
+            expect(removeEventListenerSpy).toHaveBeenCalledWith('popstate', expect.any(Function))
+        })
+
+        it('should call cancelAbandonedPayment on popstate when orderNo is in URL', async () => {
+            mockCancelAbandonedPayment.mockResolvedValue({cancelled: false})
+            const mockNavigate = jest.fn()
+
+            window.history.replaceState(null, '', '/?orderNo=00013422')
+
+            renderHook(() =>
+                useHandleBackNavigation({
+                    authToken: mockAuthToken,
+                    customerId: mockCustomerId,
+                    basketId: mockBasketId,
+                    site: mockSite,
+                    navigate: mockNavigate
+                })
+            )
+
+            await waitFor(() => expect(mockCancelAbandonedPayment).toHaveBeenCalledTimes(1))
+
+            mockCancelAbandonedPayment.mockClear()
+            mockCancelAbandonedPayment.mockResolvedValue({cancelled: true})
+
+            window.dispatchEvent(new PopStateEvent('popstate'))
+
+            await waitFor(() => {
+                expect(mockCancelAbandonedPayment).toHaveBeenCalledWith(
+                    'abandoned_session',
+                    '00013422'
+                )
+            })
+        })
+
+        it('should not call cancelAbandonedPayment on popstate when orderNo is absent', async () => {
+            mockCancelAbandonedPayment.mockResolvedValue({cancelled: true})
+            const mockNavigate = jest.fn()
+
+            renderHook(() =>
+                useHandleBackNavigation({
+                    authToken: mockAuthToken,
+                    customerId: mockCustomerId,
+                    basketId: mockBasketId,
+                    site: mockSite,
+                    navigate: mockNavigate
+                })
+            )
+
+            mockCancelAbandonedPayment.mockClear()
+
+            window.history.replaceState(null, '', '/checkout')
+            window.dispatchEvent(new PopStateEvent('popstate'))
+
+            await new Promise((resolve) => setTimeout(resolve, 50))
+
+            expect(mockCancelAbandonedPayment).not.toHaveBeenCalled()
+        })
+    })
+
+    describe('deferred check when authToken arrives after mount', () => {
+        it('should defer and retry checkForAbandonedPayment when authToken is initially missing but orderNo is in URL', async () => {
+            mockCancelAbandonedPayment.mockResolvedValue({cancelled: true})
+            const mockNavigate = jest.fn()
+
+            window.history.replaceState(null, '', '/?orderNo=00013421')
+
+            const {rerender} = renderHook(
+                ({authToken}) =>
+                    useHandleBackNavigation({
+                        authToken,
+                        customerId: mockCustomerId,
+                        basketId: mockBasketId,
+                        site: mockSite,
+                        navigate: mockNavigate
+                    }),
+                {initialProps: {authToken: null}}
+            )
+
+            await new Promise((resolve) => setTimeout(resolve, 50))
+            expect(mockCancelAbandonedPayment).not.toHaveBeenCalled()
+
+            rerender({authToken: mockAuthToken})
+
+            await waitFor(() => {
+                expect(mockCancelAbandonedPayment).toHaveBeenCalledWith(
+                    'abandoned_session',
+                    '00013421'
+                )
+            })
+        })
+
+        it('should not retry when authToken arrives but orderNo was not in URL at mount', async () => {
+            mockCancelAbandonedPayment.mockResolvedValue({cancelled: true})
+            const mockNavigate = jest.fn()
+
+            window.history.replaceState(null, '', '/checkout')
+
+            const {rerender} = renderHook(
+                ({authToken}) =>
+                    useHandleBackNavigation({
+                        authToken,
+                        customerId: mockCustomerId,
+                        basketId: mockBasketId,
+                        site: mockSite,
+                        navigate: mockNavigate
+                    }),
+                {initialProps: {authToken: null}}
+            )
+
+            rerender({authToken: mockAuthToken})
+
+            await new Promise((resolve) => setTimeout(resolve, 50))
+
+            expect(mockCancelAbandonedPayment).not.toHaveBeenCalled()
+        })
+    })
+
     describe('pageshow event handling', () => {
         it('should check for abandoned payment when page is restored from bfcache', async () => {
             mockCancelAbandonedPayment.mockResolvedValue({cancelled: true})
