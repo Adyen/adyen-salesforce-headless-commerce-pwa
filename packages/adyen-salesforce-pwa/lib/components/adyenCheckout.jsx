@@ -48,6 +48,7 @@ const AdyenCheckoutComponent = ({
     const paymentContainer = useRef(null)
     const checkoutRef = useRef(null)
     const dropinRef = useRef(null)
+    const adyenOrderRef = useRef(null)
     const [isLoading, setIsLoading] = useState(false)
     const [adyenStateData, setAdyenStateData] = useState(null)
     const [internalOrderNo, setInternalOrderNo] = useState(null)
@@ -120,6 +121,15 @@ const AdyenCheckoutComponent = ({
         }
     }, [basket?.c_orderNo, fetchedOrderNo])
 
+    const setAdyenOrder = useCallback((order) => {
+        adyenOrderRef.current = order
+        setInternalAdyenOrder(order)
+    }, [])
+
+    const resetDropin = useCallback(() => {
+        setComponentKey((prev) => prev + 1)
+    }, [])
+
     // Update internal adyen order when basket changes
     useEffect(() => {
         if (basket?.c_orderData) {
@@ -128,7 +138,7 @@ const AdyenCheckoutComponent = ({
                 c_orderData?.orderData &&
                 c_orderData?.orderData !== internalAdyenOrder?.orderData
             ) {
-                setInternalAdyenOrder(c_orderData)
+                setAdyenOrder(c_orderData)
             }
         }
     }, [basket?.c_orderData])
@@ -183,9 +193,10 @@ const AdyenCheckoutComponent = ({
             orderNo: internalOrderNo,
             returnUrl,
             customerId,
-            setAdyenOrder: setInternalAdyenOrder,
+            setAdyenOrder: setAdyenOrder,
             setAdyenAction: setInternalAdyenAction,
             setOrderNo: setInternalOrderNo,
+            resetDropin: resetDropin,
             navigate,
             onError,
             afterSubmit,
@@ -263,7 +274,7 @@ const AdyenCheckoutComponent = ({
                     paymentMethodsConfiguration,
                     adyenEnvironment,
                     adyenPaymentMethods,
-                    adyenOrder: internalAdyenOrder,
+                    adyenOrder: adyenOrderRef.current,
                     basket,
                     getTranslations: getTranslations,
                     locale,
@@ -320,7 +331,6 @@ const AdyenCheckoutComponent = ({
         adyenPaymentMethods?.paymentMethods,
         fetchingOrderNumber,
         internalAdyenAction,
-        internalAdyenOrder?.orderData,
         componentKey
     ])
 
