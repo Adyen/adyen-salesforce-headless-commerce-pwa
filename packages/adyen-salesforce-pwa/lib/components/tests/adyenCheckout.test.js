@@ -29,7 +29,8 @@ describe('AdyenCheckoutComponent', () => {
         update: jest.fn()
     }
     const mockDropinInstance = {
-        unmount: jest.fn()
+        unmount: jest.fn(),
+        update: jest.fn()
     }
 
     const defaultProps = {
@@ -138,22 +139,26 @@ describe('AdyenCheckoutComponent', () => {
         expect(mockDropinInstance.unmount).toHaveBeenCalledTimes(1)
     })
 
-    it('should update the checkout and re-mount dropin when adyenOrder changes', async () => {
+    it('should remount the dropin when adyenOrder changes (e.g. after giftcard applied)', async () => {
+        jest.useFakeTimers()
+
         // Start without order data
         const {rerender} = render(<AdyenCheckoutComponent {...defaultProps} />)
 
         // Initial render
         await act(async () => {})
         expect(createCheckoutInstance).toHaveBeenCalledTimes(1)
-        expect(handleRedirects).toHaveBeenCalledTimes(1)
         expect(mountCheckoutComponent).toHaveBeenCalledTimes(1)
 
-        // Simulate a partial payment by adding adyenOrder
+        // Simulate a giftcard being applied: basket now has c_orderData with remainingAmount
         const propsWithOrder = {
             ...defaultProps,
             basket: {
                 ...defaultProps.basket,
-                c_orderData: JSON.stringify({orderData: 'initial_order_data'})
+                c_orderData: JSON.stringify({
+                    orderData: 'initial_order_data',
+                    remainingAmount: {value: 5629, currency: 'USD'}
+                })
             }
         }
 
@@ -162,15 +167,21 @@ describe('AdyenCheckoutComponent', () => {
             rerender(<AdyenCheckoutComponent {...propsWithOrder} />)
         })
 
-        // The main initialization runs again on re-render
-        expect(createCheckoutInstance).toHaveBeenCalledTimes(1)
+        // Advance the debounce timer
+        await act(async () => {
+            jest.runAllTimers()
+        })
 
-        // mountCheckoutComponent should be called again to re-mount the dropin
-        expect(mountCheckoutComponent).toHaveBeenCalledTimes(1)
+        jest.useRealTimers()
+
+        // Dropin should be remounted with the new amount (resetDropin increments componentKey)
+        expect(mockDropinInstance.unmount).toHaveBeenCalledTimes(1)
+        expect(createCheckoutInstance).toHaveBeenCalledTimes(2)
+        expect(mountCheckoutComponent).toHaveBeenCalledTimes(2)
     })
 
-    it('should not update if checkout instance does not exist', async () => {
-        createCheckoutInstance.mockResolvedValue(null) // Simulate checkout creation failure
+    it('should not remount dropin if dropin is not yet mounted', async () => {
+        mountCheckoutComponent.mockReturnValue(null) // Simulate dropin not mounted
 
         const propsWithOrder = {
             ...defaultProps,
@@ -181,20 +192,20 @@ describe('AdyenCheckoutComponent', () => {
         }
         const {rerender} = render(<AdyenCheckoutComponent {...propsWithOrder} />)
 
-        // Update adyenOrder
-        const updatedPropsWithOrder = {
-            ...defaultProps,
-            basket: {
-                ...defaultProps.basket,
-                c_orderData: JSON.stringify({orderData: 'new_order_data'})
-            }
-        }
-
         await act(async () => {
-            rerender(<AdyenCheckoutComponent {...updatedPropsWithOrder} />)
+            rerender(
+                <AdyenCheckoutComponent
+                    {...defaultProps}
+                    basket={{
+                        ...defaultProps.basket,
+                        c_orderData: JSON.stringify({orderData: 'new_order_data'})
+                    }}
+                />
+            )
         })
 
-        expect(mockCheckoutInstance.update).not.toHaveBeenCalled()
+        // unmount should not be called since dropin was never mounted
+        expect(mockDropinInstance.unmount).not.toHaveBeenCalled()
     })
 
     it('should handle environment fetch error and call onError callbacks', async () => {

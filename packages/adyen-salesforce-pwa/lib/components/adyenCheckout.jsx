@@ -7,6 +7,7 @@ import {
     handleRedirects,
     mountCheckoutComponent
 } from './helpers/adyenCheckout.utils'
+import {getAmount} from './helpers/baseConfig'
 import {paymentMethodsConfiguration as getPaymentMethodsConfig} from './paymentMethodsConfiguration'
 import useAdyenEnvironment from '../hooks/useAdyenEnvironment'
 import useAdyenPaymentMethods from '../hooks/useAdyenPaymentMethods'
@@ -130,6 +131,23 @@ const AdyenCheckoutComponent = ({
         setComponentKey((prev) => prev + 1)
     }, [])
 
+    const resetDropinTimerRef = useRef(null)
+
+    // Remount the dropin when the adyen order changes (e.g. after giftcard applied).
+    // Debounced to avoid racing remounts when orderData and remainingAmount change in sequence
+    // (create-order fires first with full amount, then payments fires with the deducted amount).
+    useEffect(() => {
+        if (!dropinRef.current) return
+        if (resetDropinTimerRef.current) clearTimeout(resetDropinTimerRef.current)
+        resetDropinTimerRef.current = setTimeout(() => {
+            resetDropinTimerRef.current = null
+            resetDropin()
+        }, 50)
+        return () => {
+            if (resetDropinTimerRef.current) clearTimeout(resetDropinTimerRef.current)
+        }
+    }, [internalAdyenOrder?.orderData, internalAdyenOrder?.remainingAmount?.value])
+
     // Update internal adyen order when basket changes
     useEffect(() => {
         if (basket?.c_orderData) {
@@ -214,6 +232,7 @@ const AdyenCheckoutComponent = ({
         site?.id,
         basket?.basketId,
         internalAdyenOrder?.orderData,
+        internalAdyenOrder?.remainingAmount?.value,
         internalOrderNo,
         returnUrl,
         customerId,
@@ -293,12 +312,15 @@ const AdyenCheckoutComponent = ({
                 )
 
                 if (!isRedirect && !dropinRef.current) {
+                    const mountAmount = getAmount({basket, adyenOrder: adyenOrderRef.current})
                     dropinRef.current = mountCheckoutComponent(
                         internalAdyenAction,
                         checkoutRef.current,
                         paymentContainer,
                         paymentMethodsConfiguration,
-                        dropinConfiguration
+                        dropinConfiguration,
+                        mountAmount,
+                        adyenOrderRef.current
                     )
                 }
             } catch (error) {

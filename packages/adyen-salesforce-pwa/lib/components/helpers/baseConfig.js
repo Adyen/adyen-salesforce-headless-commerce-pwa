@@ -15,8 +15,9 @@ export const baseConfig = (props) => {
     // Create error handler with props in closure
     const errorHandler = (error, component) => onErrorHandler(error, component, props)
 
+    const amount = getAmount(props)
     return {
-        amount: getAmount(props),
+        amount,
         onSubmit: executeCallbacks(
             [...beforeSubmit, onSubmit, ...afterSubmit, onPaymentsSuccess],
             props
