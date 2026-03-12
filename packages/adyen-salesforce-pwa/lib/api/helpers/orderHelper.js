@@ -59,7 +59,7 @@ export function createShopperOrderClient(authorization, siteId) {
         ...appConfig.commerceAPI,
         parameters: {
             ...appConfig.commerceAPI.parameters,
-            siteId
+            siteId: siteId || appConfig.commerceAPI.parameters.siteId
         },
         headers: {authorization}
     })
@@ -122,7 +122,7 @@ export async function failOrderAndReopenBasket(adyenContext, orderNo) {
             ? await getBasket(authorization, newBasketId, customerId, siteId)
             : await getCurrentBasketForAuthorizedShopper(authorization, customerId, siteId)
         newBasketId = newBasket?.basketId
-        const tempContext = {authorization, basket: newBasket}
+        const tempContext = {authorization, siteId, basket: newBasket}
         const tempRes = {locals: {adyen: tempContext}}
         const basketService = new BasketService(tempContext, tempRes)
         await basketService.update({c_orderNo: ''})

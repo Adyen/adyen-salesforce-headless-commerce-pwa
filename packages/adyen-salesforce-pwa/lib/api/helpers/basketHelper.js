@@ -17,7 +17,7 @@ export function createShopperBasketsClient(authorization, siteId) {
         ...appConfig.commerceAPI,
         parameters: {
             ...appConfig.commerceAPI.parameters,
-            siteId
+            siteId: siteId || appConfig.commerceAPI.parameters.siteId
         },
         headers: {authorization}
     })
@@ -54,6 +54,7 @@ export async function getBasket(authorization, basketId, customerId, siteId) {
  * This is useful when the basket ID is not known upfront.
  * @param {string} authorization - The shopper's authorization token.
  * @param {string} customerId - The shopper's customer ID.
+ * @param {string} siteId - The site ID for the API client.
  * @returns {Promise<object>} A promise that resolves to the shopper's current basket.
  * @throws {AdyenError} If no baskets are found for the customer.
  */

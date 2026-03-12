@@ -15,7 +15,7 @@ export function createShopperCustomerClient(authorization, siteId) {
         ...appConfig.commerceAPI,
         parameters: {
             ...appConfig.commerceAPI.parameters,
-            siteId
+            siteId: siteId || appConfig.commerceAPI.parameters.siteId
         },
         headers: {authorization}
     })
