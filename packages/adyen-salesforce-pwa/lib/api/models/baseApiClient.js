@@ -1,5 +1,6 @@
 import fetch from 'node-fetch'
-import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
+import {RequestContext} from '../utils/request-context-util.js'
+import Logger from './logger'
 /**
  * A base class for creating Salesforce Commerce API clients.
  * It handles admin token authentication, caching, and provides a protected method for making API calls.
@@ -32,7 +33,7 @@ export class BaseApiClient {
      * @private
      */
     #buildUrl(path) {
-        const siteId = getConfig().app.commerceAPI.parameters.siteId
+        const siteId = RequestContext.adyenContext?.siteId
         const sanitizedPath = path
             .split('?')[0]
             .split('/')

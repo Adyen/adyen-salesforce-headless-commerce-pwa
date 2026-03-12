@@ -5,6 +5,7 @@ import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrent
 import Logger from '../models/logger.js'
 import {BasketService} from '../models/basketService.js'
 import {getCustomer} from '../helpers/customerHelper'
+import {RequestContext} from '../utils/request-context-util.js'
 
 /**
  * A middleware that extracts, validates, and prepares a request context.
@@ -72,9 +73,18 @@ export async function prepareRequestContext(req, res, next) {
         // Instantiate and attach the basket service to the context
         adyenContext.basketService = new BasketService(adyenContext, res)
         res.locals.adyen = adyenContext
-
+        RequestContext.set(
+            {
+                adyenConfig,
+                siteId,
+                authorization,
+                customerId: customerid
+            },
+            () => {
+                next()
+            }
+        )
         Logger.info(`prepareRequestContext for ${route}`, 'success')
-        return next()
     } catch (err) {
         Logger.error(`prepareRequestContext for ${route}`, err.stack)
         return next(err)
