@@ -8,19 +8,22 @@ export class BaseApiClient {
     #tokenUrl =
         'https://account.demandware.com/dwsso/oauth2/access_token?grant_type=client_credentials'
     #baseUrl
+    #siteId
     #accessToken = null
     #tokenExpiry = 0
 
     /**
      * @constructor
      * @param {string} baseUrl - The base URL for the specific Commerce API.
+     * @param {string} siteId - The site ID for the API client.
      * @throws {Error} If the baseUrl is not provided.
      */
-    constructor(baseUrl) {
+    constructor(baseUrl, siteId) {
         if (!baseUrl) {
             throw new Error('baseUrl is required to instantiate an API client.')
         }
         this.#baseUrl = baseUrl
+        this.#siteId = siteId || getConfig().app.commerceAPI.parameters.siteId
     }
 
     /**
@@ -32,14 +35,13 @@ export class BaseApiClient {
      * @private
      */
     #buildUrl(path) {
-        const siteId = getConfig().app.commerceAPI.parameters.siteId
         const sanitizedPath = path
             .split('?')[0]
             .split('/')
             .filter((segment) => segment !== '' && segment !== '..')
             .map(encodeURIComponent)
             .join('/')
-        return `${this.#baseUrl}/${sanitizedPath}?siteId=${encodeURIComponent(siteId)}`
+        return `${this.#baseUrl}/${sanitizedPath}?siteId=${encodeURIComponent(this.#siteId)}`
     }
 
     /**

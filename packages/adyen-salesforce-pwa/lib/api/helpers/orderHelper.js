@@ -71,7 +71,7 @@ export function createShopperOrderClient(authorization) {
  * @throws {AdyenError} If the order is not found or does not belong to the customer.
  */
 export async function failOrderAndReopenBasket(adyenContext, orderNo) {
-    const {authorization, customerId} = adyenContext
+    const {authorization, customerId, siteId} = adyenContext
     const shopperOrders = createShopperOrderClient(authorization)
 
     const order = await shopperOrders.getOrder({
@@ -102,7 +102,7 @@ export async function failOrderAndReopenBasket(adyenContext, orderNo) {
         )
     }
 
-    const orderApi = new OrderApiClient()
+    const orderApi = new OrderApiClient(siteId)
     const response = await orderApi.updateOrderStatus(
         order.orderNo,
         ORDER.ORDER_STATUS_FAILED_REOPEN
@@ -137,7 +137,7 @@ export async function failOrderAndReopenBasket(adyenContext, orderNo) {
  * @returns {Promise<object>} A promise that resolves to the existing or newly created order object.
  */
 export async function createOrderUsingOrderNo(adyenContext) {
-    const {authorization, basket, customerId} = adyenContext
+    const {authorization, basket, customerId, siteId} = adyenContext
     const {c_orderNo: orderNo, basketId, currency} = basket
     if (!orderNo) {
         throw new AdyenError(ERROR_MESSAGE.ORDER_NUMBER_NOT_FOUND, 400)
@@ -151,7 +151,7 @@ export async function createOrderUsingOrderNo(adyenContext) {
     if (order?.orderNo) {
         return order
     }
-    const customOrderApi = new CustomShopperOrderApiClient()
+    const customOrderApi = new CustomShopperOrderApiClient(siteId)
     return await customOrderApi.createOrder(authorization, basketId, customerId, orderNo, currency)
 }
 
@@ -159,52 +159,12 @@ export async function createOrderUsingOrderNo(adyenContext) {
  * Retrieves an SFCC order using its order number.
  * This function uses an admin-level API client to fetch order details.
  * @param {string} orderNo - The number of the order to retrieve.
+ * @param {string} siteId - The site ID.
  * @returns {Promise<object>} A promise that resolves to the order object.
  */
-export async function getOrderUsingOrderNo(orderNo) {
-    const customOrderApi = new CustomAdminOrderApiClient()
+export async function getOrderUsingOrderNo(orderNo, siteId) {
+    const customOrderApi = new CustomAdminOrderApiClient(siteId)
     return await customOrderApi.getOrder(orderNo)
-}
-
-/**
- * Adds a payment instrument directly to an existing SFCC order.
- * Used when the order is pre-created before the Adyen /payments call, so the basket
- * no longer exists when the payment succeeds.
- * @param {string} orderNo - The order number.
- * @param {object} amount - The Adyen amount object with value and currency.
- * @param {object} paymentMethod - The Adyen payment method object with type and optional brand.
- * @param {string} pspReference - The Adyen PSP reference.
- * @returns {Promise<object>} A promise that resolves to the created payment instrument object.
- */
-export async function addPaymentInstrumentToOrder(orderNo, amount, paymentMethod, pspReference) {
-    Logger.info('addPaymentInstrumentToOrder', `start — orderNo: ${orderNo}`)
-    const isCardPayment = paymentMethod?.type === PAYMENT_METHOD_TYPES.CREDIT_CARD
-    const paymentMethodId = isCardPayment
-        ? PAYMENT_METHODS.CREDIT_CARD
-        : PAYMENT_METHODS.ADYEN_COMPONENT
-
-    const body = {
-        amount: convertCurrencyValueToMajorUnits(amount?.value, amount?.currency),
-        paymentMethodId,
-        paymentCard: {
-            cardType: isCardPayment
-                ? getCardType(paymentMethod?.brand || paymentMethod?.srcScheme)
-                : paymentMethod?.type
-        },
-        ...(pspReference && {c_pspReference: pspReference}),
-        c_paymentMethodType: paymentMethod?.type,
-        ...((paymentMethod?.brand || paymentMethod?.srcScheme) && {
-            c_paymentMethodBrand: paymentMethod?.brand || paymentMethod?.srcScheme
-        })
-    }
-
-    const orderApi = new OrderApiClient()
-    const result = await orderApi.addPaymentInstrumentToOrder(orderNo, body)
-    Logger.info(
-        'addPaymentInstrumentToOrder',
-        `success — paymentInstrumentId: ${result?.paymentInstrumentId}`
-    )
-    return result
 }
 
 /**

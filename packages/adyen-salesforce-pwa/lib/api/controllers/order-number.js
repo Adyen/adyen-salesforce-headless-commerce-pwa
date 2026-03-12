@@ -27,7 +27,7 @@ async function getOrderNumber(req, res, next) {
             return next()
         }
 
-        const customOrderApi = new CustomShopperOrderApiClient()
+        const customOrderApi = new CustomShopperOrderApiClient(adyenContext.siteId)
         const orderNo = await customOrderApi.generateOrderNo(adyenContext.authorization)
 
         if (!orderNo) {

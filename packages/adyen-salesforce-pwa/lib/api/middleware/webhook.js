@@ -82,7 +82,7 @@ async function sendNotification(req, res, next) {
     try {
         Logger.info('sendNotification', 'start')
         const {NotificationRequestItem: notification = {}, live} = res.locals.notification
-        const customNotifyApi = new CustomNotifyApiClient()
+        const customNotifyApi = new CustomNotifyApiClient(res.locals.adyen.siteId)
         await customNotifyApi.notify({...notification, live})
         res.locals.response = messages.AUTH_SUCCESS
         return next()
