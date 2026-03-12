@@ -64,8 +64,12 @@ describe('create-temporary-basket controller', () => {
 
         expect(Logger.info).toHaveBeenCalledWith('CreateTemporaryBasketController', 'start')
         expect(BasketService).toHaveBeenCalled()
-        expect(removeExistingTemporaryBaskets).toHaveBeenCalledWith('Bearer token', 'customer1')
-        expect(createTemporaryBasket).toHaveBeenCalledWith('Bearer token', 'customer1')
+        expect(removeExistingTemporaryBaskets).toHaveBeenCalledWith(
+            'Bearer token',
+            'customer1',
+            'RefArch'
+        )
+        expect(createTemporaryBasket).toHaveBeenCalledWith('Bearer token', 'customer1', 'RefArch')
         expect(res.locals.response).toEqual(mockBasket)
         expect(Logger.info).toHaveBeenCalledWith('CreateTemporaryBasketController', 'success')
         expect(next).toHaveBeenCalled()

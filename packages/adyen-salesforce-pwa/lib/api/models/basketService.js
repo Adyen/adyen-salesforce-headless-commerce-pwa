@@ -24,7 +24,10 @@ export class BasketService {
     constructor(adyenContext, res) {
         this.adyenContext = adyenContext
         this.res = res
-        this.shopperBaskets = createShopperBasketsClient(adyenContext.authorization)
+        this.shopperBaskets = createShopperBasketsClient(
+            adyenContext.authorization,
+            adyenContext.siteId
+        )
     }
 
     /**

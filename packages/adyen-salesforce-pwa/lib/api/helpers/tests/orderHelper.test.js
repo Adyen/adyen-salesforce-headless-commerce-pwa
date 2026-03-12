@@ -63,9 +63,9 @@ describe('orderHelper', () => {
             }
             mockGetCustomerOrders.mockResolvedValue(mockOrders)
 
-            const result = await getOpenOrderForShopper('auth-token', 'customer-123')
+            const result = await getOpenOrderForShopper('auth-token', 'customer-123', 'RefArch')
 
-            expect(createShopperCustomerClient).toHaveBeenCalledWith('auth-token')
+            expect(createShopperCustomerClient).toHaveBeenCalledWith('auth-token', 'RefArch')
             expect(mockGetCustomerOrders).toHaveBeenCalledWith({
                 parameters: {
                     customerId: 'customer-123',
@@ -79,7 +79,7 @@ describe('orderHelper', () => {
         it('should return null when no orders found', async () => {
             mockGetCustomerOrders.mockResolvedValue({data: []})
 
-            const result = await getOpenOrderForShopper('auth-token', 'customer-123')
+            const result = await getOpenOrderForShopper('auth-token', 'customer-123', 'RefArch')
 
             expect(result).toBeNull()
         })
@@ -87,7 +87,7 @@ describe('orderHelper', () => {
         it('should return null when data is undefined', async () => {
             mockGetCustomerOrders.mockResolvedValue({})
 
-            const result = await getOpenOrderForShopper('auth-token', 'customer-123')
+            const result = await getOpenOrderForShopper('auth-token', 'customer-123', 'RefArch')
 
             expect(result).toBeNull()
         })
@@ -96,7 +96,7 @@ describe('orderHelper', () => {
             const apiError = new Error('API failed')
             mockGetCustomerOrders.mockRejectedValue(apiError)
 
-            const result = await getOpenOrderForShopper('auth-token', 'customer-123')
+            const result = await getOpenOrderForShopper('auth-token', 'customer-123', 'RefArch')
 
             expect(Logger.error).toHaveBeenCalledWith('getOpenOrderForShopper', 'API failed')
             expect(result).toBeNull()
@@ -116,11 +116,15 @@ describe('orderHelper', () => {
             getConfig.mockReturnValue(mockConfig)
 
             const mockAuth = 'Bearer mockToken'
-            createShopperOrderClient(mockAuth)
+            createShopperOrderClient(mockAuth, 'RefArch')
 
             expect(getConfig).toHaveBeenCalled()
             expect(ShopperOrders).toHaveBeenCalledWith({
                 ...mockConfig.app.commerceAPI,
+                parameters: {
+                    ...mockConfig.app.commerceAPI.parameters,
+                    siteId: 'RefArch'
+                },
                 headers: {authorization: mockAuth}
             })
         })
@@ -358,7 +362,7 @@ describe('orderHelper', () => {
             mockUpdatePaymentInstrumentForOrder.mockResolvedValue({})
 
             await updatePaymentInstrumentForOrder(
-                {authorization: 'auth-token'},
+                {authorization: 'auth-token', siteId: 'RefArch'},
                 'order-123',
                 'new-psp-ref'
             )
@@ -387,7 +391,7 @@ describe('orderHelper', () => {
             mockGetOrder.mockResolvedValue(mockOrder)
 
             await updatePaymentInstrumentForOrder(
-                {authorization: 'auth-token'},
+                {authorization: 'auth-token', siteId: 'RefArch'},
                 'order-123',
                 'new-psp-ref'
             )
@@ -403,7 +407,7 @@ describe('orderHelper', () => {
             mockGetOrder.mockResolvedValue({paymentInstruments: []})
 
             await updatePaymentInstrumentForOrder(
-                {authorization: 'auth-token'},
+                {authorization: 'auth-token', siteId: 'RefArch'},
                 'order-123',
                 'new-psp-ref'
             )
@@ -423,7 +427,11 @@ describe('orderHelper', () => {
             mockGetOrder.mockResolvedValue(mockOrder)
             mockUpdatePaymentInstrumentForOrder.mockResolvedValue({})
 
-            await updatePaymentInstrumentForOrder({authorization: 'auth-token'}, 'order-123', null)
+            await updatePaymentInstrumentForOrder(
+                {authorization: 'auth-token', siteId: 'RefArch'},
+                'order-123',
+                null
+            )
 
             expect(mockUpdatePaymentInstrumentForOrder).toHaveBeenCalledWith({
                 parameters: {

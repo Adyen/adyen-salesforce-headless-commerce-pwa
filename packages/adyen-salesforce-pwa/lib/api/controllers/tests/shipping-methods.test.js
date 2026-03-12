@@ -19,6 +19,7 @@ describe('Shipping Methods Controller', () => {
             locals: {
                 adyen: {
                     authorization: 'Bearer mockToken',
+                    siteId: 'RefArch',
                     basket: {
                         basketId: 'mockBasketId'
                     },
@@ -84,7 +85,7 @@ describe('Shipping Methods Controller', () => {
             await ShippingMethods.getShippingMethods(req, res, next)
 
             expect(Logger.info).toHaveBeenCalledWith('getShippingMethods', 'start')
-            expect(createShopperBasketsClient).toHaveBeenCalledWith('Bearer mockToken')
+            expect(createShopperBasketsClient).toHaveBeenCalledWith('Bearer mockToken', 'RefArch')
             expect(shopperBasketsInstanceMock.getShippingMethodsForShipment).toHaveBeenCalledWith({
                 parameters: {
                     basketId: 'mockBasketId',

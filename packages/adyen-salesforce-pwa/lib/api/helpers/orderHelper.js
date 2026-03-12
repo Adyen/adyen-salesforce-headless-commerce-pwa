@@ -29,9 +29,9 @@ import Logger from '../models/logger.js'
  * @param {string} customerId - The shopper's customer ID.
  * @returns {Promise<object|null>}
  */
-export async function getOpenOrderForShopper(authorization, customerId) {
+export async function getOpenOrderForShopper(authorization, customerId, siteId) {
     try {
-        const shopperCustomers = createShopperCustomerClient(authorization)
+        const shopperCustomers = createShopperCustomerClient(authorization, siteId)
         const result = await shopperCustomers.getCustomerOrders({
             parameters: {
                 customerId,
@@ -49,12 +49,17 @@ export async function getOpenOrderForShopper(authorization, customerId) {
 /**
  * Creates and configures an instance of the ShopperOrders API client.
  * @param {string} authorization - The shopper's authorization token.
+ * @param {string} siteId - The site ID for the API client.
  * @returns {ShopperOrders} An instance of the ShopperOrders client.
  */
-export function createShopperOrderClient(authorization) {
+export function createShopperOrderClient(authorization, siteId) {
     const {app: appConfig} = getConfig()
     return new ShopperOrders({
         ...appConfig.commerceAPI,
+        parameters: {
+            ...appConfig.commerceAPI.parameters,
+            siteId
+        },
         headers: {authorization}
     })
 }
@@ -72,7 +77,7 @@ export function createShopperOrderClient(authorization) {
  */
 export async function failOrderAndReopenBasket(adyenContext, orderNo) {
     const {authorization, customerId, siteId} = adyenContext
-    const shopperOrders = createShopperOrderClient(authorization)
+    const shopperOrders = createShopperOrderClient(authorization, siteId)
 
     const order = await shopperOrders.getOrder({
         parameters: {
@@ -86,8 +91,8 @@ export async function failOrderAndReopenBasket(adyenContext, orderNo) {
         throw new AdyenError(ERROR_MESSAGE.INVALID_ORDER, 404)
     }
     try {
-        const shopperBaskets = createShopperBasketsClient(authorization)
-        const {baskets} = await getCustomerBaskets(authorization, customerId)
+        const shopperBaskets = createShopperBasketsClient(authorization, siteId)
+        const {baskets} = await getCustomerBaskets(authorization, customerId, siteId)
         if (baskets?.length) {
             await Promise.all(
                 baskets.map((b) =>
@@ -113,8 +118,8 @@ export async function failOrderAndReopenBasket(adyenContext, orderNo) {
 
     try {
         const newBasket = newBasketId
-            ? await getBasket(authorization, newBasketId, customerId)
-            : await getCurrentBasketForAuthorizedShopper(authorization, customerId)
+            ? await getBasket(authorization, newBasketId, customerId, siteId)
+            : await getCurrentBasketForAuthorizedShopper(authorization, customerId, siteId)
         newBasketId = newBasket?.basketId
         const tempContext = {authorization, basket: newBasket}
         const tempRes = {locals: {adyen: tempContext}}
@@ -142,7 +147,7 @@ export async function createOrderUsingOrderNo(adyenContext) {
     if (!orderNo) {
         throw new AdyenError(ERROR_MESSAGE.ORDER_NUMBER_NOT_FOUND, 400)
     }
-    const shopperOrders = createShopperOrderClient(authorization)
+    const shopperOrders = createShopperOrderClient(authorization, siteId)
     const order = await shopperOrders.getOrder({
         parameters: {
             orderNo: orderNo
@@ -175,9 +180,9 @@ export async function getOrderUsingOrderNo(orderNo, siteId) {
  * @returns {Promise<void>}
  */
 export async function updatePaymentInstrumentForOrder(adyenContext, orderNo, pspReference) {
-    const {authorization} = adyenContext
+    const {authorization, siteId} = adyenContext
     Logger.info('updatePaymentInstrumentForOrder', `start  — orderNo: ${orderNo}`)
-    const shopperOrders = createShopperOrderClient(authorization)
+    const shopperOrders = createShopperOrderClient(authorization, siteId)
     const order = await shopperOrders.getOrder({
         parameters: {
             orderNo: orderNo

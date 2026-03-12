@@ -32,9 +32,9 @@ export default async function CreateTemporaryBasketController(req, res, next) {
             throw new AdyenError(ERROR_MESSAGE.INVALID_PARAMS, 400)
         }
 
-        await removeExistingTemporaryBaskets(authorization, customerid)
+        await removeExistingTemporaryBaskets(authorization, customerid, siteId)
 
-        let basket = await createTemporaryBasket(authorization, customerid)
+        let basket = await createTemporaryBasket(authorization, customerid, siteId)
         if (!basket || !basket.basketId) {
             throw new AdyenError(ERROR_MESSAGE.BASKET_NOT_CREATED, 400)
         }

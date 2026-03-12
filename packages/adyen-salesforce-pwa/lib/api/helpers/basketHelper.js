@@ -28,11 +28,12 @@ export function createShopperBasketsClient(authorization, siteId) {
  * @param {string} authorization - The shopper's authorization token.
  * @param {string} basketId - The ID of the basket to retrieve.
  * @param {string} customerId - The ID of the customer who is expected to own the basket.
+ * @param {string} siteId - The site ID for the API client.
  * @returns {Promise<object>} A promise that resolves to the basket object.
  * @throws {AdyenError} If the basket is not found or does not belong to the customer.
  */
-export async function getBasket(authorization, basketId, customerId) {
-    const shopperBaskets = createShopperBasketsClient(authorization)
+export async function getBasket(authorization, basketId, customerId, siteId) {
+    const shopperBaskets = createShopperBasketsClient(authorization, siteId)
     const basket = await shopperBaskets.getBasket({
         parameters: {
             basketId: basketId
@@ -56,8 +57,8 @@ export async function getBasket(authorization, basketId, customerId) {
  * @returns {Promise<object>} A promise that resolves to the shopper's current basket.
  * @throws {AdyenError} If no baskets are found for the customer.
  */
-export async function getCurrentBasketForAuthorizedShopper(authorization, customerId) {
-    const {baskets} = await getCustomerBaskets(authorization, customerId)
+export async function getCurrentBasketForAuthorizedShopper(authorization, customerId, siteId) {
+    const {baskets} = await getCustomerBaskets(authorization, customerId, siteId)
 
     if (!baskets?.length) {
         throw new AdyenError(ERROR_MESSAGE.INVALID_BASKET, 404)
@@ -69,10 +70,10 @@ export async function getCurrentBasketForAuthorizedShopper(authorization, custom
 /**
  * Removes any existing temporary baskets for the current customer.
  */
-export async function removeExistingTemporaryBaskets(authorization, customerId) {
+export async function removeExistingTemporaryBaskets(authorization, customerId, siteId) {
     try {
-        const shopperBaskets = createShopperBasketsClient(authorization)
-        const existingBaskets = await getCustomerBaskets(authorization, customerId)
+        const shopperBaskets = createShopperBasketsClient(authorization, siteId)
+        const existingBaskets = await getCustomerBaskets(authorization, customerId, siteId)
         const tempBaskets = existingBaskets.baskets?.filter((b) => b?.temporaryBasket === true)
         if (tempBaskets?.length) {
             await Promise.all(
@@ -92,8 +93,8 @@ export async function removeExistingTemporaryBaskets(authorization, customerId) 
  * Creates a new temporary basket for the current shopper.
  * @returns {Promise<object>} The created basket.
  */
-export async function createTemporaryBasket(authorization, customerId) {
-    const shopperBaskets = createShopperBasketsClient(authorization)
+export async function createTemporaryBasket(authorization, customerId, siteId) {
+    const shopperBaskets = createShopperBasketsClient(authorization, siteId)
     const basket = await shopperBaskets.createBasket({
         parameters: {
             temporary: true
