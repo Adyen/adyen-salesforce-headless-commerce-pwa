@@ -19,7 +19,11 @@ async function paymentCancel(req, res, next) {
         let orderNo = req.body?.orderNo || adyenContext.basket?.c_orderNo
 
         if (!orderNo) {
-            const openOrder = await getOpenOrderForShopper(authorization, customerId)
+            const openOrder = await getOpenOrderForShopper(
+                authorization,
+                customerId,
+                adyenContext.siteId
+            )
             orderNo = openOrder?.orderNo
         }
 

@@ -22,6 +22,9 @@ describe('orderClosedWebhookHandler', () => {
         req = {}
         res = {
             locals: {
+                adyen: {
+                    siteId: 'RefArch'
+                },
                 notification: {
                     NotificationRequestItem: {
                         eventCode: NOTIFICATION_EVENT_CODES.ORDER_CLOSED,
@@ -63,7 +66,7 @@ describe('orderClosedWebhookHandler', () => {
 
         await orderClosedWebhookHandler(req, res, next)
 
-        expect(getOrderUsingOrderNo).toHaveBeenCalledWith('ORDER-123')
+        expect(getOrderUsingOrderNo).toHaveBeenCalledWith('ORDER-123', 'RefArch')
         expect(OrderApiClient).not.toHaveBeenCalled()
         expect(next).toHaveBeenCalledWith()
         expect(next).toHaveBeenCalledTimes(1)

@@ -8,9 +8,9 @@ export class CustomShopperOrderApiClient extends BaseApiClient {
     /**
      * @constructor
      */
-    constructor() {
+    constructor(siteId) {
         const baseUrl = `https://${process.env.COMMERCE_API_SHORT_CODE}.api.commercecloud.salesforce.com/custom/adyen-shopper-order/v1/organizations/${process.env.COMMERCE_API_ORG_ID}`
-        super(baseUrl)
+        super(baseUrl, siteId)
     }
 
     /**

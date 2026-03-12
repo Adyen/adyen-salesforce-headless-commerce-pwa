@@ -159,9 +159,10 @@ describe('preparePaymentsDetailsContext middleware', () => {
             expect(getBasket).toHaveBeenCalledWith(
                 'Bearer test-token',
                 'basket-123',
-                'customer-456'
+                'customer-456',
+                'RefArch'
             )
-            expect(getCustomer).toHaveBeenCalledWith('Bearer test-token', 'customer-456')
+            expect(getCustomer).toHaveBeenCalledWith('Bearer test-token', 'customer-456', 'RefArch')
             expect(BasketService).toHaveBeenCalled()
 
             const adyenContext = mockRes.locals.adyen
@@ -191,9 +192,10 @@ describe('preparePaymentsDetailsContext middleware', () => {
             expect(getBasket).toHaveBeenCalledWith(
                 'Bearer test-token',
                 'basket-123',
-                'customer-456'
+                'customer-456',
+                'RefArch'
             )
-            expect(getCustomer).toHaveBeenCalledWith('Bearer test-token', 'customer-456')
+            expect(getCustomer).toHaveBeenCalledWith('Bearer test-token', 'customer-456', 'RefArch')
         })
     })
 
@@ -211,7 +213,8 @@ describe('preparePaymentsDetailsContext middleware', () => {
             )
             expect(getCurrentBasketForAuthorizedShopper).toHaveBeenCalledWith(
                 'Bearer test-token',
-                'customer-456'
+                'customer-456',
+                'RefArch'
             )
             expect(mockRes.locals.adyen.basket).toEqual({
                 basketId: 'current-basket-456',

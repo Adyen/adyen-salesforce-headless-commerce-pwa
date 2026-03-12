@@ -46,20 +46,23 @@ export async function preparePaymentsDetailsContext(req, res, next) {
         if (isValidValue(basketid)) {
             try {
                 ;[basket, customer] = await Promise.all([
-                    getBasket(authorization, basketid.trim(), customerid.trim()).catch((err) => {
-                        if (err?.statusCode === 404) {
-                            Logger.info(
-                                `prepareRequestContext for ${route}`,
-                                `Basket ${basketid} not found, falling back to current basket`
-                            )
-                            return getCurrentBasketForAuthorizedShopper(
-                                authorization,
-                                customerid.trim()
-                            )
+                    getBasket(authorization, basketid.trim(), customerid.trim(), siteId).catch(
+                        (err) => {
+                            if (err?.statusCode === 404) {
+                                Logger.info(
+                                    `prepareRequestContext for ${route}`,
+                                    `Basket ${basketid} not found, falling back to current basket`
+                                )
+                                return getCurrentBasketForAuthorizedShopper(
+                                    authorization,
+                                    customerid.trim(),
+                                    siteId
+                                )
+                            }
+                            throw err
                         }
-                        throw err
-                    }),
-                    getCustomer(authorization, customerid.trim())
+                    ),
+                    getCustomer(authorization, customerid.trim(), siteId)
                 ])
             } catch (err) {
                 Logger.info(

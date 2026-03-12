@@ -25,13 +25,13 @@ describe('CustomAdminOrderApiClient', () => {
         // Clear all mocks before each test
         jest.clearAllMocks()
         // Instantiate the client, which will use the mocked BaseApiClient
-        client = new CustomAdminOrderApiClient()
+        client = new CustomAdminOrderApiClient('RefArch')
     })
 
     it('should construct with the correct base URL', () => {
         // Check that the BaseApiClient constructor was called with the expected URL
         const expectedBaseUrl = `https://test_short_code.api.commercecloud.salesforce.com/custom/adyen-order/v1/organizations/test_org_id`
-        expect(BaseApiClient).toHaveBeenCalledWith(expectedBaseUrl)
+        expect(BaseApiClient).toHaveBeenCalledWith(expectedBaseUrl, 'RefArch')
     })
 
     describe('getOrder', () => {

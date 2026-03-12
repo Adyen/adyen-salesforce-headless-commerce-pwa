@@ -49,6 +49,9 @@ describe('authorizationWebhookHandler', () => {
         }
         res = {
             locals: {
+                adyen: {
+                    siteId: 'RefArch'
+                },
                 notification: {
                     // This is the parent object for a single notification
                     NotificationRequestItem: {

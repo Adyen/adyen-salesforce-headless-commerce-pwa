@@ -27,11 +27,12 @@ import Logger from '../models/logger.js'
  * into the order before the redirect, leaving no c_orderNo on the basket.
  * @param {string} authorization - The shopper's authorization token.
  * @param {string} customerId - The shopper's customer ID.
+ * @param {string} siteId - The site ID for the API client.
  * @returns {Promise<object|null>}
  */
-export async function getOpenOrderForShopper(authorization, customerId) {
+export async function getOpenOrderForShopper(authorization, customerId, siteId) {
     try {
-        const shopperCustomers = createShopperCustomerClient(authorization)
+        const shopperCustomers = createShopperCustomerClient(authorization, siteId)
         const result = await shopperCustomers.getCustomerOrders({
             parameters: {
                 customerId,
@@ -49,12 +50,17 @@ export async function getOpenOrderForShopper(authorization, customerId) {
 /**
  * Creates and configures an instance of the ShopperOrders API client.
  * @param {string} authorization - The shopper's authorization token.
+ * @param {string} siteId - The site ID for the API client.
  * @returns {ShopperOrders} An instance of the ShopperOrders client.
  */
-export function createShopperOrderClient(authorization) {
+export function createShopperOrderClient(authorization, siteId) {
     const {app: appConfig} = getConfig()
     return new ShopperOrders({
         ...appConfig.commerceAPI,
+        parameters: {
+            ...appConfig.commerceAPI.parameters,
+            siteId: siteId || appConfig.commerceAPI.parameters.siteId
+        },
         headers: {authorization}
     })
 }
@@ -71,8 +77,8 @@ export function createShopperOrderClient(authorization) {
  * @throws {AdyenError} If the order is not found or does not belong to the customer.
  */
 export async function failOrderAndReopenBasket(adyenContext, orderNo) {
-    const {authorization, customerId} = adyenContext
-    const shopperOrders = createShopperOrderClient(authorization)
+    const {authorization, customerId, siteId} = adyenContext
+    const shopperOrders = createShopperOrderClient(authorization, siteId)
 
     const order = await shopperOrders.getOrder({
         parameters: {
@@ -86,8 +92,8 @@ export async function failOrderAndReopenBasket(adyenContext, orderNo) {
         throw new AdyenError(ERROR_MESSAGE.INVALID_ORDER, 404)
     }
     try {
-        const shopperBaskets = createShopperBasketsClient(authorization)
-        const {baskets} = await getCustomerBaskets(authorization, customerId)
+        const shopperBaskets = createShopperBasketsClient(authorization, siteId)
+        const {baskets} = await getCustomerBaskets(authorization, customerId, siteId)
         if (baskets?.length) {
             await Promise.all(
                 baskets.map((b) =>
@@ -102,7 +108,7 @@ export async function failOrderAndReopenBasket(adyenContext, orderNo) {
         )
     }
 
-    const orderApi = new OrderApiClient()
+    const orderApi = new OrderApiClient(siteId)
     const response = await orderApi.updateOrderStatus(
         order.orderNo,
         ORDER.ORDER_STATUS_FAILED_REOPEN
@@ -113,10 +119,10 @@ export async function failOrderAndReopenBasket(adyenContext, orderNo) {
 
     try {
         const newBasket = newBasketId
-            ? await getBasket(authorization, newBasketId, customerId)
-            : await getCurrentBasketForAuthorizedShopper(authorization, customerId)
+            ? await getBasket(authorization, newBasketId, customerId, siteId)
+            : await getCurrentBasketForAuthorizedShopper(authorization, customerId, siteId)
         newBasketId = newBasket?.basketId
-        const tempContext = {authorization, basket: newBasket}
+        const tempContext = {authorization, siteId, basket: newBasket}
         const tempRes = {locals: {adyen: tempContext}}
         const basketService = new BasketService(tempContext, tempRes)
         await basketService.update({c_orderNo: ''})
@@ -137,12 +143,12 @@ export async function failOrderAndReopenBasket(adyenContext, orderNo) {
  * @returns {Promise<object>} A promise that resolves to the existing or newly created order object.
  */
 export async function createOrderUsingOrderNo(adyenContext) {
-    const {authorization, basket, customerId} = adyenContext
+    const {authorization, basket, customerId, siteId} = adyenContext
     const {c_orderNo: orderNo, basketId, currency} = basket
     if (!orderNo) {
         throw new AdyenError(ERROR_MESSAGE.ORDER_NUMBER_NOT_FOUND, 400)
     }
-    const shopperOrders = createShopperOrderClient(authorization)
+    const shopperOrders = createShopperOrderClient(authorization, siteId)
     const order = await shopperOrders.getOrder({
         parameters: {
             orderNo: orderNo
@@ -151,7 +157,7 @@ export async function createOrderUsingOrderNo(adyenContext) {
     if (order?.orderNo) {
         return order
     }
-    const customOrderApi = new CustomShopperOrderApiClient()
+    const customOrderApi = new CustomShopperOrderApiClient(siteId)
     return await customOrderApi.createOrder(authorization, basketId, customerId, orderNo, currency)
 }
 
@@ -159,52 +165,12 @@ export async function createOrderUsingOrderNo(adyenContext) {
  * Retrieves an SFCC order using its order number.
  * This function uses an admin-level API client to fetch order details.
  * @param {string} orderNo - The number of the order to retrieve.
+ * @param {string} siteId - The site ID.
  * @returns {Promise<object>} A promise that resolves to the order object.
  */
-export async function getOrderUsingOrderNo(orderNo) {
-    const customOrderApi = new CustomAdminOrderApiClient()
+export async function getOrderUsingOrderNo(orderNo, siteId) {
+    const customOrderApi = new CustomAdminOrderApiClient(siteId)
     return await customOrderApi.getOrder(orderNo)
-}
-
-/**
- * Adds a payment instrument directly to an existing SFCC order.
- * Used when the order is pre-created before the Adyen /payments call, so the basket
- * no longer exists when the payment succeeds.
- * @param {string} orderNo - The order number.
- * @param {object} amount - The Adyen amount object with value and currency.
- * @param {object} paymentMethod - The Adyen payment method object with type and optional brand.
- * @param {string} pspReference - The Adyen PSP reference.
- * @returns {Promise<object>} A promise that resolves to the created payment instrument object.
- */
-export async function addPaymentInstrumentToOrder(orderNo, amount, paymentMethod, pspReference) {
-    Logger.info('addPaymentInstrumentToOrder', `start — orderNo: ${orderNo}`)
-    const isCardPayment = paymentMethod?.type === PAYMENT_METHOD_TYPES.CREDIT_CARD
-    const paymentMethodId = isCardPayment
-        ? PAYMENT_METHODS.CREDIT_CARD
-        : PAYMENT_METHODS.ADYEN_COMPONENT
-
-    const body = {
-        amount: convertCurrencyValueToMajorUnits(amount?.value, amount?.currency),
-        paymentMethodId,
-        paymentCard: {
-            cardType: isCardPayment
-                ? getCardType(paymentMethod?.brand || paymentMethod?.srcScheme)
-                : paymentMethod?.type
-        },
-        ...(pspReference && {c_pspReference: pspReference}),
-        c_paymentMethodType: paymentMethod?.type,
-        ...((paymentMethod?.brand || paymentMethod?.srcScheme) && {
-            c_paymentMethodBrand: paymentMethod?.brand || paymentMethod?.srcScheme
-        })
-    }
-
-    const orderApi = new OrderApiClient()
-    const result = await orderApi.addPaymentInstrumentToOrder(orderNo, body)
-    Logger.info(
-        'addPaymentInstrumentToOrder',
-        `success — paymentInstrumentId: ${result?.paymentInstrumentId}`
-    )
-    return result
 }
 
 /**
@@ -215,9 +181,9 @@ export async function addPaymentInstrumentToOrder(orderNo, amount, paymentMethod
  * @returns {Promise<void>}
  */
 export async function updatePaymentInstrumentForOrder(adyenContext, orderNo, pspReference) {
-    const {authorization} = adyenContext
+    const {authorization, siteId} = adyenContext
     Logger.info('updatePaymentInstrumentForOrder', `start  — orderNo: ${orderNo}`)
-    const shopperOrders = createShopperOrderClient(authorization)
+    const shopperOrders = createShopperOrderClient(authorization, siteId)
     const order = await shopperOrders.getOrder({
         parameters: {
             orderNo: orderNo

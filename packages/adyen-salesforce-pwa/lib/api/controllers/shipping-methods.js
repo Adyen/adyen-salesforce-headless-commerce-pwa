@@ -6,7 +6,10 @@ async function getShippingMethods(req, res, next) {
 
     try {
         const {adyen: adyenContext} = res.locals
-        const shopperBaskets = createShopperBasketsClient(adyenContext.authorization)
+        const shopperBaskets = createShopperBasketsClient(
+            adyenContext.authorization,
+            adyenContext.siteId
+        )
 
         const shippingMethodsResponse = await shopperBaskets.getShippingMethodsForShipment({
             parameters: {

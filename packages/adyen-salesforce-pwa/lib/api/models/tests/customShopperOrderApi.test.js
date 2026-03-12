@@ -25,22 +25,22 @@ describe('CustomShopperOrderApiClient', () => {
     beforeEach(() => {
         // Clear all mocks before each test
         jest.clearAllMocks()
-        client = new CustomShopperOrderApiClient()
+        client = new CustomShopperOrderApiClient('RefArch')
     })
 
     describe('constructor', () => {
         it('should construct with the correct base URL', () => {
             const expectedBaseUrl = `https://test_short_code.api.commercecloud.salesforce.com/custom/adyen-shopper-order/v1/organizations/test_org_id`
-            expect(BaseApiClient).toHaveBeenCalledWith(expectedBaseUrl)
+            expect(BaseApiClient).toHaveBeenCalledWith(expectedBaseUrl, 'RefArch')
         })
 
         it('should handle different environment variables', () => {
             process.env.COMMERCE_API_SHORT_CODE = 'different_code'
             process.env.COMMERCE_API_ORG_ID = 'different_org'
 
-            new CustomShopperOrderApiClient()
+            new CustomShopperOrderApiClient('RefArch')
             const expectedBaseUrl = `https://different_code.api.commercecloud.salesforce.com/custom/adyen-shopper-order/v1/organizations/different_org`
-            expect(BaseApiClient).toHaveBeenLastCalledWith(expectedBaseUrl)
+            expect(BaseApiClient).toHaveBeenLastCalledWith(expectedBaseUrl, 'RefArch')
 
             // Restore original env
             process.env.COMMERCE_API_SHORT_CODE = 'test_short_code'

@@ -37,6 +37,7 @@ describe('BasketService', () => {
 
         mockAdyenContext = {
             authorization: 'Bearer mockToken',
+            siteId: 'RefArch',
             basket: {
                 basketId: 'mockBasketId',
                 paymentInstruments: [{paymentInstrumentId: 'pi_1'}, {paymentInstrumentId: 'pi_2'}]
@@ -69,7 +70,7 @@ describe('BasketService', () => {
 
     describe('constructor', () => {
         it('should create a shopperBaskets client with the correct authorization', () => {
-            expect(createShopperBasketsClient).toHaveBeenCalledWith('Bearer mockToken')
+            expect(createShopperBasketsClient).toHaveBeenCalledWith('Bearer mockToken', 'RefArch')
             expect(basketService.shopperBaskets).toBe(mockShopperBaskets)
         })
     })

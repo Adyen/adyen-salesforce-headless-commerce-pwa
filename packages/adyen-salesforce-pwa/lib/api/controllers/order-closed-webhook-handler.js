@@ -16,12 +16,12 @@ async function orderClosedWebhookHandler(req, res, next) {
             return next()
         }
         const orderNo = notification.merchantReference
-        const order = await getOrderUsingOrderNo(orderNo)
+        const order = await getOrderUsingOrderNo(orderNo, res.locals.adyen.siteId)
         if (!order?.orderNo) {
             Logger.info(notification.eventCode, `Order ${orderNo} was not found.`)
             return next()
         }
-        const orderApi = new OrderApiClient()
+        const orderApi = new OrderApiClient(res.locals.adyen.siteId)
         if (notification.success === NOTIFICATION_SUCCESS.TRUE) {
             Logger.info(notification.eventCode, `ORDER_CLOSED for order ${orderNo} was successful.`)
             await orderApi.updateOrderConfirmationStatus(

@@ -30,7 +30,8 @@ describe('paymentCancel Controller', () => {
                 adyen: {
                     basket: {},
                     authorization: 'Bearer test-token',
-                    customerId: 'customer123'
+                    customerId: 'customer123',
+                    siteId: 'RefArch'
                 }
             }
         }
@@ -101,7 +102,11 @@ describe('paymentCancel Controller', () => {
 
             await paymentCancel(req, res, next)
 
-            expect(getOpenOrderForShopper).toHaveBeenCalledWith('Bearer test-token', 'customer123')
+            expect(getOpenOrderForShopper).toHaveBeenCalledWith(
+                'Bearer test-token',
+                'customer123',
+                'RefArch'
+            )
             expect(failOrderAndReopenBasket).toHaveBeenCalledWith(
                 res.locals.adyen,
                 'OPEN-ORDER-123'
@@ -117,7 +122,11 @@ describe('paymentCancel Controller', () => {
 
             await paymentCancel(req, res, next)
 
-            expect(getOpenOrderForShopper).toHaveBeenCalledWith('Bearer test-token', 'customer123')
+            expect(getOpenOrderForShopper).toHaveBeenCalledWith(
+                'Bearer test-token',
+                'customer123',
+                'RefArch'
+            )
             expect(revertCheckoutState).toHaveBeenCalledWith(res.locals.adyen, 'paymentCancel')
             expect(failOrderAndReopenBasket).not.toHaveBeenCalled()
             expect(res.locals.response).toEqual({})
@@ -154,7 +163,11 @@ describe('paymentCancel Controller', () => {
 
             await paymentCancel(req, res, next)
 
-            expect(getOpenOrderForShopper).toHaveBeenCalledWith('Bearer test-token', 'customer123')
+            expect(getOpenOrderForShopper).toHaveBeenCalledWith(
+                'Bearer test-token',
+                'customer123',
+                'RefArch'
+            )
             expect(revertCheckoutState).not.toHaveBeenCalled()
             expect(failOrderAndReopenBasket).not.toHaveBeenCalled()
             expect(Logger.info).toHaveBeenCalledWith(
@@ -171,7 +184,11 @@ describe('paymentCancel Controller', () => {
 
             await paymentCancel(req, res, next)
 
-            expect(getOpenOrderForShopper).toHaveBeenCalledWith('Bearer test-token', 'customer123')
+            expect(getOpenOrderForShopper).toHaveBeenCalledWith(
+                'Bearer test-token',
+                'customer123',
+                'RefArch'
+            )
             expect(revertCheckoutState).not.toHaveBeenCalled()
             expect(failOrderAndReopenBasket).not.toHaveBeenCalled()
             expect(Logger.info).toHaveBeenCalledWith(
@@ -234,7 +251,11 @@ describe('paymentCancel Controller', () => {
 
             await paymentCancel(req, res, next)
 
-            expect(getOpenOrderForShopper).toHaveBeenCalledWith('Bearer test-token', 'customer123')
+            expect(getOpenOrderForShopper).toHaveBeenCalledWith(
+                'Bearer test-token',
+                'customer123',
+                'RefArch'
+            )
             expect(Logger.info).toHaveBeenCalledWith(
                 'paymentCancel',
                 'no abandoned payment found — skipping'

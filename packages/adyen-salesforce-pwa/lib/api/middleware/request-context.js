@@ -45,17 +45,21 @@ export async function prepareRequestContext(req, res, next) {
 
     try {
         const [basketResult, customer] = await Promise.all([
-            getBasket(authorization, basketid.trim(), customerid.trim()).catch((err) => {
+            getBasket(authorization, basketid.trim(), customerid.trim(), siteId).catch((err) => {
                 if (err?.statusCode === 404) {
                     Logger.info(
                         `prepareRequestContext for ${route}`,
                         `Basket ${basketid} not found, falling back to current basket`
                     )
-                    return getCurrentBasketForAuthorizedShopper(authorization, customerid.trim())
+                    return getCurrentBasketForAuthorizedShopper(
+                        authorization,
+                        customerid.trim(),
+                        siteId
+                    )
                 }
                 throw err
             }),
-            getCustomer(authorization, customerid.trim())
+            getCustomer(authorization, customerid.trim(), siteId)
         ])
         const basket = basketResult
         const adyenConfig = getAdyenConfigForCurrentSite(siteId)
