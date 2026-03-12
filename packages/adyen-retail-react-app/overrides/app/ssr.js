@@ -51,7 +51,8 @@ const {handler} = runtime.createHandler(options, (app) => {
                         '*.payments-amazon.com',
                         'https://www.paypalobjects.com/js-sdk-logos/2.2.7/paypal-blue.svg',
                         'https://*.cash.app',
-                        'https://*.gstatic.com'
+                        'https://*.gstatic.com',
+                        '*.cdn-apple.com'
                     ],
                     'script-src': [
                         "'self'",
