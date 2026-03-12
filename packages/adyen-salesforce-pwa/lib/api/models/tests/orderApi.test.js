@@ -5,7 +5,7 @@ describe('OrderApiClient', () => {
     let mockCallAdminApi
 
     beforeEach(() => {
-        orderApiClient = new OrderApiClient()
+        orderApiClient = new OrderApiClient('RefArch')
         mockCallAdminApi = jest.fn()
         orderApiClient._callAdminApi = mockCallAdminApi
     })

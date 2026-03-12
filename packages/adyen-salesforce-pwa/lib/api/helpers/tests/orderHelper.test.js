@@ -4,17 +4,11 @@ import {
     failOrderAndReopenBasket,
     getOrderUsingOrderNo,
     getOpenOrderForShopper,
-    addPaymentInstrumentToOrder,
     updatePaymentInstrumentForOrder
 } from '../orderHelper.js'
 import {ShopperOrders} from 'commerce-sdk-isomorphic'
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
-import {
-    ERROR_MESSAGE,
-    ORDER,
-    PAYMENT_METHOD_TYPES,
-    PAYMENT_METHODS
-} from '../../../utils/constants.mjs'
+import {ERROR_MESSAGE, ORDER, PAYMENT_METHOD_TYPES} from '../../../utils/constants.mjs'
 import {OrderApiClient} from '../../models/orderApi.js'
 import {CustomShopperOrderApiClient} from '../../models/customShopperOrderApi.js'
 import {CustomAdminOrderApiClient} from '../../models/customAdminOrderApi.js'
@@ -25,8 +19,6 @@ import {
 } from '../basketHelper.js'
 import {getCustomerBaskets, createShopperCustomerClient} from '../customerHelper.js'
 import {BasketService} from '../../models/basketService.js'
-import {convertCurrencyValueToMajorUnits} from '../../../utils/parsers.mjs'
-import {getCardType} from '../../../utils/getCardType.mjs'
 import Logger from '../../models/logger.js'
 
 // Mock dependencies
@@ -44,8 +36,6 @@ jest.mock('../../models/customAdminOrderApi.js')
 jest.mock('../basketHelper.js')
 jest.mock('../customerHelper.js')
 jest.mock('../../models/basketService.js')
-jest.mock('../../../utils/parsers.mjs')
-jest.mock('../../../utils/getCardType.mjs')
 jest.mock('../../models/logger.js')
 
 describe('orderHelper', () => {
@@ -141,7 +131,8 @@ describe('orderHelper', () => {
         const mockUpdateOrderStatus = jest.fn()
         const mockAdyenContext = {
             authorization: 'auth',
-            customerId: 'customer-abc'
+            customerId: 'customer-abc',
+            siteId: 'RefArch'
         }
 
         beforeEach(() => {
@@ -269,7 +260,8 @@ describe('orderHelper', () => {
         const mockAdyenContext = {
             authorization: 'auth',
             basket: {c_orderNo: 'order123', basketId: 'basket-abc', currency: 'USD'},
-            customerId: 'customer-abc'
+            customerId: 'customer-abc',
+            siteId: 'RefArch'
         }
 
         beforeEach(() => {
@@ -337,105 +329,6 @@ describe('orderHelper', () => {
             expect(CustomAdminOrderApiClient).toHaveBeenCalled()
             expect(mockGetOrder).toHaveBeenCalledWith('admin-order-123')
             expect(result).toEqual(mockOrder)
-        })
-    })
-
-    describe('addPaymentInstrumentToOrder', () => {
-        let mockAddPaymentInstrumentToOrder
-
-        beforeEach(() => {
-            mockAddPaymentInstrumentToOrder = jest.fn()
-            OrderApiClient.mockImplementation(() => ({
-                addPaymentInstrumentToOrder: mockAddPaymentInstrumentToOrder
-            }))
-            convertCurrencyValueToMajorUnits.mockReturnValue('100.00')
-        })
-
-        it('should add payment instrument for credit card payment', async () => {
-            const mockResult = {paymentInstrumentId: 'pi-123'}
-            mockAddPaymentInstrumentToOrder.mockResolvedValue(mockResult)
-            getCardType.mockReturnValue('visa')
-
-            const result = await addPaymentInstrumentToOrder(
-                'order-123',
-                {value: 10000, currency: 'USD'},
-                {type: PAYMENT_METHOD_TYPES.CREDIT_CARD, brand: 'visa'},
-                'psp-ref-456'
-            )
-
-            expect(convertCurrencyValueToMajorUnits).toHaveBeenCalledWith(10000, 'USD')
-            expect(getCardType).toHaveBeenCalledWith('visa')
-            expect(mockAddPaymentInstrumentToOrder).toHaveBeenCalledWith('order-123', {
-                amount: '100.00',
-                paymentMethodId: PAYMENT_METHODS.CREDIT_CARD,
-                paymentCard: {cardType: 'visa'},
-                c_pspReference: 'psp-ref-456',
-                c_paymentMethodType: PAYMENT_METHOD_TYPES.CREDIT_CARD,
-                c_paymentMethodBrand: 'visa'
-            })
-            expect(Logger.info).toHaveBeenCalledWith(
-                'addPaymentInstrumentToOrder',
-                expect.stringContaining('success — paymentInstrumentId: pi-123')
-            )
-            expect(result).toEqual(mockResult)
-        })
-
-        it('should add payment instrument for component payment', async () => {
-            const mockResult = {paymentInstrumentId: 'pi-456'}
-            mockAddPaymentInstrumentToOrder.mockResolvedValue(mockResult)
-
-            const result = await addPaymentInstrumentToOrder(
-                'order-123',
-                {value: 5000, currency: 'EUR'},
-                {type: 'ideal'},
-                'psp-ref-789'
-            )
-
-            expect(mockAddPaymentInstrumentToOrder).toHaveBeenCalledWith('order-123', {
-                amount: '100.00', // Mocked value
-                paymentMethodId: PAYMENT_METHODS.ADYEN_COMPONENT,
-                paymentCard: {cardType: 'ideal'},
-                c_pspReference: 'psp-ref-789',
-                c_paymentMethodType: 'ideal'
-            })
-            expect(result).toEqual(mockResult)
-        })
-
-        it('should handle payment without pspReference', async () => {
-            const mockResult = {paymentInstrumentId: 'pi-789'}
-            mockAddPaymentInstrumentToOrder.mockResolvedValue(mockResult)
-
-            await addPaymentInstrumentToOrder(
-                'order-123',
-                {value: 2000, currency: 'GBP'},
-                {type: 'paypal'},
-                null
-            )
-
-            const expectedBody = mockAddPaymentInstrumentToOrder.mock.calls[0][1]
-            expect(expectedBody.c_pspReference).toBeUndefined()
-        })
-
-        it('should handle srcScheme for card payments', async () => {
-            const mockResult = {paymentInstrumentId: 'pi-999'}
-            mockAddPaymentInstrumentToOrder.mockResolvedValue(mockResult)
-            getCardType.mockReturnValue('mc')
-
-            await addPaymentInstrumentToOrder(
-                'order-123',
-                {value: 3000, currency: 'USD'},
-                {type: PAYMENT_METHOD_TYPES.CREDIT_CARD, srcScheme: 'mc'},
-                'psp-ref-111'
-            )
-
-            expect(getCardType).toHaveBeenCalledWith('mc')
-            expect(mockAddPaymentInstrumentToOrder).toHaveBeenCalledWith(
-                'order-123',
-                expect.objectContaining({
-                    paymentCard: {cardType: 'mc'},
-                    c_paymentMethodBrand: 'mc'
-                })
-            )
         })
     })
 

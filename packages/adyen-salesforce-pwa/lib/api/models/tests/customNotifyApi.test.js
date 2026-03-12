@@ -8,17 +8,19 @@ describe('CustomNotifyApiClient', () => {
 
     beforeEach(() => {
         jest.clearAllMocks()
-        BaseApiClient.mockImplementation(function (baseUrl) {
+        BaseApiClient.mockImplementation(function (baseUrl, siteId) {
             this.baseUrl = baseUrl
+            this.siteId = siteId
             this._callAdminApi = jest.fn()
         })
-        client = new CustomNotifyApiClient()
+        client = new CustomNotifyApiClient('RefArch')
     })
 
     describe('constructor', () => {
         it('should call BaseApiClient with the correct base URL', () => {
             expect(BaseApiClient).toHaveBeenCalledWith(
-                `https://${process.env.COMMERCE_API_SHORT_CODE}.api.commercecloud.salesforce.com/custom/adyen-notify/v1/organizations/${process.env.COMMERCE_API_ORG_ID}`
+                `https://${process.env.COMMERCE_API_SHORT_CODE}.api.commercecloud.salesforce.com/custom/adyen-notify/v1/organizations/${process.env.COMMERCE_API_ORG_ID}`,
+                'RefArch'
             )
         })
     })

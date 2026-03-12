@@ -46,6 +46,10 @@ describe('basketHelper', () => {
             expect(getConfig).toHaveBeenCalled()
             expect(ShopperBasketsV2).toHaveBeenCalledWith({
                 ...mockConfig.app.commerceAPI,
+                parameters: {
+                    ...mockConfig.app.commerceAPI.parameters,
+                    siteId: undefined
+                },
                 headers: {authorization: mockAuth}
             })
         })
