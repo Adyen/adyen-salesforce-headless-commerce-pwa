@@ -27,6 +27,7 @@ import Logger from '../models/logger.js'
  * into the order before the redirect, leaving no c_orderNo on the basket.
  * @param {string} authorization - The shopper's authorization token.
  * @param {string} customerId - The shopper's customer ID.
+ * @param {string} siteId - The site ID for the API client.
  * @returns {Promise<object|null>}
  */
 export async function getOpenOrderForShopper(authorization, customerId, siteId) {
