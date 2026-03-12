@@ -27,6 +27,20 @@ async function _cleanupBasket(adyenContext) {
 }
 
 /**
+ * Clears only the gift-card-specific basket attributes and payment instruments after
+ * a partial payment order is cancelled.
+ * @param {object} adyenContext - The request context from `res.locals.adyen`.
+ * @private
+ */
+async function _cleanupGiftCardOrder(adyenContext) {
+    await adyenContext.basketService.update({
+        c_orderData: '',
+        c_giftCardCheckBalance: ''
+    })
+    await adyenContext.basketService.removeAllPaymentInstruments()
+}
+
+/**
  * Cancels an existing Adyen partial payment order and resets the basket state.
  * @param {object} adyenContext - The request context from `res.locals.adyen`.
  * @param {object} order - The Adyen order object to be canceled.
@@ -47,7 +61,7 @@ export async function cancelAdyenOrder(adyenContext, order) {
 
     if (response.resultCode === 'Received') {
         Logger.info('cancelAdyenOrder', 'Resetting basket state')
-        await _cleanupBasket(adyenContext)
+        await _cleanupGiftCardOrder(adyenContext)
     }
 
     Logger.info('cancelAdyenOrder', 'success')
