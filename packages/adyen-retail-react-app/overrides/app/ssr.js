@@ -78,7 +78,8 @@ const {handler} = runtime.createHandler(options, (app) => {
                         'https://www.sandbox.paypal.com/xoplatform/logger/api/logger?disableSetCookie=true',
                         '*.google.com',
                         '*.mastercard.com',
-                        '*.visa.com'
+                        '*.visa.com',
+                        '*.cdn-apple.com'
                     ],
                     'frame-src': [
                         "'self'",
@@ -87,7 +88,8 @@ const {handler} = runtime.createHandler(options, (app) => {
                         '*.google.com',
                         'https://sandbox.kit.cash.app',
                         '*.mastercard.com',
-                        '*.visa.com'
+                        '*.visa.com',
+                        '*.cdn-apple.com'
                     ],
                     /* -----------------Adyen End ------------------------ */
                     // Do not upgrade insecure requests for local development
