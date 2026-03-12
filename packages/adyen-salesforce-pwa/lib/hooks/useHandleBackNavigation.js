@@ -103,13 +103,29 @@ const useHandleBackNavigation = ({
     }, [checkForAbandonedPayment])
 
     const hasMountCheckedRef = useRef(false)
+    const pendingAuthCheckRef = useRef(false)
     useEffect(() => {
         if (!enabled || !basketId || hasMountCheckedRef.current) {
             return
         }
         hasMountCheckedRef.current = true
+        if (!authToken) {
+            const urlParams = new URLSearchParams(window.location.search)
+            if (urlParams.get('orderNo')) {
+                pendingAuthCheckRef.current = true
+            }
+            return
+        }
         checkForAbandonedPaymentRef.current()
     }, [basketId, enabled])
+
+    useEffect(() => {
+        if (!authToken || !pendingAuthCheckRef.current) {
+            return
+        }
+        pendingAuthCheckRef.current = false
+        checkForAbandonedPaymentRef.current()
+    }, [authToken])
 
     useEffect(() => {
         if (!enabled || !basketId) {
@@ -118,16 +134,25 @@ const useHandleBackNavigation = ({
 
         const handlePageShow = async (event) => {
             if (event.persisted) {
-                await checkForAbandonedPayment()
+                await checkForAbandonedPaymentRef.current()
+            }
+        }
+
+        const handlePopState = async () => {
+            const urlParams = new URLSearchParams(window.location.search)
+            if (urlParams.get('orderNo')) {
+                await checkForAbandonedPaymentRef.current()
             }
         }
 
         window.addEventListener('pageshow', handlePageShow)
+        window.addEventListener('popstate', handlePopState)
 
         return () => {
             window.removeEventListener('pageshow', handlePageShow)
+            window.removeEventListener('popstate', handlePopState)
         }
-    }, [basketId, enabled, checkForAbandonedPayment])
+    }, [basketId, enabled])
 
     return {
         error,

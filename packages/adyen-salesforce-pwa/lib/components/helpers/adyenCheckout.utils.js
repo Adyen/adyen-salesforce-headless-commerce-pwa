@@ -44,7 +44,9 @@ export const mountCheckoutComponent = (
     checkout,
     paymentContainer,
     paymentMethodsConfiguration,
-    optionalDropinConfiguration
+    optionalDropinConfiguration,
+    amount,
+    order
 ) => {
     if (adyenAction) {
         const action = JSON.parse(atob(adyenAction))
@@ -53,7 +55,9 @@ export const mountCheckoutComponent = (
 
     return new Dropin(checkout, {
         ...optionalDropinConfiguration,
-        paymentMethodsConfiguration
+        paymentMethodsConfiguration,
+        ...(amount && {amount}),
+        ...(order && {order})
     }).mount(paymentContainer.current)
 }
 
