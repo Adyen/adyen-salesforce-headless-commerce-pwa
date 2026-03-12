@@ -1,5 +1,5 @@
 import fetch from 'node-fetch'
-
+import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 /**
  * A base class for creating Salesforce Commerce API clients.
  * It handles admin token authentication, caching, and provides a protected method for making API calls.
@@ -21,6 +21,25 @@ export class BaseApiClient {
             throw new Error('baseUrl is required to instantiate an API client.')
         }
         this.#baseUrl = baseUrl
+    }
+
+    /**
+     * Builds a sanitized URL for the given path, appending the siteId query parameter.
+     * The path is sanitized to prevent path traversal and URL injection attacks.
+     * Any query string embedded in path is discarded; siteId is always the sole query parameter.
+     * @param {string} path - The API endpoint path.
+     * @returns {string} The fully constructed URL.
+     * @private
+     */
+    #buildUrl(path) {
+        const siteId = getConfig().app.commerceAPI.parameters.siteId
+        const sanitizedPath = path
+            .split('?')[0]
+            .split('/')
+            .filter((segment) => segment !== '' && segment !== '..')
+            .map(encodeURIComponent)
+            .join('/')
+        return `${this.#baseUrl}/${sanitizedPath}?siteId=${encodeURIComponent(siteId)}`
     }
 
     /**
@@ -76,7 +95,7 @@ export class BaseApiClient {
      */
     async _callAdminApi(method, path, options) {
         const token = await this.#getAdminAuthToken()
-        const url = `${this.#baseUrl}/${path}?siteId=${process.env.COMMERCE_API_SITE_ID}`
+        const url = this.#buildUrl(path)
 
         const response = await fetch(url, {
             method: method,
@@ -108,7 +127,7 @@ export class BaseApiClient {
      * @protected
      */
     async _callShopperApi(method, path, options) {
-        const url = `${this.#baseUrl}/${path}?siteId=${process.env.COMMERCE_API_SITE_ID}`
+        const url = this.#buildUrl(path)
 
         const response = await fetch(url, {
             method: method,

@@ -35,7 +35,11 @@ module.exports = {
     clearMocks: true,
     restoreMocks: true,
     resetModules: true,
-    setupFilesAfterEnv: ['jest-extended/all', '@testing-library/jest-dom'],
+    setupFilesAfterEnv: [
+        'jest-extended/all',
+        '@testing-library/jest-dom',
+        './__mocks__/ssrConfigSetup.js'
+    ],
     setupFiles: ['./__mocks__/mockEnv.js'],
     verbose: true,
     transformIgnorePatterns: ['/node_modules/@adyen/adyen-web']
