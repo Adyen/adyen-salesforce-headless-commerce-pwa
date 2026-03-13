@@ -8,10 +8,9 @@ import {PaymentCancelService} from '../services/payment-cancel'
  * @property {string} customerId - The customer ID.
  * @property {string} basketId - The basket ID.
  * @property {object} site - The site configuration object.
- * @property {function} refetchBasket - Function to refetch the basket data.
- * @property {string[]} [paymentDataFields=['c_paymentData', 'c_pspReference']] - Basket fields that indicate active payment data.
  * @property {string[]} [redirectParams=['redirectResult', 'sessionId']] - URL params that indicate a valid redirect return.
  * @property {boolean} [enabled=true] - Whether detection is enabled.
+ * @property {function} navigate - React Router navigate function.
  */
 
 /**
@@ -33,7 +32,7 @@ import {PaymentCancelService} from '../services/payment-cancel'
  *   customerId,
  *   basketId: basket?.basketId,
  *   site,
- *   refetchBasket
+ *   navigate
  * })
  */
 const useHandleBackNavigation = ({
@@ -41,18 +40,12 @@ const useHandleBackNavigation = ({
     customerId,
     basketId,
     site,
-    refetchBasket,
-    paymentDataFields = ['c_paymentData', 'c_pspReference'],
+    navigate,
     redirectParams = ['redirectResult', 'sessionId'],
     enabled = true
 }) => {
     const [error, setError] = useState(null)
     const isProcessingRef = useRef(false)
-    const refetchBasketRef = useRef(refetchBasket)
-
-    useEffect(() => {
-        refetchBasketRef.current = refetchBasket
-    }, [refetchBasket])
 
     const checkForAbandonedPayment = useCallback(async () => {
         if (isProcessingRef.current || !enabled || !authToken || !basketId) {
@@ -66,21 +59,8 @@ const useHandleBackNavigation = ({
             return false
         }
 
+        const orderNo = urlParams.get('orderNo')
         try {
-            const refetchResult = await refetchBasketRef.current()
-
-            const freshBasket = refetchResult?.data?.baskets?.[0]
-
-            if (!freshBasket || refetchResult?.data?.total === 0) {
-                return false
-            }
-
-            const hasPaymentData = paymentDataFields.some((field) => freshBasket[field])
-
-            if (!hasPaymentData) {
-                return false
-            }
-
             isProcessingRef.current = true
             setError(null)
 
@@ -90,10 +70,22 @@ const useHandleBackNavigation = ({
                 basketId,
                 site
             )
+            const cancelResponse = await paymentCancelService.cancelAbandonedPayment(
+                'abandoned_session',
+                orderNo
+            )
 
-            await paymentCancelService.cancelAbandonedPayment('abandoned_session')
+            if (cancelResponse?.cancelled === false) {
+                return false
+            }
 
-            window.location.reload()
+            const cleanParams = new URLSearchParams(window.location.search)
+            cleanParams.delete('orderNo')
+
+            if (cancelResponse?.newBasketId) {
+                cleanParams.set('newBasketId', cancelResponse.newBasketId)
+            }
+            navigate(`/checkout?${cleanParams.toString()}`)
 
             return true
         } catch (err) {
@@ -103,7 +95,37 @@ const useHandleBackNavigation = ({
         } finally {
             isProcessingRef.current = false
         }
-    }, [enabled, authToken, customerId, basketId, site, paymentDataFields, redirectParams])
+    }, [enabled, authToken, customerId, basketId, site, navigate, redirectParams])
+
+    const checkForAbandonedPaymentRef = useRef(checkForAbandonedPayment)
+    useEffect(() => {
+        checkForAbandonedPaymentRef.current = checkForAbandonedPayment
+    }, [checkForAbandonedPayment])
+
+    const hasMountCheckedRef = useRef(false)
+    const pendingAuthCheckRef = useRef(false)
+    useEffect(() => {
+        if (!enabled || !basketId || hasMountCheckedRef.current) {
+            return
+        }
+        hasMountCheckedRef.current = true
+        if (!authToken) {
+            const urlParams = new URLSearchParams(window.location.search)
+            if (urlParams.get('orderNo')) {
+                pendingAuthCheckRef.current = true
+            }
+            return
+        }
+        checkForAbandonedPaymentRef.current()
+    }, [basketId, enabled])
+
+    useEffect(() => {
+        if (!authToken || !pendingAuthCheckRef.current) {
+            return
+        }
+        pendingAuthCheckRef.current = false
+        checkForAbandonedPaymentRef.current()
+    }, [authToken])
 
     useEffect(() => {
         if (!enabled || !basketId) {
@@ -112,16 +134,25 @@ const useHandleBackNavigation = ({
 
         const handlePageShow = async (event) => {
             if (event.persisted) {
-                await checkForAbandonedPayment()
+                await checkForAbandonedPaymentRef.current()
+            }
+        }
+
+        const handlePopState = async () => {
+            const urlParams = new URLSearchParams(window.location.search)
+            if (urlParams.get('orderNo')) {
+                await checkForAbandonedPaymentRef.current()
             }
         }
 
         window.addEventListener('pageshow', handlePageShow)
+        window.addEventListener('popstate', handlePopState)
 
         return () => {
             window.removeEventListener('pageshow', handlePageShow)
+            window.removeEventListener('popstate', handlePopState)
         }
-    }, [basketId, enabled, checkForAbandonedPayment])
+    }, [basketId, enabled])
 
     return {
         error,

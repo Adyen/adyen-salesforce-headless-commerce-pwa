@@ -1,3 +1,5 @@
+import packageJson from '../../package.json' with {type: 'json'}
+
 export const PAYMENT_METHODS = {
     ADYEN_COMPONENT: 'AdyenComponent',
     CREDIT_CARD: 'CREDIT_CARD'
@@ -100,6 +102,7 @@ export const ERROR_MESSAGE = {
     UNAUTHORIZED: 'unauthorized',
     ORDER_ALREADY_EXISTS: 'order already exists',
     ORDER_NOT_FOUND: 'order not found',
+    ORDER_NUMBER_NOT_FOUND: 'order number not found on basket',
     PAYMENTS_DETAILS_NOT_SUCCESSFUL: 'payments details call not successful',
     BASKET_CHANGED: 'basket changed',
     AMOUNTS_DONT_MATCH: 'amounts do not match',
@@ -128,4 +131,4 @@ export const ADYEN_ENVIRONMENT = {
     TEST: 'TEST'
 }
 
-export const APPLICATION_VERSION = '4.2.0'
+export const APPLICATION_VERSION = packageJson.version

@@ -41,11 +41,15 @@ describe('basketHelper', () => {
             getConfig.mockReturnValue(mockConfig)
 
             const mockAuth = 'Bearer mockToken'
-            createShopperBasketsClient(mockAuth)
+            createShopperBasketsClient(mockAuth, 'RefArch')
 
             expect(getConfig).toHaveBeenCalled()
             expect(ShopperBasketsV2).toHaveBeenCalledWith({
                 ...mockConfig.app.commerceAPI,
+                parameters: {
+                    ...mockConfig.app.commerceAPI.parameters,
+                    siteId: 'RefArch'
+                },
                 headers: {authorization: mockAuth}
             })
         })
@@ -67,7 +71,7 @@ describe('basketHelper', () => {
             }
             mockGetBasket.mockResolvedValue(mockBasket)
 
-            const result = await getBasket('auth', 'basket123', 'customer-abc')
+            const result = await getBasket('auth', 'basket123', 'customer-abc', 'RefArch')
 
             expect(mockGetBasket).toHaveBeenCalledWith({parameters: {basketId: 'basket123'}})
             expect(result).toEqual(mockBasket)
@@ -76,7 +80,7 @@ describe('basketHelper', () => {
         it('should throw AdyenError if basket is not found', async () => {
             mockGetBasket.mockResolvedValue(null)
 
-            await expect(getBasket('auth', 'basket123', 'customer-abc')).rejects.toThrow(
+            await expect(getBasket('auth', 'basket123', 'customer-abc', 'RefArch')).rejects.toThrow(
                 new AdyenError(ERROR_MESSAGE.INVALID_BASKET, 404)
             )
         })
@@ -88,48 +92,42 @@ describe('basketHelper', () => {
             }
             mockGetBasket.mockResolvedValue(mockBasket)
 
-            await expect(getBasket('auth', 'basket123', 'customer-abc')).rejects.toThrow(
+            await expect(getBasket('auth', 'basket123', 'customer-abc', 'RefArch')).rejects.toThrow(
                 new AdyenError(ERROR_MESSAGE.INVALID_BASKET, 404, mockBasket)
             )
         })
     })
 
     describe('getCurrentBasketForAuthorizedShopper', () => {
-        const mockGetCustomerBaskets = jest.fn()
-
-        beforeEach(() => {
-            ShopperBasketsV2.mockImplementation(() => ({
-                getCustomerBaskets: mockGetCustomerBaskets
-            }))
-        })
-
         it('should return the first basket if found', async () => {
             const mockBaskets = {
                 baskets: [{basketId: 'basket1'}, {basketId: 'basket2'}]
             }
-            mockGetCustomerBaskets.mockResolvedValue(mockBaskets)
+            getCustomerBaskets.mockResolvedValue(mockBaskets)
 
-            const result = await getCurrentBasketForAuthorizedShopper('auth', 'customer-abc')
+            const result = await getCurrentBasketForAuthorizedShopper(
+                'auth',
+                'customer-abc',
+                'RefArch'
+            )
 
-            expect(mockGetCustomerBaskets).toHaveBeenCalledWith({
-                parameters: {customerId: 'customer-abc'}
-            })
+            expect(getCustomerBaskets).toHaveBeenCalledWith('auth', 'customer-abc', 'RefArch')
             expect(result).toEqual({basketId: 'basket1'})
         })
 
         it('should throw AdyenError if no baskets property is returned', async () => {
-            mockGetCustomerBaskets.mockResolvedValue({})
+            getCustomerBaskets.mockResolvedValue({})
 
             await expect(
-                getCurrentBasketForAuthorizedShopper('auth', 'customer-abc')
+                getCurrentBasketForAuthorizedShopper('auth', 'customer-abc', 'RefArch')
             ).rejects.toThrow(new AdyenError(ERROR_MESSAGE.INVALID_BASKET, 404))
         })
 
         it('should throw AdyenError if the baskets array is empty', async () => {
-            mockGetCustomerBaskets.mockResolvedValue({baskets: []})
+            getCustomerBaskets.mockResolvedValue({baskets: []})
 
             await expect(
-                getCurrentBasketForAuthorizedShopper('auth', 'customer-abc')
+                getCurrentBasketForAuthorizedShopper('auth', 'customer-abc', 'RefArch')
             ).rejects.toThrow(new AdyenError(ERROR_MESSAGE.INVALID_BASKET, 404))
         })
     })
@@ -155,9 +153,13 @@ describe('basketHelper', () => {
             getCustomerBaskets.mockResolvedValue(mockBaskets)
             mockShopperBaskets.deleteBasket.mockResolvedValue({})
 
-            await removeExistingTemporaryBaskets('Bearer mockToken', 'mockCustomerId')
+            await removeExistingTemporaryBaskets('Bearer mockToken', 'mockCustomerId', 'RefArch')
 
-            expect(getCustomerBaskets).toHaveBeenCalledWith('Bearer mockToken', 'mockCustomerId')
+            expect(getCustomerBaskets).toHaveBeenCalledWith(
+                'Bearer mockToken',
+                'mockCustomerId',
+                'RefArch'
+            )
             expect(mockShopperBaskets.deleteBasket).toHaveBeenCalledTimes(2)
             expect(mockShopperBaskets.deleteBasket).toHaveBeenCalledWith({
                 parameters: {basketId: 'temp1'}
@@ -171,7 +173,20 @@ describe('basketHelper', () => {
             getCustomerBaskets.mockResolvedValue({
                 baskets: [{basketId: 'nontemp', temporaryBasket: false}]
             })
-            await removeExistingTemporaryBaskets('Bearer mockToken', 'mockCustomerId')
+            await removeExistingTemporaryBaskets('Bearer mockToken', 'mockCustomerId', 'RefArch')
+            expect(mockShopperBaskets.deleteBasket).not.toHaveBeenCalled()
+        })
+
+        it('should handle errors gracefully', async () => {
+            getCustomerBaskets.mockRejectedValue(new Error('fetch failed'))
+            await expect(
+                removeExistingTemporaryBaskets('Bearer mockToken', 'mockCustomerId', 'RefArch')
+            ).resolves.not.toThrow()
+        })
+
+        it('should handle undefined baskets array', async () => {
+            getCustomerBaskets.mockResolvedValue({})
+            await removeExistingTemporaryBaskets('Bearer mockToken', 'mockCustomerId', 'RefArch')
             expect(mockShopperBaskets.deleteBasket).not.toHaveBeenCalled()
         })
     })
@@ -190,7 +205,11 @@ describe('basketHelper', () => {
             const created = {basketId: 'newTemp', temporary: true}
             mockShopperBaskets.createBasket.mockResolvedValue(created)
 
-            const result = await createTemporaryBasket('Bearer mockToken', 'mockCustomerId')
+            const result = await createTemporaryBasket(
+                'Bearer mockToken',
+                'mockCustomerId',
+                'RefArch'
+            )
 
             expect(mockShopperBaskets.createBasket).toHaveBeenCalledWith({
                 parameters: {temporary: true},

@@ -18,8 +18,10 @@ export class PaymentCancelService {
         if (res.status >= 300) {
             const errorData = await res
                 .json()
-                .catch(() => ({message: 'Payment cancellation failed'}))
-            throw new Error(errorData.message || `Payment cancel failed with status ${res.status}`)
+                .catch(() => ({errorMessage: 'Payment cancellation failed'}))
+            throw new Error(
+                errorData.errorMessage || `Payment cancel failed with status ${res.status}`
+            )
         }
         return await res.json()
     }
@@ -31,17 +33,18 @@ export class PaymentCancelService {
      * @returns {Promise<object>} The cancellation response.
      * @throws {Error} If the request fails with status >= 300.
      */
-    async cancelAbandonedPayment(reason = 'abandoned_session') {
+    async cancelAbandonedPayment(reason = 'abandoned_session', orderNo) {
         const res = await this.apiClient.post({
             path: '/cancel',
-            body: JSON.stringify({reason})
+            body: JSON.stringify({reason, ...(orderNo && {orderNo})})
         })
         if (res.status >= 300) {
             const errorData = await res
                 .json()
-                .catch(() => ({message: 'Abandoned payment cancellation failed'}))
+                .catch(() => ({errorMessage: 'Abandoned payment cancellation failed'}))
             throw new Error(
-                errorData.message || `Abandoned payment cancel failed with status ${res.status}`
+                errorData.errorMessage ||
+                    `Abandoned payment cancel failed with status ${res.status}`
             )
         }
         return await res.json()

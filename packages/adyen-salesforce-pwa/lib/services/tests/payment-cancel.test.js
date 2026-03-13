@@ -70,6 +70,26 @@ describe('PaymentCancelService', () => {
             expect(mockPost).toHaveBeenCalledTimes(1)
         })
 
+        it('should use fallback message when json parsing fails on error response', async () => {
+            mockPost.mockResolvedValue({
+                status: 500,
+                json: jest.fn().mockRejectedValue(new Error('parse error'))
+            })
+            await expect(paymentCancelService.paymentCancel(orderNo)).rejects.toThrow(
+                'Payment cancellation failed'
+            )
+        })
+
+        it('should use status-based message when no message in error json', async () => {
+            mockPost.mockResolvedValue({
+                status: 503,
+                json: jest.fn().mockResolvedValue({})
+            })
+            await expect(paymentCancelService.paymentCancel(orderNo)).rejects.toThrow(
+                'Payment cancel failed with status 503'
+            )
+        })
+
         it('should propagate errors if the apiClient.post call itself rejects', async () => {
             const networkError = new Error('Network request failed')
             mockPost.mockRejectedValue(networkError)
@@ -78,6 +98,148 @@ describe('PaymentCancelService', () => {
                 'Network request failed'
             )
             await expect(paymentCancelService.paymentCancel(orderNo)).rejects.toBe(networkError)
+        })
+
+        it('should throw error with errorMessage from response', async () => {
+            const mockErrorResponse = {
+                status: 400,
+                json: jest.fn().mockResolvedValue({errorMessage: 'Custom error message'})
+            }
+            mockPost.mockResolvedValue(mockErrorResponse)
+
+            await expect(paymentCancelService.paymentCancel(orderNo)).rejects.toThrow(
+                'Custom error message'
+            )
+        })
+
+        it('should throw default error message when json parsing fails', async () => {
+            const mockErrorResponse = {
+                status: 500,
+                json: jest.fn().mockRejectedValue(new Error('Parse error'))
+            }
+            mockPost.mockResolvedValue(mockErrorResponse)
+
+            await expect(paymentCancelService.paymentCancel(orderNo)).rejects.toThrow(
+                'Payment cancellation failed'
+            )
+        })
+    })
+
+    describe('cancelAbandonedPayment', () => {
+        it('should return the JSON response on a successful API call with default reason', async () => {
+            const mockSuccessPayload = {cancelled: true}
+            const mockApiResponse = {
+                status: 200,
+                json: jest.fn().mockResolvedValue(mockSuccessPayload)
+            }
+            mockPost.mockResolvedValue(mockApiResponse)
+
+            const result = await paymentCancelService.cancelAbandonedPayment()
+
+            expect(mockPost).toHaveBeenCalledTimes(1)
+            expect(mockPost).toHaveBeenCalledWith({
+                path: '/cancel',
+                body: JSON.stringify({reason: 'abandoned_session'})
+            })
+            expect(result).toEqual(mockSuccessPayload)
+        })
+
+        it('should return the JSON response with custom reason', async () => {
+            const mockSuccessPayload = {cancelled: true}
+            const mockApiResponse = {
+                status: 200,
+                json: jest.fn().mockResolvedValue(mockSuccessPayload)
+            }
+            mockPost.mockResolvedValue(mockApiResponse)
+
+            const result = await paymentCancelService.cancelAbandonedPayment('user_cancelled')
+
+            expect(mockPost).toHaveBeenCalledWith({
+                path: '/cancel',
+                body: JSON.stringify({reason: 'user_cancelled'})
+            })
+            expect(result).toEqual(mockSuccessPayload)
+        })
+
+        it('should include orderNo when provided', async () => {
+            const mockSuccessPayload = {cancelled: true}
+            const mockApiResponse = {
+                status: 200,
+                json: jest.fn().mockResolvedValue(mockSuccessPayload)
+            }
+            mockPost.mockResolvedValue(mockApiResponse)
+
+            const result = await paymentCancelService.cancelAbandonedPayment(
+                'abandoned_session',
+                'ORDER-123'
+            )
+
+            expect(mockPost).toHaveBeenCalledWith({
+                path: '/cancel',
+                body: JSON.stringify({reason: 'abandoned_session', orderNo: 'ORDER-123'})
+            })
+            expect(result).toEqual(mockSuccessPayload)
+        })
+
+        it('should not include orderNo when null', async () => {
+            const mockSuccessPayload = {cancelled: true}
+            const mockApiResponse = {
+                status: 200,
+                json: jest.fn().mockResolvedValue(mockSuccessPayload)
+            }
+            mockPost.mockResolvedValue(mockApiResponse)
+
+            await paymentCancelService.cancelAbandonedPayment('abandoned_session', null)
+
+            expect(mockPost).toHaveBeenCalledWith({
+                path: '/cancel',
+                body: JSON.stringify({reason: 'abandoned_session'})
+            })
+        })
+
+        it('should throw an error on a failed API call (status >= 300)', async () => {
+            const mockErrorResponse = {
+                status: 400,
+                json: jest.fn().mockResolvedValue({errorMessage: 'Abandoned cancel error'})
+            }
+            mockPost.mockResolvedValue(mockErrorResponse)
+
+            await expect(
+                paymentCancelService.cancelAbandonedPayment('abandoned_session')
+            ).rejects.toThrow('Abandoned cancel error')
+        })
+
+        it('should throw default error message when json parsing fails', async () => {
+            const mockErrorResponse = {
+                status: 500,
+                json: jest.fn().mockRejectedValue(new Error('Parse error'))
+            }
+            mockPost.mockResolvedValue(mockErrorResponse)
+
+            await expect(
+                paymentCancelService.cancelAbandonedPayment('abandoned_session')
+            ).rejects.toThrow('Abandoned payment cancellation failed')
+        })
+
+        it('should throw error with status code when error message is not available', async () => {
+            const mockErrorResponse = {
+                status: 404,
+                json: jest.fn().mockResolvedValue({})
+            }
+            mockPost.mockResolvedValue(mockErrorResponse)
+
+            await expect(
+                paymentCancelService.cancelAbandonedPayment('abandoned_session')
+            ).rejects.toThrow('Abandoned payment cancel failed with status 404')
+        })
+
+        it('should propagate errors if the apiClient.post call itself rejects', async () => {
+            const networkError = new Error('Network request failed')
+            mockPost.mockRejectedValue(networkError)
+
+            await expect(
+                paymentCancelService.cancelAbandonedPayment('abandoned_session')
+            ).rejects.toThrow('Network request failed')
         })
     })
 })

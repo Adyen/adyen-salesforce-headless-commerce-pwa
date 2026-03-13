@@ -8,9 +8,9 @@ export class OrderApiClient extends BaseApiClient {
     /**
      * @constructor
      */
-    constructor() {
+    constructor(siteId) {
         const baseUrl = `https://${process.env.COMMERCE_API_SHORT_CODE}.api.commercecloud.salesforce.com/checkout/orders/v1/organizations/${process.env.COMMERCE_API_ORG_ID}/orders`
-        super(baseUrl)
+        super(baseUrl, siteId)
     }
 
     /**

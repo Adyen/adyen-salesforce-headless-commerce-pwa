@@ -18,13 +18,15 @@ jest.mock('../../models/orderApi', () => {
     }
 })
 
+const mockGetOrderUsingOrderNo = jest.fn(() => ({
+    orderNo: '00007503',
+    total: 25.0,
+    currency: 'EUR'
+}))
+
 jest.mock('../../helpers/orderHelper.js', () => {
     return {
-        getOrderUsingOrderNo: jest.fn(() => ({
-            orderNo: '00007503',
-            total: 25.0,
-            currency: 'EUR'
-        }))
+        getOrderUsingOrderNo: (...args) => mockGetOrderUsingOrderNo(...args)
     }
 })
 describe('authorizationWebhookHandler', () => {
@@ -47,6 +49,9 @@ describe('authorizationWebhookHandler', () => {
         }
         res = {
             locals: {
+                adyen: {
+                    siteId: 'RefArch'
+                },
                 notification: {
                     // This is the parent object for a single notification
                     NotificationRequestItem: {
@@ -120,6 +125,14 @@ describe('authorizationWebhookHandler', () => {
         expect(res.locals.response).toBeUndefined()
         expect(next).toHaveBeenCalled()
     })
+    it('calls next without updating order when order is not found', async () => {
+        mockGetOrderUsingOrderNo.mockResolvedValueOnce(null)
+        await authorizationWebhookHandler(req, res, next)
+        expect(mockUpdateOrderConfirmationStatus).not.toHaveBeenCalled()
+        expect(mockUpdateOrderPaymentStatus).not.toHaveBeenCalled()
+        expect(next).toHaveBeenCalled()
+    })
+
     it('return error if order update fails', async () => {
         mockUpdateOrderConfirmationStatus.mockRejectedValueOnce(
             new Error('order confirmation failed')

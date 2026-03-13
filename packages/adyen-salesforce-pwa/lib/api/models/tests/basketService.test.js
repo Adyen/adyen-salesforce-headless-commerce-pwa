@@ -37,6 +37,7 @@ describe('BasketService', () => {
 
         mockAdyenContext = {
             authorization: 'Bearer mockToken',
+            siteId: 'RefArch',
             basket: {
                 basketId: 'mockBasketId',
                 paymentInstruments: [{paymentInstrumentId: 'pi_1'}, {paymentInstrumentId: 'pi_2'}]
@@ -69,7 +70,7 @@ describe('BasketService', () => {
 
     describe('constructor', () => {
         it('should create a shopperBaskets client with the correct authorization', () => {
-            expect(createShopperBasketsClient).toHaveBeenCalledWith('Bearer mockToken')
+            expect(createShopperBasketsClient).toHaveBeenCalledWith('Bearer mockToken', 'RefArch')
             expect(basketService.shopperBaskets).toBe(mockShopperBaskets)
         })
     })
@@ -117,6 +118,67 @@ describe('BasketService', () => {
             expect(result).toEqual(updated)
         })
 
+        it('should add item with optionItems as array', async () => {
+            const updated = {basketId: 'mockBasketId', productItems: []}
+            mockShopperBaskets.addItemToBasket.mockResolvedValue(updated)
+
+            await basketService.addProductToBasket('mockBasketId', {
+                id: 'SKU',
+                quantity: 1,
+                optionItems: [{optionId: 'opt1'}]
+            })
+
+            expect(mockShopperBaskets.addItemToBasket).toHaveBeenCalledWith({
+                parameters: {basketId: 'mockBasketId'},
+                body: [{productId: 'SKU', quantity: 1, optionItems: [{optionId: 'opt1'}]}]
+            })
+        })
+
+        it('should wrap non-array optionItems in an array', async () => {
+            const updated = {basketId: 'mockBasketId', productItems: []}
+            mockShopperBaskets.addItemToBasket.mockResolvedValue(updated)
+
+            await basketService.addProductToBasket('mockBasketId', {
+                id: 'SKU',
+                quantity: 1,
+                optionItems: {optionId: 'opt1'}
+            })
+
+            expect(mockShopperBaskets.addItemToBasket).toHaveBeenCalledWith({
+                parameters: {basketId: 'mockBasketId'},
+                body: [{productId: 'SKU', quantity: 1, optionItems: [{optionId: 'opt1'}]}]
+            })
+        })
+
+        it('should include inventoryId when provided', async () => {
+            const updated = {basketId: 'mockBasketId', productItems: []}
+            mockShopperBaskets.addItemToBasket.mockResolvedValue(updated)
+
+            await basketService.addProductToBasket('mockBasketId', {
+                id: 'SKU',
+                quantity: 1,
+                inventoryId: 'inv1'
+            })
+
+            expect(mockShopperBaskets.addItemToBasket).toHaveBeenCalledWith({
+                parameters: {basketId: 'mockBasketId'},
+                body: [{productId: 'SKU', quantity: 1, inventoryId: 'inv1'}]
+            })
+        })
+
+        it('should not update context when basketId does not match', async () => {
+            const updated = {basketId: 'otherBasketId', productItems: []}
+            mockShopperBaskets.addItemToBasket.mockResolvedValue(updated)
+
+            const result = await basketService.addProductToBasket('otherBasketId', {
+                id: 'SKU',
+                quantity: 1
+            })
+
+            expect(result).toEqual(updated)
+            expect(mockRes.locals.adyen.basket).not.toEqual(updated)
+        })
+
         it('should throw on missing params', async () => {
             await expect(
                 basketService.addProductToBasket('', {id: 'SKU', quantity: 1})
@@ -152,6 +214,18 @@ describe('BasketService', () => {
                 })
             )
             expect(mockRes.locals.adyen.basket).toEqual(mockUpdatedBasket)
+        })
+
+        it('should throw when amount is missing', async () => {
+            await expect(
+                basketService.addPaymentInstrument(null, {type: 'scheme'}, 'psp123')
+            ).rejects.toThrow()
+        })
+
+        it('should throw when paymentMethod is missing', async () => {
+            await expect(
+                basketService.addPaymentInstrument({value: 100, currency: 'USD'}, null, 'psp123')
+            ).rejects.toThrow()
         })
 
         it('should correctly add a component payment instrument', async () => {
@@ -247,6 +321,32 @@ describe('BasketService', () => {
 
             expect(mockShopperBaskets.updateShippingAddressForShipment).toHaveBeenCalledWith({
                 body: expect.any(Object),
+                parameters: {basketId: 'mockBasketId', shipmentId: 'me'}
+            })
+            expect(mockRes.locals.adyen.basket).toEqual(mockUpdatedBasket)
+            expect(result).toEqual(mockUpdatedBasket)
+        })
+    })
+
+    describe('removeShippingAddress', () => {
+        it('should call updateShippingAddressForShipment with null values and update context', async () => {
+            const mockUpdatedBasket = {basketId: 'mockBasketId', shipments: [{}]}
+            mockShopperBaskets.updateShippingAddressForShipment.mockResolvedValue(mockUpdatedBasket)
+
+            const result = await basketService.removeShippingAddress()
+
+            expect(mockShopperBaskets.updateShippingAddressForShipment).toHaveBeenCalledWith({
+                body: {
+                    address1: null,
+                    city: null,
+                    countryCode: null,
+                    postalCode: null,
+                    stateCode: null,
+                    firstName: null,
+                    fullName: null,
+                    lastName: null,
+                    phone: null
+                },
                 parameters: {basketId: 'mockBasketId', shipmentId: 'me'}
             })
             expect(mockRes.locals.adyen.basket).toEqual(mockUpdatedBasket)

@@ -1,4 +1,5 @@
-import React, {useEffect, useRef, useMemo, useCallback} from 'react'
+import React, {useEffect, useRef, useMemo, useCallback, useState} from 'react'
+import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 import PropTypes from 'prop-types'
 import {AdyenCheckout, PayPal} from '@adyen/adyen-web'
 import '../style/adyenCheckout.css'
@@ -25,8 +26,6 @@ import {paypalExpressConfig} from './paypal/expressConfig'
  *
  * @component
  * @param {object} props - Component properties
- * @param {string} props.authToken - Authentication token for API requests
- * @param {string} [props.customerId] - Customer ID for the current shopper
  * @param {object} props.locale - Locale object with id property (e.g., {id: 'en-US'})
  * @param {object} props.site - Site configuration object
  * @param {object} props.basket - Shopping basket/cart object
@@ -51,7 +50,6 @@ import {paypalExpressConfig} from './paypal/expressConfig'
  *
  * @example
  * <PayPalExpressComponent
- *   authToken={token}
  *   locale={{id: 'en-US'}}
  *   site={siteConfig}
  *   basket={currentBasket}
@@ -66,8 +64,6 @@ const PayPalExpressComponent = ({
     basket,
 
     // User data
-    authToken,
-    customerId,
     site,
     locale,
     navigate,
@@ -104,6 +100,19 @@ const PayPalExpressComponent = ({
     currency,
     product
 }) => {
+    const customerId = useCustomerId()
+    const {getTokenWhenReady} = useAccessToken()
+    const [authToken, setAuthToken] = useState()
+
+    useEffect(() => {
+        const getToken = async () => {
+            const token = await getTokenWhenReady()
+            setAuthToken(token)
+        }
+
+        getToken()
+    }, [])
+
     const isPdp = type === 'pdp'
     const shopperBasket = useMemo(
         () => (isPdp ? {currency, orderTotal: product?.price * (product?.quantity || 1)} : basket),
@@ -320,8 +329,6 @@ const PayPalExpressComponent = ({
 }
 
 PayPalExpressComponent.propTypes = {
-    authToken: PropTypes.string.isRequired,
-    customerId: PropTypes.string,
     locale: PropTypes.object.isRequired,
     site: PropTypes.object.isRequired,
     basket: PropTypes.object,
@@ -346,8 +353,6 @@ PayPalExpressComponent.propTypes = {
 
 export default React.memo(PayPalExpressComponent, (prevProps, nextProps) => {
     return (
-        prevProps.authToken === nextProps.authToken &&
-        prevProps.customerId === nextProps.customerId &&
         prevProps.locale?.id === nextProps.locale?.id &&
         prevProps.site?.id === nextProps.site?.id &&
         prevProps.basket?.basketId === nextProps.basket?.basketId &&

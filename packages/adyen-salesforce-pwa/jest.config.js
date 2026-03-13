@@ -10,6 +10,12 @@ module.exports = {
     moduleFileExtensions: ['js', 'jsx', 'mjs', 'cjs'],
     coverageThreshold: {
         global: {
+            branches: 85,
+            functions: 85,
+            lines: 85,
+            statements: 85
+        },
+        './lib/**/*.{js,jsx,mjs,cjs}': {
             branches: 70,
             functions: 70,
             lines: 70,
@@ -29,7 +35,11 @@ module.exports = {
     clearMocks: true,
     restoreMocks: true,
     resetModules: true,
-    setupFilesAfterEnv: ['jest-extended/all', '@testing-library/jest-dom'],
+    setupFilesAfterEnv: [
+        'jest-extended/all',
+        '@testing-library/jest-dom',
+        './__mocks__/ssrConfigSetup.js'
+    ],
     setupFiles: ['./__mocks__/mockEnv.js'],
     verbose: true,
     transformIgnorePatterns: ['/node_modules/@adyen/adyen-web']

@@ -42,7 +42,8 @@ describe('paypalUpdateOrder controller', () => {
                     }
                 ]
             },
-            authorization: 'Bearer test-token'
+            authorization: 'Bearer test-token',
+            siteId: 'RefArch'
         }
 
         req = {
@@ -107,7 +108,7 @@ describe('paypalUpdateOrder controller', () => {
             expect(Logger.info).toHaveBeenCalledWith('paypalUpdateOrder', 'start')
             expect(Logger.info).toHaveBeenCalledWith('paypalUpdateOrder', 'success')
 
-            expect(createShopperBasketsClient).toHaveBeenCalledWith('Bearer test-token')
+            expect(createShopperBasketsClient).toHaveBeenCalledWith('Bearer test-token', 'RefArch')
 
             expect(mockShopperBaskets.getShippingMethodsForShipment).toHaveBeenCalledWith({
                 parameters: {

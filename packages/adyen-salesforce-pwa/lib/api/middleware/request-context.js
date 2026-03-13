@@ -1,6 +1,6 @@
 import {AdyenError} from '../models/AdyenError.js'
 import {ERROR_MESSAGE} from '../../utils/constants.mjs'
-import {getBasket} from '../helpers/basketHelper.js'
+import {getBasket, getCurrentBasketForAuthorizedShopper} from '../helpers/basketHelper.js'
 import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrentSite.mjs'
 import Logger from '../models/logger.js'
 import {BasketService} from '../models/basketService.js'
@@ -44,10 +44,24 @@ export async function prepareRequestContext(req, res, next) {
     }
 
     try {
-        const [basket, customer] = await Promise.all([
-            getBasket(authorization, basketid.trim(), customerid.trim()),
-            getCustomer(authorization, customerid.trim())
+        const [basketResult, customer] = await Promise.all([
+            getBasket(authorization, basketid.trim(), customerid.trim(), siteId).catch((err) => {
+                if (err?.statusCode === 404) {
+                    Logger.info(
+                        `prepareRequestContext for ${route}`,
+                        `Basket ${basketid} not found, falling back to current basket`
+                    )
+                    return getCurrentBasketForAuthorizedShopper(
+                        authorization,
+                        customerid.trim(),
+                        siteId
+                    )
+                }
+                throw err
+            }),
+            getCustomer(authorization, customerid.trim(), siteId)
         ])
+        const basket = basketResult
         const adyenConfig = getAdyenConfigForCurrentSite(siteId)
 
         const adyenContext = {

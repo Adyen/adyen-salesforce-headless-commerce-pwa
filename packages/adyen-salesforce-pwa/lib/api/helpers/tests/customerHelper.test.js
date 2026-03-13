@@ -1,4 +1,4 @@
-import {createShopperCustomerClient, getCustomer} from '../customerHelper.js'
+import {createShopperCustomerClient, getCustomer, getCustomerBaskets} from '../customerHelper.js'
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 import {ShopperCustomers} from 'commerce-sdk-isomorphic'
 import {AdyenError} from '../../models/AdyenError.js'
@@ -35,10 +35,14 @@ describe('customerHelper', () => {
         it('should create a new ShopperCustomers client with correct configuration', () => {
             const authToken = 'test-auth-token'
 
-            createShopperCustomerClient(authToken)
+            createShopperCustomerClient(authToken, 'RefArch')
 
             expect(ShopperCustomers).toHaveBeenCalledWith({
                 ...mockConfig.app.commerceAPI,
+                parameters: {
+                    ...mockConfig.app.commerceAPI.parameters,
+                    siteId: 'RefArch'
+                },
                 headers: {authorization: authToken}
             })
         })
@@ -59,7 +63,7 @@ describe('customerHelper', () => {
         it('should return customer data when customer exists', async () => {
             mockClient.getCustomer.mockResolvedValue(mockCustomer)
 
-            const result = await getCustomer(authToken, customerId)
+            const result = await getCustomer(authToken, customerId, 'RefArch')
 
             expect(mockClient.getCustomer).toHaveBeenCalledWith({
                 parameters: {customerId}
@@ -70,24 +74,50 @@ describe('customerHelper', () => {
         it('should throw AdyenError with 404 when customer is not found', async () => {
             mockClient.getCustomer.mockResolvedValue(null)
 
-            await expect(getCustomer(authToken, 'non-existent-id')).rejects.toThrow(AdyenError)
-
-            await expect(getCustomer(authToken, 'non-existent-id')).rejects.toHaveProperty(
-                'statusCode',
-                404
+            await expect(getCustomer(authToken, 'non-existent-id', 'RefArch')).rejects.toThrow(
+                AdyenError
             )
 
-            await expect(getCustomer(authToken, 'non-existent-id')).rejects.toHaveProperty(
-                'message',
-                ERROR_MESSAGE.CUSTOMER_NOT_FOUND
-            )
+            await expect(
+                getCustomer(authToken, 'non-existent-id', 'RefArch')
+            ).rejects.toHaveProperty('statusCode', 404)
+
+            await expect(
+                getCustomer(authToken, 'non-existent-id', 'RefArch')
+            ).rejects.toHaveProperty('message', ERROR_MESSAGE.CUSTOMER_NOT_FOUND)
         })
 
         it('should propagate errors from the API client', async () => {
             const apiError = new Error('API Error')
             mockClient.getCustomer.mockRejectedValue(apiError)
 
-            await expect(getCustomer(authToken, customerId)).rejects.toThrow(apiError)
+            await expect(getCustomer(authToken, customerId, 'RefArch')).rejects.toThrow(apiError)
+        })
+    })
+
+    describe('getCustomerBaskets', () => {
+        const authToken = 'test-auth-token'
+        const customerId = 'test-customer-id'
+        let mockClient
+
+        beforeEach(() => {
+            mockClient = {
+                getCustomerBaskets: jest.fn()
+            }
+            ShopperCustomers.mockImplementation(() => mockClient)
+        })
+
+        it('should return customer baskets', async () => {
+            getConfig.mockReturnValue(mockConfig)
+            const mockBaskets = {baskets: [{basketId: 'b1'}]}
+            mockClient.getCustomerBaskets.mockResolvedValue(mockBaskets)
+
+            const result = await getCustomerBaskets(authToken, customerId, 'RefArch')
+
+            expect(mockClient.getCustomerBaskets).toHaveBeenCalledWith({
+                parameters: {customerId}
+            })
+            expect(result).toEqual(mockBaskets)
         })
     })
 })

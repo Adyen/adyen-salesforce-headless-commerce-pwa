@@ -1,4 +1,5 @@
 import React, {useEffect, useRef, useMemo, useCallback, useState} from 'react'
+import {useAccessToken, useCustomerId, useCustomerType} from '@salesforce/commerce-sdk-react'
 import PropTypes from 'prop-types'
 import '../style/adyenCheckout.css'
 import {
@@ -6,9 +7,11 @@ import {
     handleRedirects,
     mountCheckoutComponent
 } from './helpers/adyenCheckout.utils'
+import {getAmount} from './helpers/baseConfig'
 import {paymentMethodsConfiguration as getPaymentMethodsConfig} from './paymentMethodsConfiguration'
 import useAdyenEnvironment from '../hooks/useAdyenEnvironment'
 import useAdyenPaymentMethods from '../hooks/useAdyenPaymentMethods'
+import useAdyenOrderNumber from '../hooks/useAdyenOrderNumber'
 import PAGE_TYPES from '../utils/pageTypes.mjs'
 
 const AdyenCheckoutComponent = ({
@@ -17,12 +20,9 @@ const AdyenCheckoutComponent = ({
     returnUrl,
 
     // User data
-    authToken,
-    customerId,
-    isCustomerRegistered = false,
     merchantDisplayName = '',
-    site,
     locale,
+    site,
     navigate,
 
     // Page context
@@ -49,12 +49,28 @@ const AdyenCheckoutComponent = ({
     const paymentContainer = useRef(null)
     const checkoutRef = useRef(null)
     const dropinRef = useRef(null)
+    const adyenOrderRef = useRef(null)
     const [isLoading, setIsLoading] = useState(false)
     const [adyenStateData, setAdyenStateData] = useState(null)
     const [internalOrderNo, setInternalOrderNo] = useState(null)
     const [internalAdyenOrder, setInternalAdyenOrder] = useState(null)
     const [internalAdyenAction, setInternalAdyenAction] = useState(null)
     const [componentKey, setComponentKey] = useState(0)
+
+    const customerId = useCustomerId()
+    const customerTypeData = useCustomerType()
+    const isCustomerRegistered = customerTypeData.isRegistered
+    const {getTokenWhenReady} = useAccessToken()
+    const [authToken, setAuthToken] = useState()
+
+    useEffect(() => {
+        const getToken = async () => {
+            const token = await getTokenWhenReady()
+            setAuthToken(token)
+        }
+
+        getToken()
+    }, [])
 
     // Fetch Adyen environment configuration
     const {
@@ -84,14 +100,53 @@ const AdyenCheckoutComponent = ({
         skip: !callPaymentMethodsOnPages.includes(page)
     })
 
-    // Update  orderNo when basket changes
+    // Fetch a fresh order number if the basket does not already have one.
+    const {
+        orderNo: fetchedOrderNo,
+        error: orderNumberError,
+        isLoading: fetchingOrderNumber
+    } = useAdyenOrderNumber({
+        authToken,
+        customerId,
+        basketId: basket?.basketId,
+        site,
+        existingOrderNo: basket?.c_orderNo,
+        skip: page !== PAGE_TYPES.CHECKOUT
+    })
+
+    // Sync order number into internal state from either the basket or the fetch result
     useEffect(() => {
-        if (basket?.c_orderNo) {
-            if (basket?.c_orderNo && basket?.c_orderNo !== internalOrderNo) {
-                setInternalOrderNo(basket?.c_orderNo)
-            }
+        const resolvedOrderNo = basket?.c_orderNo || fetchedOrderNo
+        if (resolvedOrderNo && resolvedOrderNo !== internalOrderNo) {
+            setInternalOrderNo(resolvedOrderNo)
         }
-    }, [basket?.c_orderNo])
+    }, [basket?.c_orderNo, fetchedOrderNo])
+
+    const setAdyenOrder = useCallback((order) => {
+        adyenOrderRef.current = order
+        setInternalAdyenOrder(order)
+    }, [])
+
+    const resetDropin = useCallback(() => {
+        setComponentKey((prev) => prev + 1)
+    }, [])
+
+    const resetDropinTimerRef = useRef(null)
+
+    // Remount the dropin when the adyen order changes (e.g. after giftcard applied).
+    // Debounced to avoid racing remounts when orderData and remainingAmount change in sequence
+    // (create-order fires first with full amount, then payments fires with the deducted amount).
+    useEffect(() => {
+        if (!dropinRef.current) return
+        if (resetDropinTimerRef.current) clearTimeout(resetDropinTimerRef.current)
+        resetDropinTimerRef.current = setTimeout(() => {
+            resetDropinTimerRef.current = null
+            resetDropin()
+        }, 50)
+        return () => {
+            if (resetDropinTimerRef.current) clearTimeout(resetDropinTimerRef.current)
+        }
+    }, [internalAdyenOrder?.orderData, internalAdyenOrder?.remainingAmount?.value])
 
     // Update internal adyen order when basket changes
     useEffect(() => {
@@ -101,7 +156,7 @@ const AdyenCheckoutComponent = ({
                 c_orderData?.orderData &&
                 c_orderData?.orderData !== internalAdyenOrder?.orderData
             ) {
-                setInternalAdyenOrder(c_orderData)
+                setAdyenOrder(c_orderData)
             }
         }
     }, [basket?.c_orderData])
@@ -156,9 +211,10 @@ const AdyenCheckoutComponent = ({
             orderNo: internalOrderNo,
             returnUrl,
             customerId,
-            setAdyenOrder: setInternalAdyenOrder,
+            setAdyenOrder: setAdyenOrder,
             setAdyenAction: setInternalAdyenAction,
             setOrderNo: setInternalOrderNo,
+            resetDropin: resetDropin,
             navigate,
             onError,
             afterSubmit,
@@ -176,6 +232,7 @@ const AdyenCheckoutComponent = ({
         site?.id,
         basket?.basketId,
         internalAdyenOrder?.orderData,
+        internalAdyenOrder?.remainingAmount?.value,
         internalOrderNo,
         returnUrl,
         customerId,
@@ -193,7 +250,8 @@ const AdyenCheckoutComponent = ({
             !adyenEnvironment ||
             !paymentContainer.current ||
             fetchingEnvironment ||
-            fetchingPaymentMethods
+            fetchingPaymentMethods ||
+            fetchingOrderNumber
         ) {
             return
         }
@@ -208,6 +266,12 @@ const AdyenCheckoutComponent = ({
         if (adyenPaymentMethodsError) {
             console.error('Error fetching Adyen payment methods:', adyenPaymentMethodsError)
             onError.forEach((cb) => cb(adyenPaymentMethodsError))
+            return
+        }
+
+        if (orderNumberError) {
+            console.error('Error fetching order number:', orderNumberError)
+            onError.forEach((cb) => cb(orderNumberError))
             return
         }
 
@@ -229,7 +293,8 @@ const AdyenCheckoutComponent = ({
                     paymentMethodsConfiguration,
                     adyenEnvironment,
                     adyenPaymentMethods,
-                    adyenOrder: internalAdyenOrder,
+                    adyenOrder: adyenOrderRef.current,
+                    basket,
                     getTranslations: getTranslations,
                     locale,
                     setAdyenStateData: handleStateChange,
@@ -247,12 +312,15 @@ const AdyenCheckoutComponent = ({
                 )
 
                 if (!isRedirect && !dropinRef.current) {
+                    const mountAmount = getAmount({basket, adyenOrder: adyenOrderRef.current})
                     dropinRef.current = mountCheckoutComponent(
                         internalAdyenAction,
                         checkoutRef.current,
                         paymentContainer,
                         paymentMethodsConfiguration,
-                        dropinConfiguration
+                        dropinConfiguration,
+                        mountAmount,
+                        adyenOrderRef.current
                     )
                 }
             } catch (error) {
@@ -283,16 +351,15 @@ const AdyenCheckoutComponent = ({
         adyenEnvironment?.ADYEN_ENVIRONMENT,
         adyenEnvironment?.ADYEN_CLIENT_KEY,
         adyenPaymentMethods?.paymentMethods,
+        fetchingOrderNumber,
         internalAdyenAction,
-        internalAdyenOrder?.orderData,
         componentKey
     ])
 
     return (
         <>
-            {(isLoading || fetchingEnvironment || fetchingPaymentMethods) && spinner && (
-                <>{spinner}</>
-            )}
+            {(isLoading || fetchingEnvironment || fetchingPaymentMethods || fetchingOrderNumber) &&
+                spinner && <>{spinner}</>}
             <div ref={paymentContainer}></div>
         </>
     )
@@ -300,7 +367,6 @@ const AdyenCheckoutComponent = ({
 
 AdyenCheckoutComponent.propTypes = {
     // Required props
-    authToken: PropTypes.string.isRequired,
     site: PropTypes.object.isRequired,
     locale: PropTypes.object.isRequired,
     navigate: PropTypes.func.isRequired,
@@ -310,8 +376,6 @@ AdyenCheckoutComponent.propTypes = {
     returnUrl: PropTypes.string,
 
     // User data
-    customerId: PropTypes.string,
-    isCustomerRegistered: PropTypes.bool,
     merchantDisplayName: PropTypes.string,
 
     // Page context
@@ -339,7 +403,6 @@ export default React.memo(AdyenCheckoutComponent, (prevProps, nextProps) => {
     return (
         prevProps.basket?.basketId === nextProps.basket?.basketId &&
         prevProps.basket?.c_orderData === nextProps.basket?.c_orderData &&
-        prevProps.authToken === nextProps.authToken &&
         prevProps.site?.id === nextProps.site?.id &&
         prevProps.locale?.id === nextProps.locale?.id
     )

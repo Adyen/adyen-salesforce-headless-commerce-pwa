@@ -17,9 +17,9 @@ export class AdyenShopperDetailsService {
         if (res.status >= 300) {
             const errorData = await res
                 .json()
-                .catch(() => ({message: 'Failed to update shopper details'}))
+                .catch(() => ({errorMessage: 'Failed to update shopper details'}))
             throw new Error(
-                errorData.message || `Update shopper details failed with status ${res.status}`
+                errorData.errorMessage || `Update shopper details failed with status ${res.status}`
             )
         }
         return await res.json()
