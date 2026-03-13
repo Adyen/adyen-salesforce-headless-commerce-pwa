@@ -32,12 +32,17 @@ import {useAccessToken, useCustomerId, useCustomerType} from '@salesforce/commer
 import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
 import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
 import LoadingSpinner from '@salesforce/retail-react-app/app/components/loading-spinner'
-import {AdyenCheckout, pageTypes} from '@adyen/adyen-salesforce-pwa'
+import {
+    AdyenCheckout,
+    pageTypes,
+    useHandleBackNavigation,
+    useCheckoutErrorRecovery
+} from '@adyen/adyen-salesforce-pwa'
 /* -----------------Adyen End ------------------------ */
 
 const Payment = () => {
     const {formatMessage} = useIntl()
-    const {data: basket} = useCurrentBasket()
+    const {data: basket, refetch: refetchBasket} = useCurrentBasket()
     const customerId = useCustomerId()
     const customerTypeData = useCustomerType()
     const {getTokenWhenReady} = useAccessToken()
@@ -53,6 +58,19 @@ const Payment = () => {
 
         getToken()
     }, [])
+
+    useHandleBackNavigation({
+        authToken,
+        customerId,
+        basketId: basket?.basketId,
+        site,
+        navigate
+    })
+
+    const {adyenCheckoutKey, isRefetchingBasket} = useCheckoutErrorRecovery({
+        refetchBasket,
+        navigate
+    })
 
     const isPickupOnly =
         basket?.shipments?.length > 0 &&
@@ -147,25 +165,27 @@ const Payment = () => {
                 </Box>
 
                 <Stack spacing={6}>
-                    <AdyenCheckout
-                        // Required props
-                        authToken={authToken}
-                        site={site}
-                        locale={locale}
-                        navigate={navigate}
-                        basket={basket}
-                        // Optional
-                        page={pageTypes.CHECKOUT}
-                        customerId={customerId}
-                        isCustomerRegistered={customerTypeData.isRegistered}
-                        merchantDisplayName={'Merchant name'}
-                        paymentMethodsConfiguration={paymentMethodsConfiguration}
-                        // Callbacks
-                        beforeSubmit={[onBillingSubmit]}
-                        onError={[showError]}
-                        // UI
-                        spinner={<LoadingSpinner />}
-                    />
+                    {isRefetchingBasket ? (
+                        <LoadingSpinner />
+                    ) : (
+                        <AdyenCheckout
+                            key={adyenCheckoutKey}
+                            // Required props
+                            site={site}
+                            locale={locale}
+                            navigate={navigate}
+                            basket={basket}
+                            // Optional
+                            page={pageTypes.CHECKOUT}
+                            merchantDisplayName={'Merchant name'}
+                            paymentMethodsConfiguration={paymentMethodsConfiguration}
+                            // Callbacks
+                            beforeSubmit={[onBillingSubmit]}
+                            onError={[showError]}
+                            // UI
+                            spinner={<LoadingSpinner />}
+                        />
+                    )}
 
                     <Divider borderColor="gray.100" />
 

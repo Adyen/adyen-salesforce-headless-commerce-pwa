@@ -9,9 +9,6 @@ jest.mock('../../models/logger')
 jest.mock('../../models/adyenClientProvider')
 jest.mock('../../../utils/parsers.mjs')
 jest.mock('../../helpers/basketHelper.js')
-jest.mock('uuid', () => ({
-    v4: jest.fn(() => 'test-uuid-1234')
-}))
 
 describe('paypalUpdateOrder controller', () => {
     let req
@@ -45,7 +42,8 @@ describe('paypalUpdateOrder controller', () => {
                     }
                 ]
             },
-            authorization: 'Bearer test-token'
+            authorization: 'Bearer test-token',
+            siteId: 'RefArch'
         }
 
         req = {
@@ -110,7 +108,7 @@ describe('paypalUpdateOrder controller', () => {
             expect(Logger.info).toHaveBeenCalledWith('paypalUpdateOrder', 'start')
             expect(Logger.info).toHaveBeenCalledWith('paypalUpdateOrder', 'success')
 
-            expect(createShopperBasketsClient).toHaveBeenCalledWith('Bearer test-token')
+            expect(createShopperBasketsClient).toHaveBeenCalledWith('Bearer test-token', 'RefArch')
 
             expect(mockShopperBaskets.getShippingMethodsForShipment).toHaveBeenCalledWith({
                 parameters: {
@@ -157,7 +155,7 @@ describe('paypalUpdateOrder controller', () => {
                     }
                 },
                 {
-                    idempotencyKey: 'test-uuid-1234'
+                    idempotencyKey: '3ccb057cc831f6702e89044cea7322b6'
                 }
             )
 

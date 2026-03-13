@@ -12,7 +12,8 @@ const scriptsConfig = {
     entry: {
         'include-env': './lib/scripts/include-env.js',
         'get-env': './lib/scripts/get-env.js',
-        'upload-env': './lib/scripts/upload-env.js'
+        'upload-env': './lib/scripts/upload-env.js',
+        'update-notifier': './lib/scripts/update-notifier.js'
     },
     output: {
         path: path.resolve(__dirname, 'dist/scripts'),
@@ -76,7 +77,12 @@ const webConfig = {
     target: 'web',
     entry: './lib/index.js',
     resolve: {
-        extensions: ['.js', '.jsx', '.ts', '.tsx', '.cjs', '.mjs', '...']
+        extensions: ['.js', '.jsx', '.ts', '.tsx', '.cjs', '.mjs', '...'],
+        fallback: {
+            crypto: require.resolve('crypto-browserify'),
+            stream: require.resolve('stream-browserify'),
+            buffer: require.resolve('buffer/')
+        }
     },
     output: {
         path: path.resolve(__dirname, 'dist/app'),
@@ -87,7 +93,14 @@ const webConfig = {
             type: 'commonjs-static'
         }
     },
-    externals: [/^@chakra-ui\/.+$/i, /^react.+$/i, 'react', 'prop-types', '@adyen/adyen-web'],
+    externals: [
+        /^@chakra-ui\/.+$/i,
+        /^react.+$/i,
+        'react',
+        'prop-types',
+        '@adyen/adyen-web',
+        '@salesforce/commerce-sdk-react'
+    ],
     module: {
         rules: [
             {
@@ -118,7 +131,14 @@ const webConfig = {
             }
         ]
     },
-    plugins: [new CleanWebpackPlugin(), new MiniCssExtractPlugin({filename: 'adyen.css'})]
+    plugins: [
+        new CleanWebpackPlugin(),
+        new MiniCssExtractPlugin({filename: 'adyen.css'}),
+        new webpack.ProvidePlugin({
+            Buffer: ['buffer', 'Buffer'],
+            process: 'process/browser'
+        })
+    ]
 }
 
 module.exports = [scriptsConfig, serverConfig, webConfig]

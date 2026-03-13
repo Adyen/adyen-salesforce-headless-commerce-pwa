@@ -70,7 +70,7 @@ function parseNotification(req, res, next) {
             )
         }
         res.locals.notification = {...notificationRequestItem[0], live}
-        Logger.info('AdyenNotification', JSON.stringify(res.locals.notification))
+        Logger.info('AdyenNotification', 'parseNotification')
         return next()
     } catch (err) {
         Logger.error('parseNotification', err.stack)
@@ -82,7 +82,7 @@ async function sendNotification(req, res, next) {
     try {
         Logger.info('sendNotification', 'start')
         const {NotificationRequestItem: notification = {}, live} = res.locals.notification
-        const customNotifyApi = new CustomNotifyApiClient()
+        const customNotifyApi = new CustomNotifyApiClient(res.locals.adyen.siteId)
         await customNotifyApi.notify({...notification, live})
         res.locals.response = messages.AUTH_SUCCESS
         return next()

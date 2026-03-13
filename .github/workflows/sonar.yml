@@ -1,0 +1,42 @@
+name: SonarQube Analysis
+
+on:
+    pull_request:
+
+jobs:
+    sonarqube:
+        name: SonarQube Scan
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '22.x'
+                  cache: 'npm'
+
+            - name: Install project dependencies
+              run: npm i --ignore-scripts
+
+            - name: Install PWA package dependencies
+              working-directory: ./packages/adyen-salesforce-pwa
+              run: npm i --ignore-scripts
+
+            - name: Run lint
+              working-directory: ./packages/adyen-salesforce-pwa
+              run: npm run lint
+
+            - name: Run tests with coverage
+              working-directory: ./packages/adyen-salesforce-pwa
+              run: npm run test:coverage
+
+            - name: SonarQube Scan
+              uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602
+              env:
+                  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+                  SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}

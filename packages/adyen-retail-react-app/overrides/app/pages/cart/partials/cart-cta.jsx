@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import React, {Fragment, useEffect, useState} from 'react'
+import React, {Fragment} from 'react'
 import {FormattedMessage, useIntl} from 'react-intl'
 import {Flex, Button, Container} from '@salesforce/retail-react-app/app/components/shared/ui'
 import {
@@ -17,7 +17,6 @@ import {
 import Link from '@salesforce/retail-react-app/app/components/link'
 /* -----------------Adyen Begin ------------------------ */
 import '@adyen/adyen-salesforce-pwa/dist/app/adyen.css'
-import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 import {ApplePayExpress, PayPalExpress} from '@adyen/adyen-salesforce-pwa'
 import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
 import PropTypes from 'prop-types'
@@ -30,13 +29,10 @@ import {API_ERROR_MESSAGE} from '@salesforce/retail-react-app/app/constants'
 
 const CartCta = () => {
     const {formatMessage} = useIntl()
-    const customerId = useCustomerId()
-    const {getTokenWhenReady} = useAccessToken()
     const navigate = useNavigation()
     const {locale, site} = useMultiSite()
     const {data: basket} = useCurrentBasket()
 
-    const [authToken, setAuthToken] = useState()
     const showToast = useToast()
 
     const showError = () => {
@@ -44,19 +40,6 @@ const CartCta = () => {
             title: formatMessage(API_ERROR_MESSAGE),
             status: 'error'
         })
-    }
-
-    useEffect(() => {
-        const getToken = async () => {
-            const token = await getTokenWhenReady()
-            setAuthToken(token)
-        }
-
-        getToken()
-    }, [])
-
-    if (!authToken) {
-        return
     }
 
     return (
@@ -77,8 +60,6 @@ const CartCta = () => {
             </Button>
             <Container fluid>
                 <ApplePayExpress
-                    authToken={authToken}
-                    customerId={customerId}
                     locale={locale}
                     site={site}
                     basket={basket}
@@ -89,8 +70,6 @@ const CartCta = () => {
                     spinner={<LoadingSpinner />}
                 />
                 <PayPalExpress
-                    authToken={authToken}
-                    customerId={customerId}
                     locale={locale}
                     site={site}
                     basket={basket}

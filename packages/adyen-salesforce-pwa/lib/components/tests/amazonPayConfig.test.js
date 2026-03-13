@@ -1,4 +1,7 @@
-import {amazonPayConfig} from '../amazonpay/config' // Adjust the import path accordingly
+/**
+ * @jest-environment jest-environment-jsdom
+ */
+import {amazonPayConfig} from '../amazonpay/config'
 import {baseConfig} from '../helpers/baseConfig'
 
 jest.mock('../helpers/baseConfig', () => ({
@@ -41,6 +44,32 @@ describe('amazonPayConfig', () => {
         expect(props.beforeSubmit[0]).toHaveBeenCalled()
         expect(resolve).toHaveBeenCalled()
         expect(reject).not.toHaveBeenCalled()
+    })
+
+    it('should reject when onBillingSubmit throws', async () => {
+        const error = new Error('billing failed')
+        const props = {
+            beforeSubmit: [jest.fn().mockRejectedValue(error)],
+            returnUrl: '/checkout/redirect'
+        }
+        const result = amazonPayConfig(props)
+
+        const resolve = jest.fn()
+        const reject = jest.fn()
+
+        await result.onClick(resolve, reject)
+
+        expect(reject).toHaveBeenCalledWith(error)
+        expect(resolve).not.toHaveBeenCalled()
+    })
+
+    it('should use window.location.href as returnUrl fallback', () => {
+        const props = {
+            beforeSubmit: [jest.fn()]
+        }
+        const result = amazonPayConfig(props)
+
+        expect(result.returnUrl).toBe(`${window.location.href}/redirect`)
     })
 
     it('should return the correct configuration object', () => {

@@ -4,29 +4,29 @@
 name: Publish Package
 
 on:
-  workflow_dispatch:
+    workflow_dispatch:
 
 jobs:
-  publish-npm:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      # Setup .npmrc file to publish to npm
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 18.15
-          registry-url: https://registry.npmjs.org/
-      - run: npm install
-      # Copy LICENSE to adyen-salesforce-pwa package
-      - run: cp LICENSE packages/adyen-salesforce-pwa/
-      # Copy env example file to adyen-salesforce-pwa package
-      - run: cp packages/adyen-retail-react-app/.env.example packages/adyen-salesforce-pwa/
-      # Install the node modules
-      - run: cd packages/adyen-salesforce-pwa/ && npm install
-      # Build
-      - run: cd packages/adyen-salesforce-pwa/ && npm run build-prod
-      # Publish the npm package
-      - run: cd packages/adyen-salesforce-pwa/ && npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
-          CI: true
+    publish-npm:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            actions: read
+            id-token: write # Required for OpenID Connect (OIDC) for trusted publishing on NPM
+        steps:
+            - uses: actions/checkout@v4
+            # Setup .npmrc file to publish to npm
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 24
+            - run: npm install
+            # Copy LICENSE to adyen-salesforce-pwa package
+            - run: cp LICENSE packages/adyen-salesforce-pwa/
+            # Copy env example file to adyen-salesforce-pwa package
+            - run: cp packages/adyen-retail-react-app/.env.example packages/adyen-salesforce-pwa/
+            # Install the node modules
+            - run: cd packages/adyen-salesforce-pwa/ && npm install
+            # Build
+            - run: cd packages/adyen-salesforce-pwa/ && npm run build-prod
+            # Publish the npm package
+            - run: cd packages/adyen-salesforce-pwa/ && npm publish --tag latest --access public

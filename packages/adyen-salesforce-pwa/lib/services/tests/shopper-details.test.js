@@ -113,7 +113,7 @@ describe('AdyenShopperDetailsService', () => {
             const mockResponse = {
                 status: 300,
                 json: jest.fn().mockResolvedValue({
-                    message: 'Multiple Choices'
+                    errorMessage: 'Multiple Choices'
                 })
             }
             mockApiClient.post.mockResolvedValue(mockResponse)
@@ -127,7 +127,7 @@ describe('AdyenShopperDetailsService', () => {
             const mockResponse = {
                 status: 400,
                 json: jest.fn().mockResolvedValue({
-                    message: 'Bad Request'
+                    errorMessage: 'Bad Request'
                 })
             }
             mockApiClient.post.mockResolvedValue(mockResponse)
@@ -141,7 +141,7 @@ describe('AdyenShopperDetailsService', () => {
             const mockResponse = {
                 status: 500,
                 json: jest.fn().mockResolvedValue({
-                    message: 'Internal Server Error'
+                    errorMessage: 'Internal Server Error'
                 })
             }
             mockApiClient.post.mockResolvedValue(mockResponse)

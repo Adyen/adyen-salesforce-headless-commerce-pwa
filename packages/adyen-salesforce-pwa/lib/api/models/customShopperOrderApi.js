@@ -8,9 +8,22 @@ export class CustomShopperOrderApiClient extends BaseApiClient {
     /**
      * @constructor
      */
-    constructor() {
+    constructor(siteId) {
         const baseUrl = `https://${process.env.COMMERCE_API_SHORT_CODE}.api.commercecloud.salesforce.com/custom/adyen-shopper-order/v1/organizations/${process.env.COMMERCE_API_ORG_ID}`
-        super(baseUrl)
+        super(baseUrl, siteId)
+    }
+
+    /**
+     * Generates a new unique order number via the custom Adyen shopper order API.
+     * @param {string} authorization - SLAS access token for the shopper.
+     * @returns {Promise<string>} A promise that resolves to the generated order number.
+     */
+    async generateOrderNo(authorization) {
+        const response = await this._callShopperApi('GET', 'orders/order-number', {
+            headers: {authorization}
+        })
+        const data = await response.json()
+        return data.orderNo
     }
 
     /**

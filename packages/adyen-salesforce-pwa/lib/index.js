@@ -4,6 +4,8 @@ export {default as AdyenExpressCheckoutProvider} from './contexts/adyen-express-
 export {default as useAdyenCheckout} from './hooks/useAdyenCheckout'
 export {default as useAdyenExpressCheckout} from './hooks/useAdyenExpressCheckout'
 export {default as useAdyenReviewPage} from './hooks/useAdyenReviewPage'
+export {default as useHandleBackNavigation} from './hooks/useHandleBackNavigation'
+export {default as useCheckoutErrorRecovery} from './hooks/useCheckoutErrorRecovery'
 
 export {default as AdyenCheckout} from './components/adyenCheckout'
 export {default as ApplePayExpress} from './components/applePayExpress'

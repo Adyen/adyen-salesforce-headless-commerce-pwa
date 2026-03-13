@@ -1,3 +1,4 @@
+import crypto from 'crypto'
 import {PAYMENT_METHOD_TYPES, TAXATION} from '../../utils/constants.mjs'
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 
@@ -71,7 +72,7 @@ export function isOpenInvoiceMethod(paymentMethodType) {
  */
 export function getAdditionalData(basket) {
     const additionalData = {}
-    basket.productItems.forEach((product, index) => {
+    ;(basket.productItems ?? []).forEach((product, index) => {
         additionalData[`riskdata.basket.item${index + 1}.itemID`] = product.itemId
         additionalData[`riskdata.basket.item${index + 1}.productTitle`] = product.productName
         additionalData[`riskdata.basket.item${index + 1}.amountPerItem`] = getCurrencyValueForApi(
@@ -210,4 +211,15 @@ export function getNativeThreeDS(adyenConfig) {
     return nativeThreeDSValues.includes(adyenConfig.nativeThreeDS)
         ? adyenConfig.nativeThreeDS
         : 'preferred'
+}
+
+/**
+ * Creates an idempotency key by hashing the provided data using md5.
+ * This key ensures that the same request is not processed multiple times.
+ *
+ * @param {Object} data - The data to be hashed to create the idempotency key.
+ * @returns {string} The generated md5 hash.
+ */
+export function createIdempotencyKey(data) {
+    return crypto.createHash('md5').update(JSON.stringify(data)).digest('hex')
 }

@@ -381,6 +381,18 @@ export class PaymentRequestBuilder {
     }
 
     /**
+     * Sets the shopper locale.
+     * @returns {PaymentRequestBuilder} The builder instance for chaining.
+     */
+    withShopperLocale() {
+        const locale = this.context.req?.query?.locale
+        if (locale) {
+            this.paymentRequest.shopperLocale = locale
+        }
+        return this
+    }
+
+    /**
      * Returns whether this is a partial payment request.
      * @returns {boolean} True if this is a partial payment, false otherwise.
      */
@@ -429,5 +441,6 @@ export class PaymentRequestBuilder {
             .withOpenInvoiceData()
             .withRecurringProcessing()
             .withAdditionalData()
+            .withShopperLocale()
     }
 }

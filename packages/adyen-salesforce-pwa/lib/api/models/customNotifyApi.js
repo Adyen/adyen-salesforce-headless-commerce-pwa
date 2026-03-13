@@ -8,9 +8,9 @@ export class CustomNotifyApiClient extends BaseApiClient {
     /**
      * @constructor
      */
-    constructor() {
+    constructor(siteId) {
         const baseUrl = `https://${process.env.COMMERCE_API_SHORT_CODE}.api.commercecloud.salesforce.com/custom/adyen-notify/v1/organizations/${process.env.COMMERCE_API_ORG_ID}`
-        super(baseUrl)
+        super(baseUrl, siteId)
     }
 
     /**

@@ -51,7 +51,8 @@ const {handler} = runtime.createHandler(options, (app) => {
                         '*.payments-amazon.com',
                         'https://www.paypalobjects.com/js-sdk-logos/2.2.7/paypal-blue.svg',
                         'https://*.cash.app',
-                        'https://*.gstatic.com'
+                        'https://*.gstatic.com',
+                        '*.cdn-apple.com'
                     ],
                     'script-src': [
                         "'self'",
@@ -78,7 +79,8 @@ const {handler} = runtime.createHandler(options, (app) => {
                         'https://www.sandbox.paypal.com/xoplatform/logger/api/logger?disableSetCookie=true',
                         '*.google.com',
                         '*.mastercard.com',
-                        '*.visa.com'
+                        '*.visa.com',
+                        '*.cdn-apple.com'
                     ],
                     'frame-src': [
                         "'self'",
@@ -87,7 +89,8 @@ const {handler} = runtime.createHandler(options, (app) => {
                         '*.google.com',
                         'https://sandbox.kit.cash.app',
                         '*.mastercard.com',
-                        '*.visa.com'
+                        '*.visa.com',
+                        '*.cdn-apple.com'
                     ],
                     /* -----------------Adyen End ------------------------ */
                     // Do not upgrade insecure requests for local development
@@ -99,14 +102,15 @@ const {handler} = runtime.createHandler(options, (app) => {
     )
 
     // Handle the redirect from SLAS as to avoid error
-    app.get('/callback?*', (req, res) => {
+    app.get('/callback', (req, res) => {
         res.send()
     })
     app.get('/robots.txt', runtime.serveStaticFile('static/robots.txt'))
 
     app.get('/favicon.ico', runtime.serveStaticFile('static/ico/favicon.ico'))
 
-    app.get('/worker.js(.map)?', runtime.serveServiceWorker)
+    app.get('/worker.js', runtime.serveServiceWorker)
+    app.get('/worker.js.map', runtime.serveServiceWorker)
     /* -----------------Adyen Begin ------------------------ */
     /**
      * Adyen API Endpoints
