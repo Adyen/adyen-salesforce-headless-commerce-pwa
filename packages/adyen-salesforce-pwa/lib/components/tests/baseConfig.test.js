@@ -266,6 +266,29 @@ describe('onErrorHandler', () => {
         expect(consoleErrorSpy).not.toHaveBeenCalled()
     })
 
+    it('should navigate with newBasketId when paymentCancel returns one', async () => {
+        const navigate = jest.fn()
+        const props = {
+            token: 'testToken',
+            site: 'testSite',
+            customerId: 'testCustomer',
+            navigate: navigate,
+            orderNo: '12345',
+            basket: {basketId: 'basket123'}
+        }
+        const error = new Error('Payment failed')
+        const component = {}
+
+        PaymentCancelService.mockImplementation(() => ({
+            paymentCancel: jest.fn().mockResolvedValue({newBasketId: 'new-basket-456'})
+        }))
+
+        const result = await onErrorHandler(error, component, props)
+
+        expect(navigate).toHaveBeenCalledWith('/checkout?error=true&newBasketId=new-basket-456')
+        expect(result).toEqual({cancelled: true})
+    })
+
     it('should clear adyenOrder when it exists', async () => {
         const navigate = jest.fn()
         const setAdyenOrder = jest.fn()

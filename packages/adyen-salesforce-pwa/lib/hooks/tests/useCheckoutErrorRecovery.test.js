@@ -66,7 +66,6 @@ describe('useCheckoutErrorRecovery', () => {
             })
         )
 
-        expect(mockNavigate).toHaveBeenCalledWith('/checkout?error=true')
         expect(result.current.isRefetchingBasket).toBe(true)
 
         await waitFor(() => {
@@ -75,6 +74,10 @@ describe('useCheckoutErrorRecovery', () => {
 
         await waitFor(() => {
             expect(result.current.isRefetchingBasket).toBe(false)
+        })
+
+        await waitFor(() => {
+            expect(mockNavigate).toHaveBeenCalledWith('/checkout?error=true')
         })
 
         await waitFor(() => {

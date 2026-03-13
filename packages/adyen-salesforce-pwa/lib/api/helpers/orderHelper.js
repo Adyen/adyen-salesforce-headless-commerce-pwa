@@ -11,14 +11,7 @@ import {
 } from '../helpers/basketHelper.js'
 import {getCustomerBaskets, createShopperCustomerClient} from '../helpers/customerHelper.js'
 import {BasketService} from '../models/basketService.js'
-import {
-    ERROR_MESSAGE,
-    ORDER,
-    PAYMENT_METHOD_TYPES,
-    PAYMENT_METHODS
-} from '../../utils/constants.mjs'
-import {convertCurrencyValueToMajorUnits} from '../../utils/parsers.mjs'
-import {getCardType} from '../../utils/getCardType.mjs'
+import {ERROR_MESSAGE, ORDER, PAYMENT_METHOD_TYPES} from '../../utils/constants.mjs'
 import Logger from '../models/logger.js'
 
 /**
@@ -36,7 +29,7 @@ export async function getOpenOrderForShopper(authorization, customerId, siteId) 
         const result = await shopperCustomers.getCustomerOrders({
             parameters: {
                 customerId,
-                status: ORDER.ORDER_STATUS_NEW,
+                status: ORDER.ORDER_STATUS_CREATED,
                 limit: 1
             }
         })
