@@ -12,6 +12,7 @@ import {
 import {getCustomerBaskets, createShopperCustomerClient} from '../helpers/customerHelper.js'
 import {BasketService} from '../models/basketService.js'
 import {ERROR_MESSAGE, ORDER, PAYMENT_METHOD_TYPES} from '../../utils/constants.mjs'
+import {cleanupReopenedBasket} from '../helpers/paymentsHelper.js'
 import Logger from '../models/logger.js'
 
 /**
@@ -70,6 +71,7 @@ export function createShopperOrderClient(authorization, siteId) {
  * @throws {AdyenError} If the order is not found or does not belong to the customer.
  */
 export async function failOrderAndReopenBasket(adyenContext, orderNo) {
+    Logger.info('failOrderAndReopenBasket', 'start')
     const {authorization, customerId, siteId} = adyenContext
     const shopperOrders = createShopperOrderClient(authorization, siteId)
 
@@ -115,16 +117,14 @@ export async function failOrderAndReopenBasket(adyenContext, orderNo) {
             ? await getBasket(authorization, newBasketId, customerId, siteId)
             : await getCurrentBasketForAuthorizedShopper(authorization, customerId, siteId)
         newBasketId = newBasket?.basketId
-        const tempContext = {authorization, siteId, basket: newBasket}
+        const tempContext = {...adyenContext, basket: newBasket}
         const tempRes = {locals: {adyen: tempContext}}
-        const basketService = new BasketService(tempContext, tempRes)
-        await basketService.update({c_orderNo: ''})
-        if (newBasket?.paymentInstruments?.length) {
-            await basketService.removeAllPaymentInstruments()
-        }
+        tempContext.basketService = new BasketService(tempContext, tempRes)
+        await cleanupReopenedBasket(tempContext, 'failOrderAndReopenBasket')
     } catch (err) {
         Logger.error('failOrderAndReopenBasket', `Failed to clean up new basket: ${err.message}`)
     }
+    Logger.info('failOrderAndReopenBasket', 'success')
     return newBasketId
 }
 
