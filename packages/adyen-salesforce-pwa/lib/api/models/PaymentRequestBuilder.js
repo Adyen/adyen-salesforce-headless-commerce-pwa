@@ -1,4 +1,9 @@
-import {RECURRING_PROCESSING_MODEL, SHOPPER_INTERACTIONS, TAXATION} from '../../utils/constants.mjs'
+import {
+    PAYMENT_METHOD_TYPES,
+    RECURRING_PROCESSING_MODEL,
+    SHOPPER_INTERACTIONS,
+    TAXATION
+} from '../../utils/constants.mjs'
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 import {formatAddressInAdyenFormat} from '../../utils/formatAddress.mjs'
 import {getApplicationInfo} from '../../utils/getApplicationInfo.mjs'
@@ -375,17 +380,21 @@ export class PaymentRequestBuilder {
      * @param {string} commodityCode - The commodity code. Uses context.adyenConfig.l23CommodityCode if not provided.
      * @returns {PaymentRequestBuilder} The builder instance for chaining.
      */
-    withEnhancedSchemeData(paymentMethodType = null, basket = null, commodityCode = null) {
+    withEnhancedSchemeData(paymentMethodType = null, commodityCode = null) {
         const actualPaymentMethodType =
             paymentMethodType || this.context.stateData?.paymentMethod?.type
         const l23Enabled = this.context.adyenConfig?.l23Enabled === 'true'
         const locale = this.context.req?.query?.locale
 
-        if (!l23Enabled || locale !== 'en-US' || actualPaymentMethodType?.indexOf('scheme') > -1) {
+        if (
+            !l23Enabled ||
+            locale !== 'en-US' ||
+            actualPaymentMethodType !== PAYMENT_METHOD_TYPES.CREDIT_CARD
+        ) {
             return this
         }
 
-        const actualBasket = basket || this.context.basket
+        const actualBasket = this.context.basket
         const actualCommodityCode = commodityCode || this.context.adyenConfig?.l23CommodityCode
         if (actualBasket) {
             const enhancedSchemeData = getEnhancedSchemeData(actualBasket, actualCommodityCode)
