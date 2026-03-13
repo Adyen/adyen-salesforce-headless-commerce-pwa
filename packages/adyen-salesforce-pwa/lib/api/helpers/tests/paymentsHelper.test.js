@@ -1,4 +1,5 @@
 import {
+    cleanupReopenedBasket,
     createCheckoutResponse,
     createPaymentRequestObject,
     revertCheckoutState,
@@ -706,6 +707,63 @@ describe('paymentsHelper', () => {
             )
 
             expect(paymentRequest).toBeDefined()
+        })
+    })
+
+    describe('cleanupReopenedBasket', () => {
+        let mockAdyenContext
+        beforeEach(() => {
+            mockAdyenContext = {
+                basket: {},
+                adyenConfig: {
+                    merchantAccount: 'AdyenMerchantAccount'
+                },
+                basketService: {
+                    update: jest.fn(),
+                    removeAllPaymentInstruments: jest.fn()
+                }
+            }
+            mockOrdersApi.cancelOrder.mockReset()
+        })
+
+        it('should throw if adyenContext is not provided', async () => {
+            await expect(cleanupReopenedBasket(null, 'test')).rejects.toThrow(
+                new AdyenError('Adyen context not found in test', 500)
+            )
+        })
+
+        it('should always call _cleanupBasket for a non-partial payment basket', async () => {
+            await cleanupReopenedBasket(mockAdyenContext, 'test')
+            expect(mockOrdersApi.cancelOrder).not.toHaveBeenCalled()
+            expect(mockAdyenContext.basketService.update).toHaveBeenCalledWith({
+                c_orderNo: '',
+                c_orderData: '',
+                c_giftCardCheckBalance: '',
+                c_paymentMethod: '',
+                c_amount: '',
+                c_pspReference: '',
+                c_paymentData: '',
+                c_paymentDataForReviewPage: ''
+            })
+            expect(mockAdyenContext.basketService.removeAllPaymentInstruments).toHaveBeenCalled()
+        })
+
+        it('should cancel Adyen order AND call _cleanupBasket for a partial payment basket', async () => {
+            mockAdyenContext.basket.c_orderData = JSON.stringify({orderData: '...'})
+            mockOrdersApi.cancelOrder.mockResolvedValue({resultCode: 'Received'})
+            await cleanupReopenedBasket(mockAdyenContext, 'test')
+            expect(mockOrdersApi.cancelOrder).toHaveBeenCalled()
+            expect(mockAdyenContext.basketService.update).toHaveBeenCalled()
+            expect(mockAdyenContext.basketService.removeAllPaymentInstruments).toHaveBeenCalled()
+        })
+
+        it('should still call _cleanupBasket even when cancelAdyenOrder does not clean up (non-Received resultCode)', async () => {
+            mockAdyenContext.basket.c_orderData = JSON.stringify({orderData: '...'})
+            mockOrdersApi.cancelOrder.mockResolvedValue({resultCode: 'Error'})
+            await cleanupReopenedBasket(mockAdyenContext, 'test')
+            expect(mockOrdersApi.cancelOrder).toHaveBeenCalled()
+            expect(mockAdyenContext.basketService.update).toHaveBeenCalled()
+            expect(mockAdyenContext.basketService.removeAllPaymentInstruments).toHaveBeenCalled()
         })
     })
 

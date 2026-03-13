@@ -69,7 +69,7 @@ describe('orderHelper', () => {
             expect(mockGetCustomerOrders).toHaveBeenCalledWith({
                 parameters: {
                     customerId: 'customer-123',
-                    status: ORDER.ORDER_STATUS_NEW,
+                    status: ORDER.ORDER_STATUS_CREATED,
                     limit: 1
                 }
             })

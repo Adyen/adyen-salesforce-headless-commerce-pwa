@@ -22,10 +22,10 @@ const useCheckoutErrorRecovery = ({refetchBasket, navigate}) => {
         const newBasketId = urlParams.get('newBasketId')
         if (newBasketId && !isHandlingErrorRef.current) {
             isHandlingErrorRef.current = true
-            navigate('/checkout?error=true')
             setIsRefetchingBasket(true)
             refetchBasket().finally(() => {
                 setIsRefetchingBasket(false)
+                navigate('/checkout?error=true')
                 setAdyenCheckoutKey((prev) => prev + 1)
                 isHandlingErrorRef.current = false
             })

@@ -186,6 +186,28 @@ export async function validateBasketPayments(adyenContext, amount, paymentMethod
 }
 
 /**
+ * Handles cleanup after an order is failed and a new basket is reopened.
+ * Unlike revertCheckoutState, this always performs a full basket cleanup regardless
+ * of partial payment state. If a partial payment (gift card) order exists, it cancels
+ * it with Adyen first, then cleans the basket.
+ * @param {object} adyenContext - The request context pointing at the reopened basket.
+ * @param {string} stepName - The name of the caller for logging purposes.
+ */
+export async function cleanupReopenedBasket(adyenContext, stepName) {
+    if (!adyenContext) {
+        const errorMessage = `${ERROR_MESSAGE.ADYEN_CONTEXT_NOT_FOUND} in ${stepName}`
+        throw new AdyenError(errorMessage, 500)
+    }
+    const {basket = {}} = adyenContext
+    const adyenOrderData = JSON.parse(basket?.c_orderData || '{}')
+    const isPartialPayment = !!adyenOrderData?.orderData
+    if (isPartialPayment) {
+        await cancelAdyenOrder(adyenContext, adyenOrderData)
+    }
+    await _cleanupBasket(adyenContext)
+}
+
+/**
  * Handles the cleanup process for a failed payment.
  * It resets the basket's Adyen-related custom attributes, removes all payment instruments,
  * @param {object} adyenContext - The request context from `res.locals.adyen`.

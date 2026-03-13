@@ -85,7 +85,7 @@ export const onAdditionalDetails = async (state, component, actions, props) => {
 
 export const onErrorHandler = async (error, component, props) => {
     try {
-        const newBasketId = error?.newBasketId
+        let newBasketId = error?.newBasketId
         const basket = props.getBasket ? props.getBasket() : props.basket
         if (!newBasketId) {
             const paymentCancelService = new PaymentCancelService(
@@ -94,7 +94,10 @@ export const onErrorHandler = async (error, component, props) => {
                 basket?.basketId,
                 props.site
             )
-            await paymentCancelService.paymentCancel(props.orderNo)
+            const cancelResponse = await paymentCancelService.paymentCancel(props.orderNo)
+            if (cancelResponse?.newBasketId) {
+                newBasketId = cancelResponse.newBasketId
+            }
         }
         if (props.adyenOrder) {
             props.setAdyenOrder(null)
