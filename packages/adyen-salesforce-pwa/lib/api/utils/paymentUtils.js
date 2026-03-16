@@ -241,7 +241,6 @@ export function getEnhancedSchemeData(basket, commodityCode) {
 
     enhancedData['enhancedSchemeData.totalTaxAmount'] = String(totalTaxAmount)
 
-    console.log(enhancedData)
     return enhancedData
 }
 
