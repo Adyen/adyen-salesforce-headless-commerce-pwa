@@ -95,17 +95,20 @@ export function getAdditionalData(basket) {
  * @returns {object} The item formatted as an Adyen line item.
  * @private
  */
-const mapToLineItem = (item, currency, taxation, excludeTaxRate, quantity = item.quantity) => ({
-    id: item.itemId || item.priceAdjustmentId,
-    quantity,
-    description: item.itemText,
-    amountExcludingTax: getCurrencyValueForApi(
-        taxation === TAXATION.GROSS ? item.basePrice - item.tax : item.basePrice,
-        currency
-    ),
-    taxAmount: getCurrencyValueForApi(item.tax, currency),
-    taxPercentage: excludeTaxRate ? 0 : item.taxRate
-})
+const mapToLineItem = (item, currency, taxation, excludeTaxRate, quantity = item.quantity) => {
+    const taxPerUnit = quantity ? item.tax / quantity : item.tax
+    return {
+        id: item.itemId || item.priceAdjustmentId,
+        quantity,
+        description: item.itemText,
+        amountExcludingTax: getCurrencyValueForApi(
+            taxation === TAXATION.GROSS ? item.basePrice - taxPerUnit : item.basePrice,
+            currency
+        ),
+        taxAmount: getCurrencyValueForApi(item.tax, currency),
+        taxPercentage: excludeTaxRate ? 0 : item.taxRate
+    }
+}
 
 /**
  * Transforms all items in the basket (products, shipping, promotions) into an array of Adyen line items.
@@ -174,27 +177,31 @@ export function getEnhancedSchemeData(basket, commodityCode) {
         return {}
     }
 
-    const {currency, productItems} = basket
+    const {currency, productItems, shippingItems} = basket
     const customerId = basket.customerInfo?.customerId
     if (!customerId) {
         throw new TypeError('customerId is required for enhanced scheme data')
     }
 
-    return productItems.reduce(
+    const result = productItems.reduce(
         (acc, item, index) => {
             const lineNumber = index + 1
-            const unitPrice = getCurrencyValueForApi(item.priceAfterItemDiscount, currency)
             const quantity = item.quantity
+            const unitPrice = getCurrencyValueForApi(
+                item.priceAfterItemDiscount / quantity,
+                currency
+            )
             const taxAmount = getCurrencyValueForApi(item.tax || 0, currency)
-            const totalAmount = unitPrice * quantity + taxAmount
+            const totalAmount = unitPrice * quantity
 
             const currentLineItem = {
-                [`enhancedSchemeData.itemDetailLine${lineNumber}.unitPrice`]: unitPrice,
-                [`enhancedSchemeData.itemDetailLine${lineNumber}.totalAmount`]: totalAmount,
-                [`enhancedSchemeData.itemDetailLine${lineNumber}.quantity`]: quantity,
+                [`enhancedSchemeData.itemDetailLine${lineNumber}.unitPrice`]: String(unitPrice),
+                [`enhancedSchemeData.itemDetailLine${lineNumber}.totalAmount`]: String(totalAmount),
+                [`enhancedSchemeData.itemDetailLine${lineNumber}.quantity`]: String(quantity),
                 [`enhancedSchemeData.itemDetailLine${lineNumber}.unitOfMeasure`]: 'EAC',
                 ...(commodityCode && {
-                    [`enhancedSchemeData.itemDetailLine${lineNumber}.commodityCode`]: commodityCode
+                    [`enhancedSchemeData.itemDetailLine${lineNumber}.commodityCode`]:
+                        commodityCode.substring(0, 12)
                 }),
                 ...(item.itemText && {
                     [`enhancedSchemeData.itemDetailLine${lineNumber}.description`]: item.itemText
@@ -210,15 +217,32 @@ export function getEnhancedSchemeData(basket, commodityCode) {
             return {
                 ...acc,
                 ...currentLineItem,
-                'enhancedSchemeData.totalTaxAmount':
-                    acc['enhancedSchemeData.totalTaxAmount'] + taxAmount
+                totalTaxAmount: acc.totalTaxAmount + taxAmount
             }
         },
         {
-            'enhancedSchemeData.totalTaxAmount': 0,
+            totalTaxAmount: 0,
             'enhancedSchemeData.customerReference': customerId.substring(0, 25)
         }
     )
+
+    let {totalTaxAmount, ...enhancedData} = result
+
+    const freightAmount = (shippingItems ?? []).reduce((sum, item) => {
+        const shippingPrice = getCurrencyValueForApi(item.basePrice || 0, currency)
+        const shippingTax = getCurrencyValueForApi(item.tax || 0, currency)
+        totalTaxAmount += shippingTax
+        return sum + shippingPrice
+    }, 0)
+
+    if (freightAmount > 0) {
+        enhancedData['enhancedSchemeData.freightAmount'] = String(freightAmount)
+    }
+
+    enhancedData['enhancedSchemeData.totalTaxAmount'] = String(totalTaxAmount)
+
+    console.log(enhancedData)
+    return enhancedData
 }
 
 /**

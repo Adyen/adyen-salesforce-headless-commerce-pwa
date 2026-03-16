@@ -35,11 +35,11 @@ jest.mock('../../utils/paymentUtils.js', () => ({
     getLineItemsWithoutTax: jest.fn(() => [{id: 'item1'}]),
     getAdditionalData: jest.fn(() => ({'riskdata.basket.item1.itemID': 'item1'})),
     getEnhancedSchemeData: jest.fn(() => ({
-        'enhancedSchemeData.totalTaxAmount': 240,
+        'enhancedSchemeData.totalTaxAmount': '240',
         'enhancedSchemeData.customerReference': 'customer123',
-        'enhancedSchemeData.itemDetailLine1.unitPrice': 2999,
-        'enhancedSchemeData.itemDetailLine1.totalAmount': 3239,
-        'enhancedSchemeData.itemDetailLine1.quantity': 1,
+        'enhancedSchemeData.itemDetailLine1.unitPrice': '2999',
+        'enhancedSchemeData.itemDetailLine1.totalAmount': '2999',
+        'enhancedSchemeData.itemDetailLine1.quantity': '1',
         'enhancedSchemeData.itemDetailLine1.unitOfMeasure': 'EAC'
     })),
     amountForPartialPayments: jest.fn(() => 5000)
@@ -564,9 +564,9 @@ describe('PaymentRequestBuilder', () => {
 
             const additionalData = builder.paymentRequest.additionalData
             expect(additionalData['riskdata.basket.item1.itemID']).toBe('item1')
-            expect(additionalData['enhancedSchemeData.totalTaxAmount']).toBe(240)
+            expect(additionalData['enhancedSchemeData.totalTaxAmount']).toBe('240')
             expect(additionalData['enhancedSchemeData.customerReference']).toBe('customer123')
-            expect(additionalData['enhancedSchemeData.itemDetailLine1.unitPrice']).toBe(2999)
+            expect(additionalData['enhancedSchemeData.itemDetailLine1.unitPrice']).toBe('2999')
         })
 
         it('should add enhanced scheme data when no prior additionalData exists', () => {
@@ -574,7 +574,7 @@ describe('PaymentRequestBuilder', () => {
             builder.withEnhancedSchemeData()
 
             const additionalData = builder.paymentRequest.additionalData
-            expect(additionalData['enhancedSchemeData.totalTaxAmount']).toBe(240)
+            expect(additionalData['enhancedSchemeData.totalTaxAmount']).toBe('240')
         })
 
         it('should not add enhanced scheme data when basket is missing', () => {
@@ -593,7 +593,7 @@ describe('PaymentRequestBuilder', () => {
             builder.withEnhancedSchemeData()
 
             const additionalData = builder.paymentRequest.additionalData
-            expect(additionalData['enhancedSchemeData.totalTaxAmount']).toBe(240)
+            expect(additionalData['enhancedSchemeData.totalTaxAmount']).toBe('240')
         })
 
         it('should use provided commodity code over config', () => {
@@ -602,7 +602,7 @@ describe('PaymentRequestBuilder', () => {
             builder.withEnhancedSchemeData(null, 'CUSTOM_CODE')
 
             const additionalData = builder.paymentRequest.additionalData
-            expect(additionalData['enhancedSchemeData.totalTaxAmount']).toBe(240)
+            expect(additionalData['enhancedSchemeData.totalTaxAmount']).toBe('240')
         })
 
         it('should skip when l23Enabled is not true', () => {
