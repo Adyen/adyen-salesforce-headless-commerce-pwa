@@ -75,6 +75,17 @@ describe('AdyenDonationsService', () => {
                 donationsService.fetchDonationCampaigns(mockOrderNo, mockLocale)
             ).rejects.toThrow(mockErrorResponse.message)
         })
+
+        it('should throw fallback error when json parsing fails on error response', async () => {
+            donationsService.apiClient.get.mockResolvedValue({
+                status: 500,
+                json: () => Promise.reject(new Error('parse error'))
+            })
+
+            await expect(
+                donationsService.fetchDonationCampaigns(mockOrderNo, mockLocale)
+            ).rejects.toThrow('Failed to fetch donation campaigns')
+        })
     })
 
     describe('submitDonation', () => {
@@ -117,6 +128,17 @@ describe('AdyenDonationsService', () => {
 
             await expect(donationsService.submitDonation(mockDonationData)).rejects.toThrow(
                 mockErrorResponse.message
+            )
+        })
+
+        it('should throw fallback error when json parsing fails on error response', async () => {
+            donationsService.apiClient.post.mockResolvedValue({
+                status: 500,
+                json: () => Promise.reject(new Error('parse error'))
+            })
+
+            await expect(donationsService.submitDonation(mockDonationData)).rejects.toThrow(
+                'Donation submission failed'
             )
         })
     })
