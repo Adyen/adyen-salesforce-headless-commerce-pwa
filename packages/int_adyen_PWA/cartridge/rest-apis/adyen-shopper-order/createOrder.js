@@ -31,24 +31,16 @@ exports.createOrder = function () {
         if (!currentBasket || currentBasket.UUID !== basketId) {
           currentBasket = BasketMgr.getTemporaryBasket(basketId);
         }
-
         if (!currentBasket) {
           Logger.error('Error creating order: {0}', 'Basket not found');
           RESTResponseMgr.createError(404, 'not_found', 'Basket not found').render();
           return;
         }
         currentBasket.updateCurrency();
-        const donationToken = currentBasket.custom.donationToken;
-        const pspReference = currentBasket.custom.pspReference
+
         Transaction.begin();
         try {
             const order = OrderMgr.createOrder(currentBasket, orderNo);
-            if (donationToken) {
-                order.custom.donationToken = donationToken;
-            }
-            if (pspReference) {
-                order.custom.pspReference = pspReference;
-            }
             Transaction.commit();
             const response = {
                 orderNo: order.getOrderNo()

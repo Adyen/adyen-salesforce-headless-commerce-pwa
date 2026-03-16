@@ -121,10 +121,6 @@ async function sendPayments(req, res, next) {
                 basketUpdate.c_pspReference = response.pspReference
             }
 
-            if (response?.donationToken) {
-                basketUpdate.c_donationToken = response.donationToken
-            }
-
             if (checkoutResponse.action) {
                 basketUpdate.c_paymentData = JSON.stringify({
                     merchantReference: checkoutResponse.merchantReference,
@@ -147,7 +143,8 @@ async function sendPayments(req, res, next) {
             await adyenContext.basketService.addPaymentInstrument(
                 paymentRequest?.amount,
                 paymentRequest?.paymentMethod,
-                response?.pspReference
+                response?.pspReference,
+                response?.donationToken
             )
         }
 
@@ -156,7 +153,8 @@ async function sendPayments(req, res, next) {
                 await adyenContext.basketService.addPaymentInstrument(
                     paymentRequest?.amount,
                     paymentRequest?.paymentMethod,
-                    response?.pspReference
+                    response?.pspReference,
+                    response?.donationToken
                 )
                 await createOrderUsingOrderNo(adyenContext)
             } else {
@@ -165,7 +163,8 @@ async function sendPayments(req, res, next) {
                     await updatePaymentInstrumentForOrder(
                         adyenContext,
                         preCreatedOrderNo,
-                        pspReference
+                        pspReference,
+                        response.donationToken
                     )
                 }
             }

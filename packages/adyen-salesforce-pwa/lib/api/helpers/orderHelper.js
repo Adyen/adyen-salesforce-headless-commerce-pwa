@@ -171,9 +171,15 @@ export async function getOrderUsingOrderNo(orderNo, siteId) {
  * @param {object} adyenContext - The request context from `res.locals.adyen`.
  * @param {string} orderNo - The order number.
  * @param {string} pspReference - The Adyen PSP reference from the /payments or /payments/details response.
+ * @param {string} donationToken - The Adyen donation token from the /payments or /payments/details response.
  * @returns {Promise<void>}
  */
-export async function updatePaymentInstrumentForOrder(adyenContext, orderNo, pspReference) {
+export async function updatePaymentInstrumentForOrder(
+    adyenContext,
+    orderNo,
+    pspReference,
+    donationToken
+) {
     const {authorization, siteId} = adyenContext
     Logger.info('updatePaymentInstrumentForOrder', `start  — orderNo: ${orderNo}`)
     const shopperOrders = createShopperOrderClient(authorization, siteId)
@@ -200,7 +206,8 @@ export async function updatePaymentInstrumentForOrder(adyenContext, orderNo, psp
         },
         body: {
             ...paymentInstrument,
-            ...(pspReference && {c_pspReference: pspReference})
+            ...(pspReference && {c_pspReference: pspReference}),
+            ...(donationToken && {c_donationToken: donationToken})
         }
     })
     Logger.info(

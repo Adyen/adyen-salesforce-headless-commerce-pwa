@@ -20,9 +20,7 @@ exports.getOrder = function () {
             const response = {
                 orderNo: order.getOrderNo(),
                 total: grossPrice.value,
-                currency: grossPrice.currencyCode,
-                c_donationToken: order.custom.donationToken || null,
-                c_pspReference: order.custom.pspReference || null
+                currency: grossPrice.currencyCode
             }
             RESTResponseMgr.createSuccess(response, 200).render();
         } else {

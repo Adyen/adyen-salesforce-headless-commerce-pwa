@@ -45,7 +45,7 @@ export async function prepareOrderRequestContext(req, res, next) {
     }
 
     try {
-        const shopperOrders = createShopperOrderClient(authorization)
+        const shopperOrders = createShopperOrderClient(authorization, siteId)
         const [shopperOrder, customer] = await Promise.all([
             shopperOrders.getOrder({
                 parameters: {orderNo: orderno.trim()}
@@ -61,15 +61,10 @@ export async function prepareOrderRequestContext(req, res, next) {
             throw new AdyenError(ERROR_MESSAGE.INVALID_ORDER, 404)
         }
 
-        const order = await getOrderUsingOrderNo(orderno.trim())
-        if (!order) {
-            throw new AdyenError(ERROR_MESSAGE.ORDER_NOT_FOUND, 500)
-        }
-
         const adyenConfig = getAdyenConfigForCurrentSite(siteId)
 
         res.locals.adyen = {
-            order,
+            order: shopperOrder,
             adyenConfig,
             siteId,
             authorization,
