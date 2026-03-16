@@ -15,10 +15,18 @@ describe('donations controller', () => {
 
     const mockOrder = {
         orderNo: '00001234',
-        total: 100.0,
+        orderTotal: 100.0,
         currency: 'USD',
         c_donationToken: 'donationToken123',
-        c_pspReference: 'pspReference123'
+        c_pspReference: 'pspReference123',
+        paymentInstruments: [
+            {
+                paymentInstrumentId: 'pi123',
+                c_paymentMethodType: 'scheme',
+                c_pspReference: 'pspReference123',
+                c_donationToken: 'donationToken123'
+            }
+        ]
     }
 
     const mockAdyenConfig = {

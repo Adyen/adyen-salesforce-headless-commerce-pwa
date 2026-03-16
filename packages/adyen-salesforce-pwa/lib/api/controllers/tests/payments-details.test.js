@@ -84,7 +84,8 @@ describe('payments details controller', () => {
         expect(orderHelper.updatePaymentInstrumentForOrder).toHaveBeenCalledWith(
             res.locals.adyen,
             '123',
-            'psp-express-123'
+            'psp-express-123',
+            undefined
         )
         expect(res.locals.response).toEqual({
             isFinal: true,
@@ -195,7 +196,8 @@ describe('payments details controller', () => {
             expect(orderHelper.updatePaymentInstrumentForOrder).toHaveBeenCalledWith(
                 res.locals.adyen,
                 'order-789',
-                'psp-xyz'
+                'psp-xyz',
+                undefined
             )
             expect(res.locals.response.merchantReference).toBe('order-789')
             expect(next).toHaveBeenCalledWith()
@@ -216,7 +218,8 @@ describe('payments details controller', () => {
             expect(orderHelper.updatePaymentInstrumentForOrder).toHaveBeenCalledWith(
                 res.locals.adyen,
                 'order-123',
-                'psp-abc'
+                'psp-abc',
+                undefined
             )
             expect(res.locals.response).toEqual({
                 isFinal: true,

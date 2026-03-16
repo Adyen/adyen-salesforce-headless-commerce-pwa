@@ -141,7 +141,8 @@ describe('payments controller', () => {
         expect(orderHelper.updatePaymentInstrumentForOrder).toHaveBeenCalledWith(
             res.locals.adyen,
             '123',
-            'psp123'
+            'psp123',
+            undefined
         )
         expect(res.locals.response).toEqual({
             isFinal: true,
