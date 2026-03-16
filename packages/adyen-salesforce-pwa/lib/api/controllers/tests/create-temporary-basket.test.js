@@ -64,8 +64,12 @@ describe('create-temporary-basket controller', () => {
 
         expect(Logger.info).toHaveBeenCalledWith('CreateTemporaryBasketController', 'start')
         expect(BasketService).toHaveBeenCalled()
-        expect(removeExistingTemporaryBaskets).toHaveBeenCalledWith('Bearer token', 'customer1')
-        expect(createTemporaryBasket).toHaveBeenCalledWith('Bearer token', 'customer1')
+        expect(removeExistingTemporaryBaskets).toHaveBeenCalledWith(
+            'Bearer token',
+            'customer1',
+            'RefArch'
+        )
+        expect(createTemporaryBasket).toHaveBeenCalledWith('Bearer token', 'customer1', 'RefArch')
         expect(res.locals.response).toEqual(mockBasket)
         expect(Logger.info).toHaveBeenCalledWith('CreateTemporaryBasketController', 'success')
         expect(next).toHaveBeenCalled()
@@ -78,5 +82,46 @@ describe('create-temporary-basket controller', () => {
         const errArg = next.mock.calls[0][0]
         expect(errArg).toBeInstanceOf(AdyenError)
         expect(errArg.message).toBe(ERROR_MESSAGE.INVALID_PARAMS)
+    })
+
+    it('calls next with AdyenError when siteId is missing', async () => {
+        req.query = {}
+        await CreateTemporaryBasketController(req, res, next)
+        const errArg = next.mock.calls[0][0]
+        expect(errArg).toBeInstanceOf(AdyenError)
+    })
+
+    it('calls next with AdyenError when product id is missing', async () => {
+        req.body.product = {quantity: 1}
+        await CreateTemporaryBasketController(req, res, next)
+        const errArg = next.mock.calls[0][0]
+        expect(errArg).toBeInstanceOf(AdyenError)
+    })
+
+    it('calls next with AdyenError when product quantity is missing', async () => {
+        req.body.product = {id: 'p1'}
+        await CreateTemporaryBasketController(req, res, next)
+        const errArg = next.mock.calls[0][0]
+        expect(errArg).toBeInstanceOf(AdyenError)
+    })
+
+    it('calls next with AdyenError when basket creation returns null', async () => {
+        removeExistingTemporaryBaskets.mockResolvedValue(undefined)
+        createTemporaryBasket.mockResolvedValue(null)
+
+        await CreateTemporaryBasketController(req, res, next)
+        const errArg = next.mock.calls[0][0]
+        expect(errArg).toBeInstanceOf(AdyenError)
+        expect(errArg.message).toBe(ERROR_MESSAGE.BASKET_NOT_CREATED)
+    })
+
+    it('calls next with AdyenError when basket has no basketId', async () => {
+        removeExistingTemporaryBaskets.mockResolvedValue(undefined)
+        createTemporaryBasket.mockResolvedValue({})
+
+        await CreateTemporaryBasketController(req, res, next)
+        const errArg = next.mock.calls[0][0]
+        expect(errArg).toBeInstanceOf(AdyenError)
+        expect(errArg.message).toBe(ERROR_MESSAGE.BASKET_NOT_CREATED)
     })
 })

@@ -11,6 +11,7 @@ import PaypalUpdateOrderController from '../controllers/paypal-update-order'
 import PaymentDataReviewPageController from '../controllers/payment-data-review-page'
 import CreateTemporaryBasketController from '../controllers/create-temporary-basket'
 import DonationsController from '../controllers/donations'
+import OrderNumberController from '../controllers/order-number'
 import {
     authenticate,
     parseNotification,
@@ -26,6 +27,7 @@ import {balanceCheck, cancelOrder, createOrder} from '../controllers/giftCard'
 import {prepareRequestContext} from '../middleware/request-context'
 import {prepareMinimalRequestContext} from '../middleware/minimal-request-context'
 import {prepareOrderRequestContext} from '../middleware/order-request-context'
+import {preparePaymentsDetailsContext} from '../middleware/payments-details-request-context'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function SuccessHandler(req, res, next) {
@@ -37,7 +39,11 @@ function SuccessHandler(req, res, next) {
 function ErrorHandler(err, req, res, next) {
     Logger.info('Error Handler')
     Logger.error(err.message, err.cause)
-    return res.status(err.statusCode || 500).json(createErrorResponse(err.message))
+    const errorResponse = createErrorResponse(err.message)
+    if (err.newBasketId) {
+        errorResponse.newBasketId = err.newBasketId
+    }
+    return res.status(err.statusCode || 500).json(errorResponse)
 }
 
 function registerAdyenEndpoints(app, runtime, overrides) {
@@ -78,7 +84,7 @@ function registerAdyenEndpoints(app, runtime, overrides) {
         ErrorHandler
     ]
     const paymentsDetailsHandler = overrides?.paymentsDetails || [
-        prepareRequestContext,
+        preparePaymentsDetailsContext,
         PaymentsDetailsController,
         SuccessHandler,
         ErrorHandler
@@ -116,7 +122,7 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     ]
 
     const paymentCancelController = overrides?.paymentCancel || [
-        prepareRequestContext,
+        prepareMinimalRequestContext,
         PaymentCancelController,
         SuccessHandler,
         ErrorHandler
@@ -170,6 +176,12 @@ function registerAdyenEndpoints(app, runtime, overrides) {
         SuccessHandler,
         ErrorHandler
     ]
+    const orderNumberHandler = overrides?.orderNumber || [
+        prepareRequestContext,
+        OrderNumberController,
+        SuccessHandler,
+        ErrorHandler
+    ]
 
     const donationCampaignsHandler = overrides?.donationCampaignsHandler || [
         prepareOrderRequestContext,
@@ -219,6 +231,7 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     app.post('/api/adyen/gift-card/create-order', ...createOrderHandler)
     app.post('/api/adyen/gift-card/cancel-order', ...cancelOrderHandler)
     app.post('/api/adyen/payment-data-for-review-page', ...paymentDataForReviewPagePostHandler)
+    app.get('/api/adyen/order-number', ...orderNumberHandler)
     app.post('/api/adyen/pdp/temporary-baskets', ...createTemporaryBasketHandler)
     app.get('/api/adyen/donationCampaigns', ...donationCampaignsHandler)
     app.post('/api/adyen/donations', ...donateHandler)

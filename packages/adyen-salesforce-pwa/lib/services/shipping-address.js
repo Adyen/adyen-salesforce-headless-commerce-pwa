@@ -17,9 +17,9 @@ export class AdyenShippingAddressService {
         if (res.status >= 300) {
             const errorData = await res
                 .json()
-                .catch(() => ({message: 'Failed to update shipping address'}))
+                .catch(() => ({errorMessage: 'Failed to update shipping address'}))
             throw new Error(
-                errorData.message || `Update shipping address failed with status ${res.status}`
+                errorData.errorMessage || `Update shipping address failed with status ${res.status}`
             )
         }
         return await res.json()

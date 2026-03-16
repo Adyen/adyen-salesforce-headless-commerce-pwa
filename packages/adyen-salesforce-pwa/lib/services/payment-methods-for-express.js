@@ -15,9 +15,9 @@ export class AdyenPaymentMethodsForExpressService {
         if (res.status >= 300) {
             const errorData = await res
                 .json()
-                .catch(() => ({message: 'Failed to fetch payment methods for express'}))
+                .catch(() => ({errorMessage: 'Failed to fetch payment methods for express'}))
             throw new Error(
-                errorData.message ||
+                errorData.errorMessage ||
                     `Fetch payment methods for express failed with status ${res.status}`
             )
         }

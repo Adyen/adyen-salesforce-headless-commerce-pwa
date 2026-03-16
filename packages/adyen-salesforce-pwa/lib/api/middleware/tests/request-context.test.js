@@ -48,7 +48,12 @@ describe('prepareRequestContext middleware', () => {
 
         await prepareRequestContext(req, res, next)
 
-        expect(getBasket).toHaveBeenCalledWith('Bearer mockToken', 'mockBasketId', 'mockCustomerId')
+        expect(getBasket).toHaveBeenCalledWith(
+            'Bearer mockToken',
+            'mockBasketId',
+            'mockCustomerId',
+            'RefArch'
+        )
         expect(getAdyenConfigForCurrentSite).toHaveBeenCalledWith('RefArch')
         expect(BasketService).toHaveBeenCalled()
 

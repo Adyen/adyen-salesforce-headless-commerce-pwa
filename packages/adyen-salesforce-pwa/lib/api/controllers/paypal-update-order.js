@@ -41,7 +41,10 @@ async function paypalUpdateOrder(req, res, next) {
             throw new AdyenError(ERROR_MESSAGE.PSP_REFERENCE_NOT_FOUND, 400)
         }
 
-        const shopperBaskets = createShopperBasketsClient(adyenContext.authorization)
+        const shopperBaskets = createShopperBasketsClient(
+            adyenContext.authorization,
+            adyenContext.siteId
+        )
 
         const shippingMethodsResponse = await shopperBaskets.getShippingMethodsForShipment({
             parameters: {

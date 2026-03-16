@@ -17,9 +17,9 @@ export class AdyenPaypalUpdateOrderService {
         if (res.status >= 300) {
             const errorData = await res
                 .json()
-                .catch(() => ({message: 'Failed to update paypal order'}))
+                .catch(() => ({errorMessage: 'Failed to update paypal order'}))
             throw new Error(
-                errorData.message || `Update paypal order failed with status ${res.status}`
+                errorData.errorMessage || `Update paypal order failed with status ${res.status}`
             )
         }
         return await res.json()

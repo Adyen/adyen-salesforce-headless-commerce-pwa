@@ -24,7 +24,10 @@ export class BasketService {
     constructor(adyenContext, res) {
         this.adyenContext = adyenContext
         this.res = res
-        this.shopperBaskets = createShopperBasketsClient(adyenContext.authorization)
+        this.shopperBaskets = createShopperBasketsClient(
+            adyenContext.authorization,
+            adyenContext.siteId
+        )
     }
 
     /**
@@ -88,11 +91,10 @@ export class BasketService {
      * @returns {Promise<object>} A promise that resolves to the updated basket object.
      */
     async addPaymentInstrument(amount, paymentMethod, pspReference) {
-        if (!amount || !paymentMethod || !pspReference) {
+        if (!amount || !paymentMethod) {
             const missing = []
             if (!amount) missing.push('amount')
             if (!paymentMethod) missing.push('paymentMethod')
-            if (!pspReference) missing.push('pspReference')
             const errorMessage = `${ERROR_MESSAGE.ADD_PAYMENT_INSTRUMENTS}: ${missing.join(', ')}`
             Logger.error('addPaymentInstrument', errorMessage)
             throw new AdyenError(errorMessage)
@@ -111,7 +113,7 @@ export class BasketService {
                         ? getCardType(paymentMethod?.brand || paymentMethod?.srcScheme)
                         : paymentMethod?.type
                 },
-                c_pspReference: pspReference,
+                ...(pspReference && {c_pspReference: pspReference}),
                 c_paymentMethodType: paymentMethod?.type,
                 ...((paymentMethod?.brand || paymentMethod?.srcScheme) && {
                     c_paymentMethodBrand: paymentMethod?.brand || paymentMethod?.srcScheme

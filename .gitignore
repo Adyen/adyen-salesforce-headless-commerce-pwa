@@ -17,3 +17,4 @@ coverage
 /packages/adyen-salesforce-pwa/bundleAnalysis/
 /packages/adyen-salesforce-pwa/stats.json
 *.tgz
+docs

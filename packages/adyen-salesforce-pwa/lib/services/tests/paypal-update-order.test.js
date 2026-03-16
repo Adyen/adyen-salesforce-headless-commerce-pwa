@@ -82,7 +82,7 @@ describe('AdyenPaypalUpdateOrderService', () => {
             const mockResponse = {
                 status: 400,
                 json: jest.fn().mockResolvedValue({
-                    message: 'Bad Request'
+                    errorMessage: 'Bad Request'
                 })
             }
             mockApiClient.post.mockResolvedValue(mockResponse)

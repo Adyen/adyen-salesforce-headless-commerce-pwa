@@ -2,6 +2,67 @@
 <metadata xmlns="http://www.demandware.com/xml/impex/metadata/2006-10-31">
     <type-extension type-id="Order">
         <custom-attribute-definitions>
+            <attribute-definition attribute-id="eventCode">
+                <display-name xml:lang="x-default">eventCode</display-name>
+                <description xml:lang="x-default">AUTHORISATION, CANCELLATION, REFUND</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="paymentMethod">
+                <display-name xml:lang="x-default">paymentMethod</display-name>
+                <description xml:lang="x-default">paymentMethod used by shopper</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+                <field-length>0</field-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="pspReference">
+                <display-name xml:lang="x-default">pspReference</display-name>
+                <description xml:lang="x-default">Internal Adyen ID</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+                <field-length>0</field-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="value">
+                <display-name xml:lang="x-default">Amount paid (in minor units)</display-name>
+                <description xml:lang="x-default">Amount paid (in minor units)</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="paymentData">
+                <display-name xml:lang="x-default">paymentData</display-name>
+                <description xml:lang="x-default">payment data to be used for redirect flow</description>
+                <type>text</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="paymentDataForReviewPage">
+                <display-name xml:lang="x-default">paymentDataForReviewPage</display-name>
+                <description xml:lang="x-default">payment data to be used for payment details call from review page</description>
+                <type>text</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+        </custom-attribute-definitions>
+        <group-definitions>
+            <attribute-group group-id="AdyenPayments">
+                <display-name xml:lang="x-default">AdyenPayments</display-name>
+                <attribute attribute-id="pspReference"/>
+                <attribute attribute-id="eventCode"/>
+                <attribute attribute-id="paymentMethod"/>
+                <attribute attribute-id="value"/>
+                <attribute attribute-id="paymentData"/>
+                <attribute attribute-id="paymentDataForReviewPage"/>
+            </attribute-group>
             <attribute-definition attribute-id="donationToken">
                 <display-name xml:lang="x-default">donationToken</display-name>
                 <description xml:lang="x-default">token used to make donation request</description>
@@ -20,7 +81,7 @@
                 <min-length>0</min-length>
                 <field-length>0</field-length>
             </attribute-definition>
-        </custom-attribute-definitions>
+        </group-definitions>
     </type-extension>
     <type-extension type-id="OrderPaymentInstrument">
         <custom-attribute-definitions>

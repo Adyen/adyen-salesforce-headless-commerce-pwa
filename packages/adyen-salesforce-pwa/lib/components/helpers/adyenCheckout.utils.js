@@ -1,4 +1,5 @@
 import {AdyenCheckout, Dropin} from '@adyen/adyen-web/auto'
+import {getAmount} from './baseConfig'
 
 export const getCheckoutConfig = (adyenEnvironment, adyenPaymentMethods, translations, locale) => {
     const countryCode = locale?.id?.slice(-2)
@@ -43,7 +44,9 @@ export const mountCheckoutComponent = (
     checkout,
     paymentContainer,
     paymentMethodsConfiguration,
-    optionalDropinConfiguration
+    optionalDropinConfiguration,
+    amount,
+    order
 ) => {
     if (adyenAction) {
         const action = JSON.parse(atob(adyenAction))
@@ -52,7 +55,9 @@ export const mountCheckoutComponent = (
 
     return new Dropin(checkout, {
         ...optionalDropinConfiguration,
-        paymentMethodsConfiguration
+        paymentMethodsConfiguration,
+        ...(amount && {amount}),
+        ...(order && {order})
     }).mount(paymentContainer.current)
 }
 
@@ -61,6 +66,7 @@ export const createCheckoutInstance = async ({
     adyenEnvironment,
     adyenPaymentMethods,
     adyenOrder,
+    basket,
     getTranslations,
     locale,
     setAdyenStateData,
@@ -74,8 +80,10 @@ export const createCheckoutInstance = async ({
         locale
     )
     const pmc = paymentMethodsConfiguration
+    const amount = getAmount({basket, adyenOrder})
     return AdyenCheckout({
         ...checkoutConfig,
+        ...(amount && {amount}),
         order: adyenOrder,
         async onSubmit(state, element, actions) {
             const handler = pmc.onSubmit || pmc.card?.onSubmit

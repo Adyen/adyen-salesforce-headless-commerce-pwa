@@ -20,9 +20,8 @@ describe('Logger', () => {
 
             beforeEach(async () => {
                 jest.resetModules()
-                ;({default: createLogger} = await import(
-                    '@salesforce/pwa-kit-runtime/utils/logger-factory'
-                ))
+                ;({default: createLogger} =
+                    await import('@salesforce/pwa-kit-runtime/utils/logger-factory'))
                 mockLoggerInstance = {
                     info: jest.fn(),
                     warn: jest.fn(),

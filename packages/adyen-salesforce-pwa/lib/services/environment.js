@@ -13,9 +13,9 @@ export class AdyenEnvironmentService {
         if (res.status >= 300) {
             const errorData = await res
                 .json()
-                .catch(() => ({message: 'Failed to fetch environment'}))
+                .catch(() => ({errorMessage: 'Failed to fetch environment'}))
             throw new Error(
-                errorData.message || `Fetch environment failed with status ${res.status}`
+                errorData.errorMessage || `Fetch environment failed with status ${res.status}`
             )
         }
         return await res.json()

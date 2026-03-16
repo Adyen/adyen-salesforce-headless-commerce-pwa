@@ -20,7 +20,22 @@ async function _cleanupBasket(adyenContext) {
         c_amount: '',
         c_pspReference: '',
         c_paymentData: '',
-        c_paymentDataForReviewPage: ''
+        c_paymentDataForReviewPage: '',
+        c_orderNo: ''
+    })
+    await adyenContext.basketService.removeAllPaymentInstruments()
+}
+
+/**
+ * Clears only the gift-card-specific basket attributes and payment instruments after
+ * a partial payment order is cancelled.
+ * @param {object} adyenContext - The request context from `res.locals.adyen`.
+ * @private
+ */
+async function _cleanupGiftCardOrder(adyenContext) {
+    await adyenContext.basketService.update({
+        c_orderData: '',
+        c_giftCardCheckBalance: ''
     })
     await adyenContext.basketService.removeAllPaymentInstruments()
 }
@@ -46,7 +61,7 @@ export async function cancelAdyenOrder(adyenContext, order) {
 
     if (response.resultCode === 'Received') {
         Logger.info('cancelAdyenOrder', 'Resetting basket state')
-        await _cleanupBasket(adyenContext)
+        await _cleanupGiftCardOrder(adyenContext)
     }
 
     Logger.info('cancelAdyenOrder', 'success')
@@ -168,6 +183,28 @@ export async function validateBasketPayments(adyenContext, amount, paymentMethod
         // For a single, final payment, the amount must match the basket total exactly.
         throw new AdyenError(ERROR_MESSAGE.AMOUNTS_DONT_MATCH, 409)
     }
+}
+
+/**
+ * Handles cleanup after an order is failed and a new basket is reopened.
+ * Unlike revertCheckoutState, this always performs a full basket cleanup regardless
+ * of partial payment state. If a partial payment (gift card) order exists, it cancels
+ * it with Adyen first, then cleans the basket.
+ * @param {object} adyenContext - The request context pointing at the reopened basket.
+ * @param {string} stepName - The name of the caller for logging purposes.
+ */
+export async function cleanupReopenedBasket(adyenContext, stepName) {
+    if (!adyenContext) {
+        const errorMessage = `${ERROR_MESSAGE.ADYEN_CONTEXT_NOT_FOUND} in ${stepName}`
+        throw new AdyenError(errorMessage, 500)
+    }
+    const {basket = {}} = adyenContext
+    const adyenOrderData = JSON.parse(basket?.c_orderData || '{}')
+    const isPartialPayment = !!adyenOrderData?.orderData
+    if (isPartialPayment) {
+        await cancelAdyenOrder(adyenContext, adyenOrderData)
+    }
+    await _cleanupBasket(adyenContext)
 }
 
 /**

@@ -30,9 +30,9 @@ export class AdyenPaymentDataReviewPageService {
         if (res.status >= 300) {
             const errorData = await res
                 .json()
-                .catch(() => ({message: 'Failed to get payment data for review page'}))
+                .catch(() => ({errorMessage: 'Failed to get payment data for review page'}))
             throw new Error(
-                errorData.message || `Get payment data failed with status ${res.status}`
+                errorData.errorMessage || `Get payment data failed with status ${res.status}`
             )
         }
         return await res.json()
@@ -58,9 +58,9 @@ export class AdyenPaymentDataReviewPageService {
         if (res.status >= 300) {
             const errorData = await res
                 .json()
-                .catch(() => ({message: 'Failed to set payment data for review page'}))
+                .catch(() => ({errorMessage: 'Failed to set payment data for review page'}))
             throw new Error(
-                errorData.message || `Set payment data failed with status ${res.status}`
+                errorData.errorMessage || `Set payment data failed with status ${res.status}`
             )
         }
         return await res.json()
