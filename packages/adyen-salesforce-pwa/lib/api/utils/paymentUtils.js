@@ -177,7 +177,8 @@ export function getEnhancedSchemeData(basket, commodityCode) {
         return {}
     }
 
-    const {currency, productItems, shippingItems} = basket
+    const {currency, productItems, shippingItems, taxation} = basket
+    const isGross = taxation === TAXATION.GROSS
     const customerId = basket.customerInfo?.customerId
     if (!customerId) {
         throw new TypeError('customerId is required for enhanced scheme data')
@@ -187,8 +188,10 @@ export function getEnhancedSchemeData(basket, commodityCode) {
         (acc, item, index) => {
             const lineNumber = index + 1
             const quantity = item.quantity
+            const taxPerUnit = (item.tax || 0) / quantity
+            const pricePerUnit = item.priceAfterItemDiscount / quantity
             const unitPrice = getCurrencyValueForApi(
-                item.priceAfterItemDiscount / quantity,
+                isGross ? pricePerUnit - taxPerUnit : pricePerUnit,
                 currency
             )
             const taxAmount = getCurrencyValueForApi(item.tax || 0, currency)
@@ -229,8 +232,11 @@ export function getEnhancedSchemeData(basket, commodityCode) {
     let {totalTaxAmount, ...enhancedData} = result
 
     const freightAmount = (shippingItems ?? []).reduce((sum, item) => {
-        const shippingPrice = getCurrencyValueForApi(item.basePrice || 0, currency)
         const shippingTax = getCurrencyValueForApi(item.tax || 0, currency)
+        const shippingPrice = getCurrencyValueForApi(
+            isGross ? (item.basePrice || 0) - (item.tax || 0) : item.basePrice || 0,
+            currency
+        )
         totalTaxAmount += shippingTax
         return sum + shippingPrice
     }, 0)

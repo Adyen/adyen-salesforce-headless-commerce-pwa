@@ -358,6 +358,75 @@ describe('paymentUtils', () => {
             expect(result['enhancedSchemeData.totalTaxAmount']).toBe(String(80 + 48))
         })
 
+        it('should subtract tax from unitPrice and freightAmount for gross taxation', () => {
+            const basket = {
+                currency: 'USD',
+                taxation: 'gross',
+                customerInfo: {customerId: 'cust1'},
+                productItems: [
+                    {
+                        itemId: 'prod1',
+                        itemText: 'Product',
+                        priceAfterItemDiscount: 21.6,
+                        tax: 1.6,
+                        quantity: 2
+                    }
+                ],
+                shippingItems: [
+                    {
+                        itemId: 'ship1',
+                        basePrice: 10.8,
+                        tax: 0.8
+                    }
+                ]
+            }
+
+            const result = getEnhancedSchemeData(basket)
+
+            const expectedUnitPrice = Math.round((21.6 / 2 - 1.6 / 2) * 100)
+            expect(result['enhancedSchemeData.itemDetailLine1.unitPrice']).toBe(
+                String(expectedUnitPrice)
+            )
+            expect(result['enhancedSchemeData.itemDetailLine1.totalAmount']).toBe(
+                String(expectedUnitPrice * 2)
+            )
+            expect(result['enhancedSchemeData.freightAmount']).toBe(
+                String(Math.round((10.8 - 0.8) * 100))
+            )
+            expect(result['enhancedSchemeData.totalTaxAmount']).toBe(String(160 + 80))
+        })
+
+        it('should not subtract tax for net taxation', () => {
+            const basket = {
+                currency: 'USD',
+                taxation: 'net',
+                customerInfo: {customerId: 'cust1'},
+                productItems: [
+                    {
+                        itemId: 'prod1',
+                        itemText: 'Product',
+                        priceAfterItemDiscount: 20.0,
+                        tax: 1.6,
+                        quantity: 2
+                    }
+                ],
+                shippingItems: [
+                    {
+                        itemId: 'ship1',
+                        basePrice: 10.0,
+                        tax: 0.8
+                    }
+                ]
+            }
+
+            const result = getEnhancedSchemeData(basket)
+
+            expect(result['enhancedSchemeData.itemDetailLine1.unitPrice']).toBe(
+                String(Math.round((20.0 / 2) * 100))
+            )
+            expect(result['enhancedSchemeData.freightAmount']).toBe(String(1000))
+        })
+
         it('should not include freightAmount when no shipping items', () => {
             const basket = {
                 currency: 'USD',
