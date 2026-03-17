@@ -196,6 +196,26 @@ describe('donations controller', () => {
             expect(Logger.error).toHaveBeenCalledWith('donate', expectedError.message)
         })
 
+        test('should still succeed when donationToken nullification fails', async () => {
+            const mockDonationResponse = {
+                status: 'completed',
+                pspReference: 'donationPspRef123'
+            }
+            mockDonations.mockResolvedValue(mockDonationResponse)
+            updateOrderPaymentInstrument.mockRejectedValue(
+                new Error('Failed to update payment instrument')
+            )
+
+            await DonationsController.donate(req, res, next)
+
+            expect(res.locals.response).toEqual(mockDonationResponse)
+            expect(next).toHaveBeenCalledWith()
+            expect(Logger.error).toHaveBeenCalledWith(
+                'donate',
+                'Failed to clear donationToken after successful donation: Failed to update payment instrument'
+            )
+        })
+
         test('should call next with error when Adyen donations API throws', async () => {
             const mockError = new Error('Donation API error')
             mockDonations.mockRejectedValue(mockError)

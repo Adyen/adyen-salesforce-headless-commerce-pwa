@@ -83,14 +83,21 @@ async function donate(req, res, next) {
         const response = await donationsApi.donations(donationRequest)
         if (response.status === DONATIONS.COMPLETED) {
             Logger.info('donate', 'success')
-            await updateOrderPaymentInstrument(
-                order.orderNo,
-                adyenContext.siteId,
-                paymentInstrument.c_pspReference,
-                {
-                    donationToken: null
-                }
-            )
+            try {
+                await updateOrderPaymentInstrument(
+                    order.orderNo,
+                    adyenContext.siteId,
+                    paymentInstrument.c_pspReference,
+                    {
+                        donationToken: null
+                    }
+                )
+            } catch (tokenErr) {
+                Logger.error(
+                    'donate',
+                    `Failed to clear donationToken after successful donation: ${tokenErr.message}`
+                )
+            }
             res.locals.response = response
             return next()
         }
