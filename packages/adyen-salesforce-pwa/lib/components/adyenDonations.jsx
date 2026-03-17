@@ -27,6 +27,7 @@ const AdyenDonations = ({
 }) => {
     const paymentContainerRefs = useRef([])
     const donationComponentRefs = useRef([])
+    const isDonatingRef = useRef(false)
     const [isLoading, setIsLoading] = useState(false)
     const customerId = useCustomerId()
     const {getTokenWhenReady} = useAccessToken()
@@ -116,19 +117,21 @@ const AdyenDonations = ({
 
                 if (!isMounted) return
 
-                const donationsService = new AdyenDonationsService(
-                    authToken,
-                    customerId,
-                    null,
-                    site
-                )
-
                 const donationConfiguration = {
                     ...campaign,
                     commercialTxAmount: donationCampaignsData.orderTotal,
                     onDonate: async (state, component) => {
+                        if (isDonatingRef.current) return
+                        isDonatingRef.current = true
                         setIsLoading(true)
                         try {
+                            const freshToken = await getTokenWhenReady()
+                            const donationsService = new AdyenDonationsService(
+                                freshToken,
+                                customerId,
+                                null,
+                                site
+                            )
                             const response = await donationsService.submitDonation({
                                 orderNo,
                                 donationCampaignId: campaign.id,
@@ -145,6 +148,7 @@ const AdyenDonations = ({
                             onError.forEach((cb) => cb(error))
                             component.setStatus('error')
                         } finally {
+                            isDonatingRef.current = false
                             setIsLoading(false)
                         }
                     },

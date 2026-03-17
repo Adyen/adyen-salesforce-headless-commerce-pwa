@@ -366,7 +366,11 @@ describe('AdyenDonations', () => {
         expect(donationConfig.commercialTxAmount).toBe(100)
     })
 
-    it('creates AdyenDonationsService with correct params', async () => {
+    it('creates AdyenDonationsService with fresh token on donate', async () => {
+        mockGetTokenWhenReady.mockResolvedValue('fresh-token')
+        const mockResponse = {success: true}
+        mockSubmitDonation.mockResolvedValue(mockResponse)
+
         await act(async () => {
             render(<AdyenDonations {...defaultProps} />)
         })
@@ -375,11 +379,57 @@ describe('AdyenDonations', () => {
             await new Promise((resolve) => setTimeout(resolve, 0))
         })
 
+        const donationConfig = Donation.mock.calls[0][1]
+        const mockComponent = {setStatus: mockSetStatus}
+
+        await act(async () => {
+            await donationConfig.onDonate({data: {amount: 10}}, mockComponent)
+        })
+
         expect(AdyenDonationsService).toHaveBeenCalledWith(
-            'test-auth-token',
+            'fresh-token',
             'test-customer',
             null,
             defaultProps.site
         )
+    })
+
+    it('prevents duplicate donation submissions', async () => {
+        let resolveFirst
+        const firstPromise = new Promise((resolve) => {
+            resolveFirst = resolve
+        })
+        mockSubmitDonation.mockReturnValueOnce(firstPromise)
+
+        await act(async () => {
+            render(<AdyenDonations {...defaultProps} />)
+        })
+
+        await act(async () => {
+            await new Promise((resolve) => setTimeout(resolve, 0))
+        })
+
+        const donationConfig = Donation.mock.calls[0][1]
+        const mockComponent = {setStatus: mockSetStatus}
+
+        let firstDone = false
+        const first = donationConfig.onDonate({data: {amount: 10}}, mockComponent).then(() => {
+            firstDone = true
+        })
+        const second = donationConfig.onDonate({data: {amount: 10}}, mockComponent)
+
+        await act(async () => {
+            await second
+        })
+
+        expect(AdyenDonationsService).toHaveBeenCalledTimes(1)
+
+        await act(async () => {
+            resolveFirst({success: true})
+            await first
+        })
+
+        expect(firstDone).toBe(true)
+        expect(mockSubmitDonation).toHaveBeenCalledTimes(1)
     })
 })
