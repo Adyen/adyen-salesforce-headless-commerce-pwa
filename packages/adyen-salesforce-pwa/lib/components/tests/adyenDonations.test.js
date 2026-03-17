@@ -10,10 +10,15 @@ import useAdyenDonationCampaigns from '../../hooks/useAdyenDonationCampaigns'
 import {AdyenDonationsService} from '../../services/donations'
 import {AdyenCheckout, Donation} from '@adyen/adyen-web'
 import {getCheckoutConfig} from '../helpers/adyenCheckout.utils'
+import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 
 jest.mock('../../hooks/useAdyenEnvironment')
 jest.mock('../../hooks/useAdyenDonationCampaigns')
 jest.mock('../../services/donations')
+jest.mock('@salesforce/commerce-sdk-react', () => ({
+    useAccessToken: jest.fn(),
+    useCustomerId: jest.fn()
+}))
 jest.mock('../helpers/adyenCheckout.utils', () => ({
     getCheckoutConfig: jest.fn(() => ({
         environment: 'test',
@@ -58,6 +63,7 @@ describe('AdyenDonations', () => {
     }
 
     let mockSubmitDonation
+    let mockGetTokenWhenReady
 
     beforeEach(() => {
         jest.clearAllMocks()
@@ -67,6 +73,12 @@ describe('AdyenDonations', () => {
             data: mockEnvironmentData,
             error: null,
             isLoading: false
+        })
+
+        useCustomerId.mockReturnValue('test-customer')
+        mockGetTokenWhenReady = jest.fn().mockResolvedValue('test-auth-token')
+        useAccessToken.mockReturnValue({
+            getTokenWhenReady: mockGetTokenWhenReady
         })
 
         useAdyenDonationCampaigns.mockReturnValue({
@@ -364,8 +376,8 @@ describe('AdyenDonations', () => {
         })
 
         expect(AdyenDonationsService).toHaveBeenCalledWith(
-            defaultProps.authToken,
-            defaultProps.customerId,
+            'test-auth-token',
+            'test-customer',
             null,
             defaultProps.site
         )

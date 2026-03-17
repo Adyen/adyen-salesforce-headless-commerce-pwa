@@ -49,7 +49,7 @@ const AdyenDonations = ({
         authToken,
         customerId,
         site,
-        skip: false
+        skip: !authToken || !customerId
     })
 
     const {
@@ -62,7 +62,7 @@ const AdyenDonations = ({
         site,
         locale,
         orderNo,
-        skip: !orderNo
+        skip: !orderNo || !authToken || !customerId
     })
 
     // Memoize the translations to prevent unnecessary recalculations
@@ -72,6 +72,7 @@ const AdyenDonations = ({
 
     useEffect(() => {
         if (
+            !authToken ||
             !adyenEnvironment ||
             !donationCampaignsData ||
             fetchingEnvironment ||
@@ -188,6 +189,8 @@ const AdyenDonations = ({
             })
         }
     }, [
+        authToken,
+        customerId,
         adyenEnvironment?.ADYEN_ENVIRONMENT,
         adyenEnvironment?.ADYEN_CLIENT_KEY,
         donationCampaignsData
