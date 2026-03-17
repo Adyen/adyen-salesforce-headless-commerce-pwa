@@ -10,7 +10,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import React, {Fragment, useEffect, useState} from 'react'
+import React, {Fragment, useEffect} from 'react'
 import {FormattedMessage, FormattedNumber} from 'react-intl'
 import {
     Box,
@@ -45,22 +45,14 @@ import {useCurrency} from '@salesforce/retail-react-app/app/hooks'
 import PropTypes from 'prop-types'
 
 /* -----------------Adyen Begin ------------------------ */
-import {AdyenCheckoutProvider, AdyenDonations, pageTypes} from '@adyen/adyen-salesforce-pwa'
-import {
-    AuthHelpers,
-    useAccessToken,
-    useAuthHelper,
-    useCustomerId,
-    useOrder,
-    useProducts
-} from '@salesforce/commerce-sdk-react'
+import {AdyenDonations} from '@adyen/adyen-salesforce-pwa'
+import {AuthHelpers, useAuthHelper, useOrder, useProducts} from '@salesforce/commerce-sdk-react'
 import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
-import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 /* -----------------Adyen End ------------------------ */
 
 const onClient = typeof window !== 'undefined'
 
-const CheckoutConfirmation = ({authToken, customerId, site, locale}) => {
+const CheckoutConfirmation = ({site, locale}) => {
     const {orderNo} = useParams()
     const navigate = useNavigation()
     const {data: customer} = useCurrentCustomer()
@@ -569,13 +561,7 @@ const CheckoutConfirmation = ({authToken, customerId, site, locale}) => {
                         >
                             <Container variant="form">
                                 <Stack spacing={6}>
-                                    <AdyenDonations
-                                        authToken={authToken}
-                                        customerId={customerId}
-                                        site={site}
-                                        locale={locale}
-                                        orderNo={orderNo}
-                                    />
+                                    <AdyenDonations site={site} locale={locale} orderNo={orderNo} />
                                 </Stack>
                             </Container>
                         </Box>
@@ -589,54 +575,20 @@ const CheckoutConfirmation = ({authToken, customerId, site, locale}) => {
 
 /* -----------------Adyen Begin ------------------------ */
 const CheckoutConfirmationContainer = () => {
-    const customerId = useCustomerId()
-    const {getTokenWhenReady} = useAccessToken()
-    const navigate = useNavigation()
     const {locale, site} = useMultiSite()
-    const {data: basket} = useCurrentBasket()
-
-    const [authToken, setAuthToken] = useState()
-
-    useEffect(() => {
-        const getToken = async () => {
-            const token = await getTokenWhenReady()
-            setAuthToken(token)
-        }
-
-        getToken()
-    }, [])
-
-    if (!authToken) {
-        return
-    }
-
     return (
-        <AdyenCheckoutProvider
-            authToken={authToken}
-            customerId={customerId}
-            locale={locale}
+        <CheckoutConfirmation
             site={site}
-            basket={basket}
-            navigate={navigate}
-            page={pageTypes.CONFIRMATION}
-        >
-            <CheckoutConfirmation
-                authToken={authToken}
-                customerId={customerId}
-                site={site}
-                locale={locale}
-                useOrder={useOrder}
-                useProducts={useProducts}
-                useAuthHelper={useAuthHelper}
-                AuthHelpers={AuthHelpers}
-            />
-        </AdyenCheckoutProvider>
+            locale={locale}
+            useOrder={useOrder}
+            useProducts={useProducts}
+            useAuthHelper={useAuthHelper}
+            AuthHelpers={AuthHelpers}
+        />
     )
 }
 
 CheckoutConfirmation.propTypes = {
-    authToken: PropTypes.string,
-    customerId: PropTypes.string,
     site: PropTypes.object,
     locale: PropTypes.object,
     useOrder: PropTypes.any,

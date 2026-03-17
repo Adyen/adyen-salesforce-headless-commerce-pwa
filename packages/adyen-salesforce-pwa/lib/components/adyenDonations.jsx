@@ -5,16 +5,13 @@ import {getCheckoutConfig} from './helpers/adyenCheckout.utils'
 import useAdyenEnvironment from '../hooks/useAdyenEnvironment'
 import useAdyenDonationCampaigns from '../hooks/useAdyenDonationCampaigns'
 import {AdyenDonationsService} from '../services/donations'
+import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 
 const AdyenDonations = ({
     // Required props
-    authToken,
     site,
     locale,
     orderNo,
-
-    // User data
-    customerId,
 
     // Callbacks
     onDonate,
@@ -31,6 +28,18 @@ const AdyenDonations = ({
     const paymentContainerRefs = useRef([])
     const donationComponentRefs = useRef([])
     const [isLoading, setIsLoading] = useState(false)
+    const customerId = useCustomerId()
+    const {getTokenWhenReady} = useAccessToken()
+    const [authToken, setAuthToken] = useState()
+
+    useEffect(() => {
+        const getToken = async () => {
+            const token = await getTokenWhenReady()
+            setAuthToken(token)
+        }
+
+        getToken()
+    }, [])
 
     const {
         data: adyenEnvironment,
@@ -207,13 +216,9 @@ const AdyenDonations = ({
 
 AdyenDonations.propTypes = {
     // Required props
-    authToken: PropTypes.string.isRequired,
     site: PropTypes.object.isRequired,
     locale: PropTypes.object.isRequired,
     orderNo: PropTypes.string.isRequired,
-
-    // User data
-    customerId: PropTypes.string,
 
     // Callbacks
     onDonate: PropTypes.func,
