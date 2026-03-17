@@ -558,7 +558,9 @@ const CheckoutConfirmation = ({authToken, customerId, site, locale}) => {
                     </Box>
 
                     {/* -----------------Adyen Donations Begin ------------------------ */}
-                    {order?.c_donationToken && (
+                    {order?.paymentInstruments?.some(
+                        (pi) => pi.c_donationToken && pi.c_paymentMethodType !== 'giftcard'
+                    ) && (
                         <Box
                             layerStyle="card"
                             rounded={[0, 0, 'base']}

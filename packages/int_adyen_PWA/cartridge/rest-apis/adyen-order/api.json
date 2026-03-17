@@ -4,6 +4,11 @@
       "endpoint": "getOrder",
       "schema": "schema.yaml",
       "implementation": "getOrder"
+    },
+    {
+      "endpoint": "updateOrderPaymentInstrument",
+      "schema": "schema.yaml",
+      "implementation": "updateOrderPaymentInstrument"
     }
   ]
 }

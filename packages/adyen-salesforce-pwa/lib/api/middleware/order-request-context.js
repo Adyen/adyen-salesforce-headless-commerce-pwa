@@ -3,7 +3,7 @@ import {ERROR_MESSAGE} from '../../utils/constants.mjs'
 import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrentSite.mjs'
 import Logger from '../models/logger.js'
 import {getCustomer} from '../helpers/customerHelper'
-import {createShopperOrderClient, getOrderUsingOrderNo} from '../helpers/orderHelper'
+import {createShopperOrderClient} from '../helpers/orderHelper'
 
 /**
  * A middleware that prepares a request context for order-based endpoints

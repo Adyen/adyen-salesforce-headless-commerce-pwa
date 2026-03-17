@@ -2,7 +2,7 @@ import {DONATIONS, ERROR_MESSAGE, PAYMENT_METHOD_TYPES} from '../../utils/consta
 import AdyenClientProvider from '../models/adyenClientProvider'
 import Logger from '../models/logger'
 import {AdyenError} from '../models/AdyenError'
-import {updatePaymentInstrumentForOrder} from '../helpers/orderHelper'
+import {updateOrderPaymentInstrument} from '../helpers/orderHelper'
 
 /**
  * Retrieves active donation campaigns from Adyen.
@@ -83,6 +83,14 @@ async function donate(req, res, next) {
         const response = await donationsApi.donations(donationRequest)
         if (response.status === DONATIONS.COMPLETED) {
             Logger.info('donate', 'success')
+            await updateOrderPaymentInstrument(
+                order.orderNo,
+                adyenContext.siteId,
+                paymentInstrument.c_pspReference,
+                {
+                    donationToken: null
+                }
+            )
             res.locals.response = response
             return next()
         }
