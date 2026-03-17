@@ -3,12 +3,16 @@ import AdyenClientProvider from '../../models/adyenClientProvider'
 import Logger from '../../models/logger'
 import {AdyenError} from '../../models/AdyenError'
 import {ERROR_MESSAGE} from '../../../utils/constants.mjs'
+import {updateOrderPaymentInstrument} from '../../helpers/orderHelper'
 
 let mockDonationCampaigns = jest.fn()
 let mockDonations = jest.fn()
 
 jest.mock('../../models/logger')
 jest.mock('../../models/adyenClientProvider')
+jest.mock('../../helpers/orderHelper', () => ({
+    updateOrderPaymentInstrument: jest.fn()
+}))
 
 describe('donations controller', () => {
     let req, res, next
@@ -35,7 +39,8 @@ describe('donations controller', () => {
 
     const mockAdyenContext = {
         order: mockOrder,
-        adyenConfig: mockAdyenConfig
+        adyenConfig: mockAdyenConfig,
+        siteId: 'RefArch'
     }
 
     beforeEach(() => {
@@ -50,6 +55,7 @@ describe('donations controller', () => {
         next = jest.fn()
 
         jest.clearAllMocks()
+        updateOrderPaymentInstrument.mockResolvedValue({})
 
         // Mock AdyenClientProvider
         AdyenClientProvider.mockImplementation(() => ({
@@ -148,6 +154,12 @@ describe('donations controller', () => {
                 donationOriginalPspReference: 'pspReference123',
                 donationToken: 'donationToken123'
             })
+            expect(updateOrderPaymentInstrument).toHaveBeenCalledWith(
+                '00001234',
+                'RefArch',
+                'pspReference123',
+                {donationToken: null}
+            )
             expect(res.locals.response).toEqual(mockDonationResponse)
             expect(Logger.info).toHaveBeenCalledWith('donate', 'start')
             expect(Logger.info).toHaveBeenCalledWith('donate', 'success')
