@@ -124,7 +124,9 @@ async function donate(req, res, next) {
                     `Failed to clear donationToken after successful donation: ${tokenErr.message}`
                 )
             }
-            res.locals.response = response
+            res.locals.response = {
+                status: response.status
+            }
             return next()
         }
         throw new AdyenError(ERROR_MESSAGE.DONATION_NOT_COMPLETED, 500)
