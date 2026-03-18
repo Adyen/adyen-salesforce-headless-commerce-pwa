@@ -3,6 +3,7 @@ import {
     getShopperName,
     isOpenInvoiceMethod,
     getAdditionalData,
+    getEnhancedSchemeData,
     getLineItems,
     getLineItemsWithoutTax,
     filterStateData,
@@ -283,6 +284,374 @@ describe('paymentUtils', () => {
         })
     })
 
+    describe('getEnhancedSchemeData', () => {
+        it('should return enhanced scheme data with correct per-unit prices and string values', () => {
+            const basket = {
+                currency: 'USD',
+                customerInfo: {customerId: 'customer123'},
+                productItems: [
+                    {
+                        itemId: 'prod1',
+                        itemText: 'Product One',
+                        priceAfterItemDiscount: 59.98,
+                        tax: 4.8,
+                        quantity: 2
+                    },
+                    {
+                        itemId: 'prod2',
+                        itemText: 'Product Two',
+                        priceAfterItemDiscount: 49.99,
+                        tax: 4.0,
+                        quantity: 1
+                    }
+                ]
+            }
+
+            const result = getEnhancedSchemeData(basket)
+
+            expect(result['enhancedSchemeData.customerReference']).toBe('customer123')
+            expect(result['enhancedSchemeData.itemDetailLine1.unitPrice']).toBe(
+                String(Math.round((59.98 / 2) * 100))
+            )
+            expect(result['enhancedSchemeData.itemDetailLine1.totalAmount']).toBe(
+                String(Math.round((59.98 / 2) * 100) * 2)
+            )
+            expect(result['enhancedSchemeData.itemDetailLine1.quantity']).toBe('2')
+            expect(result['enhancedSchemeData.itemDetailLine1.unitOfMeasure']).toBe('EAC')
+            expect(result['enhancedSchemeData.itemDetailLine1.description']).toBe('Product One')
+            expect(result['enhancedSchemeData.itemDetailLine1.productCode']).toBe('prod1')
+            expect(result['enhancedSchemeData.itemDetailLine2.unitPrice']).toBe(
+                String(Math.round(49.99 * 100))
+            )
+            expect(result['enhancedSchemeData.itemDetailLine2.totalAmount']).toBe(
+                String(Math.round(49.99 * 100))
+            )
+            expect(result['enhancedSchemeData.itemDetailLine2.quantity']).toBe('1')
+            expect(result['enhancedSchemeData.totalTaxAmount']).toBe(String(480 + 400))
+        })
+
+        it('should include freight amount and shipping tax', () => {
+            const basket = {
+                currency: 'USD',
+                customerInfo: {customerId: 'cust1'},
+                productItems: [
+                    {
+                        itemId: 'prod1',
+                        itemText: 'Product',
+                        priceAfterItemDiscount: 10.0,
+                        tax: 0.8,
+                        quantity: 1
+                    }
+                ],
+                shippingItems: [
+                    {
+                        itemId: 'ship1',
+                        basePrice: 5.99,
+                        tax: 0.48
+                    }
+                ]
+            }
+
+            const result = getEnhancedSchemeData(basket)
+
+            expect(result['enhancedSchemeData.freightAmount']).toBe(String(599))
+            expect(result['enhancedSchemeData.totalTaxAmount']).toBe(String(80 + 48))
+        })
+
+        it('should subtract tax from unitPrice and freightAmount for gross taxation', () => {
+            const basket = {
+                currency: 'USD',
+                taxation: 'gross',
+                customerInfo: {customerId: 'cust1'},
+                productItems: [
+                    {
+                        itemId: 'prod1',
+                        itemText: 'Product',
+                        priceAfterItemDiscount: 21.6,
+                        tax: 1.6,
+                        quantity: 2
+                    }
+                ],
+                shippingItems: [
+                    {
+                        itemId: 'ship1',
+                        basePrice: 10.8,
+                        tax: 0.8
+                    }
+                ]
+            }
+
+            const result = getEnhancedSchemeData(basket)
+
+            const expectedUnitPrice = Math.round((21.6 / 2 - 1.6 / 2) * 100)
+            expect(result['enhancedSchemeData.itemDetailLine1.unitPrice']).toBe(
+                String(expectedUnitPrice)
+            )
+            expect(result['enhancedSchemeData.itemDetailLine1.totalAmount']).toBe(
+                String(expectedUnitPrice * 2)
+            )
+            expect(result['enhancedSchemeData.freightAmount']).toBe(
+                String(Math.round((10.8 - 0.8) * 100))
+            )
+            expect(result['enhancedSchemeData.totalTaxAmount']).toBe(String(160 + 80))
+        })
+
+        it('should not subtract tax for net taxation', () => {
+            const basket = {
+                currency: 'USD',
+                taxation: 'net',
+                customerInfo: {customerId: 'cust1'},
+                productItems: [
+                    {
+                        itemId: 'prod1',
+                        itemText: 'Product',
+                        priceAfterItemDiscount: 20.0,
+                        tax: 1.6,
+                        quantity: 2
+                    }
+                ],
+                shippingItems: [
+                    {
+                        itemId: 'ship1',
+                        basePrice: 10.0,
+                        tax: 0.8
+                    }
+                ]
+            }
+
+            const result = getEnhancedSchemeData(basket)
+
+            expect(result['enhancedSchemeData.itemDetailLine1.unitPrice']).toBe(
+                String(Math.round((20.0 / 2) * 100))
+            )
+            expect(result['enhancedSchemeData.freightAmount']).toBe(String(1000))
+        })
+
+        it('should not include freightAmount when no shipping items', () => {
+            const basket = {
+                currency: 'USD',
+                customerInfo: {customerId: 'cust1'},
+                productItems: [
+                    {
+                        itemId: 'prod1',
+                        itemText: 'Product',
+                        priceAfterItemDiscount: 10.0,
+                        tax: 0.8,
+                        quantity: 1
+                    }
+                ]
+            }
+
+            const result = getEnhancedSchemeData(basket)
+
+            expect(result).not.toHaveProperty('enhancedSchemeData.freightAmount')
+            expect(result['enhancedSchemeData.totalTaxAmount']).toBe(String(80))
+        })
+
+        it('should include commodity code when provided', () => {
+            const basket = {
+                currency: 'USD',
+                customerInfo: {customerId: 'cust1'},
+                productItems: [
+                    {
+                        itemId: 'prod1',
+                        itemText: 'Product',
+                        priceAfterItemDiscount: 10.0,
+                        tax: 0.8,
+                        quantity: 1
+                    }
+                ]
+            }
+
+            const result = getEnhancedSchemeData(basket, 'COMMOD01')
+
+            expect(result['enhancedSchemeData.itemDetailLine1.commodityCode']).toBe('COMMOD01')
+        })
+
+        it('should not include commodity code when not provided', () => {
+            const basket = {
+                currency: 'USD',
+                customerInfo: {customerId: 'cust1'},
+                productItems: [
+                    {
+                        itemId: 'prod1',
+                        itemText: 'Product',
+                        priceAfterItemDiscount: 10.0,
+                        tax: 0.8,
+                        quantity: 1
+                    }
+                ]
+            }
+
+            const result = getEnhancedSchemeData(basket)
+
+            expect(result).not.toHaveProperty('enhancedSchemeData.itemDetailLine1.commodityCode')
+        })
+
+        it('should truncate description to 26 characters and strip non-ASCII', () => {
+            const basket = {
+                currency: 'USD',
+                customerInfo: {customerId: 'cust1'},
+                productItems: [
+                    {
+                        itemId: 'prod1',
+                        itemText: 'This is a very long product description with émojis',
+                        priceAfterItemDiscount: 10.0,
+                        tax: 0,
+                        quantity: 1
+                    }
+                ]
+            }
+
+            const result = getEnhancedSchemeData(basket)
+
+            const desc = result['enhancedSchemeData.itemDetailLine1.description']
+            expect(desc.length).toBeLessThanOrEqual(26)
+        })
+
+        it('should truncate productCode to 12 characters', () => {
+            const basket = {
+                currency: 'USD',
+                customerInfo: {customerId: 'cust1'},
+                productItems: [
+                    {
+                        itemId: 'very-long-product-id-1234',
+                        itemText: 'Product',
+                        priceAfterItemDiscount: 10.0,
+                        tax: 0,
+                        quantity: 1
+                    }
+                ]
+            }
+
+            const result = getEnhancedSchemeData(basket)
+
+            expect(result['enhancedSchemeData.itemDetailLine1.productCode']).toBe('very-long-pr')
+        })
+
+        it('should truncate customerReference to 25 characters', () => {
+            const basket = {
+                currency: 'USD',
+                customerInfo: {customerId: 'a-very-long-customer-id-that-exceeds-25-chars'},
+                productItems: [
+                    {
+                        itemId: 'prod1',
+                        itemText: 'Product',
+                        priceAfterItemDiscount: 10.0,
+                        tax: 0,
+                        quantity: 1
+                    }
+                ]
+            }
+
+            const result = getEnhancedSchemeData(basket)
+
+            expect(result['enhancedSchemeData.customerReference'].length).toBeLessThanOrEqual(25)
+        })
+
+        it('should throw when customerId is missing', () => {
+            const basket = {
+                currency: 'USD',
+                productItems: [
+                    {
+                        itemId: 'prod1',
+                        itemText: 'Product',
+                        priceAfterItemDiscount: 10.0,
+                        tax: 0,
+                        quantity: 1
+                    }
+                ]
+            }
+
+            expect(() => getEnhancedSchemeData(basket)).toThrow(TypeError)
+        })
+
+        it('should return empty object when basket has no product items', () => {
+            const basket = {
+                currency: 'USD',
+                productItems: []
+            }
+
+            const result = getEnhancedSchemeData(basket)
+
+            expect(result).toEqual({})
+        })
+
+        it('should return empty object when basket is null', () => {
+            const result = getEnhancedSchemeData(null)
+
+            expect(result).toEqual({})
+        })
+
+        it('should return empty object when productItems is undefined', () => {
+            const basket = {currency: 'USD'}
+
+            const result = getEnhancedSchemeData(basket)
+
+            expect(result).toEqual({})
+        })
+
+        it('should handle items with zero tax', () => {
+            const basket = {
+                currency: 'USD',
+                customerInfo: {customerId: 'cust1'},
+                productItems: [
+                    {
+                        itemId: 'prod1',
+                        itemText: 'Tax Free Product',
+                        priceAfterItemDiscount: 75.0,
+                        tax: 0,
+                        quantity: 3
+                    }
+                ]
+            }
+
+            const result = getEnhancedSchemeData(basket)
+
+            expect(result['enhancedSchemeData.itemDetailLine1.unitPrice']).toBe(String(2500))
+            expect(result['enhancedSchemeData.itemDetailLine1.totalAmount']).toBe(String(2500 * 3))
+            expect(result['enhancedSchemeData.totalTaxAmount']).toBe('0')
+        })
+
+        it('should not include description when itemText is missing', () => {
+            const basket = {
+                currency: 'USD',
+                customerInfo: {customerId: 'cust1'},
+                productItems: [
+                    {
+                        itemId: 'prod1',
+                        priceAfterItemDiscount: 10.0,
+                        tax: 0,
+                        quantity: 1
+                    }
+                ]
+            }
+
+            const result = getEnhancedSchemeData(basket)
+
+            expect(result).not.toHaveProperty('enhancedSchemeData.itemDetailLine1.description')
+        })
+
+        it('should not include productCode when itemId is missing', () => {
+            const basket = {
+                currency: 'USD',
+                customerInfo: {customerId: 'cust1'},
+                productItems: [
+                    {
+                        itemText: 'Product',
+                        priceAfterItemDiscount: 10.0,
+                        tax: 0,
+                        quantity: 1
+                    }
+                ]
+            }
+
+            const result = getEnhancedSchemeData(basket)
+
+            expect(result).not.toHaveProperty('enhancedSchemeData.itemDetailLine1.productCode')
+        })
+    })
+
     describe('getLineItems', () => {
         it('should map all basket items to Adyen line items with tax', () => {
             const basket = {
@@ -367,6 +736,28 @@ describe('paymentUtils', () => {
 
             expect(result).toHaveLength(1)
             expect(result[0].id).toBe('prod1')
+        })
+
+        it('should correctly subtract per-unit tax for gross taxation with qty > 1', () => {
+            const basket = {
+                currency: 'USD',
+                taxation: 'gross',
+                productItems: [
+                    {
+                        itemId: 'prod1',
+                        itemText: 'Product 1',
+                        basePrice: 29.99,
+                        tax: 4.8,
+                        taxRate: 0.08,
+                        quantity: 2
+                    }
+                ]
+            }
+
+            const result = getLineItems(basket)
+
+            expect(result[0].amountExcludingTax).toBe(Math.round((29.99 - 4.8 / 2) * 100))
+            expect(result[0].taxAmount).toBe(480)
         })
 
         it('should handle empty arrays gracefully', () => {

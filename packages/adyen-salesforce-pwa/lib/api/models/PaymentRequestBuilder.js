@@ -1,4 +1,9 @@
-import {RECURRING_PROCESSING_MODEL, SHOPPER_INTERACTIONS, TAXATION} from '../../utils/constants.mjs'
+import {
+    PAYMENT_METHOD_TYPES,
+    RECURRING_PROCESSING_MODEL,
+    SHOPPER_INTERACTIONS,
+    TAXATION
+} from '../../utils/constants.mjs'
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 import {formatAddressInAdyenFormat} from '../../utils/formatAddress.mjs'
 import {getApplicationInfo} from '../../utils/getApplicationInfo.mjs'
@@ -11,6 +16,7 @@ import {
     getLineItems,
     getLineItemsWithoutTax,
     getAdditionalData,
+    getEnhancedSchemeData,
     amountForPartialPayments
 } from '../utils/paymentUtils.js'
 
@@ -367,6 +373,42 @@ export class PaymentRequestBuilder {
     }
 
     /**
+     * Adds enhanced scheme data (Level 2/3) to the payment request for card payments.
+     * This data is sent as additionalData and helps reduce interchange fees for B2B/commercial card transactions.
+     * @param {object} paymentMethodType - The payment method used.
+     * @param {object} basket - The basket object. Uses context.basket if not provided.
+     * @param {string} commodityCode - The commodity code. Uses context.adyenConfig.l23CommodityCode if not provided.
+     * @returns {PaymentRequestBuilder} The builder instance for chaining.
+     */
+    withEnhancedSchemeData(paymentMethodType = null, commodityCode = null) {
+        const actualPaymentMethodType =
+            paymentMethodType || this.context.stateData?.paymentMethod?.type
+        const l23Enabled = this.context.adyenConfig?.l23Enabled === 'true'
+        const locale = this.context.req?.query?.locale
+
+        if (
+            !l23Enabled ||
+            locale !== 'en-US' ||
+            actualPaymentMethodType !== PAYMENT_METHOD_TYPES.CREDIT_CARD
+        ) {
+            return this
+        }
+
+        const actualBasket = this.context.basket
+        const actualCommodityCode = commodityCode || this.context.adyenConfig?.l23CommodityCode
+        if (actualBasket) {
+            const enhancedSchemeData = getEnhancedSchemeData(actualBasket, actualCommodityCode)
+            if (Object.keys(enhancedSchemeData).length > 0) {
+                this.paymentRequest.additionalData = {
+                    ...this.paymentRequest.additionalData,
+                    ...enhancedSchemeData
+                }
+            }
+        }
+        return this
+    }
+
+    /**
      * Adds line items without tax amounts.
      * Used for express payment methods where tax cannot be calculated during the payments call.
      * @param {object} basket - The basket object. Uses context.basket if not provided.
@@ -441,6 +483,7 @@ export class PaymentRequestBuilder {
             .withOpenInvoiceData()
             .withRecurringProcessing()
             .withAdditionalData()
+            .withEnhancedSchemeData()
             .withShopperLocale()
     }
 }

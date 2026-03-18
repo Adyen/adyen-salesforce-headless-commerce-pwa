@@ -34,6 +34,14 @@ jest.mock('../../utils/paymentUtils.js', () => ({
     getLineItems: jest.fn(() => [{id: 'item1'}]),
     getLineItemsWithoutTax: jest.fn(() => [{id: 'item1'}]),
     getAdditionalData: jest.fn(() => ({'riskdata.basket.item1.itemID': 'item1'})),
+    getEnhancedSchemeData: jest.fn(() => ({
+        'enhancedSchemeData.totalTaxAmount': '240',
+        'enhancedSchemeData.customerReference': 'customer123',
+        'enhancedSchemeData.itemDetailLine1.unitPrice': '2999',
+        'enhancedSchemeData.itemDetailLine1.totalAmount': '2999',
+        'enhancedSchemeData.itemDetailLine1.quantity': '1',
+        'enhancedSchemeData.itemDetailLine1.unitOfMeasure': 'EAC'
+    })),
     amountForPartialPayments: jest.fn(() => 5000)
 }))
 
@@ -539,6 +547,101 @@ describe('PaymentRequestBuilder', () => {
             expect(builder.paymentRequest.additionalData).toEqual({
                 'riskdata.basket.item1.itemID': 'item1'
             })
+        })
+    })
+
+    describe('withEnhancedSchemeData', () => {
+        beforeEach(() => {
+            mockContext.adyenConfig.l23Enabled = 'true'
+            mockContext.req.query = {locale: 'en-US'}
+            mockContext.stateData.paymentMethod.type = 'scheme'
+        })
+
+        it('should merge enhanced scheme data into additionalData', () => {
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.withAdditionalData()
+            builder.withEnhancedSchemeData()
+
+            const additionalData = builder.paymentRequest.additionalData
+            expect(additionalData['riskdata.basket.item1.itemID']).toBe('item1')
+            expect(additionalData['enhancedSchemeData.totalTaxAmount']).toBe('240')
+            expect(additionalData['enhancedSchemeData.customerReference']).toBe('customer123')
+            expect(additionalData['enhancedSchemeData.itemDetailLine1.unitPrice']).toBe('2999')
+        })
+
+        it('should add enhanced scheme data when no prior additionalData exists', () => {
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.withEnhancedSchemeData()
+
+            const additionalData = builder.paymentRequest.additionalData
+            expect(additionalData['enhancedSchemeData.totalTaxAmount']).toBe('240')
+        })
+
+        it('should not add enhanced scheme data when basket is missing', () => {
+            builder = new PaymentRequestBuilder({
+                adyenConfig: {l23Enabled: 'true'},
+                req: {query: {locale: 'en-US'}}
+            })
+            builder.withEnhancedSchemeData()
+
+            expect(builder.paymentRequest.additionalData).toBeUndefined()
+        })
+
+        it('should use commodity code from adyenConfig when available', () => {
+            mockContext.adyenConfig.l23CommodityCode = 'TESTCODE'
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.withEnhancedSchemeData()
+
+            const additionalData = builder.paymentRequest.additionalData
+            expect(additionalData['enhancedSchemeData.totalTaxAmount']).toBe('240')
+        })
+
+        it('should use provided commodity code over config', () => {
+            mockContext.adyenConfig.l23CommodityCode = 'CONFIG_CODE'
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.withEnhancedSchemeData(null, 'CUSTOM_CODE')
+
+            const additionalData = builder.paymentRequest.additionalData
+            expect(additionalData['enhancedSchemeData.totalTaxAmount']).toBe('240')
+        })
+
+        it('should skip when l23Enabled is not true', () => {
+            mockContext.adyenConfig.l23Enabled = 'false'
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.withEnhancedSchemeData()
+
+            expect(builder.paymentRequest.additionalData).toBeUndefined()
+        })
+
+        it('should skip when l23Enabled is missing', () => {
+            delete mockContext.adyenConfig.l23Enabled
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.withEnhancedSchemeData()
+
+            expect(builder.paymentRequest.additionalData).toBeUndefined()
+        })
+
+        it('should skip when locale is not US', () => {
+            mockContext.req.query = {locale: 'de-DE'}
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.withEnhancedSchemeData()
+
+            expect(builder.paymentRequest.additionalData).toBeUndefined()
+        })
+
+        it('should skip when locale is missing', () => {
+            mockContext.req.query = {}
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.withEnhancedSchemeData()
+
+            expect(builder.paymentRequest.additionalData).toBeUndefined()
+        })
+
+        it('should return builder for chaining', () => {
+            builder = new PaymentRequestBuilder(mockContext)
+            const result = builder.withEnhancedSchemeData()
+
+            expect(result).toBe(builder)
         })
     })
 

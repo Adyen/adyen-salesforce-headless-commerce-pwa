@@ -20,7 +20,9 @@ describe('getAdyenConfigForCurrentSite', () => {
             webhookUser: '',
             liveEndpointUrlPrefix: '',
             appleDomainAssociation: '',
-            giftCardExpirationTime: ''
+            giftCardExpirationTime: '',
+            l23Enabled: '',
+            l23CommodityCode: ''
         }
 
         const result = getAdyenConfigForCurrentSite(siteId)
@@ -41,7 +43,9 @@ describe('getAdyenConfigForCurrentSite', () => {
             webhookUser: '',
             liveEndpointUrlPrefix: '',
             appleDomainAssociation: '',
-            giftCardExpirationTime: ''
+            giftCardExpirationTime: '',
+            l23Enabled: '',
+            l23CommodityCode: ''
         })
     })
 })
