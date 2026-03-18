@@ -115,11 +115,14 @@ export const ERROR_MESSAGE = {
     PSP_REFERENCE_NOT_FOUND: 'PSP reference not found in basket',
     INVALID_PAYMENT_DATA: 'Invalid payment data',
     PAYMENT_INSTRUMENT_NOT_FOUND: 'Payment instrument not found',
-    DONATION_NOT_COMPLETED: 'Donation unsuccessful'
+    DONATION_NOT_COMPLETED: 'Donation unsuccessful',
+    DONATION_CAMPAIGN_NOT_FOUND: 'Donation campaign not found',
+    DONATION_AMOUNT_MISMATCH: 'Donation amount does not match the roundup amount'
 }
 
 export const DONATIONS = {
-    COMPLETED: 'completed'
+    COMPLETED: 'completed',
+    ROUNDUP: 'roundup'
 }
 
 export const DEFAULT_EXPIRATION_TIME = 30
