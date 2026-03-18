@@ -14,9 +14,7 @@ const AdyenDonations = ({
     orderNo,
 
     // Callbacks
-    onDonate,
     onCancel,
-    onComplete,
     onError = [],
 
     // UI
@@ -132,17 +130,11 @@ const AdyenDonations = ({
                                 null,
                                 site
                             )
-                            const response = await donationsService.submitDonation({
+                            await donationsService.submitDonation({
                                 orderNo,
                                 donationCampaignId: campaign.id,
                                 donationAmount: state.data.amount
                             })
-                            if (onDonate) {
-                                onDonate(response)
-                            }
-                            if (onComplete) {
-                                onComplete(response)
-                            }
                             component.setStatus('success')
                         } catch (error) {
                             onError.forEach((cb) => cb(error))
@@ -161,7 +153,7 @@ const AdyenDonations = ({
                         onError.forEach((cb) => cb(error))
                         setIsLoading(false)
                         if (component) {
-                            component.setStatus('ready')
+                            component.setStatus('error')
                         }
                     }
                 }
