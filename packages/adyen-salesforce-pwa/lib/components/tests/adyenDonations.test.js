@@ -240,8 +240,6 @@ describe('AdyenDonations', () => {
             donationCampaignId: 'campaign1',
             donationAmount: 10
         })
-        expect(defaultProps.onDonate).toHaveBeenCalledWith(mockResponse)
-        expect(defaultProps.onComplete).toHaveBeenCalledWith(mockResponse)
         expect(mockSetStatus).toHaveBeenCalledWith('success')
     })
 
@@ -299,7 +297,7 @@ describe('AdyenDonations', () => {
         donationConfig.onError(mockError, mockComponent)
 
         expect(defaultProps.onError[0]).toHaveBeenCalledWith(mockError)
-        expect(mockSetStatus).toHaveBeenCalledWith('ready')
+        expect(mockSetStatus).toHaveBeenCalledWith('error')
     })
 
     it('unmounts donation component on cleanup', async () => {

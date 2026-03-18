@@ -149,8 +149,7 @@ describe('donations controller', () => {
 
         test('should successfully submit donation and attach response', async () => {
             const mockDonationResponse = {
-                status: 'completed',
-                pspReference: 'donationPspRef123'
+                status: 'completed'
             }
             mockDonations.mockResolvedValue(mockDonationResponse)
 
@@ -209,8 +208,7 @@ describe('donations controller', () => {
 
         test('should still succeed when donationToken nullification fails', async () => {
             const mockDonationResponse = {
-                status: 'completed',
-                pspReference: 'donationPspRef123'
+                status: 'completed'
             }
             mockDonations.mockResolvedValue(mockDonationResponse)
             updateOrderPaymentInstrument.mockRejectedValue(
