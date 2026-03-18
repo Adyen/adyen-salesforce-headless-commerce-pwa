@@ -10,7 +10,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import React, {Fragment, useEffect} from 'react'
+import React, {Fragment, useEffect, useState} from 'react'
 import {FormattedMessage, FormattedNumber} from 'react-intl'
 import {
     Box,
@@ -55,6 +55,7 @@ const onClient = typeof window !== 'undefined'
 const CheckoutConfirmation = ({site, locale}) => {
     const {orderNo} = useParams()
     const navigate = useNavigation()
+    const [showDonations, setShowDonations] = useState(true)
     const {data: customer} = useCurrentCustomer()
     const register = useAuthHelper(AuthHelpers.Register)
     const {data: order} = useOrder(
@@ -552,20 +553,26 @@ const CheckoutConfirmation = ({site, locale}) => {
                     {/* -----------------Adyen Donations Begin ------------------------ */}
                     {order?.paymentInstruments?.some(
                         (pi) => pi.c_donationToken && pi.c_paymentMethodType !== 'giftcard'
-                    ) && (
-                        <Box
-                            layerStyle="card"
-                            rounded={[0, 0, 'base']}
-                            px={[4, 4, 6]}
-                            py={[6, 6, 8]}
-                        >
-                            <Container variant="form">
-                                <Stack spacing={6}>
-                                    <AdyenDonations site={site} locale={locale} orderNo={orderNo} />
-                                </Stack>
-                            </Container>
-                        </Box>
-                    )}
+                    ) &&
+                        showDonations && (
+                            <Box
+                                layerStyle="card"
+                                rounded={[0, 0, 'base']}
+                                px={[4, 4, 6]}
+                                py={[6, 6, 8]}
+                            >
+                                <Container variant="form">
+                                    <Stack spacing={6}>
+                                        <AdyenDonations
+                                            site={site}
+                                            locale={locale}
+                                            orderNo={orderNo}
+                                            onCancel={() => setShowDonations(false)}
+                                        />
+                                    </Stack>
+                                </Container>
+                            </Box>
+                        )}
                     {/* -----------------Adyen Donations End ------------------------ */}
                 </Stack>
             </Container>
