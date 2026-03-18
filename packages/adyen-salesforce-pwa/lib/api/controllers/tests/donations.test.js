@@ -137,7 +137,7 @@ describe('donations controller', () => {
                 {
                     id: 'campaign1',
                     name: 'Test Campaign',
-                    donation: {type: 'fixedAmounts'}
+                    donation: {type: 'fixedAmounts', values: [500, 1000, 2000]}
                 }
             ]
         }
