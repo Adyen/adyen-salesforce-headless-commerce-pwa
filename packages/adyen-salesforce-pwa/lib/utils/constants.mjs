@@ -117,12 +117,13 @@ export const ERROR_MESSAGE = {
     PAYMENT_INSTRUMENT_NOT_FOUND: 'Payment instrument not found',
     DONATION_NOT_COMPLETED: 'Donation unsuccessful',
     DONATION_CAMPAIGN_NOT_FOUND: 'Donation campaign not found',
-    DONATION_AMOUNT_MISMATCH: 'Donation amount does not match the roundup amount'
+    DONATION_AMOUNT_MISMATCH: 'Donation amount now allowed'
 }
 
 export const DONATIONS = {
     COMPLETED: 'completed',
-    ROUNDUP: 'roundup'
+    ROUNDUP: 'roundup',
+    FIXED_AMOUNTS: 'fixedAmounts'
 }
 
 export const DEFAULT_EXPIRATION_TIME = 30

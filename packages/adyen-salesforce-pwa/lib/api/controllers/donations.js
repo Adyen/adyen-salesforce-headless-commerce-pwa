@@ -92,6 +92,12 @@ async function donate(req, res, next) {
                 throw new AdyenError(ERROR_MESSAGE.DONATION_AMOUNT_MISMATCH, 500)
             }
         }
+        if (
+            donationCampaign.donation.type === DONATIONS.FIXED_AMOUNTS &&
+            !donationCampaign.donation.values.includes(data.donationAmount.value)
+        ) {
+            throw new AdyenError(ERROR_MESSAGE.DONATION_AMOUNT_MISMATCH, 500)
+        }
         const donationRequest = {
             merchantAccount: adyenContext.adyenConfig.merchantAccount,
             donationCampaignId: data.donationCampaignId,
