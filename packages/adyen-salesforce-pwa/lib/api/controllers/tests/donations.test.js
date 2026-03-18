@@ -88,7 +88,7 @@ describe('donations controller', () => {
             })
             expect(res.locals.response).toEqual({
                 ...mockCampaignsResponse,
-                orderTotal: 100.0
+                orderTotal: 10000
             })
             expect(Logger.info).toHaveBeenCalledWith('donationCampaigns', 'start')
             expect(Logger.info).toHaveBeenCalledWith('donationCampaigns', 'success')
@@ -132,8 +132,19 @@ describe('donations controller', () => {
             donationAmount: {currency: 'USD', value: 1000}
         }
 
+        const mockCampaignsForDonate = {
+            donationCampaigns: [
+                {
+                    id: 'campaign1',
+                    name: 'Test Campaign',
+                    donation: {type: 'fixedAmounts'}
+                }
+            ]
+        }
+
         beforeEach(() => {
             req.body = {data: mockDonationData}
+            mockDonationCampaigns.mockResolvedValue(mockCampaignsForDonate)
         })
 
         test('should successfully submit donation and attach response', async () => {
@@ -219,6 +230,7 @@ describe('donations controller', () => {
         test('should call next with error when Adyen donations API throws', async () => {
             const mockError = new Error('Donation API error')
             mockDonations.mockRejectedValue(mockError)
+            mockDonationCampaigns.mockResolvedValue(mockCampaignsForDonate)
 
             await DonationsController.donate(req, res, next)
 
