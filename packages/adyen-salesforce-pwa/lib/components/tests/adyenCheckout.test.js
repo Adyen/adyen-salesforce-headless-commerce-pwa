@@ -2,7 +2,7 @@
  * @jest-environment jest-environment-jsdom
  */
 import React from 'react'
-import {act, cleanup, render} from '@testing-library/react'
+import {act, cleanup, render, waitFor} from '@testing-library/react'
 import AdyenCheckoutComponent from '../adyenCheckout'
 import useAdyenEnvironment from '../../hooks/useAdyenEnvironment'
 import useAdyenPaymentMethods from '../../hooks/useAdyenPaymentMethods'
@@ -98,11 +98,11 @@ describe('AdyenCheckoutComponent', () => {
     })
 
     it('should initialize checkout when environment and payment methods are available', async () => {
-        await act(async () => {
-            render(<AdyenCheckoutComponent {...defaultProps} />)
-        })
+        render(<AdyenCheckoutComponent {...defaultProps} />)
 
-        expect(createCheckoutInstance).toHaveBeenCalledTimes(1)
+        await waitFor(() => {
+            expect(createCheckoutInstance).toHaveBeenCalledTimes(1)
+        })
         expect(handleRedirects).toHaveBeenCalledTimes(1)
         expect(mountCheckoutComponent).toHaveBeenCalledTimes(1)
     })
@@ -123,13 +123,11 @@ describe('AdyenCheckoutComponent', () => {
     })
 
     it('should call the cleanup function on unmount', async () => {
-        let unmount
-        await act(async () => {
-            const {unmount: unmountComponent} = render(<AdyenCheckoutComponent {...defaultProps} />)
-            unmount = unmountComponent
-        })
+        const {unmount} = render(<AdyenCheckoutComponent {...defaultProps} />)
 
-        expect(mountCheckoutComponent).toHaveBeenCalledTimes(1)
+        await waitFor(() => {
+            expect(mountCheckoutComponent).toHaveBeenCalledTimes(1)
+        })
 
         act(() => {
             unmount()
@@ -145,9 +143,10 @@ describe('AdyenCheckoutComponent', () => {
         // Start without order data
         const {rerender} = render(<AdyenCheckoutComponent {...defaultProps} />)
 
-        // Initial render
-        await act(async () => {})
-        expect(createCheckoutInstance).toHaveBeenCalledTimes(1)
+        await waitFor(() => {
+            expect(createCheckoutInstance).toHaveBeenCalledTimes(1)
+        })
+        expect(handleRedirects).toHaveBeenCalledTimes(1)
         expect(mountCheckoutComponent).toHaveBeenCalledTimes(1)
 
         // Simulate a giftcard being applied: basket now has c_orderData with remainingAmount
@@ -218,12 +217,12 @@ describe('AdyenCheckoutComponent', () => {
 
         const onErrorMock = jest.fn()
 
-        await act(async () => {
-            render(<AdyenCheckoutComponent {...defaultProps} onError={[onErrorMock]} />)
-        })
+        render(<AdyenCheckoutComponent {...defaultProps} onError={[onErrorMock]} />)
 
         // Error callback should be called
-        expect(onErrorMock).toHaveBeenCalledWith(mockError)
+        await waitFor(() => {
+            expect(onErrorMock).toHaveBeenCalledWith(mockError)
+        })
     })
 
     it('should handle payment methods fetch error and call onError callbacks', async () => {
@@ -236,12 +235,12 @@ describe('AdyenCheckoutComponent', () => {
 
         const onErrorMock = jest.fn()
 
-        await act(async () => {
-            render(<AdyenCheckoutComponent {...defaultProps} onError={[onErrorMock]} />)
-        })
+        render(<AdyenCheckoutComponent {...defaultProps} onError={[onErrorMock]} />)
 
         // Error callback should be called
-        expect(onErrorMock).toHaveBeenCalledWith(mockError)
+        await waitFor(() => {
+            expect(onErrorMock).toHaveBeenCalledWith(mockError)
+        })
     })
 
     it('should call onError when checkout initialization throws error', async () => {
@@ -250,16 +249,11 @@ describe('AdyenCheckoutComponent', () => {
 
         const onErrorMock = jest.fn()
 
-        await act(async () => {
-            render(<AdyenCheckoutComponent {...defaultProps} onError={[onErrorMock]} />)
-        })
+        render(<AdyenCheckoutComponent {...defaultProps} onError={[onErrorMock]} />)
 
-        // Wait for async error handling
-        await act(async () => {
-            await new Promise((resolve) => setTimeout(resolve, 10))
+        await waitFor(() => {
+            expect(onErrorMock).toHaveBeenCalledWith(mockError)
         })
-
-        expect(onErrorMock).toHaveBeenCalledWith(mockError)
     })
 
     it('should not initialize checkout when payment methods are still loading', async () => {
@@ -294,11 +288,11 @@ describe('AdyenCheckoutComponent', () => {
     it('should handle redirect case and not mount component when redirect detected', async () => {
         handleRedirects.mockReturnValue(true) // Simulate redirect detected
 
-        await act(async () => {
-            render(<AdyenCheckoutComponent {...defaultProps} />)
-        })
+        render(<AdyenCheckoutComponent {...defaultProps} />)
 
-        expect(handleRedirects).toHaveBeenCalledTimes(1)
+        await waitFor(() => {
+            expect(handleRedirects).toHaveBeenCalledTimes(1)
+        })
         // mountCheckoutComponent should not be called when redirect is detected
         expect(mountCheckoutComponent).not.toHaveBeenCalled()
     })
@@ -378,10 +372,10 @@ describe('AdyenCheckoutComponent', () => {
             __internal_destroy__: mockPaypalDestroy
         }
 
-        let unmount
-        await act(async () => {
-            const {unmount: unmountComponent} = render(<AdyenCheckoutComponent {...defaultProps} />)
-            unmount = unmountComponent
+        const {unmount} = render(<AdyenCheckoutComponent {...defaultProps} />)
+
+        await waitFor(() => {
+            expect(mountCheckoutComponent).toHaveBeenCalledTimes(1)
         })
 
         act(() => {
@@ -396,11 +390,11 @@ describe('AdyenCheckoutComponent', () => {
 
     it('should not reinitialize checkout if dropinRef already exists', async () => {
         // First render to create dropin
-        await act(async () => {
-            render(<AdyenCheckoutComponent {...defaultProps} />)
-        })
+        render(<AdyenCheckoutComponent {...defaultProps} />)
 
-        expect(createCheckoutInstance).toHaveBeenCalledTimes(1)
+        await waitFor(() => {
+            expect(createCheckoutInstance).toHaveBeenCalledTimes(1)
+        })
         expect(mountCheckoutComponent).toHaveBeenCalledTimes(1)
     })
 
@@ -584,11 +578,11 @@ describe('AdyenCheckoutComponent', () => {
             isLoading: false
         })
 
-        await act(async () => {
-            render(<AdyenCheckoutComponent {...defaultProps} onError={[error1, error2]} />)
-        })
+        render(<AdyenCheckoutComponent {...defaultProps} onError={[error1, error2]} />)
 
-        expect(error1).toHaveBeenCalledWith(mockError)
+        await waitFor(() => {
+            expect(error1).toHaveBeenCalledWith(mockError)
+        })
         expect(error2).toHaveBeenCalledWith(mockError)
     })
 
@@ -600,10 +594,10 @@ describe('AdyenCheckoutComponent', () => {
         }
         mountCheckoutComponent.mockReturnValue(dropinWithError)
 
-        let unmount
-        await act(async () => {
-            const {unmount: unmountComponent} = render(<AdyenCheckoutComponent {...defaultProps} />)
-            unmount = unmountComponent
+        const {unmount} = render(<AdyenCheckoutComponent {...defaultProps} />)
+
+        await waitFor(() => {
+            expect(mountCheckoutComponent).toHaveBeenCalledTimes(1)
         })
 
         // Should not throw when unmounting

@@ -1,5 +1,6 @@
-import {useEffect, useState} from 'react'
+import {useQuery} from '@tanstack/react-query'
 import {AdyenShippingMethodsService} from '../services/shipping-methods'
+import {adyenKeys} from '../utils/queryKeys'
 
 /**
  * A hook for fetching and managing the Adyen shipping methods data.
@@ -14,40 +15,25 @@ import {AdyenShippingMethodsService} from '../services/shipping-methods'
  * @returns {{isLoading: boolean, data: object|null, error: object|null}}
  */
 const useAdyenShippingMethods = ({authToken, customerId, basketId, site, skip = false}) => {
-    const [isLoading, setIsLoading] = useState(!skip)
-    const [data, setData] = useState(null)
-    const [error, setError] = useState(null)
-
-    useEffect(() => {
-        const fetchShippingMethods = async () => {
-            if (skip || !authToken || !basketId) {
-                setIsLoading(false)
-                return
-            }
-
-            setIsLoading(true)
-            setError(null)
-
+    const query = useQuery({
+        queryKey: adyenKeys.shippingMethods(basketId, site?.id),
+        queryFn: async () => {
             const adyenShippingMethodsService = new AdyenShippingMethodsService(
                 authToken,
                 customerId,
                 basketId,
                 site
             )
-            try {
-                const result = await adyenShippingMethodsService.getShippingMethods()
-                setData(result)
-            } catch (err) {
-                setError(err)
-            } finally {
-                setIsLoading(false)
-            }
-        }
+            return adyenShippingMethodsService.getShippingMethods()
+        },
+        enabled: !skip && !!authToken && !!basketId
+    })
 
-        fetchShippingMethods()
-    }, [authToken, customerId, basketId, site?.id, skip])
-
-    return {isLoading, data, error}
+    return {
+        isLoading: query.isLoading && query.fetchStatus !== 'idle',
+        data: query.data ?? null,
+        error: query.error ?? null
+    }
 }
 
 export default useAdyenShippingMethods
