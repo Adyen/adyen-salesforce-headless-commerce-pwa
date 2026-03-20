@@ -63,24 +63,6 @@
                 <attribute attribute-id="paymentData"/>
                 <attribute attribute-id="paymentDataForReviewPage"/>
             </attribute-group>
-            <attribute-definition attribute-id="donationToken">
-                <display-name xml:lang="x-default">donationToken</display-name>
-                <description xml:lang="x-default">token used to make donation request</description>
-                <type>text</type>
-                <mandatory-flag>false</mandatory-flag>
-                <externally-managed-flag>false</externally-managed-flag>
-                <min-length>0</min-length>
-                <field-length>0</field-length>
-            </attribute-definition>
-            <attribute-definition attribute-id="pspReference">
-                <display-name xml:lang="x-default">pspReference</display-name>
-                <description xml:lang="x-default">psp reference used to make donation request</description>
-                <type>text</type>
-                <mandatory-flag>false</mandatory-flag>
-                <externally-managed-flag>false</externally-managed-flag>
-                <min-length>0</min-length>
-                <field-length>0</field-length>
-            </attribute-definition>
         </group-definitions>
     </type-extension>
     <type-extension type-id="OrderPaymentInstrument">
@@ -112,6 +94,15 @@
                 <min-length>0</min-length>
                 <field-length>0</field-length>
             </attribute-definition>
+            <attribute-definition attribute-id="donationToken">
+                <display-name xml:lang="x-default">donationToken</display-name>
+                <description xml:lang="x-default">token for making donations</description>
+                <type>text</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+                <field-length>0</field-length>
+            </attribute-definition>
         </custom-attribute-definitions>
         <group-definitions>
             <attribute-group group-id="AdyenPayment">
@@ -119,6 +110,7 @@
                 <attribute attribute-id="paymentMethodType"/>
                 <attribute attribute-id="paymentMethodBrand"/>
                 <attribute attribute-id="pspReference"/>
+                <attribute attribute-id="donationToken"/>
             </attribute-group>
         </group-definitions>
     </type-extension>

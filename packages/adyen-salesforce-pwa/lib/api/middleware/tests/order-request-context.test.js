@@ -1,5 +1,5 @@
 import {prepareOrderRequestContext} from '../order-request-context.js'
-import {createShopperOrderClient, getOrderUsingOrderNo} from '../../helpers/orderHelper.js'
+import {createShopperOrderClient} from '../../helpers/orderHelper.js'
 import {getAdyenConfigForCurrentSite} from '../../../utils/getAdyenConfigForCurrentSite.mjs'
 import Logger from '../../models/logger.js'
 import {AdyenError} from '../../models/AdyenError.js'
@@ -126,20 +126,6 @@ describe('prepareOrderRequestContext middleware', () => {
             const expectedError = new AdyenError(ERROR_MESSAGE.INVALID_ORDER, 404)
             expect(next).toHaveBeenCalledWith(expectedError)
         })
-
-        test('should call next with error when getOrderUsingOrderNo returns null (admin order not found)', async () => {
-            mockShopperOrders.getOrder.mockResolvedValue({
-                orderNo: 'mockOrderNo123',
-                customerInfo: {customerId: 'mockCustomerId'}
-            })
-            getCustomer.mockResolvedValue({customerId: 'mockCustomerId'})
-            getOrderUsingOrderNo.mockResolvedValue(null)
-
-            await prepareOrderRequestContext(req, res, next)
-
-            const expectedError = new AdyenError(ERROR_MESSAGE.ORDER_NOT_FOUND, 500)
-            expect(next).toHaveBeenCalledWith(expectedError)
-        })
     })
 
     describe('error handling', () => {
@@ -160,24 +146,6 @@ describe('prepareOrderRequestContext middleware', () => {
             )
         })
 
-        test('should call next with error when getOrderUsingOrderNo throws', async () => {
-            const mockError = new Error('Failed to fetch admin order')
-            mockShopperOrders.getOrder.mockResolvedValue({
-                orderNo: 'mockOrderNo123',
-                customerInfo: {customerId: 'mockCustomerId'}
-            })
-            getCustomer.mockResolvedValue({customerId: 'mockCustomerId'})
-            getOrderUsingOrderNo.mockRejectedValue(mockError)
-
-            await prepareOrderRequestContext(req, res, next)
-
-            expect(next).toHaveBeenCalledWith(mockError)
-            expect(Logger.error).toHaveBeenCalledWith(
-                'prepareOrderRequestContext for /api/adyen/donations',
-                mockError.stack
-            )
-        })
-
         test('should call next with error when getAdyenConfigForCurrentSite throws', async () => {
             const mockError = new Error('Failed to get config')
             mockShopperOrders.getOrder.mockResolvedValue({
@@ -185,7 +153,6 @@ describe('prepareOrderRequestContext middleware', () => {
                 customerInfo: {customerId: 'mockCustomerId'}
             })
             getCustomer.mockResolvedValue({customerId: 'mockCustomerId'})
-            getOrderUsingOrderNo.mockResolvedValue({orderNo: 'mockOrderNo123'})
             getAdyenConfigForCurrentSite.mockImplementation(() => {
                 throw mockError
             })
@@ -218,13 +185,12 @@ describe('prepareOrderRequestContext middleware', () => {
 
             mockShopperOrders.getOrder.mockResolvedValue(mockShopperOrder)
             getCustomer.mockResolvedValue(mockCustomer)
-            getOrderUsingOrderNo.mockResolvedValue(mockAdminOrder)
             getAdyenConfigForCurrentSite.mockReturnValue(mockAdyenConfig)
 
             await prepareOrderRequestContext(req, res, next)
 
-            // Verify createShopperOrderClient called with authorization
-            expect(createShopperOrderClient).toHaveBeenCalledWith('Bearer mockToken')
+            // Verify createShopperOrderClient called with authorization and siteId
+            expect(createShopperOrderClient).toHaveBeenCalledWith('Bearer mockToken', 'RefArch')
 
             // Verify shopperOrders.getOrder called with trimmed orderno
             expect(mockShopperOrders.getOrder).toHaveBeenCalledWith({
@@ -234,15 +200,12 @@ describe('prepareOrderRequestContext middleware', () => {
             // Verify getCustomer called with authorization and trimmed customerid
             expect(getCustomer).toHaveBeenCalledWith('Bearer mockToken', 'mockCustomerId')
 
-            // Verify getOrderUsingOrderNo called with trimmed orderno
-            expect(getOrderUsingOrderNo).toHaveBeenCalledWith('mockOrderNo123')
-
             // Verify getAdyenConfigForCurrentSite called with siteId
             expect(getAdyenConfigForCurrentSite).toHaveBeenCalledWith('RefArch')
 
             // Verify res.locals.adyen contains expected properties
             expect(res.locals.adyen).toBeDefined()
-            expect(res.locals.adyen.order).toEqual(mockAdminOrder)
+            expect(res.locals.adyen.order).toEqual(mockShopperOrder)
             expect(res.locals.adyen.adyenConfig).toEqual(mockAdyenConfig)
             expect(res.locals.adyen.siteId).toBe('RefArch')
             expect(res.locals.adyen.authorization).toBe('Bearer mockToken')
@@ -271,12 +234,10 @@ describe('prepareOrderRequestContext middleware', () => {
                 customerInfo: {customerId: 'mockCustomerId'}
             }
             const mockCustomer = {customerId: 'mockCustomerId'}
-            const mockAdminOrder = {orderNo: 'mockOrderNo123'}
             const mockAdyenConfig = {merchantAccount: 'mockAccount'}
 
             mockShopperOrders.getOrder.mockResolvedValue(mockShopperOrder)
             getCustomer.mockResolvedValue(mockCustomer)
-            getOrderUsingOrderNo.mockResolvedValue(mockAdminOrder)
             getAdyenConfigForCurrentSite.mockReturnValue(mockAdyenConfig)
 
             await prepareOrderRequestContext(req, res, next)
@@ -286,7 +247,6 @@ describe('prepareOrderRequestContext middleware', () => {
                 parameters: {orderNo: 'mockOrderNo123'}
             })
             expect(getCustomer).toHaveBeenCalledWith('Bearer mockToken', 'mockCustomerId')
-            expect(getOrderUsingOrderNo).toHaveBeenCalledWith('mockOrderNo123')
 
             // Verify ownership check uses trimmed customerid
             expect(next).toHaveBeenCalledWith()
@@ -300,12 +260,10 @@ describe('prepareOrderRequestContext middleware', () => {
                 customerInfo: {customerId: 'mockCustomerId'}
             }
             const mockCustomer = {customerId: 'mockCustomerId'}
-            const mockAdminOrder = {orderNo: 'mockOrderNo123'}
             const mockAdyenConfig = {merchantAccount: 'mockAccount'}
 
             mockShopperOrders.getOrder.mockResolvedValue(mockShopperOrder)
             getCustomer.mockResolvedValue(mockCustomer)
-            getOrderUsingOrderNo.mockResolvedValue(mockAdminOrder)
             getAdyenConfigForCurrentSite.mockReturnValue(mockAdyenConfig)
 
             await prepareOrderRequestContext(req, res, next)

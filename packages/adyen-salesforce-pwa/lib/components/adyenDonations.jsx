@@ -5,21 +5,16 @@ import {getCheckoutConfig} from './helpers/adyenCheckout.utils'
 import useAdyenEnvironment from '../hooks/useAdyenEnvironment'
 import useAdyenDonationCampaigns from '../hooks/useAdyenDonationCampaigns'
 import {AdyenDonationsService} from '../services/donations'
+import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 
 const AdyenDonations = ({
     // Required props
-    authToken,
     site,
     locale,
     orderNo,
 
-    // User data
-    customerId,
-
     // Callbacks
-    onDonate,
     onCancel,
-    onComplete,
     onError = [],
 
     // UI
@@ -30,7 +25,20 @@ const AdyenDonations = ({
 }) => {
     const paymentContainerRefs = useRef([])
     const donationComponentRefs = useRef([])
+    const isDonatingRef = useRef(false)
     const [isLoading, setIsLoading] = useState(false)
+    const customerId = useCustomerId()
+    const {getTokenWhenReady} = useAccessToken()
+    const [authToken, setAuthToken] = useState()
+
+    useEffect(() => {
+        const getToken = async () => {
+            const token = await getTokenWhenReady()
+            setAuthToken(token)
+        }
+
+        getToken()
+    }, [])
 
     const {
         data: adyenEnvironment,
@@ -40,7 +48,7 @@ const AdyenDonations = ({
         authToken,
         customerId,
         site,
-        skip: false
+        skip: !authToken || !customerId
     })
 
     const {
@@ -53,7 +61,7 @@ const AdyenDonations = ({
         site,
         locale,
         orderNo,
-        skip: !orderNo
+        skip: !orderNo || !authToken || !customerId
     })
 
     // Memoize the translations to prevent unnecessary recalculations
@@ -63,6 +71,7 @@ const AdyenDonations = ({
 
     useEffect(() => {
         if (
+            !authToken ||
             !adyenEnvironment ||
             !donationCampaignsData ||
             fetchingEnvironment ||
@@ -106,35 +115,32 @@ const AdyenDonations = ({
 
                 if (!isMounted) return
 
-                const donationsService = new AdyenDonationsService(
-                    authToken,
-                    customerId,
-                    null,
-                    site
-                )
-
                 const donationConfiguration = {
                     ...campaign,
                     commercialTxAmount: donationCampaignsData.orderTotal,
                     onDonate: async (state, component) => {
+                        if (isDonatingRef.current) return
+                        isDonatingRef.current = true
                         setIsLoading(true)
                         try {
-                            const response = await donationsService.submitDonation({
+                            const freshToken = await getTokenWhenReady()
+                            const donationsService = new AdyenDonationsService(
+                                freshToken,
+                                customerId,
+                                null,
+                                site
+                            )
+                            await donationsService.submitDonation({
                                 orderNo,
                                 donationCampaignId: campaign.id,
                                 donationAmount: state.data.amount
                             })
-                            if (onDonate) {
-                                onDonate(response)
-                            }
-                            if (onComplete) {
-                                onComplete(response)
-                            }
                             component.setStatus('success')
                         } catch (error) {
                             onError.forEach((cb) => cb(error))
                             component.setStatus('error')
                         } finally {
+                            isDonatingRef.current = false
                             setIsLoading(false)
                         }
                     },
@@ -147,7 +153,7 @@ const AdyenDonations = ({
                         onError.forEach((cb) => cb(error))
                         setIsLoading(false)
                         if (component) {
-                            component.setStatus('ready')
+                            component.setStatus('error')
                         }
                     }
                 }
@@ -179,6 +185,8 @@ const AdyenDonations = ({
             })
         }
     }, [
+        authToken,
+        customerId,
         adyenEnvironment?.ADYEN_ENVIRONMENT,
         adyenEnvironment?.ADYEN_CLIENT_KEY,
         donationCampaignsData
@@ -207,13 +215,9 @@ const AdyenDonations = ({
 
 AdyenDonations.propTypes = {
     // Required props
-    authToken: PropTypes.string.isRequired,
     site: PropTypes.object.isRequired,
     locale: PropTypes.object.isRequired,
     orderNo: PropTypes.string.isRequired,
-
-    // User data
-    customerId: PropTypes.string,
 
     // Callbacks
     onDonate: PropTypes.func,

@@ -88,9 +88,10 @@ export class BasketService {
      * @param {object} amount - The amount included in the payment request. Should have value and currency
      * @param {object} paymentMethod - The payment method object. Should have type and brand.
      * @param {string} pspReference - The payment reference returned from Adyen.
+     * @param {string} donationToken - The donation token returned from Adyen.
      * @returns {Promise<object>} A promise that resolves to the updated basket object.
      */
-    async addPaymentInstrument(amount, paymentMethod, pspReference) {
+    async addPaymentInstrument(amount, paymentMethod, pspReference, donationToken) {
         if (!amount || !paymentMethod) {
             const missing = []
             if (!amount) missing.push('amount')
@@ -117,7 +118,8 @@ export class BasketService {
                 c_paymentMethodType: paymentMethod?.type,
                 ...((paymentMethod?.brand || paymentMethod?.srcScheme) && {
                     c_paymentMethodBrand: paymentMethod?.brand || paymentMethod?.srcScheme
-                })
+                }),
+                ...(donationToken && {c_donationToken: donationToken})
             },
             parameters: {
                 basketId: this.adyenContext.basket.basketId

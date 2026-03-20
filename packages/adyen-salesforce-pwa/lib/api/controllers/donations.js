@@ -1,7 +1,9 @@
-import {ERROR_MESSAGE} from '../../utils/constants.mjs'
+import {DONATIONS, ERROR_MESSAGE, PAYMENT_METHOD_TYPES} from '../../utils/constants.mjs'
 import AdyenClientProvider from '../models/adyenClientProvider'
 import Logger from '../models/logger'
 import {AdyenError} from '../models/AdyenError'
+import {updateOrderPaymentInstrument} from '../helpers/orderHelper'
+import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 
 /**
  * Retrieves active donation campaigns from Adyen.
@@ -29,7 +31,7 @@ async function donationCampaigns(req, res, next) {
 
         const response = {
             ...donationCampaigns,
-            orderTotal: order.total
+            orderTotal: getCurrencyValueForApi(order.orderTotal, order.currency)
         }
 
         Logger.info('donationCampaigns', 'success')
@@ -64,18 +66,70 @@ async function donate(req, res, next) {
             throw new AdyenError(ERROR_MESSAGE.ORDER_NOT_FOUND, 500)
         }
         const donationsApi = new AdyenClientProvider(adyenContext).getDonationsApi()
+        const donationCampaignsResponse = await donationsApi.donationCampaigns({
+            merchantAccount: adyenContext.adyenConfig.merchantAccount,
+            currency: order.currency
+        })
+        const donationCampaign = donationCampaignsResponse?.donationCampaigns?.find(
+            (campaign) => campaign.id === data.donationCampaignId
+        )
+        if (!donationCampaign) {
+            throw new AdyenError(ERROR_MESSAGE.DONATION_CAMPAIGN_NOT_FOUND, 400)
+        }
+        const paymentInstrument = order?.paymentInstruments?.find(
+            (pi) => pi.c_paymentMethodType !== PAYMENT_METHOD_TYPES.GIFT_CARD
+        )
+        if (!paymentInstrument?.paymentInstrumentId) {
+            Logger.info('donate', 'no non-gift-card payment instrument found on order — skipping')
+            throw new AdyenError(ERROR_MESSAGE.PAYMENT_INSTRUMENT_NOT_FOUND, 500)
+        }
+        if (donationCampaign.donation.type === DONATIONS.ROUNDUP) {
+            const {maxRoundupAmount} = donationCampaign.donation
+            const orderTotal = getCurrencyValueForApi(order.orderTotal, order.currency)
+            const roundUpAmount = maxRoundupAmount - (orderTotal % maxRoundupAmount)
+            const donationAmount = parseInt(data.donationAmount.value, 10)
+            if (roundUpAmount !== donationAmount) {
+                throw new AdyenError(ERROR_MESSAGE.DONATION_AMOUNT_MISMATCH, 500)
+            }
+        }
+        if (
+            donationCampaign.donation.type === DONATIONS.FIXED_AMOUNTS &&
+            !donationCampaign.donation.values.includes(data.donationAmount.value)
+        ) {
+            throw new AdyenError(ERROR_MESSAGE.DONATION_AMOUNT_MISMATCH, 500)
+        }
         const donationRequest = {
             merchantAccount: adyenContext.adyenConfig.merchantAccount,
             donationCampaignId: data.donationCampaignId,
             amount: data.donationAmount,
             reference: `${adyenContext.adyenConfig.merchantAccount}-${order.orderNo}`,
-            donationOriginalPspReference: order.c_pspReference,
-            donationToken: order.c_donationToken
+            donationOriginalPspReference: paymentInstrument.c_pspReference,
+            donationToken: paymentInstrument.c_donationToken
         }
         const response = await donationsApi.donations(donationRequest)
-        Logger.info('donate', 'success')
-        res.locals.response = response
-        return next()
+        if (response.status === DONATIONS.COMPLETED) {
+            Logger.info('donate', 'success')
+            try {
+                await updateOrderPaymentInstrument(
+                    order.orderNo,
+                    adyenContext.siteId,
+                    paymentInstrument.c_pspReference,
+                    {
+                        donationToken: null
+                    }
+                )
+            } catch (tokenErr) {
+                Logger.error(
+                    'donate',
+                    `Failed to clear donationToken after successful donation: ${tokenErr.message}`
+                )
+            }
+            res.locals.response = {
+                status: response.status
+            }
+            return next()
+        }
+        throw new AdyenError(ERROR_MESSAGE.DONATION_NOT_COMPLETED, 500)
     } catch (err) {
         Logger.error('donate', err.message)
         return next(err)

@@ -3,22 +3,34 @@ import AdyenClientProvider from '../../models/adyenClientProvider'
 import Logger from '../../models/logger'
 import {AdyenError} from '../../models/AdyenError'
 import {ERROR_MESSAGE} from '../../../utils/constants.mjs'
+import {updateOrderPaymentInstrument} from '../../helpers/orderHelper'
 
 let mockDonationCampaigns = jest.fn()
 let mockDonations = jest.fn()
 
 jest.mock('../../models/logger')
 jest.mock('../../models/adyenClientProvider')
+jest.mock('../../helpers/orderHelper', () => ({
+    updateOrderPaymentInstrument: jest.fn()
+}))
 
 describe('donations controller', () => {
     let req, res, next
 
     const mockOrder = {
         orderNo: '00001234',
-        total: 100.0,
+        orderTotal: 100.0,
         currency: 'USD',
         c_donationToken: 'donationToken123',
-        c_pspReference: 'pspReference123'
+        c_pspReference: 'pspReference123',
+        paymentInstruments: [
+            {
+                paymentInstrumentId: 'pi123',
+                c_paymentMethodType: 'scheme',
+                c_pspReference: 'pspReference123',
+                c_donationToken: 'donationToken123'
+            }
+        ]
     }
 
     const mockAdyenConfig = {
@@ -27,7 +39,8 @@ describe('donations controller', () => {
 
     const mockAdyenContext = {
         order: mockOrder,
-        adyenConfig: mockAdyenConfig
+        adyenConfig: mockAdyenConfig,
+        siteId: 'RefArch'
     }
 
     beforeEach(() => {
@@ -42,6 +55,7 @@ describe('donations controller', () => {
         next = jest.fn()
 
         jest.clearAllMocks()
+        updateOrderPaymentInstrument.mockResolvedValue({})
 
         // Mock AdyenClientProvider
         AdyenClientProvider.mockImplementation(() => ({
@@ -74,7 +88,7 @@ describe('donations controller', () => {
             })
             expect(res.locals.response).toEqual({
                 ...mockCampaignsResponse,
-                orderTotal: 100.0
+                orderTotal: 10000
             })
             expect(Logger.info).toHaveBeenCalledWith('donationCampaigns', 'start')
             expect(Logger.info).toHaveBeenCalledWith('donationCampaigns', 'success')
@@ -118,14 +132,24 @@ describe('donations controller', () => {
             donationAmount: {currency: 'USD', value: 1000}
         }
 
+        const mockCampaignsForDonate = {
+            donationCampaigns: [
+                {
+                    id: 'campaign1',
+                    name: 'Test Campaign',
+                    donation: {type: 'fixedAmounts', values: [500, 1000, 2000]}
+                }
+            ]
+        }
+
         beforeEach(() => {
             req.body = {data: mockDonationData}
+            mockDonationCampaigns.mockResolvedValue(mockCampaignsForDonate)
         })
 
         test('should successfully submit donation and attach response', async () => {
             const mockDonationResponse = {
-                status: 'completed',
-                pspReference: 'donationPspRef123'
+                status: 'completed'
             }
             mockDonations.mockResolvedValue(mockDonationResponse)
 
@@ -140,6 +164,12 @@ describe('donations controller', () => {
                 donationOriginalPspReference: 'pspReference123',
                 donationToken: 'donationToken123'
             })
+            expect(updateOrderPaymentInstrument).toHaveBeenCalledWith(
+                '00001234',
+                'RefArch',
+                'pspReference123',
+                {donationToken: null}
+            )
             expect(res.locals.response).toEqual(mockDonationResponse)
             expect(Logger.info).toHaveBeenCalledWith('donate', 'start')
             expect(Logger.info).toHaveBeenCalledWith('donate', 'success')
@@ -176,9 +206,29 @@ describe('donations controller', () => {
             expect(Logger.error).toHaveBeenCalledWith('donate', expectedError.message)
         })
 
+        test('should still succeed when donationToken nullification fails', async () => {
+            const mockDonationResponse = {
+                status: 'completed'
+            }
+            mockDonations.mockResolvedValue(mockDonationResponse)
+            updateOrderPaymentInstrument.mockRejectedValue(
+                new Error('Failed to update payment instrument')
+            )
+
+            await DonationsController.donate(req, res, next)
+
+            expect(res.locals.response).toEqual(mockDonationResponse)
+            expect(next).toHaveBeenCalledWith()
+            expect(Logger.error).toHaveBeenCalledWith(
+                'donate',
+                'Failed to clear donationToken after successful donation: Failed to update payment instrument'
+            )
+        })
+
         test('should call next with error when Adyen donations API throws', async () => {
             const mockError = new Error('Donation API error')
             mockDonations.mockRejectedValue(mockError)
+            mockDonationCampaigns.mockResolvedValue(mockCampaignsForDonate)
 
             await DonationsController.donate(req, res, next)
 
