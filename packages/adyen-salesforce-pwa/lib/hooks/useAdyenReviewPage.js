@@ -77,7 +77,7 @@ const useAdyenReviewPage = ({authToken, customerId, basketId, site, skip = false
 
     return {
         isLoading: query.isLoading && query.fetchStatus !== 'idle',
-        isSubmitting: mutation.isLoading,
+        isSubmitting: mutation.status === 'loading',
         paymentData: query.data ?? null,
         error: query.error ?? mutationError ?? null,
         submitPaymentDetails,
