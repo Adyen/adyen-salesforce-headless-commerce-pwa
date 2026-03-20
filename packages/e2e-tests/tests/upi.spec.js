@@ -13,7 +13,7 @@ test.describe('Payments through PWA UI', () => {
         await scenarios.setupCart()
     })
 
-    test.only('UPI should render only on checkout page for Indian locale', async ({page}) => {
+    test('UPI should render only on checkout page for Indian locale', async ({page}) => {
         const scenarios = new ScenarioHelper(page, new LocaleData().IN)
         await scenarios.arrangeShippingAndProceedToPayment(user_IN)
         const paymentPage = new PaymentHelper(page)
