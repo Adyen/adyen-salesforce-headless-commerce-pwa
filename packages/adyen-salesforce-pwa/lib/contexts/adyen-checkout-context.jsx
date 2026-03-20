@@ -7,8 +7,6 @@ import useAdyenPaymentMethods from '../hooks/useAdyenPaymentMethods'
 export const AdyenCheckoutContext = React.createContext({})
 
 const initialState = {
-    adyenPaymentMethods: null,
-    adyenEnvironment: null,
     adyenStateData: null,
     adyenOrder: null,
     isLoading: false,
@@ -20,10 +18,6 @@ const initialState = {
 
 const reducer = (state, action) => {
     switch (action.type) {
-        case 'SET_ADYEN_PAYMENT_METHODS':
-            return {...state, adyenPaymentMethods: action.payload}
-        case 'SET_ADYEN_ENVIRONMENT':
-            return {...state, adyenEnvironment: action.payload}
         case 'SET_ADYEN_STATE_DATA':
             return {...state, adyenStateData: action.payload}
         case 'SET_ADYEN_ORDER':
@@ -77,16 +71,8 @@ const AdyenCheckoutProvider = ({
         authToken,
         customerId,
         basketId: basket?.basketId,
-        site,
-        skip: !!state.adyenEnvironment // Skip if already fetched
+        site
     })
-
-    useEffect(() => {
-        if (adyenEnvironment || adyenEnvironmentError) {
-            const payload = adyenEnvironment || {error: adyenEnvironmentError || true}
-            dispatch({type: 'SET_ADYEN_ENVIRONMENT', payload})
-        }
-    }, [adyenEnvironment, adyenEnvironmentError])
 
     const {
         data: adyenPaymentMethods,
@@ -98,15 +84,9 @@ const AdyenCheckoutProvider = ({
         basketId: basket?.basketId,
         site,
         locale,
-        skip: !!state.adyenPaymentMethods || !callPaymentMethodsOnPages.includes(page)
+        basket,
+        skip: !callPaymentMethodsOnPages.includes(page)
     })
-
-    useEffect(() => {
-        if (adyenPaymentMethods || adyenPaymentMethodsError) {
-            const payload = adyenPaymentMethods || {error: adyenPaymentMethodsError || true}
-            dispatch({type: 'SET_ADYEN_PAYMENT_METHODS', payload})
-        }
-    }, [adyenPaymentMethods, adyenPaymentMethodsError])
 
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search)
@@ -153,7 +133,7 @@ const AdyenCheckoutProvider = ({
 
     const paymentMethodsConfigProps = useMemo(
         () => ({
-            adyenPaymentMethods: state.adyenPaymentMethods,
+            adyenPaymentMethods,
             adyenOrder,
             orderNo,
             isCustomerRegistered,
@@ -171,7 +151,7 @@ const AdyenCheckoutProvider = ({
             adyenConfig
         }),
         [
-            state.adyenPaymentMethods,
+            adyenPaymentMethods,
             adyenOrder,
             isCustomerRegistered,
             merchantDisplayName,
@@ -198,6 +178,8 @@ const AdyenCheckoutProvider = ({
     const value = useMemo(
         () => ({
             ...state,
+            adyenPaymentMethods,
+            adyenEnvironment,
             fetchingPaymentMethods,
             locale,
             navigate,
@@ -212,6 +194,8 @@ const AdyenCheckoutProvider = ({
         }),
         [
             state,
+            adyenPaymentMethods,
+            adyenEnvironment,
             fetchingPaymentMethods,
             locale,
             navigate,
@@ -220,6 +204,7 @@ const AdyenCheckoutProvider = ({
             setAdyenOrder,
             setAdyenAction,
             setOrderNo,
+            setIsLoading,
             setAdyenStateData,
             getPaymentMethodsConfiguration,
             getTranslations

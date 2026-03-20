@@ -16,9 +16,6 @@
         "dotenv": "^16.3.1",
         "style-loader": "^3.3.3"
     },
-    "dependencies": {
-        "@adyen/adyen-salesforce-pwa": "file:../adyen-salesforce-pwa"
-    },
     "scripts": {
         "analyze-build": "cross-env MOBIFY_ANALYZE=true npm run build",
         "build": "npm run build-translations && pwa-kit-dev build",
@@ -41,6 +38,7 @@
         "test:max-file-size": "npm run build && bundlesize",
         "upload-env": "upload-env",
         "get-env": "get-env",
+        "sync-adyen": "./sync-adyen-salesforce-pwa.sh",
         "start:env": "include-env -p=npm run start",
         "push:env": "include-env -p=npm run push"
     },
@@ -69,5 +67,8 @@
         "@salesforce/pwa-kit-dev": "3.15.0",
         "@salesforce/pwa-kit-react-sdk": "3.15.0",
         "@salesforce/commerce-sdk-react": "4.3.0"
+    },
+    "dependencies": {
+        "@adyen/adyen-salesforce-pwa": "file:../adyen-salesforce-pwa"
     }
 }

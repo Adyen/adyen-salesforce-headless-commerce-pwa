@@ -3,7 +3,8 @@
  * @jest-environment-options {"url": "http://localhost:3000/", "resources": "usable"}
  */
 import React, {useContext} from 'react'
-import {act, render, screen} from '@testing-library/react'
+import {act, render, screen, waitFor} from '@testing-library/react'
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
 import {
     AdyenExpressCheckoutContext,
     AdyenExpressCheckoutProvider
@@ -34,6 +35,13 @@ const TestConsumer = () => {
     )
 }
 
+const createWrapper = (children) => {
+    const queryClient = new QueryClient({
+        defaultOptions: {queries: {retry: false}}
+    })
+    return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+}
+
 describe('AdyenExpressCheckoutProvider', () => {
     let consoleErrorSpy
     beforeEach(() => {
@@ -61,8 +69,8 @@ describe('AdyenExpressCheckoutProvider', () => {
     })
 
     it('fetches environment and payment methods on mount', async () => {
-        await act(async () => {
-            render(
+        render(
+            createWrapper(
                 <AdyenExpressCheckoutProvider
                     authToken="mockToken"
                     site={{id: 'mockSite'}}
@@ -72,21 +80,23 @@ describe('AdyenExpressCheckoutProvider', () => {
                     <TestConsumer />
                 </AdyenExpressCheckoutProvider>
             )
-        })
-
-        const contextValue = JSON.parse(screen.getByTestId('context').textContent)
+        )
 
         expect(AdyenEnvironmentService).toHaveBeenCalled()
         expect(AdyenPaymentMethodsService).toHaveBeenCalled()
-        expect(contextValue.adyenEnvironment).toEqual(mockEnvironmentResponse)
-        expect(contextValue.adyenPaymentMethods).toEqual(mockPaymentMethodsResponse)
+
+        await waitFor(() => {
+            const contextValue = JSON.parse(screen.getByTestId('context').textContent)
+            expect(contextValue.adyenEnvironment).toEqual(mockEnvironmentResponse)
+            expect(contextValue.adyenPaymentMethods).toEqual(mockPaymentMethodsResponse)
+        })
     })
 
     it('fetches shipping methods automatically when basketId is available', async () => {
         const mockBasket = {basketId: 'mockBasket'}
 
-        await act(async () => {
-            render(
+        render(
+            createWrapper(
                 <AdyenExpressCheckoutProvider
                     authToken="mockToken"
                     site={{id: 'mockSite'}}
@@ -96,11 +106,14 @@ describe('AdyenExpressCheckoutProvider', () => {
                     <TestConsumer />
                 </AdyenExpressCheckoutProvider>
             )
-        })
+        )
 
-        const contextValue = JSON.parse(screen.getByTestId('context').textContent)
         expect(AdyenShippingMethodsService).toHaveBeenCalled()
-        expect(contextValue.shippingMethods).toEqual(mockShippingMethodsResponse)
+
+        await waitFor(() => {
+            const contextValue = JSON.parse(screen.getByTestId('context').textContent)
+            expect(contextValue.shippingMethods).toEqual(mockShippingMethodsResponse)
+        })
     })
 
     it('exposes a working fetchShippingMethods function that can be called manually', async () => {
@@ -112,14 +125,16 @@ describe('AdyenExpressCheckoutProvider', () => {
 
         await act(async () => {
             render(
-                <AdyenExpressCheckoutProvider
-                    authToken="mockToken"
-                    site={{id: 'mockSite'}}
-                    basket={{basketId: 'mockBasket'}}
-                    navigate={jest.fn()}
-                >
-                    <ManualFetchConsumer />
-                </AdyenExpressCheckoutProvider>
+                createWrapper(
+                    <AdyenExpressCheckoutProvider
+                        authToken="mockToken"
+                        site={{id: 'mockSite'}}
+                        basket={{basketId: 'mockBasket'}}
+                        navigate={jest.fn()}
+                    >
+                        <ManualFetchConsumer />
+                    </AdyenExpressCheckoutProvider>
+                )
             )
         })
 
@@ -132,8 +147,8 @@ describe('AdyenExpressCheckoutProvider', () => {
             fetchPaymentMethods: jest.fn().mockRejectedValue(new Error('PM Error'))
         }))
 
-        await act(async () => {
-            render(
+        render(
+            createWrapper(
                 <AdyenExpressCheckoutProvider
                     authToken="mockToken"
                     site={{id: 'mockSite'}}
@@ -143,10 +158,12 @@ describe('AdyenExpressCheckoutProvider', () => {
                     <TestConsumer />
                 </AdyenExpressCheckoutProvider>
             )
-        })
+        )
 
-        const contextValue = JSON.parse(screen.getByTestId('context').textContent)
-        expect(contextValue.adyenPaymentMethods).toEqual({error: {}})
+        await waitFor(() => {
+            const contextValue = JSON.parse(screen.getByTestId('context').textContent)
+            expect(contextValue.adyenPaymentMethods).toBeNull()
+        })
     })
 
     it('handles shipping methods error and sets error state', async () => {
@@ -154,8 +171,8 @@ describe('AdyenExpressCheckoutProvider', () => {
             getShippingMethods: jest.fn().mockRejectedValue(new Error('Ship Error'))
         }))
 
-        await act(async () => {
-            render(
+        render(
+            createWrapper(
                 <AdyenExpressCheckoutProvider
                     authToken="mockToken"
                     site={{id: 'mockSite'}}
@@ -165,23 +182,27 @@ describe('AdyenExpressCheckoutProvider', () => {
                     <TestConsumer />
                 </AdyenExpressCheckoutProvider>
             )
-        })
+        )
 
-        const contextValue = JSON.parse(screen.getByTestId('context').textContent)
-        expect(contextValue.shippingMethods).toEqual({error: {}})
+        await waitFor(() => {
+            const contextValue = JSON.parse(screen.getByTestId('context').textContent)
+            expect(contextValue.shippingMethods).toBeNull()
+        })
     })
 
     it('skips shipping methods fetch when basketId is not available', async () => {
         await act(async () => {
             render(
-                <AdyenExpressCheckoutProvider
-                    authToken="mockToken"
-                    site={{id: 'mockSite'}}
-                    locale={{id: 'en-US'}}
-                    navigate={jest.fn()}
-                >
-                    <TestConsumer />
-                </AdyenExpressCheckoutProvider>
+                createWrapper(
+                    <AdyenExpressCheckoutProvider
+                        authToken="mockToken"
+                        site={{id: 'mockSite'}}
+                        locale={{id: 'en-US'}}
+                        navigate={jest.fn()}
+                    >
+                        <TestConsumer />
+                    </AdyenExpressCheckoutProvider>
+                )
             )
         })
 
@@ -195,8 +216,8 @@ describe('AdyenExpressCheckoutProvider', () => {
             fetchEnvironment: jest.fn().mockRejectedValue(new Error('API Error'))
         }))
 
-        await act(async () => {
-            render(
+        render(
+            createWrapper(
                 <AdyenExpressCheckoutProvider
                     authToken="mockToken"
                     site={{id: 'mockSite'}}
@@ -206,9 +227,11 @@ describe('AdyenExpressCheckoutProvider', () => {
                     <TestConsumer />
                 </AdyenExpressCheckoutProvider>
             )
-        })
+        )
 
-        const contextValue = JSON.parse(screen.getByTestId('context').textContent)
-        expect(contextValue.adyenEnvironment).toEqual({error: {}})
+        await waitFor(() => {
+            const contextValue = JSON.parse(screen.getByTestId('context').textContent)
+            expect(contextValue.adyenEnvironment).toBeNull()
+        })
     })
 })
