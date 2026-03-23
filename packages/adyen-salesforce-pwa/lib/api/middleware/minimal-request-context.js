@@ -4,39 +4,45 @@ import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrent
 import Logger from '../models/logger.js'
 
 /**
- * A lightweight middleware that prepares a minimal request context for endpoints
- * that don't require basket or customer data. It validates the presence of the
- * `siteId` query parameter, fetches the Adyen configuration, and attaches it to
- * `res.locals.adyen`.
+ * Factory that creates a minimal request context middleware with the given plugin options.
+ * The middleware prepares a minimal request context for endpoints that don't require
+ * basket or customer data. It validates the presence of the `siteId` query parameter,
+ * fetches the Adyen configuration, and attaches it to `res.locals.adyen`.
  *
  * Use this for webhooks, temporary basket creation, or any endpoint that only
  * needs Adyen configuration without basket/customer dependencies.
  *
- * @param {object} req - The Express request object.
- * @param {object} res - The Express response object.
- * @param {Function} next - The Express next middleware function.
- * @returns {Promise<void>}
+ * @param {object} [options={}] - Plugin-level options (e.g. `{ nativeThreeDS: 'disabled' }`).
+ * @returns {Function} Express middleware function.
  */
-export async function prepareMinimalRequestContext(req, res, next) {
-    Logger.info('prepareMinimalRequestContext', 'start')
-    const {siteId} = req.query
-    const {authorization, customerid} = req.headers
+export function createMinimalRequestContext(options = {}) {
+    return async function prepareMinimalRequestContext(req, res, next) {
+        Logger.info('prepareMinimalRequestContext', 'start')
+        const {siteId} = req.query
+        const {authorization, customerid} = req.headers
 
-    if (!siteId) {
-        return next(new AdyenError(ERROR_MESSAGE.INVALID_PARAMS, 400))
-    }
-
-    try {
-        const adyenConfig = getAdyenConfigForCurrentSite(siteId)
-        res.locals.adyen = {
-            adyenConfig,
-            siteId,
-            ...(authorization && {authorization}),
-            ...(customerid && {customerId: customerid})
+        if (!siteId) {
+            return next(new AdyenError(ERROR_MESSAGE.INVALID_PARAMS, 400))
         }
-        Logger.info('prepareMinimalRequestContext', 'success')
-        return next()
-    } catch (err) {
-        return next(err)
+
+        try {
+            const adyenConfig = getAdyenConfigForCurrentSite(siteId, options)
+            res.locals.adyen = {
+                adyenConfig,
+                siteId,
+                ...(authorization && {authorization}),
+                ...(customerid && {customerId: customerid})
+            }
+            Logger.info('prepareMinimalRequestContext', 'success')
+            return next()
+        } catch (err) {
+            return next(err)
+        }
     }
 }
+
+/**
+ * Default minimal request context middleware (no plugin options).
+ * Provided for backward compatibility when `registerAdyenEndpoints` is called without options.
+ */
+export const prepareMinimalRequestContext = createMinimalRequestContext()

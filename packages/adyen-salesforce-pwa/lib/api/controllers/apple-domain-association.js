@@ -1,12 +1,16 @@
 import Logger from '../models/logger'
-import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrentSite.mjs'
+import {AdyenError} from '../models/AdyenError'
+import {ERROR_MESSAGE} from '../../utils/constants.mjs'
 
 function appleDomainAssociation(req, res, next) {
     Logger.info('AppleDomainAssociation', 'start')
     try {
-        const adyenConfig = getAdyenConfigForCurrentSite()
+        const {adyen: adyenContext} = res.locals
+        if (!adyenContext?.adyenConfig) {
+            throw new AdyenError(ERROR_MESSAGE.ADYEN_CONTEXT_NOT_FOUND, 500)
+        }
         res.setHeader('content-type', 'text/plain')
-        res.send(`${adyenConfig.appleDomainAssociation}\n`)
+        res.send(`${adyenContext.adyenConfig.appleDomainAssociation}\n`)
         Logger.info('AppleDomainAssociation', 'success')
     } catch (err) {
         Logger.error('AppleDomainAssociation', err.stack)

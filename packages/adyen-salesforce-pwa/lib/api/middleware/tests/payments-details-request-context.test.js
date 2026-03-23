@@ -1,4 +1,7 @@
-import {preparePaymentsDetailsContext} from '../payments-details-request-context'
+import {
+    preparePaymentsDetailsContext,
+    createPaymentsDetailsContext
+} from '../payments-details-request-context'
 import {ERROR_MESSAGE} from '../../../utils/constants.mjs'
 import {getBasket, getCurrentBasketForAuthorizedShopper} from '../../helpers/basketHelper'
 import {getAdyenConfigForCurrentSite} from '../../../utils/getAdyenConfigForCurrentSite.mjs'
@@ -155,7 +158,7 @@ describe('preparePaymentsDetailsContext middleware', () => {
                 expect.stringContaining('prepareRequestContext'),
                 'start'
             )
-            expect(getAdyenConfigForCurrentSite).toHaveBeenCalledWith('RefArch')
+            expect(getAdyenConfigForCurrentSite).toHaveBeenCalledWith('RefArch', {})
             expect(getBasket).toHaveBeenCalledWith(
                 'Bearer test-token',
                 'basket-123',
@@ -364,5 +367,51 @@ describe('preparePaymentsDetailsContext middleware', () => {
                 })
             )
         })
+    })
+})
+
+describe('createPaymentsDetailsContext factory', () => {
+    let mockReq, mockRes, mockNext
+
+    beforeEach(() => {
+        jest.clearAllMocks()
+
+        mockReq = {
+            originalUrl: '/api/adyen/payments/details',
+            headers: {
+                authorization: 'Bearer test-token',
+                basketid: 'basket-123',
+                customerid: 'customer-456'
+            },
+            query: {siteId: 'RefArch'}
+        }
+        mockRes = {locals: {}}
+        mockNext = jest.fn()
+
+        getAdyenConfigForCurrentSite.mockReturnValue({apiKey: 'test-key', environment: 'test'})
+        getBasket.mockResolvedValue({basketId: 'basket-123', productItems: []})
+        getCustomer.mockResolvedValue({customerId: 'customer-456'})
+        BasketService.mockImplementation(() => ({}))
+    })
+
+    it('should pass options to getAdyenConfigForCurrentSite', async () => {
+        const options = {nativeThreeDS: 'disabled'}
+        const mockAdyenConfig = {apiKey: 'test-key', nativeThreeDS: 'disabled'}
+        getAdyenConfigForCurrentSite.mockReturnValue(mockAdyenConfig)
+
+        const middleware = createPaymentsDetailsContext(options)
+        await middleware(mockReq, mockRes, mockNext)
+
+        expect(getAdyenConfigForCurrentSite).toHaveBeenCalledWith('RefArch', options)
+        expect(mockRes.locals.adyen.adyenConfig).toEqual(mockAdyenConfig)
+        expect(mockNext).toHaveBeenCalledWith()
+    })
+
+    it('should use empty options by default (backward compatibility)', async () => {
+        const middleware = createPaymentsDetailsContext()
+        await middleware(mockReq, mockRes, mockNext)
+
+        expect(getAdyenConfigForCurrentSite).toHaveBeenCalledWith('RefArch', {})
+        expect(mockNext).toHaveBeenCalledWith()
     })
 })

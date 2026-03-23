@@ -19,6 +19,7 @@ export * from './models/logger'
 export * from './middleware/webhook'
 export * from './middleware/minimal-request-context'
 export * from './middleware/request-context'
+export * from './middleware/payments-details-request-context'
 
 // Controllers
 export {default as ShippingAddressController} from './controllers/shipping-address'
