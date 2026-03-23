@@ -33,6 +33,10 @@ const defaultL10nConfig = {
         {
             id: 'el-GR',
             preferredCurrency: 'EUR'
+        },
+        {
+            id: 'hi-IN',
+            preferredCurrency: 'INR'
         }
     ]
 }
