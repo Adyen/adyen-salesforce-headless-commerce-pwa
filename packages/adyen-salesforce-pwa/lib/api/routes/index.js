@@ -23,15 +23,9 @@ import {appleDomainAssociation} from '../controllers/apple-domain-association'
 import PaymentCancelController from '../controllers/payment-cancel'
 import PaymentCancelExpressController from '../controllers/payment-cancel-express'
 import {balanceCheck, cancelOrder, createOrder} from '../controllers/giftCard'
-import {createRequestContext, prepareRequestContext} from '../middleware/request-context'
-import {
-    createMinimalRequestContext,
-    prepareMinimalRequestContext
-} from '../middleware/minimal-request-context'
-import {
-    createPaymentsDetailsContext,
-    preparePaymentsDetailsContext
-} from '../middleware/payments-details-request-context'
+import {createRequestContext} from '../middleware/request-context'
+import {createMinimalRequestContext} from '../middleware/minimal-request-context'
+import {createPaymentsDetailsContext} from '../middleware/payments-details-request-context'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function SuccessHandler(req, res, next) {
@@ -59,6 +53,7 @@ function registerAdyenEndpoints(app, runtime, overrides, options = {}) {
     const paymentsDetailsContext = createPaymentsDetailsContext(options)
 
     const appleDomainAssociationHandler = overrides?.appleDomainAssociation || [
+        minimalRequestContext,
         appleDomainAssociation,
         ErrorHandler
     ]

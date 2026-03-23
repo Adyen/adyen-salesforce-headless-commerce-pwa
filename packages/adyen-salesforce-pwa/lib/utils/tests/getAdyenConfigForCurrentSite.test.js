@@ -1,4 +1,4 @@
-import {getAdyenConfigForCurrentSite, setProperty} from '../getAdyenConfigForCurrentSite.mjs'
+import {getAdyenConfigForCurrentSite} from '../getAdyenConfigForCurrentSite.mjs'
 
 describe('getAdyenConfigForCurrentSite', () => {
     it('returns the correct Adyen configuration for a given site', () => {
@@ -11,97 +11,95 @@ describe('getAdyenConfigForCurrentSite', () => {
         const expectedConfig = {
             apiKey: 'site1_api_key',
             clientKey: 'site1_client_key',
-            environment: '',
-            merchantAccount: '',
-            systemIntegratorName: '',
-            webhookHmacKey: '',
-            webhookPassword: '',
-            webhookUser: '',
-            liveEndpointUrlPrefix: '',
-            appleDomainAssociation: '',
-            giftCardExpirationTime: '',
-            l23Enabled: '',
-            l23CommodityCode: ''
+            environment: undefined,
+            merchantAccount: undefined,
+            systemIntegratorName: undefined,
+            webhookHmacKey: undefined,
+            webhookPassword: undefined,
+            webhookUser: undefined,
+            liveEndpointUrlPrefix: undefined,
+            appleDomainAssociation: undefined,
+            nativeThreeDS: undefined,
+            giftCardExpirationTime: undefined,
+            l23Enabled: undefined,
+            l23CommodityCode: undefined
         }
 
         const result = getAdyenConfigForCurrentSite(siteId)
         expect(result).toEqual(expectedConfig)
     })
 
-    it('returns an empty values when siteId is not provided', () => {
+    it('returns undefined values when siteId is not provided', () => {
         const result = getAdyenConfigForCurrentSite()
         expect(result).toEqual({
-            apiKey: '',
-            clientKey: '',
-            environment: '',
-            merchantAccount: '',
-            systemIntegratorName: '',
-            webhookHmacKey: '',
-            webhookPassword: '',
-            webhookUser: '',
-            liveEndpointUrlPrefix: '',
-            appleDomainAssociation: '',
-            giftCardExpirationTime: '',
-            l23Enabled: '',
-            l23CommodityCode: ''
+            apiKey: undefined,
+            clientKey: undefined,
+            environment: undefined,
+            merchantAccount: undefined,
+            systemIntegratorName: undefined,
+            webhookHmacKey: undefined,
+            webhookPassword: undefined,
+            webhookUser: undefined,
+            liveEndpointUrlPrefix: undefined,
+            appleDomainAssociation: undefined,
+            nativeThreeDS: undefined,
+            giftCardExpirationTime: undefined,
+            l23Enabled: undefined,
+            l23CommodityCode: undefined
         })
     })
 
-    it('does not include nativeThreeDS when no options are provided', () => {
+    it('returns undefined nativeThreeDS when no options or env are provided', () => {
         const result = getAdyenConfigForCurrentSite('site1')
-        expect(result).not.toHaveProperty('nativeThreeDS')
+        expect(result.nativeThreeDS).toBeUndefined()
     })
 })
 
 describe('getAdyenConfigForCurrentSite with options', () => {
-    it('sets nativeThreeDS from options (sourced from default.js adyenAPI config)', () => {
-        const result = getAdyenConfigForCurrentSite('site1', {nativeThreeDS: 'disabled'})
+    it('sets nativeThreeDS from options using env variable name', () => {
+        const result = getAdyenConfigForCurrentSite('site1', {ADYEN_NATIVE_3DS: 'disabled'})
 
         expect(result.nativeThreeDS).toBe('disabled')
     })
 
     it('sets nativeThreeDS to preferred when options specifies preferred', () => {
-        const result = getAdyenConfigForCurrentSite('site1', {nativeThreeDS: 'preferred'})
+        const result = getAdyenConfigForCurrentSite('site1', {ADYEN_NATIVE_3DS: 'preferred'})
 
         expect(result.nativeThreeDS).toBe('preferred')
     })
 
-    it('ignores unknown option keys (only allows ALLOWED_OPTIONS)', () => {
+    it('only maps known config keys from options', () => {
         const result = getAdyenConfigForCurrentSite(undefined, {
-            unknownKey: 'value',
-            nativeThreeDS: 'disabled'
+            UNKNOWN_KEY: 'value',
+            ADYEN_NATIVE_3DS: 'disabled'
         })
 
         expect(result.nativeThreeDS).toBe('disabled')
+        expect(result).not.toHaveProperty('UNKNOWN_KEY')
         expect(result).not.toHaveProperty('unknownKey')
     })
 
-    it('does not set nativeThreeDS when options is empty', () => {
+    it('returns undefined nativeThreeDS when options is empty', () => {
         const result = getAdyenConfigForCurrentSite('site1', {})
 
-        expect(result).not.toHaveProperty('nativeThreeDS')
-    })
-})
-
-describe('setProperty', () => {
-    it('returns the correct property value from process.env when available', () => {
-        process.env = {
-            site1_A_PROPERTY: 'property_value'
-        }
-
-        const siteId = 'site1'
-        const property = 'A_PROPERTY'
-        const result = setProperty(siteId, property)
-
-        expect(result).toBe('property_value')
+        expect(result.nativeThreeDS).toBeUndefined()
     })
 
-    it('returns an empty string when property is not found in process.env', () => {
-        process.env = {}
-        const siteId = 'site1'
-        const property = 'NON_EXISTENT_PROPERTY'
-        const result = setProperty(siteId, property)
+    it('supports site-specific options override', () => {
+        const result = getAdyenConfigForCurrentSite('site1', {
+            ADYEN_NATIVE_3DS: 'disabled',
+            site1_ADYEN_NATIVE_3DS: 'enabled'
+        })
 
-        expect(result).toBe('')
+        expect(result.nativeThreeDS).toBe('enabled')
+    })
+
+    it('prioritizes options over env variables', () => {
+        process.env.ADYEN_NATIVE_3DS = 'env-value'
+        const result = getAdyenConfigForCurrentSite('site1', {
+            ADYEN_NATIVE_3DS: 'option-value'
+        })
+
+        expect(result.nativeThreeDS).toBe('option-value')
     })
 })

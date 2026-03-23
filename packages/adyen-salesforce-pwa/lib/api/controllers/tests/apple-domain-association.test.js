@@ -1,10 +1,9 @@
 import {appleDomainAssociation} from '../apple-domain-association'
-import {getAdyenConfigForCurrentSite} from '../../../utils/getAdyenConfigForCurrentSite.mjs'
 import Logger from '../../models/logger'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import {AdyenError} from '../../models/AdyenError'
 
-jest.mock('../../../utils/getAdyenConfigForCurrentSite.mjs', () => ({
-    getAdyenConfigForCurrentSite: jest.fn()
-}))
+jest.mock('../../models/AdyenError')
 
 jest.mock('../../models/logger', () => ({
     info: jest.fn(),
@@ -19,36 +18,44 @@ describe('appleDomainAssociation Controller', () => {
         req = {}
         res = {
             send: jest.fn(),
-            setHeader: jest.fn()
+            setHeader: jest.fn(),
+            locals: {
+                adyen: {
+                    adyenConfig: {
+                        appleDomainAssociation: 'mock-apple-domain-association-content'
+                    }
+                }
+            }
         }
         next = jest.fn()
     })
 
     it('should send the apple domain association content from the adyen config', async () => {
-        const mockContent = 'mock-apple-domain-association-content'
-        getAdyenConfigForCurrentSite.mockReturnValue({
-            appleDomainAssociation: mockContent
-        })
-
         await appleDomainAssociation(req, res, next)
 
         expect(Logger.info).toHaveBeenCalledWith('AppleDomainAssociation', 'start')
-        expect(getAdyenConfigForCurrentSite).toHaveBeenCalled()
         expect(res.setHeader).toHaveBeenCalledWith('content-type', 'text/plain')
-        expect(res.send).toHaveBeenCalledWith(`${mockContent}\n`)
+        expect(res.send).toHaveBeenCalledWith('mock-apple-domain-association-content\n')
         expect(next).not.toHaveBeenCalled()
     })
 
-    it('should call next with an error if config fetching fails', async () => {
-        const mockError = new Error('Config not found')
-        getAdyenConfigForCurrentSite.mockImplementation(() => {
-            throw mockError
-        })
+    it('should call next with an error if adyen context is missing', async () => {
+        res.locals = {}
 
         await appleDomainAssociation(req, res, next)
 
-        expect(Logger.error).toHaveBeenCalledWith('AppleDomainAssociation', mockError.stack)
+        expect(Logger.error).toHaveBeenCalled()
         expect(res.send).not.toHaveBeenCalled()
-        expect(next).toHaveBeenCalledWith(mockError)
+        expect(next).toHaveBeenCalled()
+    })
+
+    it('should call next with an error if adyenConfig is missing', async () => {
+        res.locals.adyen = {}
+
+        await appleDomainAssociation(req, res, next)
+
+        expect(Logger.error).toHaveBeenCalled()
+        expect(res.send).not.toHaveBeenCalled()
+        expect(next).toHaveBeenCalled()
     })
 })

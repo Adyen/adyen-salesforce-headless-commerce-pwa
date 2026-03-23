@@ -64,7 +64,7 @@ export function createRequestContext(options = {}) {
                 getCustomer(authorization, customerid.trim(), siteId)
             ])
             const basket = basketResult
-            const adyenConfig = getAdyenConfigForCurrentSite(siteId)
+            const adyenConfig = getAdyenConfigForCurrentSite(siteId, options)
 
             const adyenContext = {
                 basket,

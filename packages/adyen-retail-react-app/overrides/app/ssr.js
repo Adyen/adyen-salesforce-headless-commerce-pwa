@@ -113,8 +113,7 @@ const {handler} = runtime.createHandler(options, (app) => {
     app.get('/worker.js.map', runtime.serveServiceWorker)
     /* -----------------Adyen Begin ------------------------ */
     /**
-     * Adyen API Endpoints
-     * - Environment
+     * Register Adyen endpoints for handling:
      * - Payment Methods
      * - Payments
      * - Payments Details
@@ -123,9 +122,9 @@ const {handler} = runtime.createHandler(options, (app) => {
      * @param app - express app used to register the routes
      * @param runtime - express runtime used to render pages after sanitizing the query params
      * @param overrides (optional) - an object that provides the option for using different endpoint handlers
-     * @param options (optional) - plugin-level configuration options sourced from app config (default.js)
+     * @param options (optional) - plugin-level configuration options
      *
-     * @example
+     * @example overrides
      * const overrides = {
      *   payments: [PrePaymentsController, PaymentsController, PostPaymentsController],
      *   webhook: [
@@ -136,9 +135,32 @@ const {handler} = runtime.createHandler(options, (app) => {
      *      donationWebhookHandler
      *  ]
      * }
+     *
+     * @example adyenOptions - Configuration options (alternative to environment variables)
+     * const adyenOptions = {
+     *   // Controls 3DS authentication method
+     *   // Use 'preferred' for native 3DS or 'disabled' for redirect 3DS
+     *   ADYEN_NATIVE_3DS: 'preferred',
+     *
+     *   // Site-specific override example (takes precedence over global config)
+     *   RefArch_ADYEN_NATIVE_3DS: 'disabled',
+     *
+     *   // Other available options (use env variable names):
+     *   // ADYEN_API_KEY: 'your-api-key',
+     *   // ADYEN_CLIENT_KEY: 'your-client-key',
+     *   // ADYEN_ENVIRONMENT: 'test',
+     *   // ADYEN_MERCHANT_ACCOUNT: 'your-merchant-account',
+     *   // ADYEN_LIVE_URL_PREFIX: 'your-prefix',
+     *   // ADYEN_WEBHOOK_USER: 'webhook-user',
+     *   // ADYEN_WEBHOOK_PASSWORD: 'webhook-password',
+     *   // ADYEN_HMAC_KEY: 'hmac-key',
+     *   // SYSTEM_INTEGRATOR_NAME: 'integrator-name',
+     *   // GIFT_CARD_EXPIRATION_TIME: '3600',
+     *   // ADYEN_L23_ENABLED: 'true',
+     *   // ADYEN_L23_COMMODITY_CODE: 'code'
+     * }
      */
-    const adyenOptions = getConfig()?.app?.adyenAPI || {}
-    registerAdyenEndpoints(app, runtime, {}, adyenOptions)
+    registerAdyenEndpoints(app, runtime, {}, {})
     /* -----------------Adyen End ------------------------ */
     app.get('*', runtime.render)
 })

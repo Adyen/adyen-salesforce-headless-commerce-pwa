@@ -47,14 +47,7 @@ module.exports = {
             // in production environment reports
             isProduction: false
         },
-        dataCloudAPI: {},
-        // Adyen api config
-        adyenAPI: {
-            // Controls 3DS authentication method.
-            // Use 'preferred' for native 3DS (default) or 'disabled' for redirect 3DS.
-            // Set to 'disabled' when strict Content Security Policy (CSP) rules prevent native 3DS.
-            nativeThreeDS: 'preferred'
-        }
+        dataCloudAPI: {}
     },
     // This list contains server-side only libraries that you don't want to be compiled by webpack
     externals: [],

@@ -54,7 +54,7 @@ describe('prepareRequestContext middleware', () => {
             'mockCustomerId',
             'RefArch'
         )
-        expect(getAdyenConfigForCurrentSite).toHaveBeenCalledWith('RefArch')
+        expect(getAdyenConfigForCurrentSite).toHaveBeenCalledWith('RefArch', {})
         expect(BasketService).toHaveBeenCalled()
 
         expect(res.locals.adyen).toBeDefined()
