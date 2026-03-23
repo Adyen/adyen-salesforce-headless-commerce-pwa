@@ -1,4 +1,7 @@
-import {prepareMinimalRequestContext} from '../minimal-request-context.js'
+import {
+    prepareMinimalRequestContext,
+    createMinimalRequestContext
+} from '../minimal-request-context.js'
 import {getAdyenConfigForCurrentSite} from '../../../utils/getAdyenConfigForCurrentSite.mjs'
 import Logger from '../../models/logger.js'
 import {AdyenError} from '../../models/AdyenError.js'
@@ -34,7 +37,7 @@ describe('prepareMinimalRequestContext middleware', () => {
 
         await prepareMinimalRequestContext(req, res, next)
 
-        expect(getAdyenConfigForCurrentSite).toHaveBeenCalledWith('RefArch')
+        expect(getAdyenConfigForCurrentSite).toHaveBeenCalledWith('RefArch', {})
         expect(res.locals.adyen).toBeDefined()
         expect(res.locals.adyen.adyenConfig).toEqual(mockAdyenConfig)
         expect(res.locals.adyen.siteId).toBe('RefArch')
@@ -62,5 +65,43 @@ describe('prepareMinimalRequestContext middleware', () => {
         await prepareMinimalRequestContext(req, res, next)
 
         expect(next).toHaveBeenCalledWith(mockError)
+    })
+})
+
+describe('createMinimalRequestContext factory', () => {
+    let req, res, next
+
+    beforeEach(() => {
+        jest.clearAllMocks()
+        req = {
+            query: {siteId: 'RefArch'},
+            headers: {authorization: 'Bearer test-token', customerid: 'customer123'}
+        }
+        res = {locals: {}}
+        next = jest.fn()
+    })
+
+    test('should pass options to getAdyenConfigForCurrentSite', async () => {
+        const options = {nativeThreeDS: 'disabled'}
+        const mockAdyenConfig = {merchantAccount: 'mockAccount', nativeThreeDS: 'disabled'}
+        getAdyenConfigForCurrentSite.mockReturnValue(mockAdyenConfig)
+
+        const middleware = createMinimalRequestContext(options)
+        await middleware(req, res, next)
+
+        expect(getAdyenConfigForCurrentSite).toHaveBeenCalledWith('RefArch', options)
+        expect(res.locals.adyen.adyenConfig).toEqual(mockAdyenConfig)
+        expect(next).toHaveBeenCalledWith()
+    })
+
+    test('should use empty options by default (backward compatibility)', async () => {
+        const mockAdyenConfig = {merchantAccount: 'mockAccount'}
+        getAdyenConfigForCurrentSite.mockReturnValue(mockAdyenConfig)
+
+        const middleware = createMinimalRequestContext()
+        await middleware(req, res, next)
+
+        expect(getAdyenConfigForCurrentSite).toHaveBeenCalledWith('RefArch', {})
+        expect(next).toHaveBeenCalledWith()
     })
 })
