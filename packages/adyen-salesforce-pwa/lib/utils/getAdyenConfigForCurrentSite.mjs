@@ -27,10 +27,11 @@ export const getAdyenConfigForCurrentSite = (currentSiteId, options = {}) => {
 const resolveConfigValue = (siteId, key, options) => {
     const siteSpecificKey = siteId ? `${siteId}_${key}` : key
 
+    // Priority: site-specific (options > env) > global (options > env)
     return (
         options[siteSpecificKey] ??
-        options[key] ??
         process.env[siteSpecificKey] ??
+        options[key] ??
         process.env[key] ??
         undefined
     )

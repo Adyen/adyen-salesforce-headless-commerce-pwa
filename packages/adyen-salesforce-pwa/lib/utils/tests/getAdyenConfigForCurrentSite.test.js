@@ -94,12 +94,30 @@ describe('getAdyenConfigForCurrentSite with options', () => {
         expect(result.nativeThreeDS).toBe('enabled')
     })
 
-    it('prioritizes options over env variables', () => {
+    it('prioritizes options over env variables at same specificity level', () => {
         process.env.ADYEN_NATIVE_3DS = 'env-value'
         const result = getAdyenConfigForCurrentSite('site1', {
             ADYEN_NATIVE_3DS: 'option-value'
         })
 
         expect(result.nativeThreeDS).toBe('option-value')
+    })
+
+    it('prioritizes site-specific env over global options (multi-site safety)', () => {
+        process.env.site1_ADYEN_API_KEY = 'site1-specific-env-key'
+        const result = getAdyenConfigForCurrentSite('site1', {
+            ADYEN_API_KEY: 'global-option-key'
+        })
+
+        expect(result.apiKey).toBe('site1-specific-env-key')
+    })
+
+    it('uses global option when no site-specific config exists', () => {
+        process.env = {}
+        const result = getAdyenConfigForCurrentSite('site1', {
+            ADYEN_API_KEY: 'global-option-key'
+        })
+
+        expect(result.apiKey).toBe('global-option-key')
     })
 })
