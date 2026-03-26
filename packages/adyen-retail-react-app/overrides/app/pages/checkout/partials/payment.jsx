@@ -44,6 +44,7 @@ const Payment = () => {
     const {formatMessage} = useIntl()
     const {data: basket, refetch: refetchBasket} = useCurrentBasket()
     const customerId = useCustomerId()
+    console.log(customerId)
     const customerTypeData = useCustomerType()
     const {getTokenWhenReady} = useAccessToken()
     const navigate = useNavigation()
@@ -149,6 +150,17 @@ const Payment = () => {
         },
         klarna_account: {
             useKlarnaWidget: false
+        },
+        card: {
+            installmentOptions: {
+                visa: {
+                    values: [2]
+                },
+                mc: {
+                    values: [4, 6]
+                }
+            },
+            showInstallmentAmounts: true
         }
     }
 
@@ -169,6 +181,8 @@ const Payment = () => {
                         <LoadingSpinner />
                     ) : (
                         <AdyenCheckout
+                            authToken={authToken}
+                            customerId={customerId}
                             key={adyenCheckoutKey}
                             // Required props
                             site={site}
