@@ -10,6 +10,17 @@ import {convertCurrencyValueToMajorUnits} from '../../utils/parsers.mjs'
 import Logger from '../models/logger'
 import {AdyenError} from './AdyenError'
 
+function mapCustomFields(customFields = []) {
+    return customFields.reduce((acc, {field, value} = {}) => {
+        if (!field || value == null) {
+            return acc
+        }
+
+        acc[field] = value
+        return acc
+    }, {})
+}
+
 /**
  * A service for managing basket state and interactions with the ShopperBaskets API.
  * It centralizes basket modifications and automatically refreshes the request context
@@ -87,10 +98,10 @@ export class BasketService {
      * Adds a payment instrument to the current basket.
      * @param {object} amount - The amount included in the payment request. Should have value and currency
      * @param {object} paymentMethod - The payment method object. Should have type and brand.
-     * @param {string} pspReference - The payment reference returned from Adyen.
+     * @param {Array<{field: string, value: any}>} [customFields=[]] - Optional custom fields to set.
      * @returns {Promise<object>} A promise that resolves to the updated basket object.
      */
-    async addPaymentInstrument(amount, paymentMethod, pspReference) {
+    async addPaymentInstrument(amount, paymentMethod, customFields = []) {
         if (!amount || !paymentMethod) {
             const missing = []
             if (!amount) missing.push('amount')
@@ -104,6 +115,7 @@ export class BasketService {
             ? PAYMENT_METHODS.CREDIT_CARD
             : PAYMENT_METHODS.ADYEN_COMPONENT
 
+        const mappedCustomFields = mapCustomFields(customFields)
         const paymentInstrumentReq = {
             body: {
                 amount: convertCurrencyValueToMajorUnits(amount?.value, amount?.currency),
@@ -113,7 +125,7 @@ export class BasketService {
                         ? getCardType(paymentMethod?.brand || paymentMethod?.srcScheme)
                         : paymentMethod?.type
                 },
-                ...(pspReference && {c_pspReference: pspReference}),
+                ...mappedCustomFields,
                 c_paymentMethodType: paymentMethod?.type,
                 ...((paymentMethod?.brand || paymentMethod?.srcScheme) && {
                     c_paymentMethodBrand: paymentMethod?.brand || paymentMethod?.srcScheme

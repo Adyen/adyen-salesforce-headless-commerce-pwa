@@ -15,6 +15,17 @@ import {ERROR_MESSAGE, ORDER, PAYMENT_METHOD_TYPES} from '../../utils/constants.
 import {cleanupReopenedBasket} from '../helpers/paymentsHelper.js'
 import Logger from '../models/logger.js'
 
+function mapCustomFields(customFields = []) {
+    return customFields.reduce((acc, {field, value} = {}) => {
+        if (!field || value == null) {
+            return acc
+        }
+
+        acc[field] = value
+        return acc
+    }, {})
+}
+
 /**
  * Returns the most recent order in 'New' status for the shopper, or null if none found.
  * Used to detect redirect payments (e.g. Klarna) where the basket was already consumed
@@ -170,10 +181,10 @@ export async function getOrderUsingOrderNo(orderNo, siteId) {
  * Updates the custom pspReference on the payment instrument of a pre-created SFCC order.
  * @param {object} adyenContext - The request context from `res.locals.adyen`.
  * @param {string} orderNo - The order number.
- * @param {string} pspReference - The Adyen PSP reference from the /payments or /payments/details response.
+ * @param {Array<{field: string, value: any}>} [customFields=[]] - Optional custom fields to set.
  * @returns {Promise<void>}
  */
-export async function updatePaymentInstrumentForOrder(adyenContext, orderNo, pspReference) {
+export async function updatePaymentInstrumentForOrder(adyenContext, orderNo, customFields = []) {
     const {authorization, siteId} = adyenContext
     Logger.info('updatePaymentInstrumentForOrder', `start  — orderNo: ${orderNo}`)
     const shopperOrders = createShopperOrderClient(authorization, siteId)
@@ -193,6 +204,7 @@ export async function updatePaymentInstrumentForOrder(adyenContext, orderNo, psp
         return
     }
     const {paymentInstrumentId, ...paymentInstrument} = firstPaymentInstrument
+    const mappedCustomFields = mapCustomFields(customFields)
     await shopperOrders.updatePaymentInstrumentForOrder({
         parameters: {
             orderNo: orderNo,
@@ -200,7 +212,7 @@ export async function updatePaymentInstrumentForOrder(adyenContext, orderNo, psp
         },
         body: {
             ...paymentInstrument,
-            ...(pspReference && {c_pspReference: pspReference})
+            ...mappedCustomFields
         }
     })
     Logger.info(

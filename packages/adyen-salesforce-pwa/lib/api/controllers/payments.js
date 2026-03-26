@@ -143,7 +143,7 @@ async function sendPayments(req, res, next) {
             await adyenContext.basketService.addPaymentInstrument(
                 paymentRequest?.amount,
                 paymentRequest?.paymentMethod,
-                response?.pspReference
+                [{field: 'c_pspReference', value: response?.pspReference}]
             )
         }
 
@@ -152,17 +152,19 @@ async function sendPayments(req, res, next) {
                 await adyenContext.basketService.addPaymentInstrument(
                     paymentRequest?.amount,
                     paymentRequest?.paymentMethod,
-                    response?.pspReference
+                    [
+                        {field: 'c_pspReference', value: response?.pspReference},
+                        {field: 'c_cardInstallments', value: paymentRequest?.installments?.value}
+                    ]
                 )
                 await createOrderUsingOrderNo(adyenContext)
             } else {
                 const pspReference = response?.pspReference || response?.order?.pspReference
                 if (pspReference) {
-                    await updatePaymentInstrumentForOrder(
-                        adyenContext,
-                        preCreatedOrderNo,
-                        pspReference
-                    )
+                    await updatePaymentInstrumentForOrder(adyenContext, preCreatedOrderNo, [
+                        {field: 'c_pspReference', value: pspReference},
+                        {field: 'c_cardInstallments', value: paymentRequest?.installments?.value}
+                    ])
                 }
             }
             Logger.info('sendPayments', `order confirmed: ${checkoutResponse.merchantReference}`)
