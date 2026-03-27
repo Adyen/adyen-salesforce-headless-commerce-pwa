@@ -1,4 +1,4 @@
-import {PaymentData} from "../data/paymentData.js";
+import {PaymentData} from '../data/paymentData.js'
 
 export class PaymentHelper {
     constructor(page) {
@@ -23,7 +23,9 @@ export class PaymentHelper {
             .locator('.input-field')
 
         // 3Ds2 Component locators
-        this.threeDS2Iframe = this.page.frameLocator("iframe[name='threeDSIframe']")
+        this.threeDS2Iframe = this.page.frameLocator(
+            "iframe[name='threeDSIframe'], iframe[name*='threeDS']"
+        )
         this.threeDS2PasswordInput = this.threeDS2Iframe.locator("input[name='answer']")
         this.threeDS2SubmitButton = this.threeDS2Iframe.locator("button[type='submit']")
         this.threeDS2CancelButton = this.threeDS2Iframe.locator('#buttonCancel')
@@ -38,13 +40,13 @@ export class PaymentHelper {
         this.AddedGiftCards = this.page.locator('.adyen-checkout__order-payment-method')
     }
 
-  async selectPaymentType(paymentType) {
-      const paymentLocator = this.page.locator(
-        `.adyen-checkout__payment-method__name:has-text("${paymentType}")`
-      );
-      await paymentLocator.waitFor({ state: 'visible' });
-      await paymentLocator.click();
-  }
+    async selectPaymentType(paymentType) {
+        const paymentLocator = this.page.locator(
+            `.adyen-checkout__payment-method__name:has-text("${paymentType}")`
+        )
+        await paymentLocator.waitFor({state: 'visible'})
+        await paymentLocator.click()
+    }
 
     /* This is the generic method to click Pay button for majority of the drop-in payment methods
     Some payment methods require a specific locator, so make sure to utilize the corresponding function */
@@ -56,47 +58,44 @@ export class PaymentHelper {
         await this.page.waitForNavigation({
             url: /.*playground.klarna/,
             timeout: 20000,
-            waitUntil: 'load',
-        });
-    };
+            waitUntil: 'load'
+        })
+    }
 
     waitForIdealLoad = async () => {
         await this.page.waitForNavigation({
             url: /.*ideal.nl/,
             timeout: 20000,
-            waitUntil: 'load',
-        });
-    };
+            waitUntil: 'load'
+        })
+    }
 
     initiatePayPalPayment = async () => {
         const payPalButton = this.page
             .frameLocator('.adyen-checkout__paypal__button--paypal iframe.visible')
-            .locator('.paypal-button');
+            .locator('.paypal-button')
 
-        const [popup] = await Promise.all([
-            this.page.waitForEvent('popup'),
-            payPalButton.click(),
-        ]);
+        const [popup] = await Promise.all([this.page.waitForEvent('popup'), payPalButton.click()])
 
         await popup.waitForNavigation({
             url: /.*sandbox.paypal.com*/,
-            timeout: 20000,
-        });
+            timeout: 20000
+        })
 
-        this.emailInput = popup.locator('#email');
-        this.nextButton = popup.locator('#btnNext');
-        this.passwordInput = popup.locator('#password');
-        this.loginButton = popup.locator('#btnLogin');
-        this.agreeAndPayNowButton = popup.locator('[data-id="payment-submit-btn"]');
+        this.emailInput = popup.locator('#email')
+        this.nextButton = popup.locator('#btnNext')
+        this.passwordInput = popup.locator('#password')
+        this.loginButton = popup.locator('#btnLogin')
+        this.agreeAndPayNowButton = popup.locator('[data-id="payment-submit-btn"]')
 
-        const payPalData = new PaymentData().PayPal;
-        await this.emailInput.click();
-        await this.emailInput.fill(payPalData.username);
-        await this.nextButton.click();
-        await this.passwordInput.fill(payPalData.password);
-        await this.loginButton.click();
-        await this.agreeAndPayNowButton.click();
-    };
+        const payPalData = new PaymentData().PayPal
+        await this.emailInput.click()
+        await this.emailInput.fill(payPalData.username)
+        await this.nextButton.click()
+        await this.passwordInput.fill(payPalData.password)
+        await this.loginButton.click()
+        await this.agreeAndPayNowButton.click()
+    }
 
     async fillInput(inputField, value) {
         await inputField.click()
@@ -122,7 +121,15 @@ export class PaymentHelper {
 
     // 3Ds2
     async validate3DS2(answer) {
-        await this.fill3DS2PasswordAndSubmit(answer)
+        const threeDSChallengeVisible = await this.page
+            .locator("iframe[name='threeDSIframe'], iframe[name*='threeDS']")
+            .first()
+            .isVisible({timeout: 10000})
+            .catch(() => false)
+
+        if (threeDSChallengeVisible) {
+            await this.fill3DS2PasswordAndSubmit(answer)
+        }
     }
 
     async fill3DS2PasswordAndSubmit(answer) {

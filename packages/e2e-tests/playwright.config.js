@@ -25,7 +25,7 @@ export default defineConfig({
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     use: {
         /* Standard timeout per action */
-        actionTimeout:20000,
+        actionTimeout: 20000,
 
         /* Base URL to use in actions like `await page.goto('/')`. */
         baseURL: 'http://localhost:3000',
@@ -80,8 +80,8 @@ export default defineConfig({
 
     /* Run your local dev server before starting the tests */
     webServer: {
-      command: 'cd ../adyen-retail-react-app && npm run start',
-      url: 'http://localhost:3000',
-      reuseExistingServer: true,
-    },
+        command: 'cd ../adyen-retail-react-app && npm run start:env',
+        url: 'http://localhost:3000',
+        reuseExistingServer: true
+    }
 })

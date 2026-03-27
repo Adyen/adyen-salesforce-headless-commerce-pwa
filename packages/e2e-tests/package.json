@@ -4,7 +4,7 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "test-headed": "npx playwright test --headed",
+        "test-headed": "npx playwright test tests/ideal.spec.js --headed",
         "test": "npx playwright test"
     },
     "keywords": [],

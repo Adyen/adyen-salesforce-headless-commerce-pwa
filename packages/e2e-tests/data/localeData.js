@@ -11,9 +11,15 @@ export class LocaleData {
             heading: 'Account Details'
         },
         productDetailPage: {
-            productColor: 'Gray',
+            productName: '12416789M',
+            productColor: 'Navy',
+            productSize: '28',
             addToCartButtonCaption: 'Add to Cart',
             proceedToCheckoutButtonCaption: 'Proceed to Checkout'
+        },
+        checkoutPage: {
+            heading: 'Checkout',
+            shippingMethodModifyButton: 'Shipping Method'
         },
         successfulOrderMessage: 'Thank you for your order!'
     }
@@ -26,7 +32,9 @@ export class LocaleData {
             heading: 'Détails du compte'
         },
         productDetailPage: {
-            productColor: 'Gris',
+            productName: '12416789M',
+            productColor: 'Marine',
+            productSize: '28',
             addToCartButtonCaption: 'Ajouter au panier',
             proceedToCheckoutButtonCaption: 'Passer au checkout'
         },
@@ -44,7 +52,9 @@ export class LocaleData {
             heading: 'Account Details'
         },
         productDetailPage: {
-            productColor: 'Gray',
+            productName: '12416789M',
+            productColor: 'Navy',
+            productSize: '28',
             addToCartButtonCaption: 'Add to Cart',
             proceedToCheckoutButtonCaption: 'Proceed to Checkout'
         },
