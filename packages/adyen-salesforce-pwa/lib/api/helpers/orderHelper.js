@@ -13,18 +13,8 @@ import {getCustomerBaskets, createShopperCustomerClient} from '../helpers/custom
 import {BasketService} from '../models/basketService.js'
 import {ERROR_MESSAGE, ORDER, PAYMENT_METHOD_TYPES} from '../../utils/constants.mjs'
 import {cleanupReopenedBasket} from '../helpers/paymentsHelper.js'
+import {mapCustomFields} from '../utils/customFieldUtils.js'
 import Logger from '../models/logger.js'
-
-function mapCustomFields(customFields = []) {
-    return customFields.reduce((acc, {field, value} = {}) => {
-        if (!field || value == null) {
-            return acc
-        }
-
-        acc[field] = value
-        return acc
-    }, {})
-}
 
 /**
  * Returns the most recent order in 'New' status for the shopper, or null if none found.

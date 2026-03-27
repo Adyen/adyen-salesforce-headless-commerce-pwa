@@ -7,19 +7,9 @@ import {
 } from '../../utils/constants.mjs'
 import {getCardType} from '../../utils/getCardType.mjs'
 import {convertCurrencyValueToMajorUnits} from '../../utils/parsers.mjs'
+import {mapCustomFields} from '../utils/customFieldUtils.js'
 import Logger from '../models/logger'
 import {AdyenError} from './AdyenError'
-
-function mapCustomFields(customFields = []) {
-    return customFields.reduce((acc, {field, value} = {}) => {
-        if (!field || value == null) {
-            return acc
-        }
-
-        acc[field] = value
-        return acc
-    }, {})
-}
 
 /**
  * A service for managing basket state and interactions with the ShopperBaskets API.
