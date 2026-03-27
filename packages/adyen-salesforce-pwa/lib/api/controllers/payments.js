@@ -88,7 +88,8 @@ async function sendPayments(req, res, next) {
         if (isStandardPayment(data)) {
             await adyenContext.basketService.addPaymentInstrument(
                 paymentRequest?.amount,
-                paymentRequest?.paymentMethod
+                paymentRequest?.paymentMethod,
+                [{field: 'c_cardInstallments', value: paymentRequest?.installments?.value}]
             )
             await createOrderUsingOrderNo(adyenContext)
             preCreatedOrderNo = adyenContext.basket?.c_orderNo
@@ -143,7 +144,10 @@ async function sendPayments(req, res, next) {
             await adyenContext.basketService.addPaymentInstrument(
                 paymentRequest?.amount,
                 paymentRequest?.paymentMethod,
-                [{field: 'c_pspReference', value: response?.pspReference}]
+                [
+                    {field: 'c_pspReference', value: response?.pspReference},
+                    {field: 'c_cardInstallments', value: paymentRequest?.installments?.value}
+                ]
             )
         }
 
@@ -160,12 +164,10 @@ async function sendPayments(req, res, next) {
                 await createOrderUsingOrderNo(adyenContext)
             } else {
                 const pspReference = response?.pspReference || response?.order?.pspReference
-                if (pspReference) {
-                    await updatePaymentInstrumentForOrder(adyenContext, preCreatedOrderNo, [
-                        {field: 'c_pspReference', value: pspReference},
-                        {field: 'c_cardInstallments', value: paymentRequest?.installments?.value}
-                    ])
-                }
+                await updatePaymentInstrumentForOrder(adyenContext, preCreatedOrderNo, [
+                    {field: 'c_pspReference', value: pspReference},
+                    {field: 'c_cardInstallments', value: paymentRequest?.installments?.value}
+                ])
             }
             Logger.info('sendPayments', `order confirmed: ${checkoutResponse.merchantReference}`)
         }
