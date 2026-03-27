@@ -435,6 +435,23 @@ export class PaymentRequestBuilder {
     }
 
     /**
+     * Gates installments in the payment request based on the country derived from locale.
+     * Only allows installments for Brazil (BR), Mexico (MX), and Japan (JP).
+     * Removes installments for all other countries.
+     * @returns {PaymentRequestBuilder} The builder instance for chaining.
+     */
+    withInstallmentsGating() {
+        const locale = this.context.req?.query?.locale
+        const countryCode = locale?.slice(-2)?.toUpperCase()
+        const eligibleCountries = ['BR', 'MX', 'JP']
+
+        if (this.paymentRequest.installments && !eligibleCountries.includes(countryCode)) {
+            delete this.paymentRequest.installments
+        }
+        return this
+    }
+
+    /**
      * Returns whether this is a partial payment request.
      * @returns {boolean} True if this is a partial payment, false otherwise.
      */
@@ -485,5 +502,6 @@ export class PaymentRequestBuilder {
             .withAdditionalData()
             .withEnhancedSchemeData()
             .withShopperLocale()
+            .withInstallmentsGating()
     }
 }
