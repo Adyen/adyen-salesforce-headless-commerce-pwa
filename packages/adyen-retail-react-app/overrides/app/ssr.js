@@ -28,7 +28,14 @@ const options = {
 
     // The protocol on which the development Express app listens.
     // Note that http://localhost is treated as a secure context for development.
-    protocol: 'http'
+    protocol: 'http',
+
+    // Enable SLAS private client flow. Requires PWA_KIT_SLAS_CLIENT_SECRET env var.
+    useSLASPrivateClient: true,
+
+    // Extend the default regex to also inject client credentials on /oauth2/authorize
+    applySLASPrivateClientToEndpoints:
+        /\/oauth2\/(authorize|token|passwordless\/(login|token)|password\/(reset|action))/
 }
 
 const runtime = getRuntime()
