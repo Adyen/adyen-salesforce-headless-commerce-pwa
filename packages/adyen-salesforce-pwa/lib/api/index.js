@@ -33,6 +33,7 @@ export {default as GiftCardController} from './controllers/giftCard'
 export {default as CreateTemporaryBasketController} from './controllers/create-temporary-basket'
 export {default as ShopperDetailsController} from './controllers/shopper-details'
 export {default as PaymentDataReviewPageController} from './controllers/payment-data-review-page'
+export {default as ShopperPaymentsController} from './controllers/shopper-payments'
 
 // Webhook event handlers
 export * from './controllers/authorization-webhook-handler'
@@ -42,4 +43,5 @@ export * from './controllers/order-closed-webhook-handler'
 export * from './helpers/basketHelper.js'
 export * from './helpers/orderHelper.js'
 export * from './helpers/paymentsHelper.js'
+export * from './helpers/shopperPaymentsHelper.js'
 export * from './utils/paymentUtils.js'

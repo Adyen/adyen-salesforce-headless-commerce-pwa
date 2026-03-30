@@ -12,6 +12,7 @@ import {paymentMethodsConfiguration as getPaymentMethodsConfig} from './paymentM
 import useAdyenEnvironment from '../hooks/useAdyenEnvironment'
 import useAdyenPaymentMethods from '../hooks/useAdyenPaymentMethods'
 import useAdyenOrderNumber from '../hooks/useAdyenOrderNumber'
+import useAdyenShopperPayments from '../hooks/useAdyenShopperPayments'
 import PAGE_TYPES from '../utils/pageTypes.mjs'
 
 const AdyenCheckoutComponent = ({
@@ -25,6 +26,7 @@ const AdyenCheckoutComponent = ({
     site,
     navigate,
     authToken: authTokenProp,
+    customerId: customerIdProp,
 
     // Page context
     page = PAGE_TYPES.CHECKOUT,
@@ -43,9 +45,7 @@ const AdyenCheckoutComponent = ({
     dropinConfiguration = {},
     paymentMethodsConfiguration: additionalPaymentMethodsConfiguration,
     translations,
-    onStateChange,
-
-    ...props
+    onStateChange
 }) => {
     const paymentContainer = useRef(null)
     const checkoutRef = useRef(null)
@@ -58,7 +58,8 @@ const AdyenCheckoutComponent = ({
     const [internalAdyenAction, setInternalAdyenAction] = useState(null)
     const [componentKey, setComponentKey] = useState(0)
 
-    const customerId = useCustomerId()
+    const hookCustomerId = useCustomerId()
+    const customerId = customerIdProp || hookCustomerId
     const customerTypeData = useCustomerType()
     const isCustomerRegistered = customerTypeData.isRegistered
     const {getTokenWhenReady} = useAccessToken()
@@ -94,6 +95,14 @@ const AdyenCheckoutComponent = ({
         error: adyenPaymentMethodsError,
         isLoading: fetchingPaymentMethods
     } = useAdyenPaymentMethods({
+        authToken,
+        customerId,
+        basketId: basket?.basketId,
+        site,
+        locale,
+        skip: !callPaymentMethodsOnPages.includes(page)
+    })
+    const {data: shopperPaymentsData} = useAdyenShopperPayments({
         authToken,
         customerId,
         basketId: basket?.basketId,
@@ -187,6 +196,12 @@ const AdyenCheckoutComponent = ({
             setComponentKey((prev) => prev + 1)
         }
     }, [urlParams.error])
+
+    useEffect(() => {
+        if (shopperPaymentsData) {
+            console.info('[POC] ShopperPayments configuration:', shopperPaymentsData)
+        }
+    }, [shopperPaymentsData])
 
     // Memoize state change handler
     const handleStateChange = useCallback(

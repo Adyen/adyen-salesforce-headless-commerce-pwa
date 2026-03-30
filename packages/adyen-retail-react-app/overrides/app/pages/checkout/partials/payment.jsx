@@ -169,6 +169,8 @@ const Payment = () => {
                         <LoadingSpinner />
                     ) : (
                         <AdyenCheckout
+                            authToken={authToken}
+                            customerId={customerId}
                             key={adyenCheckoutKey}
                             // Required props
                             site={site}

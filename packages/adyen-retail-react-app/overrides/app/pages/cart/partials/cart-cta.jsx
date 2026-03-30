@@ -58,30 +58,30 @@ const CartCta = () => {
                     id="cart_cta.link.checkout"
                 />
             </Button>
-            <Container fluid>
-                <ApplePayExpress
-                    locale={locale}
-                    site={site}
-                    basket={basket}
-                    navigate={navigate}
-                    // Callbacks
-                    onError={[showError]}
-                    // UI
-                    spinner={<LoadingSpinner />}
-                />
-                <PayPalExpress
-                    locale={locale}
-                    site={site}
-                    basket={basket}
-                    navigate={navigate}
-                    // Callbacks
-                    onError={[showError]}
-                    // UI
-                    spinner={<LoadingSpinner />}
-                    enableReview={true}
-                    reviewPageUrl="/checkout/review"
-                />
-            </Container>
+            {/*<Container fluid>*/}
+            {/*    <ApplePayExpress*/}
+            {/*        locale={locale}*/}
+            {/*        site={site}*/}
+            {/*        basket={basket}*/}
+            {/*        navigate={navigate}*/}
+            {/*        // Callbacks*/}
+            {/*        onError={[showError]}*/}
+            {/*        // UI*/}
+            {/*        spinner={<LoadingSpinner />}*/}
+            {/*    />*/}
+            {/*    <PayPalExpress*/}
+            {/*        locale={locale}*/}
+            {/*        site={site}*/}
+            {/*        basket={basket}*/}
+            {/*        navigate={navigate}*/}
+            {/*        // Callbacks*/}
+            {/*        onError={[showError]}*/}
+            {/*        // UI*/}
+            {/*        spinner={<LoadingSpinner />}*/}
+            {/*        enableReview={true}*/}
+            {/*        reviewPageUrl="/checkout/review"*/}
+            {/*    />*/}
+            {/*</Container>*/}
             <Flex justify={'center'}>
                 <VisaIcon height={8} width={10} mr={2} />
                 <MastercardIcon height={8} width={10} mr={2} />

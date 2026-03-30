@@ -14,6 +14,11 @@ import helmet from 'helmet'
 import {registerAdyenEndpoints} from '@adyen/adyen-salesforce-pwa/dist/ssr/index.js'
 /* -----------------Adyen End ------------------------ */
 const options = {
+    // Local HTTPS support for payment flows that require secure context.
+    // Reads protocol and pem path from env (see DEV_SERVER_PROTOCOL / DEV_SERVER_SSL_FILE_PATH).
+    ...(process.env.DEV_SERVER_SSL_FILE_PATH && {
+        sslFilePath: path.resolve(process.cwd(), process.env.DEV_SERVER_SSL_FILE_PATH)
+    }),
     // The build directory (an absolute path)
     buildDir: path.resolve(process.cwd(), 'build'),
 
@@ -28,7 +33,7 @@ const options = {
 
     // The protocol on which the development Express app listens.
     // Note that http://localhost is treated as a secure context for development.
-    protocol: 'http'
+    protocol: process.env.DEV_SERVER_PROTOCOL || 'http'
 }
 
 const runtime = getRuntime()

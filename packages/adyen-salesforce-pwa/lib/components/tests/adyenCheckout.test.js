@@ -6,6 +6,7 @@ import {act, cleanup, render, waitFor} from '@testing-library/react'
 import AdyenCheckoutComponent from '../adyenCheckout'
 import useAdyenEnvironment from '../../hooks/useAdyenEnvironment'
 import useAdyenPaymentMethods from '../../hooks/useAdyenPaymentMethods'
+import useAdyenShopperPayments from '../../hooks/useAdyenShopperPayments'
 import {useAccessToken, useCustomerId, useCustomerType} from '@salesforce/commerce-sdk-react'
 import useAdyenOrderNumber from '../../hooks/useAdyenOrderNumber'
 import {
@@ -17,6 +18,7 @@ import {
 // Mock the hooks and helpers
 jest.mock('../../hooks/useAdyenEnvironment')
 jest.mock('../../hooks/useAdyenPaymentMethods')
+jest.mock('../../hooks/useAdyenShopperPayments')
 jest.mock('@salesforce/commerce-sdk-react')
 jest.mock('../../hooks/useAdyenOrderNumber')
 jest.mock('../helpers/adyenCheckout.utils')
@@ -77,6 +79,11 @@ describe('AdyenCheckoutComponent', () => {
 
         useAdyenPaymentMethods.mockReturnValue({
             data: mockPaymentMethodsData,
+            error: null,
+            isLoading: false
+        })
+        useAdyenShopperPayments.mockReturnValue({
+            data: null,
             error: null,
             isLoading: false
         })

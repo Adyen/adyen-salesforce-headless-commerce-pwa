@@ -12,6 +12,8 @@ import {AdyenShippingMethodsService} from '../services/shipping-methods'
 
 const ApplePayExpressComponent = (props) => {
     const {
+        authToken: authTokenProp,
+        customerId: customerIdProp,
         locale,
         site,
         basket,
@@ -22,9 +24,10 @@ const ApplePayExpressComponent = (props) => {
         merchantDisplayName = '',
         product
     } = props
-    const customerId = useCustomerId()
+    const hookCustomerId = useCustomerId()
+    const customerId = customerIdProp || hookCustomerId
     const {getTokenWhenReady} = useAccessToken()
-    const [authToken, setAuthToken] = useState()
+    const [authToken, setAuthToken] = useState(authTokenProp)
 
     useEffect(() => {
         const getToken = async () => {

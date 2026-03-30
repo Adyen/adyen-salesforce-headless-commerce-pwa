@@ -6,11 +6,13 @@ import {applePayConfig} from './applepay/config'
 import {amazonPayConfig} from './amazonpay/config'
 import {giftcardConfig} from './giftcard/config'
 
-export const paymentMethodsConfiguration = ({
-    paymentMethods = [],
-    additionalPaymentMethodsConfiguration,
-    ...props
-}) => {
+export const paymentMethodsConfiguration = (config = {}) => {
+    const paymentMethods = config.paymentMethods || []
+    const additionalPaymentMethodsConfiguration = config.additionalPaymentMethodsConfiguration
+    const props = {...config}
+    delete props.paymentMethods
+    delete props.additionalPaymentMethodsConfiguration
+
     const defaultConfig = baseConfig(props)
     if (!paymentMethods || !paymentMethods.length) {
         return defaultConfig

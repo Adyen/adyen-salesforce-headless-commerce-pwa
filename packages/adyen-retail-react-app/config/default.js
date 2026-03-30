@@ -80,5 +80,11 @@ module.exports = {
                 path: 'ocapi'
             }
         ]
+    },
+    sfPayments: {
+        enabled: true,
+        sdkUrl: 'https://zzft-009.dx.commercecloud.salesforce.com/on/demandware.static/Sites-Site/-/-/internal/jscript/sfp/v1/sfp.js',
+        metadataUrl:
+            'https://zzft-009.dx.commercecloud.salesforce.com/on/demandware.static/Sites-Site/-/-/internal/metadata/v1.json'
     }
 }

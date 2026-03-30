@@ -903,48 +903,48 @@ const ProductView = forwardRef(
                                     }
                                 >
                                     {renderActionButtons()}
-                                    {validateOrderability(
-                                        variant,
-                                        product,
-                                        productQuantity,
-                                        stockLevel
-                                    ) && (
-                                        <>
-                                            <ApplePayExpress
-                                                locale={locale}
-                                                site={site}
-                                                currency={activeCurrency}
-                                                navigate={navigate}
-                                                isExpressPdp={true}
-                                                merchantDisplayName={'Merchant name'}
-                                                product={{...product, quantity: productQuantity}}
-                                                // Callbacks
-                                                onError={[showError]}
-                                                // UI
-                                                spinner={
-                                                    <LoadingSpinner
-                                                        wrapperStyles={{height: '100vh'}}
-                                                    />
-                                                }
-                                            />
-                                            <PayPalExpress
-                                                locale={locale}
-                                                site={site}
-                                                currency={activeCurrency}
-                                                navigate={navigate}
-                                                type="pdp"
-                                                product={{...product, quantity: productQuantity}}
-                                                // Callbacks
-                                                onError={[showError]}
-                                                // UI
-                                                spinner={
-                                                    <LoadingSpinner
-                                                        wrapperStyles={{height: '100vh'}}
-                                                    />
-                                                }
-                                            />
-                                        </>
-                                    )}
+                                    {/*{validateOrderability(*/}
+                                    {/*    variant,*/}
+                                    {/*    product,*/}
+                                    {/*    productQuantity,*/}
+                                    {/*    stockLevel*/}
+                                    {/*) && (*/}
+                                    {/*    <>*/}
+                                    {/*        <ApplePayExpress*/}
+                                    {/*            locale={locale}*/}
+                                    {/*            site={site}*/}
+                                    {/*            currency={activeCurrency}*/}
+                                    {/*            navigate={navigate}*/}
+                                    {/*            isExpressPdp={true}*/}
+                                    {/*            merchantDisplayName={'Merchant name'}*/}
+                                    {/*            product={{...product, quantity: productQuantity}}*/}
+                                    {/*            // Callbacks*/}
+                                    {/*            onError={[showError]}*/}
+                                    {/*            // UI*/}
+                                    {/*            spinner={*/}
+                                    {/*                <LoadingSpinner*/}
+                                    {/*                    wrapperStyles={{height: '100vh'}}*/}
+                                    {/*                />*/}
+                                    {/*            }*/}
+                                    {/*        />*/}
+                                    {/*        <PayPalExpress*/}
+                                    {/*            locale={locale}*/}
+                                    {/*            site={site}*/}
+                                    {/*            currency={activeCurrency}*/}
+                                    {/*            navigate={navigate}*/}
+                                    {/*            type="pdp"*/}
+                                    {/*            product={{...product, quantity: productQuantity}}*/}
+                                    {/*            // Callbacks*/}
+                                    {/*            onError={[showError]}*/}
+                                    {/*            // UI*/}
+                                    {/*            spinner={*/}
+                                    {/*                <LoadingSpinner*/}
+                                    {/*                    wrapperStyles={{height: '100vh'}}*/}
+                                    {/*                />*/}
+                                    {/*            }*/}
+                                    {/*        />*/}
+                                    {/*    </>*/}
+                                    {/*)}*/}
                                 </Box>
                             </Box>
                         </Box>
@@ -968,35 +968,35 @@ const ProductView = forwardRef(
                     boxShadow={theme.shadows.top}
                 >
                     {renderActionButtons()}
-                    {validateOrderability(variant, product, productQuantity, stockLevel) && (
-                        <>
-                            <ApplePayExpress
-                                locale={locale}
-                                site={site}
-                                currency={activeCurrency}
-                                navigate={navigate}
-                                isExpressPdp={true}
-                                merchantDisplayName={'Merchant name'}
-                                product={{...product, quantity: productQuantity}}
-                                // Callbacks
-                                onError={[showError]}
-                                // UI
-                                spinner={<LoadingSpinner wrapperStyles={{height: '100vh'}} />}
-                            />
-                            <PayPalExpress
-                                locale={locale}
-                                site={site}
-                                currency={activeCurrency}
-                                navigate={navigate}
-                                type="pdp"
-                                product={{...product, quantity: productQuantity}}
-                                // Callbacks
-                                onError={[showError]}
-                                // UI
-                                spinner={<LoadingSpinner wrapperStyles={{height: '100vh'}} />}
-                            />
-                        </>
-                    )}
+                    {/*{validateOrderability(variant, product, productQuantity, stockLevel) && (*/}
+                    {/*    <>*/}
+                    {/*        <ApplePayExpress*/}
+                    {/*            locale={locale}*/}
+                    {/*            site={site}*/}
+                    {/*            currency={activeCurrency}*/}
+                    {/*            navigate={navigate}*/}
+                    {/*            isExpressPdp={true}*/}
+                    {/*            merchantDisplayName={'Merchant name'}*/}
+                    {/*            product={{...product, quantity: productQuantity}}*/}
+                    {/*            // Callbacks*/}
+                    {/*            onError={[showError]}*/}
+                    {/*            // UI*/}
+                    {/*            spinner={<LoadingSpinner wrapperStyles={{height: '100vh'}} />}*/}
+                    {/*        />*/}
+                    {/*        <PayPalExpress*/}
+                    {/*            locale={locale}*/}
+                    {/*            site={site}*/}
+                    {/*            currency={activeCurrency}*/}
+                    {/*            navigate={navigate}*/}
+                    {/*            type="pdp"*/}
+                    {/*            product={{...product, quantity: productQuantity}}*/}
+                    {/*            // Callbacks*/}
+                    {/*            onError={[showError]}*/}
+                    {/*            // UI*/}
+                    {/*            spinner={<LoadingSpinner wrapperStyles={{height: '100vh'}} />}*/}
+                    {/*        />*/}
+                    {/*    </>*/}
+                    {/*)}*/}
                 </Box>
             </Flex>
         )

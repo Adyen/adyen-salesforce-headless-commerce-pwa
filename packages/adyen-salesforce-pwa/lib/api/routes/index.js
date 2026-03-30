@@ -11,6 +11,7 @@ import PaypalUpdateOrderController from '../controllers/paypal-update-order'
 import PaymentDataReviewPageController from '../controllers/payment-data-review-page'
 import CreateTemporaryBasketController from '../controllers/create-temporary-basket'
 import OrderNumberController from '../controllers/order-number'
+import ShopperPaymentsController from '../controllers/shopper-payments'
 import {
     authenticate,
     parseNotification,
@@ -185,6 +186,12 @@ function registerAdyenEndpoints(app, runtime, overrides, options = {}) {
         SuccessHandler,
         ErrorHandler
     ]
+    const shopperPaymentsHandler = overrides?.shopperPayments || [
+        requestContext,
+        ShopperPaymentsController,
+        SuccessHandler,
+        ErrorHandler
+    ]
 
     app.get(
         '*/checkout/redirect',
@@ -200,6 +207,7 @@ function registerAdyenEndpoints(app, runtime, overrides, options = {}) {
     app.get('*/checkout', query('adyenAction').optional().escape(), runtime.render)
     app.get('/api/adyen/environment', ...environmentHandler)
     app.get('/api/adyen/paymentMethods', ...paymentMethodsHandler)
+    app.get('/api/adyen/shopper-payments', ...shopperPaymentsHandler)
     app.get('/api/adyen/paymentMethodsForExpress', ...paymentMethodsForExpressHandler)
     app.get('/api/adyen/shipping-methods', ...shippingMethodsGetHandler)
     app.get(
