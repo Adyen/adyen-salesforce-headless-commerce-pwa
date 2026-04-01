@@ -421,14 +421,16 @@ export const onShippingOptionsChange = async (data, actions, component, props) =
  */
 export const onErrorHandler = async (error, component, props) => {
     try {
-        const basket = props.getBasket()
-        const paymentCancelExpressService = new PaymentCancelExpressService(
-            props.token,
-            props.customerId,
-            basket?.basketId,
-            props.site
-        )
-        await paymentCancelExpressService.paymentCancelExpress()
+        if (!error?.newBasketId) {
+            const basket = props.getBasket()
+            const paymentCancelExpressService = new PaymentCancelExpressService(
+                props.token,
+                props.customerId,
+                basket?.basketId,
+                props.site
+            )
+            await paymentCancelExpressService.paymentCancelExpress()
+        }
         props.navigate(`/checkout?error=true`)
         return {cancelled: true}
     } catch (err) {

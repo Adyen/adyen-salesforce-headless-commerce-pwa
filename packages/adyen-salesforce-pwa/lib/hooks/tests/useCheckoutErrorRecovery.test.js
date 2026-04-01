@@ -77,12 +77,68 @@ describe('useCheckoutErrorRecovery', () => {
         })
 
         await waitFor(() => {
-            expect(mockNavigate).toHaveBeenCalledWith('/checkout?error=true')
+            expect(mockNavigate).toHaveBeenCalledWith('/checkout')
         })
 
         await waitFor(() => {
             expect(result.current.adyenCheckoutKey).toBe(1)
         })
+    })
+
+    it('should trigger recovery when error=true is in URL without newBasketId', async () => {
+        mockUseLocation.mockReturnValue({
+            search: '?error=true',
+            pathname: '/checkout'
+        })
+
+        const {result} = renderHook(() =>
+            useCheckoutErrorRecovery({
+                refetchBasket: mockRefetchBasket,
+                navigate: mockNavigate
+            })
+        )
+
+        expect(result.current.isRefetchingBasket).toBe(true)
+
+        await waitFor(() => {
+            expect(mockRefetchBasket).toHaveBeenCalled()
+        })
+
+        await waitFor(() => {
+            expect(result.current.isRefetchingBasket).toBe(false)
+        })
+
+        await waitFor(() => {
+            expect(result.current.adyenCheckoutKey).toBe(1)
+        })
+
+        await waitFor(() => {
+            expect(mockNavigate).toHaveBeenCalledWith('/checkout')
+        })
+    })
+
+    it('should not trigger error-only recovery when newBasketId is also present', async () => {
+        mockUseLocation.mockReturnValue({
+            search: '?error=true&newBasketId=new-basket-123',
+            pathname: '/checkout'
+        })
+
+        const {result} = renderHook(() =>
+            useCheckoutErrorRecovery({
+                refetchBasket: mockRefetchBasket,
+                navigate: mockNavigate
+            })
+        )
+
+        await waitFor(() => {
+            expect(mockRefetchBasket).toHaveBeenCalledTimes(1)
+        })
+
+        await waitFor(() => {
+            expect(mockNavigate).toHaveBeenCalledWith('/checkout')
+        })
+
+        expect(mockNavigate).toHaveBeenCalledTimes(1)
     })
 
     it('should not trigger recovery multiple times for same newBasketId', async () => {
