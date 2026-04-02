@@ -194,6 +194,34 @@ describe('BasketService', () => {
     })
 
     describe('addPaymentInstrument', () => {
+        it('should preserve existing basket fields when SFCC response omits them', async () => {
+            // Simulate SFCC returning a partial response that omits c_orderNo, basketId, currency
+            // (observed for co-branded Carte Bancaire cards)
+            const basketWithOrderNo = {
+                basketId: 'mockBasketId',
+                currency: 'EUR',
+                c_orderNo: 'order-123',
+                paymentInstruments: []
+            }
+            basketService.adyenContext.basket = basketWithOrderNo
+            mockRes.locals.adyen.basket = basketWithOrderNo
+
+            const partialResponse = {paymentInstruments: [{paymentInstrumentId: 'pi_new'}]}
+            mockShopperBaskets.addPaymentInstrumentToBasket.mockResolvedValue(partialResponse)
+
+            await basketService.addPaymentInstrument(
+                {value: 100, currency: 'EUR'},
+                {type: 'scheme', brand: 'cartebancaire'}
+            )
+
+            expect(mockRes.locals.adyen.basket.c_orderNo).toBe('order-123')
+            expect(mockRes.locals.adyen.basket.basketId).toBe('mockBasketId')
+            expect(mockRes.locals.adyen.basket.currency).toBe('EUR')
+            expect(mockRes.locals.adyen.basket.paymentInstruments).toEqual([
+                {paymentInstrumentId: 'pi_new'}
+            ])
+        })
+
         it('should correctly add a card payment instrument', async () => {
             const pspReference = 'mockPspReference'
             const paymentMethod = {type: 'scheme', brand: 'visa'}
@@ -208,12 +236,34 @@ describe('BasketService', () => {
                 expect.objectContaining({
                     body: expect.objectContaining({
                         paymentMethodId: PAYMENT_METHODS.CREDIT_CARD,
+                        paymentCard: {cardType: 'Visa'},
                         c_paymentMethodType: 'scheme',
                         c_paymentMethodBrand: 'visa'
                     })
                 })
             )
             expect(mockRes.locals.adyen.basket).toEqual(mockUpdatedBasket)
+        })
+
+        it('should use ADYEN_COMPONENT for unrecognized card brands (e.g. Carte Bancaire)', async () => {
+            const paymentMethod = {type: 'scheme', brand: 'cartebancaire'}
+            const amount = {value: 100, currency: 'EUR'}
+
+            const mockUpdatedBasket = {basketId: 'mockBasketId', paymentInstruments: [{}]}
+            mockShopperBaskets.addPaymentInstrumentToBasket.mockResolvedValue(mockUpdatedBasket)
+
+            await basketService.addPaymentInstrument(amount, paymentMethod)
+
+            expect(mockShopperBaskets.addPaymentInstrumentToBasket).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    body: expect.objectContaining({
+                        paymentMethodId: PAYMENT_METHODS.ADYEN_COMPONENT,
+                        paymentCard: {cardType: 'scheme'},
+                        c_paymentMethodType: 'scheme',
+                        c_paymentMethodBrand: 'cartebancaire'
+                    })
+                })
+            )
         })
 
         it('should throw when amount is missing', async () => {
