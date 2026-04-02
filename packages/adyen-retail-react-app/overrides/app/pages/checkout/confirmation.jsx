@@ -549,6 +549,18 @@ const CheckoutConfirmation = () => {
                                                         }
                                                     </Text>
                                                 </Stack>
+                                                {order?.paymentInstruments?.[0]
+                                                    .c_cardInstallments && (
+                                                    <Stack>
+                                                        <Text>
+                                                            Installments:{' '}
+                                                            {
+                                                                order.paymentInstruments[0]
+                                                                    .c_cardInstallments
+                                                            }
+                                                        </Text>
+                                                    </Stack>
+                                                )}
                                             </Box>
                                         </Stack>
                                     </Stack>

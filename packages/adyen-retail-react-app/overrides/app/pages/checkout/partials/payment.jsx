@@ -149,6 +149,17 @@ const Payment = () => {
         },
         klarna_account: {
             useKlarnaWidget: false
+        },
+        card: {
+            installmentOptions: {
+                visa: {
+                    values: [2]
+                },
+                mc: {
+                    values: [4, 6]
+                }
+            },
+            showInstallmentAmounts: true
         }
     }
 
@@ -169,6 +180,8 @@ const Payment = () => {
                         <LoadingSpinner />
                     ) : (
                         <AdyenCheckout
+                            authToken={authToken}
+                            customerId={customerId}
                             key={adyenCheckoutKey}
                             // Required props
                             site={site}

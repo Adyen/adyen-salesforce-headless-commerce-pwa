@@ -777,4 +777,95 @@ describe('PaymentRequestBuilder', () => {
             expect(result).toHaveProperty('shopperReference')
         })
     })
+
+    describe('withInstallmentsGating', () => {
+        it('should keep installments when locale ends with BR (Brazil)', () => {
+            mockContext.req.query = {locale: 'pt-BR'}
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.paymentRequest.installments = {value: 3}
+
+            builder.withInstallmentsGating()
+
+            expect(builder.paymentRequest.installments).toEqual({value: 3})
+        })
+
+        it('should keep installments when locale ends with MX (Mexico)', () => {
+            mockContext.req.query = {locale: 'es-MX'}
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.paymentRequest.installments = {value: 3}
+
+            builder.withInstallmentsGating()
+
+            expect(builder.paymentRequest.installments).toEqual({value: 3})
+        })
+
+        it('should keep installments when locale ends with JP (Japan)', () => {
+            mockContext.req.query = {locale: 'ja-JP'}
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.paymentRequest.installments = {value: 3}
+
+            builder.withInstallmentsGating()
+
+            expect(builder.paymentRequest.installments).toEqual({value: 3})
+        })
+
+        it('should remove installments when locale ends with US', () => {
+            mockContext.req.query = {locale: 'en-US'}
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.paymentRequest.installments = {value: 3}
+
+            builder.withInstallmentsGating()
+
+            expect(builder.paymentRequest.installments).toBeUndefined()
+        })
+
+        it('should remove installments when locale ends with DE', () => {
+            mockContext.req.query = {locale: 'de-DE'}
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.paymentRequest.installments = {value: 3}
+
+            builder.withInstallmentsGating()
+
+            expect(builder.paymentRequest.installments).toBeUndefined()
+        })
+
+        it('should remove installments when locale is missing', () => {
+            mockContext.req.query = {}
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.paymentRequest.installments = {value: 3}
+
+            builder.withInstallmentsGating()
+
+            expect(builder.paymentRequest.installments).toBeUndefined()
+        })
+
+        it('should handle lowercase locale by normalizing to uppercase', () => {
+            mockContext.req.query = {locale: 'pt-br'}
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.paymentRequest.installments = {value: 3}
+
+            builder.withInstallmentsGating()
+
+            expect(builder.paymentRequest.installments).toEqual({value: 3})
+        })
+
+        it('should do nothing when installments is not present', () => {
+            mockContext.req.query = {locale: 'en-US'}
+            builder = new PaymentRequestBuilder(mockContext)
+
+            builder.withInstallmentsGating()
+
+            expect(builder.paymentRequest.installments).toBeUndefined()
+        })
+
+        it('should return builder for chaining', () => {
+            mockContext.req.query = {locale: 'en-US'}
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.paymentRequest.installments = {value: 3}
+
+            const result = builder.withInstallmentsGating()
+
+            expect(result).toBe(builder)
+        })
+    })
 })
