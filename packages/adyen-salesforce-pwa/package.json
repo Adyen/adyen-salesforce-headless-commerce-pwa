@@ -15,7 +15,8 @@
         "include-env": "dist/scripts/include-env.js",
         "get-env": "dist/scripts/get-env.js",
         "upload-env": "dist/scripts/upload-env.js",
-        "update-notifier": "dist/scripts/update-notifier.js"
+        "update-notifier": "dist/scripts/update-notifier.js",
+        "generate-installment-options": "dist/scripts/generate-installment-options.js"
     },
     "license": "MIT",
     "homepage": "https://docs.adyen.com/plugins/salesforce-commerce-cloud/",

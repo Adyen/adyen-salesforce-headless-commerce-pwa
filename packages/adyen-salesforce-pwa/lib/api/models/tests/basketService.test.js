@@ -195,19 +195,20 @@ describe('BasketService', () => {
 
     describe('addPaymentInstrument', () => {
         it('should correctly add a card payment instrument', async () => {
-            const pspReference = 'mockPspReference'
+            const customFields = [{field: 'c_pspReference', value: 'mockPspReference'}]
             const paymentMethod = {type: 'scheme', brand: 'visa'}
             const amount = {value: 100, currency: 'USD'}
 
             const mockUpdatedBasket = {basketId: 'mockBasketId', paymentInstruments: [{}]}
             mockShopperBaskets.addPaymentInstrumentToBasket.mockResolvedValue(mockUpdatedBasket)
 
-            await basketService.addPaymentInstrument(amount, paymentMethod, pspReference)
+            await basketService.addPaymentInstrument(amount, paymentMethod, customFields)
 
             expect(mockShopperBaskets.addPaymentInstrumentToBasket).toHaveBeenCalledWith(
                 expect.objectContaining({
                     body: expect.objectContaining({
                         paymentMethodId: PAYMENT_METHODS.CREDIT_CARD,
+                        c_pspReference: 'mockPspReference',
                         c_paymentMethodType: 'scheme',
                         c_paymentMethodBrand: 'visa'
                     })
@@ -218,35 +219,61 @@ describe('BasketService', () => {
 
         it('should throw when amount is missing', async () => {
             await expect(
-                basketService.addPaymentInstrument(null, {type: 'scheme'}, 'psp123')
+                basketService.addPaymentInstrument(null, {type: 'scheme'}, [
+                    {field: 'c_pspReference', value: 'psp123'}
+                ])
             ).rejects.toThrow()
         })
 
         it('should throw when paymentMethod is missing', async () => {
             await expect(
-                basketService.addPaymentInstrument({value: 100, currency: 'USD'}, null, 'psp123')
+                basketService.addPaymentInstrument({value: 100, currency: 'USD'}, null, [
+                    {field: 'c_pspReference', value: 'psp123'}
+                ])
             ).rejects.toThrow()
         })
 
         it('should correctly add a component payment instrument', async () => {
-            const pspReference = 'mockPspReference'
+            const customFields = [{field: 'c_pspReference', value: 'mockPspReference'}]
             const paymentMethod = {type: 'ideal'}
             const amount = {value: 100, currency: 'EUR'}
 
             const mockUpdatedBasket = {basketId: 'mockBasketId', paymentInstruments: [{}]}
             mockShopperBaskets.addPaymentInstrumentToBasket.mockResolvedValue(mockUpdatedBasket)
 
-            await basketService.addPaymentInstrument(amount, paymentMethod, pspReference)
+            await basketService.addPaymentInstrument(amount, paymentMethod, customFields)
 
             expect(mockShopperBaskets.addPaymentInstrumentToBasket).toHaveBeenCalledWith(
                 expect.objectContaining({
                     body: expect.objectContaining({
                         paymentMethodId: PAYMENT_METHODS.ADYEN_COMPONENT,
+                        c_pspReference: 'mockPspReference',
                         c_paymentMethodType: 'ideal'
                     })
                 })
             )
             expect(mockRes.locals.adyen.basket).toEqual(mockUpdatedBasket)
+        })
+
+        it('should ignore empty optional custom fields', async () => {
+            const paymentMethod = {type: 'ideal'}
+            const amount = {value: 100, currency: 'EUR'}
+
+            const mockUpdatedBasket = {basketId: 'mockBasketId', paymentInstruments: [{}]}
+            mockShopperBaskets.addPaymentInstrumentToBasket.mockResolvedValue(mockUpdatedBasket)
+
+            await basketService.addPaymentInstrument(amount, paymentMethod, [
+                {field: 'c_pspReference', value: null},
+                {field: '', value: 'ignored'}
+            ])
+
+            expect(mockShopperBaskets.addPaymentInstrumentToBasket).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    body: expect.not.objectContaining({
+                        c_pspReference: expect.anything()
+                    })
+                })
+            )
         })
     })
 

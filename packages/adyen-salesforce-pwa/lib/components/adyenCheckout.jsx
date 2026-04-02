@@ -25,6 +25,7 @@ const AdyenCheckoutComponent = ({
     site,
     navigate,
     authToken: authTokenProp,
+    customerId: customerIdProp,
 
     // Page context
     page = PAGE_TYPES.CHECKOUT,
@@ -58,7 +59,8 @@ const AdyenCheckoutComponent = ({
     const [internalAdyenAction, setInternalAdyenAction] = useState(null)
     const [componentKey, setComponentKey] = useState(0)
 
-    const customerId = useCustomerId()
+    const hookCustomerId = useCustomerId()
+    const customerId = customerIdProp || hookCustomerId
     const customerTypeData = useCustomerType()
     const isCustomerRegistered = customerTypeData.isRegistered
     const {getTokenWhenReady} = useAccessToken()
@@ -392,6 +394,8 @@ AdyenCheckoutComponent.propTypes = {
     afterAdditionalDetails: PropTypes.arrayOf(PropTypes.func),
     onError: PropTypes.arrayOf(PropTypes.func),
     onStateChange: PropTypes.func,
+    authToken: PropTypes.string,
+    customerId: PropTypes.string,
 
     // UI
     spinner: PropTypes.node,

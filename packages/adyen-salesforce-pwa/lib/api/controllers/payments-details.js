@@ -116,7 +116,9 @@ async function sendPaymentDetails(req, res, next) {
         if (checkoutResponse.isFinal && checkoutResponse.isSuccessful) {
             const pspReference = response?.pspReference || response?.order?.pspReference
             if (preCreatedOrderNo && pspReference) {
-                await updatePaymentInstrumentForOrder(adyenContext, preCreatedOrderNo, pspReference)
+                await updatePaymentInstrumentForOrder(adyenContext, preCreatedOrderNo, [
+                    {field: 'c_pspReference', value: pspReference}
+                ])
             }
             Logger.info('sendPaymentDetails', `order exists: ${checkoutResponse.merchantReference}`)
         }

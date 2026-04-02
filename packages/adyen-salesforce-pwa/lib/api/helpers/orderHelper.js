@@ -13,6 +13,7 @@ import {getCustomerBaskets, createShopperCustomerClient} from '../helpers/custom
 import {BasketService} from '../models/basketService.js'
 import {ERROR_MESSAGE, ORDER, PAYMENT_METHOD_TYPES} from '../../utils/constants.mjs'
 import {cleanupReopenedBasket} from '../helpers/paymentsHelper.js'
+import {mapCustomFields} from '../utils/customFieldUtils.js'
 import Logger from '../models/logger.js'
 
 /**
@@ -170,10 +171,10 @@ export async function getOrderUsingOrderNo(orderNo, siteId) {
  * Updates the custom pspReference on the payment instrument of a pre-created SFCC order.
  * @param {object} adyenContext - The request context from `res.locals.adyen`.
  * @param {string} orderNo - The order number.
- * @param {string} pspReference - The Adyen PSP reference from the /payments or /payments/details response.
+ * @param {Array<{field: string, value: any}>} [customFields=[]] - Optional custom fields to set.
  * @returns {Promise<void>}
  */
-export async function updatePaymentInstrumentForOrder(adyenContext, orderNo, pspReference) {
+export async function updatePaymentInstrumentForOrder(adyenContext, orderNo, customFields = []) {
     const {authorization, siteId} = adyenContext
     Logger.info('updatePaymentInstrumentForOrder', `start  — orderNo: ${orderNo}`)
     const shopperOrders = createShopperOrderClient(authorization, siteId)
@@ -193,6 +194,7 @@ export async function updatePaymentInstrumentForOrder(adyenContext, orderNo, psp
         return
     }
     const {paymentInstrumentId, ...paymentInstrument} = firstPaymentInstrument
+    const mappedCustomFields = mapCustomFields(customFields)
     await shopperOrders.updatePaymentInstrumentForOrder({
         parameters: {
             orderNo: orderNo,
@@ -200,7 +202,7 @@ export async function updatePaymentInstrumentForOrder(adyenContext, orderNo, psp
         },
         body: {
             ...paymentInstrument,
-            ...(pspReference && {c_pspReference: pspReference})
+            ...mappedCustomFields
         }
     })
     Logger.info(

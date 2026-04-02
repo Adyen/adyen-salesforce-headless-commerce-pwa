@@ -141,7 +141,10 @@ describe('payments controller', () => {
         expect(orderHelper.updatePaymentInstrumentForOrder).toHaveBeenCalledWith(
             res.locals.adyen,
             '123',
-            'psp123'
+            [
+                {field: 'c_pspReference', value: 'psp123'},
+                {field: 'c_cardInstallments', value: undefined}
+            ]
         )
         expect(res.locals.response).toEqual({
             isFinal: true,

@@ -13,7 +13,8 @@ const scriptsConfig = {
         'include-env': './lib/scripts/include-env.js',
         'get-env': './lib/scripts/get-env.js',
         'upload-env': './lib/scripts/upload-env.js',
-        'update-notifier': './lib/scripts/update-notifier.js'
+        'update-notifier': './lib/scripts/update-notifier.js',
+        'generate-installment-options': './lib/scripts/generate-installment-options.js'
     },
     output: {
         path: path.resolve(__dirname, 'dist/scripts'),
