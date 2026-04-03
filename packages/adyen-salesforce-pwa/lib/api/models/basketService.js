@@ -112,13 +112,12 @@ export class BasketService {
         // to fail silently with a non-basket response, leaving the order without a PI.
         // Fall back to ADYEN_COMPONENT for any card brand SFCC doesn't recognize.
         const SFCC_KNOWN_CARD_TYPES = new Set([
+            'Master',
             'Visa',
-            'Master Card',
             'Amex',
+            'Master Card',
             'Discover',
-            'Maestro',
-            'Diners',
-            'JCB'
+            'Maestro'
         ])
         const resolvedCardType = isCardPayment
             ? getCardType(paymentMethod?.brand || paymentMethod?.srcScheme)

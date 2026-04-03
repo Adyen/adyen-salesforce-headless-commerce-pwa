@@ -23,7 +23,7 @@ export function getCardType(cardType) {
             break
         case 'diners':
         case 'diners_applepay':
-            cardType = 'Diners'
+            cardType = 'DinersClub'
             break
         case 'bcmc':
             cardType = 'Bancontact'
