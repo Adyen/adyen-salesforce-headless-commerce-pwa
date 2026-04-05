@@ -69,6 +69,28 @@ export async function getCurrentBasketForAuthorizedShopper(authorization, custom
 }
 
 /**
+ * Deletes a temporary basket.
+ * @param {string} authorization - The shopper's authorization token.
+ * @param {object} basket - The basket object from adyen context.
+ * @returns {Promise<void>}
+ * @throws {AdyenError} If the basket is not temporary or deletion fails.
+ */
+export async function deleteTemporaryBasket(authorization, basket) {
+    if (!basket) {
+        throw new AdyenError(ERROR_MESSAGE.INVALID_BASKET, 404)
+    }
+
+    if (basket.temporaryBasket !== true) {
+        throw new AdyenError('Cannot delete non-temporary basket', 400)
+    }
+
+    const shopperBaskets = createShopperBasketsClient(authorization)
+    await shopperBaskets.deleteBasket({
+        parameters: {basketId: basket.basketId}
+    })
+}
+
+/**
  * Removes any existing temporary baskets for the current customer.
  */
 export async function removeExistingTemporaryBaskets(authorization, customerId, siteId) {
