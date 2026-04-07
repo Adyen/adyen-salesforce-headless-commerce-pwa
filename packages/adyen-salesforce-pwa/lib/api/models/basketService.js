@@ -107,9 +107,6 @@ export class BasketService {
         }
         const isCardPayment = paymentMethod?.type === PAYMENT_METHOD_TYPES.CREDIT_CARD
 
-        const resolvedCardType = isCardPayment
-            ? getCardType(paymentMethod?.brand || paymentMethod?.srcScheme)
-            : ''
         const paymentMethodId = isCardPayment
             ? PAYMENT_METHODS.CREDIT_CARD
             : PAYMENT_METHODS.ADYEN_COMPONENT
@@ -119,7 +116,9 @@ export class BasketService {
                 amount: convertCurrencyValueToMajorUnits(amount?.value, amount?.currency),
                 paymentMethodId,
                 paymentCard: {
-                    cardType: resolvedCardType ? resolvedCardType : paymentMethod?.type
+                    cardType: isCardPayment
+                        ? getCardType(paymentMethod?.brand || paymentMethod?.srcScheme)
+                        : paymentMethod?.type
                 },
                 ...(pspReference && {c_pspReference: pspReference}),
                 c_paymentMethodType: paymentMethod?.type,
