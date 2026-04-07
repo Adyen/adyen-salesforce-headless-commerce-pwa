@@ -116,6 +116,10 @@ export const createCheckoutInstance = async ({
             const handler = pmc.onError || pmc.card?.onError
             if (handler) handler(error)
         },
+        onPaymentFailed: (data, component) => {
+            const handler = pmc.onPaymentFailed || pmc.card?.onPaymentFailed
+            if (handler) handler(data, component)
+        },
         onOrderCancel(order, action) {
             const handler = pmc.onOrderCancel || pmc.giftcard?.onOrderCancel
             if (handler) handler(order, action)

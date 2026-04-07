@@ -36,7 +36,13 @@ export class BasketService {
      * @private
      */
     _updateContext(updatedBasket) {
-        this.res.locals.adyen.basket = updatedBasket
+        // Merge into the existing basket rather than replacing it, so that fields
+        // not returned by a given SFCC API (e.g. c_orderNo, basketId, currency missing
+        // from addPaymentInstrumentToBasket for co-branded cards) are preserved.
+        this.res.locals.adyen.basket = {
+            ...this.res.locals.adyen.basket,
+            ...updatedBasket
+        }
     }
 
     /**
@@ -100,6 +106,7 @@ export class BasketService {
             throw new AdyenError(errorMessage)
         }
         const isCardPayment = paymentMethod?.type === PAYMENT_METHOD_TYPES.CREDIT_CARD
+
         const paymentMethodId = isCardPayment
             ? PAYMENT_METHODS.CREDIT_CARD
             : PAYMENT_METHODS.ADYEN_COMPONENT
@@ -125,6 +132,19 @@ export class BasketService {
         }
         const updatedBasket =
             await this.shopperBaskets.addPaymentInstrumentToBasket(paymentInstrumentReq)
+        if (!updatedBasket?.basketId) {
+            Logger.warn(
+                'addPaymentInstrument',
+                `SFCC returned a non-basket response (missing basketId) — ` +
+                    `cardType: ${paymentInstrumentReq.body.paymentCard?.cardType}, ` +
+                    `paymentMethodId: ${paymentMethodId}. ` +
+                    `Response: ${JSON.stringify(updatedBasket)}`
+            )
+        }
+        Logger.info(
+            'addPaymentInstrument',
+            `c_orderNo in addPaymentInstrumentToBasket response: ${updatedBasket?.c_orderNo || 'MISSING'}`
+        )
         this._updateContext(updatedBasket)
         return updatedBasket
     }

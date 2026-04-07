@@ -92,7 +92,7 @@ const CheckoutConfirmation = () => {
         return null
     }
 
-    const CardIcon = getCreditCardIcon(order.paymentInstruments[0].paymentCard?.cardType)
+    const CardIcon = getCreditCardIcon(order.paymentInstruments?.[0]?.paymentCard?.cardType)
 
     const submitForm = async (data) => {
         try {
@@ -525,7 +525,7 @@ const CheckoutConfirmation = () => {
                                             <Box>
                                                 <Text>
                                                     {
-                                                        order.paymentInstruments[0].paymentCard
+                                                        order.paymentInstruments?.[0]?.paymentCard
                                                             ?.cardType
                                                     }
                                                 </Text>
@@ -533,19 +533,19 @@ const CheckoutConfirmation = () => {
                                                     <Text>
                                                         &bull;&bull;&bull;&bull;{' '}
                                                         {
-                                                            order.paymentInstruments[0].paymentCard
-                                                                ?.numberLastDigits
+                                                            order.paymentInstruments?.[0]
+                                                                ?.paymentCard?.numberLastDigits
                                                         }
                                                     </Text>
                                                     <Text>
                                                         {
-                                                            order.paymentInstruments[0].paymentCard
-                                                                ?.expirationMonth
+                                                            order.paymentInstruments?.[0]
+                                                                ?.paymentCard?.expirationMonth
                                                         }
                                                         /
                                                         {
-                                                            order.paymentInstruments[0].paymentCard
-                                                                ?.expirationYear
+                                                            order.paymentInstruments?.[0]
+                                                                ?.paymentCard?.expirationYear
                                                         }
                                                     </Text>
                                                 </Stack>

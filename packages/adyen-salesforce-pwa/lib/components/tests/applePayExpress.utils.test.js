@@ -824,4 +824,28 @@ describe('onErrorHandler', () => {
         )
         expect(result).toEqual({cancelled: false, error: 'Cancel failed'})
     })
+
+    it('should skip cancel call when error already has newBasketId', async () => {
+        const mockPaymentCancelExpress = jest.fn()
+        PaymentCancelExpressService.mockImplementation(() => ({
+            paymentCancelExpress: mockPaymentCancelExpress
+        }))
+
+        const props = {
+            token: 'test-token',
+            customerId: 'customer-123',
+            site: {id: 'RefArch'},
+            navigate: jest.fn(),
+            getBasket: () => ({basketId: 'basket-456'})
+        }
+
+        const error = new Error('Payment error')
+        error.newBasketId = 'already-created-basket'
+
+        const result = await onErrorHandler(error, {}, props)
+
+        expect(mockPaymentCancelExpress).not.toHaveBeenCalled()
+        expect(props.navigate).toHaveBeenCalledWith('/checkout?error=true')
+        expect(result).toEqual({cancelled: true})
+    })
 })

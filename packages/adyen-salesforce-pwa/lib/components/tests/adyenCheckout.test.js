@@ -404,34 +404,6 @@ describe('AdyenCheckoutComponent', () => {
         expect(mountCheckoutComponent).toHaveBeenCalledTimes(1)
     })
 
-    it('should handle URL error parameter and remount component', async () => {
-        // Mock URL with error param
-        const originalLocation = window.location
-        delete window.location
-        window.location = {
-            href: 'http://localhost/?error=test_error&redirectResult=test',
-            search: '?error=test_error&redirectResult=test'
-        }
-
-        // Mock URLSearchParams
-        const originalURLSearchParams = global.URLSearchParams
-        global.URLSearchParams = jest.fn(() => ({
-            get: (param) => {
-                if (param === 'error') return 'test_error'
-                if (param === 'redirectResult') return 'test'
-                return null
-            }
-        }))
-
-        await act(async () => {
-            render(<AdyenCheckoutComponent {...defaultProps} />)
-        })
-
-        // Restore mocks
-        window.location = originalLocation
-        global.URLSearchParams = originalURLSearchParams
-    })
-
     it('should handle internal adyen action changes', async () => {
         // This tests the internalAdyenAction dependency in useEffect
         const {rerender} = render(<AdyenCheckoutComponent {...defaultProps} />)

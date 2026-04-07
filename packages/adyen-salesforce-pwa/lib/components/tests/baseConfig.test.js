@@ -54,7 +54,7 @@ describe('onSubmit function', () => {
         const result = await onSubmit(state, component, mockActions, props)
 
         expect(result).toBeUndefined()
-        expect(mockActions.reject).toHaveBeenCalledWith('invalid state')
+        expect(mockActions.reject).toHaveBeenCalledWith(expect.any(Error))
         expect(mockActions.resolve).not.toHaveBeenCalled()
     })
 
@@ -113,7 +113,7 @@ describe('onSubmit function', () => {
         global.window = originalWindow
     })
 
-    it('should call reject and return undefined when payment service fails', async () => {
+    it('should call reject with the error and return undefined when payment service fails', async () => {
         const state = {data: {origin: 'https://adyen.com'}, isValid: true}
         const component = 'testComponent'
         const props = {
@@ -131,7 +131,7 @@ describe('onSubmit function', () => {
         const result = await onSubmit(state, component, mockActions, props)
 
         expect(result).toBeUndefined()
-        expect(mockActions.reject).toHaveBeenCalledWith('Payment failed')
+        expect(mockActions.reject).toHaveBeenCalledWith(mockError)
         expect(mockActions.resolve).not.toHaveBeenCalled()
     })
 })
@@ -199,10 +199,10 @@ describe('onAdditionalDetails function', () => {
         }))
 
         await onAdditionalDetails(state, component, mockActions, props)
-        expect(mockActions.reject).toHaveBeenCalledWith('Details failed')
+        expect(mockActions.reject).toHaveBeenCalledWith(mockError)
     })
 
-    it('should call reject and return undefined when payment details service fails', async () => {
+    it('should call reject with the error and return undefined when payment details service fails', async () => {
         const state = {data: 'test data'}
         const component = 'testComponent'
         const props = {
@@ -220,7 +220,7 @@ describe('onAdditionalDetails function', () => {
         const result = await onAdditionalDetails(state, component, mockActions, props)
 
         expect(result).toBeUndefined()
-        expect(mockActions.reject).toHaveBeenCalledWith('Details submission failed')
+        expect(mockActions.reject).toHaveBeenCalledWith(mockError)
         expect(mockActions.resolve).not.toHaveBeenCalled()
     })
 })
@@ -328,6 +328,33 @@ describe('onErrorHandler', () => {
         }))
 
         const result = await onErrorHandler(new Error('fail'), {}, props)
+        expect(result).toEqual({cancelled: true})
+    })
+
+    it('should skip cancel call when error already has newBasketId', async () => {
+        const navigate = jest.fn()
+        const props = {
+            token: 'testToken',
+            site: 'testSite',
+            customerId: 'testCustomer',
+            navigate: navigate,
+            orderNo: '12345',
+            basket: {basketId: 'basket123'}
+        }
+        const mockPaymentCancel = jest.fn()
+        PaymentCancelService.mockImplementation(() => ({
+            paymentCancel: mockPaymentCancel
+        }))
+
+        const error = new Error('Payment failed')
+        error.newBasketId = 'already-created-basket'
+
+        const result = await onErrorHandler(error, {}, props)
+
+        expect(mockPaymentCancel).not.toHaveBeenCalled()
+        expect(navigate).toHaveBeenCalledWith(
+            '/checkout?error=true&newBasketId=already-created-basket'
+        )
         expect(result).toEqual({cancelled: true})
     })
 

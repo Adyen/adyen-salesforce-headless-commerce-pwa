@@ -41,6 +41,7 @@ const ApplePayExpressComponent = (props) => {
     )
     const paymentContainer = useRef(null)
     const applePayButtonRef = useRef(null)
+    const errorShownRef = useRef(false)
 
     // Fetch Adyen environment
     const {
@@ -110,21 +111,24 @@ const ApplePayExpressComponent = (props) => {
 
     // Handle errors from hooks
     useEffect(() => {
-        if (adyenEnvironmentError) {
+        if (adyenEnvironmentError && !errorShownRef.current) {
+            errorShownRef.current = true
             console.error('Error fetching Adyen environment:', adyenEnvironmentError)
             onError.forEach((cb) => cb(adyenEnvironmentError))
         }
     }, [adyenEnvironmentError, onError])
 
     useEffect(() => {
-        if (adyenPaymentMethodsError) {
+        if (adyenPaymentMethodsError && !errorShownRef.current) {
+            errorShownRef.current = true
             console.error('Error fetching Adyen payment methods:', adyenPaymentMethodsError)
             onError.forEach((cb) => cb(adyenPaymentMethodsError))
         }
     }, [adyenPaymentMethodsError, onError])
 
     useEffect(() => {
-        if (shippingMethodsError) {
+        if (shippingMethodsError && !errorShownRef.current) {
+            errorShownRef.current = true
             console.error('Error fetching shipping methods:', shippingMethodsError)
             onError.forEach((cb) => cb(shippingMethodsError))
         }
@@ -185,7 +189,10 @@ const ApplePayExpressComponent = (props) => {
                 applePayButtonRef.current = applePayButton
             } catch (err) {
                 console.error('Error initializing Apple Pay Express:', err)
-                onError.forEach((cb) => cb(err))
+                if (!errorShownRef.current) {
+                    errorShownRef.current = true
+                    onError.forEach((cb) => cb(err))
+                }
             }
         }
 
