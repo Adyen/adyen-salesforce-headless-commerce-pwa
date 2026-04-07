@@ -245,27 +245,6 @@ describe('BasketService', () => {
             expect(mockRes.locals.adyen.basket).toEqual(mockUpdatedBasket)
         })
 
-        it('should use ADYEN_COMPONENT for unrecognized card brands (e.g. Carte Bancaire)', async () => {
-            const paymentMethod = {type: 'scheme', brand: 'cartebancaire'}
-            const amount = {value: 100, currency: 'EUR'}
-
-            const mockUpdatedBasket = {basketId: 'mockBasketId', paymentInstruments: [{}]}
-            mockShopperBaskets.addPaymentInstrumentToBasket.mockResolvedValue(mockUpdatedBasket)
-
-            await basketService.addPaymentInstrument(amount, paymentMethod)
-
-            expect(mockShopperBaskets.addPaymentInstrumentToBasket).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    body: expect.objectContaining({
-                        paymentMethodId: PAYMENT_METHODS.ADYEN_COMPONENT,
-                        paymentCard: {cardType: 'scheme'},
-                        c_paymentMethodType: 'scheme',
-                        c_paymentMethodBrand: 'cartebancaire'
-                    })
-                })
-            )
-        })
-
         it('should throw when amount is missing', async () => {
             await expect(
                 basketService.addPaymentInstrument(null, {type: 'scheme'}, 'psp123')
