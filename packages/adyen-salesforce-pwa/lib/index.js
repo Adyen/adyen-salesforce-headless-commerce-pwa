@@ -10,6 +10,7 @@ export {default as useCheckoutErrorRecovery} from './hooks/useCheckoutErrorRecov
 export {default as AdyenCheckout} from './components/adyenCheckout'
 export {default as ApplePayExpress} from './components/applePayExpress'
 export {default as PayPalExpress} from './components/paypalExpress'
+export {default as GooglePayExpress} from './components/googlePayExpress'
 
 export {default as countryList} from './utils/countryList.mjs'
 export {default as currencyList} from './utils/currencyList.mjs'
