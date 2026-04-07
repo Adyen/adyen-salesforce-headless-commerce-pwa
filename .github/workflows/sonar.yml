@@ -36,7 +36,7 @@ jobs:
               run: npm run test:coverage
 
             - name: SonarQube Scan
-              uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602
+              uses: SonarSource/sonarqube-scan-action@f099b441665cb71b0414100cfaf6d835492cee5f
               env:
                   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
                   SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
