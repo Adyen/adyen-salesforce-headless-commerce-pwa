@@ -107,23 +107,10 @@ export class BasketService {
         }
         const isCardPayment = paymentMethod?.type === PAYMENT_METHOD_TYPES.CREDIT_CARD
 
-        // SFCC only accepts standard card types configured in Business Manager.
-        // Unrecognized types (e.g. 'Carte Bancaire') cause addPaymentInstrumentToBasket
-        // to fail silently with a non-basket response, leaving the order without a PI.
-        // Fall back to ADYEN_COMPONENT for any card brand SFCC doesn't recognize.
-        const SFCC_KNOWN_CARD_TYPES = new Set([
-            'Master',
-            'Visa',
-            'Amex',
-            'Master Card',
-            'Discover',
-            'Maestro'
-        ])
         const resolvedCardType = isCardPayment
             ? getCardType(paymentMethod?.brand || paymentMethod?.srcScheme)
             : ''
-        const isSfccKnownCard = isCardPayment && SFCC_KNOWN_CARD_TYPES.has(resolvedCardType)
-        const paymentMethodId = isSfccKnownCard
+        const paymentMethodId = isCardPayment
             ? PAYMENT_METHODS.CREDIT_CARD
             : PAYMENT_METHODS.ADYEN_COMPONENT
 
@@ -132,7 +119,7 @@ export class BasketService {
                 amount: convertCurrencyValueToMajorUnits(amount?.value, amount?.currency),
                 paymentMethodId,
                 paymentCard: {
-                    cardType: isSfccKnownCard ? resolvedCardType : paymentMethod?.type
+                    cardType: resolvedCardType ? resolvedCardType : paymentMethod?.type
                 },
                 ...(pspReference && {c_pspReference: pspReference}),
                 c_paymentMethodType: paymentMethod?.type,
