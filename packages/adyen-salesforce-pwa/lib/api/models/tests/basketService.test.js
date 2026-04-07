@@ -238,6 +238,7 @@ describe('BasketService', () => {
                         paymentMethodId: PAYMENT_METHODS.CREDIT_CARD,
                         c_pspReference: 'mockPspReference',
                         paymentCard: {cardType: 'Visa'},
+                        c_pspReference: 'mockPspReference',
                         c_paymentMethodType: 'scheme',
                         c_paymentMethodBrand: 'visa'
                     })
