@@ -236,7 +236,7 @@ describe('BasketService', () => {
                 expect.objectContaining({
                     body: expect.objectContaining({
                         paymentMethodId: PAYMENT_METHODS.CREDIT_CARD,
-                        c_pspReference: customFields,
+                        c_pspReference: 'mockPspReference',
                         paymentCard: {cardType: 'Visa'},
                         c_paymentMethodType: 'scheme',
                         c_paymentMethodBrand: 'visa'
@@ -276,7 +276,7 @@ describe('BasketService', () => {
                 expect.objectContaining({
                     body: expect.objectContaining({
                         paymentMethodId: PAYMENT_METHODS.ADYEN_COMPONENT,
-                        c_pspReference: customFields,
+                        c_pspReference: 'mockPspReference',
                         c_paymentMethodType: 'ideal'
                     })
                 })
@@ -284,7 +284,7 @@ describe('BasketService', () => {
             expect(mockRes.locals.adyen.basket).toEqual(mockUpdatedBasket)
         })
 
-        it('should include custom fields array as-is', async () => {
+        it('should filter out null values and empty field names from custom fields', async () => {
             const paymentMethod = {type: 'ideal'}
             const amount = {value: 100, currency: 'EUR'}
             const customFields = [
@@ -297,13 +297,10 @@ describe('BasketService', () => {
 
             await basketService.addPaymentInstrument(amount, paymentMethod, customFields)
 
-            expect(mockShopperBaskets.addPaymentInstrumentToBasket).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    body: expect.objectContaining({
-                        c_pspReference: customFields
-                    })
-                })
-            )
+            const callArg = mockShopperBaskets.addPaymentInstrumentToBasket.mock.calls[0][0]
+            // mapCustomFields should filter out null values and empty field names
+            expect(callArg.body).not.toHaveProperty('c_pspReference')
+            expect(Object.keys(callArg.body).filter((key) => key === '')).toHaveLength(0)
         })
     })
 
