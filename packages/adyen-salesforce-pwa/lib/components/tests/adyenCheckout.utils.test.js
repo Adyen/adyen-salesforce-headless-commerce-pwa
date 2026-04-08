@@ -337,6 +337,31 @@ describe('createCheckoutInstance', () => {
         expect(cardOnError).toHaveBeenCalledWith({message: 'err'})
     })
 
+    it('should call onPaymentFailed handler', async () => {
+        const onPaymentFailed = jest.fn()
+        defaultParams.paymentMethodsConfiguration.onPaymentFailed = onPaymentFailed
+
+        await createCheckoutInstance(defaultParams)
+
+        const callArgs = mockAdyenCheckout.mock.calls[0][0]
+        const mockData = {resultCode: 'Refused'}
+        callArgs.onPaymentFailed(mockData, {})
+
+        expect(onPaymentFailed).toHaveBeenCalledWith(mockData, {})
+    })
+
+    it('should call card onPaymentFailed if top-level is missing', async () => {
+        const cardOnPaymentFailed = jest.fn()
+        defaultParams.paymentMethodsConfiguration = {card: {onPaymentFailed: cardOnPaymentFailed}}
+
+        await createCheckoutInstance(defaultParams)
+
+        const callArgs = mockAdyenCheckout.mock.calls[0][0]
+        callArgs.onPaymentFailed({resultCode: 'Refused'}, {})
+
+        expect(cardOnPaymentFailed).toHaveBeenCalledWith({resultCode: 'Refused'}, {})
+    })
+
     it('should call onOrderCancel handler', async () => {
         await createCheckoutInstance(defaultParams)
 

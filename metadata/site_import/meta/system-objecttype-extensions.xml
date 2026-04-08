@@ -94,6 +94,15 @@
                 <min-length>0</min-length>
                 <field-length>0</field-length>
             </attribute-definition>
+            <attribute-definition attribute-id="cardInstallments">
+                <display-name xml:lang="x-default">cardInstallments</display-name>
+                <description xml:lang="x-default">Card installments used for payment</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+                <field-length>0</field-length>
+            </attribute-definition>
             <attribute-definition attribute-id="donationToken">
                 <display-name xml:lang="x-default">donationToken</display-name>
                 <description xml:lang="x-default">token for making donations</description>
@@ -110,6 +119,7 @@
                 <attribute attribute-id="paymentMethodType"/>
                 <attribute attribute-id="paymentMethodBrand"/>
                 <attribute attribute-id="pspReference"/>
+                <attribute attribute-id="cardInstallments"/>
                 <attribute attribute-id="donationToken"/>
             </attribute-group>
         </group-definitions>
@@ -206,6 +216,15 @@
                 <min-length>0</min-length>
                 <field-length>0</field-length>
             </attribute-definition>
+            <attribute-definition attribute-id="cardInstallments">
+                <display-name xml:lang="x-default">cardInstallments</display-name>
+                <description xml:lang="x-default">Card installments used for payment</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+                <field-length>0</field-length>
+            </attribute-definition>
             <attribute-definition attribute-id="paymentData">
                 <display-name xml:lang="x-default">paymentData</display-name>
                 <description xml:lang="x-default">payment data to be used for redirect flow</description>
@@ -243,6 +262,7 @@
                 <attribute attribute-id="paymentData"/>
                 <attribute attribute-id="paymentDataForReviewPage"/>
                 <attribute attribute-id="donationToken"/>
+                <attribute attribute-id="cardInstallments"/>
             </attribute-group>
         </group-definitions>
     </type-extension>

@@ -3,7 +3,8 @@
  * @jest-environment-options {"url": "http://localhost:3000/", "resources": "usable"}
  */
 import React, {useContext} from 'react'
-import {act, render, screen} from '@testing-library/react'
+import {act, render, screen, waitFor} from '@testing-library/react'
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
 import AdyenCheckoutProvider, {AdyenCheckoutContext} from '../adyen-checkout-context'
 import {AdyenPaymentMethodsService} from '../../services/payment-methods'
 import {AdyenEnvironmentService} from '../../services/environment'
@@ -17,6 +18,13 @@ jest.mock('../../components/adyenCheckout', () => <div data-testid="adyen-checko
 const TestConsumer = () => {
     const context = useContext(AdyenCheckoutContext)
     return <div data-testid="context-value">{JSON.stringify(context)}</div>
+}
+
+const createWrapper = (children) => {
+    const queryClient = new QueryClient({
+        defaultOptions: {queries: {retry: false}}
+    })
+    return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 }
 
 describe('AdyenCheckoutProvider', () => {
@@ -51,20 +59,22 @@ describe('AdyenCheckoutProvider', () => {
             page: 'checkout'
         }
 
-        await act(async () => {
-            render(
+        render(
+            createWrapper(
                 <AdyenCheckoutProvider {...providerProps}>
                     <TestConsumer />
                 </AdyenCheckoutProvider>
             )
-        })
+        )
 
-        const contextValue = JSON.parse(screen.getByTestId('context-value').textContent)
         expect(AdyenEnvironmentService).toHaveBeenCalled()
         expect(AdyenPaymentMethodsService).toHaveBeenCalled()
 
-        expect(contextValue.adyenEnvironment).toEqual(mockEnvironmentResponse)
-        expect(contextValue.adyenPaymentMethods).toEqual(mockPaymentMethodsResponse)
+        await waitFor(() => {
+            const contextValue = JSON.parse(screen.getByTestId('context-value').textContent)
+            expect(contextValue.adyenEnvironment).toEqual(mockEnvironmentResponse)
+            expect(contextValue.adyenPaymentMethods).toEqual(mockPaymentMethodsResponse)
+        })
     })
 
     it('handles errors during data fetching', async () => {
@@ -81,16 +91,18 @@ describe('AdyenCheckoutProvider', () => {
             page: 'checkout'
         }
 
-        await act(async () => {
-            render(
+        render(
+            createWrapper(
                 <AdyenCheckoutProvider {...providerProps}>
                     <TestConsumer />
                 </AdyenCheckoutProvider>
             )
-        })
+        )
 
-        const contextValue = JSON.parse(screen.getByTestId('context-value').textContent)
-        expect(contextValue.adyenEnvironment).toEqual({error: {}})
+        await waitFor(() => {
+            const contextValue = JSON.parse(screen.getByTestId('context-value').textContent)
+            expect(contextValue.adyenEnvironment).toBeNull()
+        })
     })
 
     it('should provide setter functions in the context', async () => {
@@ -133,9 +145,11 @@ describe('AdyenCheckoutProvider', () => {
 
         await act(async () => {
             render(
-                <AdyenCheckoutProvider {...providerProps}>
-                    <SetterConsumer />
-                </AdyenCheckoutProvider>
+                createWrapper(
+                    <AdyenCheckoutProvider {...providerProps}>
+                        <SetterConsumer />
+                    </AdyenCheckoutProvider>
+                )
             )
         })
 
@@ -187,9 +201,11 @@ describe('AdyenCheckoutProvider', () => {
 
         await act(async () => {
             render(
-                <AdyenCheckoutProvider {...providerProps}>
-                    <DispatchConsumer />
-                </AdyenCheckoutProvider>
+                createWrapper(
+                    <AdyenCheckoutProvider {...providerProps}>
+                        <DispatchConsumer />
+                    </AdyenCheckoutProvider>
+                )
             )
         })
 
@@ -229,9 +245,11 @@ describe('AdyenCheckoutProvider', () => {
 
         await act(async () => {
             render(
-                <AdyenCheckoutProvider {...providerProps}>
-                    <TestConsumer />
-                </AdyenCheckoutProvider>
+                createWrapper(
+                    <AdyenCheckoutProvider {...providerProps}>
+                        <TestConsumer />
+                    </AdyenCheckoutProvider>
+                )
             )
         })
 
@@ -262,9 +280,11 @@ describe('AdyenCheckoutProvider', () => {
 
         await act(async () => {
             render(
-                <AdyenCheckoutProvider {...providerProps}>
-                    <TranslationsConsumer />
-                </AdyenCheckoutProvider>
+                createWrapper(
+                    <AdyenCheckoutProvider {...providerProps}>
+                        <TranslationsConsumer />
+                    </AdyenCheckoutProvider>
+                )
             )
         })
 
@@ -292,9 +312,11 @@ describe('AdyenCheckoutProvider', () => {
 
         await act(async () => {
             render(
-                <AdyenCheckoutProvider {...providerProps}>
-                    <TranslationsConsumer />
-                </AdyenCheckoutProvider>
+                createWrapper(
+                    <AdyenCheckoutProvider {...providerProps}>
+                        <TranslationsConsumer />
+                    </AdyenCheckoutProvider>
+                )
             )
         })
 
@@ -313,9 +335,11 @@ describe('AdyenCheckoutProvider', () => {
 
         await act(async () => {
             render(
-                <AdyenCheckoutProvider {...providerProps}>
-                    <TestConsumer />
-                </AdyenCheckoutProvider>
+                createWrapper(
+                    <AdyenCheckoutProvider {...providerProps}>
+                        <TestConsumer />
+                    </AdyenCheckoutProvider>
+                )
             )
         })
 
@@ -335,9 +359,11 @@ describe('AdyenCheckoutProvider', () => {
 
         await act(async () => {
             render(
-                <AdyenCheckoutProvider {...providerProps}>
-                    <TestConsumer />
-                </AdyenCheckoutProvider>
+                createWrapper(
+                    <AdyenCheckoutProvider {...providerProps}>
+                        <TestConsumer />
+                    </AdyenCheckoutProvider>
+                )
             )
         })
 
@@ -365,9 +391,11 @@ describe('AdyenCheckoutProvider', () => {
 
         await act(async () => {
             render(
-                <AdyenCheckoutProvider {...providerProps}>
-                    <TestConsumer />
-                </AdyenCheckoutProvider>
+                createWrapper(
+                    <AdyenCheckoutProvider {...providerProps}>
+                        <TestConsumer />
+                    </AdyenCheckoutProvider>
+                )
             )
         })
 

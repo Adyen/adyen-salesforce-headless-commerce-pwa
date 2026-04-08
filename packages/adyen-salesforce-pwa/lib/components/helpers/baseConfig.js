@@ -59,8 +59,7 @@ export const onSubmit = async (state, component, actions, props) => {
 
         return {paymentsResponse: paymentsResponse}
     } catch (err) {
-        actions.reject(err.message)
-        executeErrorCallbacks([...(props.onError ?? []), onErrorHandler], props)(err, component)
+        actions.reject(err)
     }
 }
 
@@ -78,8 +77,7 @@ export const onAdditionalDetails = async (state, component, actions, props) => {
         )
         return {paymentsDetailsResponse: paymentsDetailsResponse}
     } catch (err) {
-        actions.reject(err.message)
-        executeErrorCallbacks([...(props.onError ?? []), onErrorHandler], props)(err, component)
+        actions.reject(err)
     }
 }
 

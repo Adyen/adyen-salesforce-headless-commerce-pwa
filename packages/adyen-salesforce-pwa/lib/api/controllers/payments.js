@@ -88,7 +88,8 @@ async function sendPayments(req, res, next) {
         if (isStandardPayment(data)) {
             await adyenContext.basketService.addPaymentInstrument(
                 paymentRequest?.amount,
-                paymentRequest?.paymentMethod
+                paymentRequest?.paymentMethod,
+                [{field: 'c_cardInstallments', value: paymentRequest?.installments?.value}]
             )
             await createOrderUsingOrderNo(adyenContext)
             preCreatedOrderNo = adyenContext.basket?.c_orderNo
@@ -143,8 +144,11 @@ async function sendPayments(req, res, next) {
             await adyenContext.basketService.addPaymentInstrument(
                 paymentRequest?.amount,
                 paymentRequest?.paymentMethod,
-                response?.pspReference,
-                response?.donationToken
+                [
+                    {field: 'c_pspReference', value: response?.pspReference},
+                    {field: 'c_cardInstallments', value: paymentRequest?.installments?.value},
+                    {field: 'c_donationToken', value: response?.donationToken}
+                ]
             )
         }
 
@@ -153,20 +157,20 @@ async function sendPayments(req, res, next) {
                 await adyenContext.basketService.addPaymentInstrument(
                     paymentRequest?.amount,
                     paymentRequest?.paymentMethod,
-                    response?.pspReference,
-                    response?.donationToken
+                    [
+                        {field: 'c_pspReference', value: response?.pspReference},
+                        {field: 'c_cardInstallments', value: paymentRequest?.installments?.value},
+                        {field: 'c_donationToken', value: response?.donationToken}
+                    ]
                 )
                 await createOrderUsingOrderNo(adyenContext)
             } else {
                 const pspReference = response?.pspReference || response?.order?.pspReference
-                if (pspReference) {
-                    await updatePaymentInstrumentForOrder(
-                        adyenContext,
-                        preCreatedOrderNo,
-                        pspReference,
-                        response.donationToken
-                    )
-                }
+                await updatePaymentInstrumentForOrder(adyenContext, preCreatedOrderNo, [
+                    {field: 'c_pspReference', value: pspReference},
+                    {field: 'c_cardInstallments', value: paymentRequest?.installments?.value},
+                    {field: 'c_donationToken', value: response?.donationToken}
+                ])
             }
             Logger.info('sendPayments', `order confirmed: ${checkoutResponse.merchantReference}`)
         }

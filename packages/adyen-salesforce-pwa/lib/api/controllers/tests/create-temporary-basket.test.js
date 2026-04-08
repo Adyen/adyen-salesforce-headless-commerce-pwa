@@ -15,12 +15,6 @@ jest.mock('../../helpers/basketHelper', () => ({
     createTemporaryBasket: jest.fn(),
     removeExistingTemporaryBaskets: jest.fn()
 }))
-jest.mock('../../../utils/getAdyenConfigForCurrentSite.mjs', () => ({
-    getAdyenConfigForCurrentSite: jest.fn(() => ({
-        apiKey: 'test',
-        env: 'test'
-    }))
-}))
 
 describe('create-temporary-basket controller', () => {
     let req, res, next
@@ -43,7 +37,15 @@ describe('create-temporary-basket controller', () => {
             }
         }
         res = {
-            locals: {}
+            locals: {
+                adyen: {
+                    adyenConfig: {
+                        apiKey: 'test',
+                        env: 'test'
+                    },
+                    siteId: 'RefArch'
+                }
+            }
         }
         next = jest.fn()
     })
@@ -123,5 +125,16 @@ describe('create-temporary-basket controller', () => {
         const errArg = next.mock.calls[0][0]
         expect(errArg).toBeInstanceOf(AdyenError)
         expect(errArg.message).toBe(ERROR_MESSAGE.BASKET_NOT_CREATED)
+    })
+
+    it('calls next with AdyenError when adyen context is missing', async () => {
+        res.locals = {}
+        removeExistingTemporaryBaskets.mockResolvedValue(undefined)
+        createTemporaryBasket.mockResolvedValue({basketId: 'b1'})
+
+        await CreateTemporaryBasketController(req, res, next)
+        const errArg = next.mock.calls[0][0]
+        expect(errArg).toBeInstanceOf(AdyenError)
+        expect(errArg.message).toBe(ERROR_MESSAGE.ADYEN_CONTEXT_NOT_FOUND)
     })
 })

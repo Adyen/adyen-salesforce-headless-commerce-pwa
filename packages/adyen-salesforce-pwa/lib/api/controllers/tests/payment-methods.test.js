@@ -68,19 +68,14 @@ describe('payment methods controller', () => {
         })
 
         await PaymentMethodsController(req, res, next)
-        expect(mockPaymentMethods).toHaveBeenCalledWith(
-            {
-                amount: {currency: 'USD', value: 10000},
-                blockedPaymentMethods,
-                countryCode: 'US',
-                merchantAccount: 'mock_ADYEN_MERCHANT_ACCOUNT',
-                shopperLocale: 'en-US',
-                shopperReference: 'testCustomer'
-            },
-            {
-                idempotencyKey: expect.any(String)
-            }
-        )
+        expect(mockPaymentMethods).toHaveBeenCalledWith({
+            amount: {currency: 'USD', value: 10000},
+            blockedPaymentMethods,
+            countryCode: 'US',
+            merchantAccount: 'mock_ADYEN_MERCHANT_ACCOUNT',
+            shopperLocale: 'en-US',
+            shopperReference: 'testCustomer'
+        })
         expect(res.locals.response).toEqual({
             paymentMethods: [
                 {
@@ -118,19 +113,14 @@ describe('payment methods controller', () => {
             }
         })
         await PaymentMethodsController(req, res, next)
-        expect(mockPaymentMethods).toHaveBeenCalledWith(
-            {
-                amount: {currency: 'USD', value: 10000},
-                blockedPaymentMethods,
-                countryCode: 'US',
-                merchantAccount: 'mock_ADYEN_MERCHANT_ACCOUNT',
-                shopperLocale: 'en-US',
-                shopperReference: 'testCustomer'
-            },
-            {
-                idempotencyKey: expect.any(String)
-            }
-        )
+        expect(mockPaymentMethods).toHaveBeenCalledWith({
+            amount: {currency: 'USD', value: 10000},
+            blockedPaymentMethods,
+            countryCode: 'US',
+            merchantAccount: 'mock_ADYEN_MERCHANT_ACCOUNT',
+            shopperLocale: 'en-US',
+            shopperReference: 'testCustomer'
+        })
         expect(res.locals.response).toEqual({
             paymentMethods: [
                 {
@@ -161,22 +151,17 @@ describe('payment methods controller', () => {
             }
         })
         await PaymentMethodsController(req, res, next)
-        expect(mockPaymentMethods).toHaveBeenCalledWith(
-            {
-                blockedPaymentMethods,
-                countryCode: 'US',
-                merchantAccount: 'mock_ADYEN_MERCHANT_ACCOUNT',
-                shopperLocale: 'en-US',
-                shopperReference: 'testCustomer',
-                amount: {
-                    currency: 'USD',
-                    value: 10000
-                }
-            },
-            {
-                idempotencyKey: expect.any(String)
+        expect(mockPaymentMethods).toHaveBeenCalledWith({
+            blockedPaymentMethods,
+            countryCode: 'US',
+            merchantAccount: 'mock_ADYEN_MERCHANT_ACCOUNT',
+            shopperLocale: 'en-US',
+            shopperReference: 'testCustomer',
+            amount: {
+                currency: 'USD',
+                value: 10000
             }
-        )
+        })
         expect(Logger.info).toHaveBeenCalledWith('getPaymentMethods', 'start')
         expect(next).toHaveBeenCalledWith(new AdyenError(ERROR_MESSAGE.NO_PAYMENT_METHODS, 400))
     })
@@ -220,16 +205,13 @@ describe('getPaymentMethodsForExpress controller', () => {
 
         await getPaymentMethodsForExpress(req, res, next)
 
-        expect(mockPaymentMethods).toHaveBeenCalledWith(
-            {
-                allowedPaymentMethods: EXPRESS_PAYMENT_METHODS,
-                shopperLocale: 'en-US',
-                countryCode: 'US',
-                merchantAccount: 'mock_ADYEN_MERCHANT_ACCOUNT',
-                amount: {value: 1000, currency: 'USD'}
-            },
-            {idempotencyKey: expect.any(String)}
-        )
+        expect(mockPaymentMethods).toHaveBeenCalledWith({
+            allowedPaymentMethods: EXPRESS_PAYMENT_METHODS,
+            shopperLocale: 'en-US',
+            countryCode: 'US',
+            merchantAccount: 'mock_ADYEN_MERCHANT_ACCOUNT',
+            amount: {value: 1000, currency: 'USD'}
+        })
         expect(res.locals.response).toEqual({
             paymentMethods: [{type: 'applepay', name: 'Apple Pay'}],
             applicationInfo: {

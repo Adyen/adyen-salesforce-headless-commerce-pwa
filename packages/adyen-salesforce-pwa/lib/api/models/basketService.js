@@ -7,6 +7,7 @@ import {
 } from '../../utils/constants.mjs'
 import {getCardType} from '../../utils/getCardType.mjs'
 import {convertCurrencyValueToMajorUnits} from '../../utils/parsers.mjs'
+import {mapCustomFields} from '../utils/customFieldUtils.js'
 import Logger from '../models/logger'
 import {AdyenError} from './AdyenError'
 
@@ -36,7 +37,13 @@ export class BasketService {
      * @private
      */
     _updateContext(updatedBasket) {
-        this.res.locals.adyen.basket = updatedBasket
+        // Merge into the existing basket rather than replacing it, so that fields
+        // not returned by a given SFCC API (e.g. c_orderNo, basketId, currency missing
+        // from addPaymentInstrumentToBasket for co-branded cards) are preserved.
+        this.res.locals.adyen.basket = {
+            ...this.res.locals.adyen.basket,
+            ...updatedBasket
+        }
     }
 
     /**
@@ -87,11 +94,10 @@ export class BasketService {
      * Adds a payment instrument to the current basket.
      * @param {object} amount - The amount included in the payment request. Should have value and currency
      * @param {object} paymentMethod - The payment method object. Should have type and brand.
-     * @param {string} pspReference - The payment reference returned from Adyen.
-     * @param {string} donationToken - The donation token returned from Adyen.
+     * @param {Array<{field: string, value: any}>} [customFields=[]] - Optional custom fields to set.
      * @returns {Promise<object>} A promise that resolves to the updated basket object.
      */
-    async addPaymentInstrument(amount, paymentMethod, pspReference, donationToken) {
+    async addPaymentInstrument(amount, paymentMethod, customFields = []) {
         if (!amount || !paymentMethod) {
             const missing = []
             if (!amount) missing.push('amount')
@@ -101,10 +107,12 @@ export class BasketService {
             throw new AdyenError(errorMessage)
         }
         const isCardPayment = paymentMethod?.type === PAYMENT_METHOD_TYPES.CREDIT_CARD
+
         const paymentMethodId = isCardPayment
             ? PAYMENT_METHODS.CREDIT_CARD
             : PAYMENT_METHODS.ADYEN_COMPONENT
 
+        const mappedCustomFields = mapCustomFields(customFields)
         const paymentInstrumentReq = {
             body: {
                 amount: convertCurrencyValueToMajorUnits(amount?.value, amount?.currency),
@@ -114,12 +122,11 @@ export class BasketService {
                         ? getCardType(paymentMethod?.brand || paymentMethod?.srcScheme)
                         : paymentMethod?.type
                 },
-                ...(pspReference && {c_pspReference: pspReference}),
+                ...mappedCustomFields,
                 c_paymentMethodType: paymentMethod?.type,
                 ...((paymentMethod?.brand || paymentMethod?.srcScheme) && {
                     c_paymentMethodBrand: paymentMethod?.brand || paymentMethod?.srcScheme
-                }),
-                ...(donationToken && {c_donationToken: donationToken})
+                })
             },
             parameters: {
                 basketId: this.adyenContext.basket.basketId
@@ -127,6 +134,19 @@ export class BasketService {
         }
         const updatedBasket =
             await this.shopperBaskets.addPaymentInstrumentToBasket(paymentInstrumentReq)
+        if (!updatedBasket?.basketId) {
+            Logger.warn(
+                'addPaymentInstrument',
+                `SFCC returned a non-basket response (missing basketId) — ` +
+                    `cardType: ${paymentInstrumentReq.body.paymentCard?.cardType}, ` +
+                    `paymentMethodId: ${paymentMethodId}. ` +
+                    `Response: ${JSON.stringify(updatedBasket)}`
+            )
+        }
+        Logger.info(
+            'addPaymentInstrument',
+            `c_orderNo in addPaymentInstrumentToBasket response: ${updatedBasket?.c_orderNo || 'MISSING'}`
+        )
         this._updateContext(updatedBasket)
         return updatedBasket
     }

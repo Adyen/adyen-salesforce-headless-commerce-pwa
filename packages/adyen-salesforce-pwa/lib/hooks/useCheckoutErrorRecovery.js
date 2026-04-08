@@ -20,12 +20,23 @@ const useCheckoutErrorRecovery = ({refetchBasket, navigate}) => {
     useEffect(() => {
         const urlParams = new URLSearchParams(location.search)
         const newBasketId = urlParams.get('newBasketId')
+        const hasError = urlParams.get('error') === 'true'
+
         if (newBasketId && !isHandlingErrorRef.current) {
             isHandlingErrorRef.current = true
             setIsRefetchingBasket(true)
             refetchBasket().finally(() => {
                 setIsRefetchingBasket(false)
-                navigate('/checkout?error=true')
+                navigate('/checkout')
+                setAdyenCheckoutKey((prev) => prev + 1)
+                isHandlingErrorRef.current = false
+            })
+        } else if (hasError && !newBasketId && !isHandlingErrorRef.current) {
+            isHandlingErrorRef.current = true
+            setIsRefetchingBasket(true)
+            refetchBasket().finally(() => {
+                setIsRefetchingBasket(false)
+                navigate('/checkout')
                 setAdyenCheckoutKey((prev) => prev + 1)
                 isHandlingErrorRef.current = false
             })

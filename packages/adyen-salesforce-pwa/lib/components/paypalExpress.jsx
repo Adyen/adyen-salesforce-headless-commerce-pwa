@@ -121,6 +121,7 @@ const PayPalExpressComponent = ({
     const basketId = shopperBasket?.basketId
     const paymentContainer = useRef(null)
     const paypalButtonRef = useRef(null)
+    const errorShownRef = useRef(false)
 
     const {
         data: adyenEnvironment,
@@ -177,14 +178,16 @@ const PayPalExpressComponent = ({
     )
 
     useEffect(() => {
-        if (adyenEnvironmentError) {
+        if (adyenEnvironmentError && !errorShownRef.current) {
+            errorShownRef.current = true
             console.error('Error fetching Adyen environment:', adyenEnvironmentError)
             onError.forEach((cb) => cb(adyenEnvironmentError))
         }
     }, [adyenEnvironmentError, onError])
 
     useEffect(() => {
-        if (adyenPaymentMethodsError) {
+        if (adyenPaymentMethodsError && !errorShownRef.current) {
+            errorShownRef.current = true
             console.error('Error fetching Adyen payment methods:', adyenPaymentMethodsError)
             onError.forEach((cb) => cb(adyenPaymentMethodsError))
         }
@@ -270,7 +273,10 @@ const PayPalExpressComponent = ({
                 }
             } catch (err) {
                 console.error('Error initializing PayPal Express:', err)
-                onError.forEach((cb) => cb(err))
+                if (!errorShownRef.current) {
+                    errorShownRef.current = true
+                    onError.forEach((cb) => cb(err))
+                }
             }
         }
 

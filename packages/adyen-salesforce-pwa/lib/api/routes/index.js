@@ -24,10 +24,10 @@ import {appleDomainAssociation} from '../controllers/apple-domain-association'
 import PaymentCancelController from '../controllers/payment-cancel'
 import PaymentCancelExpressController from '../controllers/payment-cancel-express'
 import {balanceCheck, cancelOrder, createOrder} from '../controllers/giftCard'
-import {prepareRequestContext} from '../middleware/request-context'
-import {prepareMinimalRequestContext} from '../middleware/minimal-request-context'
+import {createRequestContext} from '../middleware/request-context'
+import {createMinimalRequestContext} from '../middleware/minimal-request-context'
+import {createPaymentsDetailsContext} from '../middleware/payments-details-request-context'
 import {prepareOrderRequestContext} from '../middleware/order-request-context'
-import {preparePaymentsDetailsContext} from '../middleware/payments-details-request-context'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function SuccessHandler(req, res, next) {
@@ -46,24 +46,29 @@ function ErrorHandler(err, req, res, next) {
     return res.status(err.statusCode || 500).json(errorResponse)
 }
 
-function registerAdyenEndpoints(app, runtime, overrides) {
+function registerAdyenEndpoints(app, runtime, overrides, options = {}) {
     app.use(bodyParser.json())
     app.set('trust proxy', true)
 
+    const requestContext = createRequestContext(options)
+    const minimalRequestContext = createMinimalRequestContext(options)
+    const paymentsDetailsContext = createPaymentsDetailsContext(options)
+
     const appleDomainAssociationHandler = overrides?.appleDomainAssociation || [
+        minimalRequestContext,
         appleDomainAssociation,
         ErrorHandler
     ]
 
     const environmentHandler = overrides?.environment || [
-        prepareMinimalRequestContext,
+        minimalRequestContext,
         EnvironmentController,
         SuccessHandler,
         ErrorHandler
     ]
 
     const webhookHandler = overrides?.webhook || [
-        prepareMinimalRequestContext,
+        minimalRequestContext,
         authenticate,
         validateHmac,
         parseNotification,
@@ -72,112 +77,112 @@ function registerAdyenEndpoints(app, runtime, overrides) {
     ]
 
     const paymentMethodsHandler = overrides?.paymentMethods || [
-        prepareRequestContext,
+        requestContext,
         PaymentMethodsController,
         SuccessHandler,
         ErrorHandler
     ]
     const paymentMethodsForExpressHandler = overrides?.paymentMethodsForExpress || [
-        prepareMinimalRequestContext,
+        minimalRequestContext,
         getPaymentMethodsForExpress,
         SuccessHandler,
         ErrorHandler
     ]
     const paymentsDetailsHandler = overrides?.paymentsDetails || [
-        preparePaymentsDetailsContext,
+        paymentsDetailsContext,
         PaymentsDetailsController,
         SuccessHandler,
         ErrorHandler
     ]
     const paymentsHandler = overrides?.payments || [
-        prepareRequestContext,
+        requestContext,
         PaymentsController,
         SuccessHandler,
         ErrorHandler
     ]
 
     const shippingMethodsPostHandler = overrides?.setShippingMethods || [
-        prepareRequestContext,
+        requestContext,
         ShippingMethodsController.setShippingMethod,
         SuccessHandler,
         ErrorHandler
     ]
     const shippingMethodsGetHandler = overrides?.getShippingMethods || [
-        prepareRequestContext,
+        requestContext,
         ShippingMethodsController.getShippingMethods,
         SuccessHandler,
         ErrorHandler
     ]
     const shippingAddressHandler = overrides?.shippingAddress || [
-        prepareRequestContext,
+        requestContext,
         ShippingAddressController,
         SuccessHandler,
         ErrorHandler
     ]
     const shopperDetailsHandler = overrides?.shopperDetails || [
-        prepareRequestContext,
+        requestContext,
         ShopperDetailsController,
         SuccessHandler,
         ErrorHandler
     ]
 
     const paymentCancelController = overrides?.paymentCancel || [
-        prepareMinimalRequestContext,
+        minimalRequestContext,
         PaymentCancelController,
         SuccessHandler,
         ErrorHandler
     ]
     const paymentCancelExpressController = overrides?.paymentCancelExpress || [
-        prepareRequestContext,
+        requestContext,
         PaymentCancelExpressController,
         SuccessHandler,
         ErrorHandler
     ]
     const balanceCheckHandler = overrides?.balanceCheck || [
-        prepareRequestContext,
+        requestContext,
         balanceCheck,
         SuccessHandler,
         ErrorHandler
     ]
     const createOrderHandler = overrides?.createOrder || [
-        prepareRequestContext,
+        requestContext,
         createOrder,
         SuccessHandler,
         ErrorHandler
     ]
     const cancelOrderHandler = overrides?.cancelOrder || [
-        prepareRequestContext,
+        requestContext,
         cancelOrder,
         SuccessHandler,
         ErrorHandler
     ]
     const paypalUpdateOrderHandler = overrides?.paypalUpdateOrder || [
-        prepareRequestContext,
+        requestContext,
         PaypalUpdateOrderController,
         SuccessHandler,
         ErrorHandler
     ]
     const paymentDataForReviewPageGetHandler = overrides?.getPaymentDataForReviewPage || [
-        prepareRequestContext,
+        requestContext,
         PaymentDataReviewPageController.getPaymentDataForReviewPage,
         SuccessHandler,
         ErrorHandler
     ]
     const paymentDataForReviewPagePostHandler = overrides?.setPaymentDataForReviewPage || [
-        prepareRequestContext,
+        requestContext,
         PaymentDataReviewPageController.setPaymentDataForReviewPage,
         SuccessHandler,
         ErrorHandler
     ]
 
     const createTemporaryBasketHandler = overrides?.createTemporaryBasket || [
-        prepareMinimalRequestContext,
+        minimalRequestContext,
         CreateTemporaryBasketController,
         SuccessHandler,
         ErrorHandler
     ]
     const orderNumberHandler = overrides?.orderNumber || [
-        prepareRequestContext,
+        requestContext,
         OrderNumberController,
         SuccessHandler,
         ErrorHandler

@@ -1,42 +1,38 @@
-export const getAdyenConfigForCurrentSite = (currentSiteId) => {
-    return {
-        apiKey: setProperty(currentSiteId, ADYEN_ENV.ADYEN_API_KEY),
-        clientKey: setProperty(currentSiteId, ADYEN_ENV.ADYEN_CLIENT_KEY),
-        environment: setProperty(currentSiteId, ADYEN_ENV.ADYEN_ENVIRONMENT),
-        merchantAccount: setProperty(currentSiteId, ADYEN_ENV.ADYEN_MERCHANT_ACCOUNT),
-        systemIntegratorName: setProperty(currentSiteId, ADYEN_ENV.SYSTEM_INTEGRATOR_NAME),
-        webhookUser: setProperty(currentSiteId, ADYEN_ENV.ADYEN_WEBHOOK_USER),
-        webhookPassword: setProperty(currentSiteId, ADYEN_ENV.ADYEN_WEBHOOK_PASSWORD),
-        webhookHmacKey: setProperty(currentSiteId, ADYEN_ENV.ADYEN_HMAC_KEY),
-        liveEndpointUrlPrefix: setProperty(currentSiteId, ADYEN_ENV.ADYEN_LIVE_URL_PREFIX),
-        appleDomainAssociation: setProperty(
-            currentSiteId,
-            ADYEN_ENV.ADYEN_APPLE_DOMAIN_ASSOCIATION
-        ),
-        nativeThreeDS: setProperty(currentSiteId, ADYEN_ENV.ADYEN_NATIVE_3DS),
-        giftCardExpirationTime: setProperty(currentSiteId, ADYEN_ENV.GIFT_CARD_EXPIRATION_TIME)
-    }
+const ENV_TO_CONFIG_MAP = {
+    ADYEN_API_KEY: 'apiKey',
+    ADYEN_CLIENT_KEY: 'clientKey',
+    ADYEN_ENVIRONMENT: 'environment',
+    ADYEN_MERCHANT_ACCOUNT: 'merchantAccount',
+    SYSTEM_INTEGRATOR_NAME: 'systemIntegratorName',
+    ADYEN_WEBHOOK_USER: 'webhookUser',
+    ADYEN_WEBHOOK_PASSWORD: 'webhookPassword',
+    ADYEN_HMAC_KEY: 'webhookHmacKey',
+    ADYEN_LIVE_URL_PREFIX: 'liveEndpointUrlPrefix',
+    ADYEN_APPLE_DOMAIN_ASSOCIATION: 'appleDomainAssociation',
+    ADYEN_NATIVE_3DS: 'nativeThreeDS',
+    GIFT_CARD_EXPIRATION_TIME: 'giftCardExpirationTime',
+    ADYEN_L23_ENABLED: 'l23Enabled',
+    ADYEN_L23_COMMODITY_CODE: 'l23CommodityCode'
 }
 
-export const setProperty = (currentSiteId, property) => {
-    const siteEnv = currentSiteId ? `${currentSiteId}_${property}` : property
-    if (Object.hasOwn(process.env, siteEnv)) {
-        return process.env[siteEnv]
-    }
-    return ''
+export const getAdyenConfigForCurrentSite = (currentSiteId, options = {}) => {
+    return Object.fromEntries(
+        Object.entries(ENV_TO_CONFIG_MAP).map(([envKey, configKey]) => [
+            configKey,
+            resolveConfigValue(currentSiteId, envKey, options)
+        ])
+    )
 }
 
-const ADYEN_ENV = {
-    ADYEN_API_KEY: 'ADYEN_API_KEY',
-    ADYEN_CLIENT_KEY: 'ADYEN_CLIENT_KEY',
-    ADYEN_ENVIRONMENT: 'ADYEN_ENVIRONMENT',
-    ADYEN_MERCHANT_ACCOUNT: 'ADYEN_MERCHANT_ACCOUNT',
-    SYSTEM_INTEGRATOR_NAME: 'SYSTEM_INTEGRATOR_NAME',
-    ADYEN_WEBHOOK_USER: 'ADYEN_WEBHOOK_USER',
-    ADYEN_WEBHOOK_PASSWORD: 'ADYEN_WEBHOOK_PASSWORD',
-    ADYEN_HMAC_KEY: 'ADYEN_HMAC_KEY',
-    ADYEN_LIVE_URL_PREFIX: 'ADYEN_LIVE_URL_PREFIX',
-    ADYEN_APPLE_DOMAIN_ASSOCIATION: 'ADYEN_APPLE_DOMAIN_ASSOCIATION',
-    ADYEN_NATIVE_3DS: 'ADYEN_NATIVE_3DS',
-    GIFT_CARD_EXPIRATION_TIME: 'GIFT_CARD_EXPIRATION_TIME'
+const resolveConfigValue = (siteId, key, options) => {
+    const siteSpecificKey = siteId ? `${siteId}_${key}` : key
+
+    // Priority: site-specific (options > env) > global (options > env)
+    return (
+        options[siteSpecificKey] ??
+        process.env[siteSpecificKey] ??
+        options[key] ??
+        process.env[key] ??
+        undefined
+    )
 }

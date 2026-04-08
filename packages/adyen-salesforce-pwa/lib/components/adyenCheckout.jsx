@@ -24,6 +24,8 @@ const AdyenCheckoutComponent = ({
     locale,
     site,
     navigate,
+    authToken: authTokenProp,
+    customerId: customerIdProp,
 
     // Page context
     page = PAGE_TYPES.CHECKOUT,
@@ -50,6 +52,7 @@ const AdyenCheckoutComponent = ({
     const checkoutRef = useRef(null)
     const dropinRef = useRef(null)
     const adyenOrderRef = useRef(null)
+    const errorShownRef = useRef(false)
     const [isLoading, setIsLoading] = useState(false)
     const [adyenStateData, setAdyenStateData] = useState(null)
     const [internalOrderNo, setInternalOrderNo] = useState(null)
@@ -57,20 +60,22 @@ const AdyenCheckoutComponent = ({
     const [internalAdyenAction, setInternalAdyenAction] = useState(null)
     const [componentKey, setComponentKey] = useState(0)
 
-    const customerId = useCustomerId()
+    const hookCustomerId = useCustomerId()
+    const customerId = customerIdProp || hookCustomerId
     const customerTypeData = useCustomerType()
     const isCustomerRegistered = customerTypeData.isRegistered
     const {getTokenWhenReady} = useAccessToken()
-    const [authToken, setAuthToken] = useState()
+    const [authToken, setAuthToken] = useState(authTokenProp)
 
     useEffect(() => {
+        if (authTokenProp) return
         const getToken = async () => {
             const token = await getTokenWhenReady()
             setAuthToken(token)
         }
 
         getToken()
-    }, [])
+    }, [authTokenProp])
 
     // Fetch Adyen environment configuration
     const {
@@ -166,25 +171,10 @@ const AdyenCheckoutComponent = ({
         if (typeof window === 'undefined') return {}
         const params = new URLSearchParams(window.location.search)
         return {
-            error: params.get('error'),
             redirectResult: params.get('redirectResult'),
             amazonCheckoutSessionId: params.get('amazonCheckoutSessionId')
         }
     }, [])
-
-    // Handle error in URL params - remount component
-    useEffect(() => {
-        if (urlParams.error) {
-            if (typeof window !== 'undefined') {
-                const url = new URL(window.location.href)
-                url.searchParams.delete('error')
-                url.searchParams.delete('redirectResult')
-                url.searchParams.delete('amazonCheckoutSessionId')
-                window.history.replaceState({}, '', url.toString())
-            }
-            setComponentKey((prev) => prev + 1)
-        }
-    }, [urlParams.error])
 
     // Memoize state change handler
     const handleStateChange = useCallback(
@@ -199,6 +189,7 @@ const AdyenCheckoutComponent = ({
 
     // Memoize the payment methods configuration to prevent unnecessary recalculations
     const paymentMethodsConfiguration = useMemo(() => {
+        if (!authToken) return null
         return getPaymentMethodsConfig({
             additionalPaymentMethodsConfiguration,
             paymentMethods: adyenPaymentMethods?.paymentMethods,
@@ -249,6 +240,7 @@ const AdyenCheckoutComponent = ({
         if (
             !adyenEnvironment ||
             !paymentContainer.current ||
+            !paymentMethodsConfiguration ||
             fetchingEnvironment ||
             fetchingPaymentMethods ||
             fetchingOrderNumber
@@ -257,19 +249,22 @@ const AdyenCheckoutComponent = ({
         }
 
         // Handle errors
-        if (adyenEnvironmentError) {
+        if (adyenEnvironmentError && !errorShownRef.current) {
+            errorShownRef.current = true
             console.error('Error fetching Adyen environment:', adyenEnvironmentError)
             onError.forEach((cb) => cb(adyenEnvironmentError))
             return
         }
 
-        if (adyenPaymentMethodsError) {
+        if (adyenPaymentMethodsError && !errorShownRef.current) {
+            errorShownRef.current = true
             console.error('Error fetching Adyen payment methods:', adyenPaymentMethodsError)
             onError.forEach((cb) => cb(adyenPaymentMethodsError))
             return
         }
 
-        if (orderNumberError) {
+        if (orderNumberError && !errorShownRef.current) {
+            errorShownRef.current = true
             console.error('Error fetching order number:', orderNumberError)
             onError.forEach((cb) => cb(orderNumberError))
             return
@@ -325,7 +320,10 @@ const AdyenCheckoutComponent = ({
                 }
             } catch (error) {
                 console.error('Error initializing Adyen Checkout:', error)
-                onError.forEach((cb) => cb(error))
+                if (!errorShownRef.current) {
+                    errorShownRef.current = true
+                    onError.forEach((cb) => cb(error))
+                }
             }
         }
 
@@ -388,6 +386,8 @@ AdyenCheckoutComponent.propTypes = {
     afterAdditionalDetails: PropTypes.arrayOf(PropTypes.func),
     onError: PropTypes.arrayOf(PropTypes.func),
     onStateChange: PropTypes.func,
+    authToken: PropTypes.string,
+    customerId: PropTypes.string,
 
     // UI
     spinner: PropTypes.node,

@@ -6,20 +6,10 @@ import useAdyenShippingMethods from '../hooks/useAdyenShippingMethods'
 
 export const AdyenExpressCheckoutContext = React.createContext({})
 
-const initialState = {
-    adyenEnvironment: null,
-    adyenPaymentMethods: null,
-    shippingMethods: null
-}
+const initialState = {}
 
 const reducer = (state, action) => {
     switch (action.type) {
-        case 'SET_ADYEN_ENVIRONMENT':
-            return {...state, adyenEnvironment: action.payload}
-        case 'SET_ADYEN_PAYMENT_METHODS':
-            return {...state, adyenPaymentMethods: action.payload}
-        case 'SET_SHIPPING_METHODS':
-            return {...state, shippingMethods: action.payload}
         default:
             return state
     }
@@ -41,16 +31,8 @@ export const AdyenExpressCheckoutProvider = ({
         authToken,
         customerId,
         basketId,
-        site,
-        skip: !!state.adyenEnvironment
+        site
     })
-
-    useEffect(() => {
-        if (adyenEnvironment || adyenEnvironmentError) {
-            const payload = adyenEnvironment || {error: adyenEnvironmentError || true}
-            dispatch({type: 'SET_ADYEN_ENVIRONMENT', payload})
-        }
-    }, [adyenEnvironment, adyenEnvironmentError])
 
     const {data: adyenPaymentMethods, error: adyenPaymentMethodsError} = useAdyenPaymentMethods({
         authToken,
@@ -58,38 +40,26 @@ export const AdyenExpressCheckoutProvider = ({
         basketId,
         site,
         locale,
-        skip: !!state.adyenPaymentMethods
+        basket
     })
-
-    useEffect(() => {
-        if (adyenPaymentMethods || adyenPaymentMethodsError) {
-            const payload = adyenPaymentMethods || {error: adyenPaymentMethodsError || true}
-            dispatch({type: 'SET_ADYEN_PAYMENT_METHODS', payload})
-        }
-    }, [adyenPaymentMethods, adyenPaymentMethodsError])
 
     const {data: shippingMethods, error: shippingMethodsError} = useAdyenShippingMethods({
         authToken,
         customerId,
         basketId,
-        site,
-        skip: !basketId
+        site
     })
 
-    useEffect(() => {
-        if (shippingMethods || shippingMethodsError) {
-            const payload = shippingMethods || {error: shippingMethodsError || true}
-            dispatch({type: 'SET_SHIPPING_METHODS', payload})
-        }
-    }, [shippingMethods, shippingMethodsError])
-
     const fetchShippingMethods = useCallback(async () => {
-        return state.shippingMethods
-    }, [state.shippingMethods])
+        return shippingMethods
+    }, [shippingMethods])
 
     const value = useMemo(
         () => ({
             ...state,
+            adyenEnvironment,
+            adyenPaymentMethods,
+            shippingMethods,
             basket,
             locale,
             site,
@@ -97,7 +67,18 @@ export const AdyenExpressCheckoutProvider = ({
             navigate,
             fetchShippingMethods
         }),
-        [state, basket, locale, site, authToken, navigate, fetchShippingMethods]
+        [
+            state,
+            adyenEnvironment,
+            adyenPaymentMethods,
+            shippingMethods,
+            basket,
+            locale,
+            site,
+            authToken,
+            navigate,
+            fetchShippingMethods
+        ]
     )
 
     return (

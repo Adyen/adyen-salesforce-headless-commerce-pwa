@@ -9,7 +9,6 @@ import Logger from '../models/logger'
 import {AdyenError} from '../models/AdyenError'
 import {getApplicationInfo} from '../../utils/getApplicationInfo.mjs'
 import currencyList from '../../utils/currencyList.mjs'
-import {createIdempotencyKey} from '../utils/paymentUtils'
 
 async function getPaymentMethods(req, res, next) {
     Logger.info('getPaymentMethods', 'start')
@@ -41,9 +40,7 @@ async function getPaymentMethods(req, res, next) {
             paymentMethodsRequest.shopperReference = customer.customerId
         }
 
-        const response = await checkout.paymentMethods(paymentMethodsRequest, {
-            idempotencyKey: createIdempotencyKey(paymentMethodsRequest)
-        })
+        const response = await checkout.paymentMethods(paymentMethodsRequest)
 
         if (!response?.paymentMethods?.length) {
             throw new AdyenError(ERROR_MESSAGE.NO_PAYMENT_METHODS, 400)
@@ -93,9 +90,7 @@ async function getPaymentMethodsForExpress(req, res, next) {
             }
         }
 
-        const response = await checkout.paymentMethods(paymentMethodsRequest, {
-            idempotencyKey: createIdempotencyKey(paymentMethodsRequest)
-        })
+        const response = await checkout.paymentMethods(paymentMethodsRequest)
 
         if (!response?.paymentMethods?.length) {
             throw new AdyenError(ERROR_MESSAGE.NO_PAYMENT_METHODS, 400)

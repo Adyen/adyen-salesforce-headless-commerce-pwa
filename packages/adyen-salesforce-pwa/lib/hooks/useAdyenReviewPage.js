@@ -1,6 +1,8 @@
-import {useCallback, useEffect, useState} from 'react'
+import {useCallback, useState} from 'react'
+import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query'
 import {AdyenPaymentDataReviewPageService} from '../services/payment-data-review-page'
 import {AdyenPaymentsDetailsService} from '../services/payments-details'
+import {adyenKeys} from '../utils/queryKeys'
 
 /**
  * A hook for managing the Adyen review page functionality.
@@ -22,41 +24,34 @@ import {AdyenPaymentsDetailsService} from '../services/payments-details'
  * }}
  */
 const useAdyenReviewPage = ({authToken, customerId, basketId, site, skip = false}) => {
-    const [isLoading, setIsLoading] = useState(!skip)
-    const [isSubmitting, setIsSubmitting] = useState(false)
-    const [paymentData, setPaymentData] = useState(null)
-    const [error, setError] = useState(null)
+    useQueryClient()
+    const [mutationError, setMutationError] = useState(null)
 
-    const fetchPaymentData = useCallback(async () => {
-        if (!authToken || !basketId) {
-            setIsLoading(false)
-            return
-        }
-
-        setIsLoading(true)
-        setError(null)
-
-        try {
+    const query = useQuery({
+        queryKey: adyenKeys.paymentData(basketId, site?.id),
+        queryFn: async () => {
             const paymentDataService = new AdyenPaymentDataReviewPageService(
                 authToken,
                 customerId,
                 basketId,
                 site
             )
-            const data = await paymentDataService.getPaymentData()
-            setPaymentData(data)
-        } catch (err) {
-            setError(err)
-        } finally {
-            setIsLoading(false)
-        }
-    }, [authToken, customerId, basketId, site?.id])
+            return paymentDataService.getPaymentData()
+        },
+        enabled: !skip && !!authToken && !!basketId
+    })
 
-    useEffect(() => {
-        if (!skip) {
-            fetchPaymentData()
+    const mutation = useMutation({
+        mutationFn: async (data) => {
+            const paymentsDetailsService = new AdyenPaymentsDetailsService(
+                authToken,
+                customerId,
+                basketId,
+                site
+            )
+            return paymentsDetailsService.submitPaymentsDetails(data)
         }
-    }, [fetchPaymentData, skip])
+    })
 
     /**
      * Submits payment details to complete the order.
@@ -65,40 +60,28 @@ const useAdyenReviewPage = ({authToken, customerId, basketId, site, skip = false
      */
     const submitPaymentDetails = useCallback(
         async (data = null) => {
-            const dataToSubmit = data || paymentData
+            const dataToSubmit = data || query.data
             if (!dataToSubmit) {
                 throw new Error('No payment data available')
             }
 
-            setIsSubmitting(true)
-            setError(null)
-
             try {
-                const paymentsDetailsService = new AdyenPaymentsDetailsService(
-                    authToken,
-                    customerId,
-                    basketId,
-                    site
-                )
-                const response = await paymentsDetailsService.submitPaymentsDetails(dataToSubmit)
-                return response
+                return await mutation.mutateAsync(dataToSubmit)
             } catch (err) {
-                setError(err)
+                setMutationError(err)
                 throw err
-            } finally {
-                setIsSubmitting(false)
             }
         },
-        [authToken, customerId, basketId, site?.id, paymentData]
+        [mutation, query.data]
     )
 
     return {
-        isLoading,
-        isSubmitting,
-        paymentData,
-        error,
+        isLoading: query.isLoading && query.fetchStatus !== 'idle',
+        isSubmitting: mutation.status === 'loading',
+        paymentData: query.data ?? null,
+        error: query.error ?? mutationError ?? null,
         submitPaymentDetails,
-        refetch: fetchPaymentData
+        refetch: query.refetch
     }
 }
 
