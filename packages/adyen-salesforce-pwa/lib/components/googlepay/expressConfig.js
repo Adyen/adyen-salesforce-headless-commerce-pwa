@@ -76,6 +76,7 @@ export const getGooglePayShopperDetails = (paymentData) => {
  * @param {Function} props.navigate - Navigation function
  * @param {Function} props.fetchShippingMethods - Function to fetch applicable shipping methods
  * @param {Function[]} [props.onError] - Error handler callbacks
+ * @param {Function} [props.onPaymentCancel] - Callback invoked when payment is cancelled (e.g., 3DS2 modal closed)
  * @param {object} [props.googlePayMethodConfig] - Google Pay configuration from Adyen payment methods response (merchantId, gatewayMerchantId)
  * @param {object} [props.configuration] - Additional top-level Google Pay display overrides (buttonColor, buttonType, etc.)
  * @param {string} [props.type='cart'] - Express checkout type: 'pdp' or 'cart'
@@ -325,10 +326,37 @@ export const getGooglePayExpressConfig = (props = {}) => {
                         `/checkout/confirmation/${paymentsDetailsResponse?.merchantReference}`
                     )
                 } else {
+                    // 3DS cancelled or failed - cleanup and re-mount
+                    const paymentCancelExpressService = new PaymentCancelExpressService(
+                        props.token,
+                        props.customerId,
+                        activeBasket?.basketId,
+                        props.site
+                    )
+                    await paymentCancelExpressService.paymentCancelExpress()
+                    if (props.onPaymentCancel) {
+                        props.onPaymentCancel()
+                    }
                     actions.reject()
                 }
             } catch (err) {
+                // Error in 3DS flow - call error callbacks, cleanup and re-mount
                 onError.forEach((cb) => cb(err))
+                try {
+                    const activeBasket = getActiveBasket()
+                    const paymentCancelExpressService = new PaymentCancelExpressService(
+                        props.token,
+                        props.customerId,
+                        activeBasket?.basketId,
+                        props.site
+                    )
+                    await paymentCancelExpressService.paymentCancelExpress()
+                } catch (cancelErr) {
+                    // Silently ignore cancellation errors
+                }
+                if (props.onPaymentCancel) {
+                    props.onPaymentCancel()
+                }
                 actions.reject(err)
             }
         },
@@ -368,11 +396,13 @@ export const getGooglePayExpressConfig = (props = {}) => {
 
 /**
  * Handles errors during Google Pay Express checkout.
- * Cancels the express payment and redirects to the checkout page with an error flag.
+ * Cancels the express payment and either calls onPaymentCancel callback (to re-render)
+ * or falls back to navigating to the checkout page with an error flag.
  *
  * @param {Error} error - The error that occurred
  * @param {object} component - Adyen component instance
  * @param {object} props - Component properties
+ * @param {Function} [props.onPaymentCancel] - Callback to signal cancellation and re-render
  * @returns {Promise<object>} Object indicating cancellation status
  */
 export const onErrorHandler = async (error, component, props) => {
@@ -387,7 +417,11 @@ export const onErrorHandler = async (error, component, props) => {
             )
             await paymentCancelExpressService.paymentCancelExpress()
         }
-        props.navigate(`/checkout?error=true`)
+        if (props.onPaymentCancel) {
+            props.onPaymentCancel()
+        } else {
+            props.navigate(`/checkout?error=true`)
+        }
         return {cancelled: true}
     } catch (err) {
         console.error('Error during express payment cancellation:', err)

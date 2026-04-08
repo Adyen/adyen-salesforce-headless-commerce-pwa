@@ -49,6 +49,11 @@ const GooglePayExpressComponent = (props) => {
     const paymentContainer = useRef(null)
     const googlePayButtonRef = useRef(null)
     const errorShownRef = useRef(false)
+    const [remountKey, setRemountKey] = useState(0)
+
+    const handlePaymentCancel = useCallback(() => {
+        setRemountKey((prev) => prev + 1)
+    }, [])
 
     const {
         data: adyenEnvironment,
@@ -137,6 +142,9 @@ const GooglePayExpressComponent = (props) => {
 
     useEffect(() => {
         const initializeCheckout = async () => {
+            // Reset error flag for fresh mount attempt
+            errorShownRef.current = false
+
             const shouldInitialize = !!(
                 adyenEnvironment &&
                 adyenPaymentMethods &&
@@ -179,6 +187,7 @@ const GooglePayExpressComponent = (props) => {
                     navigate,
                     fetchShippingMethods,
                     onError,
+                    onPaymentCancel: handlePaymentCancel,
                     googlePayMethodConfig,
                     configuration,
                     type: isPdp ? 'pdp' : 'cart',
@@ -225,7 +234,8 @@ const GooglePayExpressComponent = (props) => {
         site?.id,
         navigate,
         fetchShippingMethods,
-        product
+        product,
+        remountKey
     ])
 
     return (

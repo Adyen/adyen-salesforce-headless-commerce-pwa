@@ -589,7 +589,7 @@ describe('onErrorHandler', () => {
         consoleErrorSpy.mockRestore()
     })
 
-    it('cancels express payment and navigates on success', async () => {
+    it('cancels express payment and navigates on success when onPaymentCancel not provided', async () => {
         const mockPaymentCancelExpress = jest.fn().mockResolvedValue({})
         PaymentCancelExpressService.mockImplementation(() => ({
             paymentCancelExpress: mockPaymentCancelExpress
@@ -612,6 +612,29 @@ describe('onErrorHandler', () => {
         )
         expect(mockPaymentCancelExpress).toHaveBeenCalled()
         expect(navigate).toHaveBeenCalledWith('/checkout?error=true')
+        expect(result).toEqual({cancelled: true})
+    })
+
+    it('cancels express payment and calls onPaymentCancel when provided', async () => {
+        const mockPaymentCancelExpress = jest.fn().mockResolvedValue({})
+        PaymentCancelExpressService.mockImplementation(() => ({
+            paymentCancelExpress: mockPaymentCancelExpress
+        }))
+        const navigate = jest.fn()
+        const onPaymentCancel = jest.fn()
+        const props = {
+            token: 'test-token',
+            customerId: 'customer-123',
+            site: {id: 'RefArch'},
+            navigate,
+            onPaymentCancel,
+            getBasket: () => ({basketId: 'basket-456'})
+        }
+        const result = await onErrorHandler(new Error('Payment error'), {}, props)
+
+        expect(mockPaymentCancelExpress).toHaveBeenCalled()
+        expect(onPaymentCancel).toHaveBeenCalled()
+        expect(navigate).not.toHaveBeenCalled()
         expect(result).toEqual({cancelled: true})
     })
 
