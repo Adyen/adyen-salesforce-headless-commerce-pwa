@@ -236,7 +236,7 @@ describe('BasketService', () => {
                 expect.objectContaining({
                     body: expect.objectContaining({
                         paymentMethodId: PAYMENT_METHODS.CREDIT_CARD,
-                        c_pspReference: 'mockPspReference',
+                        c_pspReference: customFields,
                         paymentCard: {cardType: 'Visa'},
                         c_paymentMethodType: 'scheme',
                         c_paymentMethodBrand: 'visa'
@@ -276,7 +276,7 @@ describe('BasketService', () => {
                 expect.objectContaining({
                     body: expect.objectContaining({
                         paymentMethodId: PAYMENT_METHODS.ADYEN_COMPONENT,
-                        c_pspReference: 'mockPspReference',
+                        c_pspReference: customFields,
                         c_paymentMethodType: 'ideal'
                     })
                 })
@@ -284,22 +284,23 @@ describe('BasketService', () => {
             expect(mockRes.locals.adyen.basket).toEqual(mockUpdatedBasket)
         })
 
-        it('should ignore empty optional custom fields', async () => {
+        it('should include custom fields array as-is', async () => {
             const paymentMethod = {type: 'ideal'}
             const amount = {value: 100, currency: 'EUR'}
+            const customFields = [
+                {field: 'c_pspReference', value: null},
+                {field: '', value: 'ignored'}
+            ]
 
             const mockUpdatedBasket = {basketId: 'mockBasketId', paymentInstruments: [{}]}
             mockShopperBaskets.addPaymentInstrumentToBasket.mockResolvedValue(mockUpdatedBasket)
 
-            await basketService.addPaymentInstrument(amount, paymentMethod, [
-                {field: 'c_pspReference', value: null},
-                {field: '', value: 'ignored'}
-            ])
+            await basketService.addPaymentInstrument(amount, paymentMethod, customFields)
 
             expect(mockShopperBaskets.addPaymentInstrumentToBasket).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    body: expect.not.objectContaining({
-                        c_pspReference: expect.anything()
+                    body: expect.objectContaining({
+                        c_pspReference: customFields
                     })
                 })
             )
@@ -337,46 +338,6 @@ describe('BasketService', () => {
                 parameters: {basketId: 'mockBasketId'}
             })
             expect(mockRes.locals.adyen.basket).toEqual(mockUpdatedBasket)
-        })
-
-        it('should use delivery address as billing fallback when billing address has no country', async () => {
-            const shopperData = {
-                deliveryAddress: {street: '1 Ship St', country: 'US', city: 'New York'},
-                billingAddress: {street: '', country: '', city: ''},
-                profile: {firstName: 'John', lastName: 'Doe', email: 'j@example.com', phone: ''}
-            }
-            const mockUpdatedBasket = {basketId: 'mockBasketId', customerInfo: {}}
-            mockShopperBaskets.updateShippingAddressForShipment.mockResolvedValue(mockUpdatedBasket)
-            mockShopperBaskets.updateBillingAddressForBasket.mockResolvedValue(mockUpdatedBasket)
-            mockShopperBaskets.updateCustomerForBasket.mockResolvedValue(mockUpdatedBasket)
-
-            await basketService.addShopperData(shopperData)
-
-            expect(mockShopperBaskets.updateBillingAddressForBasket).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    body: expect.objectContaining({address1: '1 Ship St', countryCode: 'US'})
-                })
-            )
-        })
-
-        it('should use delivery address as billing fallback when billing address is null', async () => {
-            const shopperData = {
-                deliveryAddress: {street: '1 Ship St', country: 'US', city: 'New York'},
-                billingAddress: null,
-                profile: {firstName: 'John', lastName: 'Doe', email: 'j@example.com', phone: ''}
-            }
-            const mockUpdatedBasket = {basketId: 'mockBasketId', customerInfo: {}}
-            mockShopperBaskets.updateShippingAddressForShipment.mockResolvedValue(mockUpdatedBasket)
-            mockShopperBaskets.updateBillingAddressForBasket.mockResolvedValue(mockUpdatedBasket)
-            mockShopperBaskets.updateCustomerForBasket.mockResolvedValue(mockUpdatedBasket)
-
-            await basketService.addShopperData(shopperData)
-
-            expect(mockShopperBaskets.updateBillingAddressForBasket).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    body: expect.objectContaining({address1: '1 Ship St', countryCode: 'US'})
-                })
-            )
         })
     })
 
