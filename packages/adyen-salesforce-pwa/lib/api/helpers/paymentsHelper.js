@@ -298,6 +298,15 @@ export function isApplePayExpress(data) {
 }
 
 /**
+ * Check if the payment method is Google Pay Express.
+ * @param {object} data - The payment state data from the client.
+ * @returns {boolean} True if the payment method is Google Pay Express, false otherwise.
+ */
+export function isGooglePayExpress(data) {
+    return data.paymentMethod?.type === 'googlepay' && data.paymentMethod?.subtype === 'express'
+}
+
+/**
  * Check if the payment method is PayPal Express.
  * @param {object} data - The payment state data from the client.
  * @returns {boolean} True if the payment method is PayPal Express, false otherwise.

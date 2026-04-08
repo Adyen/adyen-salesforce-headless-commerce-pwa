@@ -98,20 +98,24 @@ const PayPalExpressComponent = ({
     // Express checkout type
     type = 'cart',
     currency,
-    product
+    product,
+    authToken: authTokenProp,
+    customerId: customerIdProp
 }) => {
-    const customerId = useCustomerId()
+    const hookCustomerId = useCustomerId()
+    const customerId = customerIdProp || hookCustomerId
     const {getTokenWhenReady} = useAccessToken()
-    const [authToken, setAuthToken] = useState()
+    const [authToken, setAuthToken] = useState(authTokenProp)
 
     useEffect(() => {
+        if (authTokenProp) return
         const getToken = async () => {
             const token = await getTokenWhenReady()
             setAuthToken(token)
         }
 
         getToken()
-    }, [])
+    }, [authTokenProp])
 
     const isPdp = type === 'pdp'
     const shopperBasket = useMemo(
@@ -354,7 +358,9 @@ PayPalExpressComponent.propTypes = {
     spinner: PropTypes.node,
     type: PropTypes.oneOf(['pdp', 'cart']),
     currency: PropTypes.string,
-    product: PropTypes.object
+    product: PropTypes.object,
+    authToken: PropTypes.string,
+    customerId: PropTypes.string
 }
 
 export default React.memo(PayPalExpressComponent, (prevProps, nextProps) => {

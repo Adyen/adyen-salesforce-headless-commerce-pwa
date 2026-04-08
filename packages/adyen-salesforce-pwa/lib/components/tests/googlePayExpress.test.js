@@ -309,8 +309,7 @@ describe('GooglePayExpressComponent', () => {
             })
 
             // The last mounted instance should be unmounted
-            const lastInstance =
-                GooglePay.mock.results[GooglePay.mock.results.length - 1].value
+            const lastInstance = GooglePay.mock.results[GooglePay.mock.results.length - 1].value
             expect(lastInstance.unmount).toHaveBeenCalled()
         })
     })
@@ -324,9 +323,7 @@ describe('GooglePayExpressComponent', () => {
             const initialCallCount = AdyenCheckout.mock.calls.length
 
             await act(async () => {
-                rerender(
-                    <GooglePayExpressComponent {...defaultProps} onError={[jest.fn()]} />
-                )
+                rerender(<GooglePayExpressComponent {...defaultProps} onError={[jest.fn()]} />)
             })
 
             expect(AdyenCheckout.mock.calls).toHaveLength(initialCallCount)

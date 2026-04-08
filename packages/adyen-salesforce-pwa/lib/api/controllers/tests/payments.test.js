@@ -61,6 +61,11 @@ jest.mock('../../helpers/paymentsHelper.js', () => {
                 data?.paymentMethod?.type === 'applepay' &&
                 data?.paymentMethod?.subtype === 'express'
         ),
+        isGooglePayExpress: jest.fn(
+            (data) =>
+                data?.paymentMethod?.type === 'googlepay' &&
+                data?.paymentMethod?.subtype === 'express'
+        ),
         isPayPalExpress: jest.fn(
             (data) =>
                 data?.paymentMethod?.type === 'paypal' && data?.paymentMethod?.subtype === 'express'
@@ -246,6 +251,19 @@ describe('payments controller', () => {
 
     it('calls addShopperData for Apple Pay Express', async () => {
         req.body.data = {paymentMethod: {type: 'applepay', subtype: 'express'}}
+        mockPayments.mockResolvedValue({
+            resultCode: RESULT_CODES.AUTHORISED,
+            merchantReference: 'ref123'
+        })
+
+        await sendPayments(req, res, next)
+
+        expect(res.locals.adyen.basketService.addShopperData).toHaveBeenCalled()
+        expect(next).toHaveBeenCalledWith()
+    })
+
+    it('calls addShopperData for Google Pay Express', async () => {
+        req.body.data = {paymentMethod: {type: 'googlepay', subtype: 'express'}}
         mockPayments.mockResolvedValue({
             resultCode: RESULT_CODES.AUTHORISED,
             merchantReference: 'ref123'

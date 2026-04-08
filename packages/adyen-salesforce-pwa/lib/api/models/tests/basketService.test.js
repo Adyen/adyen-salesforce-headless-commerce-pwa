@@ -238,7 +238,6 @@ describe('BasketService', () => {
                         paymentMethodId: PAYMENT_METHODS.CREDIT_CARD,
                         c_pspReference: 'mockPspReference',
                         paymentCard: {cardType: 'Visa'},
-                        c_pspReference: 'mockPspReference',
                         c_paymentMethodType: 'scheme',
                         c_paymentMethodBrand: 'visa'
                     })
@@ -311,7 +310,7 @@ describe('BasketService', () => {
         it('should update shipping, billing, and customer info and update the context', async () => {
             const shopperData = {
                 deliveryAddress: {street: '1 Ship St'},
-                billingAddress: {street: '1 Bill St'},
+                billingAddress: {street: '1 Bill St', country: 'US'},
                 profile: {
                     firstName: 'John',
                     lastName: 'Doe',
@@ -328,12 +327,56 @@ describe('BasketService', () => {
             await basketService.addShopperData(shopperData)
 
             expect(mockShopperBaskets.updateShippingAddressForShipment).toHaveBeenCalled()
-            expect(mockShopperBaskets.updateBillingAddressForBasket).toHaveBeenCalled()
+            expect(mockShopperBaskets.updateBillingAddressForBasket).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    body: expect.objectContaining({address1: '1 Bill St', countryCode: 'US'})
+                })
+            )
             expect(mockShopperBaskets.updateCustomerForBasket).toHaveBeenCalledWith({
                 body: {customerId: 'mockCustomerId', email: 'j.doe@example.com'},
                 parameters: {basketId: 'mockBasketId'}
             })
             expect(mockRes.locals.adyen.basket).toEqual(mockUpdatedBasket)
+        })
+
+        it('should use delivery address as billing fallback when billing address has no country', async () => {
+            const shopperData = {
+                deliveryAddress: {street: '1 Ship St', country: 'US', city: 'New York'},
+                billingAddress: {street: '', country: '', city: ''},
+                profile: {firstName: 'John', lastName: 'Doe', email: 'j@example.com', phone: ''}
+            }
+            const mockUpdatedBasket = {basketId: 'mockBasketId', customerInfo: {}}
+            mockShopperBaskets.updateShippingAddressForShipment.mockResolvedValue(mockUpdatedBasket)
+            mockShopperBaskets.updateBillingAddressForBasket.mockResolvedValue(mockUpdatedBasket)
+            mockShopperBaskets.updateCustomerForBasket.mockResolvedValue(mockUpdatedBasket)
+
+            await basketService.addShopperData(shopperData)
+
+            expect(mockShopperBaskets.updateBillingAddressForBasket).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    body: expect.objectContaining({address1: '1 Ship St', countryCode: 'US'})
+                })
+            )
+        })
+
+        it('should use delivery address as billing fallback when billing address is null', async () => {
+            const shopperData = {
+                deliveryAddress: {street: '1 Ship St', country: 'US', city: 'New York'},
+                billingAddress: null,
+                profile: {firstName: 'John', lastName: 'Doe', email: 'j@example.com', phone: ''}
+            }
+            const mockUpdatedBasket = {basketId: 'mockBasketId', customerInfo: {}}
+            mockShopperBaskets.updateShippingAddressForShipment.mockResolvedValue(mockUpdatedBasket)
+            mockShopperBaskets.updateBillingAddressForBasket.mockResolvedValue(mockUpdatedBasket)
+            mockShopperBaskets.updateCustomerForBasket.mockResolvedValue(mockUpdatedBasket)
+
+            await basketService.addShopperData(shopperData)
+
+            expect(mockShopperBaskets.updateBillingAddressForBasket).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    body: expect.objectContaining({address1: '1 Ship St', countryCode: 'US'})
+                })
+            )
         })
     })
 

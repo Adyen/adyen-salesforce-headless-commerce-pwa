@@ -36,30 +36,30 @@ export const getGooglePayDeliveryAddress = (googlePayAddress) => {
 }
 
 /**
- * Converts Google Pay payment data into Adyen/SFCC shopper details format.
+ * Converts Google Pay payment data from the Adyen Web SDK onAuthorized callback
+ * into Adyen/SFCC shopper details format.
  *
- * @param {object} googlePayPaymentData - Payment data from Google Pay's onAuthorized callback
- * @param {object} [googlePayPaymentData.shippingAddress] - Shipping address
- * @param {object} [googlePayPaymentData.paymentMethodData] - Payment method data
- * @param {object} [googlePayPaymentData.paymentMethodData.info] - Card info
- * @param {object} [googlePayPaymentData.paymentMethodData.info.billingAddress] - Billing address
- * @param {string} [googlePayPaymentData.email] - Shopper email
+ * The SDK provides pre-formatted deliveryAddress and billingAddress at the top level,
+ * alongside the raw Google Pay data nested inside authorizedEvent.
+ *
+ * @param {object} paymentData - Payment data from onAuthorized callback
+ * @param {object} [paymentData.authorizedEvent] - Raw Google Pay payment data
+ * @param {object} [paymentData.deliveryAddress] - Pre-formatted delivery address from SDK
+ * @param {object} [paymentData.billingAddress] - Pre-formatted billing address from SDK
  * @returns {object} Shopper details object
  */
-export const getGooglePayShopperDetails = (googlePayPaymentData) => {
-    const deliveryAddress = getGooglePayDeliveryAddress(googlePayPaymentData?.shippingAddress)
-    const billingAddress = getGooglePayDeliveryAddress(
-        googlePayPaymentData?.paymentMethodData?.info?.billingAddress
-    )
+export const getGooglePayShopperDetails = (paymentData) => {
+    const authorizedEvent = paymentData?.authorizedEvent
+    const shippingAddress = authorizedEvent?.shippingAddress
+    const nameParts = shippingAddress?.name?.split(' ') || []
     return {
-        deliveryAddress,
-        billingAddress,
+        deliveryAddress: paymentData?.deliveryAddress || null,
+        billingAddress: paymentData?.billingAddress || null,
         profile: {
-            email: googlePayPaymentData?.email || '',
-            firstName: googlePayPaymentData?.shippingAddress?.name?.split(' ')[0] || '',
-            lastName:
-                googlePayPaymentData?.shippingAddress?.name?.split(' ').slice(1).join(' ') || '',
-            phone: googlePayPaymentData?.shippingAddress?.phoneNumber || ''
+            email: authorizedEvent?.email || '',
+            firstName: nameParts[0] || '',
+            lastName: nameParts.slice(1).join(' ') || '',
+            phone: shippingAddress?.phoneNumber || ''
         }
     }
 }
@@ -76,14 +76,21 @@ export const getGooglePayShopperDetails = (googlePayPaymentData) => {
  * @param {Function} props.navigate - Navigation function
  * @param {Function} props.fetchShippingMethods - Function to fetch applicable shipping methods
  * @param {Function[]} [props.onError] - Error handler callbacks
- * @param {object} [props.configuration] - Additional Google Pay configuration overrides
+ * @param {object} [props.googlePayMethodConfig] - Google Pay configuration from Adyen payment methods response (merchantId, gatewayMerchantId)
+ * @param {object} [props.configuration] - Additional top-level Google Pay display overrides (buttonColor, buttonType, etc.)
  * @param {string} [props.type='cart'] - Express checkout type: 'pdp' or 'cart'
  * @param {object} [props.product] - Product object (required when type is 'pdp')
  * @param {string} [props.merchantDisplayName=''] - Merchant display name shown in payment sheet
  * @returns {object} Google Pay Express configuration object for Adyen Checkout
  */
 export const getGooglePayExpressConfig = (props = {}) => {
-    const {onError = [], configuration = {}, type = 'cart', merchantDisplayName = ''} = props
+    const {
+        onError = [],
+        googlePayMethodConfig = {},
+        configuration = {},
+        type = 'cart',
+        merchantDisplayName = ''
+    } = props
 
     const isPdp = type === 'pdp'
     let currentBasket = props.basket
@@ -289,6 +296,7 @@ export const getGooglePayExpressConfig = (props = {}) => {
 
                 if (paymentsResponse?.action) {
                     component.handleAction(paymentsResponse.action)
+                    actions.resolve(paymentsResponse)
                 } else if (paymentsResponse?.isFinal && paymentsResponse?.isSuccessful) {
                     actions.resolve(paymentsResponse)
                     props.navigate(`/checkout/confirmation/${paymentsResponse?.merchantReference}`)
@@ -317,7 +325,7 @@ export const getGooglePayExpressConfig = (props = {}) => {
                         `/checkout/confirmation/${paymentsDetailsResponse?.merchantReference}`
                     )
                 } else {
-                    actions.resolve(paymentsDetailsResponse)
+                    actions.reject()
                 }
             } catch (err) {
                 onError.forEach((cb) => cb(err))
@@ -333,9 +341,8 @@ export const getGooglePayExpressConfig = (props = {}) => {
                         customerId,
                         site
                     )
-                    temporaryBasket = await adyenTemporaryBasketService.createTemporaryBasket(
-                        product
-                    )
+                    temporaryBasket =
+                        await adyenTemporaryBasketService.createTemporaryBasket(product)
                     if (temporaryBasket?.basketId) {
                         setBasket(temporaryBasket)
                         resolve()
@@ -352,6 +359,7 @@ export const getGooglePayExpressConfig = (props = {}) => {
         },
         onError: executeErrorCallbacks([...onError, errorHandler], propsWithGetBasket),
         onPaymentFailed: executeErrorCallbacks([...onError, errorHandler], propsWithGetBasket),
+        configuration: googlePayMethodConfig,
         ...configuration
     }
 

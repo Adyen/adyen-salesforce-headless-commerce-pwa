@@ -89,28 +89,35 @@ describe('getGooglePayDeliveryAddress', () => {
 })
 
 describe('getGooglePayShopperDetails', () => {
-    it('returns shopper details from Google Pay payment data', () => {
+    it('returns shopper details from SDK onAuthorized payment data', () => {
         const result = getGooglePayShopperDetails({
-            email: 'shopper@example.com',
-            shippingAddress: {
-                name: 'John Doe',
-                phoneNumber: '+1234567890',
-                countryCode: 'US',
-                postalCode: '10001',
-                locality: 'New York',
-                administrativeArea: 'NY',
-                address1: '123 Main St'
-            },
-            paymentMethodData: {
-                info: {
-                    billingAddress: {
-                        countryCode: 'US',
-                        postalCode: '10002',
-                        locality: 'New York',
-                        administrativeArea: 'NY',
-                        address1: '456 Billing Ave'
-                    }
+            authorizedEvent: {
+                email: 'shopper@example.com',
+                shippingAddress: {
+                    name: 'John Doe',
+                    phoneNumber: '+1234567890',
+                    countryCode: 'US',
+                    postalCode: '10001',
+                    locality: 'New York',
+                    administrativeArea: 'NY',
+                    address1: '123 Main St'
                 }
+            },
+            deliveryAddress: {
+                city: 'New York',
+                country: 'US',
+                postalCode: '10001',
+                stateOrProvince: 'NY',
+                street: '123 Main St',
+                houseNumberOrName: ''
+            },
+            billingAddress: {
+                city: 'New York',
+                country: 'US',
+                postalCode: '10002',
+                stateOrProvince: 'NY',
+                street: '456 Billing Ave',
+                houseNumberOrName: ''
             }
         })
         expect(result.profile.email).toBe('shopper@example.com')
@@ -150,7 +157,13 @@ describe('getGooglePayExpressConfig', () => {
         expect(config.amount).toEqual({value: 10000, currency: 'USD'})
     })
 
-    it('merges additional configuration', () => {
+    it('passes googlePayMethodConfig as nested configuration', () => {
+        const googlePayMethodConfig = {merchantId: 'BCR2DN4T', gatewayMerchantId: 'TestMerchant'}
+        const config = getGooglePayExpressConfig({...defaultProps, googlePayMethodConfig})
+        expect(config.configuration).toEqual(googlePayMethodConfig)
+    })
+
+    it('spreads top-level display overrides from configuration', () => {
         const config = getGooglePayExpressConfig({
             ...defaultProps,
             configuration: {buttonColor: 'white'}
@@ -159,7 +172,7 @@ describe('getGooglePayExpressConfig', () => {
     })
 
     describe('onAuthorized', () => {
-        it('resolves on valid payment data', () => {
+        it('stores payment data and resolves', () => {
             const config = getGooglePayExpressConfig(defaultProps)
             const actions = {resolve: jest.fn(), reject: jest.fn()}
             config.onAuthorized({email: 'test@test.com'}, actions)
@@ -309,7 +322,7 @@ describe('getGooglePayExpressConfig', () => {
             expect(errorCb).toHaveBeenCalled()
         })
 
-        it('uses shopper details from onAuthorized', async () => {
+        it('includes shopper details from onAuthorized in payment request', async () => {
             mockSubmitPayment.mockResolvedValue({
                 isFinal: true,
                 isSuccessful: true,
@@ -318,14 +331,33 @@ describe('getGooglePayExpressConfig', () => {
             const config = getGooglePayExpressConfig(defaultProps)
             config.onAuthorized(
                 {
-                    email: 'test@test.com',
-                    shippingAddress: {
-                        name: 'John Doe',
-                        countryCode: 'US',
+                    authorizedEvent: {
+                        email: 'test@test.com',
+                        shippingAddress: {
+                            name: 'John Doe',
+                            phoneNumber: '+1234567890',
+                            countryCode: 'US',
+                            postalCode: '10001',
+                            locality: 'New York',
+                            administrativeArea: 'NY',
+                            address1: '123 Main St'
+                        }
+                    },
+                    deliveryAddress: {
+                        city: 'New York',
+                        country: 'US',
                         postalCode: '10001',
-                        locality: 'New York',
-                        administrativeArea: 'NY',
-                        address1: '123 Main St'
+                        stateOrProvince: 'NY',
+                        street: '123 Main St',
+                        houseNumberOrName: ''
+                    },
+                    billingAddress: {
+                        city: 'New York',
+                        country: 'US',
+                        postalCode: '10002',
+                        stateOrProvince: 'NY',
+                        street: '456 Billing Ave',
+                        houseNumberOrName: ''
                     }
                 },
                 {resolve: jest.fn(), reject: jest.fn()}
@@ -336,7 +368,12 @@ describe('getGooglePayExpressConfig', () => {
             expect(mockSubmitPayment).toHaveBeenCalledWith(
                 expect.objectContaining({
                     deliveryAddress: expect.objectContaining({city: 'New York'}),
-                    profile: expect.objectContaining({email: 'test@test.com'})
+                    billingAddress: expect.objectContaining({street: '456 Billing Ave'}),
+                    profile: expect.objectContaining({
+                        email: 'test@test.com',
+                        firstName: 'John',
+                        lastName: 'Doe'
+                    })
                 }),
                 defaultProps.locale
             )
@@ -361,7 +398,7 @@ describe('getGooglePayExpressConfig', () => {
             expect(actions.resolve).toHaveBeenCalled()
         })
 
-        it('resolves without navigation when not successful', async () => {
+        it('rejects and does not navigate when payment is not successful', async () => {
             AdyenPaymentsDetailsService.mockImplementation(() => ({
                 submitPaymentsDetails: jest.fn().mockResolvedValue({isSuccessful: false})
             }))
@@ -371,7 +408,8 @@ describe('getGooglePayExpressConfig', () => {
             await config.onAdditionalDetails({data: {}}, {}, actions)
 
             expect(navigate).not.toHaveBeenCalled()
-            expect(actions.resolve).toHaveBeenCalled()
+            expect(actions.reject).toHaveBeenCalled()
+            expect(actions.resolve).not.toHaveBeenCalled()
         })
 
         it('rejects on error', async () => {

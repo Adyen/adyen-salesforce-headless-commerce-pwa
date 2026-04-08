@@ -7,7 +7,8 @@ import {
     createPaymentRequestObject,
     revertCheckoutState,
     validateBasketPayments,
-    isApplePayExpress
+    isApplePayExpress,
+    isGooglePayExpress
 } from '../helpers/paymentsHelper.js'
 import {
     createOrderUsingOrderNo,
@@ -74,7 +75,7 @@ async function sendPayments(req, res, next) {
             throw new AdyenError(ERROR_MESSAGE.ADYEN_CONTEXT_NOT_FOUND, 500)
         }
 
-        if (isApplePayExpress(data)) {
+        if (isApplePayExpress(data) || isGooglePayExpress(data)) {
             await adyenContext.basketService.addShopperData(data)
         }
         const paymentRequest = await createPaymentRequestObject(data, adyenContext, req)

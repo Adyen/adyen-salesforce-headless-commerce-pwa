@@ -20,20 +20,24 @@ const ApplePayExpressComponent = (props) => {
         currency,
         isExpressPdp = false,
         merchantDisplayName = '',
-        product
+        product,
+        authToken: authTokenProp,
+        customerId: customerIdProp
     } = props
-    const customerId = useCustomerId()
+    const hookCustomerId = useCustomerId()
+    const customerId = customerIdProp || hookCustomerId
     const {getTokenWhenReady} = useAccessToken()
-    const [authToken, setAuthToken] = useState()
+    const [authToken, setAuthToken] = useState(authTokenProp)
 
     useEffect(() => {
+        if (authTokenProp) return
         const getToken = async () => {
             const token = await getTokenWhenReady()
             setAuthToken(token)
         }
 
         getToken()
-    }, [])
+    }, [authTokenProp])
     const isPdp = isExpressPdp === true
     const shopperBasket = useMemo(
         () => (isPdp ? {currency, orderTotal: product?.price * (product?.quantity || 1)} : basket),
@@ -237,7 +241,9 @@ ApplePayExpressComponent.propTypes = {
     isExpressPdp: PropTypes.bool,
     currency: PropTypes.string,
     merchantDisplayName: PropTypes.string,
-    product: PropTypes.object
+    product: PropTypes.object,
+    authToken: PropTypes.string,
+    customerId: PropTypes.string
 }
 
 export default React.memo(ApplePayExpressComponent, (prevProps, nextProps) => {
