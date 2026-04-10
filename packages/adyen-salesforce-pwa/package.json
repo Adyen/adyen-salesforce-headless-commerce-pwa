@@ -96,7 +96,7 @@
     },
     "overrides": {
         "jest": "^29.7.0",
-        "validator": "13.15.23"
+        "validator": "13.15.26"
     },
     "files": [
         "dist",
