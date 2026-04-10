@@ -168,6 +168,29 @@ export async function getOrderUsingOrderNo(orderNo, siteId) {
 }
 
 /**
+ * Retrieves an SFCC order payment instrument with updated custom properties.
+ * This function uses an admin-level API client to fetch order details.
+ * @param {string} orderNo - The number of the order to retrieve.
+ * @param {string} siteId - The site ID.
+ * @param {string} pspReference - The Adyen PSP reference from the /payments or /payments/details response.
+ * @param {object} customProperties - The custom properties to update on the payment instrument.
+ * @returns {Promise<object>} A promise that resolves to the order object.
+ */
+export async function updateOrderPaymentInstrument(
+    orderNo,
+    siteId,
+    pspReference,
+    customProperties
+) {
+    const customOrderApi = new CustomAdminOrderApiClient(siteId)
+    return await customOrderApi.updateOrderPaymentInstrument(
+        orderNo,
+        pspReference,
+        customProperties
+    )
+}
+
+/**
  * Updates the custom pspReference on the payment instrument of a pre-created SFCC order.
  * @param {object} adyenContext - The request context from `res.locals.adyen`.
  * @param {string} orderNo - The order number.

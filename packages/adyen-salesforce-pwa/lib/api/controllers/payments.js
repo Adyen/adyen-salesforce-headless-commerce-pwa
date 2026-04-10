@@ -146,7 +146,8 @@ async function sendPayments(req, res, next) {
                 paymentRequest?.paymentMethod,
                 [
                     {field: 'c_pspReference', value: response?.pspReference},
-                    {field: 'c_cardInstallments', value: paymentRequest?.installments?.value}
+                    {field: 'c_cardInstallments', value: paymentRequest?.installments?.value},
+                    {field: 'c_donationToken', value: response?.donationToken}
                 ]
             )
         }
@@ -158,7 +159,8 @@ async function sendPayments(req, res, next) {
                     paymentRequest?.paymentMethod,
                     [
                         {field: 'c_pspReference', value: response?.pspReference},
-                        {field: 'c_cardInstallments', value: paymentRequest?.installments?.value}
+                        {field: 'c_cardInstallments', value: paymentRequest?.installments?.value},
+                        {field: 'c_donationToken', value: response?.donationToken}
                     ]
                 )
                 await createOrderUsingOrderNo(adyenContext)
@@ -166,7 +168,8 @@ async function sendPayments(req, res, next) {
                 const pspReference = response?.pspReference || response?.order?.pspReference
                 await updatePaymentInstrumentForOrder(adyenContext, preCreatedOrderNo, [
                     {field: 'c_pspReference', value: pspReference},
-                    {field: 'c_cardInstallments', value: paymentRequest?.installments?.value}
+                    {field: 'c_cardInstallments', value: paymentRequest?.installments?.value},
+                    {field: 'c_donationToken', value: response?.donationToken}
                 ])
             }
             Logger.info('sendPayments', `order confirmed: ${checkoutResponse.merchantReference}`)

@@ -143,7 +143,8 @@ describe('payments controller', () => {
             '123',
             [
                 {field: 'c_pspReference', value: 'psp123'},
-                {field: 'c_cardInstallments', value: undefined}
+                {field: 'c_cardInstallments', value: undefined},
+                {field: 'c_donationToken', value: undefined}
             ]
         )
         expect(res.locals.response).toEqual({

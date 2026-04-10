@@ -45,24 +45,17 @@ import {useCurrency} from '@salesforce/retail-react-app/app/hooks'
 import PropTypes from 'prop-types'
 
 /* -----------------Adyen Begin ------------------------ */
-import {AdyenCheckoutProvider, pageTypes} from '@adyen/adyen-salesforce-pwa'
-import {
-    AuthHelpers,
-    useAccessToken,
-    useAuthHelper,
-    useCustomerId,
-    useOrder,
-    useProducts
-} from '@salesforce/commerce-sdk-react'
+import {AdyenDonations} from '@adyen/adyen-salesforce-pwa'
+import {AuthHelpers, useAuthHelper, useOrder, useProducts} from '@salesforce/commerce-sdk-react'
 import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
-import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 /* -----------------Adyen End ------------------------ */
 
 const onClient = typeof window !== 'undefined'
 
-const CheckoutConfirmation = () => {
+const CheckoutConfirmation = ({site, locale}) => {
     const {orderNo} = useParams()
     const navigate = useNavigation()
+    const [showDonations, setShowDonations] = useState(true)
     const {data: customer} = useCurrentCustomer()
     const register = useAuthHelper(AuthHelpers.Register)
     const {data: order} = useOrder(
@@ -568,6 +561,31 @@ const CheckoutConfirmation = () => {
                             </Stack>
                         </Container>
                     </Box>
+
+                    {/* -----------------Adyen Donations Begin ------------------------ */}
+                    {order?.paymentInstruments?.some(
+                        (pi) => pi.c_donationToken && pi.c_paymentMethodType !== 'giftcard'
+                    ) &&
+                        showDonations && (
+                            <Box
+                                layerStyle="card"
+                                rounded={[0, 0, 'base']}
+                                px={[4, 4, 6]}
+                                py={[6, 6, 8]}
+                            >
+                                <Container variant="form">
+                                    <Stack spacing={6}>
+                                        <AdyenDonations
+                                            site={site}
+                                            locale={locale}
+                                            orderNo={orderNo}
+                                            onCancel={() => setShowDonations(false)}
+                                        />
+                                    </Stack>
+                                </Container>
+                            </Box>
+                        )}
+                    {/* -----------------Adyen Donations End ------------------------ */}
                 </Stack>
             </Container>
         </Box>
@@ -576,48 +594,22 @@ const CheckoutConfirmation = () => {
 
 /* -----------------Adyen Begin ------------------------ */
 const CheckoutConfirmationContainer = () => {
-    const customerId = useCustomerId()
-    const {getTokenWhenReady} = useAccessToken()
-    const navigate = useNavigation()
     const {locale, site} = useMultiSite()
-    const {data: basket} = useCurrentBasket()
-
-    const [authToken, setAuthToken] = useState()
-
-    useEffect(() => {
-        const getToken = async () => {
-            const token = await getTokenWhenReady()
-            setAuthToken(token)
-        }
-
-        getToken()
-    }, [])
-
-    if (!authToken) {
-        return
-    }
-
     return (
-        <AdyenCheckoutProvider
-            authToken={authToken}
-            customerId={customerId}
-            locale={locale}
+        <CheckoutConfirmation
             site={site}
-            basket={basket}
-            navigate={navigate}
-            page={pageTypes.CONFIRMATION}
-        >
-            <CheckoutConfirmation
-                useOrder={useOrder}
-                useProducts={useProducts}
-                useAuthHelper={useAuthHelper}
-                AuthHelpers={AuthHelpers}
-            />
-        </AdyenCheckoutProvider>
+            locale={locale}
+            useOrder={useOrder}
+            useProducts={useProducts}
+            useAuthHelper={useAuthHelper}
+            AuthHelpers={AuthHelpers}
+        />
     )
 }
 
 CheckoutConfirmation.propTypes = {
+    site: PropTypes.object,
+    locale: PropTypes.object,
     useOrder: PropTypes.any,
     useProducts: PropTypes.any,
     useAuthHelper: PropTypes.any,
