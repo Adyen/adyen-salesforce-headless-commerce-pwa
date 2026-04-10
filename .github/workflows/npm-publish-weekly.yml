@@ -11,7 +11,7 @@ jobs:
             actions: read
             id-token: write # Required for OpenID Connect (OIDC) for trusted publishing on NPM
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v6
               with:
                   ref: develop # Checkout the develop branch
             
