@@ -4,31 +4,33 @@
  */
 import React from 'react'
 import {act, render, screen, waitFor} from '@testing-library/react'
-import PayPalExpressComponent from '../paypalExpress'
+import GooglePayExpressComponent from '../googlePayExpress'
 import useAdyenEnvironment from '../../hooks/useAdyenEnvironment'
 import useAdyenPaymentMethods from '../../hooks/useAdyenPaymentMethods'
 import useAdyenPaymentMethodsForExpress from '../../hooks/useAdyenPaymentMethodsForExpress'
-import {AdyenCheckout, PayPal} from '@adyen/adyen-web'
-import {paypalExpressConfig} from '../paypal/expressConfig'
+import useAdyenShippingMethods from '../../hooks/useAdyenShippingMethods'
+import {AdyenCheckout, GooglePay} from '@adyen/adyen-web'
+import {getGooglePayExpressConfig} from '../googlepay/expressConfig'
 import {AdyenShippingMethodsService} from '../../services/shipping-methods'
 import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 
 jest.mock('../../hooks/useAdyenEnvironment')
 jest.mock('../../hooks/useAdyenPaymentMethods')
 jest.mock('../../hooks/useAdyenPaymentMethodsForExpress')
-jest.mock('../paypal/expressConfig')
+jest.mock('../../hooks/useAdyenShippingMethods')
+jest.mock('../googlepay/expressConfig')
 jest.mock('../../services/shipping-methods')
 jest.mock('@salesforce/commerce-sdk-react')
 jest.mock('@adyen/adyen-web', () => ({
     AdyenCheckout: jest.fn().mockResolvedValue({}),
-    PayPal: jest.fn().mockImplementation(() => ({
+    GooglePay: jest.fn().mockImplementation(() => ({
         isAvailable: jest.fn().mockResolvedValue(true),
         mount: jest.fn(),
         unmount: jest.fn()
     }))
 }))
 
-describe('PayPalExpressComponent', () => {
+describe('GooglePayExpressComponent', () => {
     const defaultProps = {
         locale: {id: 'en-US'},
         site: {id: 'test-site'},
@@ -42,10 +44,8 @@ describe('PayPalExpressComponent', () => {
     }
 
     const mockPaymentMethodsData = {
-        paymentMethods: [{type: 'paypal'}],
-        applicationInfo: {
-            adyenLibrary: {name: 'test', version: '1.0.0'}
-        }
+        paymentMethods: [{type: 'googlepay'}],
+        applicationInfo: {adyenLibrary: {name: 'test', version: '1.0.0'}}
     }
 
     const mockShippingMethodsData = {
@@ -55,23 +55,17 @@ describe('PayPalExpressComponent', () => {
 
     let mockGetShippingMethods
     let consoleErrorSpy
-    let consoleWarnSpy
 
     beforeEach(() => {
-        // Suppress console.error and console.warn during tests
         consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
-        consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
 
-        // Reset window.paypal
-        delete window.paypal
+        AdyenCheckout.mockResolvedValue({})
 
-        // Mock commerce-sdk-react hooks
         useCustomerId.mockReturnValue('test-customer')
         useAccessToken.mockReturnValue({
             getTokenWhenReady: jest.fn().mockResolvedValue('test-auth-token')
         })
 
-        // Mock hooks
         useAdyenEnvironment.mockReturnValue({
             data: mockEnvironmentData,
             error: null,
@@ -90,20 +84,23 @@ describe('PayPalExpressComponent', () => {
             isLoading: false
         })
 
-        // Mock shipping methods service
+        useAdyenShippingMethods.mockReturnValue({
+            data: mockShippingMethodsData,
+            error: null,
+            isLoading: false
+        })
+
         mockGetShippingMethods = jest.fn().mockResolvedValue(mockShippingMethodsData)
         AdyenShippingMethodsService.mockImplementation(() => ({
             getShippingMethods: mockGetShippingMethods
         }))
 
-        // Mock paypalExpressConfig
-        paypalExpressConfig.mockReturnValue({
+        getGooglePayExpressConfig.mockReturnValue({
             showPayButton: true,
             isExpress: true
         })
 
-        // Reset PayPal mock to default implementation
-        PayPal.mockImplementation(() => ({
+        GooglePay.mockImplementation(() => ({
             isAvailable: jest.fn().mockResolvedValue(true),
             mount: jest.fn(),
             unmount: jest.fn()
@@ -113,40 +110,34 @@ describe('PayPalExpressComponent', () => {
     afterEach(() => {
         jest.clearAllMocks()
         consoleErrorSpy.mockRestore()
-        consoleWarnSpy.mockRestore()
     })
 
     describe('Rendering', () => {
-        it('renders the PayPal button container', () => {
-            render(<PayPalExpressComponent {...defaultProps} />)
-            const container = document.querySelector('.adyen-paypal-express-button-container')
-            expect(container).toBeInTheDocument()
+        it('renders the Google Pay button container', () => {
+            const {container} = render(<GooglePayExpressComponent {...defaultProps} />)
+            expect(container.querySelector('div')).toBeInTheDocument()
         })
 
         it('renders spinner when environment is loading', () => {
-            useAdyenEnvironment.mockReturnValue({
-                data: null,
-                error: null,
-                isLoading: true
-            })
-
-            render(<PayPalExpressComponent {...defaultProps} spinner={<div>Loading...</div>} />)
+            useAdyenEnvironment.mockReturnValue({data: null, error: null, isLoading: true})
+            render(<GooglePayExpressComponent {...defaultProps} spinner={<div>Loading...</div>} />)
             expect(screen.getByText('Loading...')).toBeInTheDocument()
         })
 
         it('renders spinner when payment methods are loading', () => {
-            useAdyenPaymentMethods.mockReturnValue({
-                data: null,
-                error: null,
-                isLoading: true
-            })
+            useAdyenPaymentMethods.mockReturnValue({data: null, error: null, isLoading: true})
+            render(<GooglePayExpressComponent {...defaultProps} spinner={<div>Loading...</div>} />)
+            expect(screen.getByText('Loading...')).toBeInTheDocument()
+        })
 
-            render(<PayPalExpressComponent {...defaultProps} spinner={<div>Loading...</div>} />)
+        it('renders spinner when shipping methods are loading', () => {
+            useAdyenShippingMethods.mockReturnValue({data: null, error: null, isLoading: true})
+            render(<GooglePayExpressComponent {...defaultProps} spinner={<div>Loading...</div>} />)
             expect(screen.getByText('Loading...')).toBeInTheDocument()
         })
 
         it('does not render spinner when not loading', () => {
-            render(<PayPalExpressComponent {...defaultProps} spinner={<div>Loading...</div>} />)
+            render(<GooglePayExpressComponent {...defaultProps} spinner={<div>Loading...</div>} />)
             expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
         })
     })
@@ -154,7 +145,7 @@ describe('PayPalExpressComponent', () => {
     describe('Initialization', () => {
         it('initializes AdyenCheckout with correct configuration', async () => {
             await act(async () => {
-                render(<PayPalExpressComponent {...defaultProps} />)
+                render(<GooglePayExpressComponent {...defaultProps} />)
             })
 
             await waitFor(() => {
@@ -163,7 +154,6 @@ describe('PayPalExpressComponent', () => {
                     clientKey: mockEnvironmentData.ADYEN_CLIENT_KEY,
                     countryCode: 'US',
                     locale: 'en-US',
-                    paymentMethodsResponse: mockPaymentMethodsData,
                     analytics: {
                         analyticsData: {
                             applicationInfo: mockPaymentMethodsData.applicationInfo
@@ -173,24 +163,14 @@ describe('PayPalExpressComponent', () => {
             })
         })
 
-        it('calls paypalExpressConfig with correct props', async () => {
-            const beforeSubmit = [jest.fn()]
-            const afterSubmit = [jest.fn()]
+        it('calls getGooglePayExpressConfig with correct props', async () => {
             const onError = [jest.fn()]
-
             await act(async () => {
-                render(
-                    <PayPalExpressComponent
-                        {...defaultProps}
-                        beforeSubmit={beforeSubmit}
-                        afterSubmit={afterSubmit}
-                        onError={onError}
-                    />
-                )
+                render(<GooglePayExpressComponent {...defaultProps} onError={onError} />)
             })
 
             await waitFor(() => {
-                expect(paypalExpressConfig).toHaveBeenCalledWith(
+                expect(getGooglePayExpressConfig).toHaveBeenCalledWith(
                     expect.objectContaining({
                         token: 'test-auth-token',
                         customerId: 'test-customer',
@@ -198,8 +178,6 @@ describe('PayPalExpressComponent', () => {
                         site: defaultProps.site,
                         locale: defaultProps.locale,
                         navigate: defaultProps.navigate,
-                        beforeSubmit,
-                        afterSubmit,
                         onError,
                         fetchShippingMethods: expect.any(Function)
                     })
@@ -207,150 +185,70 @@ describe('PayPalExpressComponent', () => {
             })
         })
 
-        it('creates and mounts PayPal button when available', async () => {
+        it('creates and mounts GooglePay button when available', async () => {
             await act(async () => {
-                render(<PayPalExpressComponent {...defaultProps} />)
+                render(<GooglePayExpressComponent {...defaultProps} />)
             })
 
             await waitFor(() => {
-                expect(PayPal).toHaveBeenCalled()
-                const mockPayPalInstance = PayPal.mock.results[0].value
-                expect(mockPayPalInstance.isAvailable).toHaveBeenCalled()
-                expect(mockPayPalInstance.mount).toHaveBeenCalled()
+                expect(GooglePay).toHaveBeenCalled()
+                const instance = GooglePay.mock.results[0].value
+                expect(instance.isAvailable).toHaveBeenCalled()
+                expect(instance.mount).toHaveBeenCalled()
             })
         })
 
         it('does not initialize when adyenEnvironment is missing', async () => {
-            useAdyenEnvironment.mockReturnValue({
-                data: null,
-                error: null,
-                isLoading: false
-            })
-
+            useAdyenEnvironment.mockReturnValue({data: null, error: null, isLoading: false})
             await act(async () => {
-                render(<PayPalExpressComponent {...defaultProps} />)
+                render(<GooglePayExpressComponent {...defaultProps} />)
             })
-
             expect(AdyenCheckout).not.toHaveBeenCalled()
         })
 
         it('does not initialize when adyenPaymentMethods is missing', async () => {
-            useAdyenPaymentMethods.mockReturnValue({
-                data: null,
-                error: null,
-                isLoading: false
-            })
-
+            useAdyenPaymentMethods.mockReturnValue({data: null, error: null, isLoading: false})
             await act(async () => {
-                render(<PayPalExpressComponent {...defaultProps} />)
+                render(<GooglePayExpressComponent {...defaultProps} />)
             })
-
             expect(AdyenCheckout).not.toHaveBeenCalled()
         })
 
         it('does not initialize when basket is missing', async () => {
             await act(async () => {
-                render(<PayPalExpressComponent {...defaultProps} basket={null} />)
+                render(<GooglePayExpressComponent {...defaultProps} basket={null} />)
             })
-
             expect(AdyenCheckout).not.toHaveBeenCalled()
         })
 
-        it('does not initialize when PayPal method is not available', async () => {
+        it('does not initialize when googlepay method is not in payment methods', async () => {
             useAdyenPaymentMethods.mockReturnValue({
-                data: {
-                    paymentMethods: [{type: 'scheme'}],
-                    applicationInfo: {}
-                },
+                data: {paymentMethods: [{type: 'scheme'}], applicationInfo: {}},
                 error: null,
                 isLoading: false
             })
-
             await act(async () => {
-                render(<PayPalExpressComponent {...defaultProps} />)
+                render(<GooglePayExpressComponent {...defaultProps} />)
             })
-
             expect(AdyenCheckout).not.toHaveBeenCalled()
         })
 
-        it('mounts PayPal button without isAvailable check if method does not exist', async () => {
-            const mockPayPalInstance = {
+        it('does not mount when Google Pay is not available', async () => {
+            const mockInstance = {
+                isAvailable: jest.fn().mockRejectedValue(new Error('Google Pay not available')),
                 mount: jest.fn(),
                 unmount: jest.fn()
             }
-            PayPal.mockImplementation(() => mockPayPalInstance)
+            GooglePay.mockImplementation(() => mockInstance)
 
             await act(async () => {
-                render(<PayPalExpressComponent {...defaultProps} />)
+                render(<GooglePayExpressComponent {...defaultProps} />)
             })
-
-            await waitFor(() => {
-                expect(mockPayPalInstance.mount).toHaveBeenCalled()
-            })
-        })
-
-        it('does not mount if PayPal is not available', async () => {
-            const mockPayPalInstance = {
-                isAvailable: jest.fn().mockRejectedValue(new Error('PayPal not available')),
-                mount: jest.fn(),
-                unmount: jest.fn()
-            }
-            PayPal.mockImplementation(() => mockPayPalInstance)
-
-            await act(async () => {
-                render(<PayPalExpressComponent {...defaultProps} />)
-            })
-
             await act(async () => {
                 await new Promise((resolve) => setTimeout(resolve, 0))
             })
 
-            expect(mockPayPalInstance.mount).not.toHaveBeenCalled()
-        })
-    })
-
-    describe('fetchShippingMethods callback', () => {
-        it('creates fetchShippingMethods callback with correct parameters', async () => {
-            await act(async () => {
-                render(<PayPalExpressComponent {...defaultProps} />)
-            })
-
-            await waitFor(() => {
-                expect(paypalExpressConfig).toHaveBeenCalled()
-            })
-
-            const configCall = paypalExpressConfig.mock.calls[0][0]
-            expect(configCall.fetchShippingMethods).toBeDefined()
-            expect(typeof configCall.fetchShippingMethods).toBe('function')
-        })
-
-        it('fetchShippingMethods calls AdyenShippingMethodsService', async () => {
-            let fetchShippingMethodsCallback
-
-            paypalExpressConfig.mockImplementation((props) => {
-                fetchShippingMethodsCallback = props.fetchShippingMethods
-                return {showPayButton: true, isExpress: true}
-            })
-
-            await act(async () => {
-                render(<PayPalExpressComponent {...defaultProps} />)
-            })
-
-            await waitFor(() => {
-                expect(fetchShippingMethodsCallback).toBeDefined()
-            })
-
-            const testBasketId = 'temp-basket-123'
-            const result = await fetchShippingMethodsCallback(testBasketId)
-
-            expect(AdyenShippingMethodsService).toHaveBeenCalledWith(
-                'test-auth-token',
-                'test-customer',
-                testBasketId,
-                defaultProps.site
-            )
-            expect(mockGetShippingMethods).toHaveBeenCalled()
-            expect(result).toEqual(mockShippingMethodsData)
+            expect(mockInstance.mount).not.toHaveBeenCalled()
         })
     })
 
@@ -358,43 +256,41 @@ describe('PayPalExpressComponent', () => {
         it('calls onError callbacks when environment fetch fails', () => {
             const onError = [jest.fn(), jest.fn()]
             const error = new Error('Environment fetch failed')
+            useAdyenEnvironment.mockReturnValue({data: null, error, isLoading: false})
 
-            useAdyenEnvironment.mockReturnValue({
-                data: null,
-                error,
-                isLoading: false
-            })
-
-            render(<PayPalExpressComponent {...defaultProps} onError={onError} />)
+            render(<GooglePayExpressComponent {...defaultProps} onError={onError} />)
 
             expect(onError[0]).toHaveBeenCalledWith(error)
             expect(onError[1]).toHaveBeenCalledWith(error)
         })
 
         it('calls onError callbacks when payment methods fetch fails', () => {
-            const onError = [jest.fn(), jest.fn()]
+            const onError = [jest.fn()]
             const error = new Error('Payment methods fetch failed')
+            useAdyenPaymentMethods.mockReturnValue({data: null, error, isLoading: false})
 
-            useAdyenPaymentMethods.mockReturnValue({
-                data: null,
-                error,
-                isLoading: false
-            })
-
-            render(<PayPalExpressComponent {...defaultProps} onError={onError} />)
+            render(<GooglePayExpressComponent {...defaultProps} onError={onError} />)
 
             expect(onError[0]).toHaveBeenCalledWith(error)
-            expect(onError[1]).toHaveBeenCalledWith(error)
+        })
+
+        it('calls onError callbacks when shipping methods fetch fails', () => {
+            const onError = [jest.fn()]
+            const error = new Error('Shipping methods fetch failed')
+            useAdyenShippingMethods.mockReturnValue({data: null, error, isLoading: false})
+
+            render(<GooglePayExpressComponent {...defaultProps} onError={onError} />)
+
+            expect(onError[0]).toHaveBeenCalledWith(error)
         })
 
         it('calls onError callbacks when initialization fails', async () => {
             const onError = [jest.fn()]
             const error = new Error('Initialization failed')
-
             AdyenCheckout.mockRejectedValue(error)
 
             await act(async () => {
-                render(<PayPalExpressComponent {...defaultProps} onError={onError} />)
+                render(<GooglePayExpressComponent {...defaultProps} onError={onError} />)
             })
 
             await waitFor(() => {
@@ -404,43 +300,46 @@ describe('PayPalExpressComponent', () => {
     })
 
     describe('Cleanup', () => {
-        it('clears window.paypal if it has firstElementChild on mount', async () => {
-            window.paypal = {
-                firstElementChild: document.createElement('div')
-            }
-
+        it('unmounts GooglePay button on component unmount', async () => {
+            let unmount
             await act(async () => {
-                render(<PayPalExpressComponent {...defaultProps} />)
+                const result = render(<GooglePayExpressComponent {...defaultProps} />)
+                unmount = result.unmount
             })
 
-            expect(window.paypal).toBeUndefined()
+            await waitFor(() => {
+                expect(GooglePay).toHaveBeenCalled()
+                expect(GooglePay.mock.results[0].value.mount).toHaveBeenCalled()
+            })
+
+            act(() => {
+                unmount()
+            })
+
+            // The last mounted instance should be unmounted
+            const lastInstance = GooglePay.mock.results[GooglePay.mock.results.length - 1].value
+            expect(lastInstance.unmount).toHaveBeenCalled()
         })
     })
 
     describe('React.memo optimization', () => {
         it('does not re-render when unrelated props change', async () => {
             const {rerender} = await act(async () => {
-                return render(<PayPalExpressComponent {...defaultProps} />)
+                return render(<GooglePayExpressComponent {...defaultProps} />)
             })
 
             const initialCallCount = AdyenCheckout.mock.calls.length
 
             await act(async () => {
-                rerender(
-                    <PayPalExpressComponent
-                        {...defaultProps}
-                        beforeSubmit={[jest.fn()]} // This should not trigger re-render due to memo
-                    />
-                )
+                rerender(<GooglePayExpressComponent {...defaultProps} onError={[jest.fn()]} />)
             })
 
-            // AdyenCheckout should not be called again
             expect(AdyenCheckout.mock.calls).toHaveLength(initialCallCount)
         })
 
         it('re-renders when basketId changes', async () => {
             const {rerender} = await act(async () => {
-                return render(<PayPalExpressComponent {...defaultProps} />)
+                return render(<GooglePayExpressComponent {...defaultProps} />)
             })
 
             await waitFor(() => {
@@ -451,17 +350,48 @@ describe('PayPalExpressComponent', () => {
 
             await act(async () => {
                 rerender(
-                    <PayPalExpressComponent
+                    <GooglePayExpressComponent
                         {...defaultProps}
                         basket={{basketId: 'new-basket-id'}}
                     />
                 )
             })
 
-            // Should trigger re-initialization
             await waitFor(() => {
                 expect(AdyenCheckout.mock.calls.length).toBeGreaterThan(initialCallCount)
             })
+        })
+    })
+
+    describe('fetchShippingMethods callback', () => {
+        it('fetchShippingMethods calls AdyenShippingMethodsService with correct args', async () => {
+            await act(async () => {
+                render(<GooglePayExpressComponent {...defaultProps} />)
+            })
+
+            // Wait for the component to initialize with the real auth token
+            await waitFor(() => {
+                const calls = getGooglePayExpressConfig.mock.calls
+                expect(calls.length).toBeGreaterThan(0)
+                const lastCall = calls[calls.length - 1][0]
+                expect(lastCall.token).toBe('test-auth-token')
+            })
+
+            const calls = getGooglePayExpressConfig.mock.calls
+            const {fetchShippingMethods} = calls[calls.length - 1][0]
+            expect(fetchShippingMethods).toBeDefined()
+
+            const testBasketId = 'temp-basket-123'
+            const result = await fetchShippingMethods(testBasketId)
+
+            expect(AdyenShippingMethodsService).toHaveBeenCalledWith(
+                'test-auth-token',
+                'test-customer',
+                testBasketId,
+                defaultProps.site
+            )
+            expect(mockGetShippingMethods).toHaveBeenCalled()
+            expect(result).toEqual(mockShippingMethodsData)
         })
     })
 })

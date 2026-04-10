@@ -75,6 +75,11 @@ describe('ApplePayExpressComponent', () => {
             error: null,
             isLoading: false
         })
+        useAdyenPaymentMethodsForExpress.mockReturnValue({
+            data: null,
+            error: null,
+            isLoading: false
+        })
         useAdyenShippingMethods.mockReturnValue({
             data: mockShippingMethodsData,
             error: null,
@@ -143,9 +148,12 @@ describe('ApplePayExpressComponent', () => {
                 customerId: 'test-customer',
                 basketId: defaultProps.basket.basketId,
                 site: defaultProps.site,
-                locale: defaultProps.locale
+                locale: defaultProps.locale,
+                skip: false
             })
-            expect(useAdyenPaymentMethodsForExpress).not.toHaveBeenCalled()
+            expect(useAdyenPaymentMethodsForExpress).toHaveBeenCalledWith(
+                expect.objectContaining({skip: true})
+            )
         })
 
         it('uses basket from props for cart flow', () => {
@@ -198,9 +206,12 @@ describe('ApplePayExpressComponent', () => {
                 customerId: 'test-customer',
                 site: pdpProps.site,
                 locale: pdpProps.locale,
-                currency: pdpProps.currency
+                currency: pdpProps.currency,
+                skip: false
             })
-            expect(useAdyenPaymentMethods).not.toHaveBeenCalled()
+            expect(useAdyenPaymentMethods).toHaveBeenCalledWith(
+                expect.objectContaining({skip: true})
+            )
         })
 
         it('creates temporary basket with product price for PDP flow', () => {
@@ -310,8 +321,12 @@ describe('ApplePayExpressComponent', () => {
         it('updates shopperBasket when switching from cart to PDP flow', () => {
             const {rerender} = render(<ApplePayExpressComponent {...defaultProps} />)
 
-            expect(useAdyenPaymentMethods).toHaveBeenCalled()
-            expect(useAdyenPaymentMethodsForExpress).not.toHaveBeenCalled()
+            expect(useAdyenPaymentMethods).toHaveBeenCalledWith(
+                expect.objectContaining({skip: false})
+            )
+            expect(useAdyenPaymentMethodsForExpress).toHaveBeenCalledWith(
+                expect.objectContaining({skip: true})
+            )
 
             useAdyenPaymentMethodsForExpress.mockReturnValue({
                 data: mockPaymentMethodsData,
@@ -328,7 +343,12 @@ describe('ApplePayExpressComponent', () => {
 
             rerender(<ApplePayExpressComponent {...pdpProps} />)
 
-            expect(useAdyenPaymentMethodsForExpress).toHaveBeenCalled()
+            expect(useAdyenPaymentMethodsForExpress).toHaveBeenCalledWith(
+                expect.objectContaining({skip: false})
+            )
+            expect(useAdyenPaymentMethods).toHaveBeenCalledWith(
+                expect.objectContaining({skip: true})
+            )
         })
     })
 

@@ -49,7 +49,7 @@ const {handler} = runtime.createHandler(options, (app) => {
                         '*.paypal.com',
                         '*.media-amazon.com',
                         '*.payments-amazon.com',
-                        'https://www.paypalobjects.com/js-sdk-logos/2.2.7/paypal-blue.svg',
+                        'https://www.paypalobjects.com',
                         'https://*.cash.app',
                         'https://*.gstatic.com',
                         '*.cdn-apple.com'
@@ -57,6 +57,7 @@ const {handler} = runtime.createHandler(options, (app) => {
                     'script-src': [
                         "'self'",
                         "'unsafe-eval'",
+                        "'unsafe-inline'",
                         'storage.googleapis.com',
                         '*.paypal.com',
                         '*.payments-amazon.com',

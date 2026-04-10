@@ -1,16 +1,16 @@
 import React, {useEffect, useRef, useCallback, useMemo, useState} from 'react'
 import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 import PropTypes from 'prop-types'
-import {AdyenCheckout, ApplePay} from '@adyen/adyen-web'
+import {AdyenCheckout, GooglePay} from '@adyen/adyen-web'
 import '../style/adyenCheckout.css'
 import useAdyenEnvironment from '../hooks/useAdyenEnvironment'
 import useAdyenPaymentMethods from '../hooks/useAdyenPaymentMethods'
 import useAdyenPaymentMethodsForExpress from '../hooks/useAdyenPaymentMethodsForExpress'
 import useAdyenShippingMethods from '../hooks/useAdyenShippingMethods'
-import {getAppleButtonConfig, getApplePaymentMethodConfig} from './helpers/applePayExpress.utils'
+import {getGooglePayExpressConfig} from './googlepay/expressConfig'
 import {AdyenShippingMethodsService} from '../services/shipping-methods'
 
-const ApplePayExpressComponent = (props) => {
+const GooglePayExpressComponent = (props) => {
     const {
         locale,
         site,
@@ -21,9 +21,12 @@ const ApplePayExpressComponent = (props) => {
         isExpressPdp = false,
         merchantDisplayName = '',
         product,
+        spinner,
+        configuration = {},
         authToken: authTokenProp,
         customerId: customerIdProp
     } = props
+
     const hookCustomerId = useCustomerId()
     const customerId = customerIdProp || hookCustomerId
     const {getTokenWhenReady} = useAccessToken()
@@ -35,19 +38,23 @@ const ApplePayExpressComponent = (props) => {
             const token = await getTokenWhenReady()
             setAuthToken(token)
         }
-
         getToken()
     }, [authTokenProp])
+
     const isPdp = isExpressPdp === true
     const shopperBasket = useMemo(
         () => (isPdp ? {currency, orderTotal: product?.price * (product?.quantity || 1)} : basket),
         [isPdp, currency, basket, basket?.orderTotal, basket?.basketId, product]
     )
     const paymentContainer = useRef(null)
-    const applePayButtonRef = useRef(null)
+    const googlePayButtonRef = useRef(null)
     const errorShownRef = useRef(false)
+    const [remountKey, setRemountKey] = useState(0)
 
-    // Fetch Adyen environment
+    const handlePaymentCancel = useCallback(() => {
+        setRemountKey((prev) => prev + 1)
+    }, [])
+
     const {
         data: adyenEnvironment,
         error: adyenEnvironmentError,
@@ -59,7 +66,6 @@ const ApplePayExpressComponent = (props) => {
         site
     })
 
-    // Fetch payment methods
     const cartPaymentMethods = useAdyenPaymentMethods({
         authToken,
         customerId,
@@ -82,7 +88,6 @@ const ApplePayExpressComponent = (props) => {
         isLoading: isLoadingPaymentMethods
     } = isPdp ? pdpPaymentMethods : cartPaymentMethods
 
-    // Fetch shipping methods
     const {
         data: shippingMethods,
         error: shippingMethodsError,
@@ -95,7 +100,6 @@ const ApplePayExpressComponent = (props) => {
         skip: !shopperBasket?.basketId
     })
 
-    // Memoize loading state
     const isLoading = useMemo(
         () => isLoadingEnvironment || isLoadingPaymentMethods || isLoadingShippingMethods,
         [isLoadingEnvironment, isLoadingPaymentMethods, isLoadingShippingMethods]
@@ -103,7 +107,6 @@ const ApplePayExpressComponent = (props) => {
 
     const fetchShippingMethods = useCallback(
         async (basketId) => {
-            // Fetch fresh shipping methods from API after address update
             const adyenShippingMethodsService = new AdyenShippingMethodsService(
                 authToken,
                 customerId,
@@ -115,7 +118,6 @@ const ApplePayExpressComponent = (props) => {
         [authToken, customerId, site]
     )
 
-    // Handle errors from hooks
     useEffect(() => {
         if (adyenEnvironmentError && !errorShownRef.current) {
             errorShownRef.current = true
@@ -142,6 +144,9 @@ const ApplePayExpressComponent = (props) => {
 
     useEffect(() => {
         const initializeCheckout = async () => {
+            // Reset error flag for fresh mount attempt
+            errorShownRef.current = false
+
             const shouldInitialize = !!(
                 adyenEnvironment &&
                 adyenPaymentMethods &&
@@ -152,6 +157,14 @@ const ApplePayExpressComponent = (props) => {
             if (!shouldInitialize) {
                 return
             }
+
+            const googlePayMethod = adyenPaymentMethods?.paymentMethods?.find(
+                (method) => method.type === 'googlepay'
+            )
+            if (!googlePayMethod) {
+                return
+            }
+            const googlePayMethodConfig = googlePayMethod.configuration || {}
 
             try {
                 const countryCode = locale?.id?.slice(-2)
@@ -166,35 +179,36 @@ const ApplePayExpressComponent = (props) => {
                         }
                     }
                 })
-                const applePaymentMethodConfig = getApplePaymentMethodConfig(adyenPaymentMethods)
-                if (!applePaymentMethodConfig) {
-                    return
-                }
 
-                const appleButtonConfig = getAppleButtonConfig({
+                const expressConfig = getGooglePayExpressConfig({
                     token: authToken,
-                    site,
+                    customerId,
                     basket: shopperBasket,
-                    shippingMethods: shippingMethods?.applicableShippingMethods,
-                    applePayConfig: applePaymentMethodConfig,
+                    site,
+                    locale,
                     navigate,
                     fetchShippingMethods,
                     onError,
-                    isExpressPdp,
-                    merchantDisplayName,
-                    customerId,
+                    onPaymentCancel: handlePaymentCancel,
+                    googlePayMethodConfig,
+                    configuration,
+                    type: isPdp ? 'pdp' : 'cart',
                     product,
-                    locale
+                    merchantDisplayName,
+                    shippingMethods: shippingMethods?.applicableShippingMethods
                 })
-                const applePayButton = new ApplePay(checkout, appleButtonConfig)
-                await applePayButton.isAvailable()
-                if (applePayButtonRef.current) {
-                    applePayButtonRef.current.unmount()
+
+                const googlePayButton = new GooglePay(checkout, expressConfig)
+
+                await googlePayButton.isAvailable()
+
+                if (googlePayButtonRef.current) {
+                    googlePayButtonRef.current.unmount()
                 }
-                applePayButton.mount(paymentContainer.current)
-                applePayButtonRef.current = applePayButton
+                googlePayButton.mount(paymentContainer.current)
+                googlePayButtonRef.current = googlePayButton
             } catch (err) {
-                console.error('Error initializing Apple Pay Express:', err)
+                console.error('Error initializing Google Pay Express:', err)
                 if (!errorShownRef.current) {
                     errorShownRef.current = true
                     onError.forEach((cb) => cb(err))
@@ -205,15 +219,16 @@ const ApplePayExpressComponent = (props) => {
         initializeCheckout()
 
         return () => {
-            if (applePayButtonRef.current) {
-                applePayButtonRef.current.unmount()
-                applePayButtonRef.current = null
+            if (googlePayButtonRef.current) {
+                googlePayButtonRef.current.unmount()
+                googlePayButtonRef.current = null
             }
         }
     }, [
         adyenEnvironment?.ADYEN_ENVIRONMENT,
         adyenEnvironment?.ADYEN_CLIENT_KEY,
         adyenPaymentMethods?.paymentMethods,
+        adyenPaymentMethods?.applicationInfo,
         shopperBasket?.basketId,
         shippingMethods?.applicableShippingMethods,
         locale?.id,
@@ -221,10 +236,10 @@ const ApplePayExpressComponent = (props) => {
         site?.id,
         navigate,
         fetchShippingMethods,
-        product
+        product,
+        remountKey
     ])
 
-    const {spinner} = props
     return (
         <>
             {isLoading && spinner && <>{spinner}</>}
@@ -233,7 +248,7 @@ const ApplePayExpressComponent = (props) => {
     )
 }
 
-ApplePayExpressComponent.propTypes = {
+GooglePayExpressComponent.propTypes = {
     locale: PropTypes.object.isRequired,
     site: PropTypes.object.isRequired,
     basket: PropTypes.object,
@@ -244,12 +259,12 @@ ApplePayExpressComponent.propTypes = {
     currency: PropTypes.string,
     merchantDisplayName: PropTypes.string,
     product: PropTypes.object,
+    configuration: PropTypes.object,
     authToken: PropTypes.string,
     customerId: PropTypes.string
 }
 
-export default React.memo(ApplePayExpressComponent, (prevProps, nextProps) => {
-    // Prevent unnecessary re-renders by comparing only relevant props
+export default React.memo(GooglePayExpressComponent, (prevProps, nextProps) => {
     return (
         prevProps.locale?.id === nextProps.locale?.id &&
         prevProps.site?.id === nextProps.site?.id &&

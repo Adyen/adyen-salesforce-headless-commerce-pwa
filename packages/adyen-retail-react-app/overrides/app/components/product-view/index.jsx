@@ -52,7 +52,7 @@ import {getPriceData} from '@salesforce/retail-react-app/app/utils/product-utils
 import PromoCallout from '@salesforce/retail-react-app/app/components/product-tile/promo-callout'
 import LoadingSpinner from '@salesforce/retail-react-app/app/components/loading-spinner'
 
-import {ApplePayExpress, PayPalExpress} from '@adyen/adyen-salesforce-pwa'
+import {ApplePayExpress, GooglePayExpress, PayPalExpress} from '@adyen/adyen-salesforce-pwa'
 import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
 import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
 
@@ -927,6 +927,23 @@ const ProductView = forwardRef(
                                                     />
                                                 }
                                             />
+                                            <GooglePayExpress
+                                                locale={locale}
+                                                site={site}
+                                                currency={activeCurrency}
+                                                navigate={navigate}
+                                                isExpressPdp={true}
+                                                merchantDisplayName={'Merchant name'}
+                                                product={{...product, quantity: productQuantity}}
+                                                // Callbacks
+                                                onError={[showError]}
+                                                // UI
+                                                spinner={
+                                                    <LoadingSpinner
+                                                        wrapperStyles={{height: '100vh'}}
+                                                    />
+                                                }
+                                            />
                                             <PayPalExpress
                                                 locale={locale}
                                                 site={site}
@@ -971,6 +988,19 @@ const ProductView = forwardRef(
                     {validateOrderability(variant, product, productQuantity, stockLevel) && (
                         <>
                             <ApplePayExpress
+                                locale={locale}
+                                site={site}
+                                currency={activeCurrency}
+                                navigate={navigate}
+                                isExpressPdp={true}
+                                merchantDisplayName={'Merchant name'}
+                                product={{...product, quantity: productQuantity}}
+                                // Callbacks
+                                onError={[showError]}
+                                // UI
+                                spinner={<LoadingSpinner wrapperStyles={{height: '100vh'}} />}
+                            />
+                            <GooglePayExpress
                                 locale={locale}
                                 site={site}
                                 currency={activeCurrency}
