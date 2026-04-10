@@ -60,25 +60,27 @@ const ApplePayExpressComponent = (props) => {
     })
 
     // Fetch payment methods
+    const cartPaymentMethods = useAdyenPaymentMethods({
+        authToken,
+        customerId,
+        basketId: shopperBasket?.basketId,
+        site,
+        locale,
+        skip: isPdp
+    })
+    const pdpPaymentMethods = useAdyenPaymentMethodsForExpress({
+        authToken,
+        customerId,
+        site,
+        locale,
+        currency,
+        skip: !isPdp
+    })
     const {
         data: adyenPaymentMethods,
         error: adyenPaymentMethodsError,
         isLoading: isLoadingPaymentMethods
-    } = isPdp
-        ? useAdyenPaymentMethodsForExpress({
-              authToken,
-              customerId,
-              site,
-              locale,
-              currency
-          })
-        : useAdyenPaymentMethods({
-              authToken,
-              customerId,
-              basketId: shopperBasket?.basketId,
-              site,
-              locale
-          })
+    } = isPdp ? pdpPaymentMethods : cartPaymentMethods
 
     // Fetch shipping methods
     const {

@@ -7,6 +7,7 @@ import {act, render, screen, waitFor} from '@testing-library/react'
 import GooglePayExpressComponent from '../googlePayExpress'
 import useAdyenEnvironment from '../../hooks/useAdyenEnvironment'
 import useAdyenPaymentMethods from '../../hooks/useAdyenPaymentMethods'
+import useAdyenPaymentMethodsForExpress from '../../hooks/useAdyenPaymentMethodsForExpress'
 import useAdyenShippingMethods from '../../hooks/useAdyenShippingMethods'
 import {AdyenCheckout, GooglePay} from '@adyen/adyen-web'
 import {getGooglePayExpressConfig} from '../googlepay/expressConfig'
@@ -15,6 +16,7 @@ import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 
 jest.mock('../../hooks/useAdyenEnvironment')
 jest.mock('../../hooks/useAdyenPaymentMethods')
+jest.mock('../../hooks/useAdyenPaymentMethodsForExpress')
 jest.mock('../../hooks/useAdyenShippingMethods')
 jest.mock('../googlepay/expressConfig')
 jest.mock('../../services/shipping-methods')
@@ -72,6 +74,12 @@ describe('GooglePayExpressComponent', () => {
 
         useAdyenPaymentMethods.mockReturnValue({
             data: mockPaymentMethodsData,
+            error: null,
+            isLoading: false
+        })
+
+        useAdyenPaymentMethodsForExpress.mockReturnValue({
+            data: null,
             error: null,
             isLoading: false
         })
