@@ -5,9 +5,17 @@ name: Publish Package
 
 on:
     workflow_dispatch:
+    schedule:
+        - cron: '30 6 * * 1' # Runs at 06:30 UTC (7:30 CET) every Monday
 
 jobs:
+    publish-npm-weekly:
+        if: github.event_name == 'schedule'
+        uses: ./.github/workflows/npm-publish-weekly.yml
+        secrets: inherit
+
     publish-npm:
+        if: github.event_name == 'workflow_dispatch'
         runs-on: ubuntu-latest
         permissions:
             contents: read

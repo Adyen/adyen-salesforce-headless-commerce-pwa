@@ -1,9 +1,7 @@
 name: Publish Weekly Package
 
 on:
-    schedule:
-        - cron: '30 6 * * 1' # Runs at 06:30 UTC (7:30 CET) every Monday
-    workflow_dispatch:
+    workflow_call:
 
 jobs:
     publish-npm-weekly:

@@ -84,7 +84,10 @@ describe('payments details controller', () => {
         expect(orderHelper.updatePaymentInstrumentForOrder).toHaveBeenCalledWith(
             res.locals.adyen,
             '123',
-            [{field: 'c_pspReference', value: 'psp-express-123'}]
+            [
+                {field: 'c_pspReference', value: 'psp-express-123'},
+                {field: 'c_donationToken', value: undefined}
+            ]
         )
         expect(res.locals.response).toEqual({
             isFinal: true,
@@ -195,7 +198,10 @@ describe('payments details controller', () => {
             expect(orderHelper.updatePaymentInstrumentForOrder).toHaveBeenCalledWith(
                 res.locals.adyen,
                 'order-789',
-                [{field: 'c_pspReference', value: 'psp-xyz'}]
+                [
+                    {field: 'c_pspReference', value: 'psp-xyz'},
+                    {field: 'c_donationToken', value: undefined}
+                ]
             )
             expect(res.locals.response.merchantReference).toBe('order-789')
             expect(next).toHaveBeenCalledWith()
@@ -216,7 +222,10 @@ describe('payments details controller', () => {
             expect(orderHelper.updatePaymentInstrumentForOrder).toHaveBeenCalledWith(
                 res.locals.adyen,
                 'order-123',
-                [{field: 'c_pspReference', value: 'psp-abc'}]
+                [
+                    {field: 'c_pspReference', value: 'psp-abc'},
+                    {field: 'c_donationToken', value: undefined}
+                ]
             )
             expect(res.locals.response).toEqual({
                 isFinal: true,

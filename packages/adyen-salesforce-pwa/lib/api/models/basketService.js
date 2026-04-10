@@ -94,7 +94,7 @@ export class BasketService {
      * Adds a payment instrument to the current basket.
      * @param {object} amount - The amount included in the payment request. Should have value and currency
      * @param {object} paymentMethod - The payment method object. Should have type and brand.
-     * @param {Array<{field: string, value: any}>} [customFields=[]] - Optional custom fields to set.
+     * @param {Array<{field: string, value: *}>} customFields - Array of custom fields to add to the payment instrument.
      * @returns {Promise<object>} A promise that resolves to the updated basket object.
      */
     async addPaymentInstrument(amount, paymentMethod, customFields = []) {
@@ -112,7 +112,6 @@ export class BasketService {
             ? PAYMENT_METHODS.CREDIT_CARD
             : PAYMENT_METHODS.ADYEN_COMPONENT
 
-        const mappedCustomFields = mapCustomFields(customFields)
         const paymentInstrumentReq = {
             body: {
                 amount: convertCurrencyValueToMajorUnits(amount?.value, amount?.currency),
@@ -122,7 +121,7 @@ export class BasketService {
                         ? getCardType(paymentMethod?.brand || paymentMethod?.srcScheme)
                         : paymentMethod?.type
                 },
-                ...mappedCustomFields,
+                ...mapCustomFields(customFields),
                 c_paymentMethodType: paymentMethod?.type,
                 ...((paymentMethod?.brand || paymentMethod?.srcScheme) && {
                     c_paymentMethodBrand: paymentMethod?.brand || paymentMethod?.srcScheme

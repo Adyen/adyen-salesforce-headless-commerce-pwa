@@ -10,6 +10,7 @@ import ShopperDetailsController from '../controllers/shopper-details'
 import PaypalUpdateOrderController from '../controllers/paypal-update-order'
 import PaymentDataReviewPageController from '../controllers/payment-data-review-page'
 import CreateTemporaryBasketController from '../controllers/create-temporary-basket'
+import DonationsController from '../controllers/donations'
 import OrderNumberController from '../controllers/order-number'
 import {
     authenticate,
@@ -26,6 +27,7 @@ import {balanceCheck, cancelOrder, createOrder} from '../controllers/giftCard'
 import {createRequestContext} from '../middleware/request-context'
 import {createMinimalRequestContext} from '../middleware/minimal-request-context'
 import {createPaymentsDetailsContext} from '../middleware/payments-details-request-context'
+import {prepareOrderRequestContext} from '../middleware/order-request-context'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function SuccessHandler(req, res, next) {
@@ -186,6 +188,20 @@ function registerAdyenEndpoints(app, runtime, overrides, options = {}) {
         ErrorHandler
     ]
 
+    const donationCampaignsHandler = overrides?.donationCampaignsHandler || [
+        prepareOrderRequestContext,
+        DonationsController.donationCampaigns,
+        SuccessHandler,
+        ErrorHandler
+    ]
+
+    const donateHandler = overrides?.donate || [
+        prepareOrderRequestContext,
+        DonationsController.donate,
+        SuccessHandler,
+        ErrorHandler
+    ]
+
     app.get(
         '*/checkout/redirect',
         query('redirectResult').optional().escape(),
@@ -222,6 +238,8 @@ function registerAdyenEndpoints(app, runtime, overrides, options = {}) {
     app.post('/api/adyen/payment-data-for-review-page', ...paymentDataForReviewPagePostHandler)
     app.get('/api/adyen/order-number', ...orderNumberHandler)
     app.post('/api/adyen/pdp/temporary-baskets', ...createTemporaryBasketHandler)
+    app.get('/api/adyen/donationCampaigns', ...donationCampaignsHandler)
+    app.post('/api/adyen/donations', ...donateHandler)
 }
 
 export {registerAdyenEndpoints, SuccessHandler, ErrorHandler}
