@@ -23,7 +23,7 @@
   "overrides": {
     "node-notifier": "10.0.1",
     "yargs-parser": "21.1.1",
-    "jszip": "3.8.0",
+    "jszip": "3.10.1",
     "merge": "2.1.1",
     "tough-cookie": "4.1.3"
   },
