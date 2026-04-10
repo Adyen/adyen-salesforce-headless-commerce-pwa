@@ -30,8 +30,7 @@ module.exports = {
         '!lib/api/index.js',
         '!**/node_modules/**',
         '!**/dist/**',
-        '!**/mocks/**',
-        '!lib/contexts/adyen-express-checkout-context.jsx'
+        '!**/mocks/**'
     ],
     clearMocks: true,
     restoreMocks: true,
