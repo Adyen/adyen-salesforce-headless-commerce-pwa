@@ -35,10 +35,6 @@ export {default as ShopperDetailsController} from './controllers/shopper-details
 export {default as PaymentDataReviewPageController} from './controllers/payment-data-review-page'
 export {default as DonationsController} from './controllers/donations'
 
-// Webhook event handlers
-export * from './controllers/authorization-webhook-handler'
-export * from './controllers/order-closed-webhook-handler'
-
 // Helpers
 export * from './helpers/basketHelper.js'
 export * from './helpers/orderHelper.js'
