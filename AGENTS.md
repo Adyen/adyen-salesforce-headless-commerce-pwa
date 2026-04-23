@@ -1,4 +1,4 @@
-# AGENTS.md
+# AI Agent Coding Guidelines
 
 ## Project Overview
 
@@ -47,7 +47,7 @@ Monorepo with an NPM package, a reference retail app, Playwright E2E tests, and 
 
 ## Coding Conventions
 
-- JavaScript only, ESLint + Prettier enforced
+- ESLint and Prettier are enforced for all JavaScript code
 - Components: `lib/components/`, hooks: `lib/hooks/`, services: `lib/services/`, utils: `lib/utils/`
 - API layer: `lib/api/` (controllers, models, helpers, middleware, routes, utils)
 - New public APIs must be exported from `lib/index.js`
