@@ -99,7 +99,7 @@ export class PaymentHelper {
 
     async fillInput(inputField, value) {
         await inputField.click()
-        await inputField.type(value, {delay: 50})
+        await inputField.pressSequentially(value, {delay: 50})
     }
 
     /**
@@ -113,7 +113,7 @@ export class PaymentHelper {
             // Clear any existing content before typing
             await inputField.press('ControlOrMeta+A').catch(() => {})
             await inputField.press('Delete').catch(() => {})
-            await inputField.type(value, {delay: 50})
+            await inputField.pressSequentially(value, {delay: 50})
 
             // Verify the value was entered completely by reading the input's value
             const actualDigits = await inputField
@@ -175,7 +175,7 @@ export class PaymentHelper {
     async fill3DS2PasswordAndSubmit(answer) {
         await this.threeDS2PasswordInput.waitFor({state: 'visible', timeout: 10000})
         await this.threeDS2PasswordInput.click()
-        await this.threeDS2PasswordInput.type(answer)
+        await this.threeDS2PasswordInput.pressSequentially(answer)
         await this.threeDS2SubmitButton.click()
     }
 

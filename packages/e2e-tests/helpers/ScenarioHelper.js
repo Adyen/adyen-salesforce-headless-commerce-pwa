@@ -239,7 +239,7 @@ export class ScenarioHelper {
             if (shippingAddressModifyButtonIsVisible) {
                 await this.shippingAddressModifyButton.click()
             }
-            await this.fillShippingAdress(user)
+            await this.fillShippingAddress(user)
         }
 
         // Let the UI settle before the shipping method step
@@ -260,7 +260,7 @@ export class ScenarioHelper {
         await this.retryClick(this.checkoutAsGuestButton, '/baskets/*/customer', 'PUT')
     }
 
-    async fillShippingAdress(user) {
+    async fillShippingAddress(user) {
         const shippingFormVisible = await this.firstNameField
             .isVisible({timeout: 5000})
             .catch(() => false)
