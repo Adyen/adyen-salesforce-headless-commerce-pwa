@@ -4,8 +4,10 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "test-headed": "npx playwright test tests/ideal.spec.js --headed",
-        "test": "npx playwright test"
+        "test": "npx playwright test",
+        "test-headed": "npx playwright test --headed",
+        "test:local": "node --env-file=.env node_modules/.bin/playwright test",
+        "test-headed:local": "node --env-file=.env node_modules/.bin/playwright test --headed"
     },
     "keywords": [],
     "author": "",

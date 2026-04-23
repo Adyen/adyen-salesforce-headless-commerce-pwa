@@ -34,23 +34,21 @@ test.describe('Payments through PWA UI', () => {
         await scenarios.visitStore()
         await scenarios.setupCart()
         await scenarios.login(user_US)
-
+        await scenarios.arrangeShippingAndProceedToPaymentLoggedInShopper(user_US)
         const paymentPage = new PaymentHelper(page)
-        await paymentPage.fillCVCInfo(
-            storedCard.cvc
-        )
+        await paymentPage.fillCVCInfo(storedCard.cvc)
         await paymentPage.clickPay()
         await scenarios.verifySuccessfulOrder()
     })
 
     test('Rendering Click To Pay', async ({page}) => {
-      const scenarios = new ScenarioHelper(page)
-      await scenarios.visitStore()
-      await scenarios.setupCart()
+        const scenarios = new ScenarioHelper(page)
+        await scenarios.visitStore()
+        await scenarios.setupCart()
 
-      await scenarios.arrangeShippingAndProceedToPayment(user_ClickToPay)
-      const paymentPage = new PaymentHelper(page)
-      await paymentPage.selectPaymentType('Cards')
-      await scenarios.verifyClickToPayIsRendered()
+        await scenarios.arrangeShippingAndProceedToPayment(user_ClickToPay)
+        const paymentPage = new PaymentHelper(page)
+        await paymentPage.selectPaymentType('Cards')
+        await scenarios.verifyClickToPayIsRendered()
     })
 })

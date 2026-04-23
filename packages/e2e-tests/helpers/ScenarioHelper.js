@@ -10,10 +10,6 @@ export class ScenarioHelper {
         this.heading = this.page.getByRole('heading', {
             name: `${this.locale.landingPage.heading}`
         })
-        this.carouselProduct = this.page
-            .locator("[data-testid='product-scroller']")
-            .locator("[data-testid='product-scroller-item']")
-            .first()
 
         // Product Detail Page Locators
         this.productColorRadioButton = this.page.getByLabel(
@@ -25,17 +21,16 @@ export class ScenarioHelper {
         this.addToCartButton = this.page.getByRole('button', {
             name: `${locale.productDetailPage.addToCartButtonCaption}`
         })
-        this.proceedToCheckoutLink = this.page.getByRole('link', {
-            name: `${locale.productDetailPage.proceedToCheckoutButtonCaption}`
-        })
 
         // Contact Info Page Locators
         this.contactInfoSection = this.page.locator("[data-testid='sf-toggle-card-step-0']")
+        this.contactInfoSectionModifyButton = this.page.getByRole('button', {
+            name: `${locale.checkoutPage.contactInfoSectionModifyButton}`
+        })
         this.emailField = this.contactInfoSection.locator('#email')
         this.checkoutAsGuestButton = this.contactInfoSection.locator("[type='submit']")
 
         // Login Page Locators
-        this.loginSection = this.page.locator("[data-testid='login-page']")
         this.loginEmail = this.page.locator('input#email')
         this.loginPassword = this.page.locator('input#password')
         this.loginButton = this.page.locator("[type='submit']")
@@ -43,22 +38,13 @@ export class ScenarioHelper {
             name: 'Already have an account? Log in'
         })
 
-        // Account Page Locators
-        this.accountPageHeading = this.page.getByRole('heading', {
-            name: `${this.locale.accountPage.heading}`
-        })
-
         // Shipping Details Page Locators
-        this.shippingAddressSection = this.page.locator(
-            "[data-testid='sf-toggle-card-step-1-content']"
-        )
-        this.selectedShippingAddress = this.shippingAddressSection.locator('> [class*="css"]')
-
+        this.shippingAddressSection = this.page.locator("[data-testid='sf-toggle-card-step-1']")
+        this.shippingAddressModifyButton = this.page.getByRole('button', {
+            name: `${locale.checkoutPage.shippingAddressModifyButton}`
+        })
         this.shippingAddressSectionForm = this.page.locator(
             "[data-testid='sf-shipping-address-edit-form']"
-        )
-        this.shippingAddressSectionLoggedInUser = this.page.locator(
-            "[data-testid='sf-checkout-container']"
         )
         this.firstNameField = this.shippingAddressSectionForm.locator('#firstName')
         this.lastNameField = this.shippingAddressSectionForm.locator('#lastName')
@@ -70,53 +56,70 @@ export class ScenarioHelper {
         this.zipCodeField = this.shippingAddressSectionForm.locator('#postalCode')
         this.continueToShippingMethodButton =
             this.shippingAddressSectionForm.locator("[type='submit']")
-        this.continueToShippingMethodButtonLoggedInUser =
-            this.shippingAddressSectionLoggedInUser.locator("[type='submit']")
+        // For logged-in users this button sits outside the form, so
+        // [type='submit'] doesn't match; match by accessible name instead.
+        this.continueToShippingMethodButtonLoggedInUser = this.page.getByRole('button', {
+            name: 'Continue to Shipping Method'
+        })
 
-        this.shippingMethodSection = this.page.locator(
+        // Shipping Method Locators
+        this.shippingMethodSection = this.page.locator("[data-testid='sf-toggle-card-step-2']")
+        this.shippingMethodModifyButton = this.page.getByRole('button', {
+            name: `${locale.checkoutPage.shippingMethodModifyButton}`
+        })
+        this.shippingMethodSectionContent = this.page.locator(
             "[data-testid='sf-toggle-card-step-2-content']"
         )
-        this.shippingRadioButtonsSection = this.shippingMethodSection.locator("[role='radiogroup']")
+        this.shippingRadioButtonsSection =
+            this.shippingMethodSectionContent.locator("[role='radiogroup']")
         this.standardShippingRadioButton = this.shippingRadioButtonsSection
             .locator('.chakra-radio')
             .first()
-        this.selectedShippingMethod = this.shippingMethodSection.locator('> [class*="css"]')
-        this.continueToPaymentButton = this.shippingMethodSection.locator("[type='submit']")
+        this.continueToPaymentButton = this.shippingMethodSectionContent.locator("[type='submit']")
 
         // Payment Page Locators
-        this.paymentSection = this.page.getByRole('radiogroup', {
-            name: 'Choose a payment method'
-        })
+        this.paymentSection = this.page.locator("[data-testid='sf-toggle-card-step-3-content']")
     }
 
     async retryClick(button, apiEndpoint, httpMethod = 'POST', maxRetries = 3) {
         let success = false
-        const endpointPattern = new RegExp(apiEndpoint.replace(/\*/g, '[^/]+'))
+        // Escape special regex chars except *, then replace * with .+ for flexible matching
+        const escapedEndpoint = apiEndpoint.replace(/[.+?^${}()|[\]\\]/g, '\\$&')
+        const endpointPattern = new RegExp(escapedEndpoint.replace(/\*/g, '[^/]+'))
 
         for (let attempt = 1; attempt <= maxRetries; attempt++) {
             console.log(
                 `Attempt ${attempt}: Clicking button and waiting for ${httpMethod} ${apiEndpoint}`
             )
             try {
-                const [response] = await Promise.all([
-                    this.page.waitForResponse(
-                        (res) =>
-                            endpointPattern.test(res.url()) &&
-                            res.request().method() === httpMethod,
-                        {timeout: 10000}
-                    ),
-                    button.click()
-                ])
+                await button.waitFor({state: 'visible', timeout: 10000})
+                const responsePromise = this.page.waitForResponse(
+                    (res) =>
+                        endpointPattern.test(res.url()) && res.request().method() === httpMethod,
+                    {timeout: 10000}
+                )
+                await button.click()
+                const response = await responsePromise
 
                 if (response.ok()) {
                     console.log('API call succeeded')
                     success = true
                     break
                 } else {
-                    console.warn(`API call failed with status ${response.status()}`)
+                    // Log the response body so 4xx/5xx failures are diagnosable
+                    const body = await response.text().catch(() => '<unreadable>')
+                    console.warn(
+                        `API call failed with status ${response.status()} for ${httpMethod} ${apiEndpoint}: ${body}`
+                    )
                 }
             } catch (error) {
                 console.warn(`Attempt ${attempt} failed: ${error.message}`)
+            }
+
+            // Back off between attempts so transient backend state has time
+            // to settle instead of hammering the same broken state.
+            if (attempt < maxRetries) {
+                await this.page.waitForTimeout(1000 * attempt)
             }
         }
 
@@ -134,6 +137,65 @@ export class ScenarioHelper {
         await this.switchToLoginButton.click()
         await this.fillShopperDetails(user)
         await this.submitLoginDetails()
+    }
+
+    async arrangeShippingAndProceedToPaymentLoggedInShopper() {
+        const continueButtonAppeared = await this.continueToShippingMethodButtonLoggedInUser
+            .waitFor({state: 'visible', timeout: 10000})
+            .then(() => true)
+            .catch(() => false)
+
+        if (continueButtonAppeared) {
+            const addressRadios = this.shippingAddressSection.getByRole('radio')
+            const anyChecked = await addressRadios
+                .and(this.page.locator('[aria-checked="true"], :checked'))
+                .count()
+                .catch(() => 0)
+            if (anyChecked === 0 && (await addressRadios.count()) > 0) {
+                await addressRadios.first().click({force: true})
+            }
+
+            await this.retryClick(
+                this.continueToShippingMethodButtonLoggedInUser,
+                '/shipments/me/shipping-address',
+                'PUT'
+            )
+        }
+
+        await this.selectShippingMethodAndProceedToPayment()
+    }
+
+    async selectShippingMethodAndProceedToPayment() {
+        await this.shippingMethodSection.waitFor({state: 'visible', timeout: 10000}).catch(() => {})
+
+        const shippingMethodSectionIsVisible = await this.shippingMethodSection.isVisible()
+        if (!shippingMethodSectionIsVisible) {
+            return
+        }
+
+        const radioButtonsVisible = await this.shippingRadioButtonsSection.isVisible()
+
+        if (!radioButtonsVisible) {
+            await this.shippingMethodModifyButton
+                .waitFor({state: 'visible', timeout: 10000})
+                .catch(() => {})
+            const shippingMethodModifyButtonIsVisible =
+                await this.shippingMethodModifyButton.isVisible()
+            if (shippingMethodModifyButtonIsVisible) {
+                const shippingMethodsResponsePromise = this.page.waitForResponse(
+                    (res) =>
+                        res.url().includes('/shipping-methods') && res.request().method() === 'GET',
+                    {timeout: 10000}
+                )
+                await this.shippingMethodModifyButton.click()
+                await shippingMethodsResponsePromise
+                await this.shippingRadioButtonsSection.waitFor({
+                    state: 'visible',
+                    timeout: 10000
+                })
+            }
+        }
+        await this.chooseShippingMethod()
     }
 
     async setupCart() {
@@ -154,47 +216,51 @@ export class ScenarioHelper {
     }
 
     async arrangeShippingAndProceedToPayment(user) {
-        const paymentSectionVisible = await this.paymentSection
-            .isVisible({timeout: 5000})
-            .catch(() => false)
-        if (paymentSectionVisible) {
-            return
+        await this.contactInfoSection.waitFor({state: 'visible', timeout: 10000}).catch(() => {})
+
+        const contactInfoSectionIsVisible = await this.contactInfoSection.isVisible()
+        if (contactInfoSectionIsVisible) {
+            const contactInfoSectionModifyButtonIsVisible =
+                await this.contactInfoSectionModifyButton.isVisible()
+            if (contactInfoSectionModifyButtonIsVisible) {
+                await this.contactInfoSectionModifyButton.click()
+            }
+            await this.fillContactInfo(user)
         }
 
-        const selectedShippingAddressIsVisible = await this.selectedShippingAddress.isVisible()
-        if (!selectedShippingAddressIsVisible) {
-            await this.fillShippingDetails(user)
+        await this.shippingAddressSection
+            .waitFor({state: 'visible', timeout: 10000})
+            .catch(() => {})
 
-            await this.page.waitForTimeout(1000)
+        const shippingAddressSectionIsVisible = await this.shippingAddressSection.isVisible()
+        if (shippingAddressSectionIsVisible) {
+            const shippingAddressModifyButtonIsVisible =
+                await this.shippingAddressModifyButton.isVisible()
+            if (shippingAddressModifyButtonIsVisible) {
+                await this.shippingAddressModifyButton.click()
+            }
+            await this.fillShippingAdress(user)
         }
 
-        const continueToPaymentButtonVisible = await this.continueToPaymentButton
-            .isVisible({timeout: 5000})
-            .catch(() => false)
-        await this.page.pause()
-        if (continueToPaymentButtonVisible) {
-            await this.chooseShippingMethod()
-            await this.page.pause()
-            await this.proceedToPayment()
-        }
+        // Let the UI settle before the shipping method step
+        await this.page.waitForTimeout(1000)
+
+        await this.selectShippingMethodAndProceedToPayment()
     }
 
-    async fillShippingDetails(user) {
+    async fillContactInfo(user) {
+        const emailFormVisible = await this.emailField.isVisible({timeout: 5000}).catch(() => false)
+
+        if (!emailFormVisible) {
+            return
+        }
         await this.emailField.click()
         await this.emailField.fill(user.shopperEmail)
 
-        await Promise.all([
-            this.page
-                .waitForResponse(
-                    (res) => res.url().includes('/customers') && res.request().method() === 'POST',
-                    {timeout: 10000}
-                )
-                .catch(() => null),
-            this.checkoutAsGuestButton.click()
-        ])
+        await this.retryClick(this.checkoutAsGuestButton, '/baskets/*/customer', 'PUT')
+    }
 
-        await this.page.waitForTimeout(1000)
-
+    async fillShippingAdress(user) {
         const shippingFormVisible = await this.firstNameField
             .isVisible({timeout: 5000})
             .catch(() => false)
@@ -209,6 +275,10 @@ export class ScenarioHelper {
         await this.lastNameField.fill(user.shopperName.lastName)
         await this.phoneNumberField.click()
         await this.phoneNumberField.fill(user.telephone)
+
+        if (user.address.country) {
+            await this.countryDropdown.selectOption(user.address.country)
+        }
         await this.addressField.click()
         await this.addressField.fill(`${user.address.street} ${user.address.houseNumberOrName}`)
         await this.cityField.click()
@@ -238,21 +308,19 @@ export class ScenarioHelper {
     }
 
     async chooseShippingMethod() {
+        await this.standardShippingRadioButton
+            .waitFor({state: 'visible', timeout: 10000})
+            .catch(() => {})
         const standardShippingRadioButtonIsVisible =
             await this.standardShippingRadioButton.isVisible()
-        if (!!standardShippingRadioButtonIsVisible) {
+        if (standardShippingRadioButtonIsVisible) {
             await this.standardShippingRadioButton.click()
         }
-    }
 
-    async proceedToPayment() {
-        const continueToPaymentButtonVisible = await this.continueToPaymentButton
-            .isVisible({timeout: 5000})
-            .catch(() => false)
+        await this.continueToPaymentButton.waitFor({state: 'visible', timeout: 10000})
+        await this.continueToPaymentButton.click()
 
-        if (continueToPaymentButtonVisible) {
-            await this.continueToPaymentButton.click()
-        }
+        await this.paymentSection.waitFor({state: 'visible', timeout: 20000})
     }
 
     async verifyClickToPayIsRendered() {

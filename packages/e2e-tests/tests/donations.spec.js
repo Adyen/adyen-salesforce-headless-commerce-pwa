@@ -26,18 +26,22 @@ test.describe('Donations through PWA UI', () => {
         await paymentPage.validate3DS2('password')
         await scenarios.verifySuccessfulOrder()
 
-        const donationComponent = page.locator('.adyen-checkout__donation')
+        const donationComponent = page.locator(
+            '.adyen-checkout__adyen-giving, .adyen-checkout__donation'
+        )
         await expect(donationComponent).toBeVisible({timeout: 15000})
 
         const donationAmountButton = donationComponent
-            .locator('.adyen-checkout__donation-amount__button')
+            .locator('.adyen-checkout__donation-amount__button, .adyen-checkout__button')
             .first()
         await donationAmountButton.click()
 
         const donateButton = donationComponent.locator('.adyen-checkout__button--donate')
         await donateButton.click()
 
-        const donationSuccess = donationComponent.locator('.adyen-checkout__status--success')
+        const donationSuccess = donationComponent.locator(
+            '.adyen-checkout__status--success, .adyen-checkout__status__text'
+        )
         await expect(donationSuccess).toBeVisible({timeout: 15000})
     })
 
@@ -59,7 +63,9 @@ test.describe('Donations through PWA UI', () => {
         await paymentPage.validate3DS2('password')
         await scenarios.verifySuccessfulOrder()
 
-        const donationComponent = page.locator('.adyen-checkout__donation')
+        const donationComponent = page.locator(
+            '.adyen-checkout__adyen-giving, .adyen-checkout__donation'
+        )
         await expect(donationComponent).toBeVisible({timeout: 15000})
 
         const notNowButton = donationComponent.locator('.adyen-checkout__button--decline')
