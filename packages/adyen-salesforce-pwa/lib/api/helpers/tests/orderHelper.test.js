@@ -364,7 +364,7 @@ describe('orderHelper', () => {
             await updatePaymentInstrumentForOrder(
                 {authorization: 'auth-token', siteId: 'RefArch'},
                 'order-123',
-                'new-psp-ref'
+                [{field: 'c_pspReference', value: 'new-psp-ref'}]
             )
 
             expect(mockUpdatePaymentInstrumentForOrder).toHaveBeenCalledWith({
@@ -393,7 +393,7 @@ describe('orderHelper', () => {
             await updatePaymentInstrumentForOrder(
                 {authorization: 'auth-token', siteId: 'RefArch'},
                 'order-123',
-                'new-psp-ref'
+                [{field: 'c_pspReference', value: 'new-psp-ref'}]
             )
 
             expect(Logger.info).toHaveBeenCalledWith(
@@ -409,7 +409,7 @@ describe('orderHelper', () => {
             await updatePaymentInstrumentForOrder(
                 {authorization: 'auth-token', siteId: 'RefArch'},
                 'order-123',
-                'new-psp-ref'
+                [{field: 'c_pspReference', value: 'new-psp-ref'}]
             )
 
             expect(mockUpdatePaymentInstrumentForOrder).not.toHaveBeenCalled()
@@ -430,7 +430,7 @@ describe('orderHelper', () => {
             await updatePaymentInstrumentForOrder(
                 {authorization: 'auth-token', siteId: 'RefArch'},
                 'order-123',
-                null
+                [{field: 'c_pspReference', value: null}]
             )
 
             expect(mockUpdatePaymentInstrumentForOrder).toHaveBeenCalledWith({
@@ -440,6 +440,40 @@ describe('orderHelper', () => {
                 },
                 body: {
                     c_paymentMethodType: 'scheme'
+                }
+            })
+        })
+
+        it('should merge multiple custom fields onto payment instrument', async () => {
+            const mockOrder = {
+                paymentInstruments: [
+                    {
+                        paymentInstrumentId: 'pi-123',
+                        c_paymentMethodType: 'scheme'
+                    }
+                ]
+            }
+            mockGetOrder.mockResolvedValue(mockOrder)
+            mockUpdatePaymentInstrumentForOrder.mockResolvedValue({})
+
+            await updatePaymentInstrumentForOrder(
+                {authorization: 'auth-token', siteId: 'RefArch'},
+                'order-123',
+                [
+                    {field: 'c_pspReference', value: 'new-psp-ref'},
+                    {field: 'c_resultCode', value: 'Authorised'}
+                ]
+            )
+
+            expect(mockUpdatePaymentInstrumentForOrder).toHaveBeenCalledWith({
+                parameters: {
+                    orderNo: 'order-123',
+                    paymentInstrumentId: 'pi-123'
+                },
+                body: {
+                    c_paymentMethodType: 'scheme',
+                    c_pspReference: 'new-psp-ref',
+                    c_resultCode: 'Authorised'
                 }
             })
         })

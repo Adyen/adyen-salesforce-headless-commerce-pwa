@@ -17,7 +17,7 @@ import {
 import Link from '@salesforce/retail-react-app/app/components/link'
 /* -----------------Adyen Begin ------------------------ */
 import '@adyen/adyen-salesforce-pwa/dist/app/adyen.css'
-import {ApplePayExpress, PayPalExpress} from '@adyen/adyen-salesforce-pwa'
+import {ApplePayExpress, GooglePayExpress, PayPalExpress} from '@adyen/adyen-salesforce-pwa'
 import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
 import PropTypes from 'prop-types'
 import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
@@ -60,6 +60,16 @@ const CartCta = () => {
             </Button>
             <Container fluid>
                 <ApplePayExpress
+                    locale={locale}
+                    site={site}
+                    basket={basket}
+                    navigate={navigate}
+                    // Callbacks
+                    onError={[showError]}
+                    // UI
+                    spinner={<LoadingSpinner />}
+                />
+                <GooglePayExpress
                     locale={locale}
                     site={site}
                     basket={basket}

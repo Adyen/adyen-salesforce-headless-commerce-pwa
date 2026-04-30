@@ -32,4 +32,22 @@ export class LocaleData {
         },
         successfulOrderMessage: 'Thank you for your order!'
     }
+    IN = {
+        lang: 'hi-IN',
+        landingPage: {
+            heading: 'Adyen Integration in React PWA Starter Store'
+        },
+        loginPage: {
+            paragraph: 'Welcome Back'
+        },
+        accountPage: {
+            heading: 'Account Details'
+        },
+        productDetailPage: {
+            productColor: 'Gray',
+            addToCartButtonCaption: 'Add to Cart',
+            proceedToCheckoutButtonCaption: 'Proceed to Checkout'
+        },
+        successfulOrderMessage: 'Thank you for your order!'
+    }
 }

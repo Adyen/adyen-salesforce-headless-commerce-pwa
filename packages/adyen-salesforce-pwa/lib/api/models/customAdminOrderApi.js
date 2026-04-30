@@ -22,4 +22,14 @@ export class CustomAdminOrderApiClient extends BaseApiClient {
         const response = await this._callAdminApi('GET', `orders/${orderNo}`)
         return response.json()
     }
+
+    async updateOrderPaymentInstrument(orderNo, pspReference, customProperties) {
+        const response = await this._callAdminApi('POST', `orders/${orderNo}/payment-instruments`, {
+            body: JSON.stringify({
+                pspReference,
+                customProperties
+            })
+        })
+        return response.json()
+    }
 }

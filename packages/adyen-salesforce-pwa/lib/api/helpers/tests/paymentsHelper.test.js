@@ -6,6 +6,7 @@ import {
     revertCheckoutStateForExpress,
     validateBasketPayments,
     isApplePayExpress,
+    isGooglePayExpress,
     isPayPalExpress
 } from '../paymentsHelper.js'
 import {
@@ -801,6 +802,20 @@ describe('paymentsHelper', () => {
         })
         it('should return false for other payment methods', () => {
             expect(isApplePayExpress({paymentMethod: {type: 'scheme'}})).toBe(false)
+        })
+    })
+
+    describe('isGooglePayExpress', () => {
+        it('should return true for google pay express', () => {
+            expect(
+                isGooglePayExpress({paymentMethod: {type: 'googlepay', subtype: 'express'}})
+            ).toBe(true)
+        })
+        it('should return false for non-express google pay', () => {
+            expect(isGooglePayExpress({paymentMethod: {type: 'googlepay'}})).toBe(false)
+        })
+        it('should return false for other payment methods', () => {
+            expect(isGooglePayExpress({paymentMethod: {type: 'scheme'}})).toBe(false)
         })
     })
 

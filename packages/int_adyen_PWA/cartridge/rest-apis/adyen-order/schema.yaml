@@ -41,3 +41,42 @@ paths:
           description: The requested order was not found.
         "500":
           description: An internal server error occurred.
+  /orders/{orderNo}/payment-instruments:
+    post:
+      summary: Update custom properties on payment instrument
+      operationId: updateOrderPaymentInstrument
+      parameters:
+        - in: query
+          name: siteId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - in: path
+          name: orderNo
+          required: true
+          description: The order for which payment instrument needs to be updated.
+          schema:
+            type: string
+            minLength: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ pspReference, customProperties ]
+              properties:
+                pspReference:
+                  type: string
+                customProperties:
+                  type: object
+      responses:
+        "200":
+          description: Order payment instrument updated successfully
+        "400":
+          description: Bad request, for example, a missing order number or payment instrument.
+        "404":
+          description: The requested order or payment instrument was not found.
+        "500":
+          description: An internal server error occurred.

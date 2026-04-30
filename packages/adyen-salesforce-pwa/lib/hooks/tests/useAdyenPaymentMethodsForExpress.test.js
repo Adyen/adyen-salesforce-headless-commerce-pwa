@@ -1,7 +1,9 @@
 /**
  * @jest-environment jsdom
  */
+import React from 'react'
 import {renderHook, waitFor} from '@testing-library/react'
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
 import useAdyenPaymentMethodsForExpress from '../useAdyenPaymentMethodsForExpress'
 import {AdyenPaymentMethodsForExpressService} from '../../services/payment-methods-for-express'
 
@@ -14,6 +16,16 @@ describe('useAdyenPaymentMethodsForExpress', () => {
         site: {id: 'RefArch'},
         locale: {id: 'en-US'},
         currency: 'USD'
+    }
+
+    const createWrapper = () => {
+        const queryClient = new QueryClient({
+            defaultOptions: {queries: {retry: false}}
+        })
+        // eslint-disable-next-line react/display-name, react/prop-types
+        return ({children}) => (
+            <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        )
     }
 
     let mockFetchPaymentMethodsForExpress
@@ -30,7 +42,9 @@ describe('useAdyenPaymentMethodsForExpress', () => {
         const mockData = {paymentMethods: [{type: 'applepay'}]}
         mockFetchPaymentMethodsForExpress.mockResolvedValue(mockData)
 
-        const {result} = renderHook(() => useAdyenPaymentMethodsForExpress(defaultProps))
+        const {result} = renderHook(() => useAdyenPaymentMethodsForExpress(defaultProps), {
+            wrapper: createWrapper()
+        })
 
         expect(result.current.isLoading).toBe(true)
 
@@ -50,7 +64,9 @@ describe('useAdyenPaymentMethodsForExpress', () => {
         const mockError = new Error('Fetch failed')
         mockFetchPaymentMethodsForExpress.mockRejectedValue(mockError)
 
-        const {result} = renderHook(() => useAdyenPaymentMethodsForExpress(defaultProps))
+        const {result} = renderHook(() => useAdyenPaymentMethodsForExpress(defaultProps), {
+            wrapper: createWrapper()
+        })
 
         await waitFor(() => {
             expect(result.current.isLoading).toBe(false)
@@ -61,8 +77,9 @@ describe('useAdyenPaymentMethodsForExpress', () => {
     })
 
     it('should skip fetching when skip is true', async () => {
-        const {result} = renderHook(() =>
-            useAdyenPaymentMethodsForExpress({...defaultProps, skip: true})
+        const {result} = renderHook(
+            () => useAdyenPaymentMethodsForExpress({...defaultProps, skip: true}),
+            {wrapper: createWrapper()}
         )
 
         await waitFor(() => {
@@ -74,8 +91,9 @@ describe('useAdyenPaymentMethodsForExpress', () => {
     })
 
     it('should skip fetching when authToken is missing', async () => {
-        const {result} = renderHook(() =>
-            useAdyenPaymentMethodsForExpress({...defaultProps, authToken: null})
+        const {result} = renderHook(
+            () => useAdyenPaymentMethodsForExpress({...defaultProps, authToken: null}),
+            {wrapper: createWrapper()}
         )
 
         await waitFor(() => {
@@ -86,8 +104,9 @@ describe('useAdyenPaymentMethodsForExpress', () => {
     })
 
     it('should skip fetching when currency is missing', async () => {
-        const {result} = renderHook(() =>
-            useAdyenPaymentMethodsForExpress({...defaultProps, currency: ''})
+        const {result} = renderHook(
+            () => useAdyenPaymentMethodsForExpress({...defaultProps, currency: ''}),
+            {wrapper: createWrapper()}
         )
 
         await waitFor(() => {
@@ -100,7 +119,7 @@ describe('useAdyenPaymentMethodsForExpress', () => {
     it('should construct service with correct parameters', async () => {
         mockFetchPaymentMethodsForExpress.mockResolvedValue({})
 
-        renderHook(() => useAdyenPaymentMethodsForExpress(defaultProps))
+        renderHook(() => useAdyenPaymentMethodsForExpress(defaultProps), {wrapper: createWrapper()})
 
         await waitFor(() => {
             expect(AdyenPaymentMethodsForExpressService).toHaveBeenCalledWith(

@@ -7,6 +7,7 @@ import {act, render, screen, waitFor} from '@testing-library/react'
 import PayPalExpressComponent from '../paypalExpress'
 import useAdyenEnvironment from '../../hooks/useAdyenEnvironment'
 import useAdyenPaymentMethods from '../../hooks/useAdyenPaymentMethods'
+import useAdyenPaymentMethodsForExpress from '../../hooks/useAdyenPaymentMethodsForExpress'
 import {AdyenCheckout, PayPal} from '@adyen/adyen-web'
 import {paypalExpressConfig} from '../paypal/expressConfig'
 import {AdyenShippingMethodsService} from '../../services/shipping-methods'
@@ -14,6 +15,7 @@ import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 
 jest.mock('../../hooks/useAdyenEnvironment')
 jest.mock('../../hooks/useAdyenPaymentMethods')
+jest.mock('../../hooks/useAdyenPaymentMethodsForExpress')
 jest.mock('../paypal/expressConfig')
 jest.mock('../../services/shipping-methods')
 jest.mock('@salesforce/commerce-sdk-react')
@@ -78,6 +80,12 @@ describe('PayPalExpressComponent', () => {
 
         useAdyenPaymentMethods.mockReturnValue({
             data: mockPaymentMethodsData,
+            error: null,
+            isLoading: false
+        })
+
+        useAdyenPaymentMethodsForExpress.mockReturnValue({
+            data: null,
             error: null,
             isLoading: false
         })

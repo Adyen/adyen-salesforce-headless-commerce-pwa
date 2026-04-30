@@ -53,4 +53,37 @@ describe('CustomAdminOrderApiClient', () => {
             expect(result).toEqual(mockOrder)
         })
     })
+
+    describe('updateOrderPaymentInstrument', () => {
+        it('should call _callAdminApi with correct payload and return parsed JSON', async () => {
+            const mockResult = {success: true}
+            const mockResponse = {
+                json: jest.fn().mockResolvedValue(mockResult)
+            }
+            client._callAdminApi = jest.fn().mockResolvedValue(mockResponse)
+
+            const orderNo = '12345'
+            const pspReference = 'PSP-123'
+            const customProperties = {donationToken: null}
+
+            const result = await client.updateOrderPaymentInstrument(
+                orderNo,
+                pspReference,
+                customProperties
+            )
+
+            expect(client._callAdminApi).toHaveBeenCalledWith(
+                'POST',
+                `orders/${orderNo}/payment-instruments`,
+                {
+                    body: JSON.stringify({
+                        pspReference,
+                        customProperties
+                    })
+                }
+            )
+            expect(mockResponse.json).toHaveBeenCalled()
+            expect(result).toEqual(mockResult)
+        })
+    })
 })

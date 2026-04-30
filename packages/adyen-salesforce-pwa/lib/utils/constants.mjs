@@ -12,7 +12,8 @@ export const PAYMENT_METHOD_TYPES = {
     WECHATPAY_QR: 'wechatpayQR',
     WECHATPAY_SDK: 'wechatpaySDK',
     APPLEPAY: 'applepay',
-    PAYPAL: 'paypal'
+    PAYPAL: 'paypal',
+    GOOGLEPAY: 'googlepay'
 }
 
 export const PAYMENT_TYPES = {
@@ -39,7 +40,11 @@ export const BLOCKED_PAYMENT_METHODS = [
     PAYMENT_METHOD_TYPES.WECHATPAY_SDK
 ]
 
-export const EXPRESS_PAYMENT_METHODS = [PAYMENT_METHOD_TYPES.APPLEPAY, PAYMENT_METHOD_TYPES.PAYPAL]
+export const EXPRESS_PAYMENT_METHODS = [
+    PAYMENT_METHOD_TYPES.APPLEPAY,
+    PAYMENT_METHOD_TYPES.PAYPAL,
+    PAYMENT_METHOD_TYPES.GOOGLEPAY
+]
 
 export const SHOPPER_INTERACTIONS = {
     CONT_AUTH: 'ContAuth',
@@ -113,7 +118,17 @@ export const ERROR_MESSAGE = {
     CUSTOMER_NOT_FOUND: 'customer not found',
     BASKET_NOT_FOUND: 'Basket not found in adyenContext',
     PSP_REFERENCE_NOT_FOUND: 'PSP reference not found in basket',
-    INVALID_PAYMENT_DATA: 'Invalid payment data'
+    INVALID_PAYMENT_DATA: 'Invalid payment data',
+    PAYMENT_INSTRUMENT_NOT_FOUND: 'Payment instrument not found',
+    DONATION_NOT_COMPLETED: 'Donation unsuccessful',
+    DONATION_CAMPAIGN_NOT_FOUND: 'Donation campaign not found',
+    DONATION_AMOUNT_MISMATCH: 'Donation amount now allowed'
+}
+
+export const DONATIONS = {
+    COMPLETED: 'completed',
+    ROUNDUP: 'roundup',
+    FIXED_AMOUNTS: 'fixedAmounts'
 }
 
 export const DEFAULT_EXPIRATION_TIME = 30

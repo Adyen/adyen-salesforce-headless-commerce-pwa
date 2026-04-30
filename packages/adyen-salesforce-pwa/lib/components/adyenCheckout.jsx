@@ -24,6 +24,8 @@ const AdyenCheckoutComponent = ({
     locale,
     site,
     navigate,
+    authToken: authTokenProp,
+    customerId: customerIdProp,
 
     // Page context
     page = PAGE_TYPES.CHECKOUT,
@@ -58,20 +60,22 @@ const AdyenCheckoutComponent = ({
     const [internalAdyenAction, setInternalAdyenAction] = useState(null)
     const [componentKey, setComponentKey] = useState(0)
 
-    const customerId = useCustomerId()
+    const hookCustomerId = useCustomerId()
+    const customerId = customerIdProp || hookCustomerId
     const customerTypeData = useCustomerType()
     const isCustomerRegistered = customerTypeData.isRegistered
     const {getTokenWhenReady} = useAccessToken()
-    const [authToken, setAuthToken] = useState()
+    const [authToken, setAuthToken] = useState(authTokenProp)
 
     useEffect(() => {
+        if (authTokenProp) return
         const getToken = async () => {
             const token = await getTokenWhenReady()
             setAuthToken(token)
         }
 
         getToken()
-    }, [])
+    }, [authTokenProp])
 
     // Fetch Adyen environment configuration
     const {
@@ -185,6 +189,7 @@ const AdyenCheckoutComponent = ({
 
     // Memoize the payment methods configuration to prevent unnecessary recalculations
     const paymentMethodsConfiguration = useMemo(() => {
+        if (!authToken) return null
         return getPaymentMethodsConfig({
             additionalPaymentMethodsConfiguration,
             paymentMethods: adyenPaymentMethods?.paymentMethods,
@@ -235,6 +240,7 @@ const AdyenCheckoutComponent = ({
         if (
             !adyenEnvironment ||
             !paymentContainer.current ||
+            !paymentMethodsConfiguration ||
             fetchingEnvironment ||
             fetchingPaymentMethods ||
             fetchingOrderNumber
@@ -380,6 +386,8 @@ AdyenCheckoutComponent.propTypes = {
     afterAdditionalDetails: PropTypes.arrayOf(PropTypes.func),
     onError: PropTypes.arrayOf(PropTypes.func),
     onStateChange: PropTypes.func,
+    authToken: PropTypes.string,
+    customerId: PropTypes.string,
 
     // UI
     spinner: PropTypes.node,

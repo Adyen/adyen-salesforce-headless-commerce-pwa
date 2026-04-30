@@ -219,15 +219,15 @@ export class ShopperData {
     }
     IN = {
         shopperName: {
-            firstName: 'Shubham',
-            lastName: 'Vijaivargiya'
+            firstName: 'Test',
+            lastName: 'Name'
         },
         telephone: '+91234567890',
-        shopperEmail: 'Shubham@Vijaivargiya.in',
+        shopperEmail: 'testname@test.in',
         address: {
             city: 'New Delhi',
             country: 'IN',
-            stateOrProvince: '',
+            stateOrProvince: 'IN',
             postalCode: '12345',
             street: 'Kungsgatan',
             houseNumberOrName: '37'

@@ -19,6 +19,7 @@ export * from './models/logger'
 export * from './middleware/webhook'
 export * from './middleware/minimal-request-context'
 export * from './middleware/request-context'
+export * from './middleware/payments-details-request-context'
 
 // Controllers
 export {default as ShippingAddressController} from './controllers/shipping-address'
@@ -32,10 +33,7 @@ export {default as GiftCardController} from './controllers/giftCard'
 export {default as CreateTemporaryBasketController} from './controllers/create-temporary-basket'
 export {default as ShopperDetailsController} from './controllers/shopper-details'
 export {default as PaymentDataReviewPageController} from './controllers/payment-data-review-page'
-
-// Webhook event handlers
-export * from './controllers/authorization-webhook-handler'
-export * from './controllers/order-closed-webhook-handler'
+export {default as DonationsController} from './controllers/donations'
 
 // Helpers
 export * from './helpers/basketHelper.js'

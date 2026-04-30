@@ -1,7 +1,9 @@
 /**
  * @jest-environment jsdom
  */
+import React from 'react'
 import {renderHook, waitFor, act} from '@testing-library/react'
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
 import useAdyenReviewPage from '../useAdyenReviewPage'
 import {AdyenPaymentDataReviewPageService} from '../../services/payment-data-review-page'
 import {AdyenPaymentsDetailsService} from '../../services/payments-details'
@@ -15,6 +17,16 @@ describe('useAdyenReviewPage', () => {
         customerId: 'customer-123',
         basketId: 'basket-456',
         site: {id: 'RefArch'}
+    }
+
+    const createWrapper = () => {
+        const queryClient = new QueryClient({
+            defaultOptions: {queries: {retry: false, staleTime: 0, cacheTime: 0}}
+        })
+        // eslint-disable-next-line react/display-name, react/prop-types
+        return ({children}) => (
+            <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        )
     }
 
     let mockGetPaymentData
@@ -37,7 +49,9 @@ describe('useAdyenReviewPage', () => {
         const mockData = {paymentData: 'test-data'}
         mockGetPaymentData.mockResolvedValue(mockData)
 
-        const {result} = renderHook(() => useAdyenReviewPage(defaultProps))
+        const {result} = renderHook(() => useAdyenReviewPage(defaultProps), {
+            wrapper: createWrapper()
+        })
 
         expect(result.current.isLoading).toBe(true)
 
@@ -53,7 +67,9 @@ describe('useAdyenReviewPage', () => {
         const mockError = new Error('Fetch failed')
         mockGetPaymentData.mockRejectedValue(mockError)
 
-        const {result} = renderHook(() => useAdyenReviewPage(defaultProps))
+        const {result} = renderHook(() => useAdyenReviewPage(defaultProps), {
+            wrapper: createWrapper()
+        })
 
         await waitFor(() => {
             expect(result.current.isLoading).toBe(false)
@@ -64,7 +80,9 @@ describe('useAdyenReviewPage', () => {
     })
 
     it('should skip fetching when skip is true', async () => {
-        const {result} = renderHook(() => useAdyenReviewPage({...defaultProps, skip: true}))
+        const {result} = renderHook(() => useAdyenReviewPage({...defaultProps, skip: true}), {
+            wrapper: createWrapper()
+        })
 
         await waitFor(() => {
             expect(result.current.isLoading).toBe(false)
@@ -75,7 +93,9 @@ describe('useAdyenReviewPage', () => {
     })
 
     it('should skip fetching when authToken is missing', async () => {
-        const {result} = renderHook(() => useAdyenReviewPage({...defaultProps, authToken: null}))
+        const {result} = renderHook(() => useAdyenReviewPage({...defaultProps, authToken: null}), {
+            wrapper: createWrapper()
+        })
 
         await waitFor(() => {
             expect(result.current.isLoading).toBe(false)
@@ -85,7 +105,9 @@ describe('useAdyenReviewPage', () => {
     })
 
     it('should skip fetching when basketId is missing', async () => {
-        const {result} = renderHook(() => useAdyenReviewPage({...defaultProps, basketId: null}))
+        const {result} = renderHook(() => useAdyenReviewPage({...defaultProps, basketId: null}), {
+            wrapper: createWrapper()
+        })
 
         await waitFor(() => {
             expect(result.current.isLoading).toBe(false)
@@ -101,7 +123,9 @@ describe('useAdyenReviewPage', () => {
             mockGetPaymentData.mockResolvedValue(mockPaymentData)
             mockSubmitPaymentsDetails.mockResolvedValue(mockResponse)
 
-            const {result} = renderHook(() => useAdyenReviewPage(defaultProps))
+            const {result} = renderHook(() => useAdyenReviewPage(defaultProps), {
+                wrapper: createWrapper()
+            })
 
             await waitFor(() => {
                 expect(result.current.isLoading).toBe(false)
@@ -122,7 +146,9 @@ describe('useAdyenReviewPage', () => {
             mockGetPaymentData.mockResolvedValue(mockPaymentData)
             mockSubmitPaymentsDetails.mockResolvedValue(mockResponse)
 
-            const {result} = renderHook(() => useAdyenReviewPage(defaultProps))
+            const {result} = renderHook(() => useAdyenReviewPage(defaultProps), {
+                wrapper: createWrapper()
+            })
 
             await waitFor(() => {
                 expect(result.current.paymentData).toEqual(mockPaymentData)
@@ -136,7 +162,9 @@ describe('useAdyenReviewPage', () => {
         })
 
         it('should throw when no payment data is available', async () => {
-            const {result} = renderHook(() => useAdyenReviewPage({...defaultProps, skip: true}))
+            const {result} = renderHook(() => useAdyenReviewPage({...defaultProps, skip: true}), {
+                wrapper: createWrapper()
+            })
 
             await waitFor(() => {
                 expect(result.current.isLoading).toBe(false)
@@ -155,7 +183,9 @@ describe('useAdyenReviewPage', () => {
             mockGetPaymentData.mockResolvedValue(mockPaymentData)
             mockSubmitPaymentsDetails.mockRejectedValue(mockError)
 
-            const {result} = renderHook(() => useAdyenReviewPage(defaultProps))
+            const {result} = renderHook(() => useAdyenReviewPage(defaultProps), {
+                wrapper: createWrapper()
+            })
 
             await waitFor(() => {
                 expect(result.current.paymentData).toEqual(mockPaymentData)
@@ -182,7 +212,9 @@ describe('useAdyenReviewPage', () => {
             const mockData2 = {paymentData: 'data-2'}
             mockGetPaymentData.mockResolvedValueOnce(mockData1).mockResolvedValueOnce(mockData2)
 
-            const {result} = renderHook(() => useAdyenReviewPage(defaultProps))
+            const {result} = renderHook(() => useAdyenReviewPage(defaultProps), {
+                wrapper: createWrapper()
+            })
 
             await waitFor(() => {
                 expect(result.current.paymentData).toEqual(mockData1)
@@ -192,7 +224,9 @@ describe('useAdyenReviewPage', () => {
                 await result.current.refetch()
             })
 
-            expect(result.current.paymentData).toEqual(mockData2)
+            await waitFor(() => {
+                expect(result.current.paymentData).toEqual(mockData2)
+            })
         })
     })
 })

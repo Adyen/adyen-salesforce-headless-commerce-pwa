@@ -83,6 +83,15 @@ class AdyenClientProvider {
     getUtilityApi() {
         return this.checkoutApi.UtilityApi
     }
+
+    /**
+     * Gets the Adyen Donations API instance.
+     * Used for retrieving donation campaigns and making donations.
+     * @returns {object} The Adyen DonationsApi instance.
+     */
+    getDonationsApi() {
+        return this.checkoutApi.DonationsApi
+    }
 }
 
 export default AdyenClientProvider

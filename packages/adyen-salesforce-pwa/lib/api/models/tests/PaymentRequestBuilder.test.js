@@ -34,6 +34,14 @@ jest.mock('../../utils/paymentUtils.js', () => ({
     getLineItems: jest.fn(() => [{id: 'item1'}]),
     getLineItemsWithoutTax: jest.fn(() => [{id: 'item1'}]),
     getAdditionalData: jest.fn(() => ({'riskdata.basket.item1.itemID': 'item1'})),
+    getEnhancedSchemeData: jest.fn(() => ({
+        'enhancedSchemeData.totalTaxAmount': '240',
+        'enhancedSchemeData.customerReference': 'customer123',
+        'enhancedSchemeData.itemDetailLine1.unitPrice': '2999',
+        'enhancedSchemeData.itemDetailLine1.totalAmount': '2999',
+        'enhancedSchemeData.itemDetailLine1.quantity': '1',
+        'enhancedSchemeData.itemDetailLine1.unitOfMeasure': 'EAC'
+    })),
     amountForPartialPayments: jest.fn(() => 5000)
 }))
 
@@ -542,6 +550,101 @@ describe('PaymentRequestBuilder', () => {
         })
     })
 
+    describe('withEnhancedSchemeData', () => {
+        beforeEach(() => {
+            mockContext.adyenConfig.l23Enabled = 'true'
+            mockContext.req.query = {locale: 'en-US'}
+            mockContext.stateData.paymentMethod.type = 'scheme'
+        })
+
+        it('should merge enhanced scheme data into additionalData', () => {
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.withAdditionalData()
+            builder.withEnhancedSchemeData()
+
+            const additionalData = builder.paymentRequest.additionalData
+            expect(additionalData['riskdata.basket.item1.itemID']).toBe('item1')
+            expect(additionalData['enhancedSchemeData.totalTaxAmount']).toBe('240')
+            expect(additionalData['enhancedSchemeData.customerReference']).toBe('customer123')
+            expect(additionalData['enhancedSchemeData.itemDetailLine1.unitPrice']).toBe('2999')
+        })
+
+        it('should add enhanced scheme data when no prior additionalData exists', () => {
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.withEnhancedSchemeData()
+
+            const additionalData = builder.paymentRequest.additionalData
+            expect(additionalData['enhancedSchemeData.totalTaxAmount']).toBe('240')
+        })
+
+        it('should not add enhanced scheme data when basket is missing', () => {
+            builder = new PaymentRequestBuilder({
+                adyenConfig: {l23Enabled: 'true'},
+                req: {query: {locale: 'en-US'}}
+            })
+            builder.withEnhancedSchemeData()
+
+            expect(builder.paymentRequest.additionalData).toBeUndefined()
+        })
+
+        it('should use commodity code from adyenConfig when available', () => {
+            mockContext.adyenConfig.l23CommodityCode = 'TESTCODE'
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.withEnhancedSchemeData()
+
+            const additionalData = builder.paymentRequest.additionalData
+            expect(additionalData['enhancedSchemeData.totalTaxAmount']).toBe('240')
+        })
+
+        it('should use provided commodity code over config', () => {
+            mockContext.adyenConfig.l23CommodityCode = 'CONFIG_CODE'
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.withEnhancedSchemeData(null, 'CUSTOM_CODE')
+
+            const additionalData = builder.paymentRequest.additionalData
+            expect(additionalData['enhancedSchemeData.totalTaxAmount']).toBe('240')
+        })
+
+        it('should skip when l23Enabled is not true', () => {
+            mockContext.adyenConfig.l23Enabled = 'false'
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.withEnhancedSchemeData()
+
+            expect(builder.paymentRequest.additionalData).toBeUndefined()
+        })
+
+        it('should skip when l23Enabled is missing', () => {
+            delete mockContext.adyenConfig.l23Enabled
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.withEnhancedSchemeData()
+
+            expect(builder.paymentRequest.additionalData).toBeUndefined()
+        })
+
+        it('should skip when locale is not US', () => {
+            mockContext.req.query = {locale: 'de-DE'}
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.withEnhancedSchemeData()
+
+            expect(builder.paymentRequest.additionalData).toBeUndefined()
+        })
+
+        it('should skip when locale is missing', () => {
+            mockContext.req.query = {}
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.withEnhancedSchemeData()
+
+            expect(builder.paymentRequest.additionalData).toBeUndefined()
+        })
+
+        it('should return builder for chaining', () => {
+            builder = new PaymentRequestBuilder(mockContext)
+            const result = builder.withEnhancedSchemeData()
+
+            expect(result).toBe(builder)
+        })
+    })
+
     describe('withLineItemsWithoutTax', () => {
         it('should add line items without tax', () => {
             builder = new PaymentRequestBuilder(mockContext)
@@ -672,6 +775,97 @@ describe('PaymentRequestBuilder', () => {
             expect(result).toHaveProperty('channel')
             expect(result).toHaveProperty('shopperEmail')
             expect(result).toHaveProperty('shopperReference')
+        })
+    })
+
+    describe('withInstallmentsGating', () => {
+        it('should keep installments when locale ends with BR (Brazil)', () => {
+            mockContext.req.query = {locale: 'pt-BR'}
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.paymentRequest.installments = {value: 3}
+
+            builder.withInstallmentsGating()
+
+            expect(builder.paymentRequest.installments).toEqual({value: 3})
+        })
+
+        it('should keep installments when locale ends with MX (Mexico)', () => {
+            mockContext.req.query = {locale: 'es-MX'}
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.paymentRequest.installments = {value: 3}
+
+            builder.withInstallmentsGating()
+
+            expect(builder.paymentRequest.installments).toEqual({value: 3})
+        })
+
+        it('should keep installments when locale ends with JP (Japan)', () => {
+            mockContext.req.query = {locale: 'ja-JP'}
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.paymentRequest.installments = {value: 3}
+
+            builder.withInstallmentsGating()
+
+            expect(builder.paymentRequest.installments).toEqual({value: 3})
+        })
+
+        it('should remove installments when locale ends with US', () => {
+            mockContext.req.query = {locale: 'en-US'}
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.paymentRequest.installments = {value: 3}
+
+            builder.withInstallmentsGating()
+
+            expect(builder.paymentRequest.installments).toBeUndefined()
+        })
+
+        it('should remove installments when locale ends with DE', () => {
+            mockContext.req.query = {locale: 'de-DE'}
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.paymentRequest.installments = {value: 3}
+
+            builder.withInstallmentsGating()
+
+            expect(builder.paymentRequest.installments).toBeUndefined()
+        })
+
+        it('should remove installments when locale is missing', () => {
+            mockContext.req.query = {}
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.paymentRequest.installments = {value: 3}
+
+            builder.withInstallmentsGating()
+
+            expect(builder.paymentRequest.installments).toBeUndefined()
+        })
+
+        it('should handle lowercase locale by normalizing to uppercase', () => {
+            mockContext.req.query = {locale: 'pt-br'}
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.paymentRequest.installments = {value: 3}
+
+            builder.withInstallmentsGating()
+
+            expect(builder.paymentRequest.installments).toEqual({value: 3})
+        })
+
+        it('should do nothing when installments is not present', () => {
+            mockContext.req.query = {locale: 'en-US'}
+            builder = new PaymentRequestBuilder(mockContext)
+
+            builder.withInstallmentsGating()
+
+            expect(builder.paymentRequest.installments).toBeUndefined()
+        })
+
+        it('should return builder for chaining', () => {
+            mockContext.req.query = {locale: 'en-US'}
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.paymentRequest.installments = {value: 3}
+
+            const result = builder.withInstallmentsGating()
+
+            expect(result).toBe(builder)
         })
     })
 })

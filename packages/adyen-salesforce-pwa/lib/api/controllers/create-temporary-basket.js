@@ -1,7 +1,6 @@
 import Logger from '../models/logger'
 import {AdyenError} from '../models/AdyenError'
 import {ERROR_MESSAGE} from '../../utils/constants.mjs'
-import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrentSite.mjs'
 import {BasketService} from '../models/basketService.js'
 import {createTemporaryBasket, removeExistingTemporaryBaskets} from '../helpers/basketHelper'
 
@@ -39,20 +38,19 @@ export default async function CreateTemporaryBasketController(req, res, next) {
             throw new AdyenError(ERROR_MESSAGE.BASKET_NOT_CREATED, 400)
         }
 
-        const adyenConfig = getAdyenConfigForCurrentSite(siteId)
-        const adyenContext = {
-            adyenConfig,
-            siteId,
-            authorization,
-            customerId: customerid,
-            basket: null
+        const {adyen: adyenContext} = res.locals
+        if (!adyenContext?.adyenConfig) {
+            throw new AdyenError(ERROR_MESSAGE.ADYEN_CONTEXT_NOT_FOUND, 500)
         }
+
+        adyenContext.authorization = authorization
+        adyenContext.customerId = customerid
+        adyenContext.basket = null
+
         const basketService = new BasketService(adyenContext, res)
         basket = await basketService.addProductToBasket(basket?.basketId, product)
         adyenContext.basketService = basketService
         adyenContext.basket = basket
-
-        res.locals.adyen = adyenContext
         res.locals.response = basket
 
         Logger.info('CreateTemporaryBasketController', 'success')

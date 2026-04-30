@@ -1,5 +1,6 @@
-import {useEffect, useState} from 'react'
+import {useQuery} from '@tanstack/react-query'
 import {AdyenPaymentMethodsForExpressService} from '../services/payment-methods-for-express'
+import {adyenKeys} from '../utils/queryKeys'
 
 /**
  * A hook for fetching and managing the Adyen payment methods for express checkout (Apple Pay, PayPal).
@@ -11,6 +12,7 @@ import {AdyenPaymentMethodsForExpressService} from '../services/payment-methods-
  * @param {object} props.site - The site object.
  * @param {object} props.locale - The locale object.
  * @param {string} props.currency - The currency code (e.g., 'USD', 'GBP').
+ * @param {object} [props.basket] - Optional basket object containing orderTotal for currencyAmount.
  * @param {boolean} [props.skip] - If true, the fetch will be skipped.
  * @returns {{isLoading: boolean, data: object|null, error: object|null}}
  */
@@ -20,45 +22,39 @@ const useAdyenPaymentMethodsForExpress = ({
     site,
     locale,
     currency,
+    basket,
     skip = false
 }) => {
-    const [isLoading, setIsLoading] = useState(!skip)
-    const [data, setData] = useState(null)
-    const [error, setError] = useState(null)
+    const currencyAmount = basket?.orderTotal
+    const country = locale?.id?.slice(-2)
 
-    useEffect(() => {
-        const fetchPaymentMethodsForExpress = async () => {
-            if (skip || !authToken || !currency) {
-                setIsLoading(false)
-                return
-            }
-
-            setIsLoading(true)
-            setError(null)
-
+    const query = useQuery({
+        queryKey: adyenKeys.paymentMethodsExpress(
+            site?.id,
+            locale?.id,
+            currency,
+            currencyAmount,
+            country
+        ),
+        queryFn: async () => {
             const adyenPaymentMethodsForExpressService = new AdyenPaymentMethodsForExpressService(
                 authToken,
                 customerId,
                 site
             )
-            try {
-                const result =
-                    await adyenPaymentMethodsForExpressService.fetchPaymentMethodsForExpress(
-                        locale,
-                        currency
-                    )
-                setData(result)
-            } catch (err) {
-                setError(err)
-            } finally {
-                setIsLoading(false)
-            }
-        }
+            return adyenPaymentMethodsForExpressService.fetchPaymentMethodsForExpress(
+                locale,
+                currency
+            )
+        },
+        enabled: !skip && !!authToken && !!currency
+    })
 
-        fetchPaymentMethodsForExpress()
-    }, [authToken, customerId, site?.id, locale?.id, currency, skip])
-
-    return {isLoading, data, error}
+    return {
+        isLoading: query.isLoading && query.fetchStatus !== 'idle',
+        data: query.data ?? null,
+        error: query.error ?? null
+    }
 }
 
 export default useAdyenPaymentMethodsForExpress

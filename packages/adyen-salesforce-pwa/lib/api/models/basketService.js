@@ -7,6 +7,7 @@ import {
 } from '../../utils/constants.mjs'
 import {getCardType} from '../../utils/getCardType.mjs'
 import {convertCurrencyValueToMajorUnits} from '../../utils/parsers.mjs'
+import {mapCustomFields} from '../utils/customFieldUtils.js'
 import Logger from '../models/logger'
 import {AdyenError} from './AdyenError'
 
@@ -93,10 +94,10 @@ export class BasketService {
      * Adds a payment instrument to the current basket.
      * @param {object} amount - The amount included in the payment request. Should have value and currency
      * @param {object} paymentMethod - The payment method object. Should have type and brand.
-     * @param {string} pspReference - The payment reference returned from Adyen.
+     * @param {Array<{field: string, value: *}>} customFields - Array of custom fields to add to the payment instrument.
      * @returns {Promise<object>} A promise that resolves to the updated basket object.
      */
-    async addPaymentInstrument(amount, paymentMethod, pspReference) {
+    async addPaymentInstrument(amount, paymentMethod, customFields = []) {
         if (!amount || !paymentMethod) {
             const missing = []
             if (!amount) missing.push('amount')
@@ -120,7 +121,7 @@ export class BasketService {
                         ? getCardType(paymentMethod?.brand || paymentMethod?.srcScheme)
                         : paymentMethod?.type
                 },
-                ...(pspReference && {c_pspReference: pspReference}),
+                ...mapCustomFields(customFields),
                 c_paymentMethodType: paymentMethod?.type,
                 ...((paymentMethod?.brand || paymentMethod?.srcScheme) && {
                     c_paymentMethodBrand: paymentMethod?.brand || paymentMethod?.srcScheme

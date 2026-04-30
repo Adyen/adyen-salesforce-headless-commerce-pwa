@@ -223,19 +223,20 @@ describe('BasketService', () => {
         })
 
         it('should correctly add a card payment instrument', async () => {
-            const pspReference = 'mockPspReference'
+            const customFields = [{field: 'c_pspReference', value: 'mockPspReference'}]
             const paymentMethod = {type: 'scheme', brand: 'visa'}
             const amount = {value: 100, currency: 'USD'}
 
             const mockUpdatedBasket = {basketId: 'mockBasketId', paymentInstruments: [{}]}
             mockShopperBaskets.addPaymentInstrumentToBasket.mockResolvedValue(mockUpdatedBasket)
 
-            await basketService.addPaymentInstrument(amount, paymentMethod, pspReference)
+            await basketService.addPaymentInstrument(amount, paymentMethod, customFields)
 
             expect(mockShopperBaskets.addPaymentInstrumentToBasket).toHaveBeenCalledWith(
                 expect.objectContaining({
                     body: expect.objectContaining({
                         paymentMethodId: PAYMENT_METHODS.CREDIT_CARD,
+                        c_pspReference: 'mockPspReference',
                         paymentCard: {cardType: 'Visa'},
                         c_paymentMethodType: 'scheme',
                         c_paymentMethodBrand: 'visa'
@@ -247,35 +248,59 @@ describe('BasketService', () => {
 
         it('should throw when amount is missing', async () => {
             await expect(
-                basketService.addPaymentInstrument(null, {type: 'scheme'}, 'psp123')
+                basketService.addPaymentInstrument(null, {type: 'scheme'}, [
+                    {field: 'c_pspReference', value: 'psp123'}
+                ])
             ).rejects.toThrow()
         })
 
         it('should throw when paymentMethod is missing', async () => {
             await expect(
-                basketService.addPaymentInstrument({value: 100, currency: 'USD'}, null, 'psp123')
+                basketService.addPaymentInstrument({value: 100, currency: 'USD'}, null, [
+                    {field: 'c_pspReference', value: 'psp123'}
+                ])
             ).rejects.toThrow()
         })
 
         it('should correctly add a component payment instrument', async () => {
-            const pspReference = 'mockPspReference'
+            const customFields = [{field: 'c_pspReference', value: 'mockPspReference'}]
             const paymentMethod = {type: 'ideal'}
             const amount = {value: 100, currency: 'EUR'}
 
             const mockUpdatedBasket = {basketId: 'mockBasketId', paymentInstruments: [{}]}
             mockShopperBaskets.addPaymentInstrumentToBasket.mockResolvedValue(mockUpdatedBasket)
 
-            await basketService.addPaymentInstrument(amount, paymentMethod, pspReference)
+            await basketService.addPaymentInstrument(amount, paymentMethod, customFields)
 
             expect(mockShopperBaskets.addPaymentInstrumentToBasket).toHaveBeenCalledWith(
                 expect.objectContaining({
                     body: expect.objectContaining({
                         paymentMethodId: PAYMENT_METHODS.ADYEN_COMPONENT,
+                        c_pspReference: 'mockPspReference',
                         c_paymentMethodType: 'ideal'
                     })
                 })
             )
             expect(mockRes.locals.adyen.basket).toEqual(mockUpdatedBasket)
+        })
+
+        it('should filter out null values and empty field names from custom fields', async () => {
+            const paymentMethod = {type: 'ideal'}
+            const amount = {value: 100, currency: 'EUR'}
+            const customFields = [
+                {field: 'c_pspReference', value: null},
+                {field: '', value: 'ignored'}
+            ]
+
+            const mockUpdatedBasket = {basketId: 'mockBasketId', paymentInstruments: [{}]}
+            mockShopperBaskets.addPaymentInstrumentToBasket.mockResolvedValue(mockUpdatedBasket)
+
+            await basketService.addPaymentInstrument(amount, paymentMethod, customFields)
+
+            const callArg = mockShopperBaskets.addPaymentInstrumentToBasket.mock.calls[0][0]
+            // mapCustomFields should filter out null values and empty field names
+            expect(callArg.body).not.toHaveProperty('c_pspReference')
+            expect(Object.keys(callArg.body).filter((key) => key === '')).toHaveLength(0)
         })
     })
 
@@ -283,7 +308,7 @@ describe('BasketService', () => {
         it('should update shipping, billing, and customer info and update the context', async () => {
             const shopperData = {
                 deliveryAddress: {street: '1 Ship St'},
-                billingAddress: {street: '1 Bill St'},
+                billingAddress: {street: '1 Bill St', country: 'US'},
                 profile: {
                     firstName: 'John',
                     lastName: 'Doe',
@@ -300,7 +325,11 @@ describe('BasketService', () => {
             await basketService.addShopperData(shopperData)
 
             expect(mockShopperBaskets.updateShippingAddressForShipment).toHaveBeenCalled()
-            expect(mockShopperBaskets.updateBillingAddressForBasket).toHaveBeenCalled()
+            expect(mockShopperBaskets.updateBillingAddressForBasket).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    body: expect.objectContaining({address1: '1 Bill St', countryCode: 'US'})
+                })
+            )
             expect(mockShopperBaskets.updateCustomerForBasket).toHaveBeenCalledWith({
                 body: {customerId: 'mockCustomerId', email: 'j.doe@example.com'},
                 parameters: {basketId: 'mockBasketId'}
