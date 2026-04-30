@@ -18,3 +18,10 @@ coverage
 /packages/adyen-salesforce-pwa/stats.json
 *.tgz
 docs
+
+# AI agent directories
+.claude/
+.windsurf/
+.factory/
+.gemini/
+openspec/
