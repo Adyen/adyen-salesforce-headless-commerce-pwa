@@ -138,7 +138,8 @@ export const ADYEN_LIVE_REGIONS = {
     LIVE_APSE: 'live-apse',
     LIVE_AU: 'live-au',
     LIVE_US: 'live-us',
-    LIVE_IN: 'live-in'
+    LIVE_IN: 'live-in',
+    LIVE_NEA: 'live-nea'
 }
 
 export const ADYEN_ENVIRONMENT = {
