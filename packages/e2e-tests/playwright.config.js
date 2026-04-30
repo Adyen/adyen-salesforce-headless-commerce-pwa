@@ -12,6 +12,9 @@ import {defineConfig, devices} from '@playwright/test'
  */
 export default defineConfig({
     testDir: './tests',
+    /* Maximum time per test (default 30s is too short for multi-step
+       checkout flows involving iframes, 3DS challenges, and retries) */
+    timeout: 90000,
     /* Run tests in files in parallel */
     fullyParallel: true,
     /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -25,7 +28,7 @@ export default defineConfig({
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     use: {
         /* Standard timeout per action */
-        actionTimeout:20000,
+        actionTimeout: 20000,
 
         /* Base URL to use in actions like `await page.goto('/')`. */
         baseURL: 'http://localhost:3000',
@@ -80,8 +83,11 @@ export default defineConfig({
 
     /* Run your local dev server before starting the tests */
     webServer: {
-      command: 'cd ../adyen-retail-react-app && npm run start',
-      url: 'http://localhost:3000',
-      reuseExistingServer: true,
-    },
+        command: process.env.CI
+            ? 'npm start --prefix ../adyen-retail-react-app'
+            : 'npm run start:env --prefix ../adyen-retail-react-app',
+        url: 'http://localhost:3000',
+        reuseExistingServer: true,
+        timeout: 180_000
+    }
 })
