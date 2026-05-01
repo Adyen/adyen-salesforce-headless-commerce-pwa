@@ -9,7 +9,7 @@
         "payments",
         "components"
     ],
-    "version": "4.2.2",
+    "version": "4.3.0",
     "main": "dist/app/index.js",
     "bin": {
         "include-env": "dist/scripts/include-env.js",
@@ -42,7 +42,7 @@
         "format": "prettier --write ./lib"
     },
     "peerDependencies": {
-        "@adyen/adyen-web": "^6.32.0",
+        "@adyen/adyen-web": "^6.34.0",
         "@tanstack/react-query": "^4.0.0",
         "@adyen/api-library": "^29.1.0",
         "commerce-sdk-isomorphic": "^4.2.0",
