@@ -47,12 +47,11 @@ import PropTypes from 'prop-types'
 /* -----------------Adyen Begin ------------------------ */
 import {AdyenDonations} from '@adyen/adyen-salesforce-pwa'
 import {AuthHelpers, useAuthHelper, useOrder, useProducts} from '@salesforce/commerce-sdk-react'
-import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
 /* -----------------Adyen End ------------------------ */
 
 const onClient = typeof window !== 'undefined'
 
-const CheckoutConfirmation = ({site, locale}) => {
+const CheckoutConfirmation = () => {
     const {orderNo} = useParams()
     const navigate = useNavigation()
     const [showDonations, setShowDonations] = useState(true)
@@ -576,8 +575,6 @@ const CheckoutConfirmation = ({site, locale}) => {
                                 <Container variant="form">
                                     <Stack spacing={6}>
                                         <AdyenDonations
-                                            site={site}
-                                            locale={locale}
                                             orderNo={orderNo}
                                             onCancel={() => setShowDonations(false)}
                                         />
@@ -593,23 +590,16 @@ const CheckoutConfirmation = ({site, locale}) => {
 }
 
 /* -----------------Adyen Begin ------------------------ */
-const CheckoutConfirmationContainer = () => {
-    const {locale, site} = useMultiSite()
-    return (
-        <CheckoutConfirmation
-            site={site}
-            locale={locale}
-            useOrder={useOrder}
-            useProducts={useProducts}
-            useAuthHelper={useAuthHelper}
-            AuthHelpers={AuthHelpers}
-        />
-    )
-}
+const CheckoutConfirmationContainer = () => (
+    <CheckoutConfirmation
+        useOrder={useOrder}
+        useProducts={useProducts}
+        useAuthHelper={useAuthHelper}
+        AuthHelpers={AuthHelpers}
+    />
+)
 
 CheckoutConfirmation.propTypes = {
-    site: PropTypes.object,
-    locale: PropTypes.object,
     useOrder: PropTypes.any,
     useProducts: PropTypes.any,
     useAuthHelper: PropTypes.any,
