@@ -1,5 +1,8 @@
 import React, {useEffect, useRef, useMemo, useCallback, useState} from 'react'
 import {useAccessToken, useCustomerId, useCustomerType} from '@salesforce/commerce-sdk-react'
+import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
+import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
+import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 import PropTypes from 'prop-types'
 import '../style/adyenCheckout.css'
 import {
@@ -16,14 +19,14 @@ import PAGE_TYPES from '../utils/pageTypes.mjs'
 
 const AdyenCheckoutComponent = ({
     // Order and payment data
-    basket,
+    basket: basketProp,
     returnUrl,
 
     // User data
     merchantDisplayName = '',
-    locale,
-    site,
-    navigate,
+    locale: localeProp,
+    site: siteProp,
+    navigate: navigateProp,
     authToken: authTokenProp,
     customerId: customerIdProp,
 
@@ -48,6 +51,17 @@ const AdyenCheckoutComponent = ({
 
     ...props
 }) => {
+    // Use retail-react-app hooks for default values
+    const {locale: hookLocale, site: hookSite} = useMultiSite()
+    const hookNavigate = useNavigation()
+    const {data: hookBasket, refetch: refetchBasket} = useCurrentBasket()
+
+    // Props override hook values
+    const site = siteProp ?? hookSite
+    const locale = localeProp ?? hookLocale
+    const navigate = navigateProp ?? hookNavigate
+    const basket = basketProp ?? hookBasket
+
     const paymentContainer = useRef(null)
     const checkoutRef = useRef(null)
     const dropinRef = useRef(null)
@@ -187,6 +201,34 @@ const AdyenCheckoutComponent = ({
         [onStateChange]
     )
 
+    // Refetch basket only when payment is fully resolved (no action, isFinal)
+    // This prevents dropin re-mount during 3DS2 challenge flow
+    const afterSubmitWithRefetch = useMemo(() => {
+        return [
+            ...afterSubmit,
+            async (state, component, actions, props, data) => {
+                const resp = data?.paymentsResponse
+                const hasAction = !!resp?.action
+                const isFinal = resp?.isFinal === true
+                if (!hasAction && isFinal && refetchBasket) {
+                    await refetchBasket()
+                }
+            }
+        ]
+    }, [afterSubmit, refetchBasket])
+
+    // Always refetch after additional details (3DS2 challenge etc. has resolved)
+    const afterAdditionalDetailsWithRefetch = useMemo(() => {
+        return [
+            ...afterAdditionalDetails,
+            async () => {
+                if (refetchBasket) {
+                    await refetchBasket()
+                }
+            }
+        ]
+    }, [afterAdditionalDetails, refetchBasket])
+
     // Memoize the payment methods configuration to prevent unnecessary recalculations
     const paymentMethodsConfiguration = useMemo(() => {
         if (!authToken) return null
@@ -208,9 +250,9 @@ const AdyenCheckoutComponent = ({
             resetDropin: resetDropin,
             navigate,
             onError,
-            afterSubmit,
+            afterSubmit: afterSubmitWithRefetch,
             beforeSubmit,
-            afterAdditionalDetails,
+            afterAdditionalDetails: afterAdditionalDetailsWithRefetch,
             beforeAdditionalDetails,
             locale
         })
@@ -227,7 +269,9 @@ const AdyenCheckoutComponent = ({
         internalOrderNo,
         returnUrl,
         customerId,
-        navigate
+        navigate,
+        afterSubmitWithRefetch,
+        afterAdditionalDetailsWithRefetch
     ])
 
     // Memoize the translations to prevent unnecessary recalculations
@@ -364,11 +408,11 @@ const AdyenCheckoutComponent = ({
 }
 
 AdyenCheckoutComponent.propTypes = {
-    // Required props
-    site: PropTypes.object.isRequired,
-    locale: PropTypes.object.isRequired,
-    navigate: PropTypes.func.isRequired,
-    basket: PropTypes.object.isRequired,
+    // Optional props (fetched from retail-react-app hooks if not provided)
+    site: PropTypes.object,
+    locale: PropTypes.object,
+    navigate: PropTypes.func,
+    basket: PropTypes.object,
 
     // Order and payment data
     returnUrl: PropTypes.string,

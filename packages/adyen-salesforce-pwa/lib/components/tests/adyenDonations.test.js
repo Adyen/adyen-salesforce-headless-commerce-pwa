@@ -11,6 +11,8 @@ import {AdyenDonationsService} from '../../services/donations'
 import {AdyenCheckout, Donation} from '@adyen/adyen-web'
 import {getCheckoutConfig} from '../helpers/adyenCheckout.utils'
 import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
+import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
+import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 
 jest.mock('../../hooks/useAdyenEnvironment')
 jest.mock('../../hooks/useAdyenDonationCampaigns')
@@ -19,6 +21,8 @@ jest.mock('@salesforce/commerce-sdk-react', () => ({
     useAccessToken: jest.fn(),
     useCustomerId: jest.fn()
 }))
+jest.mock('@salesforce/retail-react-app/app/hooks/use-multi-site')
+jest.mock('@salesforce/retail-react-app/app/hooks/use-current-basket')
 jest.mock('../helpers/adyenCheckout.utils', () => ({
     getCheckoutConfig: jest.fn(() => ({
         environment: 'test',
@@ -99,6 +103,16 @@ describe('AdyenDonations', () => {
 
         AdyenCheckout.mockResolvedValue({
             create: jest.fn()
+        })
+
+        // Mock retail-react-app hooks
+        useMultiSite.mockReturnValue({
+            site: {id: 'RefArchGlobal'},
+            locale: {id: 'en-US'}
+        })
+        useCurrentBasket.mockReturnValue({
+            data: null,
+            refetch: jest.fn()
         })
     })
 
@@ -429,5 +443,78 @@ describe('AdyenDonations', () => {
 
         expect(firstDone).toBe(true)
         expect(mockSubmitDonation).toHaveBeenCalledTimes(1)
+    })
+
+    describe('retail-react-app hooks integration', () => {
+        it('should use hook values when site and locale props are not provided', async () => {
+            useMultiSite.mockReturnValue({
+                site: {id: 'HookSiteId'},
+                locale: {id: 'fr-FR'}
+            })
+
+            await act(async () => {
+                render(<AdyenDonations orderNo="12345" />)
+            })
+
+            await waitFor(() => {
+                expect(useAdyenEnvironment).toHaveBeenCalledWith(
+                    expect.objectContaining({
+                        site: {id: 'HookSiteId'}
+                    })
+                )
+            })
+        })
+
+        it('should prefer explicit props over hook values', async () => {
+            useMultiSite.mockReturnValue({
+                site: {id: 'HookSiteId'},
+                locale: {id: 'fr-FR'}
+            })
+
+            await act(async () => {
+                render(
+                    <AdyenDonations
+                        site={{id: 'PropSiteId'}}
+                        locale={{id: 'en-US'}}
+                        orderNo="12345"
+                    />
+                )
+            })
+
+            await waitFor(() => {
+                expect(useAdyenEnvironment).toHaveBeenCalledWith(
+                    expect.objectContaining({
+                        site: {id: 'PropSiteId'}
+                    })
+                )
+            })
+        })
+
+        it('should call refetchBasket after successful donation', async () => {
+            const mockRefetch = jest.fn().mockResolvedValue({})
+            useCurrentBasket.mockReturnValue({
+                data: null,
+                refetch: mockRefetch
+            })
+
+            await act(async () => {
+                render(<AdyenDonations {...defaultProps} />)
+            })
+
+            await act(async () => {
+                await new Promise((resolve) => setTimeout(resolve, 0))
+            })
+
+            const donationConfig = Donation.mock.calls[0][1]
+            const mockComponent = {setStatus: mockSetStatus}
+
+            await act(async () => {
+                await donationConfig.onDonate({data: {amount: 10}}, mockComponent)
+            })
+
+            await waitFor(() => {
+                expect(mockRefetch).toHaveBeenCalled()
+            })
+        })
     })
 })

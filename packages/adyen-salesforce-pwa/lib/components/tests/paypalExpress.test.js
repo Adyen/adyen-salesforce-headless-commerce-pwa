@@ -12,6 +12,9 @@ import {AdyenCheckout, PayPal} from '@adyen/adyen-web'
 import {paypalExpressConfig} from '../paypal/expressConfig'
 import {AdyenShippingMethodsService} from '../../services/shipping-methods'
 import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
+import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
+import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
+import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 
 jest.mock('../../hooks/useAdyenEnvironment')
 jest.mock('../../hooks/useAdyenPaymentMethods')
@@ -19,6 +22,9 @@ jest.mock('../../hooks/useAdyenPaymentMethodsForExpress')
 jest.mock('../paypal/expressConfig')
 jest.mock('../../services/shipping-methods')
 jest.mock('@salesforce/commerce-sdk-react')
+jest.mock('@salesforce/retail-react-app/app/hooks/use-multi-site')
+jest.mock('@salesforce/retail-react-app/app/hooks/use-navigation')
+jest.mock('@salesforce/retail-react-app/app/hooks/use-current-basket')
 jest.mock('@adyen/adyen-web', () => ({
     AdyenCheckout: jest.fn().mockResolvedValue({}),
     PayPal: jest.fn().mockImplementation(() => ({
@@ -108,6 +114,17 @@ describe('PayPalExpressComponent', () => {
             mount: jest.fn(),
             unmount: jest.fn()
         }))
+
+        // Mock retail-react-app hooks
+        useMultiSite.mockReturnValue({
+            site: {id: 'RefArchGlobal'},
+            locale: {id: 'en-US'}
+        })
+        useNavigation.mockReturnValue(jest.fn())
+        useCurrentBasket.mockReturnValue({
+            data: defaultProps.basket,
+            refetch: jest.fn()
+        })
     })
 
     afterEach(() => {
@@ -198,9 +215,9 @@ describe('PayPalExpressComponent', () => {
                         site: defaultProps.site,
                         locale: defaultProps.locale,
                         navigate: defaultProps.navigate,
-                        beforeSubmit,
-                        afterSubmit,
-                        onError,
+                        beforeSubmit: expect.arrayContaining(beforeSubmit),
+                        afterSubmit: expect.arrayContaining(afterSubmit),
+                        onError: expect.arrayContaining(onError),
                         fetchShippingMethods: expect.any(Function)
                     })
                 )
@@ -249,6 +266,7 @@ describe('PayPalExpressComponent', () => {
         })
 
         it('does not initialize when basket is missing', async () => {
+            useCurrentBasket.mockReturnValue({data: null})
             await act(async () => {
                 render(<PayPalExpressComponent {...defaultProps} basket={null} />)
             })
@@ -462,6 +480,50 @@ describe('PayPalExpressComponent', () => {
             await waitFor(() => {
                 expect(AdyenCheckout.mock.calls.length).toBeGreaterThan(initialCallCount)
             })
+        })
+    })
+
+    describe('Active payment guard', () => {
+        it('does not re-init while a payment flow is in progress', async () => {
+            // Reset AdyenCheckout in case a previous test left it rejecting.
+            AdyenCheckout.mockResolvedValue({})
+            const beforeSubmit = [jest.fn()]
+            const {rerender} = await act(async () => {
+                return render(
+                    <PayPalExpressComponent {...defaultProps} beforeSubmit={beforeSubmit} />
+                )
+            })
+
+            await waitFor(() => {
+                expect(paypalExpressConfig).toHaveBeenCalled()
+            })
+
+            // Simulate that the user clicked the PayPal button: the SDK invokes
+            // beforeSubmit callbacks, the wrapped one flips paymentActiveRef = true.
+            const passedBeforeSubmit =
+                paypalExpressConfig.mock.calls[paypalExpressConfig.mock.calls.length - 1][0]
+                    .beforeSubmit
+            passedBeforeSubmit.forEach((cb) => cb())
+
+            const callsBeforeRerender = paypalExpressConfig.mock.calls.length
+            const checkoutCallsBefore = AdyenCheckout.mock.calls.length
+            const paypalCallsBefore = PayPal.mock.calls.length
+
+            // Trigger a re-render with a basket reference change (e.g., cache invalidated mid-flow).
+            await act(async () => {
+                rerender(
+                    <PayPalExpressComponent
+                        {...defaultProps}
+                        beforeSubmit={beforeSubmit}
+                        basket={{basketId: 'test-basket'}}
+                    />
+                )
+            })
+
+            // The init effect must NOT run again while the flow is active.
+            expect(paypalExpressConfig.mock.calls).toHaveLength(callsBeforeRerender)
+            expect(AdyenCheckout.mock.calls).toHaveLength(checkoutCallsBefore)
+            expect(PayPal.mock.calls).toHaveLength(paypalCallsBefore)
         })
     })
 })

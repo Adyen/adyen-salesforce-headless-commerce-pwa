@@ -1,5 +1,8 @@
 import React, {useEffect, useRef, useMemo, useCallback, useState} from 'react'
 import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
+import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
+import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
+import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 import PropTypes from 'prop-types'
 import {AdyenCheckout, PayPal} from '@adyen/adyen-web'
 import '../style/adyenCheckout.css'
@@ -61,12 +64,12 @@ import {paypalExpressConfig} from './paypal/expressConfig'
  */
 const PayPalExpressComponent = ({
     // Order and payment data
-    basket,
+    basket: basketProp,
 
     // User data
-    site,
-    locale,
-    navigate,
+    site: siteProp,
+    locale: localeProp,
+    navigate: navigateProp,
 
     // Callbacks - Payment flow
     beforeSubmit = [],
@@ -102,6 +105,17 @@ const PayPalExpressComponent = ({
     authToken: authTokenProp,
     customerId: customerIdProp
 }) => {
+    // Use retail-react-app hooks for default values
+    const {locale: hookLocale, site: hookSite} = useMultiSite()
+    const hookNavigate = useNavigation()
+    const {data: hookBasket, refetch: refetchBasket} = useCurrentBasket()
+
+    // Props override hook values
+    const site = siteProp ?? hookSite
+    const locale = localeProp ?? hookLocale
+    const navigate = navigateProp ?? hookNavigate
+    const basket = basketProp ?? hookBasket
+
     const hookCustomerId = useCustomerId()
     const customerId = customerIdProp || hookCustomerId
     const {getTokenWhenReady} = useAccessToken()
@@ -126,6 +140,13 @@ const PayPalExpressComponent = ({
     const paymentContainer = useRef(null)
     const paypalButtonRef = useRef(null)
     const errorShownRef = useRef(false)
+
+    // Tracks whether a payment flow is currently in progress so we don't
+    // tear down the SDK (and thus the popup) while it's running.
+    const paymentActiveRef = useRef(false)
+
+    // Use refs to store callbacks so effect doesn't depend on their identities
+    const callbacksRef = useRef({})
 
     const {
         data: adyenEnvironment,
@@ -183,23 +204,61 @@ const PayPalExpressComponent = ({
         [authToken, customerId, site]
     )
 
+    // Helpers to flip the payment-active flag so the init effect's cleanup
+    // doesn't tear down the SDK while a popup/flow is still in progress.
+    const markPaymentActive = useCallback(() => {
+        paymentActiveRef.current = true
+    }, [])
+    const markPaymentInactive = useCallback(() => {
+        paymentActiveRef.current = false
+    }, [])
+    const markPaymentInactiveIfFinal = useCallback((state) => {
+        if (!state?.action) {
+            paymentActiveRef.current = false
+        }
+    }, [])
+
+    // Update callback refs after all callbacks are defined.
+    // We append our flag-management callbacks so user callbacks always run first.
+    callbacksRef.current = {
+        beforeSubmit: [...beforeSubmit, markPaymentActive],
+        afterSubmit: [...afterSubmit, markPaymentInactiveIfFinal],
+        beforeAdditionalDetails,
+        afterAdditionalDetails: [...afterAdditionalDetails, markPaymentInactiveIfFinal],
+        beforeAuthorized,
+        afterAuthorized: [...afterAuthorized, markPaymentInactive],
+        beforeShippingAddressChange: [...beforeShippingAddressChange, markPaymentActive],
+        afterShippingAddressChange,
+        beforeShippingOptionsChange,
+        afterShippingOptionsChange,
+        onError: [...onError, markPaymentInactive],
+        navigate,
+        fetchShippingMethods
+    }
+
     useEffect(() => {
         if (adyenEnvironmentError && !errorShownRef.current) {
             errorShownRef.current = true
             console.error('Error fetching Adyen environment:', adyenEnvironmentError)
-            onError.forEach((cb) => cb(adyenEnvironmentError))
+            callbacksRef.current.onError.forEach((cb) => cb(adyenEnvironmentError))
         }
-    }, [adyenEnvironmentError, onError])
+    }, [adyenEnvironmentError])
 
     useEffect(() => {
         if (adyenPaymentMethodsError && !errorShownRef.current) {
             errorShownRef.current = true
             console.error('Error fetching Adyen payment methods:', adyenPaymentMethodsError)
-            onError.forEach((cb) => cb(adyenPaymentMethodsError))
+            callbacksRef.current.onError.forEach((cb) => cb(adyenPaymentMethodsError))
         }
-    }, [adyenPaymentMethodsError, onError])
+    }, [adyenPaymentMethodsError])
 
     useEffect(() => {
+        // Don't re-init while a payment flow is in progress — replacing the
+        // PayPal SDK mid-flow invalidates its session and causes a 403 on the
+        // PayPal orders endpoint when the user confirms in the popup.
+        if (paymentActiveRef.current) {
+            return
+        }
         if (window?.paypal?.firstElementChild) {
             window.paypal = undefined
         }
@@ -237,20 +296,20 @@ const PayPalExpressComponent = ({
                     basket: shopperBasket,
                     site,
                     locale,
-                    navigate,
-                    beforeSubmit,
-                    afterSubmit,
-                    beforeAdditionalDetails,
-                    afterAdditionalDetails,
-                    beforeAuthorized,
-                    afterAuthorized,
-                    beforeShippingAddressChange,
-                    afterShippingAddressChange,
-                    beforeShippingOptionsChange,
-                    afterShippingOptionsChange,
+                    navigate: callbacksRef.current.navigate,
+                    beforeSubmit: callbacksRef.current.beforeSubmit,
+                    afterSubmit: callbacksRef.current.afterSubmit,
+                    beforeAdditionalDetails: callbacksRef.current.beforeAdditionalDetails,
+                    afterAdditionalDetails: callbacksRef.current.afterAdditionalDetails,
+                    beforeAuthorized: callbacksRef.current.beforeAuthorized,
+                    afterAuthorized: callbacksRef.current.afterAuthorized,
+                    beforeShippingAddressChange: callbacksRef.current.beforeShippingAddressChange,
+                    afterShippingAddressChange: callbacksRef.current.afterShippingAddressChange,
+                    beforeShippingOptionsChange: callbacksRef.current.beforeShippingOptionsChange,
+                    afterShippingOptionsChange: callbacksRef.current.afterShippingOptionsChange,
                     configuration,
-                    onError,
-                    fetchShippingMethods,
+                    onError: callbacksRef.current.onError,
+                    fetchShippingMethods: callbacksRef.current.fetchShippingMethods,
                     enableReview,
                     reviewPageUrl,
                     type,
@@ -281,7 +340,7 @@ const PayPalExpressComponent = ({
                 console.error('Error initializing PayPal Express:', err)
                 if (!errorShownRef.current) {
                     errorShownRef.current = true
-                    onError.forEach((cb) => cb(err))
+                    callbacksRef.current.onError.forEach((cb) => cb(err))
                 }
             }
         }
@@ -289,11 +348,18 @@ const PayPalExpressComponent = ({
         initializeCheckout()
 
         return () => {
+            // Skip teardown while a payment flow is active so we don't kill
+            // the popup that the SDK has just opened.
+            if (paymentActiveRef.current) {
+                return
+            }
             if (paypalButtonRef.current) {
                 try {
                     paypalButtonRef.current.unmount()
-                    // PayPal specific cleanup: destroy the PayPal instance
-                    if (window.paypal && typeof window.paypal.__internal_destroy__ === 'function') {
+                    if (
+                        window.paypal &&
+                        typeof window.paypal.__internal_destroy__ === 'function'
+                    ) {
                         window.paypal.__internal_destroy__()
                     }
                 } catch (e) {
@@ -305,32 +371,40 @@ const PayPalExpressComponent = ({
     }, [
         adyenEnvironment?.ADYEN_ENVIRONMENT,
         adyenEnvironment?.ADYEN_CLIENT_KEY,
-        adyenPaymentMethods?.paymentMethods,
-        adyenPaymentMethods?.applicationInfo,
         basket?.basketId,
         basket?.orderTotal,
         locale?.id,
         authToken,
         site?.id,
         hasPayPalMethod,
-        beforeSubmit,
-        afterSubmit,
-        beforeAdditionalDetails,
-        afterAdditionalDetails,
-        beforeAuthorized,
-        afterAuthorized,
-        beforeShippingAddressChange,
-        afterShippingAddressChange,
-        beforeShippingOptionsChange,
-        afterShippingOptionsChange,
-        onError,
-        navigate,
         enableReview,
         reviewPageUrl,
-        fetchShippingMethods,
         type,
-        product
+        product?.id,
+        product?.price,
+        product?.quantity
     ])
+
+    // Always tear down on the component's actual unmount, regardless of any
+    // active payment flow (covers navigation away, etc.).
+    useEffect(() => {
+        return () => {
+            if (paypalButtonRef.current) {
+                try {
+                    paypalButtonRef.current.unmount()
+                    if (
+                        window.paypal &&
+                        typeof window.paypal.__internal_destroy__ === 'function'
+                    ) {
+                        window.paypal.__internal_destroy__()
+                    }
+                } catch (e) {
+                    // noop
+                }
+                paypalButtonRef.current = null
+            }
+        }
+    }, [])
 
     return (
         <>
@@ -341,10 +415,12 @@ const PayPalExpressComponent = ({
 }
 
 PayPalExpressComponent.propTypes = {
-    locale: PropTypes.object.isRequired,
-    site: PropTypes.object.isRequired,
+    // Optional props (fetched from retail-react-app hooks if not provided)
+    locale: PropTypes.object,
+    site: PropTypes.object,
     basket: PropTypes.object,
-    navigate: PropTypes.func.isRequired,
+    navigate: PropTypes.func,
+
     beforeSubmit: PropTypes.arrayOf(PropTypes.func),
     afterSubmit: PropTypes.arrayOf(PropTypes.func),
     beforeAdditionalDetails: PropTypes.arrayOf(PropTypes.func),

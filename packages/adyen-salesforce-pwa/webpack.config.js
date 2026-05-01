@@ -101,6 +101,7 @@ const webConfig = {
         'prop-types',
         '@adyen/adyen-web',
         '@salesforce/commerce-sdk-react',
+        /^@salesforce\/retail-react-app\/.+$/i,
         '@tanstack/react-query'
     ],
     module: {

@@ -13,6 +13,9 @@ import {AdyenCheckout, GooglePay} from '@adyen/adyen-web'
 import {getGooglePayExpressConfig} from '../googlepay/expressConfig'
 import {AdyenShippingMethodsService} from '../../services/shipping-methods'
 import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
+import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
+import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
+import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 
 jest.mock('../../hooks/useAdyenEnvironment')
 jest.mock('../../hooks/useAdyenPaymentMethods')
@@ -21,6 +24,9 @@ jest.mock('../../hooks/useAdyenShippingMethods')
 jest.mock('../googlepay/expressConfig')
 jest.mock('../../services/shipping-methods')
 jest.mock('@salesforce/commerce-sdk-react')
+jest.mock('@salesforce/retail-react-app/app/hooks/use-multi-site')
+jest.mock('@salesforce/retail-react-app/app/hooks/use-navigation')
+jest.mock('@salesforce/retail-react-app/app/hooks/use-current-basket')
 jest.mock('@adyen/adyen-web', () => ({
     AdyenCheckout: jest.fn().mockResolvedValue({}),
     GooglePay: jest.fn().mockImplementation(() => ({
@@ -105,6 +111,17 @@ describe('GooglePayExpressComponent', () => {
             mount: jest.fn(),
             unmount: jest.fn()
         }))
+
+        // Mock retail-react-app hooks
+        useMultiSite.mockReturnValue({
+            site: {id: 'RefArchGlobal'},
+            locale: {id: 'en-US'}
+        })
+        useNavigation.mockReturnValue(jest.fn())
+        useCurrentBasket.mockReturnValue({
+            data: defaultProps.basket,
+            refetch: jest.fn()
+        })
     })
 
     afterEach(() => {
@@ -178,7 +195,7 @@ describe('GooglePayExpressComponent', () => {
                         site: defaultProps.site,
                         locale: defaultProps.locale,
                         navigate: defaultProps.navigate,
-                        onError,
+                        onError: expect.arrayContaining(onError),
                         fetchShippingMethods: expect.any(Function)
                     })
                 )
@@ -215,6 +232,10 @@ describe('GooglePayExpressComponent', () => {
         })
 
         it('does not initialize when basket is missing', async () => {
+            useCurrentBasket.mockReturnValue({
+                data: null,
+                refetch: jest.fn()
+            })
             await act(async () => {
                 render(<GooglePayExpressComponent {...defaultProps} basket={null} />)
             })
@@ -392,6 +413,38 @@ describe('GooglePayExpressComponent', () => {
             )
             expect(mockGetShippingMethods).toHaveBeenCalled()
             expect(result).toEqual(mockShippingMethodsData)
+        })
+    })
+
+    describe('Active payment guard', () => {
+        it('does not re-init while a payment flow is in progress', async () => {
+            const {rerender} = await act(async () => {
+                return render(<GooglePayExpressComponent {...defaultProps} />)
+            })
+
+            await waitFor(() => {
+                expect(getGooglePayExpressConfig).toHaveBeenCalled()
+            })
+
+            const callsBefore = getGooglePayExpressConfig.mock.calls.length
+            const checkoutBefore = AdyenCheckout.mock.calls.length
+
+            // Flip paymentActiveRef = true via wrapped fetchShippingMethods.
+            const passedFetch =
+                getGooglePayExpressConfig.mock.calls[callsBefore - 1][0].fetchShippingMethods
+            await passedFetch('test-basket')
+
+            await act(async () => {
+                rerender(
+                    <GooglePayExpressComponent
+                        {...defaultProps}
+                        basket={{basketId: 'test-basket'}}
+                    />
+                )
+            })
+
+            expect(getGooglePayExpressConfig.mock.calls).toHaveLength(callsBefore)
+            expect(AdyenCheckout.mock.calls).toHaveLength(checkoutBefore)
         })
     })
 })

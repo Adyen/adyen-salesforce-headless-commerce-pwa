@@ -1,5 +1,8 @@
 import React, {useEffect, useRef, useCallback, useMemo, useState} from 'react'
 import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
+import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
+import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
+import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 import PropTypes from 'prop-types'
 import {AdyenCheckout, GooglePay} from '@adyen/adyen-web'
 import '../style/adyenCheckout.css'
@@ -12,10 +15,10 @@ import {AdyenShippingMethodsService} from '../services/shipping-methods'
 
 const GooglePayExpressComponent = (props) => {
     const {
-        locale,
-        site,
-        basket,
-        navigate,
+        locale: localeProp,
+        site: siteProp,
+        basket: basketProp,
+        navigate: navigateProp,
         onError = [],
         currency,
         isExpressPdp = false,
@@ -26,6 +29,18 @@ const GooglePayExpressComponent = (props) => {
         authToken: authTokenProp,
         customerId: customerIdProp
     } = props
+
+    // Use retail-react-app hooks for default values
+    const {locale: hookLocale, site: hookSite} = useMultiSite()
+    const hookNavigate = useNavigation()
+    const {data: hookBasket, refetch: refetchBasket} = useCurrentBasket()
+
+    // Props override hook values
+    const site = siteProp ?? hookSite
+    const locale = localeProp ?? hookLocale
+    const navigate = navigateProp ?? hookNavigate
+    const basket = basketProp ?? hookBasket
+
 
     const hookCustomerId = useCustomerId()
     const customerId = customerIdProp || hookCustomerId
@@ -51,9 +66,17 @@ const GooglePayExpressComponent = (props) => {
     const errorShownRef = useRef(false)
     const [remountKey, setRemountKey] = useState(0)
 
+    // Tracks whether a Google Pay session is currently active so we don't
+    // tear down the button (and thus the sheet) while it's running.
+    const paymentActiveRef = useRef(false)
+
     const handlePaymentCancel = useCallback(() => {
+        paymentActiveRef.current = false
         setRemountKey((prev) => prev + 1)
     }, [])
+
+    // Store callbacks in ref to avoid unnecessary re-initialization when callback identities change
+    const callbacksRef = useRef({})
 
     const {
         data: adyenEnvironment,
@@ -105,6 +128,10 @@ const GooglePayExpressComponent = (props) => {
         [isLoadingEnvironment, isLoadingPaymentMethods, isLoadingShippingMethods]
     )
 
+    const hasGooglePayMethod = useMemo(() => {
+        return adyenPaymentMethods?.paymentMethods?.some((method) => method.type === 'googlepay')
+    }, [adyenPaymentMethods?.paymentMethods])
+
     const fetchShippingMethods = useCallback(
         async (basketId) => {
             const adyenShippingMethodsService = new AdyenShippingMethodsService(
@@ -118,31 +145,62 @@ const GooglePayExpressComponent = (props) => {
         [authToken, customerId, site]
     )
 
+    // Helpers to flip the payment-active flag so the init effect's cleanup
+    // doesn't tear down the button while a Google Pay sheet is presenting.
+    const markPaymentActive = useCallback(() => {
+        paymentActiveRef.current = true
+    }, [])
+    const markPaymentInactive = useCallback(() => {
+        paymentActiveRef.current = false
+    }, [])
+
+    // Wrap fetchShippingMethods to flag a session in progress.
+    const wrappedFetchShippingMethods = useCallback(
+        async (basketId) => {
+            markPaymentActive()
+            return await fetchShippingMethods(basketId)
+        },
+        [fetchShippingMethods, markPaymentActive]
+    )
+
+    // Update callback refs after all callbacks are defined.
+    callbacksRef.current = {
+        navigate,
+        fetchShippingMethods: wrappedFetchShippingMethods,
+        onError: [...onError, markPaymentInactive],
+        handlePaymentCancel
+    }
+
     useEffect(() => {
         if (adyenEnvironmentError && !errorShownRef.current) {
             errorShownRef.current = true
             console.error('Error fetching Adyen environment:', adyenEnvironmentError)
-            onError.forEach((cb) => cb(adyenEnvironmentError))
+            callbacksRef.current.onError.forEach((cb) => cb(adyenEnvironmentError))
         }
-    }, [adyenEnvironmentError, onError])
+    }, [adyenEnvironmentError])
 
     useEffect(() => {
         if (adyenPaymentMethodsError && !errorShownRef.current) {
             errorShownRef.current = true
             console.error('Error fetching Adyen payment methods:', adyenPaymentMethodsError)
-            onError.forEach((cb) => cb(adyenPaymentMethodsError))
+            callbacksRef.current.onError.forEach((cb) => cb(adyenPaymentMethodsError))
         }
-    }, [adyenPaymentMethodsError, onError])
+    }, [adyenPaymentMethodsError])
 
     useEffect(() => {
         if (shippingMethodsError && !errorShownRef.current) {
             errorShownRef.current = true
             console.error('Error fetching shipping methods:', shippingMethodsError)
-            onError.forEach((cb) => cb(shippingMethodsError))
+            callbacksRef.current.onError.forEach((cb) => cb(shippingMethodsError))
         }
-    }, [shippingMethodsError, onError])
+    }, [shippingMethodsError])
 
     useEffect(() => {
+        // Don't re-init while a payment flow is in progress — recreating the
+        // Google Pay button would invalidate the active sheet's session.
+        if (paymentActiveRef.current) {
+            return
+        }
         const initializeCheckout = async () => {
             // Reset error flag for fresh mount attempt
             errorShownRef.current = false
@@ -186,10 +244,10 @@ const GooglePayExpressComponent = (props) => {
                     basket: shopperBasket,
                     site,
                     locale,
-                    navigate,
-                    fetchShippingMethods,
-                    onError,
-                    onPaymentCancel: handlePaymentCancel,
+                    navigate: callbacksRef.current.navigate,
+                    fetchShippingMethods: callbacksRef.current.fetchShippingMethods,
+                    onError: callbacksRef.current.onError,
+                    onPaymentCancel: callbacksRef.current.handlePaymentCancel,
                     googlePayMethodConfig,
                     configuration,
                     type: isPdp ? 'pdp' : 'cart',
@@ -211,7 +269,7 @@ const GooglePayExpressComponent = (props) => {
                 console.error('Error initializing Google Pay Express:', err)
                 if (!errorShownRef.current) {
                     errorShownRef.current = true
-                    onError.forEach((cb) => cb(err))
+                    callbacksRef.current.onError.forEach((cb) => cb(err))
                 }
             }
         }
@@ -219,6 +277,11 @@ const GooglePayExpressComponent = (props) => {
         initializeCheckout()
 
         return () => {
+            // Skip teardown while a payment flow is active so we don't kill
+            // the Google Pay sheet that's currently presenting.
+            if (paymentActiveRef.current) {
+                return
+            }
             if (googlePayButtonRef.current) {
                 googlePayButtonRef.current.unmount()
                 googlePayButtonRef.current = null
@@ -227,18 +290,36 @@ const GooglePayExpressComponent = (props) => {
     }, [
         adyenEnvironment?.ADYEN_ENVIRONMENT,
         adyenEnvironment?.ADYEN_CLIENT_KEY,
-        adyenPaymentMethods?.paymentMethods,
-        adyenPaymentMethods?.applicationInfo,
+        hasGooglePayMethod,
         shopperBasket?.basketId,
-        shippingMethods?.applicableShippingMethods,
+        shopperBasket?.orderTotal,
+        shippingMethods?.applicableShippingMethods?.length,
         locale?.id,
         authToken,
         site?.id,
-        navigate,
-        fetchShippingMethods,
-        product,
-        remountKey
+        product?.id,
+        product?.price,
+        product?.quantity,
+        remountKey,
+        isPdp,
+        merchantDisplayName,
+        customerId
     ])
+
+    // Always tear down on the component's actual unmount, regardless of any
+    // active payment flow (covers navigation away, etc.).
+    useEffect(() => {
+        return () => {
+            if (googlePayButtonRef.current) {
+                try {
+                    googlePayButtonRef.current.unmount()
+                } catch (e) {
+                    // noop
+                }
+                googlePayButtonRef.current = null
+            }
+        }
+    }, [])
 
     return (
         <>
@@ -249,10 +330,12 @@ const GooglePayExpressComponent = (props) => {
 }
 
 GooglePayExpressComponent.propTypes = {
-    locale: PropTypes.object.isRequired,
-    site: PropTypes.object.isRequired,
+    // Optional props (fetched from retail-react-app hooks if not provided)
+    locale: PropTypes.object,
+    site: PropTypes.object,
     basket: PropTypes.object,
-    navigate: PropTypes.func.isRequired,
+    navigate: PropTypes.func,
+
     onError: PropTypes.arrayOf(PropTypes.func),
     spinner: PropTypes.node,
     isExpressPdp: PropTypes.bool,

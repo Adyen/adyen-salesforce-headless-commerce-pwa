@@ -8,11 +8,15 @@ import useAdyenEnvironment from '../../hooks/useAdyenEnvironment'
 import useAdyenPaymentMethods from '../../hooks/useAdyenPaymentMethods'
 import {useAccessToken, useCustomerId, useCustomerType} from '@salesforce/commerce-sdk-react'
 import useAdyenOrderNumber from '../../hooks/useAdyenOrderNumber'
+import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
+import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
+import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 import {
     createCheckoutInstance,
     handleRedirects,
     mountCheckoutComponent
 } from '../helpers/adyenCheckout.utils.js'
+import {paymentMethodsConfiguration} from '../paymentMethodsConfiguration'
 
 // Mock the hooks and helpers
 jest.mock('../../hooks/useAdyenEnvironment')
@@ -23,6 +27,9 @@ jest.mock('../helpers/adyenCheckout.utils')
 jest.mock('../paymentMethodsConfiguration', () => ({
     paymentMethodsConfiguration: jest.fn().mockReturnValue({})
 }))
+jest.mock('@salesforce/retail-react-app/app/hooks/use-multi-site')
+jest.mock('@salesforce/retail-react-app/app/hooks/use-navigation')
+jest.mock('@salesforce/retail-react-app/app/hooks/use-current-basket')
 
 describe('AdyenCheckoutComponent', () => {
     const mockCheckoutInstance = {
@@ -85,6 +92,17 @@ describe('AdyenCheckoutComponent', () => {
             orderNo: 'order-123',
             error: null,
             isLoading: false
+        })
+
+        // Mock retail-react-app hooks
+        useMultiSite.mockReturnValue({
+            site: {id: 'RefArchGlobal'},
+            locale: {id: 'en-US'}
+        })
+        useNavigation.mockReturnValue(jest.fn())
+        useCurrentBasket.mockReturnValue({
+            data: defaultProps.basket,
+            refetch: jest.fn()
         })
 
         // Mock helpers
@@ -606,5 +624,172 @@ describe('AdyenCheckoutComponent', () => {
         })
 
         expect(dropinWithError.unmount).toHaveBeenCalled()
+    })
+
+    describe('retail-react-app hooks integration', () => {
+        it('should use hook values when props are not provided', async () => {
+            const hookNavigate = jest.fn()
+            const hookRefetch = jest.fn()
+
+            useMultiSite.mockReturnValue({
+                site: {id: 'HookSiteId'},
+                locale: {id: 'fr-FR'}
+            })
+            useNavigation.mockReturnValue(hookNavigate)
+            useCurrentBasket.mockReturnValue({
+                data: {basketId: 'hook-basket', currency: 'EUR'},
+                refetch: hookRefetch
+            })
+
+            render(<AdyenCheckoutComponent authToken="test_token" customerId="test_customer" />)
+
+            await waitFor(() => {
+                expect(useAdyenEnvironment).toHaveBeenCalledWith(
+                    expect.objectContaining({
+                        site: {id: 'HookSiteId'},
+                        basketId: 'hook-basket'
+                    })
+                )
+            })
+        })
+
+        it('should prefer explicit props over hook values', async () => {
+            const propNavigate = jest.fn()
+            const hookNavigate = jest.fn()
+
+            useMultiSite.mockReturnValue({
+                site: {id: 'HookSiteId'},
+                locale: {id: 'fr-FR'}
+            })
+            useNavigation.mockReturnValue(hookNavigate)
+            useCurrentBasket.mockReturnValue({
+                data: {basketId: 'hook-basket'},
+                refetch: jest.fn()
+            })
+
+            render(
+                <AdyenCheckoutComponent
+                    authToken="test_token"
+                    customerId="test_customer"
+                    site={{id: 'PropSiteId'}}
+                    locale={{id: 'en-US'}}
+                    navigate={propNavigate}
+                    basket={{basketId: 'prop-basket', currency: 'USD'}}
+                />
+            )
+
+            await waitFor(() => {
+                expect(useAdyenEnvironment).toHaveBeenCalledWith(
+                    expect.objectContaining({
+                        site: {id: 'PropSiteId'},
+                        basketId: 'prop-basket'
+                    })
+                )
+            })
+        })
+
+        it('should call refetchBasket after successful payment (no action, isFinal)', async () => {
+            const mockRefetch = jest.fn().mockResolvedValue({})
+
+            useCurrentBasket.mockReturnValue({
+                data: defaultProps.basket,
+                refetch: mockRefetch
+            })
+
+            // Capture the afterSubmit callbacks when paymentMethodsConfiguration is called
+            let capturedAfterSubmit = null
+            paymentMethodsConfiguration.mockImplementation((config) => {
+                capturedAfterSubmit = config.afterSubmit
+                return {}
+            })
+
+            render(<AdyenCheckoutComponent {...defaultProps} />)
+
+            // Wait for component to initialize
+            await waitFor(() => {
+                expect(capturedAfterSubmit).toBeTruthy()
+            })
+
+            // Simulate successful payment (no action, isFinal=true)
+            const mockState = {}
+            const mockComponent = {}
+            const mockActions = {}
+            const mockProps = {}
+            const mockData = {
+                paymentsResponse: {
+                    isFinal: true,
+                    isSuccessful: true
+                }
+            }
+
+            for (const cb of capturedAfterSubmit) {
+                await cb(mockState, mockComponent, mockActions, mockProps, mockData)
+            }
+
+            expect(mockRefetch).toHaveBeenCalled()
+        })
+
+        it('should NOT call refetchBasket when response contains an action (3DS2)', async () => {
+            const mockRefetch = jest.fn().mockResolvedValue({})
+
+            useCurrentBasket.mockReturnValue({
+                data: defaultProps.basket,
+                refetch: mockRefetch
+            })
+
+            let capturedAfterSubmit = null
+            paymentMethodsConfiguration.mockImplementation((config) => {
+                capturedAfterSubmit = config.afterSubmit
+                return {}
+            })
+
+            render(<AdyenCheckoutComponent {...defaultProps} />)
+
+            await waitFor(() => {
+                expect(capturedAfterSubmit).toBeTruthy()
+            })
+
+            // Simulate 3DS2 response (has action, not final)
+            const mockData = {
+                paymentsResponse: {
+                    action: {type: 'threeDS2'},
+                    isFinal: false
+                }
+            }
+
+            for (const cb of capturedAfterSubmit) {
+                await cb({}, {}, {}, {}, mockData)
+            }
+
+            expect(mockRefetch).not.toHaveBeenCalled()
+        })
+
+        it('should call refetchBasket after additional details complete', async () => {
+            const mockRefetch = jest.fn().mockResolvedValue({})
+
+            useCurrentBasket.mockReturnValue({
+                data: defaultProps.basket,
+                refetch: mockRefetch
+            })
+
+            let capturedAfterAdditionalDetails = null
+            paymentMethodsConfiguration.mockImplementation((config) => {
+                capturedAfterAdditionalDetails = config.afterAdditionalDetails
+                return {}
+            })
+
+            render(<AdyenCheckoutComponent {...defaultProps} />)
+
+            await waitFor(() => {
+                expect(capturedAfterAdditionalDetails).toBeTruthy()
+            })
+
+            // Simulate additional details completion (e.g., after 3DS2 challenge)
+            for (const cb of capturedAfterAdditionalDetails) {
+                await cb()
+            }
+
+            expect(mockRefetch).toHaveBeenCalled()
+        })
     })
 })

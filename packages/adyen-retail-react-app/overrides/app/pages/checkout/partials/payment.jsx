@@ -29,8 +29,6 @@ import {API_ERROR_MESSAGE} from '@salesforce/retail-react-app/app/constants'
 import {isPickupShipment} from '@salesforce/retail-react-app/app/utils/shipment-utils'
 /* -----------------Adyen Begin ------------------------ */
 import {useAccessToken, useCustomerId, useCustomerType} from '@salesforce/commerce-sdk-react'
-import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
-import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
 import LoadingSpinner from '@salesforce/retail-react-app/app/components/loading-spinner'
 import {
     AdyenCheckout,
@@ -46,8 +44,6 @@ const Payment = () => {
     const customerId = useCustomerId()
     const customerTypeData = useCustomerType()
     const {getTokenWhenReady} = useAccessToken()
-    const navigate = useNavigation()
-    const {locale, site} = useMultiSite()
     const [authToken, setAuthToken] = useState()
 
     useEffect(() => {
@@ -62,14 +58,11 @@ const Payment = () => {
     useHandleBackNavigation({
         authToken,
         customerId,
-        basketId: basket?.basketId,
-        site,
-        navigate
+        basketId: basket?.basketId
     })
 
     const {adyenCheckoutKey, isRefetchingBasket} = useCheckoutErrorRecovery({
-        refetchBasket,
-        navigate
+        refetchBasket
     })
 
     const isPickupOnly =
@@ -180,14 +173,7 @@ const Payment = () => {
                         <LoadingSpinner />
                     ) : (
                         <AdyenCheckout
-                            authToken={authToken}
-                            customerId={customerId}
                             key={adyenCheckoutKey}
-                            // Required props
-                            site={site}
-                            locale={locale}
-                            navigate={navigate}
-                            basket={basket}
                             // Optional
                             page={pageTypes.CHECKOUT}
                             merchantDisplayName={'Merchant name'}

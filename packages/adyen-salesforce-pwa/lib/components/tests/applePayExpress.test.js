@@ -12,6 +12,9 @@ import useAdyenShippingMethods from '../../hooks/useAdyenShippingMethods'
 import {getAppleButtonConfig, getApplePaymentMethodConfig} from '../helpers/applePayExpress.utils'
 import {AdyenCheckout} from '@adyen/adyen-web'
 import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
+import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
+import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
+import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 
 jest.mock('../../hooks/useAdyenEnvironment')
 jest.mock('../../hooks/useAdyenPaymentMethods')
@@ -19,6 +22,9 @@ jest.mock('../../hooks/useAdyenPaymentMethodsForExpress')
 jest.mock('../../hooks/useAdyenShippingMethods')
 jest.mock('../helpers/applePayExpress.utils')
 jest.mock('@salesforce/commerce-sdk-react')
+jest.mock('@salesforce/retail-react-app/app/hooks/use-multi-site')
+jest.mock('@salesforce/retail-react-app/app/hooks/use-navigation')
+jest.mock('@salesforce/retail-react-app/app/hooks/use-current-basket')
 
 const mockMount = jest.fn()
 const mockCreate = jest.fn(() => ({
@@ -87,6 +93,17 @@ describe('ApplePayExpressComponent', () => {
         })
         getApplePaymentMethodConfig.mockReturnValue({type: 'applepay'})
         getAppleButtonConfig.mockReturnValue({})
+
+        // Mock retail-react-app hooks
+        useMultiSite.mockReturnValue({
+            site: {id: 'RefArchGlobal'},
+            locale: {id: 'en-US'}
+        })
+        useNavigation.mockReturnValue(jest.fn())
+        useCurrentBasket.mockReturnValue({
+            data: defaultProps.basket,
+            refetch: jest.fn()
+        })
     })
 
     it('renders spinner when hooks are loading', () => {
@@ -391,6 +408,45 @@ describe('ApplePayExpressComponent', () => {
 
             expect(onError[0]).toHaveBeenCalledWith(error)
             expect(onError[1]).toHaveBeenCalledWith(error)
+        })
+    })
+
+    describe('Active payment guard', () => {
+        it('does not re-init while a payment flow is in progress', async () => {
+            getApplePaymentMethodConfig.mockReturnValue({merchantName: 'test'})
+            const {rerender} = await act(async () => {
+                return render(<ApplePayExpressComponent {...defaultProps} />)
+            })
+
+            // Wait for initial init.
+            await act(async () => {})
+            const callsBefore = getAppleButtonConfig.mock.calls.length
+            const checkoutBefore = AdyenCheckout.mock.calls.length
+
+            // Simulate active session: invoke the wrapped fetchShippingMethods,
+            // which flips paymentActiveRef = true. We swallow any errors caused
+            // by unmocked services — we only care about the side-effect.
+            const passedFetch =
+                getAppleButtonConfig.mock.calls[callsBefore - 1]?.[0]?.fetchShippingMethods
+            if (passedFetch) {
+                try {
+                    await passedFetch('test-basket')
+                } catch (e) {
+                    // expected — service is not mocked, but the flag is flipped first
+                }
+            }
+
+            await act(async () => {
+                rerender(
+                    <ApplePayExpressComponent
+                        {...defaultProps}
+                        basket={{basketId: 'test-basket'}}
+                    />
+                )
+            })
+
+            expect(getAppleButtonConfig.mock.calls).toHaveLength(callsBefore)
+            expect(AdyenCheckout.mock.calls).toHaveLength(checkoutBefore)
         })
     })
 })

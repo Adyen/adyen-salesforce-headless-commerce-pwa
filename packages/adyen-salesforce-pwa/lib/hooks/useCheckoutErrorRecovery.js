@@ -1,5 +1,7 @@
 import {useEffect, useRef, useState} from 'react'
 import {useLocation} from 'react-router-dom'
+import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
+import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 
 /**
  * Detects a `newBasketId` query param in the URL after a failed payment,
@@ -7,11 +9,19 @@ import {useLocation} from 'react-router-dom'
  * increments a key that the caller can use to force-remount AdyenCheckout.
  *
  * @param {object} params
- * @param {Function} params.refetchBasket - Async function that re-fetches the current basket.
- * @param {Function} params.navigate - React Router navigate / useNavigation result.
+ * @param {Function} [params.refetchBasket] - Optional async function that re-fetches the current basket. If not provided, uses useCurrentBasket hook.
+ * @param {Function} [params.navigate] - Optional React Router navigate function. If not provided, uses useNavigation hook.
  * @returns {{adyenCheckoutKey: number, isRefetchingBasket: boolean}}
  */
-const useCheckoutErrorRecovery = ({refetchBasket, navigate}) => {
+const useCheckoutErrorRecovery = ({
+    refetchBasket: refetchBasketProp,
+    navigate: navigateProp
+} = {}) => {
+    const {refetch: refetchFromHook} = useCurrentBasket()
+    const navigateFromHook = useNavigation()
+
+    const refetchBasket = refetchBasketProp ?? refetchFromHook
+    const navigate = navigateProp ?? navigateFromHook
     const location = useLocation()
     const [adyenCheckoutKey, setAdyenCheckoutKey] = useState(0)
     const [isRefetchingBasket, setIsRefetchingBasket] = useState(false)

@@ -4,11 +4,16 @@
 import {renderHook, waitFor} from '@testing-library/react'
 import useHandleBackNavigation from '../useHandleBackNavigation'
 import {PaymentCancelService} from '../../services/payment-cancel'
+import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
+import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
 
 jest.mock('../../services/payment-cancel')
+jest.mock('@salesforce/retail-react-app/app/hooks/use-navigation')
+jest.mock('@salesforce/retail-react-app/app/hooks/use-multi-site')
 
 describe('useHandleBackNavigation', () => {
     let mockCancelAbandonedPayment
+    let mockNavigate
     const mockAuthToken = 'test-auth-token'
     const mockCustomerId = 'customer-123'
     const mockBasketId = 'basket-456'
@@ -17,10 +22,17 @@ describe('useHandleBackNavigation', () => {
     beforeEach(() => {
         jest.clearAllMocks()
         mockCancelAbandonedPayment = jest.fn()
+        mockNavigate = jest.fn()
 
         PaymentCancelService.mockImplementation(() => ({
             cancelAbandonedPayment: mockCancelAbandonedPayment
         }))
+
+        // Mock retail-react-app hooks
+        useNavigation.mockReturnValue(mockNavigate)
+        useMultiSite.mockReturnValue({
+            site: mockSite
+        })
 
         window.history.replaceState(null, '', '/')
     })
@@ -483,6 +495,94 @@ describe('useHandleBackNavigation', () => {
             await new Promise((resolve) => setTimeout(resolve, 50))
 
             expect(mockCancelAbandonedPayment).not.toHaveBeenCalled()
+        })
+    })
+
+    describe('retail-react-app hooks integration', () => {
+        it('should use hook values when params are not provided', async () => {
+            const hookNavigate = jest.fn()
+            const hookSite = {id: 'hook-site-id'}
+
+            useNavigation.mockReturnValue(hookNavigate)
+            useMultiSite.mockReturnValue({
+                site: hookSite
+            })
+
+            mockCancelAbandonedPayment.mockResolvedValue({
+                cancelled: true,
+                newBasketId: 'new-basket-id'
+            })
+
+            window.history.replaceState(null, '', '/?orderNo=12345')
+
+            const {result} = renderHook(() =>
+                useHandleBackNavigation({
+                    authToken: mockAuthToken,
+                    customerId: mockCustomerId,
+                    basketId: mockBasketId
+                })
+            )
+
+            await waitFor(() => {
+                expect(mockCancelAbandonedPayment).toHaveBeenCalled()
+            })
+
+            expect(PaymentCancelService).toHaveBeenCalledWith(
+                mockAuthToken,
+                mockCustomerId,
+                mockBasketId,
+                hookSite
+            )
+
+            await waitFor(() => {
+                expect(hookNavigate).toHaveBeenCalledWith('/checkout?newBasketId=new-basket-id')
+            })
+        })
+
+        it('should prefer explicit params over hook values', async () => {
+            const propNavigate = jest.fn()
+            const propSite = {id: 'prop-site-id'}
+            const hookNavigate = jest.fn()
+            const hookSite = {id: 'hook-site-id'}
+
+            useNavigation.mockReturnValue(hookNavigate)
+            useMultiSite.mockReturnValue({
+                site: hookSite
+            })
+
+            mockCancelAbandonedPayment.mockResolvedValue({
+                cancelled: true,
+                newBasketId: 'new-basket-id'
+            })
+
+            window.history.replaceState(null, '', '/?orderNo=12345')
+
+            renderHook(() =>
+                useHandleBackNavigation({
+                    authToken: mockAuthToken,
+                    customerId: mockCustomerId,
+                    basketId: mockBasketId,
+                    site: propSite,
+                    navigate: propNavigate
+                })
+            )
+
+            await waitFor(() => {
+                expect(mockCancelAbandonedPayment).toHaveBeenCalled()
+            })
+
+            expect(PaymentCancelService).toHaveBeenCalledWith(
+                mockAuthToken,
+                mockCustomerId,
+                mockBasketId,
+                propSite
+            )
+
+            await waitFor(() => {
+                expect(propNavigate).toHaveBeenCalledWith('/checkout?newBasketId=new-basket-id')
+            })
+
+            expect(hookNavigate).not.toHaveBeenCalled()
         })
     })
 })

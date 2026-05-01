@@ -6,11 +6,13 @@ import useAdyenEnvironment from '../hooks/useAdyenEnvironment'
 import useAdyenDonationCampaigns from '../hooks/useAdyenDonationCampaigns'
 import {AdyenDonationsService} from '../services/donations'
 import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
+import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
+import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 
 const AdyenDonations = ({
     // Required props
-    site,
-    locale,
+    site: siteProp,
+    locale: localeProp,
     orderNo,
 
     // Callbacks
@@ -23,6 +25,14 @@ const AdyenDonations = ({
     // Optional overrides
     translations
 }) => {
+    // Use retail-react-app hooks for default values
+    const {locale: hookLocale, site: hookSite} = useMultiSite()
+    const {refetch: refetchBasket} = useCurrentBasket()
+
+    // Props override hook values
+    const site = siteProp ?? hookSite
+    const locale = localeProp ?? hookLocale
+
     const paymentContainerRefs = useRef([])
     const donationComponentRefs = useRef([])
     const isDonatingRef = useRef(false)
@@ -136,6 +146,10 @@ const AdyenDonations = ({
                                 donationAmount: state.data.amount
                             })
                             component.setStatus('success')
+                            // Refresh basket to update cart count
+                            if (refetchBasket) {
+                                await refetchBasket()
+                            }
                         } catch (error) {
                             onError.forEach((cb) => cb(error))
                             component.setStatus('error')
@@ -215,9 +229,11 @@ const AdyenDonations = ({
 
 AdyenDonations.propTypes = {
     // Required props
-    site: PropTypes.object.isRequired,
-    locale: PropTypes.object.isRequired,
     orderNo: PropTypes.string.isRequired,
+
+    // Optional props (fetched from retail-react-app hooks if not provided)
+    site: PropTypes.object,
+    locale: PropTypes.object,
 
     // Callbacks
     onDonate: PropTypes.func,

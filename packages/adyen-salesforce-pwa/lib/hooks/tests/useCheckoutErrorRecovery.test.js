@@ -3,12 +3,16 @@
  */
 import {renderHook, waitFor} from '@testing-library/react'
 import useCheckoutErrorRecovery from '../useCheckoutErrorRecovery'
+import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
+import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 
 const mockUseLocation = jest.fn()
 
 jest.mock('react-router-dom', () => ({
     useLocation: () => mockUseLocation()
 }))
+jest.mock('@salesforce/retail-react-app/app/hooks/use-navigation')
+jest.mock('@salesforce/retail-react-app/app/hooks/use-current-basket')
 
 describe('useCheckoutErrorRecovery', () => {
     let mockRefetchBasket
@@ -21,6 +25,12 @@ describe('useCheckoutErrorRecovery', () => {
         mockUseLocation.mockReturnValue({
             search: '',
             pathname: '/checkout'
+        })
+
+        // Mock retail-react-app hooks
+        useNavigation.mockReturnValue(mockNavigate)
+        useCurrentBasket.mockReturnValue({
+            refetch: mockRefetchBasket
         })
     })
 
@@ -162,6 +172,68 @@ describe('useCheckoutErrorRecovery', () => {
 
         await waitFor(() => {
             expect(mockRefetchBasket).toHaveBeenCalledTimes(1)
+        })
+    })
+
+    describe('retail-react-app hooks integration', () => {
+        it('should use hook values when params are not provided', async () => {
+            const hookNavigate = jest.fn()
+            const hookRefetch = jest.fn().mockResolvedValue({})
+
+            useNavigation.mockReturnValue(hookNavigate)
+            useCurrentBasket.mockReturnValue({
+                refetch: hookRefetch
+            })
+
+            mockUseLocation.mockReturnValue({
+                search: '?newBasketId=new-basket-123',
+                pathname: '/checkout'
+            })
+
+            renderHook(() => useCheckoutErrorRecovery())
+
+            await waitFor(() => {
+                expect(hookRefetch).toHaveBeenCalled()
+            })
+
+            await waitFor(() => {
+                expect(hookNavigate).toHaveBeenCalledWith('/checkout')
+            })
+        })
+
+        it('should prefer explicit params over hook values', async () => {
+            const propNavigate = jest.fn()
+            const propRefetch = jest.fn().mockResolvedValue({})
+            const hookNavigate = jest.fn()
+            const hookRefetch = jest.fn().mockResolvedValue({})
+
+            useNavigation.mockReturnValue(hookNavigate)
+            useCurrentBasket.mockReturnValue({
+                refetch: hookRefetch
+            })
+
+            mockUseLocation.mockReturnValue({
+                search: '?newBasketId=new-basket-123',
+                pathname: '/checkout'
+            })
+
+            renderHook(() =>
+                useCheckoutErrorRecovery({
+                    refetchBasket: propRefetch,
+                    navigate: propNavigate
+                })
+            )
+
+            await waitFor(() => {
+                expect(propRefetch).toHaveBeenCalled()
+            })
+
+            await waitFor(() => {
+                expect(propNavigate).toHaveBeenCalledWith('/checkout')
+            })
+
+            expect(hookNavigate).not.toHaveBeenCalled()
+            expect(hookRefetch).not.toHaveBeenCalled()
         })
     })
 })
