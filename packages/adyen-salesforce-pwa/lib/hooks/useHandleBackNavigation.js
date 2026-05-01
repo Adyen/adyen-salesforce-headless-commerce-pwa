@@ -1,5 +1,7 @@
 import {useCallback, useEffect, useRef, useState} from 'react'
 import {PaymentCancelService} from '../services/payment-cancel'
+import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
+import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
 
 /**
  * Configuration options for the useHandleBackNavigation hook.
@@ -7,10 +9,10 @@ import {PaymentCancelService} from '../services/payment-cancel'
  * @property {string} authToken - The authentication token.
  * @property {string} customerId - The customer ID.
  * @property {string} basketId - The basket ID.
- * @property {object} site - The site configuration object.
+ * @property {object} [site] - The site configuration object (optional, falls back to hook).
  * @property {string[]} [redirectParams=['redirectResult', 'sessionId']] - URL params that indicate a valid redirect return.
  * @property {boolean} [enabled=true] - Whether detection is enabled.
- * @property {function} navigate - React Router navigate function.
+ * @property {function} [navigate] - React Router navigate function (optional, falls back to hook).
  */
 
 /**
@@ -39,11 +41,17 @@ const useHandleBackNavigation = ({
     authToken,
     customerId,
     basketId,
-    site,
-    navigate,
+    site: siteProp,
+    navigate: navigateProp,
     redirectParams = ['redirectResult', 'sessionId'],
     enabled = true
 }) => {
+    // Resolve props with hook fallbacks
+    const {site: hookSite} = useMultiSite()
+    const hookNavigate = useNavigation()
+    const site = siteProp ?? hookSite
+    const navigate = navigateProp ?? hookNavigate
+
     const [error, setError] = useState(null)
     const isProcessingRef = useRef(false)
 

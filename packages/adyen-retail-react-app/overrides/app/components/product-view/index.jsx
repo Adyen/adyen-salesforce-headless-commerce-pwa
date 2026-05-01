@@ -53,8 +53,6 @@ import PromoCallout from '@salesforce/retail-react-app/app/components/product-ti
 import LoadingSpinner from '@salesforce/retail-react-app/app/components/loading-spinner'
 
 import {ApplePayExpress, GooglePayExpress, PayPalExpress} from '@adyen/adyen-salesforce-pwa'
-import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
-import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
 
 const ProductViewHeader = ({
     name,
@@ -161,9 +159,6 @@ const ProductView = forwardRef(
         },
         ref
     ) => {
-        const navigate = useNavigation()
-        const {locale, site} = useMultiSite()
-
         const {currency: activeCurrency} = useCurrency()
         const showToast = useToast()
         const intl = useIntl()
@@ -911,16 +906,11 @@ const ProductView = forwardRef(
                                     ) && (
                                         <>
                                             <ApplePayExpress
-                                                locale={locale}
-                                                site={site}
                                                 currency={activeCurrency}
-                                                navigate={navigate}
                                                 isExpressPdp={true}
                                                 merchantDisplayName={'Merchant name'}
                                                 product={{...product, quantity: productQuantity}}
-                                                // Callbacks
                                                 onError={[showError]}
-                                                // UI
                                                 spinner={
                                                     <LoadingSpinner
                                                         wrapperStyles={{height: '100vh'}}
@@ -928,16 +918,11 @@ const ProductView = forwardRef(
                                                 }
                                             />
                                             <GooglePayExpress
-                                                locale={locale}
-                                                site={site}
                                                 currency={activeCurrency}
-                                                navigate={navigate}
                                                 isExpressPdp={true}
                                                 merchantDisplayName={'Merchant name'}
                                                 product={{...product, quantity: productQuantity}}
-                                                // Callbacks
                                                 onError={[showError]}
-                                                // UI
                                                 spinner={
                                                     <LoadingSpinner
                                                         wrapperStyles={{height: '100vh'}}
@@ -945,15 +930,10 @@ const ProductView = forwardRef(
                                                 }
                                             />
                                             <PayPalExpress
-                                                locale={locale}
-                                                site={site}
                                                 currency={activeCurrency}
-                                                navigate={navigate}
                                                 type="pdp"
                                                 product={{...product, quantity: productQuantity}}
-                                                // Callbacks
                                                 onError={[showError]}
-                                                // UI
                                                 spinner={
                                                     <LoadingSpinner
                                                         wrapperStyles={{height: '100vh'}}
@@ -988,41 +968,26 @@ const ProductView = forwardRef(
                     {validateOrderability(variant, product, productQuantity, stockLevel) && (
                         <>
                             <ApplePayExpress
-                                locale={locale}
-                                site={site}
                                 currency={activeCurrency}
-                                navigate={navigate}
                                 isExpressPdp={true}
                                 merchantDisplayName={'Merchant name'}
                                 product={{...product, quantity: productQuantity}}
-                                // Callbacks
                                 onError={[showError]}
-                                // UI
                                 spinner={<LoadingSpinner wrapperStyles={{height: '100vh'}} />}
                             />
                             <GooglePayExpress
-                                locale={locale}
-                                site={site}
                                 currency={activeCurrency}
-                                navigate={navigate}
                                 isExpressPdp={true}
                                 merchantDisplayName={'Merchant name'}
                                 product={{...product, quantity: productQuantity}}
-                                // Callbacks
                                 onError={[showError]}
-                                // UI
                                 spinner={<LoadingSpinner wrapperStyles={{height: '100vh'}} />}
                             />
                             <PayPalExpress
-                                locale={locale}
-                                site={site}
                                 currency={activeCurrency}
-                                navigate={navigate}
                                 type="pdp"
                                 product={{...product, quantity: productQuantity}}
-                                // Callbacks
                                 onError={[showError]}
-                                // UI
                                 spinner={<LoadingSpinner wrapperStyles={{height: '100vh'}} />}
                             />
                         </>
