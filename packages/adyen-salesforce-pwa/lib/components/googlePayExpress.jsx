@@ -1,5 +1,8 @@
 import React, {useEffect, useRef, useCallback, useMemo, useState} from 'react'
 import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
+import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
+import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
+import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 import PropTypes from 'prop-types'
 import {AdyenCheckout, GooglePay} from '@adyen/adyen-web'
 import '../style/adyenCheckout.css'
@@ -12,10 +15,10 @@ import {AdyenShippingMethodsService} from '../services/shipping-methods'
 
 const GooglePayExpressComponent = (props) => {
     const {
-        locale,
-        site,
-        basket,
-        navigate,
+        locale: localeProp,
+        site: siteProp,
+        basket: basketProp,
+        navigate: navigateProp,
         onError = [],
         currency,
         isExpressPdp = false,
@@ -26,6 +29,16 @@ const GooglePayExpressComponent = (props) => {
         authToken: authTokenProp,
         customerId: customerIdProp
     } = props
+
+    // Resolve props with hook fallbacks
+    const {site: hookSite, locale: hookLocale} = useMultiSite()
+    const hookNavigate = useNavigation()
+    const {data: hookBasket} = useCurrentBasket()
+
+    const site = siteProp ?? hookSite
+    const locale = localeProp ?? hookLocale
+    const navigate = navigateProp ?? hookNavigate
+    const basket = basketProp ?? hookBasket
 
     const hookCustomerId = useCustomerId()
     const customerId = customerIdProp || hookCustomerId
@@ -249,10 +262,10 @@ const GooglePayExpressComponent = (props) => {
 }
 
 GooglePayExpressComponent.propTypes = {
-    locale: PropTypes.object.isRequired,
-    site: PropTypes.object.isRequired,
+    locale: PropTypes.object,
+    site: PropTypes.object,
     basket: PropTypes.object,
-    navigate: PropTypes.func.isRequired,
+    navigate: PropTypes.func,
     onError: PropTypes.arrayOf(PropTypes.func),
     spinner: PropTypes.node,
     isExpressPdp: PropTypes.bool,
