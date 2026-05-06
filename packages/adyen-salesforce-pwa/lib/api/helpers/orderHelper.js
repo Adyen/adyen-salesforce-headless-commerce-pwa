@@ -11,9 +11,8 @@ import {
 } from '../helpers/basketHelper.js'
 import {getCustomerBaskets, createShopperCustomerClient} from '../helpers/customerHelper.js'
 import {BasketService} from '../models/basketService.js'
-import {ERROR_MESSAGE, ORDER, PAYMENT_METHOD_TYPES} from '../../utils/constants.mjs'
+import {ERROR_MESSAGE, ORDER} from '../../utils/constants.mjs'
 import {cleanupReopenedBasket} from '../helpers/paymentsHelper.js'
-import {mapCustomFields} from '../utils/customFieldUtils.js'
 import Logger from '../models/logger.js'
 
 /**
@@ -187,49 +186,5 @@ export async function updateOrderPaymentInstrument(
         orderNo,
         pspReference,
         customProperties
-    )
-}
-
-/**
- * Updates the custom pspReference on the payment instrument of a pre-created SFCC order.
- * @param {object} adyenContext - The request context from `res.locals.adyen`.
- * @param {string} orderNo - The order number.
- * @param {Array<{field: string, value: any}>} [customFields=[]] - Optional custom fields to set.
- * @returns {Promise<void>}
- */
-export async function updatePaymentInstrumentForOrder(adyenContext, orderNo, customFields = []) {
-    const {authorization, siteId} = adyenContext
-    Logger.info('updatePaymentInstrumentForOrder', `start  — orderNo: ${orderNo}`)
-    const shopperOrders = createShopperOrderClient(authorization, siteId)
-    const order = await shopperOrders.getOrder({
-        parameters: {
-            orderNo: orderNo
-        }
-    })
-    const firstPaymentInstrument = order?.paymentInstruments?.find(
-        (pi) => pi.c_paymentMethodType !== PAYMENT_METHOD_TYPES.GIFT_CARD
-    )
-    if (!firstPaymentInstrument?.paymentInstrumentId) {
-        Logger.info(
-            'updatePaymentInstrumentForOrder',
-            'no non-gift-card payment instrument found on order — skipping'
-        )
-        return
-    }
-    const {paymentInstrumentId, ...paymentInstrument} = firstPaymentInstrument
-    const mappedCustomFields = mapCustomFields(customFields)
-    await shopperOrders.updatePaymentInstrumentForOrder({
-        parameters: {
-            orderNo: orderNo,
-            paymentInstrumentId: paymentInstrumentId
-        },
-        body: {
-            ...paymentInstrument,
-            ...mappedCustomFields
-        }
-    })
-    Logger.info(
-        'updatePaymentInstrumentForOrder',
-        `success — paymentInstrumentId: ${paymentInstrumentId}`
     )
 }

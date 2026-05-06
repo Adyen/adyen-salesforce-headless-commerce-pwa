@@ -19,7 +19,7 @@ jest.mock('../../helpers/paymentsHelper.js', () => ({
 jest.mock('../../helpers/orderHelper.js', () => ({
     createOrderUsingOrderNo: jest.fn(),
     failOrderAndReopenBasket: jest.fn(),
-    updatePaymentInstrumentForOrder: jest.fn()
+    updateOrderPaymentInstrument: jest.fn()
 }))
 
 describe('payments details controller', () => {
@@ -81,13 +81,11 @@ describe('payments details controller', () => {
         )
         expect(orderHelper.createOrderUsingOrderNo).toHaveBeenCalled()
         // pspReference patched onto the order after Adyen response
-        expect(orderHelper.updatePaymentInstrumentForOrder).toHaveBeenCalledWith(
-            res.locals.adyen,
+        expect(orderHelper.updateOrderPaymentInstrument).toHaveBeenCalledWith(
             '123',
-            [
-                {field: 'c_pspReference', value: 'psp-express-123'},
-                {field: 'c_donationToken', value: undefined}
-            ]
+            'RefArch',
+            'psp-express-123',
+            {pspReference: 'psp-express-123', donationToken: undefined}
         )
         expect(res.locals.response).toEqual({
             isFinal: true,
@@ -195,13 +193,11 @@ describe('payments details controller', () => {
             // Must not attempt order creation on the empty basket
             expect(orderHelper.createOrderUsingOrderNo).not.toHaveBeenCalled()
             expect(paymentsHelper.validateBasketPayments).not.toHaveBeenCalled()
-            expect(orderHelper.updatePaymentInstrumentForOrder).toHaveBeenCalledWith(
-                res.locals.adyen,
+            expect(orderHelper.updateOrderPaymentInstrument).toHaveBeenCalledWith(
                 'order-789',
-                [
-                    {field: 'c_pspReference', value: 'psp-xyz'},
-                    {field: 'c_donationToken', value: undefined}
-                ]
+                'RefArch',
+                'psp-xyz',
+                {pspReference: 'psp-xyz', donationToken: undefined}
             )
             expect(res.locals.response.merchantReference).toBe('order-789')
             expect(next).toHaveBeenCalledWith()
@@ -219,13 +215,11 @@ describe('payments details controller', () => {
             // No basket — must not attempt order creation
             expect(orderHelper.createOrderUsingOrderNo).not.toHaveBeenCalled()
             // PSP reference patched onto the pre-created order via merchantReference
-            expect(orderHelper.updatePaymentInstrumentForOrder).toHaveBeenCalledWith(
-                res.locals.adyen,
+            expect(orderHelper.updateOrderPaymentInstrument).toHaveBeenCalledWith(
                 'order-123',
-                [
-                    {field: 'c_pspReference', value: 'psp-abc'},
-                    {field: 'c_donationToken', value: undefined}
-                ]
+                'RefArch',
+                'psp-abc',
+                {pspReference: 'psp-abc', donationToken: undefined}
             )
             expect(res.locals.response).toEqual({
                 isFinal: true,
