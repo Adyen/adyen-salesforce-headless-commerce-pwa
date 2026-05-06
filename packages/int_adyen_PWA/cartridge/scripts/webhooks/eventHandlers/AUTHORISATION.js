@@ -98,10 +98,16 @@ function handle({order, customObj, result, totalAmount}) {
     AdyenLogs.info_log(`AUTHORIZATION webhook handler called for order ${order.orderNo}`);
     if (isWebhookSuccessful(customObj)) {
         const amountPaid = parseFloat(customObj.custom.value);
+        const webhookData = JSON.parse(customObj.custom.log);
+        const fraudResultType = webhookData['additionalData.fraudResultType'];
         if (order.paymentStatus.value === Order.PAYMENT_STATUS_PAID) {
             handleDuplicateCallback(order);
         } else if (amountPaid < totalAmount) {
             handlePartialPayment(order, customObj, totalAmount);
+        } else if (fraudResultType === constants.FRAUD_STATUS_AMBER) {
+            order.trackOrderChange(
+              'Order sent for manual review in Adyen Customer Area',
+            );
         } else {
             handleFailedOrderRecovery(order, amountPaid, totalAmount);
             handleSuccessfulAuthorisation(order, result);
