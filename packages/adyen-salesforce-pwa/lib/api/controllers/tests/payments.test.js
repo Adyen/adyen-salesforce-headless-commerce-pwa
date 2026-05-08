@@ -76,7 +76,7 @@ jest.mock('../../helpers/paymentsHelper.js', () => {
 jest.mock('../../helpers/orderHelper.js', () => ({
     createOrderUsingOrderNo: jest.fn(),
     failOrderAndReopenBasket: jest.fn(),
-    updatePaymentInstrumentForOrder: jest.fn()
+    updateOrderPaymentInstrument: jest.fn()
 }))
 
 describe('payments controller', () => {
@@ -143,14 +143,15 @@ describe('payments controller', () => {
         // basket was consumed by order creation — must NOT attempt basket update
         expect(res.locals.adyen.basketService.update).not.toHaveBeenCalled()
         // PSP reference patched onto the pre-created order
-        expect(orderHelper.updatePaymentInstrumentForOrder).toHaveBeenCalledWith(
-            res.locals.adyen,
+        expect(orderHelper.updateOrderPaymentInstrument).toHaveBeenCalledWith(
             '123',
-            [
-                {field: 'c_pspReference', value: 'psp123'},
-                {field: 'c_cardInstallments', value: undefined},
-                {field: 'c_donationToken', value: undefined}
-            ]
+            'RefArch',
+            'psp123',
+            {
+                pspReference: 'psp123',
+                cardInstallments: undefined,
+                donationToken: undefined
+            }
         )
         expect(res.locals.response).toEqual({
             isFinal: true,

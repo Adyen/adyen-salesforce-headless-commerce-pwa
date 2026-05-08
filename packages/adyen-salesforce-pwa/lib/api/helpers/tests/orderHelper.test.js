@@ -4,11 +4,11 @@ import {
     failOrderAndReopenBasket,
     getOrderUsingOrderNo,
     getOpenOrderForShopper,
-    updatePaymentInstrumentForOrder
+    updateOrderPaymentInstrument
 } from '../orderHelper.js'
 import {ShopperOrders} from 'commerce-sdk-isomorphic'
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
-import {ERROR_MESSAGE, ORDER, PAYMENT_METHOD_TYPES} from '../../../utils/constants.mjs'
+import {ERROR_MESSAGE, ORDER} from '../../../utils/constants.mjs'
 import {OrderApiClient} from '../../models/orderApi.js'
 import {CustomShopperOrderApiClient} from '../../models/customShopperOrderApi.js'
 import {CustomAdminOrderApiClient} from '../../models/customAdminOrderApi.js'
@@ -336,146 +336,29 @@ describe('orderHelper', () => {
         })
     })
 
-    describe('updatePaymentInstrumentForOrder', () => {
-        let mockGetOrder, mockUpdatePaymentInstrumentForOrder
+    describe('updateOrderPaymentInstrument', () => {
+        const mockUpdateOrderPaymentInstrument = jest.fn()
 
         beforeEach(() => {
-            mockGetOrder = jest.fn()
-            mockUpdatePaymentInstrumentForOrder = jest.fn()
-            ShopperOrders.mockImplementation(() => ({
-                getOrder: mockGetOrder,
-                updatePaymentInstrumentForOrder: mockUpdatePaymentInstrumentForOrder
+            CustomAdminOrderApiClient.mockImplementation(() => ({
+                updateOrderPaymentInstrument: mockUpdateOrderPaymentInstrument
             }))
         })
 
-        it('should update payment instrument with pspReference', async () => {
-            const mockOrder = {
-                paymentInstruments: [
-                    {
-                        paymentInstrumentId: 'pi-123',
-                        c_paymentMethodType: 'scheme',
-                        c_pspReference: 'old-ref'
-                    }
-                ]
-            }
-            mockGetOrder.mockResolvedValue(mockOrder)
-            mockUpdatePaymentInstrumentForOrder.mockResolvedValue({})
+        it('should call custom admin order API client with expected payload', async () => {
+            mockUpdateOrderPaymentInstrument.mockResolvedValue({success: true})
 
-            await updatePaymentInstrumentForOrder(
-                {authorization: 'auth-token', siteId: 'RefArch'},
-                'order-123',
-                [{field: 'c_pspReference', value: 'new-psp-ref'}]
-            )
-
-            expect(mockUpdatePaymentInstrumentForOrder).toHaveBeenCalledWith({
-                parameters: {
-                    orderNo: 'order-123',
-                    paymentInstrumentId: 'pi-123'
-                },
-                body: {
-                    c_paymentMethodType: 'scheme',
-                    c_pspReference: 'new-psp-ref'
-                }
+            const result = await updateOrderPaymentInstrument('order-123', 'RefArch', 'psp-123', {
+                pspReference: 'psp-123',
+                donationToken: 'token-1'
             })
-        })
 
-        it('should skip when no non-gift-card payment instrument found', async () => {
-            const mockOrder = {
-                paymentInstruments: [
-                    {
-                        paymentInstrumentId: 'pi-gift',
-                        c_paymentMethodType: PAYMENT_METHOD_TYPES.GIFT_CARD
-                    }
-                ]
-            }
-            mockGetOrder.mockResolvedValue(mockOrder)
-
-            await updatePaymentInstrumentForOrder(
-                {authorization: 'auth-token', siteId: 'RefArch'},
-                'order-123',
-                [{field: 'c_pspReference', value: 'new-psp-ref'}]
-            )
-
-            expect(Logger.info).toHaveBeenCalledWith(
-                'updatePaymentInstrumentForOrder',
-                'no non-gift-card payment instrument found on order — skipping'
-            )
-            expect(mockUpdatePaymentInstrumentForOrder).not.toHaveBeenCalled()
-        })
-
-        it('should skip when order has no payment instruments', async () => {
-            mockGetOrder.mockResolvedValue({paymentInstruments: []})
-
-            await updatePaymentInstrumentForOrder(
-                {authorization: 'auth-token', siteId: 'RefArch'},
-                'order-123',
-                [{field: 'c_pspReference', value: 'new-psp-ref'}]
-            )
-
-            expect(mockUpdatePaymentInstrumentForOrder).not.toHaveBeenCalled()
-        })
-
-        it('should handle missing pspReference gracefully', async () => {
-            const mockOrder = {
-                paymentInstruments: [
-                    {
-                        paymentInstrumentId: 'pi-123',
-                        c_paymentMethodType: 'scheme'
-                    }
-                ]
-            }
-            mockGetOrder.mockResolvedValue(mockOrder)
-            mockUpdatePaymentInstrumentForOrder.mockResolvedValue({})
-
-            await updatePaymentInstrumentForOrder(
-                {authorization: 'auth-token', siteId: 'RefArch'},
-                'order-123',
-                [{field: 'c_pspReference', value: null}]
-            )
-
-            expect(mockUpdatePaymentInstrumentForOrder).toHaveBeenCalledWith({
-                parameters: {
-                    orderNo: 'order-123',
-                    paymentInstrumentId: 'pi-123'
-                },
-                body: {
-                    c_paymentMethodType: 'scheme'
-                }
+            expect(CustomAdminOrderApiClient).toHaveBeenCalledWith('RefArch')
+            expect(mockUpdateOrderPaymentInstrument).toHaveBeenCalledWith('order-123', 'psp-123', {
+                pspReference: 'psp-123',
+                donationToken: 'token-1'
             })
-        })
-
-        it('should merge multiple custom fields onto payment instrument', async () => {
-            const mockOrder = {
-                paymentInstruments: [
-                    {
-                        paymentInstrumentId: 'pi-123',
-                        c_paymentMethodType: 'scheme'
-                    }
-                ]
-            }
-            mockGetOrder.mockResolvedValue(mockOrder)
-            mockUpdatePaymentInstrumentForOrder.mockResolvedValue({})
-
-            await updatePaymentInstrumentForOrder(
-                {authorization: 'auth-token', siteId: 'RefArch'},
-                'order-123',
-                [
-                    {field: 'c_pspReference', value: 'new-psp-ref'},
-                    {field: 'c_resultCode', value: 'Authorised'}
-                ]
-            )
-
-            expect(mockUpdatePaymentInstrumentForOrder).toHaveBeenCalledWith({
-                parameters: {
-                    orderNo: 'order-123',
-                    paymentInstrumentId: 'pi-123'
-                },
-                body: {
-                    c_paymentMethodType: 'scheme',
-                    c_pspReference: 'new-psp-ref',
-                    c_resultCode: 'Authorised'
-                }
-            })
+            expect(result).toEqual({success: true})
         })
     })
 })
