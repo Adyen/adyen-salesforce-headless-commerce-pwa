@@ -12,7 +12,10 @@ const ENV_TO_CONFIG_MAP = {
     ADYEN_NATIVE_3DS: 'nativeThreeDS',
     GIFT_CARD_EXPIRATION_TIME: 'giftCardExpirationTime',
     ADYEN_L23_ENABLED: 'l23Enabled',
-    ADYEN_L23_COMMODITY_CODE: 'l23CommodityCode'
+    ADYEN_L23_COMMODITY_CODE: 'l23CommodityCode',
+    ADYEN_TERMINAL_API_KEY: 'terminalApiKey',
+    ADYEN_TERMINAL_ENVIRONMENT: 'terminalEnvironment',
+    ADYEN_LIVE_TERMINAL_URL_PREFIX: 'liveTerminalUrlPrefix'
 }
 
 export const getAdyenConfigForCurrentSite = (currentSiteId, options = {}) => {
