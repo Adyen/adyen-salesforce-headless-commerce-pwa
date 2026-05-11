@@ -75,6 +75,6 @@
         "tmp": ">=0.2.4"
     },
     "dependencies": {
-        "@adyen/adyen-salesforce-pwa": "file:../adyen-salesforce-pwa/adyen-adyen-salesforce-pwa-4.3.0-beta.124.tgz"
+        "@adyen/adyen-salesforce-pwa": "file:../adyen-salesforce-pwa"
     }
 }
