@@ -1,4 +1,6 @@
 import CheckoutAPI from '@adyen/api-library/lib/src/services/checkout/index.js'
+import TerminalCloudAPI from '@adyen/api-library/lib/src/services/terminalCloudAPI.js'
+import ManagementAPI from '@adyen/api-library/lib/src/services/management/index.js'
 import Client from '@adyen/api-library/lib/src/client.js'
 import {ADYEN_ENVIRONMENT, ADYEN_LIVE_REGIONS, ERROR_MESSAGE} from '../../utils/constants.mjs'
 import {AdyenError} from './AdyenError'
@@ -91,6 +93,30 @@ class AdyenClientProvider {
      */
     getDonationsApi() {
         return this.checkoutApi.DonationsApi
+    }
+
+    /**
+     * Gets the Adyen Terminal Cloud API instance.
+     * Used for sending synchronous and asynchronous payment requests to POS terminals.
+     * @returns {TerminalCloudAPI} The Adyen TerminalCloudAPI instance.
+     */
+    getTerminalCloudApi() {
+        if (!this.terminalCloudApi) {
+            this.terminalCloudApi = new TerminalCloudAPI(this.getClient())
+        }
+        return this.terminalCloudApi
+    }
+
+    /**
+     * Gets the Adyen Management API instance.
+     * Used for listing terminals and managing terminal settings.
+     * @returns {ManagementAPI} The Adyen ManagementAPI instance.
+     */
+    getManagementApi() {
+        if (!this.managementApi) {
+            this.managementApi = new ManagementAPI(this.getClient())
+        }
+        return this.managementApi
     }
 }
 
