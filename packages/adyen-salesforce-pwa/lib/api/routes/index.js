@@ -24,6 +24,9 @@ import {appleDomainAssociation} from '../controllers/apple-domain-association'
 import PaymentCancelController from '../controllers/payment-cancel'
 import PaymentCancelExpressController from '../controllers/payment-cancel-express'
 import {balanceCheck, cancelOrder, createOrder} from '../controllers/giftCard'
+import TerminalListController from '../controllers/terminal-list'
+import TerminalPaymentController from '../controllers/terminal-payment'
+import TerminalAbortController from '../controllers/terminal-abort'
 import {createRequestContext} from '../middleware/request-context'
 import {createMinimalRequestContext} from '../middleware/minimal-request-context'
 import {createPaymentsDetailsContext} from '../middleware/payments-details-request-context'
@@ -202,6 +205,25 @@ function registerAdyenEndpoints(app, runtime, overrides, options = {}) {
         ErrorHandler
     ]
 
+    const terminalsHandler = overrides?.terminals || [
+        minimalRequestContext,
+        TerminalListController,
+        SuccessHandler,
+        ErrorHandler
+    ]
+    const terminalPaymentHandler = overrides?.terminalPayment || [
+        requestContext,
+        TerminalPaymentController,
+        SuccessHandler,
+        ErrorHandler
+    ]
+    const terminalAbortHandler = overrides?.terminalAbort || [
+        prepareOrderRequestContext,
+        TerminalAbortController,
+        SuccessHandler,
+        ErrorHandler
+    ]
+
     app.get(
         '*/checkout/redirect',
         query('redirectResult').optional().escape(),
@@ -240,6 +262,9 @@ function registerAdyenEndpoints(app, runtime, overrides, options = {}) {
     app.post('/api/adyen/pdp/temporary-baskets', ...createTemporaryBasketHandler)
     app.get('/api/adyen/donationCampaigns', ...donationCampaignsHandler)
     app.post('/api/adyen/donations', ...donateHandler)
+    app.get('/api/adyen/terminal-api/terminals', ...terminalsHandler)
+    app.post('/api/adyen/terminal-api/payment', ...terminalPaymentHandler)
+    app.post('/api/adyen/terminal-api/abort', ...terminalAbortHandler)
 }
 
 export {registerAdyenEndpoints, SuccessHandler, ErrorHandler}
