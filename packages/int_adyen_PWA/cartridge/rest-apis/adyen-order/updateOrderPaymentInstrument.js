@@ -13,7 +13,17 @@ exports.updateOrderPaymentInstrument = function () {
     const match = request.httpPath.match(/\/orders\/([^/]+)\/payment-instruments$/);
     const orderNo = match ? match[1] : null;
     const requestBody = request.httpParameterMap.requestBodyAsString;
-    const allowedCustomProperties = ['donationToken', 'pspReference', 'cardInstallments'];
+    const allowedCustomProperties = [
+      'donationToken',
+      'pspReference',
+      'cardInstallments',
+      'adyenPaymentMethod',
+      'adyen_payment__Adyen_Payment_Method',
+      'Adyen_Payment_Method_Variant',
+      'adyen_payment__Adyen_Payment_Method_Variant',
+      'terminalId',
+      'storeId',
+    ];
     const {pspReference, customProperties = {}} = JSON.parse(requestBody);
     if (!orderNo) {
       RESTResponseMgr.createError(400, 'bad_request', 'Missing orderNo parameter').render();

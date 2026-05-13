@@ -1,12 +1,15 @@
 export {default as useAdyenReviewPage} from './hooks/useAdyenReviewPage'
 export {default as useHandleBackNavigation} from './hooks/useHandleBackNavigation'
 export {default as useCheckoutErrorRecovery} from './hooks/useCheckoutErrorRecovery'
+export {default as useAdyenEnvironment} from './hooks/useAdyenEnvironment'
+export {default as useTerminalPayment} from './hooks/useTerminalPayment'
 
 export {default as AdyenCheckout} from './components/adyenCheckout'
 export {default as AdyenDonations} from './components/adyenDonations'
 export {default as ApplePayExpress} from './components/applePayExpress'
 export {default as PayPalExpress} from './components/paypalExpress'
 export {default as GooglePayExpress} from './components/googlePayExpress'
+export {default as TerminalPayment} from './components/terminalPayment'
 
 export {default as countryList} from './utils/countryList.mjs'
 export {default as currencyList} from './utils/currencyList.mjs'

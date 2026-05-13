@@ -107,10 +107,13 @@ export class BasketService {
             throw new AdyenError(errorMessage)
         }
         const isCardPayment = paymentMethod?.type === PAYMENT_METHOD_TYPES.CREDIT_CARD
+        const isPosPayment = paymentMethod?.type === PAYMENT_METHODS.ADYEN_POS
 
         const paymentMethodId = isCardPayment
             ? PAYMENT_METHODS.CREDIT_CARD
-            : PAYMENT_METHODS.ADYEN_COMPONENT
+            : isPosPayment
+              ? PAYMENT_METHODS.ADYEN_POS
+              : PAYMENT_METHODS.ADYEN_COMPONENT
 
         const paymentInstrumentReq = {
             body: {
