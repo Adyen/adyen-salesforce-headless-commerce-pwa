@@ -6,6 +6,10 @@ import Client from '@adyen/api-library/lib/src/client.js'
 const mockPaymentsApi = {name: 'PaymentsApi'}
 const mockOrdersApi = {name: 'OrdersApi'}
 const mockUtilityApi = {name: 'UtilityApi'}
+const mockDonationsApi = {name: 'DonationsApi'}
+
+const mockTerminalCloudApi = {name: 'TerminalCloudAPI'}
+const mockManagementApi = {name: 'ManagementAPI'}
 
 const mockTerminalSync = jest.fn()
 
@@ -15,11 +19,20 @@ jest.mock('@adyen/api-library/lib/src/client.js', () => {
     }))
 })
 
+jest.mock('@adyen/api-library/lib/src/services/terminalCloudAPI.js', () => {
+    return jest.fn().mockImplementation(() => mockTerminalCloudApi)
+})
+
+jest.mock('@adyen/api-library/lib/src/services/management/index.js', () => {
+    return jest.fn().mockImplementation(() => mockManagementApi)
+})
+
 jest.mock('@adyen/api-library/lib/src/services/checkout/index.js', () => {
     return jest.fn().mockImplementation(() => ({
         PaymentsApi: mockPaymentsApi,
         OrdersApi: mockOrdersApi,
-        UtilityApi: mockUtilityApi
+        UtilityApi: mockUtilityApi,
+        DonationsApi: mockDonationsApi
     }))
 })
 
@@ -63,6 +76,27 @@ describe('AdyenClientProvider', () => {
     it('should provide the UtilityApi', () => {
         const provider = new AdyenClientProvider(mockAdyenContext)
         expect(provider.getUtilityApi()).toBeDefined()
+    })
+
+    it('should provide the DonationsApi', () => {
+        const provider = new AdyenClientProvider(mockAdyenContext)
+        expect(provider.getDonationsApi()).toBeDefined()
+    })
+
+    it('should provide the TerminalCloudApi with lazy initialization', () => {
+        const provider = new AdyenClientProvider(mockAdyenContext)
+        const api1 = provider.getTerminalCloudApi()
+        const api2 = provider.getTerminalCloudApi()
+        expect(api1).toBe(mockTerminalCloudApi)
+        expect(api1).toBe(api2)
+    })
+
+    it('should provide the ManagementApi with lazy initialization', () => {
+        const provider = new AdyenClientProvider(mockAdyenContext)
+        const api1 = provider.getManagementApi()
+        const api2 = provider.getManagementApi()
+        expect(api1).toBe(mockManagementApi)
+        expect(api1).toBe(api2)
     })
 
     it('should correctly instantiate and provide APIs for LIVE environment', () => {

@@ -2,7 +2,8 @@ import packageJson from '../../package.json' with {type: 'json'}
 
 export const PAYMENT_METHODS = {
     ADYEN_COMPONENT: 'AdyenComponent',
-    CREDIT_CARD: 'CREDIT_CARD'
+    CREDIT_CARD: 'CREDIT_CARD',
+    ADYEN_POS: 'AdyenPOS'
 }
 
 export const PAYMENT_METHOD_TYPES = {
@@ -127,7 +128,11 @@ export const ERROR_MESSAGE = {
     DONATION_AMOUNT_MISMATCH: 'Donation amount now allowed',
     TERMINAL_API_FAILURE: 'terminal API call failed',
     MISSING_TERMINAL_POI_ID: 'missing terminal POI ID',
-    MISSING_LIVE_TERMINAL_PREFIX: 'missing live terminal URL prefix'
+    MISSING_LIVE_TERMINAL_PREFIX: 'missing live terminal URL prefix',
+    TERMINAL_NOT_FOUND: 'terminal not found',
+    TERMINAL_PAYMENT_FAILED: 'terminal payment failed',
+    TERMINAL_ABORT_FAILED: 'terminal abort failed',
+    INVALID_STORE_ID: 'invalid or unauthorized store id'
 }
 
 export const DONATIONS = {
@@ -166,3 +171,13 @@ export const TERMINAL_REVERSAL_REASON = {
 }
 
 export const APPLICATION_VERSION = packageJson.version
+
+export const POS = Object.freeze({
+    PROTOCOL_VERSION: '3.0',
+    MESSAGE_CLASS: {SERVICE: 'Service'},
+    MESSAGE_CATEGORY: {PAYMENT: 'Payment', ABORT: 'Abort'},
+    MESSAGE_TYPE: {REQUEST: 'Request'},
+    ABORT_REASON: {MERCHANT_ABORT: 'MerchantAbort'},
+    REFERENCE_ID: 'SalesforceCommerceCloudPOS',
+    SALE_ID: 'SalesforceCommerceCloud'
+})
