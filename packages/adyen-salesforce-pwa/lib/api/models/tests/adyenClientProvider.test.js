@@ -11,8 +11,6 @@ const mockDonationsApi = {name: 'DonationsApi'}
 const mockTerminalCloudApi = {name: 'TerminalCloudAPI'}
 const mockManagementApi = {name: 'ManagementAPI'}
 
-const mockTerminalSync = jest.fn()
-
 jest.mock('@adyen/api-library/lib/src/client.js', () => {
     return jest.fn().mockImplementation((config) => ({
         config: config
@@ -34,10 +32,6 @@ jest.mock('@adyen/api-library/lib/src/services/checkout/index.js', () => {
         UtilityApi: mockUtilityApi,
         DonationsApi: mockDonationsApi
     }))
-})
-
-jest.mock('@adyen/api-library/lib/src/services/terminalCloudAPI.js', () => {
-    return jest.fn().mockImplementation(() => ({sync: mockTerminalSync}))
 })
 
 describe('AdyenClientProvider', () => {
