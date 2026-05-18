@@ -5,7 +5,7 @@ import {TERMINAL_MESSAGE_CATEGORY, TERMINAL_REVERSAL_REASON} from '../../utils/c
  * @returns {string} A unique service ID string.
  */
 function generateServiceId() {
-    return Date.now().toString(36) + Math.random().toString(36).slice(2, 7)
+    return (Date.now().toString(36) + Math.random().toString(36).slice(2)).slice(0, 10)
 }
 
 /**
@@ -17,6 +17,12 @@ export class TerminalRequestBuilder {
         this.saleToPOIRequest = {
             MessageHeader: null
         }
+    }
+
+    _clearRequestTypes() {
+        delete this.saleToPOIRequest.PaymentRequest
+        delete this.saleToPOIRequest.AbortRequest
+        delete this.saleToPOIRequest.ReversalRequest
     }
 
     /**
@@ -49,6 +55,7 @@ export class TerminalRequestBuilder {
      * @returns {TerminalRequestBuilder} The builder instance for chaining.
      */
     withPaymentRequest(amount, currency, reference, timestamp) {
+        this._clearRequestTypes()
         this.saleToPOIRequest.PaymentRequest = {
             SaleData: {
                 SaleTransactionID: {
@@ -74,13 +81,12 @@ export class TerminalRequestBuilder {
      * @returns {TerminalRequestBuilder} The builder instance for chaining.
      */
     withAbortRequest(abortReason, serviceId, messageCategory = TERMINAL_MESSAGE_CATEGORY.PAYMENT) {
+        this._clearRequestTypes()
         this.saleToPOIRequest.AbortRequest = {
             AbortReason: abortReason,
             MessageReference: {
                 MessageCategory: messageCategory,
-                ServiceID: serviceId,
-                POIID: this.saleToPOIRequest.MessageHeader?.POIID,
-                SaleID: this.saleToPOIRequest.MessageHeader?.SaleID
+                ServiceID: serviceId
             }
         }
         return this
@@ -98,6 +104,7 @@ export class TerminalRequestBuilder {
         reversalReason = TERMINAL_REVERSAL_REASON.MERCHANT_CANCEL,
         reversedAmount
     ) {
+        this._clearRequestTypes()
         const reversalRequest = {
             OriginalPOITransaction: originalPoiTransaction,
             ReversalReason: reversalReason
@@ -114,6 +121,12 @@ export class TerminalRequestBuilder {
      * @returns {object} The constructed TerminalApiRequest with SaleToPOIRequest.
      */
     build() {
+        if (this.saleToPOIRequest.AbortRequest && this.saleToPOIRequest.MessageHeader) {
+            this.saleToPOIRequest.AbortRequest.MessageReference.POIID =
+                this.saleToPOIRequest.MessageHeader.POIID
+            this.saleToPOIRequest.AbortRequest.MessageReference.SaleID =
+                this.saleToPOIRequest.MessageHeader.SaleID
+        }
         return {SaleToPOIRequest: this.saleToPOIRequest}
     }
 

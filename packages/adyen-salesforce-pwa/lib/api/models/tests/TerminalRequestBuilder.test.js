@@ -8,6 +8,19 @@ describe('TerminalRequestBuilder', () => {
     const currency = 'EUR'
     const reference = 'ORDER-123'
 
+    describe('generateServiceId', () => {
+        it('generates a ServiceID of at most 10 characters', () => {
+            for (let i = 0; i < 20; i++) {
+                const request = new TerminalRequestBuilder()
+                    .withMessageHeader(TERMINAL_MESSAGE_CATEGORY.PAYMENT, poiId, saleId)
+                    .build()
+                expect(request.SaleToPOIRequest.MessageHeader.ServiceID.length).toBeLessThanOrEqual(
+                    10
+                )
+            }
+        })
+    })
+
     describe('withMessageHeader', () => {
         it('sets the MessageHeader with required fields', () => {
             const request = new TerminalRequestBuilder()
@@ -111,6 +124,54 @@ describe('TerminalRequestBuilder', () => {
             expect(request.SaleToPOIRequest.AbortRequest.MessageReference.MessageCategory).toBe(
                 TERMINAL_MESSAGE_CATEGORY.REVERSAL
             )
+        })
+
+        it('resolves POIID and SaleID from MessageHeader even when called before withMessageHeader', () => {
+            const request = new TerminalRequestBuilder()
+                .withAbortRequest('UserCancelled', 'svc-001')
+                .withMessageHeader(TERMINAL_MESSAGE_CATEGORY.ABORT, poiId, saleId)
+                .build()
+
+            expect(request.SaleToPOIRequest.AbortRequest.MessageReference.POIID).toBe(poiId)
+            expect(request.SaleToPOIRequest.AbortRequest.MessageReference.SaleID).toBe(saleId)
+        })
+    })
+
+    describe('single request type enforcement', () => {
+        it('clears a previous PaymentRequest when AbortRequest is set', () => {
+            const request = new TerminalRequestBuilder()
+                .withMessageHeader(TERMINAL_MESSAGE_CATEGORY.PAYMENT, poiId, saleId)
+                .withPaymentRequest(amount, currency, reference)
+                .withAbortRequest('reason', 'svc-001')
+                .build()
+
+            expect(request.SaleToPOIRequest.PaymentRequest).toBeUndefined()
+            expect(request.SaleToPOIRequest.AbortRequest).toBeDefined()
+        })
+
+        it('clears a previous AbortRequest when PaymentRequest is set', () => {
+            const request = new TerminalRequestBuilder()
+                .withMessageHeader(TERMINAL_MESSAGE_CATEGORY.ABORT, poiId, saleId)
+                .withAbortRequest('reason', 'svc-001')
+                .withPaymentRequest(amount, currency, reference)
+                .build()
+
+            expect(request.SaleToPOIRequest.AbortRequest).toBeUndefined()
+            expect(request.SaleToPOIRequest.PaymentRequest).toBeDefined()
+        })
+
+        it('clears a previous PaymentRequest when ReversalRequest is set', () => {
+            const originalPoiTransaction = {
+                POITransactionID: {TransactionID: 'txn-001', TimeStamp: '2026-01-01T10:00:00.000Z'}
+            }
+            const request = new TerminalRequestBuilder()
+                .withMessageHeader(TERMINAL_MESSAGE_CATEGORY.REVERSAL, poiId, saleId)
+                .withPaymentRequest(amount, currency, reference)
+                .withReversalRequest(originalPoiTransaction)
+                .build()
+
+            expect(request.SaleToPOIRequest.PaymentRequest).toBeUndefined()
+            expect(request.SaleToPOIRequest.ReversalRequest).toBeDefined()
         })
     })
 

@@ -1,7 +1,10 @@
 import CheckoutAPI from '@adyen/api-library/lib/src/services/checkout/index.js'
+import TerminalCloudAPI from '@adyen/api-library/lib/src/services/terminalCloudAPI.js'
 import Client from '@adyen/api-library/lib/src/client.js'
 import {ADYEN_ENVIRONMENT, ADYEN_LIVE_REGIONS, ERROR_MESSAGE} from '../../utils/constants.mjs'
 import {AdyenError} from './AdyenError'
+
+const LIVE_TERMINAL_URL_PATTERN = 'https://terminal-api-live-{prefix}.adyen.com'
 
 /**
  * Provider class for creating and managing Adyen API clients.
@@ -91,6 +94,31 @@ class AdyenClientProvider {
      */
     getDonationsApi() {
         return this.checkoutApi.DonationsApi
+    }
+
+    /**
+     * Creates and returns a configured Adyen Terminal Cloud API client.
+     * Uses terminalApiKey if available, falling back to apiKey.
+     * Uses liveTerminalUrlPrefix if available, falling back to liveEndpointUrlPrefix.
+     * Environment (live/test) is determined from adyenConfig.environment.
+     * @returns {TerminalCloudAPI} A configured Terminal Cloud API instance.
+     * @throws {AdyenError} If a live prefix is missing for live environments.
+     */
+    getTerminalClient() {
+        const {adyenConfig} = this.adyenContext
+        const apiKey = adyenConfig.terminalApiKey || adyenConfig.apiKey
+        const isLive = this.isLiveEnvironment(adyenConfig.environment)
+        const config = {apiKey}
+
+        if (isLive) {
+            const prefix = adyenConfig.liveTerminalUrlPrefix || adyenConfig.liveEndpointUrlPrefix
+            config.environment = ADYEN_ENVIRONMENT.LIVE
+            config.endpoint = LIVE_TERMINAL_URL_PATTERN.replace('{prefix}', prefix)
+        } else {
+            config.environment = ADYEN_ENVIRONMENT.TEST
+        }
+
+        return new TerminalCloudAPI(new Client(config))
     }
 }
 
