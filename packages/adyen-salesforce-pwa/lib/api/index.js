@@ -13,6 +13,7 @@ export * from './models/customShopperOrderApi'
 export * from './models/customAdminOrderApi'
 export * from './models/adyenClientProvider'
 export * from './models/PaymentRequestBuilder'
+export * from './models/TerminalRequestBuilder'
 export * from './models/logger'
 
 // Middleware

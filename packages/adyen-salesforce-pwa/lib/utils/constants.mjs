@@ -126,6 +126,9 @@ export const ERROR_MESSAGE = {
     DONATION_NOT_COMPLETED: 'Donation unsuccessful',
     DONATION_CAMPAIGN_NOT_FOUND: 'Donation campaign not found',
     DONATION_AMOUNT_MISMATCH: 'Donation amount now allowed',
+    TERMINAL_API_FAILURE: 'terminal API call failed',
+    MISSING_TERMINAL_POI_ID: 'missing terminal POI ID',
+    MISSING_LIVE_TERMINAL_PREFIX: 'missing live terminal URL prefix',
     TERMINAL_NOT_FOUND: 'terminal not found',
     TERMINAL_PAYMENT_FAILED: 'terminal payment failed',
     TERMINAL_ABORT_FAILED: 'terminal abort failed',
@@ -152,6 +155,19 @@ export const ADYEN_LIVE_REGIONS = {
 export const ADYEN_ENVIRONMENT = {
     LIVE: 'LIVE',
     TEST: 'TEST'
+}
+
+export const TERMINAL_MESSAGE_CATEGORY = {
+    PAYMENT: 'Payment',
+    ABORT: 'Abort',
+    REVERSAL: 'Reversal'
+}
+
+export const TERMINAL_REVERSAL_REASON = {
+    CUST_CANCEL: 'CustCancel',
+    MALFUNCTION: 'Malfunction',
+    MERCHANT_CANCEL: 'MerchantCancel',
+    UNABLE_TO_COMPLETE: 'Unable2Compl'
 }
 
 export const APPLICATION_VERSION = packageJson.version
