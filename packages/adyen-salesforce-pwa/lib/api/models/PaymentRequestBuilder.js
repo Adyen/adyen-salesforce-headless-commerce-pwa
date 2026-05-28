@@ -317,11 +317,13 @@ export class PaymentRequestBuilder {
     }
 
     /**
-     * Sets the country code.
+     * Sets the country code from billing address if available, falling back to locale.
      * @returns {PaymentRequestBuilder} The builder instance for chaining.
      */
     withCountryCode() {
-        const country = this.context.req?.query?.locale?.slice(-2)?.toUpperCase()
+        const country =
+            this.paymentRequest.billingAddress?.country ||
+            this.context.req?.query?.locale?.slice(-2)?.toUpperCase()
         if (country) {
             this.paymentRequest.countryCode = country
         }
