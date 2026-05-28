@@ -317,6 +317,18 @@ export class PaymentRequestBuilder {
     }
 
     /**
+     * Sets the country code.
+     * @returns {PaymentRequestBuilder} The builder instance for chaining.
+     */
+    withCountryCode() {
+        const country = this.context.req?.query?.locale?.slice(-2)?.toUpperCase()
+        if (country) {
+            this.paymentRequest.countryCode = country
+        }
+        return this
+    }
+
+    /**
      * Adds line items and country code for open invoice methods.
      * @param {string} paymentMethodType - The payment method type. Uses context.stateData if not provided.
      * @param {object} basket - The basket object. Uses context.basket if not provided.
@@ -485,6 +497,7 @@ export class PaymentRequestBuilder {
         return new PaymentRequestBuilder({basket, stateData, adyenConfig, req})
             .withStateData()
             .withBillingAddress(stateData.billingAddress)
+            .withCountryCode()
             .withDeliveryAddress(stateData.deliveryAddress)
             .withReference()
             .withMerchantAccount()

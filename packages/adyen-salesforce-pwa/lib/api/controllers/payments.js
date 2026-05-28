@@ -98,6 +98,7 @@ async function sendPayments(req, res, next) {
         }
 
         const checkout = new AdyenClientProvider(adyenContext).getPaymentsApi()
+        console.log(paymentRequest)
         const response = await checkout.payments(paymentRequest, {
             idempotencyKey: createIdempotencyKey(paymentRequest)
         })

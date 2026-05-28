@@ -37,7 +37,7 @@ export function getShopperName(basket) {
 }
 
 const OPEN_INVOICE_METHODS = new Set(['affirm'])
-const OPEN_INVOICE_PREFIXES = ['afterpay', 'klarna', 'ratepay', 'facilypay']
+const OPEN_INVOICE_PREFIXES = ['afterpay', 'klarna', 'ratepay', 'facilypay', 'riverty', 'clearpay']
 const ZERO_TAX_METHODS = ['klarna']
 
 /**
@@ -270,7 +270,8 @@ const VALID_STATE_DATA_FIELDS = new Set([
     'conversionId',
     'origin',
     'returnUrl',
-    'order'
+    'order',
+    'company'
 ])
 
 /**
