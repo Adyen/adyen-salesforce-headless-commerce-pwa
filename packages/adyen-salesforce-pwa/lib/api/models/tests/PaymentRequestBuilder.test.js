@@ -487,48 +487,6 @@ describe('PaymentRequestBuilder', () => {
         })
     })
 
-    describe('withCountryCode', () => {
-        it('should add country code from billing address', () => {
-            builder = new PaymentRequestBuilder(mockContext)
-            builder.withBillingAddress()
-            builder.withCountryCode()
-
-            expect(builder.paymentRequest.countryCode).toBe('US')
-        })
-
-        it('should fall back to locale country code if billing address is not set', () => {
-            mockContext.req.query = {locale: 'en-GB'}
-            builder = new PaymentRequestBuilder(mockContext)
-            builder.withCountryCode()
-
-            expect(builder.paymentRequest.countryCode).toBe('GB')
-        })
-
-        it('should not add country code if neither billing address nor locale is available', () => {
-            mockContext.req.query = {}
-            builder = new PaymentRequestBuilder(mockContext)
-            builder.withCountryCode()
-
-            expect(builder.paymentRequest.countryCode).toBeUndefined()
-        })
-
-        it('should prefer billing address country over locale', () => {
-            mockContext.req.query = {locale: 'en-GB'}
-            builder = new PaymentRequestBuilder(mockContext)
-            builder.withBillingAddress()
-            builder.withCountryCode()
-
-            expect(builder.paymentRequest.countryCode).toBe('US')
-        })
-
-        it('should return builder for chaining', () => {
-            builder = new PaymentRequestBuilder(mockContext)
-            const result = builder.withCountryCode()
-
-            expect(result).toBe(builder)
-        })
-    })
-
     describe('withOpenInvoiceData', () => {
         it('should add line items and country code for open invoice methods', () => {
             mockContext.stateData.paymentMethod.type = 'klarna'
@@ -786,7 +744,6 @@ describe('PaymentRequestBuilder', () => {
             expect(result).toHaveProperty('merchantAccount')
             expect(result).toHaveProperty('amount')
             expect(result).toHaveProperty('channel')
-            expect(result).toHaveProperty('countryCode', 'US')
         })
     })
 
@@ -797,7 +754,6 @@ describe('PaymentRequestBuilder', () => {
             const result = builder
                 .withStateData()
                 .withBillingAddress()
-                .withCountryCode()
                 .withDeliveryAddress()
                 .withReference()
                 .withMerchantAccount()
