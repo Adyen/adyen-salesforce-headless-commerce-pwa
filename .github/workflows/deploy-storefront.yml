@@ -82,9 +82,6 @@ jobs:
       - name: Install Retail app package dependencies
         working-directory: ./packages/adyen-retail-react-app
         run: pnpm install
-      - name: Install PWA in Retail app
-        working-directory: ./packages/adyen-retail-react-app
-        run: pnpm add ../adyen-salesforce-pwa/adyen-adyen-salesforce-pwa-$(node -p "require('../adyen-salesforce-pwa/package.json').version").tgz
       - name: Build and deploy to storefront
         working-directory: ./packages/adyen-retail-react-app
         run: pnpm run push -- -s "$MRT_PROJECT_SLUG" -t "$MRT_DEPLOY_TARGET" --user "$MRT_USER" --key "$MRT_API_KEY"
