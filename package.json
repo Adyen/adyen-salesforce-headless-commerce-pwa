@@ -20,6 +20,11 @@
     "husky": "^8.0.3",
     "sgmf-scripts": "^4.0.0"
   },
+  "pnpm": {
+    "overrides": {
+      "merge": "2.1.1"
+    }
+  },
   "overrides": {
     "node-notifier": "10.0.1",
     "yargs-parser": "21.1.1",
