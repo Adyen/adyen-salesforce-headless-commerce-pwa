@@ -23,6 +23,10 @@ jobs:
             id-token: write # Required for OpenID Connect (OIDC) for trusted publishing on NPM
         steps:
             - uses: actions/checkout@v4
+            - name: Install pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                  version: 10
             # Setup .npmrc file to publish to npm
             - uses: actions/setup-node@v4
               with:
@@ -33,8 +37,8 @@ jobs:
             # Copy env example file to adyen-salesforce-pwa package
             - run: cp packages/adyen-retail-react-app/.env.example packages/adyen-salesforce-pwa/
             # Install the node modules
-            - run: cd packages/adyen-salesforce-pwa/ && npm install
+            - run: cd packages/adyen-salesforce-pwa/ && pnpm install
             # Build
-            - run: cd packages/adyen-salesforce-pwa/ && npm run build-prod
+            - run: cd packages/adyen-salesforce-pwa/ && pnpm run build-prod
             # Publish the npm package
             - run: cd packages/adyen-salesforce-pwa/ && npm publish --tag latest --access public

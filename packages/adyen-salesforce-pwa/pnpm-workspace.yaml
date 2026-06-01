@@ -1,0 +1,8 @@
+ignoredBuiltDependencies:
+  - '@salesforce/retail-react-app'
+  - aws-sdk
+  - core-js
+  - core-js-pure
+  - es5-ext
+  - full-icu
+  - msw

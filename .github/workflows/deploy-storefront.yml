@@ -26,6 +26,10 @@ jobs:
       labels: ubuntu-latest-8-cores
     steps:
       - uses: actions/checkout@v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -68,19 +72,19 @@ jobs:
            sfcc-ci instance:import site_import.zip -i "$PWA_HOSTNAME" -s
       - name: Install PWA package dependencies
         working-directory: ./packages/adyen-salesforce-pwa
-        run: npm i --ignore-scripts
+        run: pnpm install
       - name: Build PWA
         working-directory: ./packages/adyen-salesforce-pwa
-        run: npm run build-prod
+        run: pnpm run build-prod
       - name: Pack PWA
         working-directory: ./packages/adyen-salesforce-pwa
-        run: npm pack
+        run: pnpm pack
       - name: Install Retail app package dependencies
         working-directory: ./packages/adyen-retail-react-app
-        run: npm i --no-cache --ignore-scripts
+        run: pnpm install
       - name: Install PWA in Retail app
         working-directory: ./packages/adyen-retail-react-app
-        run: npm i ../adyen-salesforce-pwa/adyen-adyen-salesforce-pwa-$(node -p "require('../adyen-salesforce-pwa/package.json').version").tgz --no-cache
+        run: pnpm add ../adyen-salesforce-pwa/adyen-adyen-salesforce-pwa-$(node -p "require('../adyen-salesforce-pwa/package.json').version").tgz
       - name: Build and deploy to storefront
         working-directory: ./packages/adyen-retail-react-app
-        run: npm run push -- -s "$MRT_PROJECT_SLUG" -t "$MRT_DEPLOY_TARGET" --user "$MRT_USER" --key "$MRT_API_KEY"
+        run: pnpm run push -- -s "$MRT_PROJECT_SLUG" -t "$MRT_DEPLOY_TARGET" --user "$MRT_USER" --key "$MRT_API_KEY"

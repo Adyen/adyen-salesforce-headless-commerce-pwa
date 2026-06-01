@@ -13,6 +13,10 @@ jobs:
               uses: actions/checkout@v4
               with:
                   fetch-depth: 0
+            - name: Install pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                  version: 10
 
             - name: Setup Node.js
               uses: actions/setup-node@v4
@@ -25,15 +29,15 @@ jobs:
 
             - name: Install PWA package dependencies
               working-directory: ./packages/adyen-salesforce-pwa
-              run: npm i --ignore-scripts
+              run: pnpm install --ignore-scripts
 
             - name: Run lint
               working-directory: ./packages/adyen-salesforce-pwa
-              run: npm run lint
+              run: pnpm run lint
 
             - name: Run tests with coverage
               working-directory: ./packages/adyen-salesforce-pwa
-              run: npm run test:coverage
+              run: pnpm run test:coverage
 
             - name: SonarQube Scan
               uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602
