@@ -84,4 +84,4 @@ jobs:
         run: pnpm install
       - name: Build and deploy to storefront
         working-directory: ./packages/adyen-retail-react-app
-        run: pnpm run push  -s "$MRT_PROJECT_SLUG" -t "$MRT_DEPLOY_TARGET" --user "$MRT_USER" --key "$MRT_API_KEY"
+        run: pnpm run push  -s "$MRT_PROJECT_SLUG" -t "$MRT_DEPLOY_TARGET" --user "$MRT_USER" --key "$MRT_API_KEY" -m "${{ github.head_ref }}"
