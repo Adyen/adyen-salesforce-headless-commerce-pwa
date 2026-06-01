@@ -106,7 +106,16 @@
             "compression": ">=1.8.1",
             "cookie": ">=0.7.0",
             "tmp": ">=0.2.4"
-        }
+        },
+        "ignoredBuiltDependencies": [
+            "@salesforce/retail-react-app",
+            "aws-sdk",
+            "core-js",
+            "core-js-pure",
+            "es5-ext",
+            "full-icu",
+            "msw"
+        ]
     },
     "files": [
         "dist",
