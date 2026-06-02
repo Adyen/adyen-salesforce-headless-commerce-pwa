@@ -37,7 +37,7 @@ jobs:
       - name: Build and upload int_adyen_PWA cartridge
         run: pnpm run buildCartridge
       - name: Install Salesforce CLI
-        run: pnpm install -g sfcc-ci@4 --ignore-scripts
+        run: pnpm install -g sfcc-ci@2.13.0 --ignore-scripts
       - name: Zip site_import
         working-directory: ./metadata
         run: zip -r $GITHUB_WORKSPACE/site_import.zip site_import
