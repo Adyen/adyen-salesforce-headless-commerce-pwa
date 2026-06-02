@@ -27,7 +27,7 @@ test.describe('Donations through PWA UI', () => {
         await scenarios.verifySuccessfulOrder()
 
         const donationComponent = page.locator(
-            '.adyen-checkout__adyen-giving, .adyen-checkout__donation'
+            '.adyen-checkout__adyen-giving'
         )
         await expect(donationComponent).toBeVisible({timeout: 15000})
 
@@ -64,7 +64,7 @@ test.describe('Donations through PWA UI', () => {
         await scenarios.verifySuccessfulOrder()
 
         const donationComponent = page.locator(
-            '.adyen-checkout__adyen-giving, .adyen-checkout__donation'
+            '.adyen-checkout__adyen-giving'
         )
         await expect(donationComponent).toBeVisible({timeout: 15000})
 
