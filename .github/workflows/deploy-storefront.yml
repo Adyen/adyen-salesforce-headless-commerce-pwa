@@ -84,7 +84,9 @@ jobs:
         run: pnpm install --ignore-scripts
       - name: Install PWA in Retail app
         working-directory: ./packages/adyen-retail-react-app
-        run: pnpm add "file:../adyen-salesforce-pwa/adyen-adyen-salesforce-pwa-$(node -p \"require('../adyen-salesforce-pwa/package.json').version\").tgz"
+        run: |
+          VERSION=$(node -p "require('../adyen-salesforce-pwa/package.json').version")
+          pnpm add "file:../adyen-salesforce-pwa/adyen-adyen-salesforce-pwa-${VERSION}.tgz"
       - name: Build and deploy to storefront
         working-directory: ./packages/adyen-retail-react-app
         env:
