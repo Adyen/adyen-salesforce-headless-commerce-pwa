@@ -2,22 +2,8 @@ name: Deploy Storefront
 on:
   pull_request:
     branches: [main, develop]
-env:
-  COMMERCE_API_CLIENT_ID: ${{ secrets.COMMERCE_API_CLIENT_ID }}
-  COMMERCE_API_ORG_ID: ${{ secrets.COMMERCE_API_ORG_ID }}
-  COMMERCE_API_SHORT_CODE: ${{ secrets.COMMERCE_API_SHORT_CODE }}
-  COMMERCE_API_SITE_ID: ${{ secrets.COMMERCE_API_SITE_ID }}
-  COMMERCE_API_DEFAULT_SITE: ${{ secrets.COMMERCE_API_DEFAULT_SITE }}
-  SCAPI_URL: ${{ secrets.SCAPI_URL }}
-  OCAPI_URL: ${{ secrets.OCAPI_URL }}
-  ENVIRONMENT_ID: ${{ secrets.ENVIRONMENT_ID }}
-  PROJECT_ID: ${{ secrets.PROJECT_ID }}
-  COMMERCE_API_CLIENT_ID_PRIVATE: ${{ secrets.COMMERCE_API_CLIENT_ID_PRIVATE }}
-  COMMERCE_API_CLIENT_SECRET: ${{ secrets.COMMERCE_API_CLIENT_SECRET }}
-  MRT_PROJECT_SLUG: ${{ secrets.MRT_PROJECT_SLUG }}
-  MRT_DEPLOY_TARGET: ${{ secrets.MRT_DEPLOY_TARGET }}
-  MRT_USER: ${{ secrets.MRT_USER }}
-  MRT_API_KEY: ${{ secrets.MRT_API_KEY }}
+permissions:
+  contents: read
 jobs:
   deploy-storefront:
     timeout-minutes: 30
@@ -25,16 +11,16 @@ jobs:
       group: larger-runners
       labels: ubuntu-latest-8-cores
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Install pnpm
         uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
         with:
           version: 10
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
       - name: Install project dependencies
-        run: npm i --ignore-scripts
+        run: pnpm i --ignore-scripts
       - name: Create dw.json file
         env:
           PWA_USERNAME: ${{ secrets.PWA_USERNAME }}
@@ -42,16 +28,16 @@ jobs:
           PWA_HOSTNAME: ${{ secrets.PWA_HOSTNAME }}
           PWA_CODE_VERSION: ${{ secrets.PWA_CODE_VERSION }}
         run: |
-          echo '{
-            "username": "'"$PWA_USERNAME"'",
-            "password": "'"$PWA_PASSWORD"'",
-            "hostname": "'"$PWA_HOSTNAME"'",
-            "code-version": "'"$PWA_CODE_VERSION"'"
-          }' >> dw.json
+          jq -n \
+            --arg username "$PWA_USERNAME" \
+            --arg password "$PWA_PASSWORD" \
+            --arg hostname "$PWA_HOSTNAME" \
+            --arg codeVersion "$PWA_CODE_VERSION" \
+            '{username:$username, password:$password, hostname:$hostname, "code-version":$codeVersion}' > dw.json
       - name: Build and upload int_adyen_PWA cartridge
-        run: npm run buildCartridge
+        run: pnpm run buildCartridge
       - name: Install Salesforce CLI
-        run: npm install -g sfcc-ci --ignore-scripts
+        run: pnpm install -g sfcc-ci@4 --ignore-scripts
       - name: Zip site_import
         working-directory: ./metadata
         run: zip -r $GITHUB_WORKSPACE/site_import.zip site_import
@@ -91,4 +77,19 @@ jobs:
         working-directory: ./packages/adyen-retail-react-app
         env:
           BRANCH_NAME: ${{ github.head_ref }}
+          COMMERCE_API_CLIENT_ID: ${{ secrets.COMMERCE_API_CLIENT_ID }}
+          COMMERCE_API_ORG_ID: ${{ secrets.COMMERCE_API_ORG_ID }}
+          COMMERCE_API_SHORT_CODE: ${{ secrets.COMMERCE_API_SHORT_CODE }}
+          COMMERCE_API_SITE_ID: ${{ secrets.COMMERCE_API_SITE_ID }}
+          COMMERCE_API_DEFAULT_SITE: ${{ secrets.COMMERCE_API_DEFAULT_SITE }}
+          SCAPI_URL: ${{ secrets.SCAPI_URL }}
+          OCAPI_URL: ${{ secrets.OCAPI_URL }}
+          ENVIRONMENT_ID: ${{ secrets.ENVIRONMENT_ID }}
+          PROJECT_ID: ${{ secrets.PROJECT_ID }}
+          COMMERCE_API_CLIENT_ID_PRIVATE: ${{ secrets.COMMERCE_API_CLIENT_ID_PRIVATE }}
+          COMMERCE_API_CLIENT_SECRET: ${{ secrets.COMMERCE_API_CLIENT_SECRET }}
+          MRT_PROJECT_SLUG: ${{ secrets.MRT_PROJECT_SLUG }}
+          MRT_DEPLOY_TARGET: ${{ secrets.MRT_DEPLOY_TARGET }}
+          MRT_USER: ${{ secrets.MRT_USER }}
+          MRT_API_KEY: ${{ secrets.MRT_API_KEY }}
         run: pnpm run push  -s "$MRT_PROJECT_SLUG" -t "$MRT_DEPLOY_TARGET" --user "$MRT_USER" --key "$MRT_API_KEY" -m "$BRANCH_NAME"
