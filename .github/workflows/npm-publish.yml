@@ -37,7 +37,7 @@ jobs:
             # Copy env example file to adyen-salesforce-pwa package
             - run: cp packages/adyen-retail-react-app/.env.example packages/adyen-salesforce-pwa/
             # Install the node modules
-            - run: cd packages/adyen-salesforce-pwa/ && pnpm install
+            - run: cd packages/adyen-salesforce-pwa/ && pnpm install --ignore-scripts
             # Build
             - run: cd packages/adyen-salesforce-pwa/ && pnpm run build-prod
             # Publish the npm package

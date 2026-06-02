@@ -72,7 +72,7 @@ jobs:
            sfcc-ci instance:import site_import.zip -i "$PWA_HOSTNAME" -s
       - name: Install PWA package dependencies
         working-directory: ./packages/adyen-salesforce-pwa
-        run: pnpm install
+        run: pnpm install --ignore-scripts
       - name: Build PWA
         working-directory: ./packages/adyen-salesforce-pwa
         run: pnpm run build-prod
@@ -81,10 +81,12 @@ jobs:
         run: pnpm pack
       - name: Install Retail app package dependencies
         working-directory: ./packages/adyen-retail-react-app
-        run: pnpm install
+        run: pnpm install --ignore-scripts
       - name: Install PWA in Retail app
         working-directory: ./packages/adyen-retail-react-app
-        run: pnpm add "file:../adyen-salesforce-pwa/adyen-adyen-salesforce-pwa-$(node -p \"require('../adyen-salesforce-pwa/package.json').version\").tgz"
+        run: pnpm add --ignore-scripts "file:../adyen-salesforce-pwa/adyen-adyen-salesforce-pwa-$(node -p \"require('../adyen-salesforce-pwa/package.json').version\").tgz"
       - name: Build and deploy to storefront
         working-directory: ./packages/adyen-retail-react-app
-        run: pnpm run push  -s "$MRT_PROJECT_SLUG" -t "$MRT_DEPLOY_TARGET" --user "$MRT_USER" --key "$MRT_API_KEY" -m "${{ github.head_ref }}"
+        env:
+          BRANCH_NAME: ${{ github.head_ref }}
+        run: pnpm run push  -s "$MRT_PROJECT_SLUG" -t "$MRT_DEPLOY_TARGET" --user "$MRT_USER" --key "$MRT_API_KEY" -m "$BRANCH_NAME"

@@ -22,7 +22,7 @@ jobs:
         run: npm i
       - name: Install PWA package dependencies
         working-directory: ./packages/adyen-salesforce-pwa
-        run: pnpm install
+        run: pnpm install --ignore-scripts
       - name: Build PWA
         working-directory: ./packages/adyen-salesforce-pwa
         run: pnpm run build-dev
@@ -31,7 +31,7 @@ jobs:
         run: pnpm pack
       - name: Install Retail app package dependencies
         working-directory: ./packages/adyen-retail-react-app
-        run: pnpm install
+        run: pnpm install --ignore-scripts
       - name: Install PWA in Retail app
         working-directory: ./packages/adyen-retail-react-app
         run: pnpm add ../adyen-salesforce-pwa/adyen-adyen-salesforce-pwa-$(node -p "require('../adyen-salesforce-pwa/package.json').version").tgz
