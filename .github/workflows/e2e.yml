@@ -44,7 +44,7 @@ jobs:
         run: pnpm install --ignore-scripts
       - name: Install Playwright Browsers
         working-directory: ./packages/e2e-tests
-        run: pnpm exec playwright install --with-deps
+        run: pnpm exec playwright install --with-deps --ignore-scripts
       - name: Start Webserver & Run Playwright tests
         working-directory: ./packages/e2e-tests
         run: pnpm run test
