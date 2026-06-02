@@ -27,7 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
         with:
           version: 10
       - uses: actions/setup-node@v4
@@ -84,7 +84,7 @@ jobs:
         run: pnpm install --ignore-scripts
       - name: Install PWA in Retail app
         working-directory: ./packages/adyen-retail-react-app
-        run: pnpm add --ignore-scripts "file:../adyen-salesforce-pwa/adyen-adyen-salesforce-pwa-$(node -p \"require('../adyen-salesforce-pwa/package.json').version\").tgz"
+        run: pnpm add "file:../adyen-salesforce-pwa/adyen-adyen-salesforce-pwa-$(node -p \"require('../adyen-salesforce-pwa/package.json').version\").tgz"
       - name: Build and deploy to storefront
         working-directory: ./packages/adyen-retail-react-app
         env:
