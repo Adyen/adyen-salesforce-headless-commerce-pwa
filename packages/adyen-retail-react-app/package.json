@@ -17,30 +17,30 @@
         "style-loader": "^3.3.3"
     },
     "scripts": {
-        "analyze-build": "cross-env MOBIFY_ANALYZE=true npm run build",
-        "build": "npm run build-translations && pwa-kit-dev build",
-        "build-translations": "npm run extract-default-translations && npm run compile-translations",
+        "analyze-build": "cross-env MOBIFY_ANALYZE=true pnpm run build",
+        "build": "pnpm run build-translations && pwa-kit-dev build",
+        "build-translations": "pnpm run extract-default-translations && pnpm run compile-translations",
         "compile-translations": "node ./node_modules/@salesforce/retail-react-app/scripts/translations/compile-folder.js translations",
         "compile-translations:pseudo": "node ./node_modules/@salesforce/retail-react-app/scripts/translations/compile-pseudo.js translations/en-US.json",
         "extract-default-translations": "node ./node_modules/@salesforce/retail-react-app/scripts/translations/extract-default-messages.js en-US",
         "format": "pwa-kit-dev format \"**/*.{js,jsx}\"",
         "lint": "pwa-kit-dev lint \"**/*.{js,jsx}\"",
-        "lint:fix": "npm run lint -- --fix",
-        "postinstall": "npm run compile-translations && npm run compile-translations:pseudo",
-        "push": "npm run build && pwa-kit-dev push",
+        "lint:fix": "pnpm run lint -- --fix",
+        "postinstall": "pnpm run compile-translations && pnpm run compile-translations:pseudo",
+        "push": "pnpm run build && pwa-kit-dev push",
         "save-credentials": "pwa-kit-dev save-credentials",
         "start": "cross-env NODE_ICU_DATA=node_modules/full-icu pwa-kit-dev start",
-        "start:inspect": "npm run start -- --inspect",
-        "start:pseudolocale": "npm run extract-default-translations && npm run compile-translations:pseudo && cross-env USE_PSEUDOLOCALE=true npm run start",
+        "start:inspect": "pnpm run start -- --inspect",
+        "start:pseudolocale": "pnpm run extract-default-translations && pnpm run compile-translations:pseudo && cross-env USE_PSEUDOLOCALE=true pnpm run start",
         "tail-logs": "pwa-kit-dev tail-logs",
         "test": "pwa-kit-dev test",
         "test:lighthouse": "cross-env NODE_ENV=production lhci autorun --config=tests/lighthouserc.js",
-        "test:max-file-size": "npm run build && bundlesize",
+        "test:max-file-size": "pnpm run build && bundlesize",
         "upload-env": "upload-env",
         "get-env": "get-env",
         "sync-adyen": "./sync-adyen-salesforce-pwa.sh",
-        "start:env": "include-env -p=npm run start",
-        "push:env": "include-env -p=npm run push"
+        "start:env": "include-env -p=pnpm run start",
+        "push:env": "include-env -p=pnpm run push"
     },
     "bundlesize": [
         {
@@ -57,6 +57,34 @@
         "Android >= 4.4.4",
         "last 4 ChromeAndroid versions"
     ],
+    "pnpm": {
+        "overrides": {
+            "ws": ">=8.17.1",
+            "express": "^4.21.0",
+            "braces": ">=3.0.3",
+            "react": "^18.2.0",
+            "react-dom": "^18.2.0",
+            "@salesforce/pwa-kit-runtime": "3.15.0",
+            "@salesforce/pwa-kit-dev": "3.15.0",
+            "@salesforce/pwa-kit-react-sdk": "3.15.0",
+            "@salesforce/commerce-sdk-react": "4.3.0",
+            "serialize-javascript": ">=7.0.5",
+            "tar-fs": ">=2.1.4",
+            "postcss": ">=8.5.10",
+            "compression": ">=1.8.1",
+            "cookie": ">=0.7.0",
+            "tmp": ">=0.2.4"
+        },
+        "ignoredBuiltDependencies": [
+            "@salesforce/retail-react-app",
+            "aws-sdk",
+            "core-js",
+            "core-js-pure",
+            "es5-ext",
+            "full-icu",
+            "msw"
+        ]
+    },
     "overrides": {
         "ws": ">=8.17.1",
         "express": "^4.21.0",

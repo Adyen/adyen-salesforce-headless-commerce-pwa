@@ -11,17 +11,21 @@ jobs:
             actions: read
             id-token: write # Required for OpenID Connect (OIDC) for trusted publishing on NPM
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
               with:
                   ref: develop # Checkout the develop branch
+            - name: Install pnpm
+              uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
+              with:
+                  version: 10
             
-            - uses: actions/setup-node@v4
+            - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
               with:
                   node-version: 24
                   registry-url: 'https://registry.npmjs.org'
 
             - name: Install root dependencies
-              run: npm install --ignore-scripts
+              run: pnpm install --ignore-scripts
 
             - name: Copy LICENSE to adyen-salesforce-pwa package
               run: cp LICENSE packages/adyen-salesforce-pwa/
@@ -30,7 +34,7 @@ jobs:
               run: cp packages/adyen-retail-react-app/.env.example packages/adyen-salesforce-pwa/
 
             - name: Install package dependencies
-              run: cd packages/adyen-salesforce-pwa/ && npm install --ignore-scripts
+              run: cd packages/adyen-salesforce-pwa/ && pnpm install --ignore-scripts
 
             - name: Update version for weekly build
               run: |
@@ -39,10 +43,10 @@ jobs:
                   TIMESTAMP=$(date +%Y%m%d%H%M%S)
                   NEW_VERSION="${BASE_VERSION}-weekly-${TIMESTAMP}"
                   echo "Updating version to ${NEW_VERSION}"
-                  npm version ${NEW_VERSION} --no-git-tag-version
+                  pnpm version ${NEW_VERSION} --no-git-tag-version
 
             - name: Build package
-              run: cd packages/adyen-salesforce-pwa/ && npm run build-prod
+              run: cd packages/adyen-salesforce-pwa/ && pnpm run build-prod
 
             - name: Publish weekly package
               run: cd packages/adyen-salesforce-pwa/ && npm publish --tag weekly --access public

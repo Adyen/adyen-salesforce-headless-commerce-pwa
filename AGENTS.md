@@ -23,23 +23,23 @@ Monorepo with an NPM package, a reference retail app, Playwright E2E tests, and 
 - **E2E Tests**: Playwright
 - **Lint**: ESLint + Prettier
 - **Code Quality**: SonarQube (runs on every PR)
-- **Package Manager**: npm
+- **Package Manager**: npm (pnpm for `packages/adyen-salesforce-pwa` and `packages/adyen-retail-react-app`)
 
 ## Key Commands
 
 ### adyen-salesforce-pwa (core package)
-- `npm test` - Run unit tests (Jest)
-- `npm run test:coverage` - Unit tests with coverage
-- `npm run lint` - Lint
-- `npm run lint:fix` - Auto-fix lint
-- `npm run build-dev` / `npm run build-prod` - Build
-- `npm run format` - Prettier format
+- `pnpm test` - Run unit tests (Jest)
+- `pnpm run test:coverage` - Unit tests with coverage
+- `pnpm run lint` - Lint
+- `pnpm run lint:fix` - Auto-fix lint
+- `pnpm run build-dev` / `pnpm run build-prod` - Build
+- `pnpm run format` - Prettier format
 
 ### adyen-retail-react-app (reference app)
-- `npm start` - Dev server (port 3000)
-- `npm test` - Tests
-- `npm run build` - Production build
-- `npm run lint` - Lint
+- `pnpm start` - Dev server (port 3000)
+- `pnpm test` - Tests
+- `pnpm run build` - Production build
+- `pnpm run lint` - Lint
 
 ### e2e-tests
 - `npm test` - Playwright headless

@@ -2,6 +2,8 @@ name: E2E Tests with Playwright
 on:
   pull_request:
     branches: [main, develop]
+permissions:
+  contents: read
 jobs:
   build-and-test:
     if: ${{ !startsWith(github.head_ref, 'renovate/') }}
@@ -10,36 +12,42 @@ jobs:
       group: larger-runners
       labels: ubuntu-latest-8-cores
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
         with:
-          node-version: 18
+          version: 10
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
       - name: Install project dependencies
-        run: npm i
+        run: pnpm install --ignore-scripts
       - name: Install PWA package dependencies
         working-directory: ./packages/adyen-salesforce-pwa
-        run: npm i
+        run: pnpm install --ignore-scripts
       - name: Build PWA
         working-directory: ./packages/adyen-salesforce-pwa
-        run: npm run build-dev
-      - name: Make PWA NPM Link
+        run: pnpm run build-dev
+      - name: Pack PWA package
         working-directory: ./packages/adyen-salesforce-pwa
-        run: npm link
+        run: pnpm pack
       - name: Install Retail app package dependencies
         working-directory: ./packages/adyen-retail-react-app
-        run: npm i
-      - name: Link PWA to Retail app
+        run: pnpm install --ignore-scripts
+      - name: Install PWA in Retail app
         working-directory: ./packages/adyen-retail-react-app
-        run: npm link @adyen/adyen-salesforce-pwa
+        run: |
+          VERSION=$(node -p "require('../adyen-salesforce-pwa/package.json').version")
+          pnpm add "file:../adyen-salesforce-pwa/adyen-adyen-salesforce-pwa-${VERSION}.tgz"
       - name: Install Playwright dependencies
         working-directory: ./packages/e2e-tests
-        run: npm i
+        run: pnpm install --ignore-scripts
       - name: Install Playwright Browsers
         working-directory: ./packages/e2e-tests
-        run: npx playwright install --with-deps
+        run: pnpm exec playwright install --with-deps
       - name: Start Webserver & Run Playwright tests
         working-directory: ./packages/e2e-tests
-        run: npm run test
+        run: pnpm run test
         env:
           RefArch_ADYEN_API_KEY: ${{secrets.ADYEN_API_KEY}}
           RefArch_ADYEN_MERCHANT_ACCOUNT: ${{secrets.ADYEN_MERCHANT_ACCOUNT}}
@@ -63,7 +71,7 @@ jobs:
           NODE_ENV: ${{ secrets.NODE_ENV }}
           E2E_PAYPAL_USERNAME: ${{secrets.E2E_PAYPAL_USERNAME}}
           E2E_PAYPAL_PASSWORD: ${{secrets.E2E_PAYPAL_PASSWORD}}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:
           name: playwright-report
