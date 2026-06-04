@@ -46,6 +46,7 @@ const AdyenCheckoutComponent = ({
     // Optional overrides
     dropinConfiguration = {},
     paymentMethodsConfiguration: additionalPaymentMethodsConfiguration,
+    paymentRequestData = {},
     translations,
     onStateChange,
 
@@ -225,6 +226,7 @@ const AdyenCheckoutComponent = ({
             beforeSubmit,
             afterAdditionalDetails,
             beforeAdditionalDetails,
+            paymentRequestData,
             locale
         })
     }, [
@@ -240,7 +242,8 @@ const AdyenCheckoutComponent = ({
         internalOrderNo,
         returnUrl,
         customerId,
-        navigate
+        navigate,
+        paymentRequestData
     ])
 
     // Memoize the translations to prevent unnecessary recalculations
@@ -408,6 +411,7 @@ AdyenCheckoutComponent.propTypes = {
     // Optional overrides
     dropinConfiguration: PropTypes.object,
     paymentMethodsConfiguration: PropTypes.object,
+    paymentRequestData: PropTypes.object,
     translations: PropTypes.object
 }
 
