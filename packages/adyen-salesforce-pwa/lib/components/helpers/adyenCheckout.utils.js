@@ -8,7 +8,8 @@ export const getCheckoutConfig = (adyenEnvironment, adyenPaymentMethods, transla
         clientKey: adyenEnvironment?.ADYEN_CLIENT_KEY,
         countryCode,
         paymentMethodsResponse: adyenPaymentMethods,
-        ...(translations && {locale: locale.id, translations})
+        ...(translations && {locale: locale.id, translations}),
+        locale: locale?.id
     }
 }
 
