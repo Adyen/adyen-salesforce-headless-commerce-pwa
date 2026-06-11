@@ -46,7 +46,7 @@ const AdyenCheckoutComponent = ({
     // Optional overrides
     dropinConfiguration = {},
     paymentMethodsConfiguration: additionalPaymentMethodsConfiguration,
-    paymentRequestData = {},
+    paymentRequestData,
     translations,
     onStateChange,
 

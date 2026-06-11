@@ -155,12 +155,15 @@ const Payment = () => {
             showInstallmentAmounts: true
         }
     }
-    const paymentRequestData = {
-        company: {
-            name: 'PWA',
-            registrationNumber: '78512300'
-        }
-    }
+    const paymentRequestData = useMemo(
+        () => ({
+            company: {
+                name: 'PWA',
+                registrationNumber: '78512300'
+            }
+        }),
+        []
+    )
 
     return (
         <ToggleCard
