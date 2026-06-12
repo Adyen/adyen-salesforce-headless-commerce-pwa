@@ -155,6 +155,15 @@ const Payment = () => {
             showInstallmentAmounts: true
         }
     }
+    const paymentRequestData = useMemo(
+        () => ({
+            company: {
+                name: 'PWA',
+                registrationNumber: '78512300'
+            }
+        }),
+        []
+    )
 
     return (
         <ToggleCard
@@ -179,6 +188,7 @@ const Payment = () => {
                             page={pageTypes.CHECKOUT}
                             merchantDisplayName={'Merchant name'}
                             paymentMethodsConfiguration={paymentMethodsConfiguration}
+                            paymentRequestData={paymentRequestData}
                             beforeSubmit={[onBillingSubmit]}
                             onError={[showError]}
                             spinner={<LoadingSpinner />}

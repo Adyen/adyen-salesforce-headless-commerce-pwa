@@ -35,14 +35,16 @@ describe('baseConfig function', () => {
 
 describe('onSubmit function', () => {
     let mockActions
+    let mockSubmitPayment
 
     beforeEach(() => {
         mockActions = {
             resolve: jest.fn(),
             reject: jest.fn()
         }
+        mockSubmitPayment = jest.fn().mockResolvedValue({mockData: 'Mocked response'})
         AdyenPaymentsService.mockImplementation(() => ({
-            submitPayment: jest.fn().mockResolvedValue({mockData: 'Mocked response'})
+            submitPayment: mockSubmitPayment
         }))
     })
 
@@ -133,6 +135,39 @@ describe('onSubmit function', () => {
         expect(result).toBeUndefined()
         expect(mockActions.reject).toHaveBeenCalledWith(mockError)
         expect(mockActions.resolve).not.toHaveBeenCalled()
+    })
+
+    it('should merge paymentRequestData into submitted payload', async () => {
+        const state = {
+            data: {paymentMethod: {type: 'scheme'}, origin: 'https://adyen.com'},
+            isValid: true
+        }
+        const props = {
+            token: 'testToken',
+            customerId: 'testCustomerId',
+            basket: {basketId: 'basket123'},
+            locale: {id: 'en-US'},
+            returnUrl: 'https://adyen.com/checkout/redirect',
+            paymentRequestData: {
+                company: {
+                    name: 'Acme Corp',
+                    registrationNumber: '123456789'
+                }
+            }
+        }
+
+        await onSubmit(state, {}, mockActions, props)
+
+        expect(mockSubmitPayment).toHaveBeenCalledWith(
+            expect.objectContaining({
+                paymentMethod: {type: 'scheme'},
+                company: {
+                    name: 'Acme Corp',
+                    registrationNumber: '123456789'
+                }
+            }),
+            {id: 'en-US'}
+        )
     })
 })
 

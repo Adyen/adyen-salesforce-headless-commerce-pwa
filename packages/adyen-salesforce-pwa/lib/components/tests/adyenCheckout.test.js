@@ -8,6 +8,7 @@ import useAdyenEnvironment from '../../hooks/useAdyenEnvironment'
 import useAdyenPaymentMethods from '../../hooks/useAdyenPaymentMethods'
 import {useAccessToken, useCustomerId, useCustomerType} from '@salesforce/commerce-sdk-react'
 import useAdyenOrderNumber from '../../hooks/useAdyenOrderNumber'
+import {paymentMethodsConfiguration} from '../paymentMethodsConfiguration'
 import {
     createCheckoutInstance,
     handleRedirects,
@@ -528,6 +529,25 @@ describe('AdyenCheckoutComponent', () => {
         })
 
         // Callbacks should be passed to payment methods configuration
+    })
+
+    it('should pass paymentRequestData to payment methods configuration', async () => {
+        const paymentRequestData = {
+            company: {
+                name: 'Acme Corp',
+                registrationNumber: '123456789'
+            }
+        }
+
+        render(<AdyenCheckoutComponent {...defaultProps} paymentRequestData={paymentRequestData} />)
+
+        await waitFor(() => {
+            expect(paymentMethodsConfiguration).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    paymentRequestData
+                })
+            )
+        })
     })
 
     it('should handle beforeAdditionalDetails and afterAdditionalDetails callbacks', async () => {
