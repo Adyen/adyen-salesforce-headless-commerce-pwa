@@ -123,7 +123,7 @@ describe('useCheckoutErrorRecovery', () => {
             pathname: '/checkout'
         })
 
-        const {result} = renderHook(() =>
+        renderHook(() =>
             useCheckoutErrorRecovery({
                 refetchBasket: mockRefetchBasket,
                 navigate: mockNavigate

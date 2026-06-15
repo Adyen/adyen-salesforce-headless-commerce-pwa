@@ -102,15 +102,35 @@ async function createTerminalPayment(req, res, next) {
             }
         }
 
-        const terminalCloudApi = new AdyenClientProvider(adyenContext).getTerminalCloudApi()
+        const terminalCloudApi = new AdyenClientProvider(adyenContext).getTerminalClient()
         const response = await terminalCloudApi.sync(terminalApiRequest)
-
         const paymentResult = parsePaymentResponse(response)
-
-        Logger.info('createTerminalPayment', `result: ${paymentResult.result}`)
-
         if (paymentResult.result === 'Failure') {
-            throw new AdyenError(ERROR_MESSAGE.TERMINAL_PAYMENT_FAILED, 400, paymentResult.error)
+            Logger.info(
+                'createTerminalPayment',
+                `terminal failure: ${JSON.stringify(paymentResult.error)}`
+            )
+
+            let newBasketId = null
+            if (orderNo) {
+                try {
+                    newBasketId = await failOrderAndReopenBasket(res.locals.adyen, orderNo)
+                    Logger.info(
+                        'createTerminalPayment',
+                        `order ${orderNo} failed, new basket: ${newBasketId}`
+                    )
+                } catch (orderErr) {
+                    Logger.error('createTerminalPayment orderFailure', orderErr.message)
+                }
+            }
+
+            res.locals.response = {
+                ...paymentResult,
+                orderNo,
+                serviceId,
+                newBasketId
+            }
+            return next()
         }
 
         if (paymentResult.pspReference) {
@@ -192,8 +212,8 @@ async function sendAbortRequest(adyenContext, serviceId, terminalId) {
         }
     }
 
-    const terminalCloudApi = new AdyenClientProvider(adyenContext).getTerminalCloudApi()
-    await terminalCloudApi.async(abortRequest)
+    const terminalCloudApi = new AdyenClientProvider(adyenContext).getTerminalClient()
+    await terminalCloudApi.sync(abortRequest)
     Logger.info('sendAbortRequest', `abort sent for serviceId: ${serviceId}`)
 }
 

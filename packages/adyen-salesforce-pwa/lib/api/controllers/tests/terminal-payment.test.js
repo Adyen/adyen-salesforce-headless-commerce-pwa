@@ -10,19 +10,17 @@ jest.mock('../../helpers/orderHelper')
 
 describe('createTerminalPayment controller', () => {
     let req, res, next
-    let mockSync, mockAsync, mockAddPaymentInstrument
+    let mockSync, mockAddPaymentInstrument
 
     beforeEach(() => {
         jest.clearAllMocks()
         jest.spyOn(terminalHelper, 'generateServiceId').mockReturnValue('1234567890')
 
         mockSync = jest.fn()
-        mockAsync = jest.fn()
 
         AdyenClientProvider.mockImplementation(() => ({
-            getTerminalCloudApi: () => ({
-                sync: mockSync,
-                async: mockAsync
+            getTerminalClient: () => ({
+                sync: mockSync
             })
         }))
 
@@ -181,30 +179,26 @@ describe('createTerminalPayment controller', () => {
         }
 
         mockSync.mockResolvedValue(terminalResponse)
-        mockAsync.mockResolvedValue('ok')
 
         await createTerminalPayment(req, res, next)
 
-        expect(next).toHaveBeenCalledWith(
-            expect.objectContaining({message: ERROR_MESSAGE.TERMINAL_PAYMENT_FAILED})
-        )
-        expect(mockAsync).toHaveBeenCalled()
+        expect(next).toHaveBeenCalledWith()
         expect(orderHelper.failOrderAndReopenBasket).toHaveBeenCalledWith(
             res.locals.adyen,
             'ORDER-001'
         )
-        const error = next.mock.calls[0][0]
-        expect(error.newBasketId).toBe('new-basket-123')
+        expect(res.locals.response.result).toBe('Failure')
+        expect(res.locals.response.error.errorCondition).toBe('Refusal')
+        expect(res.locals.response.newBasketId).toBe('new-basket-123')
     })
 
     it('should send abort and fail order on communication error', async () => {
-        mockSync.mockRejectedValue(new Error('Network timeout'))
-        mockAsync.mockResolvedValue('ok')
+        mockSync.mockRejectedValueOnce(new Error('Network timeout')).mockResolvedValueOnce('ok')
 
         await createTerminalPayment(req, res, next)
 
         expect(next).toHaveBeenCalledWith(expect.any(Error))
-        expect(mockAsync).toHaveBeenCalled()
+        expect(mockSync).toHaveBeenCalledTimes(2)
         expect(orderHelper.failOrderAndReopenBasket).toHaveBeenCalledWith(
             res.locals.adyen,
             'ORDER-001'

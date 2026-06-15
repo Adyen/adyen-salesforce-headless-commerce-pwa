@@ -16,7 +16,8 @@ const ENV_TO_CONFIG_MAP = {
     ADYEN_TERMINAL_API_KEY: 'terminalApiKey',
     ADYEN_TERMINAL_ENVIRONMENT: 'terminalEnvironment',
     ADYEN_LIVE_TERMINAL_URL_PREFIX: 'liveTerminalUrlPrefix',
-    ADYEN_POS_ACTIVE_STORE_IDS: 'posActiveStoreIds'
+    ADYEN_POS_ACTIVE_STORE_IDS: 'posActiveStoreIds',
+    ADYEN_POS_ENABLED: 'posEnabled'
 }
 
 export const getAdyenConfigForCurrentSite = (currentSiteId, options = {}) => {

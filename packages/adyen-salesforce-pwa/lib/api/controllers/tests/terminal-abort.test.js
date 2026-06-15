@@ -10,17 +10,17 @@ jest.mock('../../helpers/orderHelper')
 
 describe('abortTerminalPayment controller', () => {
     let req, res, next
-    let mockAsync
+    let mockSync
 
     beforeEach(() => {
         jest.clearAllMocks()
         jest.spyOn(terminalHelper, 'generateServiceId').mockReturnValue('9876543210')
 
-        mockAsync = jest.fn()
+        mockSync = jest.fn()
 
         AdyenClientProvider.mockImplementation(() => ({
-            getTerminalCloudApi: () => ({
-                async: mockAsync
+            getTerminalClient: () => ({
+                sync: mockSync
             })
         }))
 
@@ -51,11 +51,11 @@ describe('abortTerminalPayment controller', () => {
     })
 
     it('should send abort and fail order successfully', async () => {
-        mockAsync.mockResolvedValue('ok')
+        mockSync.mockResolvedValue('ok')
 
         await abortTerminalPayment(req, res, next)
 
-        expect(mockAsync).toHaveBeenCalledWith(
+        expect(mockSync).toHaveBeenCalledWith(
             expect.objectContaining({
                 SaleToPOIRequest: expect.objectContaining({
                     MessageHeader: expect.objectContaining({
@@ -86,7 +86,7 @@ describe('abortTerminalPayment controller', () => {
     })
 
     it('should handle failOrderAndReopenBasket error gracefully', async () => {
-        mockAsync.mockResolvedValue('ok')
+        mockSync.mockResolvedValue('ok')
         orderHelper.failOrderAndReopenBasket.mockRejectedValue(new Error('order fail error'))
 
         await abortTerminalPayment(req, res, next)
@@ -103,7 +103,7 @@ describe('abortTerminalPayment controller', () => {
         expect(next).toHaveBeenCalledWith(
             expect.objectContaining({message: ERROR_MESSAGE.INVALID_PARAMS})
         )
-        expect(mockAsync).not.toHaveBeenCalled()
+        expect(mockSync).not.toHaveBeenCalled()
     })
 
     it('should call next with error when terminalId is missing', async () => {
@@ -126,9 +126,9 @@ describe('abortTerminalPayment controller', () => {
         )
     })
 
-    it('should handle async API errors gracefully', async () => {
+    it('should handle sync API errors gracefully', async () => {
         const apiError = new Error('Terminal Cloud API error')
-        mockAsync.mockRejectedValue(apiError)
+        mockSync.mockRejectedValue(apiError)
 
         await abortTerminalPayment(req, res, next)
 
