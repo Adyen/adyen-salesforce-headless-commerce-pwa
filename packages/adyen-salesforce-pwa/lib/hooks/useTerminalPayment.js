@@ -2,16 +2,7 @@ import {useState, useCallback, useRef} from 'react'
 import {useQuery} from '@tanstack/react-query'
 import {TerminalApiService} from '../services/terminal-api'
 import {adyenKeys} from '../utils/queryKeys'
-
-export const TERMINAL_PAYMENT_STATUS = {
-    IDLE: 'idle',
-    SENDING: 'sending',
-    WAITING: 'waiting',
-    SUCCESS: 'success',
-    DECLINED: 'declined',
-    CANCELLED: 'cancelled',
-    ERROR: 'error'
-}
+import {TERMINAL_PAYMENT_STATUS} from '../utils/constants.mjs'
 
 /**
  * Hook that manages the full terminal payment lifecycle with a state machine.
@@ -45,6 +36,9 @@ const useTerminalPayment = ({
     const [error, setError] = useState(null)
     const [result, setResult] = useState(null)
 
+    const statusRef = useRef(status)
+    statusRef.current = status
+
     const paymentContextRef = useRef({serviceId: null, orderNo: null, terminalId: null})
 
     const terminalsQuery = useQuery({
@@ -58,7 +52,7 @@ const useTerminalPayment = ({
 
     const sendPayment = useCallback(
         async (terminalId) => {
-            if (status !== TERMINAL_PAYMENT_STATUS.IDLE) return
+            if (statusRef.current !== TERMINAL_PAYMENT_STATUS.IDLE) return
 
             setStatus(TERMINAL_PAYMENT_STATUS.SENDING)
             setError(null)
@@ -90,7 +84,7 @@ const useTerminalPayment = ({
                 onError?.(err)
             }
         },
-        [authToken, customerId, basketId, site, status, onSuccess, onDeclined, onError]
+        [authToken, customerId, basketId, site, onSuccess, onDeclined, onError]
     )
 
     const abortPayment = useCallback(async () => {

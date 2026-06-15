@@ -7,7 +7,7 @@ import {failOrderAndReopenBasket} from '../helpers/orderHelper.js'
 
 /**
  * Express middleware that sends an abort request for an in-progress terminal payment.
- * Uses the Adyen Terminal Cloud API async method to send a fire-and-forget abort.
+ * Uses the Adyen Terminal Cloud API sync method to send an abort request.
  * Fails the order (from orderRequestContext) and reopens the basket.
  *
  * Requires orderRequestContext middleware (provides order via res.locals.adyen.order).

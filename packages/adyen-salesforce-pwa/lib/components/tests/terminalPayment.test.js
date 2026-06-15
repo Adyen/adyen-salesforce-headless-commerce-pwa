@@ -5,7 +5,8 @@
 import React from 'react'
 import {render, screen, fireEvent, waitFor} from '@testing-library/react'
 import TerminalPaymentComponent from '../terminalPayment'
-import useTerminalPayment, {TERMINAL_PAYMENT_STATUS} from '../../hooks/useTerminalPayment'
+import useTerminalPayment from '../../hooks/useTerminalPayment'
+import {TERMINAL_PAYMENT_STATUS} from '../../utils/constants.mjs'
 import useAdyenOrderNumber from '../../hooks/useAdyenOrderNumber'
 import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 

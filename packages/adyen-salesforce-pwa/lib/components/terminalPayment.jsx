@@ -13,11 +13,11 @@ import {
     Text
 } from '@salesforce/retail-react-app/app/components/shared/ui'
 import PropTypes from 'prop-types'
-import useTerminalPayment, {TERMINAL_PAYMENT_STATUS} from '../hooks/useTerminalPayment'
+import useTerminalPayment from '../hooks/useTerminalPayment'
+import {TERMINAL_PAYMENT_STATUS} from '../utils/constants.mjs'
 import useAdyenOrderNumber from '../hooks/useAdyenOrderNumber'
 
 const TerminalPaymentComponent = ({
-    locale: localeProp,
     site: siteProp,
     basket: basketProp,
     navigate: navigateProp,
@@ -44,11 +44,7 @@ const TerminalPaymentComponent = ({
     const {getTokenWhenReady} = useAccessToken()
     const [authToken, setAuthToken] = useState(authTokenProp)
 
-    const {
-        orderNo,
-        isLoading: isLoadingOrderNumber,
-        refetch: refetchOrderNumber
-    } = useAdyenOrderNumber({
+    const {isLoading: isLoadingOrderNumber, refetch: refetchOrderNumber} = useAdyenOrderNumber({
         authToken,
         customerId,
         basketId: basket?.basketId,
@@ -110,24 +106,6 @@ const TerminalPaymentComponent = ({
     })
 
     useEffect(() => {
-        if (error && !errorShownRef.current) {
-            errorShownRef.current = true
-            onError.forEach((cb) => cb(error))
-        }
-    }, [error])
-
-    useEffect(() => {
-        if (
-            status === TERMINAL_PAYMENT_STATUS.DECLINED &&
-            result?.error &&
-            !errorShownRef.current
-        ) {
-            errorShownRef.current = true
-            onError.forEach((cb) => cb(result.error))
-        }
-    }, [status, result])
-
-    useEffect(() => {
         if (status === TERMINAL_PAYMENT_STATUS.IDLE) {
             errorShownRef.current = false
         }
@@ -151,7 +129,6 @@ const TerminalPaymentComponent = ({
     const isCancelled = status === TERMINAL_PAYMENT_STATUS.CANCELLED
     const isError = status === TERMINAL_PAYMENT_STATUS.ERROR
     const isProcessing = isSending || isWaiting
-    const isTerminalState = isSuccess || isDeclined || isCancelled || isError
 
     if (isLoadingTerminals || isLoadingOrderNumber) {
         return spinner ? <>{spinner}</> : null
@@ -256,7 +233,6 @@ TerminalPaymentComponent.propTypes = {
     site: PropTypes.object,
     basket: PropTypes.object,
     navigate: PropTypes.func,
-    locale: PropTypes.object,
     storeId: PropTypes.string.isRequired,
     onSuccess: PropTypes.func,
     onDeclined: PropTypes.func,

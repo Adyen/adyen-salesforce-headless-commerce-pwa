@@ -4,7 +4,8 @@
 import React from 'react'
 import {renderHook, waitFor, act} from '@testing-library/react'
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
-import useTerminalPayment, {TERMINAL_PAYMENT_STATUS} from '../useTerminalPayment'
+import useTerminalPayment from '../useTerminalPayment'
+import {TERMINAL_PAYMENT_STATUS} from '../../utils/constants.mjs'
 
 const mockFetchTerminals = jest.fn()
 const mockCreatePayment = jest.fn()
