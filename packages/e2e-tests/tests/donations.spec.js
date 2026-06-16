@@ -31,11 +31,6 @@ test.describe('Donations through PWA UI', () => {
         )
         await expect(donationComponent).toBeVisible({timeout: 15000})
 
-        const donationAmountButton = donationComponent
-            .locator('.adyen-checkout__donation-amount__button, .adyen-checkout__button')
-            .first()
-        await donationAmountButton.click()
-
         const donateButton = donationComponent.locator('.adyen-checkout__button--donate')
         await donateButton.click()
 
