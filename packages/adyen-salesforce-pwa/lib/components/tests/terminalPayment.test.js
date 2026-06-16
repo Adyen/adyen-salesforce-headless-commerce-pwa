@@ -283,6 +283,119 @@ describe('TerminalPaymentComponent', () => {
         })
     })
 
+    describe('Custom labels', () => {
+        it('renders custom labels when provided', () => {
+            const customLabels = {
+                selectTerminal: 'Choisir un terminal',
+                selectTerminalPlaceholder: '-- Choisissez --',
+                sendToTerminal: 'Envoyer au terminal'
+            }
+
+            render(<TerminalPaymentComponent {...defaultProps} labels={customLabels} />)
+
+            expect(screen.getByText('Choisir un terminal')).toBeInTheDocument()
+            expect(screen.getByText('Envoyer au terminal')).toBeInTheDocument()
+        })
+
+        it('renders custom labels in processing state', () => {
+            useTerminalPayment.mockReturnValue(
+                setupHookReturn({status: TERMINAL_PAYMENT_STATUS.WAITING})
+            )
+
+            const customLabels = {
+                waitingForPayment: 'En attente du paiement...',
+                cancel: 'Annuler'
+            }
+
+            render(<TerminalPaymentComponent {...defaultProps} labels={customLabels} />)
+
+            expect(screen.getByText('En attente du paiement...')).toBeInTheDocument()
+            expect(screen.getByText('Annuler')).toBeInTheDocument()
+        })
+
+        it('renders custom labels in result states', () => {
+            useTerminalPayment.mockReturnValue(
+                setupHookReturn({status: TERMINAL_PAYMENT_STATUS.SUCCESS})
+            )
+
+            const customLabels = {paymentSuccessful: 'Paiement réussi'}
+
+            render(<TerminalPaymentComponent {...defaultProps} labels={customLabels} />)
+
+            expect(screen.getByText('Paiement réussi')).toBeInTheDocument()
+        })
+
+        it('uses default labels when labels prop is not provided', () => {
+            render(<TerminalPaymentComponent {...defaultProps} />)
+
+            expect(screen.getByText('Select Terminal')).toBeInTheDocument()
+            expect(screen.getByText('Send to Terminal')).toBeInTheDocument()
+        })
+
+        it('merges partial custom labels with defaults', () => {
+            useTerminalPayment.mockReturnValue(
+                setupHookReturn({status: TERMINAL_PAYMENT_STATUS.CANCELLED})
+            )
+
+            const customLabels = {tryAgain: 'Réessayer'}
+
+            render(<TerminalPaymentComponent {...defaultProps} labels={customLabels} />)
+
+            expect(screen.getByText('Payment cancelled')).toBeInTheDocument()
+            expect(screen.getByText('Réessayer')).toBeInTheDocument()
+        })
+    })
+
+    describe('Custom classNames', () => {
+        it('applies classNames to container and idle state', () => {
+            const classNames = {
+                container: 'custom-container',
+                idle: 'custom-idle',
+                sendButton: 'custom-send-btn'
+            }
+
+            render(<TerminalPaymentComponent {...defaultProps} classNames={classNames} />)
+
+            expect(screen.getByTestId('terminal-payment')).toHaveClass('custom-container')
+            expect(screen.getByTestId('terminal-payment-idle')).toHaveClass('custom-idle')
+            expect(screen.getByTestId('send-to-terminal')).toHaveClass('custom-send-btn')
+        })
+
+        it('applies classNames to processing state', () => {
+            useTerminalPayment.mockReturnValue(
+                setupHookReturn({status: TERMINAL_PAYMENT_STATUS.WAITING})
+            )
+
+            const classNames = {
+                processing: 'custom-processing',
+                cancelButton: 'custom-cancel-btn'
+            }
+
+            render(<TerminalPaymentComponent {...defaultProps} classNames={classNames} />)
+
+            expect(screen.getByTestId('terminal-payment-processing')).toHaveClass(
+                'custom-processing'
+            )
+            expect(screen.getByTestId('abort-payment')).toHaveClass('custom-cancel-btn')
+        })
+
+        it('applies classNames to result states', () => {
+            useTerminalPayment.mockReturnValue(
+                setupHookReturn({status: TERMINAL_PAYMENT_STATUS.DECLINED})
+            )
+
+            const classNames = {
+                declined: 'custom-declined',
+                tryAgainButton: 'custom-retry-btn'
+            }
+
+            render(<TerminalPaymentComponent {...defaultProps} classNames={classNames} />)
+
+            expect(screen.getByTestId('terminal-payment-declined')).toHaveClass('custom-declined')
+            expect(screen.getByTestId('try-again')).toHaveClass('custom-retry-btn')
+        })
+    })
+
     describe('Hook integration', () => {
         it('passes correct props to useTerminalPayment', () => {
             render(<TerminalPaymentComponent {...defaultProps} />)

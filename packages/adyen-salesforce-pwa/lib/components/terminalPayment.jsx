@@ -17,6 +17,20 @@ import useTerminalPayment from '../hooks/useTerminalPayment'
 import {TERMINAL_PAYMENT_STATUS} from '../utils/constants.mjs'
 import useAdyenOrderNumber from '../hooks/useAdyenOrderNumber'
 
+const DEFAULT_LABELS = {
+    selectTerminal: 'Select Terminal',
+    selectTerminalPlaceholder: '-- Select a terminal --',
+    sendToTerminal: 'Send to Terminal',
+    sendingPayment: 'Sending payment to terminal...',
+    waitingForPayment: 'Waiting for payment on terminal...',
+    cancel: 'Cancel',
+    paymentSuccessful: 'Payment successful',
+    paymentDeclined: 'Payment declined',
+    paymentCancelled: 'Payment cancelled',
+    errorOccurred: 'An error occurred',
+    tryAgain: 'Try Again'
+}
+
 const TerminalPaymentComponent = ({
     site: siteProp,
     basket: basketProp,
@@ -29,8 +43,11 @@ const TerminalPaymentComponent = ({
     onError = [],
     onAbort,
     beforeSubmit = [],
-    spinner = null
+    spinner = null,
+    labels: labelsProp,
+    classNames = {}
 }) => {
+    const labels = {...DEFAULT_LABELS, ...labelsProp}
     const {site: hookSite} = useMultiSite()
     const hookNavigate = useNavigation()
     const {data: hookBasket} = useCurrentBasket()
@@ -135,15 +152,15 @@ const TerminalPaymentComponent = ({
     }
 
     return (
-        <Box data-testid="terminal-payment">
+        <Box data-testid="terminal-payment" className={classNames.container}>
             {isIdle && (
-                <Stack spacing={4} data-testid="terminal-payment-idle">
+                <Stack spacing={4} data-testid="terminal-payment-idle" className={classNames.idle}>
                     <FormControl>
-                        <FormLabel htmlFor="terminal-select">Select Terminal</FormLabel>
+                        <FormLabel htmlFor="terminal-select">{labels.selectTerminal}</FormLabel>
                         <Select
                             id="terminal-select"
                             data-testid="terminal-select"
-                            placeholder="-- Select a terminal --"
+                            placeholder={labels.selectTerminalPlaceholder}
                             value={selectedTerminalId}
                             onChange={(e) => setSelectedTerminalId(e.target.value)}
                         >
@@ -159,14 +176,19 @@ const TerminalPaymentComponent = ({
                         w="full"
                         isDisabled={!selectedTerminalId}
                         onClick={handleSend}
+                        className={classNames.sendButton}
                     >
-                        Send to Terminal
+                        {labels.sendToTerminal}
                     </Button>
                 </Stack>
             )}
 
             {isProcessing && (
-                <Box position="relative" data-testid="terminal-payment-processing">
+                <Box
+                    position="relative"
+                    data-testid="terminal-payment-processing"
+                    className={classNames.processing}
+                >
                     {spinner && <>{spinner}</>}
                     <Stack
                         spacing={4}
@@ -177,49 +199,77 @@ const TerminalPaymentComponent = ({
                     >
                         <Text>
                             {isSending
-                                ? 'Sending payment to terminal...'
-                                : 'Waiting for payment on terminal...'}
+                                ? labels.sendingPayment
+                                : labels.waitingForPayment}
                         </Text>
                         <Button
                             variant="outline"
                             data-testid="abort-payment"
                             onClick={abortPayment}
+                            className={classNames.cancelButton}
                         >
-                            Cancel
+                            {labels.cancel}
                         </Button>
                     </Stack>
                 </Box>
             )}
 
             {isSuccess && (
-                <Box data-testid="terminal-payment-success">
-                    <Text>Payment successful</Text>
+                <Box data-testid="terminal-payment-success" className={classNames.success}>
+                    <Text>{labels.paymentSuccessful}</Text>
                 </Box>
             )}
 
             {isDeclined && (
-                <Stack spacing={4} data-testid="terminal-payment-declined">
-                    <Text>{result?.error?.message || 'Payment declined'}</Text>
-                    <Button variant="outline" data-testid="try-again" onClick={reset}>
-                        Try Again
+                <Stack
+                    spacing={4}
+                    data-testid="terminal-payment-declined"
+                    className={classNames.declined}
+                >
+                    <Text>{result?.error?.message || labels.paymentDeclined}</Text>
+                    <Button
+                        variant="outline"
+                        data-testid="try-again"
+                        onClick={reset}
+                        className={classNames.tryAgainButton}
+                    >
+                        {labels.tryAgain}
                     </Button>
                 </Stack>
             )}
 
             {isCancelled && (
-                <Stack spacing={4} data-testid="terminal-payment-cancelled">
-                    <Text>Payment cancelled</Text>
-                    <Button variant="outline" data-testid="try-again" onClick={reset}>
-                        Try Again
+                <Stack
+                    spacing={4}
+                    data-testid="terminal-payment-cancelled"
+                    className={classNames.cancelled}
+                >
+                    <Text>{labels.paymentCancelled}</Text>
+                    <Button
+                        variant="outline"
+                        data-testid="try-again"
+                        onClick={reset}
+                        className={classNames.tryAgainButton}
+                    >
+                        {labels.tryAgain}
                     </Button>
                 </Stack>
             )}
 
             {isError && (
-                <Stack spacing={4} data-testid="terminal-payment-error">
-                    <Text>{error?.message || 'An error occurred'}</Text>
-                    <Button variant="outline" data-testid="try-again" onClick={reset}>
-                        Try Again
+                <Stack
+                    spacing={4}
+                    data-testid="terminal-payment-error"
+                    className={classNames.error}
+                >
+                    <Text>{error?.message || labels.errorOccurred}</Text>
+                    <Button
+                        variant="outline"
+                        data-testid="try-again"
+                        onClick={reset}
+                        className={classNames.tryAgainButton}
+                    >
+                        {labels.tryAgain}
                     </Button>
                 </Stack>
             )}
@@ -239,7 +289,9 @@ TerminalPaymentComponent.propTypes = {
     onError: PropTypes.arrayOf(PropTypes.func),
     onAbort: PropTypes.func,
     beforeSubmit: PropTypes.arrayOf(PropTypes.func),
-    spinner: PropTypes.node
+    spinner: PropTypes.node,
+    labels: PropTypes.object,
+    classNames: PropTypes.object
 }
 
 export default React.memo(TerminalPaymentComponent, (prevProps, nextProps) => {
