@@ -129,14 +129,19 @@ const TerminalPaymentComponent = ({
     }, [status])
 
     const handleSend = useCallback(async () => {
-        if (selectedTerminalId) {
+        if (!selectedTerminalId) return
+
+        try {
             for (const callback of beforeSubmit) {
-                await callback()
+                const result = await callback()
+                if (result === false) return
             }
             await refetchOrderNumber()
             sendPayment(selectedTerminalId)
+        } catch (err) {
+            onError.forEach((cb) => cb(err))
         }
-    }, [selectedTerminalId, sendPayment, beforeSubmit, refetchOrderNumber])
+    }, [selectedTerminalId, sendPayment, beforeSubmit, refetchOrderNumber, onError])
 
     const isIdle = status === TERMINAL_PAYMENT_STATUS.IDLE
     const isSending = status === TERMINAL_PAYMENT_STATUS.SENDING
@@ -298,6 +303,7 @@ export default React.memo(TerminalPaymentComponent, (prevProps, nextProps) => {
     return (
         prevProps.basket?.basketId === nextProps.basket?.basketId &&
         prevProps.site?.id === nextProps.site?.id &&
-        prevProps.storeId === nextProps.storeId
+        prevProps.storeId === nextProps.storeId &&
+        prevProps.authToken === nextProps.authToken
     )
 })

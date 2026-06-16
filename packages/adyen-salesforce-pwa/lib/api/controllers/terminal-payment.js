@@ -67,6 +67,7 @@ async function createTerminalPayment(req, res, next) {
         const currency = basket.currency
         const amount = getCurrencyValueForApi(basket.orderTotal, currency)
 
+        await adyenContext.basketService.removeAllPaymentInstruments()
         await adyenContext.basketService.addPaymentInstrument(
             {value: amount, currency},
             {type: PAYMENT_METHODS.ADYEN_POS}

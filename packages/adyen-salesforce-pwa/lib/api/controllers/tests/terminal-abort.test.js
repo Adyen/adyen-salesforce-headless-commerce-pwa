@@ -126,12 +126,34 @@ describe('abortTerminalPayment controller', () => {
         )
     })
 
-    it('should handle sync API errors gracefully', async () => {
-        const apiError = new Error('Terminal Cloud API error')
-        mockSync.mockRejectedValue(apiError)
+    it('should still fail order and reopen basket when sync call throws', async () => {
+        mockSync.mockRejectedValue(new Error('Terminal Cloud API error'))
 
         await abortTerminalPayment(req, res, next)
 
-        expect(next).toHaveBeenCalledWith(apiError)
+        expect(orderHelper.failOrderAndReopenBasket).toHaveBeenCalledWith(
+            res.locals.adyen,
+            'ORDER-001'
+        )
+        expect(res.locals.response).toEqual({
+            success: true,
+            response: undefined,
+            newBasketId: 'new-basket-456'
+        })
+        expect(next).toHaveBeenCalledWith()
+    })
+
+    it('should handle both sync and order failure gracefully', async () => {
+        mockSync.mockRejectedValue(new Error('sync error'))
+        orderHelper.failOrderAndReopenBasket.mockRejectedValue(new Error('order error'))
+
+        await abortTerminalPayment(req, res, next)
+
+        expect(res.locals.response).toEqual({
+            success: true,
+            response: undefined,
+            newBasketId: null
+        })
+        expect(next).toHaveBeenCalledWith()
     })
 })

@@ -135,6 +135,9 @@ class AdyenClientProvider {
 
         if (isLive) {
             const prefix = adyenConfig.liveTerminalUrlPrefix || adyenConfig.liveEndpointUrlPrefix
+            if (!prefix) {
+                throw new AdyenError(ERROR_MESSAGE.MISSING_LIVE_TERMINAL_PREFIX, 400)
+            }
             config.environment = ADYEN_ENVIRONMENT.LIVE
             config.endpoint = LIVE_TERMINAL_URL_PATTERN.replace('{prefix}', prefix)
         } else {

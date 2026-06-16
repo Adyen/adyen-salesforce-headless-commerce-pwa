@@ -108,6 +108,46 @@ describe('TerminalPaymentComponent', () => {
                 expect(mockSendPayment).toHaveBeenCalledWith('V400m-123')
             })
         })
+
+        it('aborts payment flow when beforeSubmit returns false', async () => {
+            const beforeSubmit = [jest.fn().mockResolvedValue(false)]
+
+            render(<TerminalPaymentComponent {...defaultProps} beforeSubmit={beforeSubmit} />)
+
+            fireEvent.change(screen.getByTestId('terminal-select'), {
+                target: {value: 'V400m-123'}
+            })
+            fireEvent.click(screen.getByTestId('send-to-terminal'))
+
+            await waitFor(() => {
+                expect(beforeSubmit[0]).toHaveBeenCalled()
+            })
+            expect(mockSendPayment).not.toHaveBeenCalled()
+        })
+
+        it('calls onError when beforeSubmit throws', async () => {
+            const submitError = new Error('validation failed')
+            const beforeSubmit = [jest.fn().mockRejectedValue(submitError)]
+            const onErrorCb = jest.fn()
+
+            render(
+                <TerminalPaymentComponent
+                    {...defaultProps}
+                    beforeSubmit={beforeSubmit}
+                    onError={[onErrorCb]}
+                />
+            )
+
+            fireEvent.change(screen.getByTestId('terminal-select'), {
+                target: {value: 'V400m-123'}
+            })
+            fireEvent.click(screen.getByTestId('send-to-terminal'))
+
+            await waitFor(() => {
+                expect(onErrorCb).toHaveBeenCalledWith(submitError)
+            })
+            expect(mockSendPayment).not.toHaveBeenCalled()
+        })
     })
 
     describe('Loading state', () => {

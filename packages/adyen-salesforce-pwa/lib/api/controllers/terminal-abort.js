@@ -59,9 +59,13 @@ async function abortTerminalPayment(req, res, next) {
         }
 
         const terminalCloudApi = new AdyenClientProvider(adyenContext).getTerminalClient()
-        const response = await terminalCloudApi.sync(abortRequest)
-
-        Logger.info('abortTerminalPayment', 'abort sent')
+        let response
+        try {
+            response = await terminalCloudApi.sync(abortRequest)
+            Logger.info('abortTerminalPayment', 'abort sent')
+        } catch (syncErr) {
+            Logger.error('abortTerminalPayment syncError', syncErr.message)
+        }
 
         let newBasketId = null
         try {

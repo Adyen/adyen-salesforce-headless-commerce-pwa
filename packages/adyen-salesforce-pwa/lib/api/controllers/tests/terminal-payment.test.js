@@ -10,7 +10,7 @@ jest.mock('../../helpers/orderHelper')
 
 describe('createTerminalPayment controller', () => {
     let req, res, next
-    let mockSync, mockAddPaymentInstrument
+    let mockSync, mockAddPaymentInstrument, mockRemoveAllPaymentInstruments
 
     beforeEach(() => {
         jest.clearAllMocks()
@@ -25,6 +25,7 @@ describe('createTerminalPayment controller', () => {
         }))
 
         mockAddPaymentInstrument = jest.fn().mockResolvedValue({})
+        mockRemoveAllPaymentInstruments = jest.fn().mockResolvedValue({})
         orderHelper.createOrderUsingOrderNo.mockResolvedValue({orderNo: 'ORDER-001'})
         orderHelper.updateOrderPaymentInstrument.mockResolvedValue({})
         orderHelper.failOrderAndReopenBasket.mockResolvedValue('new-basket-123')
@@ -49,7 +50,8 @@ describe('createTerminalPayment controller', () => {
                         c_orderNo: 'ORDER-001'
                     },
                     basketService: {
-                        addPaymentInstrument: mockAddPaymentInstrument
+                        addPaymentInstrument: mockAddPaymentInstrument,
+                        removeAllPaymentInstruments: mockRemoveAllPaymentInstruments
                     },
                     siteId: 'RefArch'
                 }
@@ -94,6 +96,7 @@ describe('createTerminalPayment controller', () => {
 
         await createTerminalPayment(req, res, next)
 
+        expect(mockRemoveAllPaymentInstruments).toHaveBeenCalled()
         expect(mockAddPaymentInstrument).toHaveBeenCalledWith(
             expect.objectContaining({currency: 'EUR'}),
             {type: 'AdyenPOS'}

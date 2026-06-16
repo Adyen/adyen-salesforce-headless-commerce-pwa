@@ -164,6 +164,22 @@ describe('AdyenClientProvider - getTerminalClient', () => {
         )
     })
 
+    it('throws AdyenError when live terminal prefix is missing', () => {
+        mockAdyenContext.adyenConfig = {
+            apiKey: 'api-key',
+            environment: 'TEST'
+        }
+        const provider = new AdyenClientProvider(mockAdyenContext)
+
+        // Override to live after construction so getClient() in constructor succeeds
+        provider.adyenContext.adyenConfig.environment = 'live'
+        provider.adyenContext.adyenConfig.liveEndpointUrlPrefix = undefined
+
+        expect(() => provider.getTerminalClient()).toThrow(
+            new AdyenError(ERROR_MESSAGE.MISSING_LIVE_TERMINAL_PREFIX, 400)
+        )
+    })
+
     it('falls back to liveEndpointUrlPrefix when liveTerminalUrlPrefix is not set', () => {
         mockAdyenContext.adyenConfig = {
             apiKey: 'api-key',
