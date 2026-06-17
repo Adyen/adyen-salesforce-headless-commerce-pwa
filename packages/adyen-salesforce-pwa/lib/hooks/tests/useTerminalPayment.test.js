@@ -232,6 +232,41 @@ describe('useTerminalPayment', () => {
         expect(mockCreatePayment).not.toHaveBeenCalled()
     })
 
+    it('should pass orderNo from sendPayment to abortPayment', async () => {
+        mockFetchTerminals.mockResolvedValue([])
+        // createPayment is a long-running call; simulate it never resolving
+        // so we abort mid-flight, before the response sets orderNo
+        let resolvePayment
+        mockCreatePayment.mockImplementation(
+            () => new Promise((resolve) => (resolvePayment = resolve))
+        )
+        const abortResponse = {success: true, newBasketId: 'basket-new'}
+        mockAbortPayment.mockResolvedValue(abortResponse)
+
+        const {result} = renderHook(() => useTerminalPayment(defaultProps), {
+            wrapper: createWrapper()
+        })
+
+        // Send payment with orderNo
+        act(() => {
+            result.current.sendPayment('V400m-123', 'ORDER-PRE')
+        })
+
+        await waitFor(() => expect(result.current.status).toBe(TERMINAL_PAYMENT_STATUS.WAITING))
+
+        // Abort while payment is in-flight
+        await act(async () => {
+            await result.current.abortPayment()
+        })
+
+        expect(mockAbortPayment).toHaveBeenCalledWith(
+            expect.objectContaining({orderNo: 'ORDER-PRE'})
+        )
+
+        // Cleanup: resolve the dangling promise
+        resolvePayment({result: 'Success', orderNo: 'ORDER-PRE'})
+    })
+
     it('should not abort when no serviceId exists', async () => {
         mockFetchTerminals.mockResolvedValue([])
 

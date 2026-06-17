@@ -105,7 +105,7 @@ describe('TerminalPaymentComponent', () => {
             fireEvent.click(screen.getByTestId('send-to-terminal'))
 
             await waitFor(() => {
-                expect(mockSendPayment).toHaveBeenCalledWith('V400m-123')
+                expect(mockSendPayment).toHaveBeenCalledWith('V400m-123', 'ORDER-001')
             })
         })
 

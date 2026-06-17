@@ -136,8 +136,8 @@ const TerminalPaymentComponent = ({
                 const result = await callback()
                 if (result === false) return
             }
-            await refetchOrderNumber()
-            sendPayment(selectedTerminalId)
+            const {data} = await refetchOrderNumber()
+            sendPayment(selectedTerminalId, data?.orderNo)
         } catch (err) {
             onError.forEach((cb) => cb(err))
         }

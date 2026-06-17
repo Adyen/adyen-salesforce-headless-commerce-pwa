@@ -51,7 +51,7 @@ const useTerminalPayment = ({
     })
 
     const sendPayment = useCallback(
-        async (terminalId) => {
+        async (terminalId, orderNo) => {
             if (statusRef.current !== TERMINAL_PAYMENT_STATUS.IDLE) return
 
             setStatus(TERMINAL_PAYMENT_STATUS.SENDING)
@@ -59,7 +59,7 @@ const useTerminalPayment = ({
             setResult(null)
 
             const serviceId = Date.now().toString().slice(-10)
-            paymentContextRef.current = {serviceId, orderNo: null, terminalId}
+            paymentContextRef.current = {serviceId, orderNo: orderNo || null, terminalId}
 
             try {
                 const service = new TerminalApiService(authToken, customerId, basketId, site)
