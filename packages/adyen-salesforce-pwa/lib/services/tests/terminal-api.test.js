@@ -170,12 +170,11 @@ describe('TerminalApiService', () => {
     describe('abortPayment', () => {
         const abortParams = {
             serviceId: 'svc-123',
-            terminalId: 'V400m-123',
-            orderNo: '00001'
+            terminalId: 'V400m-123'
         }
 
         it('should return abort result on successful API call', async () => {
-            const mockResult = {success: true, newBasketId: 'basket-new-123'}
+            const mockResult = {success: true}
             mockPost.mockResolvedValue({
                 status: 200,
                 json: jest.fn().mockResolvedValue(mockResult)
@@ -188,10 +187,7 @@ describe('TerminalApiService', () => {
                 body: JSON.stringify({
                     serviceId: 'svc-123',
                     terminalId: 'V400m-123'
-                }),
-                headers: {
-                    orderno: '00001'
-                }
+                })
             })
             expect(result).toEqual(mockResult)
         })

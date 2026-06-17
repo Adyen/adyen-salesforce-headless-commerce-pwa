@@ -40,13 +40,10 @@ export class TerminalApiService {
         return await res.json()
     }
 
-    async abortPayment({serviceId, terminalId, orderNo}) {
+    async abortPayment({serviceId, terminalId}) {
         const res = await this.apiClient.post({
             path: '/abort',
-            body: JSON.stringify({serviceId, terminalId}),
-            headers: {
-                orderno: orderNo
-            }
+            body: JSON.stringify({serviceId, terminalId})
         })
         if (res.status >= 300) {
             const errorData = await res

@@ -3,14 +3,14 @@ import AdyenClientProvider from '../models/adyenClientProvider'
 import Logger from '../models/logger'
 import {AdyenError} from '../models/AdyenError'
 import {generateServiceId, buildMessageHeader} from '../helpers/terminalHelper'
-import {failOrderAndReopenBasket} from '../helpers/orderHelper.js'
 
 /**
  * Express middleware that sends an abort request for an in-progress terminal payment.
  * Uses the Adyen Terminal Cloud API sync method to send an abort request.
- * Fails the order (from orderRequestContext) and reopens the basket.
+ * Order failure and basket recovery are handled by the createTerminalPayment controller
+ * when its sync call returns with ErrorCondition: Aborted.
  *
- * Requires orderRequestContext middleware (provides order via res.locals.adyen.order).
+ * Requires minimalRequestContext middleware (provides adyenConfig via res.locals.adyen).
  * Request body: {serviceId, terminalId}
  *
  * @param {object} req - The Express request object.
@@ -28,7 +28,6 @@ async function abortTerminalPayment(req, res, next) {
         }
 
         const {serviceId, terminalId} = req.body
-        const orderNo = adyenContext.order?.orderNo
 
         if (!terminalId) {
             throw new AdyenError(ERROR_MESSAGE.INVALID_PARAMS, 400)
@@ -67,18 +66,7 @@ async function abortTerminalPayment(req, res, next) {
             Logger.error('abortTerminalPayment syncError', syncErr.message)
         }
 
-        let newBasketId = null
-        try {
-            newBasketId = await failOrderAndReopenBasket(adyenContext, orderNo)
-            Logger.info(
-                'abortTerminalPayment',
-                `order ${orderNo} failed, new basket: ${newBasketId}`
-            )
-        } catch (orderErr) {
-            Logger.error('abortTerminalPayment orderFailure', orderErr.message)
-        }
-
-        res.locals.response = {success: true, response, newBasketId}
+        res.locals.response = {success: true, response}
         next()
     } catch (err) {
         Logger.error('abortTerminalPayment', err.message)

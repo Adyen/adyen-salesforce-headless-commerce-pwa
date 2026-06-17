@@ -2,11 +2,9 @@ import abortTerminalPayment from '../terminal-abort'
 import AdyenClientProvider from '../../models/adyenClientProvider'
 import {ERROR_MESSAGE} from '../../../utils/constants.mjs'
 import * as terminalHelper from '../../helpers/terminalHelper'
-import * as orderHelper from '../../helpers/orderHelper'
 
 jest.mock('../../models/adyenClientProvider')
 jest.mock('../../models/logger')
-jest.mock('../../helpers/orderHelper')
 
 describe('abortTerminalPayment controller', () => {
     let req, res, next
@@ -24,8 +22,6 @@ describe('abortTerminalPayment controller', () => {
             })
         }))
 
-        orderHelper.failOrderAndReopenBasket.mockResolvedValue('new-basket-456')
-
         req = {
             body: {
                 serviceId: '1234567890',
@@ -39,7 +35,6 @@ describe('abortTerminalPayment controller', () => {
                     adyenConfig: {
                         merchantAccount: 'TestMerchant'
                     },
-                    order: {orderNo: 'ORDER-001'},
                     siteId: 'RefArch',
                     authorization: 'Bearer token',
                     customerId: 'cust-001'
@@ -50,7 +45,7 @@ describe('abortTerminalPayment controller', () => {
         next = jest.fn()
     })
 
-    it('should send abort and fail order successfully', async () => {
+    it('should send abort request successfully', async () => {
         mockSync.mockResolvedValue('ok')
 
         await abortTerminalPayment(req, res, next)
@@ -73,25 +68,22 @@ describe('abortTerminalPayment controller', () => {
                 })
             })
         )
-        expect(orderHelper.failOrderAndReopenBasket).toHaveBeenCalledWith(
-            res.locals.adyen,
-            'ORDER-001'
-        )
         expect(res.locals.response).toEqual({
             success: true,
-            response: 'ok',
-            newBasketId: 'new-basket-456'
+            response: 'ok'
         })
         expect(next).toHaveBeenCalledWith()
     })
 
-    it('should handle failOrderAndReopenBasket error gracefully', async () => {
-        mockSync.mockResolvedValue('ok')
-        orderHelper.failOrderAndReopenBasket.mockRejectedValue(new Error('order fail error'))
+    it('should handle sync error gracefully', async () => {
+        mockSync.mockRejectedValue(new Error('Terminal Cloud API error'))
 
         await abortTerminalPayment(req, res, next)
 
-        expect(res.locals.response).toEqual({success: true, response: 'ok', newBasketId: null})
+        expect(res.locals.response).toEqual({
+            success: true,
+            response: undefined
+        })
         expect(next).toHaveBeenCalledWith()
     })
 
@@ -124,36 +116,5 @@ describe('abortTerminalPayment controller', () => {
         expect(next).toHaveBeenCalledWith(
             expect.objectContaining({message: ERROR_MESSAGE.ADYEN_CONTEXT_NOT_FOUND})
         )
-    })
-
-    it('should still fail order and reopen basket when sync call throws', async () => {
-        mockSync.mockRejectedValue(new Error('Terminal Cloud API error'))
-
-        await abortTerminalPayment(req, res, next)
-
-        expect(orderHelper.failOrderAndReopenBasket).toHaveBeenCalledWith(
-            res.locals.adyen,
-            'ORDER-001'
-        )
-        expect(res.locals.response).toEqual({
-            success: true,
-            response: undefined,
-            newBasketId: 'new-basket-456'
-        })
-        expect(next).toHaveBeenCalledWith()
-    })
-
-    it('should handle both sync and order failure gracefully', async () => {
-        mockSync.mockRejectedValue(new Error('sync error'))
-        orderHelper.failOrderAndReopenBasket.mockRejectedValue(new Error('order error'))
-
-        await abortTerminalPayment(req, res, next)
-
-        expect(res.locals.response).toEqual({
-            success: true,
-            response: undefined,
-            newBasketId: null
-        })
-        expect(next).toHaveBeenCalledWith()
     })
 })
