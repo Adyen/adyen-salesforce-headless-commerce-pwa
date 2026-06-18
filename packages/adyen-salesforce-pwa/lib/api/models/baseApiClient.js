@@ -99,6 +99,8 @@ export class BaseApiClient {
         const token = await this.#getAdminAuthToken()
         const url = this.#buildUrl(path)
 
+        console.log(url)
+        console.log(options?.body)
         const response = await fetch(url, {
             method: method,
             body: options?.body || null,
