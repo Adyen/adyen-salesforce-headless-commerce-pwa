@@ -1,12 +1,6 @@
 import {TERMINAL_MESSAGE_CATEGORY, TERMINAL_REVERSAL_REASON} from '../../utils/constants.mjs'
-
-/**
- * Generates a unique service ID for Terminal API requests.
- * @returns {string} A unique service ID string.
- */
-function generateServiceId() {
-    return (Date.now().toString(36) + Math.random().toString(36).slice(2)).slice(0, 10)
-}
+import {generateServiceId} from '../../utils/generateServiceId.mjs'
+import {getApplicationInfo} from '../../utils/getApplicationInfo.mjs'
 
 /**
  * Builder class for constructing Adyen Terminal API request objects (SaleToPOIRequest).
@@ -69,6 +63,38 @@ export class TerminalRequestBuilder {
                     RequestedAmount: amount
                 }
             }
+        }
+        return this
+    }
+
+    /**
+     * Sets the SaleReferenceID on an existing PaymentRequest's SaleData.
+     * Must be called after withPaymentRequest.
+     * @param {string} referenceId - The sale reference identifier.
+     * @returns {TerminalRequestBuilder} The builder instance for chaining.
+     */
+    withSaleReferenceId(referenceId) {
+        if (this.saleToPOIRequest.PaymentRequest?.SaleData) {
+            this.saleToPOIRequest.PaymentRequest.SaleData.SaleReferenceID = referenceId
+        }
+        return this
+    }
+
+    /**
+     * Sets the SaleToAcquirerData on an existing PaymentRequest's SaleData.
+     * Encodes applicationInfo from the provided Adyen config as base64.
+     * Must be called after withPaymentRequest.
+     * @param {object} adyenConfig - The Adyen configuration object.
+     * @returns {TerminalRequestBuilder} The builder instance for chaining.
+     */
+    withSaleToAcquirerData(adyenConfig) {
+        if (this.saleToPOIRequest.PaymentRequest?.SaleData) {
+            const applicationInfoObject = {
+                applicationInfo: getApplicationInfo(adyenConfig.systemIntegratorName)
+            }
+            this.saleToPOIRequest.PaymentRequest.SaleData.SaleToAcquirerData = Buffer.from(
+                JSON.stringify(applicationInfoObject)
+            ).toString('base64')
         }
         return this
     }

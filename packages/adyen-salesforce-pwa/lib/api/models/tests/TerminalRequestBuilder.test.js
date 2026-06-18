@@ -8,19 +8,6 @@ describe('TerminalRequestBuilder', () => {
     const currency = 'EUR'
     const reference = 'ORDER-123'
 
-    describe('generateServiceId', () => {
-        it('generates a ServiceID of at most 10 characters', () => {
-            for (let i = 0; i < 20; i++) {
-                const request = new TerminalRequestBuilder()
-                    .withMessageHeader(TERMINAL_MESSAGE_CATEGORY.PAYMENT, poiId, saleId)
-                    .build()
-                expect(request.SaleToPOIRequest.MessageHeader.ServiceID.length).toBeLessThanOrEqual(
-                    10
-                )
-            }
-        })
-    })
-
     describe('withMessageHeader', () => {
         it('sets the MessageHeader with required fields', () => {
             const request = new TerminalRequestBuilder()
@@ -91,6 +78,55 @@ describe('TerminalRequestBuilder', () => {
             const timestamp =
                 request.SaleToPOIRequest.PaymentRequest.SaleData.SaleTransactionID.TimeStamp
             expect(timestamp >= before).toBe(true)
+        })
+    })
+
+    describe('withSaleReferenceId', () => {
+        it('sets the SaleReferenceID on PaymentRequest SaleData', () => {
+            const request = new TerminalRequestBuilder()
+                .withMessageHeader(TERMINAL_MESSAGE_CATEGORY.PAYMENT, poiId, saleId)
+                .withPaymentRequest(amount, currency, reference)
+                .withSaleReferenceId('MyRefId')
+                .build()
+
+            expect(request.SaleToPOIRequest.PaymentRequest.SaleData.SaleReferenceID).toBe('MyRefId')
+        })
+
+        it('is a no-op when called before withPaymentRequest', () => {
+            const request = new TerminalRequestBuilder()
+                .withMessageHeader(TERMINAL_MESSAGE_CATEGORY.PAYMENT, poiId, saleId)
+                .withSaleReferenceId('MyRefId')
+                .build()
+
+            expect(request.SaleToPOIRequest.PaymentRequest).toBeUndefined()
+        })
+    })
+
+    describe('withSaleToAcquirerData', () => {
+        it('encodes applicationInfo from adyenConfig as base64', () => {
+            const adyenConfig = {systemIntegratorName: 'TestIntegrator'}
+            const request = new TerminalRequestBuilder()
+                .withMessageHeader(TERMINAL_MESSAGE_CATEGORY.PAYMENT, poiId, saleId)
+                .withPaymentRequest(amount, currency, reference)
+                .withSaleToAcquirerData(adyenConfig)
+                .build()
+
+            const encoded = request.SaleToPOIRequest.PaymentRequest.SaleData.SaleToAcquirerData
+            const decoded = JSON.parse(Buffer.from(encoded, 'base64').toString('utf-8'))
+            expect(decoded.applicationInfo).toBeDefined()
+            expect(decoded.applicationInfo.merchantApplication.name).toBe(
+                'adyen-salesforce-commerce-cloud'
+            )
+            expect(decoded.applicationInfo.externalPlatform.integrator).toBe('TestIntegrator')
+        })
+
+        it('is a no-op when called before withPaymentRequest', () => {
+            const request = new TerminalRequestBuilder()
+                .withMessageHeader(TERMINAL_MESSAGE_CATEGORY.PAYMENT, poiId, saleId)
+                .withSaleToAcquirerData({systemIntegratorName: 'Test'})
+                .build()
+
+            expect(request.SaleToPOIRequest.PaymentRequest).toBeUndefined()
         })
     })
 

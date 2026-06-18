@@ -3,6 +3,7 @@ import {useQuery} from '@tanstack/react-query'
 import {TerminalApiService} from '../services/terminal-api'
 import {adyenKeys} from '../utils/queryKeys'
 import {TERMINAL_PAYMENT_STATUS} from '../utils/constants.mjs'
+import {generateServiceId} from '../utils/generateServiceId.mjs'
 
 /**
  * Hook that manages the full terminal payment lifecycle with a state machine.
@@ -58,7 +59,7 @@ const useTerminalPayment = ({
             setError(null)
             setResult(null)
 
-            const serviceId = Date.now().toString().slice(-10)
+            const serviceId = generateServiceId()
             paymentContextRef.current = {serviceId, orderNo: null, terminalId}
 
             try {

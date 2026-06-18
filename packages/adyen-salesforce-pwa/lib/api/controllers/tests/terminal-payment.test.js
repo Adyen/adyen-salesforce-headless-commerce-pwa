@@ -1,7 +1,7 @@
 import createTerminalPayment from '../terminal-payment'
 import AdyenClientProvider from '../../models/adyenClientProvider'
 import {ERROR_MESSAGE} from '../../../utils/constants.mjs'
-import * as terminalHelper from '../../helpers/terminalHelper'
+import * as generateServiceIdModule from '../../../utils/generateServiceId.mjs'
 import * as orderHelper from '../../helpers/orderHelper'
 
 jest.mock('../../models/adyenClientProvider')
@@ -14,7 +14,7 @@ describe('createTerminalPayment controller', () => {
 
     beforeEach(() => {
         jest.clearAllMocks()
-        jest.spyOn(terminalHelper, 'generateServiceId').mockReturnValue('1234567890')
+        jest.spyOn(generateServiceIdModule, 'generateServiceId').mockReturnValue('1234567890')
 
         mockSync = jest.fn()
 
@@ -107,7 +107,20 @@ describe('createTerminalPayment controller', () => {
                 SaleToPOIRequest: expect.objectContaining({
                     MessageHeader: expect.objectContaining({
                         MessageCategory: 'Payment',
-                        POIID: 'V400m-123456789'
+                        POIID: 'V400m-123456789',
+                        SaleID: 'SalesforceCommerceCloud'
+                    }),
+                    PaymentRequest: expect.objectContaining({
+                        SaleData: expect.objectContaining({
+                            SaleTransactionID: expect.objectContaining({
+                                TransactionID: 'ORDER-001'
+                            }),
+                            SaleReferenceID: 'SalesforceCommerceCloudPOS',
+                            SaleToAcquirerData: expect.any(String)
+                        }),
+                        PaymentTransaction: expect.objectContaining({
+                            AmountsReq: {Currency: 'EUR', RequestedAmount: 100.0}
+                        })
                     })
                 })
             })

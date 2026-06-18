@@ -2,7 +2,7 @@ import {ERROR_MESSAGE, POS} from '../../utils/constants.mjs'
 import AdyenClientProvider from '../models/adyenClientProvider'
 import Logger from '../models/logger'
 import {AdyenError} from '../models/AdyenError'
-import {generateServiceId, buildMessageHeader} from '../helpers/terminalHelper'
+import {TerminalRequestBuilder} from '../models/TerminalRequestBuilder'
 
 /**
  * Express middleware that sends an abort request for an in-progress terminal payment.
@@ -37,25 +37,12 @@ async function abortTerminalPayment(req, res, next) {
             throw new AdyenError(ERROR_MESSAGE.INVALID_PARAMS, 400)
         }
 
-        const newServiceId = generateServiceId()
-
-        const abortRequest = {
-            SaleToPOIRequest: {
-                MessageHeader: buildMessageHeader({
-                    messageCategory: POS.MESSAGE_CATEGORY.ABORT,
-                    serviceId: newServiceId,
-                    terminalId
-                }),
-                AbortRequest: {
-                    AbortReason: POS.ABORT_REASON.MERCHANT_ABORT,
-                    MessageReference: {
-                        SaleID: POS.SALE_ID,
-                        ServiceID: serviceId,
-                        MessageCategory: POS.MESSAGE_CATEGORY.PAYMENT
-                    }
-                }
-            }
-        }
+        const abortRequest = TerminalRequestBuilder.createAbort(
+            terminalId,
+            POS.SALE_ID,
+            POS.ABORT_REASON.MERCHANT_ABORT,
+            serviceId
+        )
 
         const terminalCloudApi = new AdyenClientProvider(adyenContext).getTerminalClient()
         let response

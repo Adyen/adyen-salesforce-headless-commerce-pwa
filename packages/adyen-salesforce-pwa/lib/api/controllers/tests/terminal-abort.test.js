@@ -1,7 +1,6 @@
 import abortTerminalPayment from '../terminal-abort'
 import AdyenClientProvider from '../../models/adyenClientProvider'
 import {ERROR_MESSAGE} from '../../../utils/constants.mjs'
-import * as terminalHelper from '../../helpers/terminalHelper'
 
 jest.mock('../../models/adyenClientProvider')
 jest.mock('../../models/logger')
@@ -12,7 +11,6 @@ describe('abortTerminalPayment controller', () => {
 
     beforeEach(() => {
         jest.clearAllMocks()
-        jest.spyOn(terminalHelper, 'generateServiceId').mockReturnValue('9876543210')
 
         mockSync = jest.fn()
 
@@ -55,14 +53,16 @@ describe('abortTerminalPayment controller', () => {
                 SaleToPOIRequest: expect.objectContaining({
                     MessageHeader: expect.objectContaining({
                         MessageCategory: 'Abort',
-                        ServiceID: '9876543210',
-                        POIID: 'V400m-123456789'
+                        POIID: 'V400m-123456789',
+                        SaleID: 'SalesforceCommerceCloud'
                     }),
                     AbortRequest: expect.objectContaining({
                         AbortReason: 'MerchantAbort',
                         MessageReference: expect.objectContaining({
                             ServiceID: '1234567890',
-                            MessageCategory: 'Payment'
+                            MessageCategory: 'Payment',
+                            SaleID: 'SalesforceCommerceCloud',
+                            POIID: 'V400m-123456789'
                         })
                     })
                 })
