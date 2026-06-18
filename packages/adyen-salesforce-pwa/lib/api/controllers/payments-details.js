@@ -117,6 +117,10 @@ async function sendPaymentDetails(req, res, next) {
             const pspReference = response?.pspReference || response?.order?.pspReference
             if (preCreatedOrderNo && pspReference) {
                 try {
+                    Logger.error('sendPaymentDetails', preCreatedOrderNo)
+                    Logger.error('sendPaymentDetails', adyenContext.siteId)
+                    Logger.error('sendPaymentDetails', pspReference)
+                    Logger.error('sendPaymentDetails', response.donationToken)
                     await updateOrderPaymentInstrument(
                         preCreatedOrderNo,
                         adyenContext.siteId,
