@@ -172,6 +172,16 @@ export const TERMINAL_REVERSAL_REASON = {
 
 export const APPLICATION_VERSION = packageJson.version
 
+export const TERMINAL_PAYMENT_STATUS = Object.freeze({
+    IDLE: 'idle',
+    SENDING: 'sending',
+    WAITING: 'waiting',
+    SUCCESS: 'success',
+    DECLINED: 'declined',
+    CANCELLED: 'cancelled',
+    ERROR: 'error'
+})
+
 export const POS = Object.freeze({
     PROTOCOL_VERSION: '3.0',
     MESSAGE_CLASS: {SERVICE: 'Service'},

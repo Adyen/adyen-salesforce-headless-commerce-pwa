@@ -218,7 +218,7 @@ function registerAdyenEndpoints(app, runtime, overrides, options = {}) {
         ErrorHandler
     ]
     const terminalAbortHandler = overrides?.terminalAbort || [
-        prepareOrderRequestContext,
+        minimalRequestContext,
         TerminalAbortController,
         SuccessHandler,
         ErrorHandler

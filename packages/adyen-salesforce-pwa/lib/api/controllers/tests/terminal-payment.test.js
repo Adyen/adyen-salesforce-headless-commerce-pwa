@@ -1,7 +1,7 @@
 import createTerminalPayment from '../terminal-payment'
 import AdyenClientProvider from '../../models/adyenClientProvider'
 import {ERROR_MESSAGE} from '../../../utils/constants.mjs'
-import * as terminalHelper from '../../helpers/terminalHelper'
+import * as generateServiceIdModule from '../../../utils/generateServiceId.mjs'
 import * as orderHelper from '../../helpers/orderHelper'
 
 jest.mock('../../models/adyenClientProvider')
@@ -10,23 +10,22 @@ jest.mock('../../helpers/orderHelper')
 
 describe('createTerminalPayment controller', () => {
     let req, res, next
-    let mockSync, mockAsync, mockAddPaymentInstrument
+    let mockSync, mockAddPaymentInstrument, mockRemoveAllPaymentInstruments
 
     beforeEach(() => {
         jest.clearAllMocks()
-        jest.spyOn(terminalHelper, 'generateServiceId').mockReturnValue('1234567890')
+        jest.spyOn(generateServiceIdModule, 'generateServiceId').mockReturnValue('1234567890')
 
         mockSync = jest.fn()
-        mockAsync = jest.fn()
 
         AdyenClientProvider.mockImplementation(() => ({
-            getTerminalCloudApi: () => ({
-                sync: mockSync,
-                async: mockAsync
+            getTerminalClient: () => ({
+                sync: mockSync
             })
         }))
 
         mockAddPaymentInstrument = jest.fn().mockResolvedValue({})
+        mockRemoveAllPaymentInstruments = jest.fn().mockResolvedValue({})
         orderHelper.createOrderUsingOrderNo.mockResolvedValue({orderNo: 'ORDER-001'})
         orderHelper.updateOrderPaymentInstrument.mockResolvedValue({})
         orderHelper.failOrderAndReopenBasket.mockResolvedValue('new-basket-123')
@@ -51,7 +50,8 @@ describe('createTerminalPayment controller', () => {
                         c_orderNo: 'ORDER-001'
                     },
                     basketService: {
-                        addPaymentInstrument: mockAddPaymentInstrument
+                        addPaymentInstrument: mockAddPaymentInstrument,
+                        removeAllPaymentInstruments: mockRemoveAllPaymentInstruments
                     },
                     siteId: 'RefArch'
                 }
@@ -96,6 +96,7 @@ describe('createTerminalPayment controller', () => {
 
         await createTerminalPayment(req, res, next)
 
+        expect(mockRemoveAllPaymentInstruments).toHaveBeenCalled()
         expect(mockAddPaymentInstrument).toHaveBeenCalledWith(
             expect.objectContaining({currency: 'EUR'}),
             {type: 'AdyenPOS'}
@@ -106,7 +107,20 @@ describe('createTerminalPayment controller', () => {
                 SaleToPOIRequest: expect.objectContaining({
                     MessageHeader: expect.objectContaining({
                         MessageCategory: 'Payment',
-                        POIID: 'V400m-123456789'
+                        POIID: 'V400m-123456789',
+                        SaleID: 'SalesforceCommerceCloud'
+                    }),
+                    PaymentRequest: expect.objectContaining({
+                        SaleData: expect.objectContaining({
+                            SaleTransactionID: expect.objectContaining({
+                                TransactionID: 'ORDER-001'
+                            }),
+                            SaleReferenceID: 'SalesforceCommerceCloudPOS',
+                            SaleToAcquirerData: expect.any(String)
+                        }),
+                        PaymentTransaction: expect.objectContaining({
+                            AmountsReq: {Currency: 'EUR', RequestedAmount: 100.0}
+                        })
                     })
                 })
             })
@@ -181,30 +195,26 @@ describe('createTerminalPayment controller', () => {
         }
 
         mockSync.mockResolvedValue(terminalResponse)
-        mockAsync.mockResolvedValue('ok')
 
         await createTerminalPayment(req, res, next)
 
-        expect(next).toHaveBeenCalledWith(
-            expect.objectContaining({message: ERROR_MESSAGE.TERMINAL_PAYMENT_FAILED})
-        )
-        expect(mockAsync).toHaveBeenCalled()
+        expect(next).toHaveBeenCalledWith()
         expect(orderHelper.failOrderAndReopenBasket).toHaveBeenCalledWith(
             res.locals.adyen,
             'ORDER-001'
         )
-        const error = next.mock.calls[0][0]
-        expect(error.newBasketId).toBe('new-basket-123')
+        expect(res.locals.response.result).toBe('Failure')
+        expect(res.locals.response.error.errorCondition).toBe('Refusal')
+        expect(res.locals.response.newBasketId).toBe('new-basket-123')
     })
 
     it('should send abort and fail order on communication error', async () => {
-        mockSync.mockRejectedValue(new Error('Network timeout'))
-        mockAsync.mockResolvedValue('ok')
+        mockSync.mockRejectedValueOnce(new Error('Network timeout')).mockResolvedValueOnce('ok')
 
         await createTerminalPayment(req, res, next)
 
         expect(next).toHaveBeenCalledWith(expect.any(Error))
-        expect(mockAsync).toHaveBeenCalled()
+        expect(mockSync).toHaveBeenCalledTimes(2)
         expect(orderHelper.failOrderAndReopenBasket).toHaveBeenCalledWith(
             res.locals.adyen,
             'ORDER-001'

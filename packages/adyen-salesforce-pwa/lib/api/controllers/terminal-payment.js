@@ -1,13 +1,10 @@
 import {ERROR_MESSAGE, POS, PAYMENT_METHODS} from '../../utils/constants.mjs'
+import {generateServiceId} from '../../utils/generateServiceId.mjs'
 import AdyenClientProvider from '../models/adyenClientProvider'
 import Logger from '../models/logger'
 import {AdyenError} from '../models/AdyenError'
-import {
-    generateServiceId,
-    buildMessageHeader,
-    buildSaleToAcquirerData,
-    parsePaymentResponse
-} from '../helpers/terminalHelper'
+import {TerminalRequestBuilder} from '../models/TerminalRequestBuilder'
+import {parsePaymentResponse} from '../helpers/terminalHelper'
 import {
     createOrderUsingOrderNo,
     failOrderAndReopenBasket,
@@ -67,6 +64,7 @@ async function createTerminalPayment(req, res, next) {
         const currency = basket.currency
         const amount = getCurrencyValueForApi(basket.orderTotal, currency)
 
+        await adyenContext.basketService.removeAllPaymentInstruments()
         await adyenContext.basketService.addPaymentInstrument(
             {value: amount, currency},
             {type: PAYMENT_METHODS.ADYEN_POS}
@@ -76,41 +74,42 @@ async function createTerminalPayment(req, res, next) {
         orderNo = adyenContext.basket?.c_orderNo
         Logger.info('createTerminalPayment', `order created: ${orderNo}`)
 
-        const terminalApiRequest = {
-            SaleToPOIRequest: {
-                MessageHeader: buildMessageHeader({
-                    messageCategory: POS.MESSAGE_CATEGORY.PAYMENT,
-                    serviceId,
-                    terminalId
-                }),
-                PaymentRequest: {
-                    SaleData: {
-                        SaleTransactionID: {
-                            TransactionID: orderNo,
-                            TimeStamp: new Date().toISOString()
-                        },
-                        SaleReferenceID: POS.REFERENCE_ID,
-                        SaleToAcquirerData: buildSaleToAcquirerData(adyenConfig)
-                    },
-                    PaymentTransaction: {
-                        AmountsReq: {
-                            Currency: currency,
-                            RequestedAmount: basket.orderTotal
-                        }
-                    }
+        const terminalApiRequest = new TerminalRequestBuilder()
+            .withMessageHeader(POS.MESSAGE_CATEGORY.PAYMENT, terminalId, POS.SALE_ID, serviceId)
+            .withPaymentRequest(basket.orderTotal, currency, orderNo)
+            .withSaleReferenceId(POS.REFERENCE_ID)
+            .withSaleToAcquirerData(adyenConfig)
+            .build()
+
+        const terminalCloudApi = new AdyenClientProvider(adyenContext).getTerminalClient()
+        const response = await terminalCloudApi.sync(terminalApiRequest)
+        const paymentResult = parsePaymentResponse(response)
+        if (paymentResult.result === 'Failure') {
+            Logger.info(
+                'createTerminalPayment',
+                `terminal failure: ${JSON.stringify(paymentResult.error)}`
+            )
+
+            let newBasketId = null
+            if (orderNo) {
+                try {
+                    newBasketId = await failOrderAndReopenBasket(res.locals.adyen, orderNo)
+                    Logger.info(
+                        'createTerminalPayment',
+                        `order ${orderNo} failed, new basket: ${newBasketId}`
+                    )
+                } catch (orderErr) {
+                    Logger.error('createTerminalPayment orderFailure', orderErr.message)
                 }
             }
-        }
 
-        const terminalCloudApi = new AdyenClientProvider(adyenContext).getTerminalCloudApi()
-        const response = await terminalCloudApi.sync(terminalApiRequest)
-
-        const paymentResult = parsePaymentResponse(response)
-
-        Logger.info('createTerminalPayment', `result: ${paymentResult.result}`)
-
-        if (paymentResult.result === 'Failure') {
-            throw new AdyenError(ERROR_MESSAGE.TERMINAL_PAYMENT_FAILED, 400, paymentResult.error)
+            res.locals.response = {
+                ...paymentResult,
+                orderNo,
+                serviceId,
+                newBasketId
+            }
+            return next()
         }
 
         if (paymentResult.pspReference) {
@@ -172,28 +171,15 @@ async function createTerminalPayment(req, res, next) {
  * @returns {Promise<void>}
  */
 async function sendAbortRequest(adyenContext, serviceId, terminalId) {
-    const newServiceId = generateServiceId()
+    const abortRequest = TerminalRequestBuilder.createAbort(
+        terminalId,
+        POS.SALE_ID,
+        POS.ABORT_REASON.MERCHANT_ABORT,
+        serviceId
+    )
 
-    const abortRequest = {
-        SaleToPOIRequest: {
-            MessageHeader: buildMessageHeader({
-                messageCategory: POS.MESSAGE_CATEGORY.ABORT,
-                serviceId: newServiceId,
-                terminalId
-            }),
-            AbortRequest: {
-                AbortReason: POS.ABORT_REASON.MERCHANT_ABORT,
-                MessageReference: {
-                    SaleID: POS.SALE_ID,
-                    ServiceID: serviceId,
-                    MessageCategory: POS.MESSAGE_CATEGORY.PAYMENT
-                }
-            }
-        }
-    }
-
-    const terminalCloudApi = new AdyenClientProvider(adyenContext).getTerminalCloudApi()
-    await terminalCloudApi.async(abortRequest)
+    const terminalCloudApi = new AdyenClientProvider(adyenContext).getTerminalClient()
+    await terminalCloudApi.sync(abortRequest)
     Logger.info('sendAbortRequest', `abort sent for serviceId: ${serviceId}`)
 }
 

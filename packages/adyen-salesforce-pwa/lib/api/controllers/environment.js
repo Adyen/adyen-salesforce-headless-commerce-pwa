@@ -11,7 +11,9 @@ async function getEnvironment(req, res, next) {
         }
         res.locals.response = {
             ADYEN_CLIENT_KEY: adyenContext.adyenConfig?.clientKey,
-            ADYEN_ENVIRONMENT: adyenContext.adyenConfig?.environment
+            ADYEN_ENVIRONMENT: adyenContext.adyenConfig?.environment,
+            ADYEN_POS_ENABLED: adyenContext.adyenConfig?.posEnabled === 'true',
+            ADYEN_POS_STORE_ID: adyenContext.adyenConfig?.posActiveStoreIds || ''
         }
         Logger.info('getEnvironment', 'success')
         next()
