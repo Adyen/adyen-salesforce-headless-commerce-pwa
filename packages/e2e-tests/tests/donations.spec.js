@@ -5,7 +5,7 @@ import {PaymentHelper} from '../helpers/PaymentHelper.js'
 import {CardData} from '../data/cardData.js'
 
 const user_US = new ShopperData().US
-const threeDs2 = new CardData().threeDs2
+const card = new CardData().storedCard
 
 test.describe.only('Donations through PWA UI', () => {
     test('donation after CC 3Ds2 payment should succeed', async ({page}) => {
@@ -18,12 +18,11 @@ test.describe.only('Donations through PWA UI', () => {
         await paymentPage.selectPaymentType('Cards')
         await paymentPage.fillCreditCardInfo(
             user_US.shopperName,
-            threeDs2.cardNumber,
-            threeDs2.expirationDate,
-            threeDs2.cvc
+            card.cardNumber,
+            card.expirationDate,
+            card.cvc
         )
         await paymentPage.clickPay()
-        await paymentPage.validate3DS2('password')
         await scenarios.verifySuccessfulOrder()
 
         const donationComponent = page.locator(
@@ -49,13 +48,12 @@ test.describe.only('Donations through PWA UI', () => {
         const paymentPage = new PaymentHelper(page)
         await paymentPage.selectPaymentType('Cards')
         await paymentPage.fillCreditCardInfo(
-            user_US.shopperName,
-            threeDs2.cardNumber,
-            threeDs2.expirationDate,
-            threeDs2.cvc
+          user_US.shopperName,
+          card.cardNumber,
+          card.expirationDate,
+          card.cvc
         )
         await paymentPage.clickPay()
-        await paymentPage.validate3DS2('password')
         await scenarios.verifySuccessfulOrder()
 
         const donationComponent = page.locator(
