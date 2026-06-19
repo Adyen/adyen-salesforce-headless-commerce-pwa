@@ -7,7 +7,7 @@ import {CardData} from '../data/cardData.js'
 const user_US = new ShopperData().US
 const card = new CardData().storedCard
 
-test.describe.only('Donations through PWA UI', () => {
+test.describe('Donations through PWA UI', () => {
     test('donation after CC 3Ds2 payment should succeed', async ({page}) => {
         const scenarios = new ScenarioHelper(page)
         await scenarios.visitStore()
