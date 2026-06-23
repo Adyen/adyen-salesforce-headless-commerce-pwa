@@ -71,6 +71,9 @@ jobs:
           NODE_ENV: ${{ secrets.NODE_ENV }}
           E2E_PAYPAL_USERNAME: ${{secrets.E2E_PAYPAL_USERNAME}}
           E2E_PAYPAL_PASSWORD: ${{secrets.E2E_PAYPAL_PASSWORD}}
+          SFCC_REALM_ID: ${{ secrets.SFCC_REALM_ID }}
+          SFCC_INSTANCE_ID: ${{ secrets.SFCC_INSTANCE_ID }}
+          SFCC_OAUTH_SCOPES: ${{ secrets.SFCC_OAUTH_SCOPES }}
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:

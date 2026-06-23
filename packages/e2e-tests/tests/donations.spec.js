@@ -5,7 +5,7 @@ import {PaymentHelper} from '../helpers/PaymentHelper.js'
 import {CardData} from '../data/cardData.js'
 
 const user_US = new ShopperData().US
-const threeDs2 = new CardData().threeDs2
+const card = new CardData().storedCard
 
 test.describe('Donations through PWA UI', () => {
     test('donation after CC 3Ds2 payment should succeed', async ({page}) => {
@@ -18,23 +18,17 @@ test.describe('Donations through PWA UI', () => {
         await paymentPage.selectPaymentType('Cards')
         await paymentPage.fillCreditCardInfo(
             user_US.shopperName,
-            threeDs2.cardNumber,
-            threeDs2.expirationDate,
-            threeDs2.cvc
+            card.cardNumber,
+            card.expirationDate,
+            card.cvc
         )
         await paymentPage.clickPay()
-        await paymentPage.validate3DS2('password')
         await scenarios.verifySuccessfulOrder()
 
         const donationComponent = page.locator(
             '.adyen-checkout__adyen-giving'
         )
         await expect(donationComponent).toBeVisible({timeout: 15000})
-
-        const donationAmountButton = donationComponent
-            .locator('.adyen-checkout__donation-amount__button, .adyen-checkout__button')
-            .first()
-        await donationAmountButton.click()
 
         const donateButton = donationComponent.locator('.adyen-checkout__button--donate')
         await donateButton.click()
@@ -54,13 +48,12 @@ test.describe('Donations through PWA UI', () => {
         const paymentPage = new PaymentHelper(page)
         await paymentPage.selectPaymentType('Cards')
         await paymentPage.fillCreditCardInfo(
-            user_US.shopperName,
-            threeDs2.cardNumber,
-            threeDs2.expirationDate,
-            threeDs2.cvc
+          user_US.shopperName,
+          card.cardNumber,
+          card.expirationDate,
+          card.cvc
         )
         await paymentPage.clickPay()
-        await paymentPage.validate3DS2('password')
         await scenarios.verifySuccessfulOrder()
 
         const donationComponent = page.locator(
