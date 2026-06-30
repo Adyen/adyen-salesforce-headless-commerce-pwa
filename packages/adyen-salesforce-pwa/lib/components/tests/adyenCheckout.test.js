@@ -350,10 +350,14 @@ describe('AdyenCheckoutComponent', () => {
         render(<AdyenCheckoutComponent {...defaultProps} onStateChange={onStateChangeMock} />)
 
         await waitFor(() => {
-            expect(createCheckoutInstance).toHaveBeenCalledWith(
-                expect.objectContaining({setAdyenStateData: expect.any(Function)})
-            )
+            expect(createCheckoutInstance).toHaveBeenCalled()
         })
+
+        const setAdyenStateData = createCheckoutInstance.mock.calls[0][0].setAdyenStateData
+        act(() => {
+            setAdyenStateData({some: 'data'})
+        })
+        expect(onStateChangeMock).toHaveBeenCalledWith({some: 'data'})
     })
 
     it('should handle translations correctly', async () => {
