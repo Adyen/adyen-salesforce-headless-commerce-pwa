@@ -28,7 +28,7 @@ import {PromoCode, usePromoCode} from '@salesforce/retail-react-app/app/componen
 import {API_ERROR_MESSAGE} from '@salesforce/retail-react-app/app/constants'
 import {isPickupShipment} from '@salesforce/retail-react-app/app/utils/shipment-utils'
 /* -----------------Adyen Begin ------------------------ */
-import {useAccessToken, useCustomerId, useCustomerType} from '@salesforce/commerce-sdk-react'
+import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 import LoadingSpinner from '@salesforce/retail-react-app/app/components/loading-spinner'
 import {
     AdyenCheckout,
