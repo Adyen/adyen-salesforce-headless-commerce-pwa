@@ -42,7 +42,6 @@ const Payment = () => {
     const {formatMessage} = useIntl()
     const {data: basket, refetch: refetchBasket} = useCurrentBasket()
     const customerId = useCustomerId()
-    const customerTypeData = useCustomerType()
     const {getTokenWhenReady} = useAccessToken()
     const [authToken, setAuthToken] = useState()
 
