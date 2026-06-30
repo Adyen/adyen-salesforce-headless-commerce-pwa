@@ -21,7 +21,8 @@ describe('useAdyenReviewPage', () => {
 
     const createWrapper = () => {
         const queryClient = new QueryClient({
-            defaultOptions: {queries: {retry: false, staleTime: 0, cacheTime: 0}}
+            defaultOptions: {queries: {retry: false, staleTime: 0, cacheTime: 0}},
+            logger: {log: jest.fn(), warn: jest.fn(), error: jest.fn()}
         })
         // eslint-disable-next-line react/display-name, react/prop-types
         return ({children}) => (

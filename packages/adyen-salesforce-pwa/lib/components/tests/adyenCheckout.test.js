@@ -26,6 +26,8 @@ jest.mock('../paymentMethodsConfiguration', () => ({
 }))
 
 describe('AdyenCheckoutComponent', () => {
+    let consoleErrorSpy
+
     const mockCheckoutInstance = {
         update: jest.fn()
     }
@@ -61,6 +63,8 @@ describe('AdyenCheckoutComponent', () => {
 
     beforeEach(() => {
         jest.clearAllMocks()
+        consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+        jest.spyOn(console, 'warn').mockImplementation(() => {})
 
         // Mock the hooks
         useCustomerId.mockReturnValue('test_customer')
@@ -343,12 +347,13 @@ describe('AdyenCheckoutComponent', () => {
     it('should call onStateChange when state changes', async () => {
         const onStateChangeMock = jest.fn()
 
-        await act(async () => {
-            render(<AdyenCheckoutComponent {...defaultProps} onStateChange={onStateChangeMock} />)
-        })
+        render(<AdyenCheckoutComponent {...defaultProps} onStateChange={onStateChangeMock} />)
 
-        // The onStateChange should be called during state updates
-        // Note: This depends on internal implementation triggering state changes
+        await waitFor(() => {
+            expect(createCheckoutInstance).toHaveBeenCalledWith(
+                expect.objectContaining({setAdyenStateData: expect.any(Function)})
+            )
+        })
     })
 
     it('should handle translations correctly', async () => {
@@ -358,11 +363,13 @@ describe('AdyenCheckoutComponent', () => {
             }
         }
 
-        await act(async () => {
-            render(<AdyenCheckoutComponent {...defaultProps} translations={translations} />)
-        })
+        render(<AdyenCheckoutComponent {...defaultProps} translations={translations} />)
 
-        // Component should use translations
+        await waitFor(() => {
+            expect(createCheckoutInstance).toHaveBeenCalledWith(
+                expect.objectContaining({getTranslations: expect.any(Function)})
+            )
+        })
     })
 
     it('should handle unmount cleanup with paypal destroy', async () => {
@@ -400,8 +407,11 @@ describe('AdyenCheckoutComponent', () => {
     })
 
     it('should handle internal adyen action changes', async () => {
-        // This tests the internalAdyenAction dependency in useEffect
         const {rerender} = render(<AdyenCheckoutComponent {...defaultProps} />)
+
+        await waitFor(() => {
+            expect(createCheckoutInstance).toHaveBeenCalledTimes(1)
+        })
 
         await act(async () => {
             rerender(
@@ -412,17 +422,24 @@ describe('AdyenCheckoutComponent', () => {
             )
         })
 
-        // Should handle component re-render with different config
+        expect(createCheckoutInstance).toHaveBeenCalledTimes(1)
     })
 
-    it('should not initialize when paymentContainer is not available', async () => {
-        // This is implicitly tested since we always render with a container ref
+    it('should initialize checkout when paymentContainer is available', async () => {
+        render(<AdyenCheckoutComponent {...defaultProps} />)
+
+        await waitFor(() => {
+            expect(createCheckoutInstance).toHaveBeenCalledTimes(1)
+        })
+        expect(mountCheckoutComponent).toHaveBeenCalledTimes(1)
     })
 
     it('should update orderNo when basket c_orderNo changes', async () => {
         const {rerender} = render(<AdyenCheckoutComponent {...defaultProps} />)
 
-        await act(async () => {})
+        await waitFor(() => {
+            expect(createCheckoutInstance).toHaveBeenCalledTimes(1)
+        })
 
         const propsWithOrderNo = {
             ...defaultProps,
@@ -436,7 +453,7 @@ describe('AdyenCheckoutComponent', () => {
             rerender(<AdyenCheckoutComponent {...propsWithOrderNo} />)
         })
 
-        // OrderNo should be updated
+        expect(createCheckoutInstance).toHaveBeenCalledTimes(1)
     })
 
     it('should not update orderNo when c_orderNo is the same', async () => {
@@ -450,20 +467,23 @@ describe('AdyenCheckoutComponent', () => {
 
         const {rerender} = render(<AdyenCheckoutComponent {...propsWithOrderNo} />)
 
-        await act(async () => {})
+        await waitFor(() => {
+            expect(createCheckoutInstance).toHaveBeenCalledTimes(1)
+        })
 
-        // Re-render with same orderNo
         await act(async () => {
             rerender(<AdyenCheckoutComponent {...propsWithOrderNo} />)
         })
 
-        // Should not cause issues
+        expect(createCheckoutInstance).toHaveBeenCalledTimes(1)
     })
 
     it('should update adyen order when c_orderData changes', async () => {
         const {rerender} = render(<AdyenCheckoutComponent {...defaultProps} />)
 
-        await act(async () => {})
+        await waitFor(() => {
+            expect(createCheckoutInstance).toHaveBeenCalledTimes(1)
+        })
 
         const propsWithOrderData = {
             ...defaultProps,
@@ -476,23 +496,26 @@ describe('AdyenCheckoutComponent', () => {
         await act(async () => {
             rerender(<AdyenCheckoutComponent {...propsWithOrderData} />)
         })
+
+        expect(createCheckoutInstance).toHaveBeenCalledTimes(1)
     })
 
     it('should not call onStateChange when not provided', async () => {
-        // Render without onStateChange
-        await act(async () => {
-            render(<AdyenCheckoutComponent {...defaultProps} />)
-        })
+        render(<AdyenCheckoutComponent {...defaultProps} />)
 
-        // Should work without error
+        await waitFor(() => {
+            expect(createCheckoutInstance).toHaveBeenCalledTimes(1)
+        })
+        expect(consoleErrorSpy).not.toHaveBeenCalled()
     })
 
     it('should handle missing translations gracefully', async () => {
-        await act(async () => {
-            render(<AdyenCheckoutComponent {...defaultProps} translations={null} />)
-        })
+        render(<AdyenCheckoutComponent {...defaultProps} translations={null} />)
 
-        // Should work without error
+        await waitFor(() => {
+            expect(createCheckoutInstance).toHaveBeenCalledTimes(1)
+        })
+        expect(consoleErrorSpy).not.toHaveBeenCalled()
     })
 
     it('should handle translations for different locale', async () => {
@@ -507,9 +530,11 @@ describe('AdyenCheckoutComponent', () => {
             locale: {id: 'de-DE'}
         }
 
-        await act(async () => {
-            render(
-                <AdyenCheckoutComponent {...propsWithGermanLocale} translations={translations} />
+        render(<AdyenCheckoutComponent {...propsWithGermanLocale} translations={translations} />)
+
+        await waitFor(() => {
+            expect(createCheckoutInstance).toHaveBeenCalledWith(
+                expect.objectContaining({locale: {id: 'de-DE'}})
             )
         })
     })
@@ -518,17 +543,22 @@ describe('AdyenCheckoutComponent', () => {
         const beforeSubmitMock = jest.fn()
         const afterSubmitMock = jest.fn()
 
-        await act(async () => {
-            render(
-                <AdyenCheckoutComponent
-                    {...defaultProps}
-                    beforeSubmit={[beforeSubmitMock]}
-                    afterSubmit={[afterSubmitMock]}
-                />
+        render(
+            <AdyenCheckoutComponent
+                {...defaultProps}
+                beforeSubmit={[beforeSubmitMock]}
+                afterSubmit={[afterSubmitMock]}
+            />
+        )
+
+        await waitFor(() => {
+            expect(paymentMethodsConfiguration).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    beforeSubmit: [beforeSubmitMock],
+                    afterSubmit: [afterSubmitMock]
+                })
             )
         })
-
-        // Callbacks should be passed to payment methods configuration
     })
 
     it('should pass paymentRequestData to payment methods configuration', async () => {
@@ -554,13 +584,20 @@ describe('AdyenCheckoutComponent', () => {
         const beforeAdditionalDetailsMock = jest.fn()
         const afterAdditionalDetailsMock = jest.fn()
 
-        await act(async () => {
-            render(
-                <AdyenCheckoutComponent
-                    {...defaultProps}
-                    beforeAdditionalDetails={[beforeAdditionalDetailsMock]}
-                    afterAdditionalDetails={[afterAdditionalDetailsMock]}
-                />
+        render(
+            <AdyenCheckoutComponent
+                {...defaultProps}
+                beforeAdditionalDetails={[beforeAdditionalDetailsMock]}
+                afterAdditionalDetails={[afterAdditionalDetailsMock]}
+            />
+        )
+
+        await waitFor(() => {
+            expect(paymentMethodsConfiguration).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    beforeAdditionalDetails: [beforeAdditionalDetailsMock],
+                    afterAdditionalDetails: [afterAdditionalDetailsMock]
+                })
             )
         })
     })
@@ -568,15 +605,17 @@ describe('AdyenCheckoutComponent', () => {
     it('should handle isRegistered customer type', async () => {
         useCustomerType.mockReturnValue({isRegistered: true})
 
-        await act(async () => {
-            render(<AdyenCheckoutComponent {...defaultProps} />)
-        })
+        render(<AdyenCheckoutComponent {...defaultProps} />)
 
-        // Component should handle registered customer
+        await waitFor(() => {
+            expect(paymentMethodsConfiguration).toHaveBeenCalledWith(
+                expect.objectContaining({isCustomerRegistered: true})
+            )
+        })
     })
 
-    it('should skip payment methods for expressPDP page', async () => {
-        render(<AdyenCheckoutComponent {...defaultProps} page="expressPDP" />)
+    it('should skip payment methods for redirect page', async () => {
+        render(<AdyenCheckoutComponent {...defaultProps} page="redirect" />)
 
         await act(async () => {})
 

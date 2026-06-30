@@ -10,6 +10,7 @@ jest.mock('../../helpers/basketHelper.js', () => {
         createShopperBasketsClient: jest.fn()
     }
 })
+jest.mock('../logger')
 jest.mock('@salesforce/pwa-kit-runtime/utils/ssr-config.server', () => ({
     getConfig: jest.fn(() => ({
         app: {
