@@ -75,8 +75,8 @@ function handleFailedAuthorisation(order) {
     AdyenLogs.info_log(`Authorization for order ${order.orderNo} was not successful.`);
     const statusValue = order.status.value;
     if (statusValue === Order.ORDER_STATUS_CREATED) {
-        order.trackOrderChange('Authorisation refused (success=false), failing order');
         Transaction.wrap(function () {
+            order.trackOrderChange('Authorisation refused (success=false), failing order');
             order.setConfirmationStatus(Order.CONFIRMATION_STATUS_NOTCONFIRMED);
             order.setPaymentStatus(Order.PAYMENT_STATUS_NOTPAID);
             order.setExportStatus(Order.EXPORT_STATUS_NOTEXPORTED);
