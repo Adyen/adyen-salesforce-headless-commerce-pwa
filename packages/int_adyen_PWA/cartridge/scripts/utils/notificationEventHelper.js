@@ -104,7 +104,11 @@ function updatePaymentTransaction(order, customObj, transactionType) {
     const paymentInstruments = order.getPaymentInstruments().toArray();
 
     const applyUpdate = (pi) => {
-        const processor = PaymentMgr.getPaymentMethod(pi.getPaymentMethod()).getPaymentProcessor();
+        const paymentMethod = PaymentMgr.getPaymentMethod(pi.getPaymentMethod());
+        const processor = paymentMethod ? paymentMethod.getPaymentProcessor() : null;
+        if (!processor) {
+            return;
+        }
         const amount = new Money(customObj.custom.value, customObj.custom.currency);
         const divideBy = getDivisorForCurrency(amount);
         const transactionAmount = amount.divide(divideBy);
@@ -125,7 +129,7 @@ function updatePaymentTransaction(order, customObj, transactionType) {
 
     if (matched.length) {
         matched.forEach(applyUpdate);
-        return;
+        return true;
     }
 
     // Fallback: the /payments/details response was dropped (e.g. shopper closed the redirect
@@ -135,7 +139,9 @@ function updatePaymentTransaction(order, customObj, transactionType) {
     );
     if (fallbackPi) {
         applyUpdate(fallbackPi);
+        return true;
     }
+    return false;
 }
 
 module.exports = {

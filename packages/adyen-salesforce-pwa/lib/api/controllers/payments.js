@@ -159,7 +159,7 @@ async function sendPayments(req, res, next) {
             checkoutResponse.isSuccessful &&
             response?.pspReference
         ) {
-            Logger.error(
+            Logger.info(
                 'sendPayments',
                 `updateOrderPaymentInstrument with psp reference: ${response?.pspReference}`
             )
