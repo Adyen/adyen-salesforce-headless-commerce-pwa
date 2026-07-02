@@ -101,25 +101,47 @@ function isWebhookSuccessful(customObj) {
  * @returns {boolean} - True if any Adyen instrument was found
  */
 function updatePaymentTransaction(order, customObj, transactionType) {
-    const paymentInstruments = order.getPaymentInstruments();
-    Object.values(paymentInstruments).forEach((pi) => {
-        const processor = PaymentMgr.getPaymentMethod(
-            pi.getPaymentMethod(),
-        ).getPaymentProcessor();
-        if (pi.custom.pspReference === customObj.custom.pspReference) {
-            const amount = new Money(customObj.custom.value, customObj.custom.currency);
-            const divideBy = getDivisorForCurrency(amount);
-            const transactionAmount = amount.divide(divideBy);
-            Transaction.wrap(function () {
-                pi.paymentTransaction.setTransactionID(customObj.custom.pspReference);
-                pi.paymentTransaction.setType(transactionType);
-                pi.paymentTransaction.setPaymentProcessor(processor);
-                pi.paymentTransaction.setAmount(transactionAmount);
-                pi.paymentTransaction.setAccountID(customObj.custom.merchantAccountCode);
-                pi.paymentTransaction.custom.notification_data = customObj.custom.log;
-            })
+    const paymentInstruments = order.getPaymentInstruments().toArray();
+
+    const applyUpdate = (pi) => {
+        const paymentMethod = PaymentMgr.getPaymentMethod(pi.getPaymentMethod());
+        const processor = paymentMethod ? paymentMethod.getPaymentProcessor() : null;
+        if (!processor) {
+            return;
         }
-    });
+        const amount = new Money(customObj.custom.value, customObj.custom.currency);
+        const divideBy = getDivisorForCurrency(amount);
+        const transactionAmount = amount.divide(divideBy);
+        Transaction.wrap(function () {
+            pi.custom.pspReference = customObj.custom.pspReference;
+            pi.paymentTransaction.setTransactionID(customObj.custom.pspReference);
+            pi.paymentTransaction.setType(transactionType);
+            pi.paymentTransaction.setPaymentProcessor(processor);
+            pi.paymentTransaction.setAmount(transactionAmount);
+            pi.paymentTransaction.setAccountID(customObj.custom.merchantAccountCode);
+            pi.paymentTransaction.custom.notification_data = customObj.custom.log;
+        });
+    };
+
+    const matched = paymentInstruments.filter(
+        (pi) => pi.custom.pspReference === customObj.custom.pspReference
+    );
+
+    if (matched.length) {
+        matched.forEach(applyUpdate);
+        return true;
+    }
+
+    // Fallback: the /payments/details response was dropped (e.g. shopper closed the redirect
+    // tab), so the PSP reference was never stored on the order. Recover it from the webhook.
+    const fallbackPi = paymentInstruments.find(
+        (pi) => pi.custom.paymentMethodType !== 'giftcard'
+    );
+    if (fallbackPi) {
+        applyUpdate(fallbackPi);
+        return true;
+    }
+    return false;
 }
 
 module.exports = {

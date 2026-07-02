@@ -1,6 +1,7 @@
 const RESTResponseMgr = require('dw/system/RESTResponseMgr');
 const OrderMgr = require('dw/order/OrderMgr');
 const Logger = require('dw/system/Logger');
+const Transaction = require('dw/system/Transaction');
 
 /**
  * Implements the PATCH method for the adyen-order API.
@@ -30,13 +31,15 @@ exports.updateOrderPaymentInstrument = function () {
         RESTResponseMgr.createError(404, 'not_found', 'Payment instrument not found').render();
         return;
       }
-      allowedCustomProperties.forEach((prop) => {
-        if (
-          Object.prototype.hasOwnProperty.call(customProperties, prop) &&
-          customProperties[prop] !== undefined
-        ) {
-          paymentInstrument.custom[prop] = customProperties[prop];
-        }
+      Transaction.wrap(function () {
+        allowedCustomProperties.forEach((prop) => {
+          if (
+            Object.prototype.hasOwnProperty.call(customProperties, prop) &&
+            customProperties[prop] !== undefined
+          ) {
+            paymentInstrument.custom[prop] = customProperties[prop];
+          }
+        });
       });
       RESTResponseMgr.createSuccess({}, 200).render();
     } else {

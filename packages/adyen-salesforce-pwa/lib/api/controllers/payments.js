@@ -153,6 +153,35 @@ async function sendPayments(req, res, next) {
             )
         }
 
+        if (
+            preCreatedOrderNo &&
+            !checkoutResponse.isFinal &&
+            checkoutResponse.isSuccessful &&
+            response?.pspReference
+        ) {
+            Logger.info(
+                'sendPayments',
+                `updateOrderPaymentInstrument with psp reference: ${response?.pspReference}`
+            )
+            try {
+                await updateOrderPaymentInstrument(
+                    preCreatedOrderNo,
+                    adyenContext.siteId,
+                    response.pspReference,
+                    {
+                        pspReference: response.pspReference,
+                        cardInstallments: paymentRequest?.installments?.value,
+                        donationToken: response?.donationToken
+                    }
+                )
+            } catch (piErr) {
+                Logger.error(
+                    'sendPayments',
+                    `Failed to update payment instrument on order ${preCreatedOrderNo}: ${piErr.message}`
+                )
+            }
+        }
+
         if (checkoutResponse.isFinal && checkoutResponse.isSuccessful) {
             if (!preCreatedOrderNo) {
                 await adyenContext.basketService.addPaymentInstrument(
