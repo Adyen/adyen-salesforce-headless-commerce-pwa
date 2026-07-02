@@ -72,11 +72,17 @@ function handleSuccessfulAuthorisation(order, result) {
  * @param {dw.order.Order} order - The order object
  */
 function handleFailedAuthorisation(order) {
-    AdyenLogs.info_log(
-        `Authorization for order ${order.orderNo} was not successful - no update.`,
-    );
-    // Determine if payment was refused and was used Adyen payment method
-    if (order.status.value === Order.ORDER_STATUS_FAILED) {
+    AdyenLogs.info_log(`Authorization for order ${order.orderNo} was not successful.`);
+    const statusValue = order.status.value;
+    if (statusValue === Order.ORDER_STATUS_CREATED) {
+        Transaction.wrap(function () {
+            order.trackOrderChange('Authorisation refused (success=false), failing order');
+            order.setConfirmationStatus(Order.CONFIRMATION_STATUS_NOTCONFIRMED);
+            order.setPaymentStatus(Order.PAYMENT_STATUS_NOTPAID);
+            order.setExportStatus(Order.EXPORT_STATUS_NOTEXPORTED);
+            OrderMgr.failOrder(order, false);
+        });
+    } else if (statusValue === Order.ORDER_STATUS_FAILED) {
         Transaction.wrap(function () {
             order.setConfirmationStatus(Order.CONFIRMATION_STATUS_NOTCONFIRMED);
             order.setPaymentStatus(Order.PAYMENT_STATUS_NOTPAID);
