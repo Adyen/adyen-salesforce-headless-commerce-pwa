@@ -10,11 +10,11 @@ vulnerability, [create a GitHub issue](https://github.com/Adyen/adyen-salesforce
 
 Adyen Payments Composable Storefront Integration for B2C Commerce depends on:
 
-1. PWA v8
-2. [Adyen Web v6.21.0](https://www.npmjs.com/package/@adyen/adyen-web)
+1. PWA v9
+2. [Adyen Web v6.34.0](https://www.npmjs.com/package/@adyen/adyen-web)
 3. [Adyen API Library for Node.js v29.1.0](https://www.npmjs.com/package/@adyen/api-library)
 4. Node v22 or later
-5. NPM v11 or later
+5. pnpm v10 or later
 6. Salesforce Managed Runtime
 
 ## Installation
