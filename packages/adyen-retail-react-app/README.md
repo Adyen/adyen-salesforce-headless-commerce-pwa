@@ -11,6 +11,8 @@ This application is not intended for production use. It is provided "as is" with
 ## Usage
 This application allows developers to demonstrate the default functionalities of the [Adyen Salesforce PWA package](https://www.npmjs.com/package/@adyen/adyen-salesforce-pwa), using the following [dependencies and requirements.](https://github.com/Adyen/adyen-salesforce-headless-commerce-pwa/tree/main/packages/adyen-salesforce-pwa#dependencies--requirements)
 
+It is built on top of the Salesforce Retail React App v9.
+
 ## Installation and Configuration
 We do not provide instructions for this application, as it cannot be used for any development, testing, or production environments. It can only be used as a demonstration of how to use the NPM package within a PWA application.
 
