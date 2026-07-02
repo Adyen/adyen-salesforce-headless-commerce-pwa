@@ -48,7 +48,7 @@ packages:
     resolution: {integrity: sha512-6OzddxPio9UiWTCemp4N8cYLV2ZN1ncRnV1cVGtve7dhPOtRkleRyx32GQCYSwDYgaHU3USMm84tNsvKzRCa1Q==}
 
   '@adyen/adyen-salesforce-pwa@file:../adyen-salesforce-pwa/adyen-adyen-salesforce-pwa-5.0.0.tgz':
-    resolution: {integrity: sha512-KC/x6rWavk67v/Cqw2vs5VZOyUYm9nak97/Y3eZ2tPllGgWNfwRPHeFqHgLYu/DVf7ceWY+1BRT14L9l2vfAYg==, tarball: file:../adyen-salesforce-pwa/adyen-adyen-salesforce-pwa-5.0.0.tgz}
+    resolution: {integrity: sha512-SYYPSVVY3ov8mPJIkW0yyqr0+iKuCRDW/Q+qLI29P3wxp3TZ4XnG7zPADQVErav2AJjF2HzJlvbfM1sfqVjWdg==, tarball: file:../adyen-salesforce-pwa/adyen-adyen-salesforce-pwa-5.0.0.tgz}
     version: 5.0.0
     hasBin: true
     peerDependencies:
