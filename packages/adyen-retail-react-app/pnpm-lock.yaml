@@ -8,6 +8,9 @@ overrides:
   ws: '>=8.17.1'
   express: ^4.21.0
   braces: '>=3.0.3'
+  minimatch: '>=3.1.4'
+  js-yaml: '>=3.15.0'
+  fast-xml-parser: '>=5.3.6'
   react: ^18.2.0
   react-dom: ^18.2.0
   '@salesforce/pwa-kit-runtime': 3.17.1
@@ -26,8 +29,8 @@ importers:
   .:
     dependencies:
       '@adyen/adyen-salesforce-pwa':
-        specifier: file:../adyen-salesforce-pwa/adyen-adyen-salesforce-pwa-5.0.0.tgz
-        version: file:../adyen-salesforce-pwa/adyen-adyen-salesforce-pwa-5.0.0.tgz(343fcd521f69baa95967e76d7d771719)
+        specifier: file:../adyen-salesforce-pwa
+        version: file:../adyen-salesforce-pwa(343fcd521f69baa95967e76d7d771719)
     devDependencies:
       '@salesforce/retail-react-app':
         specifier: ^9.1.1
@@ -47,9 +50,8 @@ packages:
   '@adobe/css-tools@4.5.0':
     resolution: {integrity: sha512-6OzddxPio9UiWTCemp4N8cYLV2ZN1ncRnV1cVGtve7dhPOtRkleRyx32GQCYSwDYgaHU3USMm84tNsvKzRCa1Q==}
 
-  '@adyen/adyen-salesforce-pwa@file:../adyen-salesforce-pwa/adyen-adyen-salesforce-pwa-5.0.0.tgz':
-    resolution: {integrity: sha512-SYYPSVVY3ov8mPJIkW0yyqr0+iKuCRDW/Q+qLI29P3wxp3TZ4XnG7zPADQVErav2AJjF2HzJlvbfM1sfqVjWdg==, tarball: file:../adyen-salesforce-pwa/adyen-adyen-salesforce-pwa-5.0.0.tgz}
-    version: 5.0.0
+  '@adyen/adyen-salesforce-pwa@file:../adyen-salesforce-pwa':
+    resolution: {directory: ../adyen-salesforce-pwa, type: directory}
     hasBin: true
     peerDependencies:
       '@adyen/adyen-web': ^6.34.0
@@ -2579,9 +2581,6 @@ packages:
     resolution: {integrity: sha512-ZcbTaIqJOfCc03QwD468Unz/5Ir8ATtvAHsK+FdXbDIbGfihqh9mrvdcYunQzqn4HrvWWaFyaxJhGZagaJJpPQ==}
     engines: {node: '>= 14'}
 
-  argparse@1.0.10:
-    resolution: {integrity: sha512-o5Roy6tNG4SL/FOkCAN6RzjiakZS25RLYFrcMttJqbdd8BWrnA+fGz57iN5Pb06pvBGvl5gQ0B48dJlslXvoTg==}
-
   argparse@2.0.1:
     resolution: {integrity: sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==}
 
@@ -2852,9 +2851,6 @@ packages:
   boxen@8.0.1:
     resolution: {integrity: sha512-F3PH5k5juxom4xktynS7MoFY+NUWH5LC4CnH11YB8NPew+HLpmBLCybSAEyb2F+4pRXhuhWqFesoQd6DAyc2hw==}
     engines: {node: '>=18'}
-
-  brace-expansion@1.1.15:
-    resolution: {integrity: sha512-EwOCDEex4quD37XhqM3omwtMoJjr//isUZz1JopUNWms+4Z2ViyM/k1YIRePpoVNnQhENnxtFjLaxNHrT7xIUg==}
 
   brace-expansion@2.1.1:
     resolution: {integrity: sha512-WR1cURNjuvBLMZBMbqM0UoE+WAfdUcEV1ccD8PVBVOI+Z3ND4+SZbN8RsfT2bMuG1qwz5RFvPukSZm5fF2D5eA==}
@@ -3133,9 +3129,6 @@ packages:
 
   compute-scroll-into-view@1.0.20:
     resolution: {integrity: sha512-UCB0ioiyj8CRjtrvaceBLqqhZCVP+1B8+NWQhmdsm0VXOJtobBCf1dBQmebCCo34qZmUwZfIH2MZLqNHazrfjg==}
-
-  concat-map@0.0.1:
-    resolution: {integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==}
 
   config-chain@1.1.13:
     resolution: {integrity: sha512-qj+f8APARXHrM0hraqXYb2/bOVSV4PvJQlNZ/DVj0QrmNM2q2euizkeuVckQ57J+W0mRH6Hvi+k50M4Jul2VRQ==}
@@ -4881,10 +4874,6 @@ packages:
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
 
-  js-yaml@3.14.2:
-    resolution: {integrity: sha512-PMSmkqxr106Xa156c2M265Z+FTrPl+oxd/rgOQy2tijQeK5TxQ43psO1ZCwhVOSdnn+RzkzlRz/eY4BgJBYVpg==}
-    hasBin: true
-
   js-yaml@4.2.0:
     resolution: {integrity: sha512-ePWsvanv0DWuDRsW8dnt+R4jQ31SCRCQ7hhNcPXZPsoBZiemuZNYGf7adZdqX2D86j6rvKp3RpCxVTSb8WQlOw==}
     hasBin: true
@@ -5203,13 +5192,6 @@ packages:
   min-indent@1.0.1:
     resolution: {integrity: sha512-I9jwMn07Sy/IwOj3zVkVik2JTvgpaykDZEigL6Rx6N9LbMywwUSMtxET+7lVoDLLd3O3IXwJwvuuns8UB/HeAg==}
     engines: {node: '>=4'}
-
-  minimatch@3.1.2:
-    resolution: {integrity: sha512-J7p63hRiAjw1NDEww1W7i37+ByIrOWO5XQQAzZ3VOcL0PNybwpfmV/N05zFAzwQ9USyEcX6t3UO+K5aqBQOIHw==}
-
-  minimatch@5.1.9:
-    resolution: {integrity: sha512-7o1wEA2RyMP7Iu7GNba9vc0RWWGACJOCZBJX2GJWip0ikV+wcOsgVuY9uE8CPiyQhkGFSlhuSkZPavN7u1c2Fw==}
-    engines: {node: '>=10'}
 
   minimatch@8.0.7:
     resolution: {integrity: sha512-V+1uQNdzybxa14e/p00HZnQNNcTjnRJjDxg2V8wtkjFctq4M7hXFws4oekyTP0Jebeq7QYtpFyOeBAjc88zvYg==}
@@ -6353,9 +6335,6 @@ packages:
     resolution: {integrity: sha512-NzNVhJDYpwceVVii8/Hu6DKfD2G+NrQHlS/V/qgv763EYudVwEcMQNxd2lh+0VrUByXN/oJkl5grOhYWvQUYiw==}
     engines: {node: '>=0.10.0'}
 
-  sprintf-js@1.0.3:
-    resolution: {integrity: sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==}
-
   stack-utils@2.0.6:
     resolution: {integrity: sha512-XlkWvfIm6RmsWtNJx+uqtKLS8eqFbxUg0ZzLXqY0caEy9l7hruX8IpiDnjsLavoBgqCCR71TqWO8MaXYheJ3RQ==}
     engines: {node: '>=10'}
@@ -7145,7 +7124,7 @@ snapshots:
 
   '@adobe/css-tools@4.5.0': {}
 
-  '@adyen/adyen-salesforce-pwa@file:../adyen-salesforce-pwa/adyen-adyen-salesforce-pwa-5.0.0.tgz(343fcd521f69baa95967e76d7d771719)':
+  '@adyen/adyen-salesforce-pwa@file:../adyen-salesforce-pwa(343fcd521f69baa95967e76d7d771719)':
     dependencies:
       '@adyen/adyen-web': 6.40.1
       '@adyen/api-library': 29.1.0
@@ -9177,7 +9156,7 @@ snapshots:
       ignore: 5.3.2
       import-fresh: 3.3.1
       js-yaml: 4.2.0
-      minimatch: 3.1.2
+      minimatch: 9.0.9
       strip-json-comments: 3.1.1
     transitivePeerDependencies:
       - supports-color
@@ -9312,7 +9291,7 @@ snapshots:
     dependencies:
       '@humanwhocodes/object-schema': 2.0.3
       debug: 4.4.3
-      minimatch: 3.1.2
+      minimatch: 9.0.9
     transitivePeerDependencies:
       - supports-color
 
@@ -9341,7 +9320,7 @@ snapshots:
       camelcase: 5.3.1
       find-up: 4.1.0
       get-package-type: 0.1.0
-      js-yaml: 3.14.2
+      js-yaml: 4.2.0
       resolve-from: 5.0.0
 
   '@istanbuljs/schema@0.1.6': {}
@@ -9593,7 +9572,7 @@ snapshots:
     dependencies:
       debug: 4.4.3
       isomorphic-fetch: 3.0.0
-      js-yaml: 3.14.2
+      js-yaml: 4.2.0
       lighthouse: 9.6.8
       tree-kill: 1.2.2
     transitivePeerDependencies:
@@ -9854,7 +9833,7 @@ snapshots:
       jest-expect-message: 1.1.3
       jest-fetch-mock: 3.0.3
       mime-types: 2.1.35
-      minimatch: 3.1.2
+      minimatch: 9.0.9
       node-fetch: 2.7.0
       open: 8.4.2
       prettier: 2.8.8
@@ -10809,10 +10788,6 @@ snapshots:
       - bare-buffer
       - react-native-b4a
 
-  argparse@1.0.10:
-    dependencies:
-      sprintf-js: 1.0.3
-
   argparse@2.0.1: {}
 
   aria-hidden@1.2.6:
@@ -11167,11 +11142,6 @@ snapshots:
       widest-line: 5.0.0
       wrap-ansi: 9.0.2
 
-  brace-expansion@1.1.15:
-    dependencies:
-      balanced-match: 1.0.2
-      concat-map: 0.0.1
-
   brace-expansion@2.1.1:
     dependencies:
       balanced-match: 1.0.2
@@ -11472,8 +11442,6 @@ snapshots:
 
   compute-scroll-into-view@1.0.20: {}
 
-  concat-map@0.0.1: {}
-
   config-chain@1.1.13:
     dependencies:
       ini: 1.3.8
@@ -11545,7 +11513,7 @@ snapshots:
     dependencies:
       import-fresh: 2.0.0
       is-directory: 0.3.1
-      js-yaml: 3.14.2
+      js-yaml: 4.2.0
       parse-json: 4.0.0
 
   cosmiconfig@7.1.0:
@@ -12084,7 +12052,7 @@ snapshots:
       has: 1.0.4
       jsx-ast-utils: 3.3.5
       language-tags: 1.0.5
-      minimatch: 3.1.2
+      minimatch: 9.0.9
       object.entries: 1.1.9
       object.fromentries: 2.0.8
       semver: 6.3.1
@@ -12113,7 +12081,7 @@ snapshots:
       estraverse: 5.3.0
       hasown: 2.0.4
       jsx-ast-utils: 3.3.5
-      minimatch: 3.1.2
+      minimatch: 9.0.9
       object.entries: 1.1.9
       object.fromentries: 2.0.8
       object.values: 1.2.1
@@ -12176,7 +12144,7 @@ snapshots:
       json-stable-stringify-without-jsonify: 1.0.1
       levn: 0.4.1
       lodash.merge: 4.6.2
-      minimatch: 3.1.2
+      minimatch: 9.0.9
       natural-compare: 1.4.0
       optionator: 0.9.4
       strip-ansi: 6.0.1
@@ -12643,7 +12611,7 @@ snapshots:
       fs.realpath: 1.0.0
       inflight: 1.0.6
       inherits: 2.0.4
-      minimatch: 3.1.2
+      minimatch: 9.0.9
       once: 1.4.0
       path-is-absolute: 1.0.1
 
@@ -13640,11 +13608,6 @@ snapshots:
 
   js-tokens@4.0.0: {}
 
-  js-yaml@3.14.2:
-    dependencies:
-      argparse: 1.0.10
-      esprima: 4.0.1
-
   js-yaml@4.2.0:
     dependencies:
       argparse: 2.0.1
@@ -14005,14 +13968,6 @@ snapshots:
   mimic-fn@2.1.0: {}
 
   min-indent@1.0.1: {}
-
-  minimatch@3.1.2:
-    dependencies:
-      brace-expansion: 1.1.15
-
-  minimatch@5.1.9:
-    dependencies:
-      brace-expansion: 2.1.1
 
   minimatch@8.0.7:
     dependencies:
@@ -14818,7 +14773,7 @@ snapshots:
 
   readdir-glob@1.1.3:
     dependencies:
-      minimatch: 5.1.9
+      minimatch: 9.0.9
 
   readdirp@3.6.0:
     dependencies:
@@ -15243,8 +15198,6 @@ snapshots:
     dependencies:
       extend-shallow: 3.0.2
 
-  sprintf-js@1.0.3: {}
-
   stack-utils@2.0.6:
     dependencies:
       escape-string-regexp: 2.0.0
@@ -15519,7 +15472,7 @@ snapshots:
     dependencies:
       '@istanbuljs/schema': 0.1.6
       glob: 7.2.3
-      minimatch: 3.1.2
+      minimatch: 9.0.9
 
   text-decoder@1.2.7:
     dependencies:
