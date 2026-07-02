@@ -235,5 +235,126 @@ describe('donations controller', () => {
             expect(next).toHaveBeenCalledWith(mockError)
             expect(Logger.error).toHaveBeenCalledWith('donate', mockError.message)
         })
+
+        test('should call next with error when donation campaign is not found', async () => {
+            req.body = {data: {...mockDonationData, donationCampaignId: 'nonexistent-campaign'}}
+
+            await DonationsController.donate(req, res, next)
+
+            const expectedError = new AdyenError(ERROR_MESSAGE.DONATION_CAMPAIGN_NOT_FOUND, 400)
+            expect(next).toHaveBeenCalledWith(expectedError)
+            expect(Logger.error).toHaveBeenCalledWith('donate', expectedError.message)
+        })
+
+        test('should call next with error when order has only gift-card payment instruments', async () => {
+            res.locals.adyen = {
+                ...mockAdyenContext,
+                order: {
+                    ...mockOrder,
+                    paymentInstruments: [
+                        {paymentInstrumentId: 'gi123', c_paymentMethodType: 'giftcard'}
+                    ]
+                }
+            }
+
+            await DonationsController.donate(req, res, next)
+
+            const expectedError = new AdyenError(ERROR_MESSAGE.PAYMENT_INSTRUMENT_NOT_FOUND, 500)
+            expect(next).toHaveBeenCalledWith(expectedError)
+            expect(Logger.info).toHaveBeenCalledWith(
+                'donate',
+                'no non-gift-card payment instrument found on order \u2014 skipping'
+            )
+            expect(Logger.error).toHaveBeenCalledWith('donate', expectedError.message)
+        })
+
+        test('should call next with error when non-gift-card instrument has no paymentInstrumentId', async () => {
+            res.locals.adyen = {
+                ...mockAdyenContext,
+                order: {
+                    ...mockOrder,
+                    paymentInstruments: [{c_paymentMethodType: 'scheme'}]
+                }
+            }
+
+            await DonationsController.donate(req, res, next)
+
+            const expectedError = new AdyenError(ERROR_MESSAGE.PAYMENT_INSTRUMENT_NOT_FOUND, 500)
+            expect(next).toHaveBeenCalledWith(expectedError)
+            expect(Logger.error).toHaveBeenCalledWith('donate', expectedError.message)
+        })
+
+        test('should process roundup donation successfully when amount matches', async () => {
+            const roundupCampaign = {
+                donationCampaigns: [
+                    {
+                        id: 'campaign1',
+                        donation: {type: 'roundup', maxRoundupAmount: 100}
+                    }
+                ]
+            }
+            mockDonationCampaigns.mockResolvedValue(roundupCampaign)
+            mockDonations.mockResolvedValue({status: 'completed'})
+
+            // orderTotal = 99.5 USD → 9950 minor units
+            // roundUpAmount = 100 - (9950 % 100) = 100 - 50 = 50
+            res.locals.adyen = {
+                ...mockAdyenContext,
+                order: {...mockOrder, orderTotal: 99.5}
+            }
+            req.body = {data: {...mockDonationData, donationAmount: {currency: 'USD', value: 50}}}
+
+            await DonationsController.donate(req, res, next)
+
+            expect(next).toHaveBeenCalledWith()
+            expect(res.locals.response).toEqual({status: 'completed'})
+        })
+
+        test('should call next with error for roundup type when amount does not match', async () => {
+            const roundupCampaign = {
+                donationCampaigns: [
+                    {
+                        id: 'campaign1',
+                        donation: {type: 'roundup', maxRoundupAmount: 100}
+                    }
+                ]
+            }
+            mockDonationCampaigns.mockResolvedValue(roundupCampaign)
+
+            // orderTotal = 99.5 USD → 9950 minor units; roundUpAmount = 50, but sending 75
+            res.locals.adyen = {
+                ...mockAdyenContext,
+                order: {...mockOrder, orderTotal: 99.5}
+            }
+            req.body = {data: {...mockDonationData, donationAmount: {currency: 'USD', value: 75}}}
+
+            await DonationsController.donate(req, res, next)
+
+            const expectedError = new AdyenError(ERROR_MESSAGE.DONATION_AMOUNT_MISMATCH, 500)
+            expect(next).toHaveBeenCalledWith(expectedError)
+            expect(Logger.error).toHaveBeenCalledWith('donate', expectedError.message)
+        })
+
+        test('should call next with error for fixedAmounts type when value is not in allowed list', async () => {
+            req.body = {
+                data: {...mockDonationData, donationAmount: {currency: 'USD', value: 750}}
+            }
+
+            await DonationsController.donate(req, res, next)
+
+            const expectedError = new AdyenError(ERROR_MESSAGE.DONATION_AMOUNT_MISMATCH, 500)
+            expect(next).toHaveBeenCalledWith(expectedError)
+            expect(Logger.error).toHaveBeenCalledWith('donate', expectedError.message)
+        })
+
+        test('should call next with error when donation status is not completed', async () => {
+            mockDonations.mockResolvedValue({status: 'failed'})
+
+            await DonationsController.donate(req, res, next)
+
+            const expectedError = new AdyenError(ERROR_MESSAGE.DONATION_NOT_COMPLETED, 500)
+            expect(next).toHaveBeenCalledWith(expectedError)
+            expect(Logger.error).toHaveBeenCalledWith('donate', expectedError.message)
+        })
     })
 })
