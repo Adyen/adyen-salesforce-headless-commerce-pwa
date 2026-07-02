@@ -188,3 +188,15 @@ export async function updateOrderPaymentInstrument(
         customProperties
     )
 }
+
+/**
+ * Updates custom attributes on an SFCC order using an admin-level API client.
+ * @param {string} orderNo - The number of the order to update.
+ * @param {string} siteId - The site ID.
+ * @param {object} customAttributes - Map of custom attribute id to value.
+ * @returns {Promise<object>} A promise that resolves to the response object.
+ */
+export async function updateOrderCustomAttributes(orderNo, siteId, customAttributes) {
+    const customOrderApi = new CustomAdminOrderApiClient(siteId)
+    return await customOrderApi.updateOrderCustomAttributes(orderNo, customAttributes)
+}

@@ -32,4 +32,17 @@ export class CustomAdminOrderApiClient extends BaseApiClient {
         })
         return response.json()
     }
+
+    /**
+     * Updates custom attributes on an order using the custom admin API.
+     * @param {string} orderNo - The order number to update.
+     * @param {object} customAttributes - Map of custom attribute id to value.
+     * @returns {Promise<object>} A promise that resolves to the response object.
+     */
+    async updateOrderCustomAttributes(orderNo, customAttributes) {
+        const response = await this._callAdminApi('POST', `orders/${orderNo}/custom-attributes`, {
+            body: JSON.stringify({customAttributes})
+        })
+        return response.json()
+    }
 }

@@ -86,6 +86,28 @@ function handleFailedAuthorisation(order) {
 }
 
 /**
+ * Populates terminal-specific custom attributes on the order for POS payments.
+ * @param {dw.order.Order} order - The order object
+ * @param {Object} additionalData - The additionalData from the webhook payload
+ */
+function populateTerminalOrderFields(order, additionalData) {
+    if (!additionalData || !additionalData.terminalId) {
+        return;
+    }
+    Transaction.wrap(function () {
+        order.custom.Adyen_Payment_Method = constants.PAYMENT_CHANNEL_POS;
+        order.custom.Adyen_Payment_Method_Variant = additionalData.paymentMethodVariant;
+        order.custom.terminalId = additionalData.terminalId;
+        if (additionalData.store) {
+            order.custom.storeId = additionalData.store;
+        }
+    });
+    AdyenLogs.info_log(
+        `Terminal order fields populated for order ${order.orderNo} (terminal ${additionalData.terminalId})`,
+    );
+}
+
+/**
  * Main handler for AUTHORISATION webhook events
  * @param {Object} params - Handler parameters
  * @param {dw.order.Order} params.order - The order object
@@ -114,6 +136,7 @@ function handle({order, customObj, result, totalAmount}) {
         }
         updatePaymentTransaction(order, customObj, PaymentTransaction.TYPE_AUTH)
         AdyenLogs.info_log(`Payment transaction updated for order ${order.orderNo}`);
+        populateTerminalOrderFields(order, webhookData?.additionalData);
         return {success: true, isAdyenPayment: true};
     }
     handleFailedAuthorisation(order);

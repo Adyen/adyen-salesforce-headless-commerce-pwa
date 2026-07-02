@@ -1,4 +1,4 @@
-import {ERROR_MESSAGE, POS, PAYMENT_METHODS} from '../../utils/constants.mjs'
+import {ERROR_MESSAGE, POS, PAYMENT_METHODS, ADYEN_PAYMENT_CHANNEL} from '../../utils/constants.mjs'
 import {generateServiceId} from '../../utils/generateServiceId.mjs'
 import AdyenClientProvider from '../models/adyenClientProvider'
 import Logger from '../models/logger'
@@ -8,7 +8,8 @@ import {parsePaymentResponse} from '../helpers/terminalHelper'
 import {
     createOrderUsingOrderNo,
     failOrderAndReopenBasket,
-    updateOrderPaymentInstrument
+    updateOrderPaymentInstrument,
+    updateOrderCustomAttributes
 } from '../helpers/orderHelper.js'
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 
@@ -46,6 +47,7 @@ async function createTerminalPayment(req, res, next) {
         const {body} = req
         terminalId = body.terminalId
         serviceId = body.serviceId
+        const storeId = body.storeId || adyenContext.adyenConfig?.posActiveStoreIds
 
         if (!terminalId) {
             throw new AdyenError(ERROR_MESSAGE.INVALID_PARAMS, 400)
@@ -127,6 +129,20 @@ async function createTerminalPayment(req, res, next) {
                 Logger.error(
                     'createTerminalPayment',
                     `Failed to update payment instrument on order ${orderNo}: ${piErr.message}`
+                )
+            }
+
+            try {
+                await updateOrderCustomAttributes(orderNo, adyenContext.siteId, {
+                    Adyen_Payment_Method: ADYEN_PAYMENT_CHANNEL.POS,
+                    Adyen_Payment_Method_Variant: paymentResult.paymentMethodVariant,
+                    terminalId,
+                    storeId
+                })
+            } catch (attrErr) {
+                Logger.error(
+                    'createTerminalPayment',
+                    `Failed to update custom attributes on order ${orderNo}: ${attrErr.message}`
                 )
             }
         }

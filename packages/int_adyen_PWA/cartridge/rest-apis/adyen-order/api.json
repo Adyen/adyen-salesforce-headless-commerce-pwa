@@ -9,6 +9,11 @@
       "endpoint": "updateOrderPaymentInstrument",
       "schema": "schema.yaml",
       "implementation": "updateOrderPaymentInstrument"
+    },
+    {
+      "endpoint": "updateOrderCustomAttributes",
+      "schema": "schema.yaml",
+      "implementation": "updateOrderCustomAttributes"
     }
   ]
 }

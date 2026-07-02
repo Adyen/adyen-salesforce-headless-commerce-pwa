@@ -22,6 +22,11 @@ export const PAYMENT_TYPES = {
     EXPRESS_PDP: 'expressPDP'
 }
 
+export const ADYEN_PAYMENT_CHANNEL = {
+    POS: 'pos',
+    ECOM: 'ecom'
+}
+
 export const RESULT_CODES = {
     AUTHORISED: 'Authorised',
     CANCELLED: 'Cancelled',
@@ -63,6 +68,7 @@ export const GIFT_CARD_RESULT_CODES = {
 
 export const NOTIFICATION_EVENT_CODES = {
     AUTHORISATION: 'AUTHORISATION',
+    CAPTURE: 'CAPTURE',
     ORDER_CLOSED: 'ORDER_CLOSED',
     MANUAL_REVIEW_ACCEPT: 'MANUAL_REVIEW_ACCEPT',
     MANUAL_REVIEW_REJECT: 'MANUAL_REVIEW_REJECT'

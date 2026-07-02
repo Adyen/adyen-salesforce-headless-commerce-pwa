@@ -4,7 +4,8 @@ import {
     failOrderAndReopenBasket,
     getOrderUsingOrderNo,
     getOpenOrderForShopper,
-    updateOrderPaymentInstrument
+    updateOrderPaymentInstrument,
+    updateOrderCustomAttributes
 } from '../orderHelper.js'
 import {ShopperOrders} from 'commerce-sdk-isomorphic'
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
@@ -358,6 +359,37 @@ describe('orderHelper', () => {
                 pspReference: 'psp-123',
                 donationToken: 'token-1'
             })
+            expect(result).toEqual({success: true})
+        })
+    })
+
+    describe('updateOrderCustomAttributes', () => {
+        const mockUpdateOrderCustomAttributes = jest.fn()
+
+        beforeEach(() => {
+            CustomAdminOrderApiClient.mockImplementation(() => ({
+                updateOrderCustomAttributes: mockUpdateOrderCustomAttributes
+            }))
+        })
+
+        it('should call custom admin order API client with expected payload', async () => {
+            mockUpdateOrderCustomAttributes.mockResolvedValue({success: true})
+
+            const customAttributes = {
+                Adyen_Payment_Method: 'pos',
+                terminalId: 'V400m-123'
+            }
+            const result = await updateOrderCustomAttributes(
+                'order-123',
+                'RefArch',
+                customAttributes
+            )
+
+            expect(CustomAdminOrderApiClient).toHaveBeenCalledWith('RefArch')
+            expect(mockUpdateOrderCustomAttributes).toHaveBeenCalledWith(
+                'order-123',
+                customAttributes
+            )
             expect(result).toEqual({success: true})
         })
     })

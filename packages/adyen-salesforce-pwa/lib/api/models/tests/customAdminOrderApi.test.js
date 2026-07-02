@@ -86,4 +86,32 @@ describe('CustomAdminOrderApiClient', () => {
             expect(result).toEqual(mockResult)
         })
     })
+
+    describe('updateOrderCustomAttributes', () => {
+        it('should call _callAdminApi with correct payload and return parsed JSON', async () => {
+            const mockResult = {success: true}
+            const mockResponse = {
+                json: jest.fn().mockResolvedValue(mockResult)
+            }
+            client._callAdminApi = jest.fn().mockResolvedValue(mockResponse)
+
+            const orderNo = '12345'
+            const customAttributes = {
+                Adyen_Payment_Method: 'pos',
+                terminalId: 'V400m-123'
+            }
+
+            const result = await client.updateOrderCustomAttributes(orderNo, customAttributes)
+
+            expect(client._callAdminApi).toHaveBeenCalledWith(
+                'POST',
+                `orders/${orderNo}/custom-attributes`,
+                {
+                    body: JSON.stringify({customAttributes})
+                }
+            )
+            expect(mockResponse.json).toHaveBeenCalled()
+            expect(result).toEqual(mockResult)
+        })
+    })
 })

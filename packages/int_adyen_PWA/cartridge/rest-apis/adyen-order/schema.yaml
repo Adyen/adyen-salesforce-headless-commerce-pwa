@@ -80,3 +80,40 @@ paths:
           description: The requested order or payment instrument was not found.
         "500":
           description: An internal server error occurred.
+  /orders/{orderNo}/custom-attributes:
+    post:
+      summary: Update custom attributes on an order
+      operationId: updateOrderCustomAttributes
+      parameters:
+        - in: query
+          name: siteId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - in: path
+          name: orderNo
+          required: true
+          description: The order for which custom attributes need to be updated.
+          schema:
+            type: string
+            minLength: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ customAttributes ]
+              properties:
+                customAttributes:
+                  type: object
+      responses:
+        "200":
+          description: Order custom attributes updated successfully
+        "400":
+          description: Bad request, for example, a missing order number.
+        "404":
+          description: The requested order was not found.
+        "500":
+          description: An internal server error occurred.

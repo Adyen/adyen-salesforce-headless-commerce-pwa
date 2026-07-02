@@ -28,6 +28,7 @@ describe('createTerminalPayment controller', () => {
         mockRemoveAllPaymentInstruments = jest.fn().mockResolvedValue({})
         orderHelper.createOrderUsingOrderNo.mockResolvedValue({orderNo: 'ORDER-001'})
         orderHelper.updateOrderPaymentInstrument.mockResolvedValue({})
+        orderHelper.updateOrderCustomAttributes.mockResolvedValue({})
         orderHelper.failOrderAndReopenBasket.mockResolvedValue('new-basket-123')
 
         req = {
@@ -130,6 +131,15 @@ describe('createTerminalPayment controller', () => {
             'RefArch',
             'ABCDEF123',
             expect.objectContaining({pspReference: 'ABCDEF123'})
+        )
+        expect(orderHelper.updateOrderCustomAttributes).toHaveBeenCalledWith(
+            'ORDER-001',
+            'RefArch',
+            expect.objectContaining({
+                Adyen_Payment_Method: 'pos',
+                Adyen_Payment_Method_Variant: 'visadebit',
+                terminalId: 'V400m-123456789'
+            })
         )
         expect(res.locals.response.pspReference).toBe('ABCDEF123')
         expect(res.locals.response.orderNo).toBe('ORDER-001')

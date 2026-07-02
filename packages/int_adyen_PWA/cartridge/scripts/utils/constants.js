@@ -4,6 +4,7 @@ module.exports = {
     AMOUNT: 'amount',
     METHOD_ADYEN: 'Adyen',
     METHOD_ADYEN_POS: 'AdyenPOS',
+    PAYMENT_CHANNEL_POS: 'pos',
     METHOD_ADYEN_COMPONENT: 'AdyenComponent',
     METHOD_CREDIT_CARD: 'CREDIT_CARD',
 
