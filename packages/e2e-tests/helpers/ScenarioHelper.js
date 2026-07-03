@@ -8,6 +8,7 @@ export class ScenarioHelper {
 
         // Landing Page Locators
         this.heading = this.page.getByRole('heading', {
+            level: 1,
             name: `${this.locale.landingPage.heading}`
         })
 
