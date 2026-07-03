@@ -131,7 +131,7 @@ export class ScenarioHelper {
 
     async visitStore() {
         await this.page.goto(`/RefArch/${this.locale.lang}`)
-        await this.heading.waitFor({state: 'visible', timeout: 30000})
+        await this.page.getByTestId('home-page').waitFor({state: 'visible', timeout: 30000})
     }
 
     async login(user) {
