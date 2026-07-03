@@ -2,7 +2,7 @@ export class LocaleData {
     EN = {
         lang: 'en-US',
         landingPage: {
-            heading: 'Adyen Integration in React PWA Starter Store'
+            heading: 'The React PWA Starter Store for Retail'
         },
         loginPage: {
             paragraph: 'Welcome Back'
@@ -28,7 +28,7 @@ export class LocaleData {
     FR = {
         lang: 'fr-FR',
         landingPage: {
-            heading: 'React PWA Starter Store pour le retail'
+            heading: 'Adyen React PWA Starter Store pour le retail'
         },
         accountPage: {
             heading: 'Détails du compte'
@@ -51,7 +51,7 @@ export class LocaleData {
     IN = {
         lang: 'hi-IN',
         landingPage: {
-            heading: 'Adyen Integration in React PWA Starter Store'
+            heading: 'The React PWA Starter Store for Retail'
         },
         loginPage: {
             paragraph: 'Welcome Back'
