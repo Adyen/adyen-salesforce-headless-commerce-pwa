@@ -72,6 +72,11 @@ export default () => {
     const resetPasswordLandingPath = loginConfig?.resetPassword?.landingPath
     const socialLoginEnabled = loginConfig?.social?.enabled
     const socialRedirectURI = loginConfig?.social?.redirectURI
+    const socialRedirectPath =
+        socialRedirectURI &&
+        (socialRedirectURI.startsWith('http')
+            ? new URL(socialRedirectURI).pathname
+            : socialRedirectURI)
     const passwordlessLoginEnabled = loginConfig?.passwordless?.enabled
     const passwordlessLoginLandingPath = loginConfig?.passwordless?.landingPath
 
@@ -89,8 +94,8 @@ export default () => {
                 exact: true
             },
         socialLoginEnabled &&
-            socialRedirectURI && {
-                path: socialRedirectURI,
+            socialRedirectPath && {
+                path: socialRedirectPath,
                 component: SocialLoginRedirect,
                 exact: true
             }
