@@ -107,7 +107,7 @@
             "cookie": ">=0.7.0",
             "tmp": ">=0.2.4",
             "braces": ">=3.0.3",
-            "minimatch": ">=3.1.4",
+            "minimatch": "^3.1.4",
             "js-yaml": ">=3.15.0",
             "fast-xml-parser": ">=5.3.6"
         },
