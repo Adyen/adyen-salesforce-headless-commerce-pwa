@@ -21,9 +21,9 @@ export function createMinimalRequestContext(options = {}) {
         const {siteId} = req.query
         const {authorization, customerid} = req.headers
 
-        if (!siteId) {
-            return next(new AdyenError(ERROR_MESSAGE.INVALID_PARAMS, 400))
-        }
+        // if (!siteId) {
+        //     return next(new AdyenError(ERROR_MESSAGE.INVALID_PARAMS, 400))
+        // }
 
         try {
             const adyenConfig = getAdyenConfigForCurrentSite(siteId, options)
