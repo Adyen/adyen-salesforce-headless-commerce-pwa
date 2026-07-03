@@ -55,7 +55,6 @@ function registerAdyenEndpoints(app, runtime, overrides, options = {}) {
     const paymentsDetailsContext = createPaymentsDetailsContext(options)
 
     const appleDomainAssociationHandler = overrides?.appleDomainAssociation || [
-        minimalRequestContext,
         appleDomainAssociation,
         ErrorHandler
     ]
