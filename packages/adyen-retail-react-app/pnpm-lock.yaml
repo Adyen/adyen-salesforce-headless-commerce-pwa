@@ -24,8 +24,8 @@ importers:
   .:
     dependencies:
       '@adyen/adyen-salesforce-pwa':
-        specifier: file:../adyen-salesforce-pwa/adyen-adyen-salesforce-pwa-5.0.0.tgz
-        version: file:../adyen-salesforce-pwa/adyen-adyen-salesforce-pwa-5.0.0.tgz(343fcd521f69baa95967e76d7d771719)
+        specifier: file:../adyen-salesforce-pwa
+        version: file:../adyen-salesforce-pwa(343fcd521f69baa95967e76d7d771719)
     devDependencies:
       '@salesforce/retail-react-app':
         specifier: ^9.1.1
@@ -45,9 +45,8 @@ packages:
   '@adobe/css-tools@4.5.0':
     resolution: {integrity: sha512-6OzddxPio9UiWTCemp4N8cYLV2ZN1ncRnV1cVGtve7dhPOtRkleRyx32GQCYSwDYgaHU3USMm84tNsvKzRCa1Q==}
 
-  '@adyen/adyen-salesforce-pwa@file:../adyen-salesforce-pwa/adyen-adyen-salesforce-pwa-5.0.0.tgz':
-    resolution: {integrity: sha512-AOTcOi9nuort9Zqh699Zm/n+tMWi2bdxjvAMeIKBPdJ8HMOdo+XQr2OSwv+mnZd3wmo5mlVOnBeSNqXTTBjifw==, tarball: file:../adyen-salesforce-pwa/adyen-adyen-salesforce-pwa-5.0.0.tgz}
-    version: 5.0.0
+  '@adyen/adyen-salesforce-pwa@file:../adyen-salesforce-pwa':
+    resolution: {directory: ../adyen-salesforce-pwa, type: directory}
     hasBin: true
     peerDependencies:
       '@adyen/adyen-web': ^6.34.0
@@ -6878,7 +6877,7 @@ snapshots:
 
   '@adobe/css-tools@4.5.0': {}
 
-  '@adyen/adyen-salesforce-pwa@file:../adyen-salesforce-pwa/adyen-adyen-salesforce-pwa-5.0.0.tgz(343fcd521f69baa95967e76d7d771719)':
+  '@adyen/adyen-salesforce-pwa@file:../adyen-salesforce-pwa(343fcd521f69baa95967e76d7d771719)':
     dependencies:
       '@adyen/adyen-web': 6.40.1
       '@adyen/api-library': 29.1.0
