@@ -15,6 +15,7 @@ export class LocaleData {
             productColor: 'Navy',
             productSize: '28',
             addToCartButtonCaption: 'Add to Cart',
+            trackingConsentDeclineButton: 'Decline',
             proceedToCheckoutButtonCaption: 'Proceed to Checkout'
         },
         checkoutPage: {
@@ -38,6 +39,7 @@ export class LocaleData {
             productColor: 'Marine',
             productSize: '28',
             addToCartButtonCaption: 'Ajouter au panier',
+            trackingConsentDeclineButton: 'Refuser',
             proceedToCheckoutButtonCaption: 'Passer au checkout'
         },
         checkoutPage: {
@@ -64,6 +66,7 @@ export class LocaleData {
             productColor: 'Navy',
             productSize: '28',
             addToCartButtonCaption: 'Add to Cart',
+            trackingConsentDeclineButton: 'Decline',
             proceedToCheckoutButtonCaption: 'Proceed to Checkout'
         },
         checkoutPage: {
