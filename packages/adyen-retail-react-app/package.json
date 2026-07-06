@@ -84,6 +84,6 @@
         ]
     },
     "dependencies": {
-        "@adyen/adyen-salesforce-pwa": "file:../adyen-salesforce-pwa"
+        "@adyen/adyen-salesforce-pwa": "file:../adyen-salesforce-pwa/adyen-adyen-salesforce-pwa-5.0.0.tgz"
     }
 }
