@@ -7,7 +7,7 @@ permissions:
 jobs:
   build-and-test:
     if: ${{ !startsWith(github.head_ref, 'renovate/') }}
-    timeout-minutes: 30
+    timeout-minutes: 10
     runs-on:
       group: larger-runners
       labels: ubuntu-latest-8-cores

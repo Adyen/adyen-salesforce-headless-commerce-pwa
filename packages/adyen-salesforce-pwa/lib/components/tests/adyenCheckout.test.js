@@ -22,6 +22,9 @@ jest.mock('../../hooks/useAdyenPaymentMethods')
 jest.mock('@salesforce/commerce-sdk-react')
 jest.mock('../../hooks/useAdyenOrderNumber')
 jest.mock('../helpers/adyenCheckout.utils')
+jest.mock('@tanstack/react-query', () => ({
+    useQueryClient: jest.fn().mockReturnValue({invalidateQueries: jest.fn()})
+}))
 jest.mock('../paymentMethodsConfiguration', () => ({
     paymentMethodsConfiguration: jest.fn().mockReturnValue({})
 }))
