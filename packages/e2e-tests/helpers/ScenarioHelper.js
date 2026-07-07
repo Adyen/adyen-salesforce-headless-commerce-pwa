@@ -315,7 +315,15 @@ export class ScenarioHelper {
         await this.cityField.fill(user.address.city)
 
         if (user.address.stateOrProvince) {
-            await this.stateDropdown.selectOption(user.address.stateOrProvince)
+            const stateFieldTagName = await this.stateDropdown.evaluate((el) =>
+                el.tagName.toLowerCase()
+            )
+            if (stateFieldTagName === 'select') {
+                await this.stateDropdown.selectOption(user.address.stateOrProvince)
+            } else {
+                await this.stateDropdown.click()
+                await this.stateDropdown.fill(user.address.stateOrProvince)
+            }
         } else {
             // The state/province dropdown always lists US states or Canadian
             // provinces regardless of the selected shipping country, and it is a
