@@ -1,43 +1,15 @@
 import Logger from '../models/logger'
 import {AdyenError} from '../models/AdyenError'
 import {ERROR_MESSAGE} from '../../utils/constants.mjs'
+import {validateBasketPayments} from '../helpers/paymentsHelper.js'
+import {createOrderUsingOrderNo} from '../helpers/orderHelper.js'
 import {
-    createCheckoutResponse,
-    revertCheckoutState,
-    validateBasketPayments
-} from '../helpers/paymentsHelper.js'
-import {
-    createOrderUsingOrderNo,
-    failOrderAndReopenBasket,
-    updateOrderPaymentInstrument
-} from '../helpers/orderHelper.js'
+    buildCheckoutResponse,
+    patchOrderPaymentInstrument,
+    handleReconciliationError
+} from '../helpers/orderReconciliation.js'
 import AdyenClientProvider from '../models/adyenClientProvider'
 import {createIdempotencyKey} from '../utils/paymentUtils'
-
-/**
- * Handles errors that occur during the payment details submission process.
- * If an order was pre-created before the paymentsDetails call, fails it and reopens the basket.
- * Otherwise reverts basket state.
- * @param {object} res - The Express response object.
- * @param {string|null} orderNo - The order number if an order was pre-created.
- * @returns {Promise<string|null>} The new basket ID if the order was failed and basket reopened.
- */
-async function handlePaymentDetailsError(res, orderNo) {
-    try {
-        Logger.info('handlePaymentDetailsError', 'start')
-        const adyenContext = res.locals.adyen
-        if (orderNo) {
-            return await failOrderAndReopenBasket(adyenContext, orderNo)
-        }
-        const hasBasket = !!adyenContext?.basket?.basketId
-        if (hasBasket) {
-            await revertCheckoutState(adyenContext, 'sendPaymentDetails')
-        }
-    } catch (err) {
-        Logger.error('handlePaymentDetailsError', err.stack)
-    }
-    return null
-}
 
 /**
  * An Express middleware that handles the /payments/details request from the client.
@@ -94,14 +66,11 @@ async function sendPaymentDetails(req, res, next) {
             Logger.info('sendPaymentDetails', `resolved pre-created order: ${preCreatedOrderNo}`)
         }
 
-        const checkoutResponse = {
-            ...createCheckoutResponse(response, resolvedOrderNo),
-            order: response?.order,
-            resultCode: response?.resultCode
-        }
-        if (checkoutResponse.isFinal && !checkoutResponse.isSuccessful) {
-            throw new AdyenError(ERROR_MESSAGE.PAYMENTS_DETAILS_NOT_SUCCESSFUL, 400, response)
-        }
+        const checkoutResponse = buildCheckoutResponse(
+            response,
+            resolvedOrderNo,
+            ERROR_MESSAGE.PAYMENTS_DETAILS_NOT_SUCCESSFUL
+        )
 
         if (
             !checkoutResponse.isFinal &&
@@ -116,22 +85,15 @@ async function sendPaymentDetails(req, res, next) {
         if (checkoutResponse.isFinal && checkoutResponse.isSuccessful) {
             const pspReference = response?.pspReference || response?.order?.pspReference
             if (preCreatedOrderNo && pspReference) {
-                try {
-                    await updateOrderPaymentInstrument(
-                        preCreatedOrderNo,
-                        adyenContext.siteId,
+                await patchOrderPaymentInstrument(
+                    {
+                        orderNo: preCreatedOrderNo,
+                        siteId: adyenContext.siteId,
                         pspReference,
-                        {
-                            pspReference,
-                            donationToken: response.donationToken
-                        }
-                    )
-                } catch (piErr) {
-                    Logger.error(
-                        'sendPaymentDetails',
-                        `Failed to update payment instrument on order ${preCreatedOrderNo}: ${piErr.message}`
-                    )
-                }
+                        donationToken: response.donationToken
+                    },
+                    'sendPaymentDetails'
+                )
             }
             Logger.info('sendPaymentDetails', `order exists: ${checkoutResponse.merchantReference}`)
         }
@@ -140,7 +102,10 @@ async function sendPaymentDetails(req, res, next) {
         return next()
     } catch (err) {
         Logger.error('sendPaymentDetails', err.stack)
-        const newBasketId = await handlePaymentDetailsError(res, preCreatedOrderNo)
+        const newBasketId = await handleReconciliationError(res, preCreatedOrderNo, {
+            stepName: 'sendPaymentDetails',
+            requireBasket: true
+        })
         if (newBasketId) {
             err.newBasketId = newBasketId
         }

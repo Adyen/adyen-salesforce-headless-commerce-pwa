@@ -3,18 +3,17 @@ import AdyenClientProvider from '../models/adyenClientProvider'
 import Logger from '../models/logger'
 import {AdyenError} from '../models/AdyenError'
 import {
-    createCheckoutResponse,
     createPaymentRequestObject,
-    revertCheckoutState,
     validateBasketPayments,
     isApplePayExpress,
     isGooglePayExpress
 } from '../helpers/paymentsHelper.js'
+import {createOrderUsingOrderNo} from '../helpers/orderHelper.js'
 import {
-    createOrderUsingOrderNo,
-    failOrderAndReopenBasket,
-    updateOrderPaymentInstrument
-} from '../helpers/orderHelper.js'
+    buildCheckoutResponse,
+    patchOrderPaymentInstrument,
+    handleReconciliationError
+} from '../helpers/orderReconciliation.js'
 import {createIdempotencyKey} from '../utils/paymentUtils'
 
 /**
@@ -27,28 +26,6 @@ function isStandardPayment(data) {
     const isExpress = data?.paymentMethod?.subtype === 'express'
     const isGiftCard = data?.paymentMethod?.type === PAYMENT_METHOD_TYPES.GIFT_CARD
     return !isExpress && !isGiftCard
-}
-
-/**
- * Handles errors that occur during the payment process.
- * For standard payments where an order was already created, fails the order and reopens the basket.
- * For other flows, reverts basket state.
- * @param {object} res - The Express response object.
- * @param {string|null} orderNo - The order number if an order was created before the payment call.
- * @returns {Promise<string|null>} The new basket ID if the order was failed and basket reopened.
- */
-async function handlePaymentError(res, orderNo) {
-    try {
-        Logger.info('handlePaymentError', 'start')
-        const adyenContext = res.locals.adyen
-        if (orderNo) {
-            return await failOrderAndReopenBasket(adyenContext, orderNo)
-        }
-        await revertCheckoutState(adyenContext, 'sendPayments')
-    } catch (err) {
-        Logger.error('handlePaymentError', err.stack)
-    }
-    return null
 }
 
 /**
@@ -103,15 +80,11 @@ async function sendPayments(req, res, next) {
         })
         Logger.info('sendPayments', `resultCode ${response?.resultCode}`)
 
-        const checkoutResponse = {
-            ...createCheckoutResponse(response, adyenContext.basket?.c_orderNo),
-            order: response?.order,
-            resultCode: response?.resultCode
-        }
-
-        if (checkoutResponse.isFinal && !checkoutResponse.isSuccessful) {
-            throw new AdyenError(ERROR_MESSAGE.PAYMENT_NOT_SUCCESSFUL, 400, response)
-        }
+        const checkoutResponse = buildCheckoutResponse(
+            response,
+            adyenContext.basket?.c_orderNo,
+            ERROR_MESSAGE.PAYMENT_NOT_SUCCESSFUL
+        )
 
         if (checkoutResponse.isSuccessful && !preCreatedOrderNo) {
             const basketUpdate = {
@@ -163,23 +136,16 @@ async function sendPayments(req, res, next) {
                 'sendPayments',
                 `updateOrderPaymentInstrument with psp reference: ${response?.pspReference}`
             )
-            try {
-                await updateOrderPaymentInstrument(
-                    preCreatedOrderNo,
-                    adyenContext.siteId,
-                    response.pspReference,
-                    {
-                        pspReference: response.pspReference,
-                        cardInstallments: paymentRequest?.installments?.value,
-                        donationToken: response?.donationToken
-                    }
-                )
-            } catch (piErr) {
-                Logger.error(
-                    'sendPayments',
-                    `Failed to update payment instrument on order ${preCreatedOrderNo}: ${piErr.message}`
-                )
-            }
+            await patchOrderPaymentInstrument(
+                {
+                    orderNo: preCreatedOrderNo,
+                    siteId: adyenContext.siteId,
+                    pspReference: response.pspReference,
+                    cardInstallments: paymentRequest?.installments?.value,
+                    donationToken: response?.donationToken
+                },
+                'sendPayments'
+            )
         }
 
         if (checkoutResponse.isFinal && checkoutResponse.isSuccessful) {
@@ -196,23 +162,16 @@ async function sendPayments(req, res, next) {
                 await createOrderUsingOrderNo(adyenContext)
             } else {
                 const pspReference = response?.pspReference || response?.order?.pspReference
-                try {
-                    await updateOrderPaymentInstrument(
-                        preCreatedOrderNo,
-                        adyenContext.siteId,
+                await patchOrderPaymentInstrument(
+                    {
+                        orderNo: preCreatedOrderNo,
+                        siteId: adyenContext.siteId,
                         pspReference,
-                        {
-                            pspReference,
-                            cardInstallments: paymentRequest?.installments?.value,
-                            donationToken: response?.donationToken
-                        }
-                    )
-                } catch (piErr) {
-                    Logger.error(
-                        'sendPayments',
-                        `Failed to update payment instrument on order ${preCreatedOrderNo}: ${piErr.message}`
-                    )
-                }
+                        cardInstallments: paymentRequest?.installments?.value,
+                        donationToken: response?.donationToken
+                    },
+                    'sendPayments'
+                )
             }
             Logger.info('sendPayments', `order confirmed: ${checkoutResponse.merchantReference}`)
         }
@@ -222,7 +181,9 @@ async function sendPayments(req, res, next) {
         return next()
     } catch (err) {
         Logger.error('sendPayments', err.stack)
-        const newBasketId = await handlePaymentError(res, preCreatedOrderNo)
+        const newBasketId = await handleReconciliationError(res, preCreatedOrderNo, {
+            stepName: 'sendPayments'
+        })
         if (newBasketId) {
             err.newBasketId = newBasketId
         }
