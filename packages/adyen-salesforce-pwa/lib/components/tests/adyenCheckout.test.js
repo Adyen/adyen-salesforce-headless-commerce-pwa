@@ -26,8 +26,6 @@ jest.mock('../paymentMethodsConfiguration', () => ({
 }))
 
 describe('AdyenCheckoutComponent', () => {
-    let consoleErrorSpy
-
     const mockCheckoutInstance = {
         update: jest.fn()
     }
@@ -63,7 +61,7 @@ describe('AdyenCheckoutComponent', () => {
 
     beforeEach(() => {
         jest.clearAllMocks()
-        consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+        jest.spyOn(console, 'error').mockImplementation(() => {})
         jest.spyOn(console, 'warn').mockImplementation(() => {})
 
         // Mock the hooks
