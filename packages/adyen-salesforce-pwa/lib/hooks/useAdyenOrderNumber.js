@@ -15,7 +15,7 @@ import {adyenKeys} from '../utils/queryKeys'
  * @param {string} [props.existingOrderNo] - Used only to seed initial local state; the server
  *   is the authoritative guard against duplicate generation.
  * @param {boolean} [props.skip] - If true, the fetch will be skipped.
- * @returns {{isLoading: boolean, orderNo: string|null, error: object|null}}
+ * @returns {{isLoading: boolean, orderNo: string|null, error: object|null, refetch: Function}}
  */
 const useAdyenOrderNumber = ({
     authToken,
@@ -43,7 +43,8 @@ const useAdyenOrderNumber = ({
     return {
         isLoading: query.isLoading && query.fetchStatus !== 'idle',
         orderNo: query.data?.orderNo || null,
-        error: query.error ?? null
+        error: query.error ?? null,
+        refetch: query.refetch
     }
 }
 

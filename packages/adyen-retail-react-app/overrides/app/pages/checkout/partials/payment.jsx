@@ -30,11 +30,14 @@ import {isPickupShipment} from '@salesforce/retail-react-app/app/utils/shipment-
 /* -----------------Adyen Begin ------------------------ */
 import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 import LoadingSpinner from '@salesforce/retail-react-app/app/components/loading-spinner'
+import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
 import {
     AdyenCheckout,
+    TerminalPayment,
     pageTypes,
     useHandleBackNavigation,
-    useCheckoutErrorRecovery
+    useCheckoutErrorRecovery,
+    useAdyenEnvironment
 } from '@adyen/adyen-salesforce-pwa'
 /* -----------------Adyen End ------------------------ */
 
@@ -43,6 +46,7 @@ const Payment = () => {
     const {data: basket, refetch: refetchBasket} = useCurrentBasket()
     const customerId = useCustomerId()
     const {getTokenWhenReady} = useAccessToken()
+    const {site} = useMultiSite()
     const [authToken, setAuthToken] = useState()
 
     useEffect(() => {
@@ -63,6 +67,15 @@ const Payment = () => {
     const {adyenCheckoutKey, isRefetchingBasket} = useCheckoutErrorRecovery({
         refetchBasket
     })
+
+    const {data: adyenEnvironment} = useAdyenEnvironment({
+        authToken,
+        customerId,
+        basketId: basket?.basketId,
+        site,
+        skip: !authToken
+    })
+    const isPosEnabled = adyenEnvironment?.ADYEN_POS_ENABLED === true
 
     const isPickupOnly =
         basket?.shipments?.length > 0 &&
@@ -179,6 +192,15 @@ const Payment = () => {
                 <Stack spacing={6}>
                     {isRefetchingBasket ? (
                         <LoadingSpinner />
+                    ) : isPosEnabled ? (
+                        <TerminalPayment
+                            authToken={authToken}
+                            customerId={customerId}
+                            storeId={adyenEnvironment?.ADYEN_POS_STORE_ID || ''}
+                            beforeSubmit={[onBillingSubmit]}
+                            onError={[showError]}
+                            spinner={<LoadingSpinner />}
+                        />
                     ) : (
                         <AdyenCheckout
                             authToken={authToken}

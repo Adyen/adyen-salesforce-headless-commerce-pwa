@@ -92,6 +92,46 @@ function handleFailedAuthorisation(order) {
 }
 
 /**
+ * Populates terminal-specific fields for POS payments on the payment instrument: OMS payment
+ * method/variant and terminal tracking fields (terminalId, storeId).
+ * @param {dw.order.Order} order - The order object
+ * @param {Object} additionalData - The additionalData from the webhook payload
+ */
+function populateTerminalOrderFields(order, additionalData) {
+    if (!additionalData || !additionalData.terminalId) {
+        return;
+    }
+    const paymentInstruments = order.paymentInstruments.toArray();
+    const paymentInstrument = paymentInstruments.find(
+        (pi) => pi.custom.paymentMethodType !== 'giftcard',
+    );
+    if (!paymentInstrument) {
+        return;
+    }
+    Transaction.wrap(function () {
+        if (additionalData.paymentMethod) {
+            paymentInstrument.custom.adyenPaymentMethod = additionalData.paymentMethod;
+            paymentInstrument.custom[`${constants.OMS_NAMESPACE}__Adyen_Payment_Method`] =
+                additionalData.paymentMethod;
+        }
+        if (additionalData.paymentMethodVariant) {
+            paymentInstrument.custom.Adyen_Payment_Method_Variant =
+                additionalData.paymentMethodVariant;
+            paymentInstrument.custom[
+                `${constants.OMS_NAMESPACE}__Adyen_Payment_Method_Variant`
+            ] = additionalData.paymentMethodVariant;
+        }
+        paymentInstrument.custom.terminalId = additionalData.terminalId;
+        if (additionalData.store) {
+            paymentInstrument.custom.storeId = additionalData.store;
+        }
+    });
+    AdyenLogs.info_log(
+        `Terminal payment instrument fields populated for order ${order.orderNo} (terminal ${additionalData.terminalId})`,
+    );
+}
+
+/**
  * Main handler for AUTHORISATION webhook events
  * @param {Object} params - Handler parameters
  * @param {dw.order.Order} params.order - The order object
@@ -120,6 +160,7 @@ function handle({order, customObj, result, totalAmount}) {
         }
         updatePaymentTransaction(order, customObj, PaymentTransaction.TYPE_AUTH)
         AdyenLogs.info_log(`Payment transaction updated for order ${order.orderNo}`);
+        populateTerminalOrderFields(order, webhookData?.additionalData);
         return {success: true, isAdyenPayment: true};
     }
     handleFailedAuthorisation(order);

@@ -104,6 +104,22 @@ describe('WebhookHandler', () => {
             )
             expect(next).toHaveBeenCalledWith(new AdyenError('Access Denied!', 401))
         })
+        it('when valid HMAC is present on a terminal-originated notification', () => {
+            const terminalItem = {
+                eventCode: 'AUTHORISATION',
+                pspReference: 'PSP-POS-1',
+                paymentMethod: 'pos',
+                additionalData: {terminalId: 'V400m-123456789', paymentMethodVariant: 'visadebit'}
+            }
+            req.body.notificationItems = [{NotificationRequestItem: terminalItem}]
+            res.locals.adyen.adyenConfig.webhookHmacKey = 'test_hmac_key'
+            mockValidateHMAC.mockImplementationOnce(() => {
+                return true
+            })
+            validateHmac(req, res, next)
+            expect(mockValidateHMAC).toHaveBeenCalledWith(terminalItem, 'test_hmac_key')
+            expect(next).toHaveBeenCalledWith()
+        })
     })
     describe('parseNotification', () => {
         it('when valid notification is present', () => {
@@ -142,6 +158,47 @@ describe('WebhookHandler', () => {
             }
 
             await sendNotification(req, res, next)
+            expect(res.locals.response).toBe('[accepted]')
+            expect(next).toHaveBeenCalledWith()
+        })
+
+        it('should log the event code and pspReference', async () => {
+            mockNotify.mockResolvedValue({})
+            res.locals.notification = {
+                NotificationRequestItem: {eventCode: 'CAPTURE', pspReference: 'PSP-123'},
+                live: 'false'
+            }
+
+            await sendNotification(req, res, next)
+            expect(Logger.info).toHaveBeenCalledWith(
+                'sendNotification',
+                expect.stringContaining('eventCode=CAPTURE')
+            )
+            expect(Logger.info).toHaveBeenCalledWith(
+                'sendNotification',
+                expect.stringContaining('pspReference=PSP-123')
+            )
+        })
+
+        it('should forward a terminal-originated notification to the notify API', async () => {
+            mockNotify.mockResolvedValue({})
+            const terminalNotification = {
+                eventCode: 'AUTHORISATION',
+                pspReference: 'PSP-POS-1',
+                paymentMethod: 'pos',
+                additionalData: {
+                    terminalId: 'V400m-123456789',
+                    paymentMethodVariant: 'visadebit',
+                    'pos.entryMode': 'CONTACTLESS'
+                }
+            }
+            res.locals.notification = {
+                NotificationRequestItem: terminalNotification,
+                live: 'false'
+            }
+
+            await sendNotification(req, res, next)
+            expect(mockNotify).toHaveBeenCalledWith({...terminalNotification, live: 'false'})
             expect(res.locals.response).toBe('[accepted]')
             expect(next).toHaveBeenCalledWith()
         })
