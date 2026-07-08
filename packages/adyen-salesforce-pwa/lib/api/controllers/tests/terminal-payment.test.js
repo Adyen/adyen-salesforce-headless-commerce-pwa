@@ -178,6 +178,97 @@ describe('createTerminalPayment controller', () => {
         expect(res.locals.response.serviceId).toBe('CLIENT-SVC-ID')
     })
 
+    it('should fall back to the single configured store when storeId is not provided', async () => {
+        res.locals.adyen.adyenConfig.posActiveStoreIds = 'STORE-001'
+
+        const additionalData = {additionalData: {paymentMethod: 'visa'}, message: 'OK'}
+        const terminalResponse = {
+            SaleToPOIResponse: {
+                PaymentResponse: {
+                    POIData: {POITransactionID: {TransactionID: 'test.PSP2'}},
+                    PaymentResult: {PaymentInstrumentData: {PaymentInstrumentType: 'Card'}},
+                    Response: {
+                        Result: 'Success',
+                        AdditionalResponse: Buffer.from(JSON.stringify(additionalData)).toString(
+                            'base64'
+                        )
+                    }
+                }
+            }
+        }
+        mockSync.mockResolvedValue(terminalResponse)
+
+        await createTerminalPayment(req, res, next)
+
+        expect(orderHelper.updateOrderPaymentInstrument).toHaveBeenCalledWith(
+            'ORDER-001',
+            'RefArch',
+            'PSP2',
+            expect.objectContaining({storeId: 'STORE-001'})
+        )
+    })
+
+    it('should default storeId to empty when multiple stores are configured and none provided', async () => {
+        res.locals.adyen.adyenConfig.posActiveStoreIds = 'STORE-001,STORE-002'
+
+        const additionalData = {additionalData: {paymentMethod: 'visa'}, message: 'OK'}
+        const terminalResponse = {
+            SaleToPOIResponse: {
+                PaymentResponse: {
+                    POIData: {POITransactionID: {TransactionID: 'test.PSP3'}},
+                    PaymentResult: {PaymentInstrumentData: {PaymentInstrumentType: 'Card'}},
+                    Response: {
+                        Result: 'Success',
+                        AdditionalResponse: Buffer.from(JSON.stringify(additionalData)).toString(
+                            'base64'
+                        )
+                    }
+                }
+            }
+        }
+        mockSync.mockResolvedValue(terminalResponse)
+
+        await createTerminalPayment(req, res, next)
+
+        expect(orderHelper.updateOrderPaymentInstrument).toHaveBeenCalledWith(
+            'ORDER-001',
+            'RefArch',
+            'PSP3',
+            expect.objectContaining({storeId: ''})
+        )
+    })
+
+    it('should use storeId from request body when provided', async () => {
+        req.body.storeId = 'STORE-BODY'
+        res.locals.adyen.adyenConfig.posActiveStoreIds = 'STORE-001,STORE-002'
+
+        const additionalData = {additionalData: {paymentMethod: 'visa'}, message: 'OK'}
+        const terminalResponse = {
+            SaleToPOIResponse: {
+                PaymentResponse: {
+                    POIData: {POITransactionID: {TransactionID: 'test.PSP4'}},
+                    PaymentResult: {PaymentInstrumentData: {PaymentInstrumentType: 'Card'}},
+                    Response: {
+                        Result: 'Success',
+                        AdditionalResponse: Buffer.from(JSON.stringify(additionalData)).toString(
+                            'base64'
+                        )
+                    }
+                }
+            }
+        }
+        mockSync.mockResolvedValue(terminalResponse)
+
+        await createTerminalPayment(req, res, next)
+
+        expect(orderHelper.updateOrderPaymentInstrument).toHaveBeenCalledWith(
+            'ORDER-001',
+            'RefArch',
+            'PSP4',
+            expect.objectContaining({storeId: 'STORE-BODY'})
+        )
+    })
+
     it('should fail order and reopen basket on payment failure', async () => {
         const additionalData = {
             additionalData: {},
