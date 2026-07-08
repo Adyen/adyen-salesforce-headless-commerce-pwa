@@ -92,14 +92,14 @@ const useTerminalPayment = ({
         const {serviceId, terminalId} = paymentContextRef.current
         if (!serviceId || !terminalId) return
 
-        setStatus(TERMINAL_PAYMENT_STATUS.CANCELLED)
-
         try {
             const service = new TerminalApiService(authToken, customerId, basketId, site)
             const response = await service.abortPayment({serviceId, terminalId})
+            setStatus(TERMINAL_PAYMENT_STATUS.CANCELLED)
             setResult(response)
             onAbort?.(response)
         } catch (err) {
+            setStatus(TERMINAL_PAYMENT_STATUS.ERROR)
             setError(err)
             onError?.(err)
         }

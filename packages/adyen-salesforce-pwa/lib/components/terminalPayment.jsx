@@ -139,9 +139,9 @@ const TerminalPaymentComponent = ({
             await refetchOrderNumber()
             sendPayment(selectedTerminalId)
         } catch (err) {
-            onError.forEach((cb) => cb(err))
+            handleError(err)
         }
-    }, [selectedTerminalId, sendPayment, beforeSubmit, refetchOrderNumber, onError])
+    }, [selectedTerminalId, sendPayment, beforeSubmit, refetchOrderNumber, handleError])
 
     const isIdle = status === TERMINAL_PAYMENT_STATUS.IDLE
     const isSending = status === TERMINAL_PAYMENT_STATUS.SENDING

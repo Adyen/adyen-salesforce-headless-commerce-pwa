@@ -180,7 +180,7 @@ describe('useTerminalPayment', () => {
             await result.current.abortPayment()
         })
 
-        expect(result.current.status).toBe(TERMINAL_PAYMENT_STATUS.CANCELLED)
+        expect(result.current.status).toBe(TERMINAL_PAYMENT_STATUS.ERROR)
         expect(result.current.error).toBe(abortError)
         expect(onError).toHaveBeenCalledWith(abortError)
     })

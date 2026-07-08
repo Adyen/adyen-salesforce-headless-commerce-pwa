@@ -49,9 +49,10 @@ async function getTerminals(req, res, next) {
 
         const terminals = (response?.data || []).map((terminal) => ({
             poiId: terminal.id,
-            name: terminal.assignment?.companyId
-                ? `${terminal.model} - ${terminal.serialNumber}`
-                : terminal.id,
+            name:
+                terminal.model && terminal.serialNumber
+                    ? `${terminal.model} - ${terminal.serialNumber}`
+                    : terminal.id,
             storeId: terminal.assignment?.storeId || storeId
         }))
 

@@ -75,9 +75,9 @@ describe('getTerminals controller', () => {
         expect(next).toHaveBeenCalledWith()
     })
 
-    it('should use terminal id as name when no companyId', async () => {
+    it('should use terminal id as name when model or serialNumber is missing', async () => {
         const mockResponse = {
-            data: [{id: 'V400m-333', model: 'V400m', serialNumber: '333', assignment: {}}]
+            data: [{id: 'V400m-333', model: 'V400m', assignment: {}}]
         }
         mockListTerminals.mockResolvedValue(mockResponse)
 

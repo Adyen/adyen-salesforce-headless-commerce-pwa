@@ -46,7 +46,10 @@ async function createTerminalPayment(req, res, next) {
         const {body} = req
         terminalId = body.terminalId
         serviceId = body.serviceId
-        const storeId = body.storeId || adyenContext.adyenConfig?.posActiveStoreIds
+        const activeStoreIds = adyenContext.adyenConfig?.posActiveStoreIds
+            ? adyenContext.adyenConfig.posActiveStoreIds.split(',').map((id) => id.trim())
+            : []
+        const storeId = body.storeId || (activeStoreIds.length === 1 ? activeStoreIds[0] : '')
 
         if (!terminalId) {
             throw new AdyenError(ERROR_MESSAGE.INVALID_PARAMS, 400)
