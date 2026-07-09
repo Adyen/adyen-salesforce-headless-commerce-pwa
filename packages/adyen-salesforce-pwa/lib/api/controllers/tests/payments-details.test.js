@@ -19,6 +19,7 @@ jest.mock('../../helpers/paymentsHelper.js', () => ({
 jest.mock('../../helpers/orderHelper.js', () => ({
     createOrderUsingOrderNo: jest.fn(),
     failOrderAndReopenBasket: jest.fn(),
+    getOpenOrderForShopper: jest.fn(),
     updateOrderPaymentInstrument: jest.fn()
 }))
 
@@ -244,6 +245,43 @@ describe('payments details controller', () => {
             expect(orderHelper.failOrderAndReopenBasket).toHaveBeenCalled()
             const err = next.mock.calls[0][0]
             expect(err.newBasketId).toBe('newBasket789')
+        })
+
+        it('falls back to getOpenOrderForShopper when paymentsDetails throws without merchantReference', async () => {
+            res.locals.adyen.basket = {}
+            res.locals.adyen.authorization = 'Bearer token'
+            res.locals.adyen.customerId = 'cust-123'
+            res.locals.adyen.siteId = 'RefArch'
+            mockPaymentsDetails.mockRejectedValue(new Error('Network timeout'))
+            orderHelper.getOpenOrderForShopper.mockResolvedValue({orderNo: 'orphan-order-1'})
+            orderHelper.failOrderAndReopenBasket.mockResolvedValue('recovered-basket-id')
+
+            await sendPaymentDetails(req, res, next)
+
+            expect(orderHelper.getOpenOrderForShopper).toHaveBeenCalledWith(
+                'Bearer token',
+                'cust-123',
+                'RefArch'
+            )
+            expect(orderHelper.failOrderAndReopenBasket).toHaveBeenCalled()
+            const err = next.mock.calls[0][0]
+            expect(err.newBasketId).toBe('recovered-basket-id')
+        })
+
+        it('returns no newBasketId when no open order found and no basket exists', async () => {
+            res.locals.adyen.basket = {}
+            res.locals.adyen.authorization = 'Bearer token'
+            res.locals.adyen.customerId = 'cust-123'
+            res.locals.adyen.siteId = 'RefArch'
+            mockPaymentsDetails.mockRejectedValue(new Error('Network timeout'))
+            orderHelper.getOpenOrderForShopper.mockResolvedValue(null)
+
+            await sendPaymentDetails(req, res, next)
+
+            expect(orderHelper.getOpenOrderForShopper).toHaveBeenCalled()
+            expect(orderHelper.failOrderAndReopenBasket).not.toHaveBeenCalled()
+            const err = next.mock.calls[0][0]
+            expect(err.newBasketId).toBeUndefined()
         })
     })
 })

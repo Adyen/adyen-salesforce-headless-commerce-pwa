@@ -9,6 +9,7 @@ import {
 import {
     createOrderUsingOrderNo,
     failOrderAndReopenBasket,
+    getOpenOrderForShopper,
     updateOrderPaymentInstrument
 } from '../helpers/orderHelper.js'
 import AdyenClientProvider from '../models/adyenClientProvider'
@@ -26,12 +27,27 @@ async function handlePaymentDetailsError(res, orderNo) {
     try {
         Logger.info('handlePaymentDetailsError', 'start')
         const adyenContext = res.locals.adyen
-        if (orderNo) {
-            return await failOrderAndReopenBasket(adyenContext, orderNo)
+        if (!adyenContext) {
+            return null
         }
-        const hasBasket = !!adyenContext?.basket?.basketId
-        if (hasBasket) {
-            await revertCheckoutState(adyenContext, 'sendPaymentDetails')
+        let resolvedOrderNo = orderNo
+
+        if (!resolvedOrderNo) {
+            const hasBasket = !!adyenContext?.basket?.basketId
+            if (hasBasket) {
+                await revertCheckoutState(adyenContext, 'sendPaymentDetails')
+                return null
+            }
+            const openOrder = await getOpenOrderForShopper(
+                adyenContext.authorization,
+                adyenContext.customerId,
+                adyenContext.siteId
+            )
+            resolvedOrderNo = openOrder?.orderNo
+        }
+
+        if (resolvedOrderNo) {
+            return await failOrderAndReopenBasket(adyenContext, resolvedOrderNo)
         }
     } catch (err) {
         Logger.error('handlePaymentDetailsError', err.stack)
