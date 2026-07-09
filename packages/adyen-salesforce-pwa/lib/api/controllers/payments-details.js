@@ -27,6 +27,9 @@ async function handlePaymentDetailsError(res, orderNo) {
     try {
         Logger.info('handlePaymentDetailsError', 'start')
         const adyenContext = res.locals.adyen
+        if (!adyenContext) {
+            return null
+        }
         let resolvedOrderNo = orderNo
 
         if (!resolvedOrderNo) {
