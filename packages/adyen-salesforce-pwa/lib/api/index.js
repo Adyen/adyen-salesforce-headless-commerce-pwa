@@ -13,6 +13,7 @@ export * from './models/customShopperOrderApi'
 export * from './models/customAdminOrderApi'
 export * from './models/adyenClientProvider'
 export * from './models/PaymentRequestBuilder'
+export * from './models/TerminalRequestBuilder'
 export * from './models/logger'
 
 // Middleware
@@ -34,6 +35,9 @@ export {default as CreateTemporaryBasketController} from './controllers/create-t
 export {default as ShopperDetailsController} from './controllers/shopper-details'
 export {default as PaymentDataReviewPageController} from './controllers/payment-data-review-page'
 export {default as DonationsController} from './controllers/donations'
+export {default as TerminalListController} from './controllers/terminal-list'
+export {default as TerminalPaymentController} from './controllers/terminal-payment'
+export {default as TerminalAbortController} from './controllers/terminal-abort'
 
 // Helpers
 export * from './helpers/basketHelper.js'

@@ -20,5 +20,6 @@ export const adyenKeys = {
     ],
     shippingMethods: (basketId, siteId) => ['adyen', 'shippingMethods', basketId, siteId],
     orderNumber: (basketId, siteId) => ['adyen', 'orderNumber', basketId, siteId],
-    paymentData: (basketId, siteId) => ['adyen', 'paymentData', basketId, siteId]
+    paymentData: (basketId, siteId) => ['adyen', 'paymentData', basketId, siteId],
+    terminals: (storeId, siteId) => ['adyen', 'terminals', storeId, siteId]
 }
