@@ -9,7 +9,8 @@ import {
 import {
     createOrderUsingOrderNo,
     failOrderAndReopenBasket,
-    updatePaymentInstrumentForOrder
+    getOpenOrderForShopper,
+    updateOrderPaymentInstrument
 } from '../helpers/orderHelper.js'
 import AdyenClientProvider from '../models/adyenClientProvider'
 import {createIdempotencyKey} from '../utils/paymentUtils'
@@ -26,12 +27,27 @@ async function handlePaymentDetailsError(res, orderNo) {
     try {
         Logger.info('handlePaymentDetailsError', 'start')
         const adyenContext = res.locals.adyen
-        if (orderNo) {
-            return await failOrderAndReopenBasket(adyenContext, orderNo)
+        if (!adyenContext) {
+            return null
         }
-        const hasBasket = !!adyenContext?.basket?.basketId
-        if (hasBasket) {
-            await revertCheckoutState(adyenContext, 'sendPaymentDetails')
+        let resolvedOrderNo = orderNo
+
+        if (!resolvedOrderNo) {
+            const hasBasket = !!adyenContext?.basket?.basketId
+            if (hasBasket) {
+                await revertCheckoutState(adyenContext, 'sendPaymentDetails')
+                return null
+            }
+            const openOrder = await getOpenOrderForShopper(
+                adyenContext.authorization,
+                adyenContext.customerId,
+                adyenContext.siteId
+            )
+            resolvedOrderNo = openOrder?.orderNo
+        }
+
+        if (resolvedOrderNo) {
+            return await failOrderAndReopenBasket(adyenContext, resolvedOrderNo)
         }
     } catch (err) {
         Logger.error('handlePaymentDetailsError', err.stack)
@@ -116,10 +132,22 @@ async function sendPaymentDetails(req, res, next) {
         if (checkoutResponse.isFinal && checkoutResponse.isSuccessful) {
             const pspReference = response?.pspReference || response?.order?.pspReference
             if (preCreatedOrderNo && pspReference) {
-                await updatePaymentInstrumentForOrder(adyenContext, preCreatedOrderNo, [
-                    {field: 'c_pspReference', value: pspReference},
-                    {field: 'c_donationToken', value: response.donationToken}
-                ])
+                try {
+                    await updateOrderPaymentInstrument(
+                        preCreatedOrderNo,
+                        adyenContext.siteId,
+                        pspReference,
+                        {
+                            pspReference,
+                            donationToken: response.donationToken
+                        }
+                    )
+                } catch (piErr) {
+                    Logger.error(
+                        'sendPaymentDetails',
+                        `Failed to update payment instrument on order ${preCreatedOrderNo}: ${piErr.message}`
+                    )
+                }
             }
             Logger.info('sendPaymentDetails', `order exists: ${checkoutResponse.merchantReference}`)
         }

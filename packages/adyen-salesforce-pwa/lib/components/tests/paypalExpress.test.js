@@ -12,6 +12,7 @@ import {AdyenCheckout, PayPal} from '@adyen/adyen-web'
 import {paypalExpressConfig} from '../paypal/expressConfig'
 import {AdyenShippingMethodsService} from '../../services/shipping-methods'
 import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
+import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 
 jest.mock('../../hooks/useAdyenEnvironment')
 jest.mock('../../hooks/useAdyenPaymentMethods')
@@ -19,6 +20,9 @@ jest.mock('../../hooks/useAdyenPaymentMethodsForExpress')
 jest.mock('../paypal/expressConfig')
 jest.mock('../../services/shipping-methods')
 jest.mock('@salesforce/commerce-sdk-react')
+jest.mock('@salesforce/retail-react-app/app/hooks/use-current-basket', () => ({
+    useCurrentBasket: jest.fn()
+}))
 jest.mock('@adyen/adyen-web', () => ({
     AdyenCheckout: jest.fn().mockResolvedValue({}),
     PayPal: jest.fn().mockImplementation(() => ({
@@ -70,6 +74,7 @@ describe('PayPalExpressComponent', () => {
         useAccessToken.mockReturnValue({
             getTokenWhenReady: jest.fn().mockResolvedValue('test-auth-token')
         })
+        useCurrentBasket.mockReturnValue({data: defaultProps.basket})
 
         // Mock hooks
         useAdyenEnvironment.mockReturnValue({
@@ -248,7 +253,8 @@ describe('PayPalExpressComponent', () => {
             expect(AdyenCheckout).not.toHaveBeenCalled()
         })
 
-        it('does not initialize when basket is missing', async () => {
+        it('does not initialize when both prop basket and hook basket are missing', async () => {
+            useCurrentBasket.mockReturnValue({data: null})
             await act(async () => {
                 render(<PayPalExpressComponent {...defaultProps} basket={null} />)
             })

@@ -10,8 +10,9 @@ import useAdyenPaymentMethods from '../../hooks/useAdyenPaymentMethods'
 import useAdyenPaymentMethodsForExpress from '../../hooks/useAdyenPaymentMethodsForExpress'
 import useAdyenShippingMethods from '../../hooks/useAdyenShippingMethods'
 import {getAppleButtonConfig, getApplePaymentMethodConfig} from '../helpers/applePayExpress.utils'
-import {AdyenCheckout} from '@adyen/adyen-web'
+import {AdyenCheckout, ApplePay} from '@adyen/adyen-web'
 import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
+import {AdyenShippingMethodsService} from '../../services/shipping-methods'
 
 jest.mock('../../hooks/useAdyenEnvironment')
 jest.mock('../../hooks/useAdyenPaymentMethods')
@@ -19,6 +20,13 @@ jest.mock('../../hooks/useAdyenPaymentMethodsForExpress')
 jest.mock('../../hooks/useAdyenShippingMethods')
 jest.mock('../helpers/applePayExpress.utils')
 jest.mock('@salesforce/commerce-sdk-react')
+
+const mockGetShippingMethods = jest.fn()
+jest.mock('../../services/shipping-methods', () => ({
+    AdyenShippingMethodsService: jest.fn().mockImplementation(() => ({
+        getShippingMethods: mockGetShippingMethods
+    }))
+}))
 
 const mockMount = jest.fn()
 const mockCreate = jest.fn(() => ({
@@ -391,6 +399,150 @@ describe('ApplePayExpressComponent', () => {
 
             expect(onError[0]).toHaveBeenCalledWith(error)
             expect(onError[1]).toHaveBeenCalledWith(error)
+        })
+
+        it('calls onError callbacks when environment fetch fails', () => {
+            const onError = [jest.fn(), jest.fn()]
+            const error = new Error('Environment fetch failed')
+
+            useAdyenEnvironment.mockReturnValue({data: null, error, isLoading: false})
+
+            render(<ApplePayExpressComponent {...defaultProps} onError={onError} />)
+
+            expect(onError[0]).toHaveBeenCalledWith(error)
+            expect(onError[1]).toHaveBeenCalledWith(error)
+        })
+
+        it('calls onError callbacks when shipping methods fetch fails', () => {
+            const onError = [jest.fn(), jest.fn()]
+            const error = new Error('Shipping methods fetch failed')
+
+            useAdyenShippingMethods.mockReturnValue({data: null, error, isLoading: false})
+
+            render(<ApplePayExpressComponent {...defaultProps} onError={onError} />)
+
+            expect(onError[0]).toHaveBeenCalledWith(error)
+            expect(onError[1]).toHaveBeenCalledWith(error)
+        })
+    })
+
+    describe('Initialization edge cases', () => {
+        it('returns early when getApplePaymentMethodConfig returns null', async () => {
+            getApplePaymentMethodConfig.mockReturnValue(null)
+
+            await act(async () => {
+                render(<ApplePayExpressComponent {...defaultProps} />)
+            })
+
+            expect(AdyenCheckout).toHaveBeenCalled()
+            expect(getAppleButtonConfig).not.toHaveBeenCalled()
+        })
+
+        it('mounts Apple Pay button when isAvailable resolves', async () => {
+            const mockApplePayInstance = {
+                isAvailable: jest.fn().mockResolvedValue(true),
+                mount: jest.fn(),
+                unmount: jest.fn()
+            }
+            ApplePay.mockImplementation(() => mockApplePayInstance)
+
+            await act(async () => {
+                render(<ApplePayExpressComponent {...defaultProps} />)
+            })
+
+            expect(mockApplePayInstance.isAvailable).toHaveBeenCalled()
+            expect(mockApplePayInstance.mount).toHaveBeenCalled()
+        })
+
+        it('unmounts existing button before mounting a new one on re-initialization', async () => {
+            const mockApplePayInstance = {
+                isAvailable: jest.fn().mockResolvedValue(true),
+                mount: jest.fn(),
+                unmount: jest.fn()
+            }
+            ApplePay.mockImplementation(() => mockApplePayInstance)
+
+            const {rerender} = render(<ApplePayExpressComponent {...defaultProps} />)
+
+            await act(async () => {
+                await new Promise((resolve) => setTimeout(resolve, 0))
+            })
+
+            expect(mockApplePayInstance.mount.mock.calls.length).toBeGreaterThan(0)
+            const mountCountBefore = mockApplePayInstance.mount.mock.calls.length
+            const unmountCountBefore = mockApplePayInstance.unmount.mock.calls.length
+
+            // Trigger re-initialization by changing locale (in the useEffect deps)
+            await act(async () => {
+                rerender(<ApplePayExpressComponent {...defaultProps} locale={{id: 'de-DE'}} />)
+            })
+
+            expect(mockApplePayInstance.unmount.mock.calls).toHaveLength(unmountCountBefore + 1)
+            expect(mockApplePayInstance.mount.mock.calls).toHaveLength(mountCountBefore + 1)
+        })
+
+        it('unmounts button on component unmount', async () => {
+            const mockApplePayInstance = {
+                isAvailable: jest.fn().mockResolvedValue(true),
+                mount: jest.fn(),
+                unmount: jest.fn()
+            }
+            ApplePay.mockImplementation(() => mockApplePayInstance)
+
+            const {unmount} = render(<ApplePayExpressComponent {...defaultProps} />)
+
+            await act(async () => {
+                await new Promise((resolve) => setTimeout(resolve, 0))
+            })
+
+            expect(mockApplePayInstance.mount.mock.calls.length).toBeGreaterThan(0)
+
+            act(() => {
+                unmount()
+            })
+
+            expect(mockApplePayInstance.unmount).toHaveBeenCalled()
+        })
+
+        it('calls onError when Apple Pay initialization throws', async () => {
+            const onError = [jest.fn()]
+            const initError = new Error('isAvailable failed')
+            const mockApplePayInstance = {
+                isAvailable: jest.fn().mockRejectedValue(initError)
+            }
+            ApplePay.mockImplementation(() => mockApplePayInstance)
+
+            await act(async () => {
+                render(<ApplePayExpressComponent {...defaultProps} onError={onError} />)
+            })
+
+            expect(onError[0]).toHaveBeenCalledWith(initError)
+        })
+    })
+
+    describe('fetchShippingMethods callback', () => {
+        it('creates AdyenShippingMethodsService and fetches shipping methods', async () => {
+            const mockShippingData = {applicableShippingMethods: [{id: 'ground'}]}
+            mockGetShippingMethods.mockResolvedValue(mockShippingData)
+
+            const propsWithToken = {...defaultProps, authToken: 'test-auth-token'}
+
+            await act(async () => {
+                render(<ApplePayExpressComponent {...propsWithToken} />)
+            })
+
+            const fetchShippingMethodsCb =
+                getAppleButtonConfig.mock.calls[0][0].fetchShippingMethods
+            const result = await fetchShippingMethodsCb('basket-123')
+
+            expect(AdyenShippingMethodsService).toHaveBeenCalledWith(
+                'test-auth-token',
+                'test-customer',
+                'basket-123',
+                defaultProps.site
+            )
+            expect(mockGetShippingMethods).toHaveBeenCalled()
+            expect(result).toEqual(mockShippingData)
         })
     })
 })

@@ -76,7 +76,7 @@ jest.mock('../../helpers/paymentsHelper.js', () => {
 jest.mock('../../helpers/orderHelper.js', () => ({
     createOrderUsingOrderNo: jest.fn(),
     failOrderAndReopenBasket: jest.fn(),
-    updatePaymentInstrumentForOrder: jest.fn()
+    updateOrderPaymentInstrument: jest.fn()
 }))
 
 describe('payments controller', () => {
@@ -143,14 +143,15 @@ describe('payments controller', () => {
         // basket was consumed by order creation — must NOT attempt basket update
         expect(res.locals.adyen.basketService.update).not.toHaveBeenCalled()
         // PSP reference patched onto the pre-created order
-        expect(orderHelper.updatePaymentInstrumentForOrder).toHaveBeenCalledWith(
-            res.locals.adyen,
+        expect(orderHelper.updateOrderPaymentInstrument).toHaveBeenCalledWith(
             '123',
-            [
-                {field: 'c_pspReference', value: 'psp123'},
-                {field: 'c_cardInstallments', value: undefined},
-                {field: 'c_donationToken', value: undefined}
-            ]
+            'RefArch',
+            'psp123',
+            {
+                pspReference: 'psp123',
+                cardInstallments: undefined,
+                donationToken: undefined
+            }
         )
         expect(res.locals.response).toEqual({
             isFinal: true,
@@ -174,6 +175,8 @@ describe('payments controller', () => {
         expect(orderHelper.createOrderUsingOrderNo).toHaveBeenCalled()
         // basket was consumed — must NOT attempt basket update
         expect(res.locals.adyen.basketService.update).not.toHaveBeenCalled()
+        // no pspReference in the 3DS challenge response — no PI update
+        expect(orderHelper.updateOrderPaymentInstrument).not.toHaveBeenCalled()
         expect(res.locals.response).toEqual({
             isFinal: false,
             isSuccessful: true,
@@ -181,6 +184,39 @@ describe('payments controller', () => {
             action: mockAction,
             order: undefined,
             resultCode: RESULT_CODES.CHALLENGE_SHOPPER
+        })
+        expect(next).toHaveBeenCalledWith()
+    })
+
+    it('standard payment (scheme): persists pspReference on pre-created order on redirect (non-final)', async () => {
+        const mockAction = {type: 'redirect', url: 'https://ideal.nl'}
+        mockPayments.mockResolvedValue({
+            resultCode: RESULT_CODES.REDIRECT_SHOPPER,
+            action: mockAction,
+            pspReference: 'psp-redirect-123'
+        })
+
+        await sendPayments(req, res, next)
+
+        expect(orderHelper.createOrderUsingOrderNo).toHaveBeenCalled()
+        expect(res.locals.adyen.basketService.update).not.toHaveBeenCalled()
+        expect(orderHelper.updateOrderPaymentInstrument).toHaveBeenCalledWith(
+            '123',
+            'RefArch',
+            'psp-redirect-123',
+            {
+                pspReference: 'psp-redirect-123',
+                cardInstallments: undefined,
+                donationToken: undefined
+            }
+        )
+        expect(res.locals.response).toEqual({
+            isFinal: false,
+            isSuccessful: true,
+            merchantReference: '123',
+            action: mockAction,
+            order: undefined,
+            resultCode: RESULT_CODES.REDIRECT_SHOPPER
         })
         expect(next).toHaveBeenCalledWith()
     })

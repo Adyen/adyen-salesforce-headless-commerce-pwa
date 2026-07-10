@@ -1,5 +1,8 @@
 import React, {useEffect, useRef, useMemo, useCallback, useState} from 'react'
 import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
+import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
+import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
+import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 import PropTypes from 'prop-types'
 import {AdyenCheckout, PayPal} from '@adyen/adyen-web'
 import '../style/adyenCheckout.css'
@@ -61,12 +64,12 @@ import {paypalExpressConfig} from './paypal/expressConfig'
  */
 const PayPalExpressComponent = ({
     // Order and payment data
-    basket,
+    basket: basketProp,
 
     // User data
-    site,
-    locale,
-    navigate,
+    site: siteProp,
+    locale: localeProp,
+    navigate: navigateProp,
 
     // Callbacks - Payment flow
     beforeSubmit = [],
@@ -102,6 +105,16 @@ const PayPalExpressComponent = ({
     authToken: authTokenProp,
     customerId: customerIdProp
 }) => {
+    // Resolve props with hook fallbacks
+    const {site: hookSite, locale: hookLocale} = useMultiSite()
+    const hookNavigate = useNavigation()
+    const {data: hookBasket} = useCurrentBasket()
+
+    const site = siteProp ?? hookSite
+    const locale = localeProp ?? hookLocale
+    const navigate = navigateProp ?? hookNavigate
+    const basket = basketProp ?? hookBasket
+
     const hookCustomerId = useCustomerId()
     const customerId = customerIdProp || hookCustomerId
     const {getTokenWhenReady} = useAccessToken()
@@ -341,10 +354,10 @@ const PayPalExpressComponent = ({
 }
 
 PayPalExpressComponent.propTypes = {
-    locale: PropTypes.object.isRequired,
-    site: PropTypes.object.isRequired,
+    locale: PropTypes.object,
+    site: PropTypes.object,
     basket: PropTypes.object,
-    navigate: PropTypes.func.isRequired,
+    navigate: PropTypes.func,
     beforeSubmit: PropTypes.arrayOf(PropTypes.func),
     afterSubmit: PropTypes.arrayOf(PropTypes.func),
     beforeAdditionalDetails: PropTypes.arrayOf(PropTypes.func),

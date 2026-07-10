@@ -13,7 +13,7 @@ import {
 import {
     createOrderUsingOrderNo,
     failOrderAndReopenBasket,
-    updatePaymentInstrumentForOrder
+    updateOrderPaymentInstrument
 } from '../helpers/orderHelper.js'
 import {createIdempotencyKey} from '../utils/paymentUtils'
 
@@ -153,6 +153,35 @@ async function sendPayments(req, res, next) {
             )
         }
 
+        if (
+            preCreatedOrderNo &&
+            !checkoutResponse.isFinal &&
+            checkoutResponse.isSuccessful &&
+            response?.pspReference
+        ) {
+            Logger.info(
+                'sendPayments',
+                `updateOrderPaymentInstrument with psp reference: ${response?.pspReference}`
+            )
+            try {
+                await updateOrderPaymentInstrument(
+                    preCreatedOrderNo,
+                    adyenContext.siteId,
+                    response.pspReference,
+                    {
+                        pspReference: response.pspReference,
+                        cardInstallments: paymentRequest?.installments?.value,
+                        donationToken: response?.donationToken
+                    }
+                )
+            } catch (piErr) {
+                Logger.error(
+                    'sendPayments',
+                    `Failed to update payment instrument on order ${preCreatedOrderNo}: ${piErr.message}`
+                )
+            }
+        }
+
         if (checkoutResponse.isFinal && checkoutResponse.isSuccessful) {
             if (!preCreatedOrderNo) {
                 await adyenContext.basketService.addPaymentInstrument(
@@ -167,11 +196,23 @@ async function sendPayments(req, res, next) {
                 await createOrderUsingOrderNo(adyenContext)
             } else {
                 const pspReference = response?.pspReference || response?.order?.pspReference
-                await updatePaymentInstrumentForOrder(adyenContext, preCreatedOrderNo, [
-                    {field: 'c_pspReference', value: pspReference},
-                    {field: 'c_cardInstallments', value: paymentRequest?.installments?.value},
-                    {field: 'c_donationToken', value: response?.donationToken}
-                ])
+                try {
+                    await updateOrderPaymentInstrument(
+                        preCreatedOrderNo,
+                        adyenContext.siteId,
+                        pspReference,
+                        {
+                            pspReference,
+                            cardInstallments: paymentRequest?.installments?.value,
+                            donationToken: response?.donationToken
+                        }
+                    )
+                } catch (piErr) {
+                    Logger.error(
+                        'sendPayments',
+                        `Failed to update payment instrument on order ${preCreatedOrderNo}: ${piErr.message}`
+                    )
+                }
             }
             Logger.info('sendPayments', `order confirmed: ${checkoutResponse.merchantReference}`)
         }

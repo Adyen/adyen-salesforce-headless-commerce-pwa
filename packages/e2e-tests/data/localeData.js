@@ -11,9 +11,17 @@ export class LocaleData {
             heading: 'Account Details'
         },
         productDetailPage: {
-            productColor: 'Gray',
+            productName: '12416789M',
+            productColor: 'Navy',
+            productSize: '28',
             addToCartButtonCaption: 'Add to Cart',
             proceedToCheckoutButtonCaption: 'Proceed to Checkout'
+        },
+        checkoutPage: {
+            heading: 'Checkout',
+            contactInfoSectionModifyButton: 'Contact Info',
+            shippingMethodModifyButton: 'Edit Shipping Options',
+            shippingAddressModifyButton: 'Shipping Address'
         },
         successfulOrderMessage: 'Thank you for your order!'
     }
@@ -26,9 +34,17 @@ export class LocaleData {
             heading: 'Détails du compte'
         },
         productDetailPage: {
-            productColor: 'Gris',
+            productName: '12416789M',
+            productColor: 'Marine',
+            productSize: '28',
             addToCartButtonCaption: 'Ajouter au panier',
             proceedToCheckoutButtonCaption: 'Passer au checkout'
+        },
+        checkoutPage: {
+            heading: 'Checkout',
+            contactInfoSectionModifyButton: 'Modifier les coordonnées',
+            shippingMethodModifyButton: 'Modifier les options de',
+            shippingAddressModifyButton: 'Modifier l’adresse de'
         },
         successfulOrderMessage: 'Thank you for your order!'
     }
@@ -44,9 +60,17 @@ export class LocaleData {
             heading: 'Account Details'
         },
         productDetailPage: {
-            productColor: 'Gray',
+            productName: '12416789M',
+            productColor: 'Navy',
+            productSize: '28',
             addToCartButtonCaption: 'Add to Cart',
             proceedToCheckoutButtonCaption: 'Proceed to Checkout'
+        },
+        checkoutPage: {
+            heading: 'Checkout',
+            contactInfoSectionModifyButton: 'Contact Info',
+            shippingMethodModifyButton: 'Edit Shipping Options',
+            shippingAddressModifyButton: 'Shipping Address'
         },
         successfulOrderMessage: 'Thank you for your order!'
     }

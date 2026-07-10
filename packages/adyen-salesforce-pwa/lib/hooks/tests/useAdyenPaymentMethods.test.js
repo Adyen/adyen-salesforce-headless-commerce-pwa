@@ -17,7 +17,8 @@ jest.mock('../../services/payment-methods', () => ({
 describe('useAdyenPaymentMethods', () => {
     const createWrapper = () => {
         const queryClient = new QueryClient({
-            defaultOptions: {queries: {retry: false}}
+            defaultOptions: {queries: {retry: false}},
+            logger: {log: jest.fn(), warn: jest.fn(), error: jest.fn()}
         })
         // eslint-disable-next-line react/display-name, react/prop-types
         return ({children}) => (

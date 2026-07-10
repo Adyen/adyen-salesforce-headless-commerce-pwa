@@ -20,6 +20,7 @@ jest.mock('@salesforce/pwa-kit-runtime/utils/ssr-config', () => ({
     getConfig: jest.fn()
 }))
 
+jest.mock('../../models/logger')
 jest.mock('../customerHelper', () => ({
     getCustomerBaskets: jest.fn()
 }))

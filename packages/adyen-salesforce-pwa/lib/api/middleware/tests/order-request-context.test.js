@@ -174,13 +174,6 @@ describe('prepareOrderRequestContext middleware', () => {
                 customerInfo: {customerId: 'mockCustomerId'}
             }
             const mockCustomer = {customerId: 'mockCustomerId', email: 'test@example.com'}
-            const mockAdminOrder = {
-                orderNo: 'mockOrderNo123',
-                total: 100.0,
-                currency: 'USD',
-                c_donationToken: 'donationToken123',
-                c_pspReference: 'pspRef123'
-            }
             const mockAdyenConfig = {merchantAccount: 'mockAccount'}
 
             mockShopperOrders.getOrder.mockResolvedValue(mockShopperOrder)

@@ -18,10 +18,7 @@ import Link from '@salesforce/retail-react-app/app/components/link'
 /* -----------------Adyen Begin ------------------------ */
 import '@adyen/adyen-salesforce-pwa/dist/app/adyen.css'
 import {ApplePayExpress, GooglePayExpress, PayPalExpress} from '@adyen/adyen-salesforce-pwa'
-import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
 import PropTypes from 'prop-types'
-import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
-import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 import {useToast} from '@salesforce/retail-react-app/app/hooks/use-toast'
 import LoadingSpinner from '@salesforce/retail-react-app/app/components/loading-spinner'
 import {API_ERROR_MESSAGE} from '@salesforce/retail-react-app/app/constants'
@@ -29,9 +26,6 @@ import {API_ERROR_MESSAGE} from '@salesforce/retail-react-app/app/constants'
 
 const CartCta = () => {
     const {formatMessage} = useIntl()
-    const navigate = useNavigation()
-    const {locale, site} = useMultiSite()
-    const {data: basket} = useCurrentBasket()
 
     const showToast = useToast()
 
@@ -59,34 +53,10 @@ const CartCta = () => {
                 />
             </Button>
             <Container fluid>
-                <ApplePayExpress
-                    locale={locale}
-                    site={site}
-                    basket={basket}
-                    navigate={navigate}
-                    // Callbacks
-                    onError={[showError]}
-                    // UI
-                    spinner={<LoadingSpinner />}
-                />
-                <GooglePayExpress
-                    locale={locale}
-                    site={site}
-                    basket={basket}
-                    navigate={navigate}
-                    // Callbacks
-                    onError={[showError]}
-                    // UI
-                    spinner={<LoadingSpinner />}
-                />
+                <ApplePayExpress onError={[showError]} spinner={<LoadingSpinner />} />
+                <GooglePayExpress onError={[showError]} spinner={<LoadingSpinner />} />
                 <PayPalExpress
-                    locale={locale}
-                    site={site}
-                    basket={basket}
-                    navigate={navigate}
-                    // Callbacks
                     onError={[showError]}
-                    // UI
                     spinner={<LoadingSpinner />}
                     enableReview={true}
                     reviewPageUrl="/checkout/review"

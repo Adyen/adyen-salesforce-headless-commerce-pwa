@@ -1,6 +1,7 @@
 const RESTResponseMgr = require('dw/system/RESTResponseMgr');
 const OrderMgr = require('dw/order/OrderMgr');
 const Logger = require('dw/system/Logger');
+const Transaction = require('dw/system/Transaction');
 
 /**
  * Implements the PATCH method for the adyen-order API.
@@ -12,7 +13,17 @@ exports.updateOrderPaymentInstrument = function () {
     const match = request.httpPath.match(/\/orders\/([^/]+)\/payment-instruments$/);
     const orderNo = match ? match[1] : null;
     const requestBody = request.httpParameterMap.requestBodyAsString;
-    const allowedCustomProperties = ['donationToken'];
+    const allowedCustomProperties = [
+      'donationToken',
+      'pspReference',
+      'cardInstallments',
+      'adyenPaymentMethod',
+      'adyen_payment__Adyen_Payment_Method',
+      'Adyen_Payment_Method_Variant',
+      'adyen_payment__Adyen_Payment_Method_Variant',
+      'terminalId',
+      'storeId',
+    ];
     const {pspReference, customProperties = {}} = JSON.parse(requestBody);
     if (!orderNo) {
       RESTResponseMgr.createError(400, 'bad_request', 'Missing orderNo parameter').render();
@@ -21,13 +32,24 @@ exports.updateOrderPaymentInstrument = function () {
 
     const order = OrderMgr.getOrder(orderNo);
     if (order) {
-      const paymentInstrument = order.paymentInstruments.toArray().find((pi) => pi.custom.pspReference === pspReference);
+      const paymentInstruments = order.paymentInstruments.toArray();
+      let paymentInstrument = paymentInstruments.find((pi) => pspReference && pi.custom.pspReference === pspReference);
+      if (!paymentInstrument) {
+        paymentInstrument = paymentInstruments.find((pi) => pi.custom.paymentMethodType !== 'giftcard');
+      }
       if (!paymentInstrument) {
         RESTResponseMgr.createError(404, 'not_found', 'Payment instrument not found').render();
         return;
       }
-      allowedCustomProperties.forEach((prop) => {
-        paymentInstrument.custom[prop] = customProperties[prop];
+      Transaction.wrap(function () {
+        allowedCustomProperties.forEach((prop) => {
+          if (
+            Object.prototype.hasOwnProperty.call(customProperties, prop) &&
+            customProperties[prop] !== undefined
+          ) {
+            paymentInstrument.custom[prop] = customProperties[prop];
+          }
+        });
       });
       RESTResponseMgr.createSuccess({}, 200).render();
     } else {

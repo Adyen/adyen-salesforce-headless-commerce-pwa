@@ -38,7 +38,8 @@ describe('getCheckoutConfig', () => {
             paymentMethodsResponse: {
                 paymentMethods: ['visa', 'mastercard']
             },
-            countryCode: 'US'
+            countryCode: 'US',
+            locale: 'en_US'
         })
     })
 

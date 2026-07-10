@@ -4,8 +4,10 @@
     "description": "",
     "main": "index.js",
     "scripts": {
+        "test": "npx playwright test",
         "test-headed": "npx playwright test --headed",
-        "test": "npx playwright test"
+        "test:local": "node --env-file=.env node_modules/.bin/playwright test",
+        "test-headed:local": "node --env-file=.env node_modules/.bin/playwright test --headed"
     },
     "keywords": [],
     "author": "",

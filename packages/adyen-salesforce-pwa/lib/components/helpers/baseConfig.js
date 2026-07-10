@@ -51,6 +51,7 @@ export const onSubmit = async (state, component, actions, props) => {
         const paymentsResponse = await adyenPaymentService.submitPayment(
             {
                 ...state.data,
+                ...props?.paymentRequestData,
                 origin: state.data.origin || window.location.origin,
                 returnUrl: props?.returnUrl || `${window.location.href}/redirect`
             },

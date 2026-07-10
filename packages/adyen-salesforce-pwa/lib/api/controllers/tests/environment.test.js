@@ -34,10 +34,27 @@ describe('getEnvironment middleware', () => {
 
         expect(res.locals.response).toEqual({
             ADYEN_CLIENT_KEY: 'mockClientKey',
-            ADYEN_ENVIRONMENT: 'mockEnvironment'
+            ADYEN_ENVIRONMENT: 'mockEnvironment',
+            ADYEN_POS_ENABLED: false,
+            ADYEN_POS_STORE_ID: ''
         })
         expect(next).toHaveBeenCalledWith()
         expect(next).toHaveBeenCalledTimes(1)
+    })
+
+    it('should return ADYEN_POS_ENABLED as true when posEnabled is "true"', async () => {
+        res.locals.adyen.adyenConfig.posEnabled = 'true'
+        await getEnvironment(req, res, next)
+
+        expect(res.locals.response.ADYEN_POS_ENABLED).toBe(true)
+        expect(next).toHaveBeenCalledWith()
+    })
+
+    it('should return ADYEN_POS_ENABLED as false when posEnabled is "false"', async () => {
+        res.locals.adyen.adyenConfig.posEnabled = 'false'
+        await getEnvironment(req, res, next)
+
+        expect(res.locals.response.ADYEN_POS_ENABLED).toBe(false)
     })
 
     it('should call next with an error if getAdyenConfigForCurrentSite throws an error', async () => {

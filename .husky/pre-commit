@@ -4,7 +4,7 @@
 npm run check-branch-name
 
 cd ./packages/adyen-retail-react-app
-npm run lint
+pnpm run lint
 
 cd ../adyen-salesforce-pwa
-npm run lint
+pnpm run lint

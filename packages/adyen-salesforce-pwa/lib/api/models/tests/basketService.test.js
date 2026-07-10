@@ -10,6 +10,7 @@ jest.mock('../../helpers/basketHelper.js', () => {
         createShopperBasketsClient: jest.fn()
     }
 })
+jest.mock('../logger')
 jest.mock('@salesforce/pwa-kit-runtime/utils/ssr-config.server', () => ({
     getConfig: jest.fn(() => ({
         app: {
@@ -278,6 +279,26 @@ describe('BasketService', () => {
                         paymentMethodId: PAYMENT_METHODS.ADYEN_COMPONENT,
                         c_pspReference: 'mockPspReference',
                         c_paymentMethodType: 'ideal'
+                    })
+                })
+            )
+            expect(mockRes.locals.adyen.basket).toEqual(mockUpdatedBasket)
+        })
+
+        it('should correctly add a POS payment instrument with AdyenPOS paymentMethodId', async () => {
+            const paymentMethod = {type: PAYMENT_METHODS.ADYEN_POS}
+            const amount = {value: 100, currency: 'EUR'}
+
+            const mockUpdatedBasket = {basketId: 'mockBasketId', paymentInstruments: [{}]}
+            mockShopperBaskets.addPaymentInstrumentToBasket.mockResolvedValue(mockUpdatedBasket)
+
+            await basketService.addPaymentInstrument(amount, paymentMethod)
+
+            expect(mockShopperBaskets.addPaymentInstrumentToBasket).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    body: expect.objectContaining({
+                        paymentMethodId: PAYMENT_METHODS.ADYEN_POS,
+                        c_paymentMethodType: PAYMENT_METHODS.ADYEN_POS
                     })
                 })
             )

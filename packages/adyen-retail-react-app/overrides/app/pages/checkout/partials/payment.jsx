@@ -28,15 +28,16 @@ import {PromoCode, usePromoCode} from '@salesforce/retail-react-app/app/componen
 import {API_ERROR_MESSAGE} from '@salesforce/retail-react-app/app/constants'
 import {isPickupShipment} from '@salesforce/retail-react-app/app/utils/shipment-utils'
 /* -----------------Adyen Begin ------------------------ */
-import {useAccessToken, useCustomerId, useCustomerType} from '@salesforce/commerce-sdk-react'
-import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
-import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
+import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 import LoadingSpinner from '@salesforce/retail-react-app/app/components/loading-spinner'
+import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
 import {
     AdyenCheckout,
+    TerminalPayment,
     pageTypes,
     useHandleBackNavigation,
-    useCheckoutErrorRecovery
+    useCheckoutErrorRecovery,
+    useAdyenEnvironment
 } from '@adyen/adyen-salesforce-pwa'
 /* -----------------Adyen End ------------------------ */
 
@@ -44,10 +45,8 @@ const Payment = () => {
     const {formatMessage} = useIntl()
     const {data: basket, refetch: refetchBasket} = useCurrentBasket()
     const customerId = useCustomerId()
-    const customerTypeData = useCustomerType()
     const {getTokenWhenReady} = useAccessToken()
-    const navigate = useNavigation()
-    const {locale, site} = useMultiSite()
+    const {site} = useMultiSite()
     const [authToken, setAuthToken] = useState()
 
     useEffect(() => {
@@ -62,15 +61,21 @@ const Payment = () => {
     useHandleBackNavigation({
         authToken,
         customerId,
-        basketId: basket?.basketId,
-        site,
-        navigate
+        basketId: basket?.basketId
     })
 
     const {adyenCheckoutKey, isRefetchingBasket} = useCheckoutErrorRecovery({
-        refetchBasket,
-        navigate
+        refetchBasket
     })
+
+    const {data: adyenEnvironment} = useAdyenEnvironment({
+        authToken,
+        customerId,
+        basketId: basket?.basketId,
+        site,
+        skip: !authToken
+    })
+    const isPosEnabled = adyenEnvironment?.ADYEN_POS_ENABLED === true
 
     const isPickupOnly =
         basket?.shipments?.length > 0 &&
@@ -162,6 +167,15 @@ const Payment = () => {
             showInstallmentAmounts: true
         }
     }
+    const paymentRequestData = useMemo(
+        () => ({
+            company: {
+                name: 'PWA',
+                registrationNumber: '78512300'
+            }
+        }),
+        []
+    )
 
     return (
         <ToggleCard
@@ -178,24 +192,26 @@ const Payment = () => {
                 <Stack spacing={6}>
                     {isRefetchingBasket ? (
                         <LoadingSpinner />
+                    ) : isPosEnabled ? (
+                        <TerminalPayment
+                            authToken={authToken}
+                            customerId={customerId}
+                            storeId={adyenEnvironment?.ADYEN_POS_STORE_ID || ''}
+                            beforeSubmit={[onBillingSubmit]}
+                            onError={[showError]}
+                            spinner={<LoadingSpinner />}
+                        />
                     ) : (
                         <AdyenCheckout
                             authToken={authToken}
                             customerId={customerId}
                             key={adyenCheckoutKey}
-                            // Required props
-                            site={site}
-                            locale={locale}
-                            navigate={navigate}
-                            basket={basket}
-                            // Optional
                             page={pageTypes.CHECKOUT}
                             merchantDisplayName={'Merchant name'}
                             paymentMethodsConfiguration={paymentMethodsConfiguration}
-                            // Callbacks
+                            paymentRequestData={paymentRequestData}
                             beforeSubmit={[onBillingSubmit]}
                             onError={[showError]}
-                            // UI
                             spinner={<LoadingSpinner />}
                         />
                     )}

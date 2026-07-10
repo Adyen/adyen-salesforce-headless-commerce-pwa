@@ -6,11 +6,12 @@ import useAdyenEnvironment from '../hooks/useAdyenEnvironment'
 import useAdyenDonationCampaigns from '../hooks/useAdyenDonationCampaigns'
 import {AdyenDonationsService} from '../services/donations'
 import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
+import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
 
 const AdyenDonations = ({
     // Required props
-    site,
-    locale,
+    site: siteProp,
+    locale: localeProp,
     orderNo,
 
     // Callbacks
@@ -27,6 +28,12 @@ const AdyenDonations = ({
     const donationComponentRefs = useRef([])
     const isDonatingRef = useRef(false)
     const [isLoading, setIsLoading] = useState(false)
+
+    // Resolve props with hook fallbacks
+    const {site: hookSite, locale: hookLocale} = useMultiSite()
+    const site = siteProp ?? hookSite
+    const locale = localeProp ?? hookLocale
+
     const customerId = useCustomerId()
     const {getTokenWhenReady} = useAccessToken()
     const [authToken, setAuthToken] = useState()
@@ -214,9 +221,9 @@ const AdyenDonations = ({
 }
 
 AdyenDonations.propTypes = {
-    // Required props
-    site: PropTypes.object.isRequired,
-    locale: PropTypes.object.isRequired,
+    // Optional props (fallback to retail-react-app hooks)
+    site: PropTypes.object,
+    locale: PropTypes.object,
     orderNo: PropTypes.string.isRequired,
 
     // Callbacks

@@ -1,5 +1,8 @@
 import React, {useEffect, useRef, useMemo, useCallback, useState} from 'react'
 import {useAccessToken, useCustomerId, useCustomerType} from '@salesforce/commerce-sdk-react'
+import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
+import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
+import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 import PropTypes from 'prop-types'
 import '../style/adyenCheckout.css'
 import {
@@ -16,14 +19,14 @@ import PAGE_TYPES from '../utils/pageTypes.mjs'
 
 const AdyenCheckoutComponent = ({
     // Order and payment data
-    basket,
+    basket: basketProp,
     returnUrl,
 
     // User data
     merchantDisplayName = '',
-    locale,
-    site,
-    navigate,
+    locale: localeProp,
+    site: siteProp,
+    navigate: navigateProp,
     authToken: authTokenProp,
     customerId: customerIdProp,
 
@@ -43,6 +46,7 @@ const AdyenCheckoutComponent = ({
     // Optional overrides
     dropinConfiguration = {},
     paymentMethodsConfiguration: additionalPaymentMethodsConfiguration,
+    paymentRequestData,
     translations,
     onStateChange,
 
@@ -59,6 +63,16 @@ const AdyenCheckoutComponent = ({
     const [internalAdyenOrder, setInternalAdyenOrder] = useState(null)
     const [internalAdyenAction, setInternalAdyenAction] = useState(null)
     const [componentKey, setComponentKey] = useState(0)
+
+    // Resolve props with hook fallbacks
+    const {site: hookSite, locale: hookLocale} = useMultiSite()
+    const hookNavigate = useNavigation()
+    const {data: hookBasket} = useCurrentBasket()
+
+    const site = siteProp ?? hookSite
+    const locale = localeProp ?? hookLocale
+    const navigate = navigateProp ?? hookNavigate
+    const basket = basketProp ?? hookBasket
 
     const hookCustomerId = useCustomerId()
     const customerId = customerIdProp || hookCustomerId
@@ -212,6 +226,7 @@ const AdyenCheckoutComponent = ({
             beforeSubmit,
             afterAdditionalDetails,
             beforeAdditionalDetails,
+            paymentRequestData,
             locale
         })
     }, [
@@ -227,7 +242,8 @@ const AdyenCheckoutComponent = ({
         internalOrderNo,
         returnUrl,
         customerId,
-        navigate
+        navigate,
+        paymentRequestData
     ])
 
     // Memoize the translations to prevent unnecessary recalculations
@@ -364,11 +380,11 @@ const AdyenCheckoutComponent = ({
 }
 
 AdyenCheckoutComponent.propTypes = {
-    // Required props
-    site: PropTypes.object.isRequired,
-    locale: PropTypes.object.isRequired,
-    navigate: PropTypes.func.isRequired,
-    basket: PropTypes.object.isRequired,
+    // Optional props (fallback to retail-react-app hooks)
+    site: PropTypes.object,
+    locale: PropTypes.object,
+    navigate: PropTypes.func,
+    basket: PropTypes.object,
 
     // Order and payment data
     returnUrl: PropTypes.string,
@@ -395,6 +411,7 @@ AdyenCheckoutComponent.propTypes = {
     // Optional overrides
     dropinConfiguration: PropTypes.object,
     paymentMethodsConfiguration: PropTypes.object,
+    paymentRequestData: PropTypes.object,
     translations: PropTypes.object
 }
 

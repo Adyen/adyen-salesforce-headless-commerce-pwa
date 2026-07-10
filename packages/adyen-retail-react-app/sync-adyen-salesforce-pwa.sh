@@ -16,18 +16,22 @@ echo -e "${BLUE}--- Starting @adyen/adyen-salesforce-pwa Package Update ---${NC}
 echo -e "${BLUE}[1/4] Building adyen-salesforce-pwa Package...${NC}"
 cd "$PACKAGE_DIR" || { echo -e "${RED}Failed to enter package directory${NC}"; exit 1; }
 rm -rf dist
-npm run build-prod || { echo -e "${RED}Build failed!${NC}"; exit 1; }
+pnpm run build-prod || { echo -e "${RED}Build failed!${NC}"; exit 1; }
 
 # 2. Pack
-echo -e "${BLUE}[2/4] Packaging (npm pack)...${NC}"
-TARBALL_NAME=$(npm pack | tail -n 1)
+echo -e "${BLUE}[2/4] Packaging (pnpm pack)...${NC}"
+TARBALL_NAME=$(basename "$(pnpm pack | tail -n 1)")
 echo -e "${GREEN}Created: $TARBALL_NAME${NC}"
 
-# 3. Move and Install
+# 3. Move and Install (extract into node_modules without changing package.json)
 echo -e "${BLUE}[3/4] Installing in Adyen Retail React App...${NC}"
 mv "$TARBALL_NAME" "$APP_DIR/"
 cd "$APP_DIR" || exit
-npm install "./$TARBALL_NAME" --ignore-scripts --no-save || { echo -e "${RED}Install failed!${NC}"; exit 1; }
+TARGET_DIR="$APP_DIR/node_modules/@adyen/adyen-salesforce-pwa"
+rm -rf "$TARGET_DIR"
+mkdir -p "$TARGET_DIR"
+# npm/pnpm tarballs wrap contents in a top-level "package/" directory
+tar -xzf "./$TARBALL_NAME" -C "$TARGET_DIR" --strip-components=1 || { echo -e "${RED}Install failed!${NC}"; exit 1; }
 
 # 4. Cleanup
 echo -e "${BLUE}[4/4] Cleaning up...${NC}"
