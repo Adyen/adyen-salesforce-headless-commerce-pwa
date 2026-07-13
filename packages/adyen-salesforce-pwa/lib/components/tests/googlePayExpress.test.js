@@ -25,6 +25,9 @@ jest.mock('@salesforce/commerce-sdk-react')
 jest.mock('@salesforce/retail-react-app/app/hooks/use-current-basket', () => ({
     useCurrentBasket: jest.fn()
 }))
+jest.mock('@tanstack/react-query', () => ({
+    useQueryClient: jest.fn().mockReturnValue({invalidateQueries: jest.fn()})
+}))
 jest.mock('@adyen/adyen-web', () => ({
     AdyenCheckout: jest.fn().mockResolvedValue({}),
     GooglePay: jest.fn().mockImplementation(() => ({
@@ -184,7 +187,24 @@ describe('GooglePayExpressComponent', () => {
                         locale: defaultProps.locale,
                         navigate: defaultProps.navigate,
                         onError,
-                        fetchShippingMethods: expect.any(Function)
+                        fetchShippingMethods: expect.any(Function),
+                        queryClient: expect.objectContaining({
+                            invalidateQueries: expect.any(Function)
+                        })
+                    })
+                )
+            })
+        })
+
+        it('passes a locale/site-aware absolute returnUrl to getGooglePayExpressConfig', async () => {
+            await act(async () => {
+                render(<GooglePayExpressComponent {...defaultProps} />)
+            })
+
+            await waitFor(() => {
+                expect(getGooglePayExpressConfig).toHaveBeenCalledWith(
+                    expect.objectContaining({
+                        returnUrl: `http://localhost:3000/${defaultProps.site.id}/${defaultProps.locale.id}/checkout/redirect`
                     })
                 )
             })

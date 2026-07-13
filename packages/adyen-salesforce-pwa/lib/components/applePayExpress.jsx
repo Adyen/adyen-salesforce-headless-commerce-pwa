@@ -1,4 +1,5 @@
 import React, {useEffect, useRef, useCallback, useMemo, useState} from 'react'
+import {useQueryClient} from '@tanstack/react-query'
 import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
 import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
@@ -42,6 +43,7 @@ const ApplePayExpressComponent = (props) => {
     const customerId = customerIdProp || hookCustomerId
     const {getTokenWhenReady} = useAccessToken()
     const [authToken, setAuthToken] = useState(authTokenProp)
+    const queryClient = useQueryClient()
 
     useEffect(() => {
         if (authTokenProp) return
@@ -198,7 +200,8 @@ const ApplePayExpressComponent = (props) => {
                     merchantDisplayName,
                     customerId,
                     product,
-                    locale
+                    locale,
+                    queryClient
                 })
                 const applePayButton = new ApplePay(checkout, appleButtonConfig)
                 await applePayButton.isAvailable()

@@ -1,4 +1,5 @@
 import React, {useEffect, useRef, useCallback, useMemo, useState} from 'react'
+import {useQueryClient} from '@tanstack/react-query'
 import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
 import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
@@ -31,7 +32,7 @@ const GooglePayExpressComponent = (props) => {
     } = props
 
     // Resolve props with hook fallbacks
-    const {site: hookSite, locale: hookLocale} = useMultiSite()
+    const {site: hookSite, locale: hookLocale, buildUrl} = useMultiSite()
     const hookNavigate = useNavigation()
     const {data: hookBasket} = useCurrentBasket()
 
@@ -40,10 +41,24 @@ const GooglePayExpressComponent = (props) => {
     const navigate = navigateProp ?? hookNavigate
     const basket = basketProp ?? hookBasket
 
+    // Absolute, locale/site-aware return URL for redirect payments (e.g. 3DS).
+    // window.location.origin/href can't be reused directly here since this component
+    // also mounts on PDP/cart pages, not just /checkout.
+    const returnUrl = useMemo(() => {
+        if (typeof window === 'undefined') return undefined
+        const path = buildUrl(
+            '/checkout/redirect',
+            site?.alias || site?.id,
+            locale?.alias || locale?.id
+        )
+        return `${window.location.origin}${path}`
+    }, [buildUrl, site?.alias, site?.id, locale?.alias, locale?.id])
+
     const hookCustomerId = useCustomerId()
     const customerId = customerIdProp || hookCustomerId
     const {getTokenWhenReady} = useAccessToken()
     const [authToken, setAuthToken] = useState(authTokenProp)
+    const queryClient = useQueryClient()
 
     useEffect(() => {
         if (authTokenProp) return
@@ -208,7 +223,9 @@ const GooglePayExpressComponent = (props) => {
                     type: isPdp ? 'pdp' : 'cart',
                     product,
                     merchantDisplayName,
-                    shippingMethods: shippingMethods?.applicableShippingMethods
+                    shippingMethods: shippingMethods?.applicableShippingMethods,
+                    returnUrl,
+                    queryClient
                 })
 
                 const googlePayButton = new GooglePay(checkout, expressConfig)
@@ -250,7 +267,8 @@ const GooglePayExpressComponent = (props) => {
         navigate,
         fetchShippingMethods,
         product,
-        remountKey
+        remountKey,
+        returnUrl
     ])
 
     return (

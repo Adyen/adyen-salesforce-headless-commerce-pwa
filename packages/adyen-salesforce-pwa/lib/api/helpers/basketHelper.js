@@ -92,9 +92,15 @@ export async function removeExistingTemporaryBaskets(authorization, customerId, 
 
 /**
  * Creates a new temporary basket for the current shopper.
+ * @param {string} authorization - The shopper's authorization token.
+ * @param {string} customerId - The shopper's customer ID.
+ * @param {string} siteId - The site ID for the API client.
+ * @param {string} [currency] - Currency code to create the basket with. Ensures the basket
+ * currency matches the currency the shopper's express payment SDK (e.g. PayPal) was initialized
+ * with, since the basket otherwise defaults to the site's default currency.
  * @returns {Promise<object>} The created basket.
  */
-export async function createTemporaryBasket(authorization, customerId, siteId) {
+export async function createTemporaryBasket(authorization, customerId, siteId, currency) {
     const shopperBaskets = createShopperBasketsClient(authorization, siteId)
     const basket = await shopperBaskets.createBasket({
         parameters: {
@@ -103,7 +109,8 @@ export async function createTemporaryBasket(authorization, customerId, siteId) {
         body: {
             customerInfo: {
                 customerId
-            }
+            },
+            ...(currency && {currency})
         }
     })
     return basket

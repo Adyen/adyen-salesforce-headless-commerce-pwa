@@ -177,7 +177,10 @@ export const createTemporaryBasketCallback = async (state, component, actions, p
     try {
         const {token, customerId, site, product, setBasket} = props
         const adyenTemporaryBasketService = new AdyenTemporaryBasketService(token, customerId, site)
-        const temporaryBasket = await adyenTemporaryBasketService.createTemporaryBasket(product)
+        const temporaryBasket = await adyenTemporaryBasketService.createTemporaryBasket(
+            product,
+            props.getBasket()?.currency
+        )
         if (temporaryBasket?.basketId) {
             setBasket(temporaryBasket)
         } else {
@@ -230,6 +233,7 @@ export const onPaymentsSuccess = (state, component, actions, props, responses) =
 export const onPaymentsDetailsSuccess = async (state, component, actions, props, responses) => {
     try {
         if (responses?.paymentsDetailsResponse?.isSuccessful) {
+            props?.queryClient?.invalidateQueries()
             props?.navigate(
                 `/checkout/confirmation/${responses?.paymentsDetailsResponse?.merchantReference}`
             )

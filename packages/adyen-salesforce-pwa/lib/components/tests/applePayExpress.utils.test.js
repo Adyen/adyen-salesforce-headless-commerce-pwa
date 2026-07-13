@@ -288,6 +288,24 @@ describe('getAppleButtonConfig', () => {
             expect(defaultProps.navigate).toHaveBeenCalledWith('/checkout/confirmation/order-789')
         })
 
+        it('invalidates queries before navigating so the confirmation page fetches fresh auth/order data', async () => {
+            mockSubmitPayment.mockResolvedValue({
+                isFinal: true,
+                isSuccessful: true,
+                merchantReference: 'order-789'
+            })
+            defaultProps.queryClient = {invalidateQueries: jest.fn()}
+            const config = getAppleButtonConfig(defaultProps)
+            authorizeFirst(config)
+            const actions = {resolve: jest.fn(), reject: jest.fn()}
+            const state = {data: {origin: 'https://test.com'}}
+
+            await config.onSubmit(state, {}, actions)
+
+            expect(defaultProps.queryClient.invalidateQueries).toHaveBeenCalled()
+            expect(defaultProps.navigate).toHaveBeenCalledWith('/checkout/confirmation/order-789')
+        })
+
         it('should reject when payment is not successful', async () => {
             mockSubmitPayment.mockResolvedValue({
                 isFinal: true,
@@ -735,7 +753,10 @@ describe('getAppleButtonConfig', () => {
 
             await config.onClick(resolve, reject)
 
-            expect(mockCreateTemporaryBasket).toHaveBeenCalledWith({id: 'prod-1', quantity: 1})
+            expect(mockCreateTemporaryBasket).toHaveBeenCalledWith(
+                {id: 'prod-1', quantity: 1},
+                'USD'
+            )
             expect(resolve).toHaveBeenCalledWith(
                 expect.objectContaining({
                     newTotal: expect.objectContaining({

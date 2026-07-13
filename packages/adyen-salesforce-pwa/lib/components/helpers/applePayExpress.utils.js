@@ -96,7 +96,8 @@ export const getAppleButtonConfig = (props = {}) => {
         merchantDisplayName = '',
         customerId,
         product,
-        locale
+        locale,
+        queryClient
     } = props
 
     let applePayAmount = basket.orderTotal
@@ -160,6 +161,7 @@ export const getAppleButtonConfig = (props = {}) => {
                         }
                     }
                     actions.resolve(finalPriceUpdate)
+                    queryClient?.invalidateQueries()
                     navigate(`/checkout/confirmation/${paymentsResponse?.merchantReference}`)
                 } else {
                     actions.reject()
@@ -284,7 +286,10 @@ export const getAppleButtonConfig = (props = {}) => {
                     customerId,
                     site
                 )
-                temporaryBasket = await adyenTemporaryBasketService.createTemporaryBasket(product)
+                temporaryBasket = await adyenTemporaryBasketService.createTemporaryBasket(
+                    product,
+                    currentBasket?.currency
+                )
                 if (temporaryBasket?.basketId) {
                     setBasket(temporaryBasket)
                     applePayAmount = temporaryBasket.orderTotal
