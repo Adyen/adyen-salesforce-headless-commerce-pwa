@@ -62,10 +62,10 @@ packages:
       react-router-dom: ^5.3.4
 
   '@adyen/adyen-web@6.34.1':
-    resolution: {integrity: sha512-jgMqt6SJDPlgcK2WmLsqJdm2BbtCs7E8Ovf0oGzBmwFz7ozhpskPgjmlXpx+V0FH1d/TBOw25A1c3g1qtCt7Cg==, tarball: https://artifacts.is.adyen.com/artifactory/api/npm/frontend-npm-virtual/@adyen/adyen-web/-/adyen-web-6.34.1.tgz}
+    resolution: {integrity: sha512-jgMqt6SJDPlgcK2WmLsqJdm2BbtCs7E8Ovf0oGzBmwFz7ozhpskPgjmlXpx+V0FH1d/TBOw25A1c3g1qtCt7Cg==}
 
   '@adyen/api-library@29.1.0':
-    resolution: {integrity: sha512-yNIPv5HK9P94cAsIdSf4REr4a8p9OHJl/u7XwPhLHueqMZKP+LbCJY1t34fBt9oJ75mDfiy9u2fypo8v5Jx04A==, tarball: https://artifacts.is.adyen.com/artifactory/api/npm/frontend-npm-virtual/@adyen/api-library/-/api-library-29.1.0.tgz}
+    resolution: {integrity: sha512-yNIPv5HK9P94cAsIdSf4REr4a8p9OHJl/u7XwPhLHueqMZKP+LbCJY1t34fBt9oJ75mDfiy9u2fypo8v5Jx04A==}
     engines: {node: '>=18'}
 
   '@aws-crypto/crc32@5.2.0':
