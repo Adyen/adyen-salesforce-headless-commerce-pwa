@@ -21,6 +21,9 @@ jest.mock('../../hooks/useAdyenPaymentMethodsForExpress')
 jest.mock('../paypal/expressConfig')
 jest.mock('../../services/shipping-methods')
 jest.mock('@salesforce/commerce-sdk-react')
+jest.mock('@tanstack/react-query', () => ({
+    useQueryClient: jest.fn().mockReturnValue({invalidateQueries: jest.fn()})
+}))
 jest.mock('@salesforce/retail-react-app/app/hooks/use-current-basket', () => ({
     useCurrentBasket: jest.fn()
 }))
@@ -209,7 +212,10 @@ describe('PayPalExpressComponent', () => {
                         beforeSubmit,
                         afterSubmit,
                         onError,
-                        fetchShippingMethods: expect.any(Function)
+                        fetchShippingMethods: expect.any(Function),
+                        queryClient: expect.objectContaining({
+                            invalidateQueries: expect.any(Function)
+                        })
                     })
                 )
             })

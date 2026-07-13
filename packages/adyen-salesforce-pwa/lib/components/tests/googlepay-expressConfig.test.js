@@ -433,6 +433,24 @@ describe('getGooglePayExpressConfig', () => {
             expect(actions.resolve).toHaveBeenCalled()
         })
 
+        it('invalidates queries before navigating so the confirmation page fetches fresh auth/order data', async () => {
+            const mockSubmitDetails = jest.fn().mockResolvedValue({
+                isSuccessful: true,
+                merchantReference: 'ORDER-001'
+            })
+            AdyenPaymentsDetailsService.mockImplementation(() => ({
+                submitPaymentsDetails: mockSubmitDetails
+            }))
+            const navigate = jest.fn()
+            const queryClient = {invalidateQueries: jest.fn()}
+            const config = getGooglePayExpressConfig({...defaultProps, navigate, queryClient})
+            const actions = {resolve: jest.fn(), reject: jest.fn()}
+            await config.onAdditionalDetails({data: {}}, {}, actions)
+
+            expect(queryClient.invalidateQueries).toHaveBeenCalled()
+            expect(navigate).toHaveBeenCalledWith('/checkout/confirmation/ORDER-001')
+        })
+
         it('passes the pre-created order number from the cart flow to the details call', async () => {
             const mockSubmitDetails = jest.fn().mockResolvedValue({
                 isSuccessful: true,

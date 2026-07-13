@@ -1,0 +1,43 @@
+apiVersion: agent-marketplace/v2
+harnesses: [factory]
+
+registries:
+  - url: git@gitlab.is.adyen.com:adyen/ai-projects/agent-marketplace
+    ref: main
+    default: true
+
+  - url: git@gitlab.is.adyen.com:containers/rtf/harness.git
+    ref: main
+    default: true
+    subagents:
+      exclude_all: true
+
+  - url: git@gitlab.is.adyen.com:aleksandarm/ai-harness.git
+    ref: main
+    path: plugins/global
+    default: true
+
+  - url: git@gitlab.is.adyen.com:aleksandarm/ai-harness.git
+    ref: main
+    path: plugins/engineering
+    default: true
+
+  - url: git@gitlab.is.adyen.com:aleksandarm/ai-harness.git
+    ref: main
+    path: plugins/delivery-pipeline
+    default: true
+
+  - url: git@gitlab.is.adyen.com:aleksandarm/ai-harness.git
+    ref: main
+    path: plugins/pwa-adyen
+    default: true
+
+  - url: git@gitlab.is.adyen.com:aleksandarm/ai-harness.git
+    ref: main
+    path: plugins/memory-graph
+    default: true
+
+  - url: git@gitlab.is.adyen.com:aleksandarm/ai-harness.git
+    ref: main
+    path: plugins/observability
+    default: true

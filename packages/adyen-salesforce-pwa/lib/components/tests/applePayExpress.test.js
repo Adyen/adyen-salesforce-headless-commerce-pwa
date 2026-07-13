@@ -21,6 +21,9 @@ jest.mock('../../hooks/useAdyenPaymentMethodsForExpress')
 jest.mock('../../hooks/useAdyenShippingMethods')
 jest.mock('../helpers/applePayExpress.utils')
 jest.mock('@salesforce/commerce-sdk-react')
+jest.mock('@tanstack/react-query', () => ({
+    useQueryClient: jest.fn().mockReturnValue({invalidateQueries: jest.fn()})
+}))
 
 const mockGetShippingMethods = jest.fn()
 jest.mock('../../services/shipping-methods', () => ({
@@ -188,6 +191,20 @@ describe('ApplePayExpressComponent', () => {
             expect(getAppleButtonConfig).toHaveBeenCalledWith(
                 expect.objectContaining({
                     basket: defaultProps.basket
+                })
+            )
+        })
+
+        it('passes queryClient to getAppleButtonConfig', async () => {
+            await act(async () => {
+                render(<ApplePayExpressComponent {...defaultProps} />)
+            })
+
+            expect(getAppleButtonConfig).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    queryClient: expect.objectContaining({
+                        invalidateQueries: expect.any(Function)
+                    })
                 })
             )
         })

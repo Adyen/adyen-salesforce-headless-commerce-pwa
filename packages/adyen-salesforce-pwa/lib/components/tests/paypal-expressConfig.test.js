@@ -348,6 +348,7 @@ describe('paypal/expressConfig', () => {
                 site: {id: 'site-id'},
                 product: {id: 'product123', quantity: 2},
                 setBasket: jest.fn(),
+                getBasket: jest.fn().mockReturnValue({currency: 'EUR'}),
                 onError: [jest.fn()],
                 handleError: jest.fn()
             }
@@ -367,10 +368,13 @@ describe('paypal/expressConfig', () => {
             expect(AdyenTemporaryBasketService).toHaveBeenCalledWith('test-token', 'customer123', {
                 id: 'site-id'
             })
-            expect(mockTemporaryBasketService.createTemporaryBasket).toHaveBeenCalledWith({
-                id: 'product123',
-                quantity: 2
-            })
+            expect(mockTemporaryBasketService.createTemporaryBasket).toHaveBeenCalledWith(
+                {
+                    id: 'product123',
+                    quantity: 2
+                },
+                'EUR'
+            )
             expect(props.setBasket).toHaveBeenCalledWith(mockBasket)
         })
 
@@ -444,6 +448,19 @@ describe('paypal/expressConfig', () => {
 
             expect(props.navigate).not.toHaveBeenCalled()
             expect(actions.resolve).toHaveBeenCalledWith(responses.paymentsDetailsResponse)
+        })
+
+        it('should invalidate queries before navigating so the confirmation page fetches fresh auth/order data', async () => {
+            props.queryClient = {invalidateQueries: jest.fn()}
+            responses.paymentsDetailsResponse = {
+                isSuccessful: true,
+                merchantReference: '00012345'
+            }
+
+            await onPaymentsDetailsSuccess(state, component, actions, props, responses)
+
+            expect(props.queryClient.invalidateQueries).toHaveBeenCalled()
+            expect(props.navigate).toHaveBeenCalledWith('/checkout/confirmation/00012345')
         })
 
         it('should reject on error', async () => {

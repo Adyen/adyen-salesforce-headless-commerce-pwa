@@ -47,7 +47,7 @@ describe('TemporaryBasketService', () => {
             const result = await temporaryBasketService.createTemporaryBasket(mockProduct)
 
             expect(temporaryBasketService.apiClient.post).toHaveBeenCalledWith({
-                body: JSON.stringify({product: mockProduct})
+                body: JSON.stringify({product: mockProduct, currency: undefined})
             })
             expect(result).toEqual(mockBasketResponse)
         })
@@ -62,7 +62,23 @@ describe('TemporaryBasketService', () => {
             const result = await temporaryBasketService.createTemporaryBasket()
 
             expect(temporaryBasketService.apiClient.post).toHaveBeenCalledWith({
-                body: JSON.stringify({product: undefined})
+                body: JSON.stringify({product: undefined, currency: undefined})
+            })
+            expect(result).toEqual(mockBasketResponse)
+        })
+
+        it('should create a temporary basket with a currency', async () => {
+            const mockProduct = {id: 'product123', quantity: 2, price: 49.99}
+            const mockResponse = {
+                status: 200,
+                json: jest.fn().mockResolvedValue(mockBasketResponse)
+            }
+            temporaryBasketService.apiClient.post.mockResolvedValueOnce(mockResponse)
+
+            const result = await temporaryBasketService.createTemporaryBasket(mockProduct, 'EUR')
+
+            expect(temporaryBasketService.apiClient.post).toHaveBeenCalledWith({
+                body: JSON.stringify({product: mockProduct, currency: 'EUR'})
             })
             expect(result).toEqual(mockBasketResponse)
         })
@@ -121,7 +137,7 @@ describe('TemporaryBasketService', () => {
             const result = await temporaryBasketService.createTemporaryBasket(mockProduct)
 
             expect(temporaryBasketService.apiClient.post).toHaveBeenCalledWith({
-                body: JSON.stringify({product: mockProduct})
+                body: JSON.stringify({product: mockProduct, currency: undefined})
             })
             expect(result).toEqual(expectedBasket)
             expect(result.basketId).toBe('basket456')
