@@ -118,6 +118,10 @@ export const getAmount = ({basket, adyenOrder}) => {
     if (adyenOrder) {
         return adyenOrder.remainingAmount
     }
+    // A minimal basket (e.g. `{basketId}` used to resolve the express basket on the
+    // 3DS redirect return) has no currency yet - skip amount calculation rather than
+    // letting getCurrencyValueForApi throw on an unrecognized currency code.
+    if (!basket.currency) return null
     return {
         value: getCurrencyValueForApi(basket.orderTotal, basket.currency),
         currency: basket.currency

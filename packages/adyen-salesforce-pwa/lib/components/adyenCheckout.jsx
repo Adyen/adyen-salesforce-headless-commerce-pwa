@@ -73,7 +73,25 @@ const AdyenCheckoutComponent = ({
     const site = siteProp ?? hookSite
     const locale = localeProp ?? hookLocale
     const navigate = navigateProp ?? hookNavigate
-    const basket = basketProp ?? hookBasket
+
+    // Extract redirect params from URL
+    const urlParams = useMemo(() => {
+        if (typeof window === 'undefined') return {}
+        const params = new URLSearchParams(window.location.search)
+        return {
+            redirectResult: params.get('redirectResult'),
+            amazonCheckoutSessionId: params.get('amazonCheckoutSessionId'),
+            expressBasketId: params.get('adyenExpressBasketId')
+        }
+    }, [])
+
+    // On the 3DS redirect return for an express payment, the shopper's regular basket
+    // (from useCurrentBasket) is not the basket the payment was made against - the
+    // express/temporary basket carrying `c_orderNo` must be used instead so that
+    // /payments/details can create the SFCC order.
+    const basket =
+        basketProp ??
+        (urlParams.expressBasketId ? {basketId: urlParams.expressBasketId} : hookBasket)
 
     const hookCustomerId = useCustomerId()
     const customerId = customerIdProp || hookCustomerId
@@ -181,16 +199,6 @@ const AdyenCheckoutComponent = ({
             }
         }
     }, [basket?.c_orderData])
-
-    // Extract redirect params from URL
-    const urlParams = useMemo(() => {
-        if (typeof window === 'undefined') return {}
-        const params = new URLSearchParams(window.location.search)
-        return {
-            redirectResult: params.get('redirectResult'),
-            amazonCheckoutSessionId: params.get('amazonCheckoutSessionId')
-        }
-    }, [])
 
     // Memoize state change handler
     const handleStateChange = useCallback(

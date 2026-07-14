@@ -65,6 +65,24 @@ export const getGooglePayShopperDetails = (paymentData) => {
 }
 
 /**
+ * Appends the express basket id to the 3DS redirect return URL so that the
+ * `/checkout/redirect` page can resolve the temporary/express basket (which holds
+ * `c_orderNo`) instead of the shopper's regular basket when the browser navigates
+ * back from the issuer.
+ *
+ * @param {string} returnUrl - The base return URL.
+ * @param {string} basketId - The id of the basket the express payment was made against.
+ * @returns {string} The return URL with the express basket id appended as a query param.
+ */
+export const buildExpressReturnUrl = (returnUrl, basketId) => {
+    if (!returnUrl || !basketId) {
+        return returnUrl
+    }
+    const separator = returnUrl.includes('?') ? '&' : '?'
+    return `${returnUrl}${separator}adyenExpressBasketId=${encodeURIComponent(basketId)}`
+}
+
+/**
  * Creates the Google Pay Express configuration object for Adyen Checkout.
  *
  * @param {object} [props={}] - Configuration properties
@@ -292,7 +310,12 @@ export const getGooglePayExpressConfig = (props = {}) => {
                         ...state.data,
                         ...shopperDetails,
                         origin: state.data?.origin || window.location.origin,
-                        ...(props.returnUrl && {returnUrl: props.returnUrl})
+                        ...(props.returnUrl && {
+                            returnUrl: buildExpressReturnUrl(
+                                props.returnUrl,
+                                activeBasket?.basketId
+                            )
+                        })
                     },
                     locale
                 )

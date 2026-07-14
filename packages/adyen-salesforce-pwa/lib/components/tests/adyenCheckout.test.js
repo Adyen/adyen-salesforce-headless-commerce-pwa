@@ -607,6 +607,46 @@ describe('AdyenCheckoutComponent', () => {
         )
     })
 
+    describe('express basket on 3DS redirect return', () => {
+        afterEach(() => {
+            window.history.pushState({}, '', '/')
+        })
+
+        it('uses the express basket id from the URL instead of the current basket when returning from a redirect', async () => {
+            window.history.pushState(
+                {},
+                '',
+                '/checkout/redirect?redirectResult=xyz&adyenExpressBasketId=express-basket-1'
+            )
+            const {basket: _unusedBasket, ...propsWithoutBasket} = defaultProps
+
+            render(<AdyenCheckoutComponent {...propsWithoutBasket} page="redirect" />)
+
+            await waitFor(() => {
+                expect(paymentMethodsConfiguration).toHaveBeenCalledWith(
+                    expect.objectContaining({
+                        basket: {basketId: 'express-basket-1'}
+                    })
+                )
+            })
+        })
+
+        it('falls back to the current basket when there is no express basket id in the URL', async () => {
+            window.history.pushState({}, '', '/checkout/redirect?redirectResult=xyz')
+            const {basket: _unusedBasket, ...propsWithoutBasket} = defaultProps
+
+            render(<AdyenCheckoutComponent {...propsWithoutBasket} page="redirect" />)
+
+            await waitFor(() => {
+                expect(paymentMethodsConfiguration).toHaveBeenCalledWith(
+                    expect.objectContaining({
+                        basket: expect.objectContaining({basketId: 'mock-basket-id'})
+                    })
+                )
+            })
+        })
+    })
+
     it('should handle multiple error callbacks', async () => {
         const error1 = jest.fn()
         const error2 = jest.fn()
