@@ -118,6 +118,10 @@ export const getAmount = ({basket, adyenOrder}) => {
     if (adyenOrder) {
         return adyenOrder.remainingAmount
     }
+    // A minimal basket (e.g. `{basketId}` used to resolve the express basket on the
+    // 3DS redirect return) has no currency yet - skip amount calculation rather than
+    // letting getCurrencyValueForApi throw on an unrecognized currency code.
+    if (!basket.currency) return null
     return {
         value: getCurrencyValueForApi(basket.orderTotal, basket.currency),
         currency: basket.currency
@@ -167,11 +171,16 @@ export const onPaymentsSuccess = async (state, component, actions, props, respon
     if (responses?.paymentsResponse?.isSuccessful && responses?.paymentsResponse?.isFinal) {
         if (responses?.paymentsResponse?.order) {
             if (responses?.paymentsResponse?.order?.remainingAmount?.value <= 0) {
+                // Order is complete: the basket has been replaced server-side, so the
+                // cached basket (and the header's cart count derived from it) must be
+                // refreshed, otherwise the cart badge keeps showing the old item count.
+                props?.queryClient?.invalidateQueries()
                 props?.navigate(
                     `/checkout/confirmation/${responses?.paymentsResponse?.merchantReference}`
                 )
             }
         } else {
+            props?.queryClient?.invalidateQueries()
             props?.navigate(
                 `/checkout/confirmation/${responses?.paymentsResponse?.merchantReference}`
             )
@@ -184,6 +193,7 @@ export const onPaymentsSuccess = async (state, component, actions, props, respon
 
 export const onPaymentsDetailsSuccess = async (state, component, actions, props, responses) => {
     if (responses?.paymentsDetailsResponse?.isSuccessful) {
+        props?.queryClient?.invalidateQueries()
         props?.navigate(
             `/checkout/confirmation/${responses?.paymentsDetailsResponse?.merchantReference}`
         )

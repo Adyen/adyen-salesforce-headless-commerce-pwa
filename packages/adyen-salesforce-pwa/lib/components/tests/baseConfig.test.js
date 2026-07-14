@@ -441,6 +441,15 @@ describe('getAmount function', () => {
         expect(getAmount(props)).toEqual(expectedAmount)
     })
 
+    it('returns null if basket has no currency (e.g. a minimal express basket)', () => {
+        const props = {
+            basket: {
+                basketId: 'express-basket-1'
+            }
+        }
+        expect(getAmount(props)).toBeNull()
+    })
+
     it('returns remainingAmount from adyenOrder if available', () => {
         const props = {
             basket: {

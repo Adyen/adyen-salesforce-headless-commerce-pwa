@@ -25,3 +25,4 @@ docs
 .factory/
 .gemini/
 openspec/
+.agents/

@@ -289,7 +289,8 @@
       "value": " "
     },
     {
-      "offset": 0,
+      "type": 6,
+      "value": "quantity",
       "options": {
         "one": {
           "value": [
@@ -308,9 +309,8 @@
           ]
         }
       },
-      "pluralType": "cardinal",
-      "type": 6,
-      "value": "quantity"
+      "offset": 0,
+      "pluralType": "cardinal"
     },
     {
       "type": 0,
@@ -379,14 +379,14 @@
       "value": "我们刚刚向 "
     },
     {
+      "type": 8,
+      "value": "b",
       "children": [
         {
           "type": 1,
           "value": "email"
         }
-      ],
-      "type": 8,
-      "value": "b"
+      ]
     },
     {
       "type": 0,
@@ -437,14 +437,14 @@
       "value": "您将通过 "
     },
     {
+      "type": 8,
+      "value": "b",
       "children": [
         {
           "type": 1,
           "value": "email"
         }
-      ],
-      "type": 8,
-      "value": "b"
+      ]
     },
     {
       "type": 0,
@@ -549,7 +549,8 @@
       "value": "购物车（"
     },
     {
-      "offset": 0,
+      "type": 6,
+      "value": "itemCount",
       "options": {
         "=0": {
           "value": [
@@ -582,9 +583,8 @@
           ]
         }
       },
-      "pluralType": "cardinal",
-      "type": 6,
-      "value": "itemCount"
+      "offset": 0,
+      "pluralType": "cardinal"
     },
     {
       "type": 0,
@@ -761,7 +761,8 @@
   ],
   "checkout_confirmation.message.num_of_items_in_order": [
     {
-      "offset": 0,
+      "type": 6,
+      "value": "itemCount",
       "options": {
         "=0": {
           "value": [
@@ -794,9 +795,8 @@
           ]
         }
       },
-      "pluralType": "cardinal",
-      "type": 6,
-      "value": "itemCount"
+      "offset": 0,
+      "pluralType": "cardinal"
     }
   ],
   "checkout_confirmation.message.will_email_shortly": [
@@ -805,14 +805,14 @@
       "value": "我们会尽快向 "
     },
     {
+      "type": 8,
+      "value": "b",
       "children": [
         {
           "type": 1,
           "value": "email"
         }
-      ],
-      "type": 8,
-      "value": "b"
+      ]
     },
     {
       "type": 0,
@@ -1631,7 +1631,8 @@
       "value": " "
     },
     {
-      "offset": 0,
+      "type": 6,
+      "value": "quantity",
       "options": {
         "one": {
           "value": [
@@ -1650,9 +1651,8 @@
           ]
         }
       },
-      "pluralType": "cardinal",
-      "type": 6,
-      "value": "quantity"
+      "offset": 0,
+      "pluralType": "cardinal"
     },
     {
       "type": 0,
@@ -2395,7 +2395,8 @@
       "value": "购物车内有 "
     },
     {
-      "offset": 0,
+      "type": 6,
+      "value": "itemCount",
       "options": {
         "=0": {
           "value": [
@@ -2428,9 +2429,8 @@
           ]
         }
       },
-      "pluralType": "cardinal",
-      "type": 6,
-      "value": "itemCount"
+      "offset": 0,
+      "pluralType": "cardinal"
     }
   ],
   "order_summary.cart_items.link.edit_cart": [
@@ -3067,28 +3067,28 @@
       "value": "创建帐户即表示您同意 Salesforce "
     },
     {
+      "type": 8,
+      "value": "policy",
       "children": [
         {
           "type": 0,
           "value": "隐私政策"
         }
-      ],
-      "type": 8,
-      "value": "policy"
+      ]
     },
     {
       "type": 0,
       "value": "和"
     },
     {
+      "type": 8,
+      "value": "terms",
       "children": [
         {
           "type": 0,
           "value": "条款与条件"
         }
-      ],
-      "type": 8,
-      "value": "terms"
+      ]
     }
   ],
   "register_form.message.already_have_account": [
@@ -3285,14 +3285,14 @@
       "value": "如果您没有被自动重定向，请点击"
     },
     {
+      "type": 8,
+      "value": "link",
       "children": [
         {
           "type": 0,
           "value": "此链接"
         }
-      ],
-      "type": 8,
-      "value": "link"
+      ]
     },
     {
       "type": 0,
@@ -4103,7 +4103,8 @@
       "value": " "
     },
     {
-      "offset": 0,
+      "type": 6,
+      "value": "quantity",
       "options": {
         "one": {
           "value": [
@@ -4122,9 +4123,8 @@
           ]
         }
       },
-      "pluralType": "cardinal",
-      "type": 6,
-      "value": "quantity"
+      "offset": 0,
+      "pluralType": "cardinal"
     },
     {
       "type": 0,

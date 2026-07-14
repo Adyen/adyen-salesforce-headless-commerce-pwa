@@ -8,6 +8,7 @@ export class ScenarioHelper {
 
         // Landing Page Locators
         this.heading = this.page.getByRole('heading', {
+            level: 1,
             name: `${this.locale.landingPage.heading}`
         })
 
@@ -20,6 +21,11 @@ export class ScenarioHelper {
         )
         this.addToCartButton = this.page.getByRole('button', {
             name: `${locale.productDetailPage.addToCartButtonCaption}`
+        })
+
+        // Tracking Consent Popup Locators
+        this.trackingConsentDeclineButton = this.page.getByRole('button', {
+            name: `${locale.productDetailPage.trackingConsentDeclineButton}`
         })
 
         // Contact Info Page Locators
@@ -130,7 +136,23 @@ export class ScenarioHelper {
 
     async visitStore() {
         await this.page.goto(`/RefArch/${this.locale.lang}`)
-        await this.heading.waitFor({state: 'visible', timeout: 30000})
+        await this.page.getByTestId('home-page').waitFor({state: 'visible', timeout: 30000})
+        await this.dismissTrackingConsentIfPresent()
+    }
+
+    // The tracking consent (DNT) modal overlays the page on first visit and
+    // intercepts pointer events on underlying elements like Add to Cart.
+    // It persists its choice in a cookie, so declining it once per session is enough.
+    async dismissTrackingConsentIfPresent() {
+        const isVisible = await this.trackingConsentDeclineButton
+            .isVisible({timeout: 5000})
+            .catch(() => false)
+        if (isVisible) {
+            await this.trackingConsentDeclineButton.click()
+            await this.trackingConsentDeclineButton
+                .waitFor({state: 'hidden', timeout: 5000})
+                .catch(() => {})
+        }
     }
 
     async login(user) {
@@ -204,6 +226,7 @@ export class ScenarioHelper {
         )
         await this.productColorRadioButton.click()
         await this.productSizeRadioButton.click()
+        await this.dismissTrackingConsentIfPresent()
         await this.submitAddToCartButton()
 
         await this.page.waitForTimeout(2000)
@@ -285,7 +308,15 @@ export class ScenarioHelper {
         await this.cityField.fill(user.address.city)
 
         if (user.address.stateOrProvince !== '') {
-            await this.stateDropdown.selectOption(user.address.stateOrProvince)
+            const stateFieldTagName = await this.stateDropdown.evaluate((el) =>
+                el.tagName.toLowerCase()
+            )
+            if (stateFieldTagName === 'select') {
+                await this.stateDropdown.selectOption(user.address.stateOrProvince)
+            } else {
+                await this.stateDropdown.click()
+                await this.stateDropdown.fill(user.address.stateOrProvince)
+            }
         }
 
         await this.zipCodeField.click()

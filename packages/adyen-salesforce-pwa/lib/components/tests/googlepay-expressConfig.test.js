@@ -226,7 +226,10 @@ describe('getGooglePayExpressConfig', () => {
             expect(AdyenTemporaryBasketService).toHaveBeenCalledWith('test-token', 'customer-123', {
                 id: 'RefArch'
             })
-            expect(mockCreateTemporaryBasket).toHaveBeenCalledWith({id: 'prod-1', quantity: 1})
+            expect(mockCreateTemporaryBasket).toHaveBeenCalledWith(
+                {id: 'prod-1', quantity: 1},
+                'USD'
+            )
             expect(resolve).toHaveBeenCalled()
         })
 
@@ -291,6 +294,22 @@ describe('getGooglePayExpressConfig', () => {
             expect(actions.resolve).toHaveBeenCalled()
         })
 
+        it('invalidates queries before navigating so the confirmation page fetches fresh auth/order data', async () => {
+            mockSubmitPayment.mockResolvedValue({
+                isFinal: true,
+                isSuccessful: true,
+                merchantReference: 'ORDER-001'
+            })
+            const navigate = jest.fn()
+            const queryClient = {invalidateQueries: jest.fn()}
+            const config = getGooglePayExpressConfig({...defaultProps, navigate, queryClient})
+            const actions = {resolve: jest.fn(), reject: jest.fn()}
+            await config.onSubmit({data: {}}, {handleAction: jest.fn()}, actions)
+
+            expect(queryClient.invalidateQueries).toHaveBeenCalled()
+            expect(navigate).toHaveBeenCalledWith('/checkout/confirmation/ORDER-001')
+        })
+
         it('calls handleAction when 3DS action is present', async () => {
             const mockAction = {type: 'threeDS2'}
             mockSubmitPayment.mockResolvedValue({action: mockAction})
@@ -300,6 +319,74 @@ describe('getGooglePayExpressConfig', () => {
             await config.onSubmit({data: {}}, component, actions)
 
             expect(component.handleAction).toHaveBeenCalledWith(mockAction)
+        })
+
+        it('forwards returnUrl with the express basket id appended to submitPayment when provided', async () => {
+            mockSubmitPayment.mockResolvedValue({isFinal: true, isSuccessful: true})
+            const returnUrl = 'http://localhost:3000/RefArch/fr-FR/checkout/redirect'
+            const config = getGooglePayExpressConfig({...defaultProps, returnUrl})
+            const actions = {resolve: jest.fn(), reject: jest.fn()}
+            await config.onSubmit({data: {}}, {handleAction: jest.fn()}, actions)
+
+            expect(mockSubmitPayment).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    returnUrl: `${returnUrl}?adyenExpressBasketId=${defaultProps.basket.basketId}`
+                }),
+                defaultProps.locale
+            )
+        })
+
+        it('appends the express basket id using & when returnUrl already has query params', async () => {
+            mockSubmitPayment.mockResolvedValue({isFinal: true, isSuccessful: true})
+            const returnUrl = 'http://localhost:3000/RefArch/fr-FR/checkout/redirect?locale=fr-FR'
+            const config = getGooglePayExpressConfig({...defaultProps, returnUrl})
+            const actions = {resolve: jest.fn(), reject: jest.fn()}
+            await config.onSubmit({data: {}}, {handleAction: jest.fn()}, actions)
+
+            expect(mockSubmitPayment).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    returnUrl: `${returnUrl}&adyenExpressBasketId=${defaultProps.basket.basketId}`
+                }),
+                defaultProps.locale
+            )
+        })
+
+        it('omits returnUrl from submitPayment when not provided', async () => {
+            mockSubmitPayment.mockResolvedValue({isFinal: true, isSuccessful: true})
+            const config = getGooglePayExpressConfig(defaultProps)
+            const actions = {resolve: jest.fn(), reject: jest.fn()}
+            await config.onSubmit({data: {}}, {handleAction: jest.fn()}, actions)
+
+            const [submittedData] = mockSubmitPayment.mock.calls[0]
+            expect(submittedData).not.toHaveProperty('returnUrl')
+        })
+
+        it('appends the temporary (PDP) basket id, not the cart basket id, to returnUrl', async () => {
+            AdyenTemporaryBasketService.mockImplementation(() => ({
+                createTemporaryBasket: jest.fn().mockResolvedValue({
+                    basketId: 'temp-basket-1',
+                    orderTotal: 50,
+                    currency: 'USD'
+                })
+            }))
+            mockSubmitPayment.mockResolvedValue({isFinal: true, isSuccessful: true})
+            const returnUrl = 'http://localhost:3000/RefArch/fr-FR/checkout/redirect'
+            const config = getGooglePayExpressConfig({
+                ...defaultProps,
+                type: 'pdp',
+                product: {id: 'prod-1', quantity: 1},
+                returnUrl
+            })
+            await config.onClick(jest.fn(), jest.fn())
+            const actions = {resolve: jest.fn(), reject: jest.fn()}
+            await config.onSubmit({data: {}}, {handleAction: jest.fn()}, actions)
+
+            expect(mockSubmitPayment).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    returnUrl: `${returnUrl}?adyenExpressBasketId=temp-basket-1`
+                }),
+                defaultProps.locale
+            )
         })
 
         it('rejects when payment is not successful', async () => {
@@ -396,6 +483,24 @@ describe('getGooglePayExpressConfig', () => {
 
             expect(navigate).toHaveBeenCalledWith('/checkout/confirmation/ORDER-001')
             expect(actions.resolve).toHaveBeenCalled()
+        })
+
+        it('invalidates queries before navigating so the confirmation page fetches fresh auth/order data', async () => {
+            const mockSubmitDetails = jest.fn().mockResolvedValue({
+                isSuccessful: true,
+                merchantReference: 'ORDER-001'
+            })
+            AdyenPaymentsDetailsService.mockImplementation(() => ({
+                submitPaymentsDetails: mockSubmitDetails
+            }))
+            const navigate = jest.fn()
+            const queryClient = {invalidateQueries: jest.fn()}
+            const config = getGooglePayExpressConfig({...defaultProps, navigate, queryClient})
+            const actions = {resolve: jest.fn(), reject: jest.fn()}
+            await config.onAdditionalDetails({data: {}}, {}, actions)
+
+            expect(queryClient.invalidateQueries).toHaveBeenCalled()
+            expect(navigate).toHaveBeenCalledWith('/checkout/confirmation/ORDER-001')
         })
 
         it('rejects and does not navigate when payment is not successful', async () => {

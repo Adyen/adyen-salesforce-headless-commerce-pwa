@@ -1,4 +1,5 @@
 import React, {useEffect, useRef, useMemo, useCallback, useState} from 'react'
+import {useQueryClient} from '@tanstack/react-query'
 import {useAccessToken, useCustomerId, useCustomerType} from '@salesforce/commerce-sdk-react'
 import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
 import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
@@ -72,7 +73,25 @@ const AdyenCheckoutComponent = ({
     const site = siteProp ?? hookSite
     const locale = localeProp ?? hookLocale
     const navigate = navigateProp ?? hookNavigate
-    const basket = basketProp ?? hookBasket
+
+    // Extract redirect params from URL
+    const urlParams = useMemo(() => {
+        if (typeof window === 'undefined') return {}
+        const params = new URLSearchParams(window.location.search)
+        return {
+            redirectResult: params.get('redirectResult'),
+            amazonCheckoutSessionId: params.get('amazonCheckoutSessionId'),
+            expressBasketId: params.get('adyenExpressBasketId')
+        }
+    }, [])
+
+    // On the 3DS redirect return for an express payment, the shopper's regular basket
+    // (from useCurrentBasket) is not the basket the payment was made against - the
+    // express/temporary basket carrying `c_orderNo` must be used instead so that
+    // /payments/details can create the SFCC order.
+    const basket =
+        basketProp ??
+        (urlParams.expressBasketId ? {basketId: urlParams.expressBasketId} : hookBasket)
 
     const hookCustomerId = useCustomerId()
     const customerId = customerIdProp || hookCustomerId
@@ -80,6 +99,7 @@ const AdyenCheckoutComponent = ({
     const isCustomerRegistered = customerTypeData.isRegistered
     const {getTokenWhenReady} = useAccessToken()
     const [authToken, setAuthToken] = useState(authTokenProp)
+    const queryClient = useQueryClient()
 
     useEffect(() => {
         if (authTokenProp) return
@@ -180,16 +200,6 @@ const AdyenCheckoutComponent = ({
         }
     }, [basket?.c_orderData])
 
-    // Extract redirect params from URL
-    const urlParams = useMemo(() => {
-        if (typeof window === 'undefined') return {}
-        const params = new URLSearchParams(window.location.search)
-        return {
-            redirectResult: params.get('redirectResult'),
-            amazonCheckoutSessionId: params.get('amazonCheckoutSessionId')
-        }
-    }, [])
-
     // Memoize state change handler
     const handleStateChange = useCallback(
         (data) => {
@@ -221,6 +231,7 @@ const AdyenCheckoutComponent = ({
             setOrderNo: setInternalOrderNo,
             resetDropin: resetDropin,
             navigate,
+            queryClient,
             onError,
             afterSubmit,
             beforeSubmit,
@@ -350,11 +361,12 @@ const AdyenCheckoutComponent = ({
             isMounted = false
             if (dropinRef.current) {
                 try {
+                    // Only unmount this dropin instance. Calling
+                    // window.paypal.__internal_destroy__() here would tear down the
+                    // shared zoid registry for ALL PayPal components on the page
+                    // (including ones still mounting), causing "zoid destroyed all
+                    // components" errors.
                     dropinRef.current.unmount()
-                    // PayPal specific cleanup: destroy the PayPal instance
-                    if (window.paypal && typeof window.paypal.__internal_destroy__ === 'function') {
-                        window.paypal.__internal_destroy__()
-                    }
                 } catch (e) {
                     console.error('Error unmounting dropin:', e)
                 }

@@ -20,6 +20,9 @@ jest.mock('../../hooks/useAdyenPaymentMethodsForExpress')
 jest.mock('../paypal/expressConfig')
 jest.mock('../../services/shipping-methods')
 jest.mock('@salesforce/commerce-sdk-react')
+jest.mock('@tanstack/react-query', () => ({
+    useQueryClient: jest.fn().mockReturnValue({invalidateQueries: jest.fn()})
+}))
 jest.mock('@salesforce/retail-react-app/app/hooks/use-current-basket', () => ({
     useCurrentBasket: jest.fn()
 }))
@@ -206,7 +209,38 @@ describe('PayPalExpressComponent', () => {
                         beforeSubmit,
                         afterSubmit,
                         onError,
-                        fetchShippingMethods: expect.any(Function)
+                        fetchShippingMethods: expect.any(Function),
+                        onPaymentCancel: undefined,
+                        queryClient: expect.objectContaining({
+                            invalidateQueries: expect.any(Function)
+                        })
+                    })
+                )
+            })
+        })
+
+        it('passes an onPaymentCancel callback for PDP flow so errors re-render in place', async () => {
+            useAdyenPaymentMethodsForExpress.mockReturnValue({
+                data: mockPaymentMethodsData,
+                error: null,
+                isLoading: false
+            })
+
+            await act(async () => {
+                render(
+                    <PayPalExpressComponent
+                        {...defaultProps}
+                        type="pdp"
+                        currency="USD"
+                        product={{price: 10, quantity: 1}}
+                    />
+                )
+            })
+
+            await waitFor(() => {
+                expect(paypalExpressConfig).toHaveBeenCalledWith(
+                    expect.objectContaining({
+                        onPaymentCancel: expect.any(Function)
                     })
                 )
             })

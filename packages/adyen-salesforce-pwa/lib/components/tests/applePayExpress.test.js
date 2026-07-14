@@ -20,6 +20,9 @@ jest.mock('../../hooks/useAdyenPaymentMethodsForExpress')
 jest.mock('../../hooks/useAdyenShippingMethods')
 jest.mock('../helpers/applePayExpress.utils')
 jest.mock('@salesforce/commerce-sdk-react')
+jest.mock('@tanstack/react-query', () => ({
+    useQueryClient: jest.fn().mockReturnValue({invalidateQueries: jest.fn()})
+}))
 
 const mockGetShippingMethods = jest.fn()
 jest.mock('../../services/shipping-methods', () => ({
@@ -185,6 +188,20 @@ describe('ApplePayExpressComponent', () => {
                 })
             )
         })
+
+        it('passes queryClient to getAppleButtonConfig', async () => {
+            await act(async () => {
+                render(<ApplePayExpressComponent {...defaultProps} />)
+            })
+
+            expect(getAppleButtonConfig).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    queryClient: expect.objectContaining({
+                        invalidateQueries: expect.any(Function)
+                    })
+                })
+            )
+        })
     })
 
     describe('PDP Flow', () => {
@@ -286,6 +303,30 @@ describe('ApplePayExpressComponent', () => {
             expect(getAppleButtonConfig).toHaveBeenCalledWith(
                 expect.objectContaining({
                     product: pdpProps.product
+                })
+            )
+        })
+
+        it('passes an onPaymentCancel callback to getAppleButtonConfig so errors re-render in place', async () => {
+            await act(async () => {
+                render(<ApplePayExpressComponent {...pdpProps} />)
+            })
+
+            expect(getAppleButtonConfig).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    onPaymentCancel: expect.any(Function)
+                })
+            )
+        })
+
+        it('does not pass onPaymentCancel for cart flow (falls back to navigate)', async () => {
+            await act(async () => {
+                render(<ApplePayExpressComponent {...defaultProps} />)
+            })
+
+            expect(getAppleButtonConfig).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    onPaymentCancel: undefined
                 })
             )
         })

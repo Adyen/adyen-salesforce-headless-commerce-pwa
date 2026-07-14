@@ -21,6 +21,9 @@ jest.mock('../../hooks/useAdyenPaymentMethods')
 jest.mock('@salesforce/commerce-sdk-react')
 jest.mock('../../hooks/useAdyenOrderNumber')
 jest.mock('../helpers/adyenCheckout.utils')
+jest.mock('@tanstack/react-query', () => ({
+    useQueryClient: jest.fn().mockReturnValue({invalidateQueries: jest.fn()})
+}))
 jest.mock('../paymentMethodsConfiguration', () => ({
     paymentMethodsConfiguration: jest.fn().mockReturnValue({})
 }))
@@ -602,6 +605,48 @@ describe('AdyenCheckoutComponent', () => {
                 skip: true
             })
         )
+    })
+
+    describe('express basket on 3DS redirect return', () => {
+        afterEach(() => {
+            window.history.pushState({}, '', '/')
+        })
+
+        it('uses the express basket id from the URL instead of the current basket when returning from a redirect', async () => {
+            window.history.pushState(
+                {},
+                '',
+                '/checkout/redirect?redirectResult=xyz&adyenExpressBasketId=express-basket-1'
+            )
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const {basket: _unusedBasket, ...propsWithoutBasket} = defaultProps
+
+            render(<AdyenCheckoutComponent {...propsWithoutBasket} page="redirect" />)
+
+            await waitFor(() => {
+                expect(paymentMethodsConfiguration).toHaveBeenCalledWith(
+                    expect.objectContaining({
+                        basket: {basketId: 'express-basket-1'}
+                    })
+                )
+            })
+        })
+
+        it('falls back to the current basket when there is no express basket id in the URL', async () => {
+            window.history.pushState({}, '', '/checkout/redirect?redirectResult=xyz')
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const {basket: _unusedBasket, ...propsWithoutBasket} = defaultProps
+
+            render(<AdyenCheckoutComponent {...propsWithoutBasket} page="redirect" />)
+
+            await waitFor(() => {
+                expect(paymentMethodsConfiguration).toHaveBeenCalledWith(
+                    expect.objectContaining({
+                        basket: expect.objectContaining({basketId: 'mock-basket-id'})
+                    })
+                )
+            })
+        })
     })
 
     it('should handle multiple error callbacks', async () => {

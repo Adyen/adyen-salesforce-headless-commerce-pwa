@@ -65,6 +65,24 @@ export const getGooglePayShopperDetails = (paymentData) => {
 }
 
 /**
+ * Appends the express basket id to the 3DS redirect return URL so that the
+ * `/checkout/redirect` page can resolve the temporary/express basket (which holds
+ * `c_orderNo`) instead of the shopper's regular basket when the browser navigates
+ * back from the issuer.
+ *
+ * @param {string} returnUrl - The base return URL.
+ * @param {string} basketId - The id of the basket the express payment was made against.
+ * @returns {string} The return URL with the express basket id appended as a query param.
+ */
+export const buildExpressReturnUrl = (returnUrl, basketId) => {
+    if (!returnUrl || !basketId) {
+        return returnUrl
+    }
+    const separator = returnUrl.includes('?') ? '&' : '?'
+    return `${returnUrl}${separator}adyenExpressBasketId=${encodeURIComponent(basketId)}`
+}
+
+/**
  * Creates the Google Pay Express configuration object for Adyen Checkout.
  *
  * @param {object} [props={}] - Configuration properties
@@ -82,6 +100,7 @@ export const getGooglePayShopperDetails = (paymentData) => {
  * @param {string} [props.type='cart'] - Express checkout type: 'pdp' or 'cart'
  * @param {object} [props.product] - Product object (required when type is 'pdp')
  * @param {string} [props.merchantDisplayName=''] - Merchant display name shown in payment sheet
+ * @param {string} [props.returnUrl] - Absolute, locale/site-aware return URL for redirect payments (e.g. 3DS)
  * @returns {object} Google Pay Express configuration object for Adyen Checkout
  */
 export const getGooglePayExpressConfig = (props = {}) => {
@@ -290,7 +309,13 @@ export const getGooglePayExpressConfig = (props = {}) => {
                         paymentType: isPdp ? PAYMENT_TYPES.EXPRESS_PDP : PAYMENT_TYPES.EXPRESS,
                         ...state.data,
                         ...shopperDetails,
-                        origin: state.data?.origin || window.location.origin
+                        origin: state.data?.origin || window.location.origin,
+                        ...(props.returnUrl && {
+                            returnUrl: buildExpressReturnUrl(
+                                props.returnUrl,
+                                activeBasket?.basketId
+                            )
+                        })
                     },
                     locale
                 )
@@ -300,6 +325,7 @@ export const getGooglePayExpressConfig = (props = {}) => {
                     actions.resolve(paymentsResponse)
                 } else if (paymentsResponse?.isFinal && paymentsResponse?.isSuccessful) {
                     actions.resolve(paymentsResponse)
+                    props.queryClient?.invalidateQueries()
                     props.navigate(`/checkout/confirmation/${paymentsResponse?.merchantReference}`)
                 } else {
                     actions.reject()
@@ -322,6 +348,7 @@ export const getGooglePayExpressConfig = (props = {}) => {
                     await adyenPaymentsDetailsService.submitPaymentsDetails(state.data)
                 if (paymentsDetailsResponse?.isSuccessful) {
                     actions.resolve(paymentsDetailsResponse)
+                    props.queryClient?.invalidateQueries()
                     props.navigate(
                         `/checkout/confirmation/${paymentsDetailsResponse?.merchantReference}`
                     )
@@ -369,8 +396,10 @@ export const getGooglePayExpressConfig = (props = {}) => {
                         customerId,
                         site
                     )
-                    temporaryBasket =
-                        await adyenTemporaryBasketService.createTemporaryBasket(product)
+                    temporaryBasket = await adyenTemporaryBasketService.createTemporaryBasket(
+                        product,
+                        currentBasket?.currency
+                    )
                     if (temporaryBasket?.basketId) {
                         setBasket(temporaryBasket)
                         resolve()

@@ -218,5 +218,23 @@ describe('basketHelper', () => {
             })
             expect(result).toEqual(created)
         })
+
+        it('should create a new temporary basket with a currency when provided', async () => {
+            const created = {basketId: 'newTemp', temporary: true, currency: 'EUR'}
+            mockShopperBaskets.createBasket.mockResolvedValue(created)
+
+            const result = await createTemporaryBasket(
+                'Bearer mockToken',
+                'mockCustomerId',
+                'RefArch',
+                'EUR'
+            )
+
+            expect(mockShopperBaskets.createBasket).toHaveBeenCalledWith({
+                parameters: {temporary: true},
+                body: {customerInfo: {customerId: 'mockCustomerId'}, currency: 'EUR'}
+            })
+            expect(result).toEqual(created)
+        })
     })
 })

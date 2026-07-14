@@ -52,7 +52,9 @@ const {handler} = runtime.createHandler(options, (app) => {
                         'https://www.paypalobjects.com',
                         'https://*.cash.app',
                         'https://*.gstatic.com',
-                        '*.cdn-apple.com'
+                        '*.cdn-apple.com',
+                        '*.mastercard.com',
+                        '*.visa.com'
                     ],
                     'script-src': [
                         "'self'",
@@ -64,7 +66,6 @@ const {handler} = runtime.createHandler(options, (app) => {
                         'https://x.klarnacdn.net/kp/lib/v1/api.js',
                         'https://static-eu.payments-amazon.com/checkout.js',
                         'https://sandbox.src.mastercard.com/sdk/srcsdk.mastercard.js',
-                        'https://sandbox-assets.secure.checkout.visa.com/checkout-widget/resources/js/src-i-adapter/visa-sdk.js?v2',
                         'https://pay.google.com/gp/p/js/pay.js',
                         'https://*.cash.app',
                         'https://*.checkout.visa.com',
@@ -77,8 +78,9 @@ const {handler} = runtime.createHandler(options, (app) => {
                         'https://api.lab.amplitude.com/sdk/vardata',
                         '*.adyen.com',
                         '*.amazon.com',
-                        'https://www.sandbox.paypal.com/xoplatform/logger/api/logger?disableSetCookie=true',
+                        'https://www.sandbox.paypal.com',
                         '*.google.com',
+                        'pay.google.com',
                         '*.mastercard.com',
                         '*.visa.com',
                         '*.cdn-apple.com'
@@ -93,6 +95,7 @@ const {handler} = runtime.createHandler(options, (app) => {
                         '*.visa.com',
                         '*.cdn-apple.com'
                     ],
+                    'frame-ancestors': ["'self'", '*.visa.com', '*.mastercard.com'],
                     /* -----------------Adyen End ------------------------ */
                     // Do not upgrade insecure requests for local development
                     'upgrade-insecure-requests': isRemote() ? [] : null
