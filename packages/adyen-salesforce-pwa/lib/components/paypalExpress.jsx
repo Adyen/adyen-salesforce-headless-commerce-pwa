@@ -142,6 +142,11 @@ const PayPalExpressComponent = ({
     const basketId = shopperBasket?.basketId
     const paymentContainer = useRef(null)
     const paypalButtonRef = useRef(null)
+    const [remountKey, setRemountKey] = useState(0)
+
+    const handlePaymentCancel = useCallback(() => {
+        setRemountKey((prev) => prev + 1)
+    }, [])
 
     const {
         data: adyenEnvironment,
@@ -264,6 +269,7 @@ const PayPalExpressComponent = ({
                     afterShippingOptionsChange,
                     configuration,
                     onError,
+                    onPaymentCancel: isPdp ? handlePaymentCancel : undefined,
                     fetchShippingMethods,
                     enableReview,
                     reviewPageUrl,
@@ -344,7 +350,8 @@ const PayPalExpressComponent = ({
         reviewPageUrl,
         fetchShippingMethods,
         type,
-        product
+        product,
+        remountKey
     ])
 
     return (
