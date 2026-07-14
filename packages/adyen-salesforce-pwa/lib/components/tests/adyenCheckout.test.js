@@ -618,6 +618,7 @@ describe('AdyenCheckoutComponent', () => {
                 '',
                 '/checkout/redirect?redirectResult=xyz&adyenExpressBasketId=express-basket-1'
             )
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const {basket: _unusedBasket, ...propsWithoutBasket} = defaultProps
 
             render(<AdyenCheckoutComponent {...propsWithoutBasket} page="redirect" />)
@@ -633,6 +634,7 @@ describe('AdyenCheckoutComponent', () => {
 
         it('falls back to the current basket when there is no express basket id in the URL', async () => {
             window.history.pushState({}, '', '/checkout/redirect?redirectResult=xyz')
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const {basket: _unusedBasket, ...propsWithoutBasket} = defaultProps
 
             render(<AdyenCheckoutComponent {...propsWithoutBasket} page="redirect" />)
