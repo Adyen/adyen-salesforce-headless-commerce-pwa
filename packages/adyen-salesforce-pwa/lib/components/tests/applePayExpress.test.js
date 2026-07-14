@@ -306,6 +306,30 @@ describe('ApplePayExpressComponent', () => {
                 })
             )
         })
+
+        it('passes an onPaymentCancel callback to getAppleButtonConfig so errors re-render in place', async () => {
+            await act(async () => {
+                render(<ApplePayExpressComponent {...pdpProps} />)
+            })
+
+            expect(getAppleButtonConfig).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    onPaymentCancel: expect.any(Function)
+                })
+            )
+        })
+
+        it('does not pass onPaymentCancel for cart flow (falls back to navigate)', async () => {
+            await act(async () => {
+                render(<ApplePayExpressComponent {...defaultProps} />)
+            })
+
+            expect(getAppleButtonConfig).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    onPaymentCancel: undefined
+                })
+            )
+        })
     })
 
     describe('shopperBasket Memoization', () => {

@@ -62,6 +62,11 @@ const ApplePayExpressComponent = (props) => {
     const paymentContainer = useRef(null)
     const applePayButtonRef = useRef(null)
     const errorShownRef = useRef(false)
+    const [remountKey, setRemountKey] = useState(0)
+
+    const handlePaymentCancel = useCallback(() => {
+        setRemountKey((prev) => prev + 1)
+    }, [])
 
     // Fetch Adyen environment
     const {
@@ -196,6 +201,7 @@ const ApplePayExpressComponent = (props) => {
                     navigate,
                     fetchShippingMethods,
                     onError,
+                    onPaymentCancel: isPdp ? handlePaymentCancel : undefined,
                     isExpressPdp,
                     merchantDisplayName,
                     customerId,
@@ -238,7 +244,8 @@ const ApplePayExpressComponent = (props) => {
         site?.id,
         navigate,
         fetchShippingMethods,
-        product
+        product,
+        remountKey
     ])
 
     const {spinner} = props

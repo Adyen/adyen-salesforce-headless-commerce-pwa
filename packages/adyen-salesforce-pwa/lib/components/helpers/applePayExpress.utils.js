@@ -317,7 +317,8 @@ export const getAppleButtonConfig = (props = {}) => {
 /**
  * Handles errors during Apple Pay Express checkout.
  * Cancels the express payment, cleans up the basket, removes shipping method and address,
- * and redirects to checkout page with error flag.
+ * and either calls onPaymentCancel (to re-render in place, e.g. on PDP) or falls back to
+ * redirecting to the checkout page with an error flag.
  *
  * @param {Error} error - The error that occurred
  * @param {object} component - Adyen component instance
@@ -327,6 +328,7 @@ export const getAppleButtonConfig = (props = {}) => {
  * @param {string} props.customerId - Customer ID
  * @param {object} props.site - Site configuration
  * @param {Function} props.navigate - Navigation function
+ * @param {Function} [props.onPaymentCancel] - Callback to signal cancellation and re-render
  * @returns {Promise<object>} Object indicating cancellation status
  */
 export const onErrorHandler = async (error, component, props) => {
@@ -341,7 +343,11 @@ export const onErrorHandler = async (error, component, props) => {
             )
             await paymentCancelExpressService.paymentCancelExpress()
         }
-        props.navigate(`/checkout?error=true`)
+        if (props.onPaymentCancel) {
+            props.onPaymentCancel()
+        } else {
+            props.navigate(`/checkout?error=true`)
+        }
         return {cancelled: true}
     } catch (err) {
         console.error('Error during express payment cancellation:', err)
