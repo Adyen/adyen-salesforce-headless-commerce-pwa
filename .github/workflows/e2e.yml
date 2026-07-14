@@ -4,6 +4,8 @@ on:
     branches: [main, develop]
 permissions:
   contents: read
+env:
+  NPM_CONFIG_REGISTRY: https://registry.npmjs.org/
 jobs:
   build-and-test:
     if: ${{ !startsWith(github.head_ref, 'renovate/') }}
