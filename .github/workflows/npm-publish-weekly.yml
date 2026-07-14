@@ -3,9 +3,6 @@ name: Publish Weekly Package
 on:
     workflow_call:
 
-env:
-    NPM_CONFIG_REGISTRY: https://registry.npmjs.org/
-
 jobs:
     publish-npm-weekly:
         runs-on: ubuntu-latest
