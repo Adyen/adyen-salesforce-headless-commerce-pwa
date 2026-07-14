@@ -307,11 +307,12 @@ const PayPalExpressComponent = ({
         return () => {
             if (paypalButtonRef.current) {
                 try {
+                    // Only unmount this specific PayPal button instance. Calling
+                    // window.paypal.__internal_destroy__() here would tear down the
+                    // shared zoid registry for ALL PayPal components on the page
+                    // (including ones still mounting), causing "zoid destroyed all
+                    // components" errors.
                     paypalButtonRef.current.unmount()
-                    // PayPal specific cleanup: destroy the PayPal instance
-                    if (window.paypal && typeof window.paypal.__internal_destroy__ === 'function') {
-                        window.paypal.__internal_destroy__()
-                    }
                 } catch (e) {
                     console.error('Error unmounting paypalButton:', e)
                 }

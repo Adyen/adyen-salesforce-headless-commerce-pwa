@@ -361,11 +361,12 @@ const AdyenCheckoutComponent = ({
             isMounted = false
             if (dropinRef.current) {
                 try {
+                    // Only unmount this dropin instance. Calling
+                    // window.paypal.__internal_destroy__() here would tear down the
+                    // shared zoid registry for ALL PayPal components on the page
+                    // (including ones still mounting), causing "zoid destroyed all
+                    // components" errors.
                     dropinRef.current.unmount()
-                    // PayPal specific cleanup: destroy the PayPal instance
-                    if (window.paypal && typeof window.paypal.__internal_destroy__ === 'function') {
-                        window.paypal.__internal_destroy__()
-                    }
                 } catch (e) {
                     console.error('Error unmounting dropin:', e)
                 }
