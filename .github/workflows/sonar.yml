@@ -4,6 +4,8 @@ on:
     pull_request:
 permissions:
     contents: read
+env:
+    NPM_CONFIG_REGISTRY: https://registry.npmjs.org/
 
 jobs:
     sonarqube:

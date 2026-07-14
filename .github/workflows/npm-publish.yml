@@ -8,6 +8,9 @@ on:
     schedule:
         - cron: '30 6 * * 1' # Runs at 06:30 UTC (7:30 CET) every Monday
 
+env:
+    NPM_CONFIG_REGISTRY: https://registry.npmjs.org/
+
 jobs:
     publish-npm-weekly:
         if: github.event_name == 'schedule'
