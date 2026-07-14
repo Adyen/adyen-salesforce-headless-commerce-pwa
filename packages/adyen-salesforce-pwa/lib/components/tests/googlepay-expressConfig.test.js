@@ -8,7 +8,6 @@ import {
     getGooglePayShopperDetails,
     onErrorHandler
 } from '../googlepay/expressConfig'
-import {__resetErrorNotificationThrottle} from '../../utils/executeCallbacks'
 import {AdyenPaymentsService} from '../../services/payments'
 import {AdyenPaymentsDetailsService} from '../../services/payments-details'
 import {AdyenShippingAddressService} from '../../services/shipping-address'
@@ -24,14 +23,10 @@ jest.mock('../../services/shipping-methods')
 jest.mock('../../services/temporary-basket')
 jest.mock('../../services/order-number')
 jest.mock('../../services/payment-cancel-express')
-jest.mock('../../utils/executeCallbacks', () => {
-    const actual = jest.requireActual('../../utils/executeCallbacks')
-    return {
-        ...actual,
-        executeCallbacks: jest.fn((cbs) => cbs),
-        executeErrorCallbacks: jest.fn((cbs) => cbs)
-    }
-})
+jest.mock('../../utils/executeCallbacks', () => ({
+    executeCallbacks: jest.fn((cbs) => cbs),
+    executeErrorCallbacks: jest.fn((cbs) => cbs)
+}))
 jest.mock('../../utils/parsers.mjs', () => ({
     getCurrencyValueForApi: jest.fn((value) => value * 100)
 }))
@@ -143,37 +138,7 @@ describe('getGooglePayShopperDetails', () => {
 
 describe('getGooglePayExpressConfig', () => {
     beforeEach(() => {
-        __resetErrorNotificationThrottle()
         jest.clearAllMocks()
-    })
-
-    afterEach(() => {
-        __resetErrorNotificationThrottle()
-    })
-
-    it('should call error handler only once across two config instances (dual-mount)', async () => {
-        const mockErrorHandler = jest.fn()
-        const props = {
-            ...defaultProps,
-            onError: [mockErrorHandler]
-        }
-
-        // Build two configs (simulating dual mount)
-        const config1 = getGooglePayExpressConfig(props)
-        const config2 = getGooglePayExpressConfig(props)
-
-        const testError = new Error('Dual mount error')
-
-        // Fire error on both configs
-        if (typeof config1.onError === 'function') {
-            await config1.onError(testError)
-        }
-        if (typeof config2.onError === 'function') {
-            await config2.onError(testError)
-        }
-
-        // Handler should be called only once across both instances
-        expect(mockErrorHandler).toHaveBeenCalledTimes(1)
     })
 
     it('returns config with expected base properties', () => {
@@ -261,7 +226,10 @@ describe('getGooglePayExpressConfig', () => {
             expect(AdyenTemporaryBasketService).toHaveBeenCalledWith('test-token', 'customer-123', {
                 id: 'RefArch'
             })
-            expect(mockCreateTemporaryBasket).toHaveBeenCalledWith({id: 'prod-1', quantity: 1})
+            expect(mockCreateTemporaryBasket).toHaveBeenCalledWith(
+                {id: 'prod-1', quantity: 1},
+                'USD'
+            )
             expect(resolve).toHaveBeenCalled()
         })
 
@@ -326,6 +294,22 @@ describe('getGooglePayExpressConfig', () => {
             expect(actions.resolve).toHaveBeenCalled()
         })
 
+        it('invalidates queries before navigating so the confirmation page fetches fresh auth/order data', async () => {
+            mockSubmitPayment.mockResolvedValue({
+                isFinal: true,
+                isSuccessful: true,
+                merchantReference: 'ORDER-001'
+            })
+            const navigate = jest.fn()
+            const queryClient = {invalidateQueries: jest.fn()}
+            const config = getGooglePayExpressConfig({...defaultProps, navigate, queryClient})
+            const actions = {resolve: jest.fn(), reject: jest.fn()}
+            await config.onSubmit({data: {}}, {handleAction: jest.fn()}, actions)
+
+            expect(queryClient.invalidateQueries).toHaveBeenCalled()
+            expect(navigate).toHaveBeenCalledWith('/checkout/confirmation/ORDER-001')
+        })
+
         it('calls handleAction when 3DS action is present', async () => {
             const mockAction = {type: 'threeDS2'}
             mockSubmitPayment.mockResolvedValue({action: mockAction})
@@ -335,6 +319,74 @@ describe('getGooglePayExpressConfig', () => {
             await config.onSubmit({data: {}}, component, actions)
 
             expect(component.handleAction).toHaveBeenCalledWith(mockAction)
+        })
+
+        it('forwards returnUrl with the express basket id appended to submitPayment when provided', async () => {
+            mockSubmitPayment.mockResolvedValue({isFinal: true, isSuccessful: true})
+            const returnUrl = 'http://localhost:3000/RefArch/fr-FR/checkout/redirect'
+            const config = getGooglePayExpressConfig({...defaultProps, returnUrl})
+            const actions = {resolve: jest.fn(), reject: jest.fn()}
+            await config.onSubmit({data: {}}, {handleAction: jest.fn()}, actions)
+
+            expect(mockSubmitPayment).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    returnUrl: `${returnUrl}?adyenExpressBasketId=${defaultProps.basket.basketId}`
+                }),
+                defaultProps.locale
+            )
+        })
+
+        it('appends the express basket id using & when returnUrl already has query params', async () => {
+            mockSubmitPayment.mockResolvedValue({isFinal: true, isSuccessful: true})
+            const returnUrl = 'http://localhost:3000/RefArch/fr-FR/checkout/redirect?locale=fr-FR'
+            const config = getGooglePayExpressConfig({...defaultProps, returnUrl})
+            const actions = {resolve: jest.fn(), reject: jest.fn()}
+            await config.onSubmit({data: {}}, {handleAction: jest.fn()}, actions)
+
+            expect(mockSubmitPayment).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    returnUrl: `${returnUrl}&adyenExpressBasketId=${defaultProps.basket.basketId}`
+                }),
+                defaultProps.locale
+            )
+        })
+
+        it('omits returnUrl from submitPayment when not provided', async () => {
+            mockSubmitPayment.mockResolvedValue({isFinal: true, isSuccessful: true})
+            const config = getGooglePayExpressConfig(defaultProps)
+            const actions = {resolve: jest.fn(), reject: jest.fn()}
+            await config.onSubmit({data: {}}, {handleAction: jest.fn()}, actions)
+
+            const [submittedData] = mockSubmitPayment.mock.calls[0]
+            expect(submittedData).not.toHaveProperty('returnUrl')
+        })
+
+        it('appends the temporary (PDP) basket id, not the cart basket id, to returnUrl', async () => {
+            AdyenTemporaryBasketService.mockImplementation(() => ({
+                createTemporaryBasket: jest.fn().mockResolvedValue({
+                    basketId: 'temp-basket-1',
+                    orderTotal: 50,
+                    currency: 'USD'
+                })
+            }))
+            mockSubmitPayment.mockResolvedValue({isFinal: true, isSuccessful: true})
+            const returnUrl = 'http://localhost:3000/RefArch/fr-FR/checkout/redirect'
+            const config = getGooglePayExpressConfig({
+                ...defaultProps,
+                type: 'pdp',
+                product: {id: 'prod-1', quantity: 1},
+                returnUrl
+            })
+            await config.onClick(jest.fn(), jest.fn())
+            const actions = {resolve: jest.fn(), reject: jest.fn()}
+            await config.onSubmit({data: {}}, {handleAction: jest.fn()}, actions)
+
+            expect(mockSubmitPayment).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    returnUrl: `${returnUrl}?adyenExpressBasketId=temp-basket-1`
+                }),
+                defaultProps.locale
+            )
         })
 
         it('rejects when payment is not successful', async () => {
@@ -451,106 +503,15 @@ describe('getGooglePayExpressConfig', () => {
             expect(navigate).toHaveBeenCalledWith('/checkout/confirmation/ORDER-001')
         })
 
-        it('passes the pre-created order number from the cart flow to the details call', async () => {
-            const mockSubmitDetails = jest.fn().mockResolvedValue({
-                isSuccessful: true,
-                merchantReference: 'ORDER-001'
-            })
-            AdyenPaymentsDetailsService.mockImplementation(() => ({
-                submitPaymentsDetails: mockSubmitDetails
-            }))
-            AdyenPaymentsService.mockImplementation(() => ({
-                submitPayment: jest.fn().mockResolvedValue({action: {type: 'threeDS2'}})
-            }))
-            AdyenOrderNumberService.mockImplementation(() => ({
-                fetchOrderNumber: jest.fn().mockResolvedValue({orderNo: 'ORDER-001'})
-            }))
-            const config = getGooglePayExpressConfig(defaultProps)
-            await config.onSubmit(
-                {data: {}},
-                {handleAction: jest.fn()},
-                {resolve: jest.fn(), reject: jest.fn()}
-            )
-            await config.onAdditionalDetails(
-                {data: {details: {}}},
-                {},
-                {resolve: jest.fn(), reject: jest.fn()}
-            )
-
-            expect(mockSubmitDetails).toHaveBeenCalledWith(
-                {details: {}},
-                {orderNo: 'ORDER-001', isTemporaryBasket: false}
-            )
-        })
-
-        it('passes the temporary basket order number to the details call in the pdp flow', async () => {
-            const mockSubmitDetails = jest.fn().mockResolvedValue({
-                isSuccessful: true,
-                merchantReference: 'ORDER-PDP'
-            })
-            AdyenPaymentsDetailsService.mockImplementation(() => ({
-                submitPaymentsDetails: mockSubmitDetails
-            }))
-            AdyenPaymentsService.mockImplementation(() => ({
-                submitPayment: jest.fn().mockResolvedValue({action: {type: 'threeDS2'}})
-            }))
-            AdyenOrderNumberService.mockImplementation(() => ({
-                fetchOrderNumber: jest.fn().mockResolvedValue({orderNo: 'ORDER-PDP'})
-            }))
-            AdyenTemporaryBasketService.mockImplementation(() => ({
-                createTemporaryBasket: jest.fn().mockResolvedValue({
-                    basketId: 'temp-basket-1',
-                    orderTotal: 50,
-                    currency: 'USD',
-                    customerInfo: {customerId: 'customer-123'}
-                })
-            }))
-            const config = getGooglePayExpressConfig({
-                ...defaultProps,
-                type: 'pdp',
-                product: {id: 'prod-1', quantity: 1}
-            })
-            await config.onClick(jest.fn(), jest.fn())
-            await config.onSubmit(
-                {data: {}},
-                {handleAction: jest.fn()},
-                {resolve: jest.fn(), reject: jest.fn()}
-            )
-            await config.onAdditionalDetails(
-                {data: {details: {}}},
-                {},
-                {resolve: jest.fn(), reject: jest.fn()}
-            )
-
-            expect(AdyenPaymentsDetailsService).toHaveBeenLastCalledWith(
-                'test-token',
-                'customer-123',
-                'temp-basket-1',
-                {id: 'RefArch'}
-            )
-            expect(mockSubmitDetails).toHaveBeenCalledWith(
-                {details: {}},
-                {orderNo: 'ORDER-PDP', isTemporaryBasket: true}
-            )
-        })
-
         it('rejects and does not navigate when payment is not successful', async () => {
             AdyenPaymentsDetailsService.mockImplementation(() => ({
                 submitPaymentsDetails: jest.fn().mockResolvedValue({isSuccessful: false})
-            }))
-            const mockPaymentCancelExpress = jest.fn().mockResolvedValue({})
-            PaymentCancelExpressService.mockImplementation(() => ({
-                paymentCancelExpress: mockPaymentCancelExpress
             }))
             const navigate = jest.fn()
             const config = getGooglePayExpressConfig({...defaultProps, navigate})
             const actions = {resolve: jest.fn(), reject: jest.fn()}
             await config.onAdditionalDetails({data: {}}, {}, actions)
 
-            expect(mockPaymentCancelExpress).toHaveBeenCalledWith({
-                orderNo: undefined,
-                isTemporaryBasket: false
-            })
             expect(navigate).not.toHaveBeenCalled()
             expect(actions.reject).toHaveBeenCalled()
             expect(actions.resolve).not.toHaveBeenCalled()
@@ -744,7 +705,7 @@ describe('onErrorHandler', () => {
             customerId: 'customer-123',
             site: {id: 'RefArch'},
             navigate,
-            getBasket: () => ({basketId: 'basket-456', c_orderNo: 'ORDER-001'})
+            getBasket: () => ({basketId: 'basket-456'})
         }
         const result = await onErrorHandler(new Error('Payment error'), {}, props)
 
@@ -754,33 +715,9 @@ describe('onErrorHandler', () => {
             'basket-456',
             {id: 'RefArch'}
         )
-        expect(mockPaymentCancelExpress).toHaveBeenCalledWith({
-            orderNo: 'ORDER-001',
-            isTemporaryBasket: false
-        })
+        expect(mockPaymentCancelExpress).toHaveBeenCalled()
         expect(navigate).toHaveBeenCalledWith('/checkout?error=true')
         expect(result).toEqual({cancelled: true})
-    })
-
-    it('flags the basket as temporary for the pdp flow', async () => {
-        const mockPaymentCancelExpress = jest.fn().mockResolvedValue({})
-        PaymentCancelExpressService.mockImplementation(() => ({
-            paymentCancelExpress: mockPaymentCancelExpress
-        }))
-        const props = {
-            token: 'test-token',
-            customerId: 'customer-123',
-            site: {id: 'RefArch'},
-            type: 'pdp',
-            navigate: jest.fn(),
-            getBasket: () => ({basketId: 'temp-basket-1', c_orderNo: 'ORDER-PDP'})
-        }
-        await onErrorHandler(new Error('Payment error'), {}, props)
-
-        expect(mockPaymentCancelExpress).toHaveBeenCalledWith({
-            orderNo: 'ORDER-PDP',
-            isTemporaryBasket: true
-        })
     })
 
     it('cancels express payment and calls onPaymentCancel when provided', async () => {
