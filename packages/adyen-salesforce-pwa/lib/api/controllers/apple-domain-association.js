@@ -9,6 +9,9 @@ function appleDomainAssociation(req, res, next) {
         if (!adyenContext?.adyenConfig) {
             throw new AdyenError(ERROR_MESSAGE.ADYEN_CONTEXT_NOT_FOUND, 500)
         }
+        if (!adyenContext.adyenConfig.appleDomainAssociation) {
+            throw new AdyenError(ERROR_MESSAGE.APPLE_PAY_DOMAIN_ASSOCIATION_FILE_NOT_FOUND, 500)
+        }
         res.setHeader('content-type', 'text/plain')
         res.send(`${adyenContext.adyenConfig.appleDomainAssociation}`)
         Logger.info('AppleDomainAssociation', 'success')
