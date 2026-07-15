@@ -20,7 +20,7 @@ importers:
   .:
     dependencies:
       '@adyen/adyen-web':
-        specifier: ^6.34.0
+        specifier: ^6.35.0
         version: 6.37.0
       '@adyen/api-library':
         specifier: ^29.1.0
@@ -16666,11 +16666,7 @@ snapshots:
       pretty-format: 26.6.2
       throat: 5.0.0
     transitivePeerDependencies:
-      - bufferutil
-      - canvas
       - supports-color
-      - ts-node
-      - utf-8-validate
 
   jest-leak-detector@26.6.2:
     dependencies:
