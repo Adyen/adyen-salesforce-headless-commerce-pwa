@@ -29,6 +29,7 @@ import TerminalPaymentController from '../controllers/terminal-payment'
 import TerminalAbortController from '../controllers/terminal-abort'
 import {createRequestContext} from '../middleware/request-context'
 import {createMinimalRequestContext} from '../middleware/minimal-request-context'
+import {createApplePayContext} from '../middleware/apple-pay-context'
 import {createPaymentsDetailsContext} from '../middleware/payments-details-request-context'
 import {prepareOrderRequestContext} from '../middleware/order-request-context'
 
@@ -55,10 +56,11 @@ function registerAdyenEndpoints(app, runtime, overrides, options = {}) {
 
     const requestContext = createRequestContext(options)
     const minimalRequestContext = createMinimalRequestContext(options)
+    const applePayContext = createApplePayContext(options)
     const paymentsDetailsContext = createPaymentsDetailsContext(options)
 
     const appleDomainAssociationHandler = overrides?.appleDomainAssociation || [
-        minimalRequestContext,
+        applePayContext,
         appleDomainAssociation,
         ErrorHandler
     ]
