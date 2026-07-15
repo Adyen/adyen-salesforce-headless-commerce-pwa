@@ -35,7 +35,7 @@ describe('appleDomainAssociation Controller', () => {
 
         expect(Logger.info).toHaveBeenCalledWith('AppleDomainAssociation', 'start')
         expect(res.setHeader).toHaveBeenCalledWith('content-type', 'text/plain')
-        expect(res.send).toHaveBeenCalledWith('mock-apple-domain-association-content\n')
+        expect(res.send).toHaveBeenCalledWith('mock-apple-domain-association-content')
         expect(next).not.toHaveBeenCalled()
     })
 
