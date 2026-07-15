@@ -10,7 +10,7 @@ function appleDomainAssociation(req, res, next) {
             throw new AdyenError(ERROR_MESSAGE.ADYEN_CONTEXT_NOT_FOUND, 500)
         }
         res.setHeader('content-type', 'text/plain')
-        res.send(`${adyenContext.adyenConfig.appleDomainAssociation}\n`)
+        res.send(`${adyenContext.adyenConfig.appleDomainAssociation}`)
         Logger.info('AppleDomainAssociation', 'success')
     } catch (err) {
         Logger.error('AppleDomainAssociation', err.stack)
