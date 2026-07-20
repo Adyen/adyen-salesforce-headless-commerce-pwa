@@ -10,11 +10,11 @@ import {ERROR_MESSAGE} from '../../utils/constants.mjs'
  * @private
  */
 function validateShopperEmail(email) {
-    if (!email) {
+    if (email === undefined || email === null || email === '') {
         return
     }
 
-    if (email.length > 256) {
+    if (typeof email !== 'string' || email.length > 256) {
         throw new AdyenError(ERROR_MESSAGE.INVALID_EMAIL, 400)
     }
 
@@ -101,7 +101,7 @@ function encodeAndTruncateUrl(url, maxLength) {
 
     // Encode non-ASCII characters
     // eslint-disable-next-line no-control-regex
-    const encoded = url.replace(/[^\x00-\x7F]/g, (char) => encodeURIComponent(char))
+    const encoded = url.replace(/[^\x00-\x7F]/gu, (char) => encodeURIComponent(char))
     return truncate(encoded, maxLength)
 }
 
@@ -148,7 +148,7 @@ function formatDeliveryAddress(address) {
         formatted.postalCode = truncate(formatted.postalCode, 10)
     }
 
-    if (formatted.stateOrProvince) {
+    if (typeof formatted.stateOrProvince === 'string' && formatted.stateOrProvince) {
         formatted.stateOrProvince = truncate(formatted.stateOrProvince.toUpperCase(), 2)
     }
 

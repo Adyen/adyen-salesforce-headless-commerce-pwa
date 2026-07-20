@@ -80,6 +80,25 @@ describe('checkoutV72Validation', () => {
 
                     expect(result).toEqual({reference: 'test-ref'})
                 })
+
+                it('should throw AdyenError for a numeric shopperEmail instead of crashing', () => {
+                    const paymentRequest = {shopperEmail: 12345}
+
+                    expect(() => formatAndValidatePaymentRequest(paymentRequest)).toThrow(
+                        AdyenError
+                    )
+                    expect(() => formatAndValidatePaymentRequest(paymentRequest)).toThrow(
+                        ERROR_MESSAGE.INVALID_EMAIL
+                    )
+                })
+
+                it('should throw AdyenError for an object shopperEmail instead of crashing', () => {
+                    const paymentRequest = {shopperEmail: {address: 'test@example.com'}}
+
+                    expect(() => formatAndValidatePaymentRequest(paymentRequest)).toThrow(
+                        AdyenError
+                    )
+                })
             })
 
             describe('dateOfBirth validation', () => {
@@ -276,6 +295,31 @@ describe('checkoutV72Validation', () => {
                 expect(result.deliveryAddress.stateOrProvince).toBe('CA')
             })
 
+            it('should not throw and leave a numeric deliveryAddress.stateOrProvince unchanged', () => {
+                const paymentRequest = {
+                    deliveryAddress: {
+                        stateOrProvince: 12345
+                    }
+                }
+
+                const result = formatAndValidatePaymentRequest(paymentRequest)
+
+                expect(result.deliveryAddress.stateOrProvince).toBe(12345)
+            })
+
+            it('should not throw and leave an object deliveryAddress.stateOrProvince unchanged', () => {
+                const stateOrProvince = {code: 'CA'}
+                const paymentRequest = {
+                    deliveryAddress: {
+                        stateOrProvince
+                    }
+                }
+
+                const result = formatAndValidatePaymentRequest(paymentRequest)
+
+                expect(result.deliveryAddress.stateOrProvince).toBe(stateOrProvince)
+            })
+
             it('should encode non-ASCII and truncate returnUrl to 1024 characters', () => {
                 const paymentRequest = {
                     returnUrl: 'https://example.com/callback?param=' + 'é'.repeat(500)
@@ -285,6 +329,16 @@ describe('checkoutV72Validation', () => {
 
                 expect(result.returnUrl.length).toBeLessThanOrEqual(1024)
                 expect(result.returnUrl).toContain('%C3%A9')
+            })
+
+            it('should encode astral (surrogate-pair) characters like emoji without throwing', () => {
+                const paymentRequest = {
+                    returnUrl: 'https://example.com/callback?param=😀'
+                }
+
+                const result = formatAndValidatePaymentRequest(paymentRequest)
+
+                expect(result.returnUrl).toContain('%F0%9F%98%80')
             })
 
             it('should truncate returnUrl without non-ASCII to 1024 characters', () => {
