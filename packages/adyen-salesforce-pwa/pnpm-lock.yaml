@@ -23,8 +23,8 @@ importers:
         specifier: ^6.34.0
         version: 6.37.0
       '@adyen/api-library':
-        specifier: ^29.1.0
-        version: 29.1.0
+        specifier: ^32.0.0
+        version: 32.0.0
       '@salesforce/commerce-sdk-react':
         specifier: ^5.0.0
         version: 5.2.0(@tanstack/react-query@4.44.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react-helmet@6.1.0(react@18.3.1))(react@18.3.1)
@@ -173,8 +173,8 @@ packages:
   '@adyen/adyen-web@6.37.0':
     resolution: {integrity: sha512-bHIil/Gqyt19poj8lhwF6uRLjwGHj66dhgq6AbEuxWotukL6VeN9DHzwl5FqqlPyLfVgfuuz/+9KkDKisq3M5A==}
 
-  '@adyen/api-library@29.1.0':
-    resolution: {integrity: sha512-yNIPv5HK9P94cAsIdSf4REr4a8p9OHJl/u7XwPhLHueqMZKP+LbCJY1t34fBt9oJ75mDfiy9u2fypo8v5Jx04A==}
+  '@adyen/api-library@32.0.0':
+    resolution: {integrity: sha512-TU8KnN1Zeh/NdhNFsH2jy9ahN+p9LTgM+hg8tY/IXyqqDKz1W7nxdCyEs9lVXzkOjwIBYF9VYdR9LUkQ5CvOFQ==}
     engines: {node: '>=18'}
 
   '@aws-crypto/crc32@5.2.0':
@@ -8578,7 +8578,7 @@ snapshots:
       classnames: 2.5.1
       preact: 10.29.1
 
-  '@adyen/api-library@29.1.0':
+  '@adyen/api-library@32.0.0':
     dependencies:
       https-proxy-agent: 5.0.1
     optionalDependencies:

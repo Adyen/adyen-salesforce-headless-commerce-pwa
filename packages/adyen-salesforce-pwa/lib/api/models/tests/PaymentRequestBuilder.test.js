@@ -35,12 +35,18 @@ jest.mock('../../utils/paymentUtils.js', () => ({
     getLineItemsWithoutTax: jest.fn(() => [{id: 'item1'}]),
     getAdditionalData: jest.fn(() => ({'riskdata.basket.item1.itemID': 'item1'})),
     getEnhancedSchemeData: jest.fn(() => ({
-        'enhancedSchemeData.totalTaxAmount': '240',
-        'enhancedSchemeData.customerReference': 'customer123',
-        'enhancedSchemeData.itemDetailLine1.unitPrice': '2999',
-        'enhancedSchemeData.itemDetailLine1.totalAmount': '2999',
-        'enhancedSchemeData.itemDetailLine1.quantity': '1',
-        'enhancedSchemeData.itemDetailLine1.unitOfMeasure': 'EAC'
+        levelTwoThree: {
+            totalTaxAmount: 240,
+            customerReferenceNumber: 'customer123',
+            itemDetailLines: [
+                {
+                    unitPrice: 2999,
+                    totalAmount: 2999,
+                    quantity: 1,
+                    unitOfMeasure: 'EAC'
+                }
+            ]
+        }
     })),
     amountForPartialPayments: jest.fn(() => 5000)
 }))
@@ -557,24 +563,25 @@ describe('PaymentRequestBuilder', () => {
             mockContext.stateData.paymentMethod.type = 'scheme'
         })
 
-        it('should merge enhanced scheme data into additionalData', () => {
+        it('should set enhancedSchemeData as a dedicated top-level field, not merged into additionalData', () => {
             builder = new PaymentRequestBuilder(mockContext)
             builder.withAdditionalData()
             builder.withEnhancedSchemeData()
 
-            const additionalData = builder.paymentRequest.additionalData
-            expect(additionalData['riskdata.basket.item1.itemID']).toBe('item1')
-            expect(additionalData['enhancedSchemeData.totalTaxAmount']).toBe('240')
-            expect(additionalData['enhancedSchemeData.customerReference']).toBe('customer123')
-            expect(additionalData['enhancedSchemeData.itemDetailLine1.unitPrice']).toBe('2999')
+            expect(builder.paymentRequest.additionalData).toEqual({
+                'riskdata.basket.item1.itemID': 'item1'
+            })
+            const enhancedSchemeData = builder.paymentRequest.enhancedSchemeData
+            expect(enhancedSchemeData.levelTwoThree.totalTaxAmount).toBe(240)
+            expect(enhancedSchemeData.levelTwoThree.customerReferenceNumber).toBe('customer123')
+            expect(enhancedSchemeData.levelTwoThree.itemDetailLines[0].unitPrice).toBe(2999)
         })
 
         it('should add enhanced scheme data when no prior additionalData exists', () => {
             builder = new PaymentRequestBuilder(mockContext)
             builder.withEnhancedSchemeData()
 
-            const additionalData = builder.paymentRequest.additionalData
-            expect(additionalData['enhancedSchemeData.totalTaxAmount']).toBe('240')
+            expect(builder.paymentRequest.enhancedSchemeData.levelTwoThree.totalTaxAmount).toBe(240)
         })
 
         it('should not add enhanced scheme data when basket is missing', () => {
@@ -584,7 +591,7 @@ describe('PaymentRequestBuilder', () => {
             })
             builder.withEnhancedSchemeData()
 
-            expect(builder.paymentRequest.additionalData).toBeUndefined()
+            expect(builder.paymentRequest.enhancedSchemeData).toBeUndefined()
         })
 
         it('should use commodity code from adyenConfig when available', () => {
@@ -592,8 +599,7 @@ describe('PaymentRequestBuilder', () => {
             builder = new PaymentRequestBuilder(mockContext)
             builder.withEnhancedSchemeData()
 
-            const additionalData = builder.paymentRequest.additionalData
-            expect(additionalData['enhancedSchemeData.totalTaxAmount']).toBe('240')
+            expect(builder.paymentRequest.enhancedSchemeData.levelTwoThree.totalTaxAmount).toBe(240)
         })
 
         it('should use provided commodity code over config', () => {
@@ -601,8 +607,7 @@ describe('PaymentRequestBuilder', () => {
             builder = new PaymentRequestBuilder(mockContext)
             builder.withEnhancedSchemeData(null, 'CUSTOM_CODE')
 
-            const additionalData = builder.paymentRequest.additionalData
-            expect(additionalData['enhancedSchemeData.totalTaxAmount']).toBe('240')
+            expect(builder.paymentRequest.enhancedSchemeData.levelTwoThree.totalTaxAmount).toBe(240)
         })
 
         it('should skip when l23Enabled is not true', () => {
@@ -610,7 +615,7 @@ describe('PaymentRequestBuilder', () => {
             builder = new PaymentRequestBuilder(mockContext)
             builder.withEnhancedSchemeData()
 
-            expect(builder.paymentRequest.additionalData).toBeUndefined()
+            expect(builder.paymentRequest.enhancedSchemeData).toBeUndefined()
         })
 
         it('should skip when l23Enabled is missing', () => {
@@ -618,7 +623,7 @@ describe('PaymentRequestBuilder', () => {
             builder = new PaymentRequestBuilder(mockContext)
             builder.withEnhancedSchemeData()
 
-            expect(builder.paymentRequest.additionalData).toBeUndefined()
+            expect(builder.paymentRequest.enhancedSchemeData).toBeUndefined()
         })
 
         it('should skip when locale is not US', () => {
@@ -626,7 +631,7 @@ describe('PaymentRequestBuilder', () => {
             builder = new PaymentRequestBuilder(mockContext)
             builder.withEnhancedSchemeData()
 
-            expect(builder.paymentRequest.additionalData).toBeUndefined()
+            expect(builder.paymentRequest.enhancedSchemeData).toBeUndefined()
         })
 
         it('should skip when locale is missing', () => {
@@ -634,7 +639,7 @@ describe('PaymentRequestBuilder', () => {
             builder = new PaymentRequestBuilder(mockContext)
             builder.withEnhancedSchemeData()
 
-            expect(builder.paymentRequest.additionalData).toBeUndefined()
+            expect(builder.paymentRequest.enhancedSchemeData).toBeUndefined()
         })
 
         it('should return builder for chaining', () => {
@@ -699,6 +704,102 @@ describe('PaymentRequestBuilder', () => {
             const result = builder.build()
 
             expect(result.order).toEqual({orderData: 'data', someField: 'value'})
+        })
+
+        describe('v72 validation and formatting', () => {
+            it('should apply formatting to truncate long fields', () => {
+                builder = new PaymentRequestBuilder(mockContext)
+                builder.paymentRequest.reference = 'a'.repeat(100)
+                builder.paymentRequest.shopperIP = 'b'.repeat(300)
+                builder.paymentRequest.telephoneNumber = '1'.repeat(100)
+
+                const result = builder.build()
+
+                expect(result.reference).toBe('a'.repeat(80))
+                expect(result.shopperIP).toBe('b'.repeat(256))
+                expect(result.telephoneNumber).toBe('1'.repeat(64))
+            })
+
+            it('should apply formatting to shopperName', () => {
+                builder = new PaymentRequestBuilder(mockContext)
+                builder.paymentRequest.shopperName = {
+                    firstName: 'x'.repeat(150),
+                    lastName: 'y'.repeat(150)
+                }
+
+                const result = builder.build()
+
+                expect(result.shopperName.firstName).toBe('x'.repeat(100))
+                expect(result.shopperName.lastName).toBe('y'.repeat(100))
+            })
+
+            it('should apply formatting to addresses', () => {
+                builder = new PaymentRequestBuilder(mockContext)
+                builder.paymentRequest.billingAddress = {
+                    postalCode: '1'.repeat(20),
+                    stateOrProvince: 'a'.repeat(20)
+                }
+                builder.paymentRequest.deliveryAddress = {
+                    postalCode: '2'.repeat(20),
+                    stateOrProvince: 'california'
+                }
+
+                const result = builder.build()
+
+                expect(result.billingAddress.postalCode).toBe('1'.repeat(10))
+                expect(result.billingAddress.stateOrProvince).toBe('a'.repeat(10))
+                expect(result.deliveryAddress.postalCode).toBe('2'.repeat(10))
+                expect(result.deliveryAddress.stateOrProvince).toBe('CA')
+            })
+
+            it('should clamp captureDelayHours to 672', () => {
+                builder = new PaymentRequestBuilder(mockContext)
+                builder.paymentRequest.captureDelayHours = 1000
+
+                const result = builder.build()
+
+                expect(result.captureDelayHours).toBe(672)
+            })
+
+            it('should throw AdyenError for invalid shopperEmail', () => {
+                builder = new PaymentRequestBuilder(mockContext)
+                builder.paymentRequest.shopperEmail = 'invalid @email.com'
+
+                expect(() => builder.build()).toThrow('invalid shopper email format')
+            })
+
+            it('should throw AdyenError for invalid dateOfBirth', () => {
+                builder = new PaymentRequestBuilder(mockContext)
+                builder.paymentRequest.dateOfBirth = '01/01/2000'
+
+                expect(() => builder.build()).toThrow(
+                    'invalid date of birth format, must be YYYY-MM-DD'
+                )
+            })
+
+            it('should throw AdyenError for invalid entityType', () => {
+                builder = new PaymentRequestBuilder(mockContext)
+                builder.paymentRequest.entityType = 'InvalidType'
+
+                expect(() => builder.build()).toThrow(
+                    'invalid entity type, must be NaturalPerson or CompanyName'
+                )
+            })
+
+            it('should pass through valid values without modification', () => {
+                builder = new PaymentRequestBuilder(mockContext)
+                builder.paymentRequest.reference = 'REF123'
+                builder.paymentRequest.shopperEmail = 'test@example.com'
+                builder.paymentRequest.dateOfBirth = '1990-01-01'
+                builder.paymentRequest.entityType = 'NaturalPerson'
+
+                const result = builder.build()
+
+                expect(result.reference).toBe('REF123')
+                expect(result.shopperEmail).toBe('test@example.com')
+                expect(result.dateOfBirth).toBe('1990-01-01')
+                expect(result.entityType).toBe('NaturalPerson')
+            })
         })
     })
 
