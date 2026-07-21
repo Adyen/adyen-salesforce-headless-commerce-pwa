@@ -1,6 +1,7 @@
 import {formatAndValidatePaymentRequest} from '../checkoutV72Validation'
 import {AdyenError} from '../../models/AdyenError'
 import {ERROR_MESSAGE} from '../../../utils/constants.mjs'
+import {ObjectSerializer} from '@adyen/api-library/lib/src/typings/checkout/objectSerializer'
 
 describe('checkoutV72Validation', () => {
     describe('formatAndValidatePaymentRequest', () => {
@@ -134,7 +135,9 @@ describe('checkoutV72Validation', () => {
 
                     const result = formatAndValidatePaymentRequest(paymentRequest)
 
-                    expect(result.dateOfBirth).toBe('2000-01-01')
+                    expect(result.dateOfBirth.toISOString()).toBe('2000-01-01')
+                    expect(result.dateOfBirth.toJSON()).toBe('2000-01-01')
+                    expect(result.dateOfBirth.toString()).toBe('2000-01-01')
                 })
 
                 it('should pass when dateOfBirth is not present', () => {
@@ -143,6 +146,27 @@ describe('checkoutV72Validation', () => {
                     const result = formatAndValidatePaymentRequest(paymentRequest)
 
                     expect(result).toEqual({reference: 'test-ref'})
+                })
+
+                it('should produce a dateOfBirth that serializes correctly through SDK ObjectSerializer', () => {
+                    const paymentRequest = {
+                        amount: {currency: 'EUR', value: 1000},
+                        reference: 'REF123',
+                        merchantAccount: 'TestMerchant',
+                        returnUrl: 'https://example.com/return',
+                        dateOfBirth: '1985-03-15'
+                    }
+
+                    const result = formatAndValidatePaymentRequest(paymentRequest)
+
+                    // Serialize the result as PaymentRequest - should not throw
+                    let serialized
+                    expect(() => {
+                        serialized = ObjectSerializer.serialize(result, 'PaymentRequest')
+                    }).not.toThrow()
+
+                    // Verify dateOfBirth is serialized as YYYY-MM-DD string, not datetime
+                    expect(serialized.dateOfBirth).toBe('1985-03-15')
                 })
             })
 
@@ -458,10 +482,12 @@ describe('checkoutV72Validation', () => {
 
                 const result = formatAndValidatePaymentRequest(paymentRequest)
 
-                expect(result).toEqual({
+                // Destructure dateOfBirth out for separate assertion
+                const {dateOfBirth, ...restOfResult} = result
+
+                expect(restOfResult).toEqual({
                     reference: 'REF123',
                     shopperEmail: 'test@example.com',
-                    dateOfBirth: '1990-01-01',
                     entityType: 'NaturalPerson',
                     shopperIP: '192.168.1.1',
                     telephoneNumber: '+31612345678',
@@ -484,6 +510,14 @@ describe('checkoutV72Validation', () => {
                     },
                     captureDelayHours: 24
                 })
+
+                // Assert dateOfBirth separately via adapter methods
+                expect(dateOfBirth.toISOString()).toBe('1990-01-01')
+                expect(dateOfBirth.toJSON()).toBe('1990-01-01')
+
+                // Verify JSON.stringify produces the original string for idempotency key stability
+                const stringified = JSON.stringify(result)
+                expect(stringified).toContain('"dateOfBirth":"1990-01-01"')
             })
 
             it('should handle shopperName that is not an object', () => {

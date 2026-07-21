@@ -797,7 +797,7 @@ describe('PaymentRequestBuilder', () => {
 
                 expect(result.reference).toBe('REF123')
                 expect(result.shopperEmail).toBe('test@example.com')
-                expect(result.dateOfBirth).toBe('1990-01-01')
+                expect(result.dateOfBirth.toISOString()).toBe('1990-01-01')
                 expect(result.entityType).toBe('NaturalPerson')
             })
         })

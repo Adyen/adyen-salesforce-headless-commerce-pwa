@@ -203,6 +203,23 @@ function formatMetadata(metadata) {
 }
 
 /**
+ * Creates a date-only value object that satisfies the SDK's ObjectSerializer expectations.
+ * The SDK's Date/date-time serialization branch calls toISOString(), but v72 requires
+ * date-only format (YYYY-MM-DD), not full datetime. This adapter returns the original
+ * date string from all serialization methods.
+ * @param {string} dateString - ISO-8601 date string (YYYY-MM-DD).
+ * @returns {object} An adapter object with toISOString, toJSON, and toString methods.
+ * @private
+ */
+function createDateOnlyValue(dateString) {
+    return {
+        toISOString: () => dateString,
+        toJSON: () => dateString,
+        toString: () => dateString
+    }
+}
+
+/**
  * Formats and validates a payment request according to Checkout API v72 requirements.
  * Silently truncates/normalizes length-limited fields and throws AdyenError for invalid hard-format fields.
  * @param {object} paymentRequest - The payment request object to format and validate.
@@ -221,6 +238,11 @@ export function formatAndValidatePaymentRequest(paymentRequest) {
 
     // Create a shallow copy to avoid mutating the original
     const formatted = {...paymentRequest}
+
+    // Replace dateOfBirth string with date-only adapter for SDK serialization
+    if (formatted.dateOfBirth) {
+        formatted.dateOfBirth = createDateOnlyValue(formatted.dateOfBirth)
+    }
 
     // Format length-limited fields (silently truncate/normalize)
     if (formatted.reference) {
