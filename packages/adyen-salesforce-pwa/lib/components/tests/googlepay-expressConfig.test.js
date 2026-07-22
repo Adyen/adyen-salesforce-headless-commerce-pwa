@@ -23,10 +23,14 @@ jest.mock('../../services/shipping-methods')
 jest.mock('../../services/temporary-basket')
 jest.mock('../../services/order-number')
 jest.mock('../../services/payment-cancel-express')
-jest.mock('../../utils/executeCallbacks', () => ({
-    executeCallbacks: jest.fn((cbs) => cbs),
-    executeErrorCallbacks: jest.fn((cbs) => cbs)
-}))
+jest.mock('../../utils/executeCallbacks', () => {
+    const actual = jest.requireActual('../../utils/executeCallbacks')
+    return {
+        ...actual,
+        executeCallbacks: jest.fn((cbs) => cbs),
+        executeErrorCallbacks: jest.fn((cbs) => cbs)
+    }
+})
 jest.mock('../../utils/parsers.mjs', () => ({
     getCurrencyValueForApi: jest.fn((value) => value * 100)
 }))
@@ -676,5 +680,30 @@ describe('onErrorHandler', () => {
         expect(mockPaymentCancelExpress).not.toHaveBeenCalled()
         expect(navigate).toHaveBeenCalledWith('/checkout?error=true')
         expect(result).toEqual({cancelled: true})
+    })
+})
+
+describe('throttled error handler in getGooglePayExpressConfig', () => {
+    it('should use the same throttled handler instance for onError and onPaymentFailed', () => {
+        const config = getGooglePayExpressConfig(defaultProps)
+        expect(config.onError).toBeDefined()
+        expect(config.onPaymentFailed).toBeDefined()
+        expect(config.onError).toBe(config.onPaymentFailed)
+    })
+
+    it('should only execute error callbacks once when both onError and onPaymentFailed fire', async () => {
+        jest.useFakeTimers()
+        const errorCallback = jest.fn().mockResolvedValue({})
+        const config = getGooglePayExpressConfig({
+            ...defaultProps,
+            onError: [errorCallback]
+        })
+        const error = new Error('Test error')
+
+        await config.onError(error)
+        await config.onPaymentFailed(error)
+
+        expect(errorCallback).toHaveBeenCalledTimes(1)
+        jest.useRealTimers()
     })
 })

@@ -5,7 +5,7 @@ import {AdyenShippingMethodsService} from '../../services/shipping-methods'
 import {AdyenTemporaryBasketService} from '../../services/temporary-basket'
 import {AdyenOrderNumberService} from '../../services/order-number'
 import {PaymentCancelExpressService} from '../../services/payment-cancel-express'
-import {executeErrorCallbacks} from '../../utils/executeCallbacks'
+import {createThrottledErrorHandler} from '../../utils/executeCallbacks'
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 import {PAYMENT_TYPES} from '../../utils/constants.mjs'
 
@@ -106,6 +106,10 @@ export const getGooglePayExpressConfig = (props = {}) => {
     const propsWithGetBasket = {...props, getBasket, setBasket}
 
     const errorHandler = (error, component) => onErrorHandler(error, component, propsWithGetBasket)
+
+    // Create a single throttled error handler instance
+    const handleError = createThrottledErrorHandler([...onError, errorHandler], propsWithGetBasket)
+    propsWithGetBasket.handleError = handleError
 
     const getActiveBasket = () => (isPdp ? temporaryBasket : currentBasket)
 
@@ -246,7 +250,7 @@ export const getGooglePayExpressConfig = (props = {}) => {
                         message: 'An error occurred while processing the shipping information',
                         intent: 'SHIPPING_ADDRESS'
                     }
-                    onError.forEach((cb) => cb(err))
+                    handleError(err)
                 }
 
                 return paymentDataRequestUpdate
@@ -257,7 +261,7 @@ export const getGooglePayExpressConfig = (props = {}) => {
                 shopperData = paymentData
                 actions.resolve()
             } catch (err) {
-                onError.forEach((cb) => cb(err))
+                handleError(err)
                 actions.reject(err)
             }
         },
@@ -305,7 +309,7 @@ export const getGooglePayExpressConfig = (props = {}) => {
                     actions.reject()
                 }
             } catch (err) {
-                onError.forEach((cb) => cb(err))
+                handleError(err)
                 actions.reject(err)
             }
         },
@@ -341,7 +345,7 @@ export const getGooglePayExpressConfig = (props = {}) => {
                 }
             } catch (err) {
                 // Error in 3DS flow - call error callbacks, cleanup and re-mount
-                onError.forEach((cb) => cb(err))
+                handleError(err)
                 try {
                     const activeBasket = getActiveBasket()
                     const paymentCancelExpressService = new PaymentCancelExpressService(
@@ -378,15 +382,15 @@ export const getGooglePayExpressConfig = (props = {}) => {
                         reject()
                     }
                 } catch (err) {
-                    onError.forEach((cb) => cb(err))
+                    handleError(err)
                     reject(err)
                 }
             } else {
                 resolve()
             }
         },
-        onError: executeErrorCallbacks([...onError, errorHandler], propsWithGetBasket),
-        onPaymentFailed: executeErrorCallbacks([...onError, errorHandler], propsWithGetBasket),
+        onError: handleError,
+        onPaymentFailed: handleError,
         configuration: googlePayMethodConfig,
         ...configuration
     }

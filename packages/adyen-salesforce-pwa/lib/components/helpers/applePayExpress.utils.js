@@ -5,7 +5,7 @@ import {AdyenShippingAddressService} from '../../services/shipping-address'
 import {AdyenTemporaryBasketService} from '../../services/temporary-basket'
 import {AdyenOrderNumberService} from '../../services/order-number'
 import {PAYMENT_TYPES} from '../../utils/constants.mjs'
-import {executeErrorCallbacks} from '../../utils/executeCallbacks'
+import {createThrottledErrorHandler} from '../../utils/executeCallbacks'
 import {PaymentCancelExpressService} from '../../services/payment-cancel-express'
 
 export const getApplePaymentMethodConfig = (paymentMethodsResponse) => {
@@ -76,8 +76,7 @@ export const generateOrderNumber = async (state, component, actions, props, bask
         }
         props.setBasket({...basketData, c_orderNo: orderNo})
     } catch (err) {
-        const {onError = []} = props
-        onError.forEach((cb) => cb(err))
+        props.handleError(err)
         actions.reject(err.message)
     }
 }
@@ -113,6 +112,11 @@ export const getAppleButtonConfig = (props = {}) => {
     const propsWithGetBasket = {...props, getBasket, setBasket}
 
     const errorHandler = (error, component) => onErrorHandler(error, component, propsWithGetBasket)
+
+    // Create a single throttled error handler instance
+    const handleError = createThrottledErrorHandler([...onError, errorHandler], propsWithGetBasket)
+    propsWithGetBasket.handleError = handleError
+
     const buttonConfig = {
         showPayButton: true,
         isExpress: true,
@@ -165,7 +169,7 @@ export const getAppleButtonConfig = (props = {}) => {
                     actions.reject()
                 }
             } catch (err) {
-                onError.forEach((cb) => cb(err))
+                handleError(err)
                 actions.reject(err)
             }
         },
@@ -176,7 +180,7 @@ export const getAppleButtonConfig = (props = {}) => {
                 billingData = authorizedEvent.payment.billingContact
                 actions.resolve()
             } catch (err) {
-                onError.forEach((cb) => cb(err))
+                handleError(err)
                 actions.reject(err)
             }
         },
@@ -238,7 +242,7 @@ export const getAppleButtonConfig = (props = {}) => {
                     resolve(finalPriceUpdate)
                 }
             } catch (err) {
-                onError.forEach((cb) => cb(err))
+                handleError(err)
                 reject(err)
             }
         },
@@ -273,7 +277,7 @@ export const getAppleButtonConfig = (props = {}) => {
                     resolve(applePayShippingMethodUpdate)
                 }
             } catch (err) {
-                onError.forEach((cb) => cb(err))
+                handleError(err)
                 reject(err)
             }
         },
@@ -303,8 +307,8 @@ export const getAppleButtonConfig = (props = {}) => {
                 resolve()
             }
         },
-        onError: executeErrorCallbacks([...onError, errorHandler], propsWithGetBasket),
-        onPaymentFailed: executeErrorCallbacks([...onError, errorHandler], propsWithGetBasket)
+        onError: handleError,
+        onPaymentFailed: handleError
     }
     return buttonConfig
 }

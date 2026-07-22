@@ -29,9 +29,9 @@ const CartCta = () => {
 
     const showToast = useToast()
 
-    const showError = () => {
+    const showError = (error) => {
         showToast({
-            title: formatMessage(API_ERROR_MESSAGE),
+            title: error?.message || formatMessage(API_ERROR_MESSAGE),
             status: 'error'
         })
     }

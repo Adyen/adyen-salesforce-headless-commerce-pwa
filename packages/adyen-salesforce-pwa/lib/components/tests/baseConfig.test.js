@@ -31,6 +31,33 @@ describe('baseConfig function', () => {
         expect(config.onSubmit).toBeDefined()
         expect(config.onAdditionalDetails).toBeDefined()
     })
+
+    it('should use the same throttled handler instance for onError and onPaymentFailed', () => {
+        const config = baseConfig(mockProps)
+        expect(config.onError).toBeDefined()
+        expect(config.onPaymentFailed).toBeDefined()
+        // Both should reference the exact same function instance (throttled handler)
+        expect(config.onError).toBe(config.onPaymentFailed)
+    })
+
+    it('should only execute error callbacks once when both onError and onPaymentFailed fire', async () => {
+        jest.useFakeTimers()
+        const errorCallback = jest.fn().mockResolvedValue({})
+        const props = {
+            ...mockProps,
+            onError: [errorCallback]
+        }
+        const config = baseConfig(props)
+        const error = new Error('Test error')
+
+        // Simulate both events firing (e.g., Adyen Web fires both onError and onPaymentFailed)
+        await config.onError(error)
+        await config.onPaymentFailed(error)
+
+        // Due to throttling, the callback should only execute once
+        expect(errorCallback).toHaveBeenCalledTimes(1)
+        jest.useRealTimers()
+    })
 })
 
 describe('onSubmit function', () => {

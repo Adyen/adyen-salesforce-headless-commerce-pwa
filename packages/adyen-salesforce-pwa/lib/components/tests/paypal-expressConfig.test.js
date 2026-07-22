@@ -22,7 +22,14 @@ import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 import {onErrorHandler} from '../paypal/expressConfig'
 
 jest.mock('../helpers/baseConfig')
-jest.mock('../../utils/executeCallbacks')
+jest.mock('../../utils/executeCallbacks', () => {
+    const actual = jest.requireActual('../../utils/executeCallbacks')
+    return {
+        ...actual,
+        executeCallbacks: jest.fn((cbs) => cbs),
+        executeErrorCallbacks: jest.fn((cbs) => cbs)
+    }
+})
 jest.mock('../../services/shopper-details')
 jest.mock('../../services/shipping-methods')
 jest.mock('../../services/shipping-address')
@@ -277,13 +284,15 @@ describe('paypal/expressConfig', () => {
                 resolve: jest.fn(),
                 reject: jest.fn()
             }
+            const errorCallback = jest.fn()
             props = {
                 token: 'test-token',
                 customerId: 'customer123',
                 site: {id: 'site-id'},
                 product: {id: 'product123', quantity: 2},
                 setBasket: jest.fn(),
-                onError: [jest.fn()]
+                onError: [errorCallback],
+                handleError: jest.fn()
             }
 
             mockTemporaryBasketService = {
@@ -314,7 +323,7 @@ describe('paypal/expressConfig', () => {
             await createTemporaryBasketCallback(state, component, actions, props)
 
             expect(actions.reject).toHaveBeenCalledWith('Failed to create temporary basket')
-            expect(props.onError[0]).toHaveBeenCalled()
+            expect(props.handleError).toHaveBeenCalled()
         })
 
         it('should reject on error', async () => {
@@ -325,7 +334,7 @@ describe('paypal/expressConfig', () => {
             await createTemporaryBasketCallback(state, component, actions, props)
 
             expect(actions.reject).toHaveBeenCalledWith('Service error')
-            expect(props.onError[0]).toHaveBeenCalled()
+            expect(props.handleError).toHaveBeenCalled()
         })
     })
 
@@ -877,6 +886,31 @@ describe('paypal/expressConfig', () => {
             await onShippingOptionsChange(data, actions, component, props)
 
             expect(actions.reject).toHaveBeenCalledWith('METHOD_UNAVAILABLE')
+        })
+    })
+
+    describe('throttled error handler', () => {
+        it('should use the same throttled handler instance for onError and onPaymentFailed', () => {
+            const config = paypalExpressConfig({basket: {}})
+            expect(config.onError).toBeDefined()
+            expect(config.onPaymentFailed).toBeDefined()
+            expect(config.onError).toBe(config.onPaymentFailed)
+        })
+
+        it('should only execute error callbacks once when both onError and onPaymentFailed fire', async () => {
+            jest.useFakeTimers()
+            const errorCallback = jest.fn().mockResolvedValue({})
+            const config = paypalExpressConfig({
+                basket: {},
+                onError: [errorCallback]
+            })
+            const error = new Error('Test error')
+
+            await config.onError(error)
+            await config.onPaymentFailed(error)
+
+            expect(errorCallback).toHaveBeenCalledTimes(1)
+            jest.useRealTimers()
         })
     })
 })

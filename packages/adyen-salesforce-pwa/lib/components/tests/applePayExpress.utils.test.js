@@ -13,17 +13,23 @@ import {AdyenPaymentsService} from '../../services/payments'
 import {AdyenShippingAddressService} from '../../services/shipping-address'
 import {AdyenShippingMethodsService} from '../../services/shipping-methods'
 import {AdyenTemporaryBasketService} from '../../services/temporary-basket'
+import {AdyenOrderNumberService} from '../../services/order-number'
 import {PaymentCancelExpressService} from '../../services/payment-cancel-express'
 
 jest.mock('../../services/payments')
 jest.mock('../../services/shipping-address')
 jest.mock('../../services/shipping-methods')
 jest.mock('../../services/temporary-basket')
+jest.mock('../../services/order-number')
 jest.mock('../../services/payment-cancel-express')
-jest.mock('../../utils/executeCallbacks', () => ({
-    executeCallbacks: jest.fn((cbs) => cbs),
-    executeErrorCallbacks: jest.fn((cbs) => cbs)
-}))
+jest.mock('../../utils/executeCallbacks', () => {
+    const actual = jest.requireActual('../../utils/executeCallbacks')
+    return {
+        ...actual,
+        executeCallbacks: jest.fn((cbs) => cbs),
+        executeErrorCallbacks: jest.fn((cbs) => cbs)
+    }
+})
 
 describe('getApplePaymentMethodConfig function', () => {
     it('returns null if paymentMethodsResponse is undefined', () => {
@@ -178,6 +184,7 @@ describe('getAppleButtonConfig', () => {
     let mockUpdateShippingAddress
     let mockUpdateShippingMethod
     let mockCreateTemporaryBasket
+    let mockFetchOrderNumber
     let defaultProps
 
     beforeEach(() => {
@@ -187,6 +194,7 @@ describe('getAppleButtonConfig', () => {
         mockUpdateShippingAddress = jest.fn()
         mockUpdateShippingMethod = jest.fn()
         mockCreateTemporaryBasket = jest.fn()
+        mockFetchOrderNumber = jest.fn().mockResolvedValue({orderNo: 'ORDER-001'})
 
         AdyenPaymentsService.mockImplementation(() => ({
             submitPayment: mockSubmitPayment
@@ -199,6 +207,9 @@ describe('getAppleButtonConfig', () => {
         }))
         AdyenTemporaryBasketService.mockImplementation(() => ({
             createTemporaryBasket: mockCreateTemporaryBasket
+        }))
+        AdyenOrderNumberService.mockImplementation(() => ({
+            fetchOrderNumber: mockFetchOrderNumber
         }))
 
         defaultProps = {
@@ -362,7 +373,7 @@ describe('getAppleButtonConfig', () => {
 
             await config.onSubmit({data: {}}, {}, actions)
 
-            expect(errorCb).toHaveBeenCalledWith(mockError)
+            expect(errorCb).toHaveBeenCalledWith(mockError, expect.any(Object), {})
             expect(actions.reject).toHaveBeenCalledWith(mockError)
         })
     })
@@ -593,7 +604,7 @@ describe('getAppleButtonConfig', () => {
                 shippingContact: {locality: 'City'}
             })
 
-            expect(errorCb).toHaveBeenCalledWith(mockError)
+            expect(errorCb).toHaveBeenCalledWith(mockError, expect.any(Object), {})
             expect(reject).toHaveBeenCalledWith(mockError)
         })
     })
@@ -704,7 +715,7 @@ describe('getAppleButtonConfig', () => {
                 shippingMethod: {identifier: 'id'}
             })
 
-            expect(errorCb).toHaveBeenCalledWith(mockError)
+            expect(errorCb).toHaveBeenCalledWith(mockError, expect.any(Object), {})
             expect(reject).toHaveBeenCalledWith(mockError)
         })
     })
@@ -847,5 +858,46 @@ describe('onErrorHandler', () => {
         expect(mockPaymentCancelExpress).not.toHaveBeenCalled()
         expect(props.navigate).toHaveBeenCalledWith('/checkout?error=true')
         expect(result).toEqual({cancelled: true})
+    })
+})
+
+describe('throttled error handler in getAppleButtonConfig', () => {
+    const defaultProps = {
+        token: 'test-token',
+        site: {id: 'RefArch'},
+        basket: {
+            basketId: 'basket-123',
+            orderTotal: 100,
+            currency: 'USD'
+        },
+        shippingMethods: [],
+        applePayConfig: {merchantName: 'Test Merchant'},
+        navigate: jest.fn(),
+        fetchShippingMethods: jest.fn(),
+        customerId: 'customer-123',
+        onError: []
+    }
+
+    it('should use the same throttled handler instance for onError and onPaymentFailed', () => {
+        const config = getAppleButtonConfig(defaultProps)
+        expect(config.onError).toBeDefined()
+        expect(config.onPaymentFailed).toBeDefined()
+        expect(config.onError).toBe(config.onPaymentFailed)
+    })
+
+    it('should only execute error callbacks once when both onError and onPaymentFailed fire', async () => {
+        jest.useFakeTimers()
+        const errorCallback = jest.fn().mockResolvedValue({})
+        const config = getAppleButtonConfig({
+            ...defaultProps,
+            onError: [errorCallback]
+        })
+        const error = new Error('Test error')
+
+        await config.onError(error)
+        await config.onPaymentFailed(error)
+
+        expect(errorCallback).toHaveBeenCalledTimes(1)
+        jest.useRealTimers()
     })
 })

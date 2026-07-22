@@ -1,6 +1,6 @@
 import {AdyenPaymentsService} from '../../services/payments'
 import {AdyenPaymentsDetailsService} from '../../services/payments-details'
-import {executeCallbacks, executeErrorCallbacks} from '../../utils/executeCallbacks'
+import {executeCallbacks, createThrottledErrorHandler} from '../../utils/executeCallbacks'
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 import {PaymentCancelService} from '../../services/payment-cancel'
 
@@ -14,6 +14,9 @@ export const baseConfig = (props) => {
     } = props
     // Create error handler with props in closure
     const errorHandler = (error, component) => onErrorHandler(error, component, props)
+
+    // Create a single throttled error handler instance to share across onError and onPaymentFailed
+    const handleError = createThrottledErrorHandler([...onError, errorHandler], props)
 
     const amount = getAmount(props)
     return {
@@ -31,8 +34,8 @@ export const baseConfig = (props) => {
             ],
             props
         ),
-        onError: executeErrorCallbacks([...onError, errorHandler], props),
-        onPaymentFailed: executeErrorCallbacks([...onError, errorHandler], props)
+        onError: handleError,
+        onPaymentFailed: handleError
     }
 }
 
