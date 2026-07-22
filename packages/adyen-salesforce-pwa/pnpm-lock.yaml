@@ -39,7 +39,7 @@ importers:
   .:
     dependencies:
       '@adyen/adyen-web':
-        specifier: ^6.34.0
+        specifier: ^6.35.0
         version: 6.37.0
       '@adyen/api-library':
         specifier: ^29.1.0
