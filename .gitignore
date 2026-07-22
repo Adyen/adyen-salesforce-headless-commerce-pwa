@@ -20,6 +20,7 @@ coverage
 docs
 
 # AI agent directories
+.agents/
 .claude/
 .windsurf/
 .factory/
