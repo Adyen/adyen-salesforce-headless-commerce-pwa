@@ -379,18 +379,20 @@ describe('paypal/expressConfig', () => {
 
             await createTemporaryBasketCallback(state, component, actions, props)
 
-            expect(actions.reject).toHaveBeenCalledWith('Failed to create temporary basket')
+            expect(actions.reject).toHaveBeenCalledWith(expect.any(Error))
+            expect(actions.reject.mock.calls[0][0].message).toBe(
+                'Failed to create temporary basket'
+            )
             expect(props.handleError).toHaveBeenCalled()
         })
 
         it('should reject on error', async () => {
-            mockTemporaryBasketService.createTemporaryBasket.mockRejectedValue(
-                new Error('Service error')
-            )
+            const mockError = new Error('Service error')
+            mockTemporaryBasketService.createTemporaryBasket.mockRejectedValue(mockError)
 
             await createTemporaryBasketCallback(state, component, actions, props)
 
-            expect(actions.reject).toHaveBeenCalledWith('Service error')
+            expect(actions.reject).toHaveBeenCalledWith(mockError)
             expect(props.handleError).toHaveBeenCalled()
         })
 
@@ -401,7 +403,7 @@ describe('paypal/expressConfig', () => {
             await createTemporaryBasketCallback(state, component, actions, props)
 
             expect(props.handleError).toHaveBeenCalledWith(mockError)
-            expect(actions.reject).toHaveBeenCalledWith('Basket creation failed')
+            expect(actions.reject).toHaveBeenCalledWith(mockError)
         })
     })
 

@@ -77,7 +77,7 @@ export const generateOrderNumber = async (state, component, actions, props, bask
         props.setBasket({...basketData, c_orderNo: orderNo})
     } catch (err) {
         props.handleError(err)
-        actions.reject(err.message)
+        actions.reject(err)
     }
 }
 

@@ -172,7 +172,7 @@ export const generateOrderNumberCallback = async (state, component, actions, pro
         props.setBasket({...basket, c_orderNo: orderNo})
     } catch (err) {
         props.handleError(err)
-        actions.reject(err.message)
+        actions.reject(err)
     }
 }
 
@@ -198,7 +198,7 @@ export const createTemporaryBasketCallback = async (state, component, actions, p
         }
     } catch (err) {
         props.handleError(err)
-        actions.reject(err.message)
+        actions.reject(err)
     }
 }
 
