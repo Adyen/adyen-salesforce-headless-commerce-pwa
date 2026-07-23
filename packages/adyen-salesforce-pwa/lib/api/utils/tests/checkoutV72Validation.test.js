@@ -100,6 +100,54 @@ describe('checkoutV72Validation', () => {
                         AdyenError
                     )
                 })
+
+                it('should pass for a quoted local part containing an internal @', () => {
+                    const paymentRequest = {shopperEmail: '"a@b"@example.com'}
+
+                    const result = formatAndValidatePaymentRequest(paymentRequest)
+
+                    expect(result.shopperEmail).toBe('"a@b"@example.com')
+                })
+
+                it('should pass for a quoted local part with an escaped internal quote', () => {
+                    const paymentRequest = {shopperEmail: '"a\\"b"@example.com'}
+
+                    const result = formatAndValidatePaymentRequest(paymentRequest)
+
+                    expect(result.shopperEmail).toBe('"a\\"b"@example.com')
+                })
+
+                it('should throw AdyenError for an unquoted local part containing a "', () => {
+                    const paymentRequest = {shopperEmail: 'te"st@example.com'}
+
+                    expect(() => formatAndValidatePaymentRequest(paymentRequest)).toThrow(
+                        AdyenError
+                    )
+                })
+
+                it('should throw AdyenError for a local part with an unescaped internal quote', () => {
+                    const paymentRequest = {shopperEmail: '"a"b"@example.com'}
+
+                    expect(() => formatAndValidatePaymentRequest(paymentRequest)).toThrow(
+                        AdyenError
+                    )
+                })
+
+                it('should throw AdyenError for an unquoted local part with multiple @', () => {
+                    const paymentRequest = {shopperEmail: 'a@b@example.com'}
+
+                    expect(() => formatAndValidatePaymentRequest(paymentRequest)).toThrow(
+                        AdyenError
+                    )
+                })
+
+                it('should throw AdyenError for a domain containing a space', () => {
+                    const paymentRequest = {shopperEmail: 'test@exa mple.com'}
+
+                    expect(() => formatAndValidatePaymentRequest(paymentRequest)).toThrow(
+                        AdyenError
+                    )
+                })
             })
 
             describe('dateOfBirth validation', () => {
@@ -375,6 +423,31 @@ describe('checkoutV72Validation', () => {
                 expect(result.returnUrl).toBe(
                     ('https://example.com/' + 'a'.repeat(1500)).substring(0, 1024)
                 )
+            })
+
+            it('should encode spaces and reserved characters in returnUrl', () => {
+                const paymentRequest = {
+                    returnUrl: 'https://example.com/callback?name=John Doe&note="hi there"'
+                }
+
+                const result = formatAndValidatePaymentRequest(paymentRequest)
+
+                expect(result.returnUrl).not.toContain(' ')
+                expect(result.returnUrl).not.toContain('"')
+                expect(result.returnUrl).toContain('%20')
+                expect(result.returnUrl).toContain('name=John%20Doe')
+            })
+
+            it('should not leave a dangling escape sequence when truncation lands mid-encoding', () => {
+                const paymentRequest = {
+                    returnUrl: 'https://example.com/callback?param=' + 'é'.repeat(500)
+                }
+
+                const result = formatAndValidatePaymentRequest(paymentRequest)
+
+                expect(() => decodeURIComponent(result.returnUrl)).not.toThrow()
+                expect(result.returnUrl.endsWith('%')).toBe(false)
+                expect(result.returnUrl).not.toMatch(/%[0-9A-Fa-f]?$/)
             })
 
             it('should truncate metadata keys to 20 and values to 80 characters', () => {

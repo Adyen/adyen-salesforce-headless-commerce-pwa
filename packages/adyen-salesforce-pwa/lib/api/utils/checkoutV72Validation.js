@@ -2,9 +2,71 @@ import {AdyenError} from '../models/AdyenError.js'
 import {ERROR_MESSAGE} from '../../utils/constants.mjs'
 
 /**
+ * Field length/value limits enforced by the Checkout API v72 contract.
+ * Centralized here so every truncation/validation rule below references a
+ * single named source instead of a scattered magic number.
+ */
+const V72_FIELD_LIMITS = {
+    SHOPPER_EMAIL_MAX_LENGTH: 256,
+    SHOPPER_NAME_MAX_LENGTH: 100,
+    ADDRESS_POSTAL_CODE_MAX_LENGTH: 10,
+    ADDRESS_STATE_OR_PROVINCE_MAX_LENGTH: 10,
+    DELIVERY_STATE_OR_PROVINCE_CODE_LENGTH: 2,
+    METADATA_KEY_MAX_LENGTH: 20,
+    METADATA_VALUE_MAX_LENGTH: 80,
+    REFERENCE_MAX_LENGTH: 80,
+    SHOPPER_IP_MAX_LENGTH: 256,
+    TELEPHONE_NUMBER_MAX_LENGTH: 64,
+    SOCIAL_SECURITY_NUMBER_MAX_LENGTH: 50,
+    RETURN_URL_MAX_LENGTH: 1024,
+    CAPTURE_DELAY_MAX_HOURS: 672
+}
+
+/**
+ * Checks whether a local part (the segment before the last '@') is a validly
+ * quoted string per RFC 5321, e.g. "a@b" in "a@b"@example.com. Quoting allows
+ * otherwise-illegal characters (spaces, '@', '"') as long as the whole local
+ * part is wrapped in double quotes and any interior quote is escaped ('\"').
+ * @param {string} localPart - The local part to check, including any quotes.
+ * @returns {boolean} True if localPart is a well-formed quoted string.
+ * @private
+ */
+function isValidQuotedLocalPart(localPart) {
+    if (localPart.length < 2 || !localPart.startsWith('"') || !localPart.endsWith('"')) {
+        return false
+    }
+
+    const inner = localPart.slice(1, -1)
+    for (let i = 0; i < inner.length; i++) {
+        if (inner[i] === '"' && inner[i - 1] !== '\\') {
+            return false
+        }
+    }
+    return true
+}
+
+/**
+ * Validates the local part (before the last '@') of a shopper email.
+ * Plain local parts must not contain spaces, '@', or '"'. Local parts that do
+ * contain any of those characters are only valid if fully quoted (see
+ * isValidQuotedLocalPart), e.g. "a@b"@example.com.
+ * @param {string} localPart - The local part to validate.
+ * @returns {boolean} True if the local part is valid.
+ * @private
+ */
+function isValidLocalPart(localPart) {
+    if (!localPart.includes('"') && !localPart.includes('@') && !localPart.includes(' ')) {
+        return true
+    }
+    return isValidQuotedLocalPart(localPart)
+}
+
+/**
  * Validates shopper email format according to Checkout API v72 requirements.
- * Must not contain spaces, must have exactly one '@' with text on both sides,
- * domain must not start with '.', and must be ≤ 256 characters.
+ * The domain (after the last '@') must not start with '.' or contain spaces.
+ * The local part (before the last '@') must not contain spaces, '@', or '"'
+ * unless it is fully quoted per RFC 5321 (see isValidLocalPart). Must be
+ * ≤ 256 characters.
  * @param {string} email - The email address to validate.
  * @throws {AdyenError} If the email format is invalid.
  * @private
@@ -14,25 +76,25 @@ function validateShopperEmail(email) {
         return
     }
 
-    if (typeof email !== 'string' || email.length > 256) {
+    if (typeof email !== 'string' || email.length > V72_FIELD_LIMITS.SHOPPER_EMAIL_MAX_LENGTH) {
         throw new AdyenError(ERROR_MESSAGE.INVALID_EMAIL, 400)
     }
 
-    if (email.includes(' ')) {
+    // Split on the last '@': the domain never contains '@', but a quoted
+    // local part legitimately may (e.g. "a@b"@example.com).
+    const atIndex = email.lastIndexOf('@')
+    if (atIndex <= 0 || atIndex === email.length - 1) {
         throw new AdyenError(ERROR_MESSAGE.INVALID_EMAIL, 400)
     }
 
-    const atIndex = email.indexOf('@')
-    if (atIndex === -1 || atIndex !== email.lastIndexOf('@')) {
-        throw new AdyenError(ERROR_MESSAGE.INVALID_EMAIL, 400)
-    }
-
-    if (atIndex === 0 || atIndex === email.length - 1) {
-        throw new AdyenError(ERROR_MESSAGE.INVALID_EMAIL, 400)
-    }
-
+    const localPart = email.substring(0, atIndex)
     const domain = email.substring(atIndex + 1)
-    if (domain.startsWith('.')) {
+
+    if (domain.startsWith('.') || domain.includes(' ')) {
+        throw new AdyenError(ERROR_MESSAGE.INVALID_EMAIL, 400)
+    }
+
+    if (!isValidLocalPart(localPart)) {
         throw new AdyenError(ERROR_MESSAGE.INVALID_EMAIL, 400)
     }
 }
@@ -88,7 +150,41 @@ function truncate(value, maxLength) {
 }
 
 /**
- * Encodes non-ASCII characters in a URL and truncates to maximum length.
+ * Truncates an already percent-encoded URL to maxLength without leaving a
+ * dangling/invalid escape sequence at the cut point. A naive substring can
+ * land mid-escape (e.g. "...%C3%A" or "...%C3%") or mid multi-byte UTF-8
+ * sequence (e.g. "...%C3" without its "%A9" continuation byte), producing a
+ * malformed URL. decodeURIComponent throws on both cases, so trimming one
+ * character at a time until it succeeds guarantees a well-formed result.
+ * @param {string} encoded - The percent-encoded URL to truncate.
+ * @param {number} maxLength - The maximum allowed length.
+ * @returns {string} The truncated URL with no incomplete escape sequence.
+ * @private
+ */
+function truncateEncodedUrl(encoded, maxLength) {
+    if (encoded.length <= maxLength) {
+        return encoded
+    }
+
+    let truncated = encoded.substring(0, maxLength)
+    while (truncated.length > 0) {
+        try {
+            decodeURIComponent(truncated)
+            return truncated
+        } catch {
+            truncated = truncated.slice(0, -1)
+        }
+    }
+    return truncated
+}
+
+/**
+ * Encodes a URL according to Checkout API v72 requirements, which require
+ * encoding of non-ASCII characters as well as unsafe/reserved ASCII
+ * characters like spaces, then truncates to maximum length. Uses encodeURI
+ * rather than a custom regex so it also escapes spaces and other unsafe
+ * ASCII (quotes, angle brackets, etc.) while preserving URL-structural
+ * characters (":", "/", "?", "#", "&", "=", ...), matching RFC 2396.
  * @param {string} url - The URL to encode and truncate.
  * @param {number} maxLength - The maximum allowed length.
  * @returns {string} The encoded and truncated URL.
@@ -99,10 +195,8 @@ function encodeAndTruncateUrl(url, maxLength) {
         return url
     }
 
-    // Encode non-ASCII characters
-    // eslint-disable-next-line no-control-regex
-    const encoded = url.replace(/[^\x00-\x7F]/gu, (char) => encodeURIComponent(char))
-    return truncate(encoded, maxLength)
+    const encoded = encodeURI(url)
+    return truncateEncodedUrl(encoded, maxLength)
 }
 
 /**
@@ -120,11 +214,17 @@ function formatAddress(address) {
     const formatted = {...address}
 
     if (formatted.postalCode) {
-        formatted.postalCode = truncate(formatted.postalCode, 10)
+        formatted.postalCode = truncate(
+            formatted.postalCode,
+            V72_FIELD_LIMITS.ADDRESS_POSTAL_CODE_MAX_LENGTH
+        )
     }
 
     if (formatted.stateOrProvince) {
-        formatted.stateOrProvince = truncate(formatted.stateOrProvince, 10)
+        formatted.stateOrProvince = truncate(
+            formatted.stateOrProvince,
+            V72_FIELD_LIMITS.ADDRESS_STATE_OR_PROVINCE_MAX_LENGTH
+        )
     }
 
     return formatted
@@ -145,11 +245,23 @@ function formatDeliveryAddress(address) {
     const formatted = {...address}
 
     if (formatted.postalCode) {
-        formatted.postalCode = truncate(formatted.postalCode, 10)
+        formatted.postalCode = truncate(
+            formatted.postalCode,
+            V72_FIELD_LIMITS.ADDRESS_POSTAL_CODE_MAX_LENGTH
+        )
     }
 
+    // v72 expects a 2-letter ISO 3166-2 subdivision code here, not a free-text
+    // region name. Truncating to 2 chars is only correct if the upstream
+    // caller already supplies an ISO code (e.g. "CA"); truncating a full name
+    // like "Queensland" would silently produce an incorrect code ("QU")
+    // rather than a valid one. This function does not attempt to resolve
+    // names to ISO codes, it only enforces the length constraint.
     if (typeof formatted.stateOrProvince === 'string' && formatted.stateOrProvince) {
-        formatted.stateOrProvince = truncate(formatted.stateOrProvince.toUpperCase(), 2)
+        formatted.stateOrProvince = truncate(
+            formatted.stateOrProvince.toUpperCase(),
+            V72_FIELD_LIMITS.DELIVERY_STATE_OR_PROVINCE_CODE_LENGTH
+        )
     }
 
     return formatted
@@ -170,11 +282,14 @@ function formatShopperName(shopperName) {
     const formatted = {...shopperName}
 
     if (formatted.firstName) {
-        formatted.firstName = truncate(formatted.firstName, 100)
+        formatted.firstName = truncate(
+            formatted.firstName,
+            V72_FIELD_LIMITS.SHOPPER_NAME_MAX_LENGTH
+        )
     }
 
     if (formatted.lastName) {
-        formatted.lastName = truncate(formatted.lastName, 100)
+        formatted.lastName = truncate(formatted.lastName, V72_FIELD_LIMITS.SHOPPER_NAME_MAX_LENGTH)
     }
 
     return formatted
@@ -194,8 +309,11 @@ function formatMetadata(metadata) {
 
     const formatted = {}
     for (const [key, value] of Object.entries(metadata)) {
-        const truncatedKey = truncate(key, 20)
-        const truncatedValue = typeof value === 'string' ? truncate(value, 80) : value
+        const truncatedKey = truncate(key, V72_FIELD_LIMITS.METADATA_KEY_MAX_LENGTH)
+        const truncatedValue =
+            typeof value === 'string'
+                ? truncate(value, V72_FIELD_LIMITS.METADATA_VALUE_MAX_LENGTH)
+                : value
         formatted[truncatedKey] = truncatedValue
     }
 
@@ -246,19 +364,25 @@ export function formatAndValidatePaymentRequest(paymentRequest) {
 
     // Format length-limited fields (silently truncate/normalize)
     if (formatted.reference) {
-        formatted.reference = truncate(formatted.reference, 80)
+        formatted.reference = truncate(formatted.reference, V72_FIELD_LIMITS.REFERENCE_MAX_LENGTH)
     }
 
     if (formatted.shopperIP) {
-        formatted.shopperIP = truncate(formatted.shopperIP, 256)
+        formatted.shopperIP = truncate(formatted.shopperIP, V72_FIELD_LIMITS.SHOPPER_IP_MAX_LENGTH)
     }
 
     if (formatted.telephoneNumber) {
-        formatted.telephoneNumber = truncate(formatted.telephoneNumber, 64)
+        formatted.telephoneNumber = truncate(
+            formatted.telephoneNumber,
+            V72_FIELD_LIMITS.TELEPHONE_NUMBER_MAX_LENGTH
+        )
     }
 
     if (formatted.socialSecurityNumber) {
-        formatted.socialSecurityNumber = truncate(formatted.socialSecurityNumber, 50)
+        formatted.socialSecurityNumber = truncate(
+            formatted.socialSecurityNumber,
+            V72_FIELD_LIMITS.SOCIAL_SECURITY_NUMBER_MAX_LENGTH
+        )
     }
 
     if (formatted.shopperName) {
@@ -274,15 +398,21 @@ export function formatAndValidatePaymentRequest(paymentRequest) {
     }
 
     if (formatted.returnUrl) {
-        formatted.returnUrl = encodeAndTruncateUrl(formatted.returnUrl, 1024)
+        formatted.returnUrl = encodeAndTruncateUrl(
+            formatted.returnUrl,
+            V72_FIELD_LIMITS.RETURN_URL_MAX_LENGTH
+        )
     }
 
     if (formatted.metadata) {
         formatted.metadata = formatMetadata(formatted.metadata)
     }
 
-    if (formatted.captureDelayHours !== undefined && formatted.captureDelayHours > 672) {
-        formatted.captureDelayHours = 672
+    if (
+        formatted.captureDelayHours !== undefined &&
+        formatted.captureDelayHours > V72_FIELD_LIMITS.CAPTURE_DELAY_MAX_HOURS
+    ) {
+        formatted.captureDelayHours = V72_FIELD_LIMITS.CAPTURE_DELAY_MAX_HOURS
     }
 
     return formatted
