@@ -208,7 +208,15 @@ const ProductView = forwardRef(
         const storeName = selectedStore?.name
         const inventoryId = selectedStore?.inventoryId
 
+        // PDP mounts express payment buttons twice (desktop + mobile sticky CTA), so a single
+        // payment error can trigger onError from both instances. Throttle to a single toast.
+        const lastErrorShownRef = useRef(0)
         const showError = (error) => {
+            const now = Date.now()
+            if (now - lastErrorShownRef.current < 300) {
+                return
+            }
+            lastErrorShownRef.current = now
             showToast({
                 title: error?.message || intl.formatMessage(API_ERROR_MESSAGE),
                 status: 'error'
