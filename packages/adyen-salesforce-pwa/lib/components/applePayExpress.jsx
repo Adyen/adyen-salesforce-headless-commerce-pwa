@@ -12,6 +12,8 @@ import useAdyenPaymentMethodsForExpress from '../hooks/useAdyenPaymentMethodsFor
 import useAdyenShippingMethods from '../hooks/useAdyenShippingMethods'
 import {getAppleButtonConfig, getApplePaymentMethodConfig} from './helpers/applePayExpress.utils'
 import {AdyenShippingMethodsService} from '../services/shipping-methods'
+import {shouldNotifyError} from '../utils/executeCallbacks'
+import {ERROR_NOTIFICATION_KEYS} from '../utils/constants.mjs'
 
 const ApplePayExpressComponent = (props) => {
     const {
@@ -59,7 +61,6 @@ const ApplePayExpressComponent = (props) => {
     )
     const paymentContainer = useRef(null)
     const applePayButtonRef = useRef(null)
-    const errorShownRef = useRef(false)
 
     // Fetch Adyen environment
     const {
@@ -131,24 +132,24 @@ const ApplePayExpressComponent = (props) => {
 
     // Handle errors from hooks
     useEffect(() => {
-        if (adyenEnvironmentError && !errorShownRef.current) {
-            errorShownRef.current = true
+        if (adyenEnvironmentError && shouldNotifyError(ERROR_NOTIFICATION_KEYS.APPLE_PAY_EXPRESS)) {
             console.error('Error fetching Adyen environment:', adyenEnvironmentError)
             onError.forEach((cb) => cb(adyenEnvironmentError))
         }
     }, [adyenEnvironmentError, onError])
 
     useEffect(() => {
-        if (adyenPaymentMethodsError && !errorShownRef.current) {
-            errorShownRef.current = true
+        if (
+            adyenPaymentMethodsError &&
+            shouldNotifyError(ERROR_NOTIFICATION_KEYS.APPLE_PAY_EXPRESS)
+        ) {
             console.error('Error fetching Adyen payment methods:', adyenPaymentMethodsError)
             onError.forEach((cb) => cb(adyenPaymentMethodsError))
         }
     }, [adyenPaymentMethodsError, onError])
 
     useEffect(() => {
-        if (shippingMethodsError && !errorShownRef.current) {
-            errorShownRef.current = true
+        if (shippingMethodsError && shouldNotifyError(ERROR_NOTIFICATION_KEYS.APPLE_PAY_EXPRESS)) {
             console.error('Error fetching shipping methods:', shippingMethodsError)
             onError.forEach((cb) => cb(shippingMethodsError))
         }
@@ -209,8 +210,7 @@ const ApplePayExpressComponent = (props) => {
                 applePayButtonRef.current = applePayButton
             } catch (err) {
                 console.error('Error initializing Apple Pay Express:', err)
-                if (!errorShownRef.current) {
-                    errorShownRef.current = true
+                if (shouldNotifyError(ERROR_NOTIFICATION_KEYS.APPLE_PAY_EXPRESS)) {
                     onError.forEach((cb) => cb(err))
                 }
             }

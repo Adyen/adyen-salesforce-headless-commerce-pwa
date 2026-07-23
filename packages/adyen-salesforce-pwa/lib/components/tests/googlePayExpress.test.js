@@ -14,6 +14,7 @@ import {getGooglePayExpressConfig} from '../googlepay/expressConfig'
 import {AdyenShippingMethodsService} from '../../services/shipping-methods'
 import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
+import {__resetErrorNotificationThrottle} from '../../utils/executeCallbacks'
 
 jest.mock('../../hooks/useAdyenEnvironment')
 jest.mock('../../hooks/useAdyenPaymentMethods')
@@ -61,6 +62,7 @@ describe('GooglePayExpressComponent', () => {
     let consoleErrorSpy
 
     beforeEach(() => {
+        __resetErrorNotificationThrottle()
         consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
 
         AdyenCheckout.mockResolvedValue({})
@@ -113,6 +115,7 @@ describe('GooglePayExpressComponent', () => {
     })
 
     afterEach(() => {
+        __resetErrorNotificationThrottle()
         jest.clearAllMocks()
         consoleErrorSpy.mockRestore()
     })
@@ -398,6 +401,79 @@ describe('GooglePayExpressComponent', () => {
             )
             expect(mockGetShippingMethods).toHaveBeenCalled()
             expect(result).toEqual(mockShippingMethodsData)
+        })
+    })
+
+    describe('Dual-mount error deduplication', () => {
+        it('should fire onError only once when two instances fail with the same error', async () => {
+            const onErrorMock = jest.fn()
+            const mockError = new Error('Test initialization error')
+
+            AdyenCheckout.mockRejectedValue(mockError)
+
+            const props = {
+                ...defaultProps,
+                onError: [onErrorMock]
+            }
+
+            // Render two instances (simulating desktop + mobile mount)
+            await act(async () => {
+                render(<GooglePayExpressComponent {...props} />)
+                render(<GooglePayExpressComponent {...props} />)
+            })
+
+            // Wait for initialization attempts
+            await waitFor(() => {
+                expect(onErrorMock).toHaveBeenCalled()
+            })
+
+            // onError should be called only once across both instances
+            expect(onErrorMock).toHaveBeenCalledTimes(1)
+            expect(onErrorMock).toHaveBeenCalledWith(mockError)
+        })
+
+        it('should suppress duplicate error notification when remounting within 300ms window', async () => {
+            const onErrorMock = jest.fn()
+            const mockError = new Error('Init error')
+
+            // Make initialization fail consistently
+            AdyenCheckout.mockRejectedValue(mockError)
+
+            const props = {
+                ...defaultProps,
+                onError: [onErrorMock]
+            }
+
+            let firstUnmount
+
+            // First mount and error
+            await act(async () => {
+                const result = render(<GooglePayExpressComponent {...props} />)
+                firstUnmount = result.unmount
+            })
+
+            // Wait for the error to be triggered
+            await waitFor(() => {
+                expect(onErrorMock).toHaveBeenCalledTimes(1)
+            })
+
+            // Unmount first instance
+            act(() => {
+                firstUnmount()
+            })
+
+            // Remount within 300ms (simulating handlePaymentCancel/setRemountKey)
+            await act(async () => {
+                render(<GooglePayExpressComponent {...props} />)
+            })
+
+            // Give it time to attempt initialization
+            await act(async () => {
+                await new Promise((resolve) => setTimeout(resolve, 100))
+            })
+
+            // Error should still be called only once (shared 300ms window behavior)
+            expect(onErrorMock).toHaveBeenCalledTimes(1)
         })
     })
 })

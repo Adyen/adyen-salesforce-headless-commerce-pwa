@@ -9,7 +9,7 @@ import {
     createTemporaryBasketCallback
 } from '../paypal/expressConfig'
 import {baseConfig, onSubmit, onAdditionalDetails} from '../helpers/baseConfig'
-import {executeCallbacks} from '../../utils/executeCallbacks'
+import {executeCallbacks, __resetErrorNotificationThrottle} from '../../utils/executeCallbacks'
 import {AdyenShopperDetailsService} from '../../services/shopper-details'
 import {AdyenShippingMethodsService} from '../../services/shipping-methods'
 import {AdyenShippingAddressService} from '../../services/shipping-address'
@@ -22,7 +22,14 @@ import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 import {onErrorHandler} from '../paypal/expressConfig'
 
 jest.mock('../helpers/baseConfig')
-jest.mock('../../utils/executeCallbacks')
+jest.mock('../../utils/executeCallbacks', () => {
+    const actual = jest.requireActual('../../utils/executeCallbacks')
+    return {
+        ...actual,
+        executeCallbacks: jest.fn((cbs) => cbs),
+        executeErrorCallbacks: jest.fn((cbs) => cbs)
+    }
+})
 jest.mock('../../services/shopper-details')
 jest.mock('../../services/shipping-methods')
 jest.mock('../../services/shipping-address')
@@ -35,8 +42,13 @@ jest.mock('../../utils/parsers.mjs')
 
 describe('paypal/expressConfig', () => {
     beforeEach(() => {
+        __resetErrorNotificationThrottle()
         jest.clearAllMocks()
         getCurrencyValueForApi.mockImplementation((value) => value)
+    })
+
+    afterEach(() => {
+        __resetErrorNotificationThrottle()
     })
 
     describe('paypalExpressConfig', () => {
@@ -196,6 +208,59 @@ describe('paypal/expressConfig', () => {
             expect(result).toHaveProperty('isExpress', true)
         })
 
+        it('should call error handler only once when onError and onPaymentFailed are triggered', async () => {
+            baseConfig.mockReturnValue({})
+            const mockErrorHandler = jest.fn()
+            executeCallbacks.mockImplementation((callbacks) => callbacks)
+
+            const config = paypalExpressConfig({
+                onError: [mockErrorHandler],
+                basket: {orderTotal: 100, currency: 'USD'}
+            })
+
+            const testError = new Error('Test error')
+
+            // Call onError
+            if (typeof config.onError === 'function') {
+                await config.onError(testError)
+            }
+            // Call onPaymentFailed
+            if (typeof config.onPaymentFailed === 'function') {
+                await config.onPaymentFailed(testError)
+            }
+
+            // Handler should be called only once due to throttling
+            expect(mockErrorHandler).toHaveBeenCalledTimes(1)
+        })
+
+        it('should call error handler only once across two config instances (dual-mount)', async () => {
+            baseConfig.mockReturnValue({})
+            const mockErrorHandler = jest.fn()
+            executeCallbacks.mockImplementation((callbacks) => callbacks)
+
+            const props = {
+                onError: [mockErrorHandler],
+                basket: {orderTotal: 100, currency: 'USD'}
+            }
+
+            // Build two configs (simulating dual mount)
+            const config1 = paypalExpressConfig(props)
+            const config2 = paypalExpressConfig(props)
+
+            const testError = new Error('Dual mount error')
+
+            // Fire error on both configs
+            if (typeof config1.onError === 'function') {
+                await config1.onError(testError)
+            }
+            if (typeof config2.onError === 'function') {
+                await config2.onError(testError)
+            }
+
+            // Handler should be called only once across both instances
+            expect(mockErrorHandler).toHaveBeenCalledTimes(1)
+        })
+
         it('should set amount with orderTotal from basket', () => {
             baseConfig.mockReturnValue({})
             executeCallbacks.mockImplementation((callbacks) => callbacks)
@@ -283,7 +348,8 @@ describe('paypal/expressConfig', () => {
                 site: {id: 'site-id'},
                 product: {id: 'product123', quantity: 2},
                 setBasket: jest.fn(),
-                onError: [jest.fn()]
+                onError: [jest.fn()],
+                handleError: jest.fn()
             }
 
             mockTemporaryBasketService = {
@@ -314,7 +380,7 @@ describe('paypal/expressConfig', () => {
             await createTemporaryBasketCallback(state, component, actions, props)
 
             expect(actions.reject).toHaveBeenCalledWith('Failed to create temporary basket')
-            expect(props.onError[0]).toHaveBeenCalled()
+            expect(props.handleError).toHaveBeenCalled()
         })
 
         it('should reject on error', async () => {
@@ -325,7 +391,17 @@ describe('paypal/expressConfig', () => {
             await createTemporaryBasketCallback(state, component, actions, props)
 
             expect(actions.reject).toHaveBeenCalledWith('Service error')
-            expect(props.onError[0]).toHaveBeenCalled()
+            expect(props.handleError).toHaveBeenCalled()
+        })
+
+        it('should call handleError when temporary basket creation rejects', async () => {
+            const mockError = new Error('Basket creation failed')
+            mockTemporaryBasketService.createTemporaryBasket.mockRejectedValue(mockError)
+
+            await createTemporaryBasketCallback(state, component, actions, props)
+
+            expect(props.handleError).toHaveBeenCalledWith(mockError)
+            expect(actions.reject).toHaveBeenCalledWith('Basket creation failed')
         })
     })
 
