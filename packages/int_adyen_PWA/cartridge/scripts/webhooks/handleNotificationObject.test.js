@@ -69,7 +69,7 @@ describe('handleNotificationObject', () => {
         });
 
         it('dispatches to the matching event handler once past the delay window', () => {
-            jest.mock('./eventHandlers/AUTHORISATION', () => ({
+            jest.doMock('./eventHandlers/AUTHORISATION', () => ({
                 handle: jest.fn(() => ({success: true}))
             }));
             const order = makeOrder();
@@ -87,7 +87,7 @@ describe('handleNotificationObject', () => {
         });
 
         it('computes Pending only for PENDING events whose handler reports pending: true', () => {
-            jest.mock('./eventHandlers/PENDING', () => ({
+            jest.doMock('./eventHandlers/PENDING', () => ({
                 handle: jest.fn(() => ({pending: true}))
             }));
             const order = makeOrder();
