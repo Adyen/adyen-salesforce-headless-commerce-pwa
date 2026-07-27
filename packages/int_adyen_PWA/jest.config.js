@@ -8,5 +8,14 @@ module.exports = {
     },
     setupFilesAfterEnv: ['<rootDir>/test/setupGlobals.js'],
     clearMocks: true,
-    restoreMocks: true
+    restoreMocks: true,
+    collectCoverageFrom: ['<rootDir>/cartridge/**/*.js', '!<rootDir>/cartridge/**/*.test.js'],
+    coverageThreshold: {
+        global: {
+            branches: 85,
+            functions: 85,
+            lines: 85,
+            statements: 85
+        }
+    }
 };
