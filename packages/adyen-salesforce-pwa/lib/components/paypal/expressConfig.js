@@ -1,5 +1,5 @@
 import {baseConfig, onSubmit, onAdditionalDetails} from '../helpers/baseConfig'
-import {executeCallbacks, executeErrorCallbacks} from '../../utils/executeCallbacks'
+import {executeCallbacks, createThrottledErrorHandler} from '../../utils/executeCallbacks'
 import {PaymentCancelExpressService} from '../../services/payment-cancel-express'
 import {AdyenShopperDetailsService} from '../../services/shopper-details'
 import {AdyenShippingMethodsService} from '../../services/shipping-methods'
@@ -10,6 +10,7 @@ import {AdyenTemporaryBasketService} from '../../services/temporary-basket'
 import {AdyenOrderNumberService} from '../../services/order-number'
 import {formatPayPalShopperDetails} from '../helpers/addressHelper'
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
+import {ERROR_NOTIFICATION_KEYS} from '../../utils/constants.mjs'
 
 /**
  * Creates the PayPal Express configuration object for Adyen Checkout.
@@ -58,6 +59,18 @@ export const paypalExpressConfig = (props = {}) => {
 
     const errorHandler = (error, component) => onErrorHandler(error, component, propsWithGetBasket)
 
+    // Create a single throttled error handler shared across all error sites
+    const handleError = createThrottledErrorHandler(
+        [...onError, errorHandler],
+        propsWithGetBasket,
+        {
+            key: ERROR_NOTIFICATION_KEYS.PAYPAL_EXPRESS
+        }
+    )
+
+    // Expose handleError on props for use in callbacks
+    propsWithGetBasket.handleError = handleError
+
     const redirectShopperToReviewPage = async (state) => {
         try {
             const basket = getBasket()
@@ -71,7 +84,7 @@ export const paypalExpressConfig = (props = {}) => {
             await adyenPaymentDataReviewPageService.setPaymentData(state.data)
             props.navigate(props.reviewPageUrl)
         } catch (err) {
-            props.onError(err)
+            propsWithGetBasket.handleError(err)
         }
     }
     return {
@@ -125,8 +138,8 @@ export const paypalExpressConfig = (props = {}) => {
             ],
             propsWithGetBasket
         ),
-        onError: executeErrorCallbacks([...onError, errorHandler], propsWithGetBasket),
-        onPaymentFailed: executeErrorCallbacks([...onError, errorHandler], propsWithGetBasket),
+        onError: handleError,
+        onPaymentFailed: handleError,
         ...configuration
     }
 }
@@ -158,8 +171,8 @@ export const generateOrderNumberCallback = async (state, component, actions, pro
         }
         props.setBasket({...basket, c_orderNo: orderNo})
     } catch (err) {
-        props.onError?.forEach((cb) => cb(err))
-        actions.reject(err.message)
+        props.handleError(err)
+        actions.reject(err)
     }
 }
 
@@ -184,8 +197,8 @@ export const createTemporaryBasketCallback = async (state, component, actions, p
             throw new Error('Failed to create temporary basket')
         }
     } catch (err) {
-        props.onError?.forEach((cb) => cb(err))
-        actions.reject(err.message)
+        props.handleError(err)
+        actions.reject(err)
     }
 }
 

@@ -208,9 +208,9 @@ const ProductView = forwardRef(
         const storeName = selectedStore?.name
         const inventoryId = selectedStore?.inventoryId
 
-        const showError = () => {
+        const showError = (error) => {
             showToast({
-                title: intl.formatMessage(API_ERROR_MESSAGE),
+                title: error?.message || intl.formatMessage(API_ERROR_MESSAGE),
                 status: 'error'
             })
         }

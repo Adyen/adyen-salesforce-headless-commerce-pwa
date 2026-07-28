@@ -10,6 +10,7 @@ import {
 import {AdyenPaymentsService} from '../../services/payments'
 import {AdyenPaymentsDetailsService} from '../../services/payments-details'
 import {PaymentCancelService} from '../../services/payment-cancel'
+import {__resetErrorNotificationThrottle} from '../../utils/executeCallbacks'
 
 jest.mock('../../services/payments')
 jest.mock('../../services/payments-details')
@@ -25,11 +26,69 @@ describe('baseConfig function', () => {
         onError: [() => {}]
     }
 
+    beforeEach(() => {
+        __resetErrorNotificationThrottle()
+    })
+
+    afterEach(() => {
+        __resetErrorNotificationThrottle()
+    })
+
     it('returns expected configuration object', () => {
         const config = baseConfig(mockProps)
         expect(config.amount).toBeDefined()
         expect(config.onSubmit).toBeDefined()
         expect(config.onAdditionalDetails).toBeDefined()
+    })
+
+    it('calls error handler only once when both onError and onPaymentFailed are triggered from same config', async () => {
+        const mockErrorHandler = jest.fn()
+        const props = {
+            ...mockProps,
+            onError: [mockErrorHandler]
+        }
+        const config = baseConfig(props)
+        const testError = new Error('Test payment error')
+
+        // Call onError
+        await config.onError(testError)
+        // Call onPaymentFailed
+        await config.onPaymentFailed(testError)
+
+        // Error handler should be called only once due to throttling
+        expect(mockErrorHandler).toHaveBeenCalledTimes(1)
+        expect(mockErrorHandler).toHaveBeenCalledWith(
+            testError,
+            expect.any(Object),
+            expect.any(Object)
+        )
+    })
+
+    it('calls error handler only once across two separate config instances (dual-mount scenario)', async () => {
+        const mockErrorHandler = jest.fn()
+        const props = {
+            ...mockProps,
+            onError: [mockErrorHandler]
+        }
+
+        // Build two separate config instances (simulating two mounts)
+        const config1 = baseConfig(props)
+        const config2 = baseConfig(props)
+
+        const testError = new Error('Dual mount error')
+
+        // Fire onError on the first config
+        await config1.onError(testError)
+        // Fire onError on the second config
+        await config2.onError(testError)
+
+        // Handler should be called only once across both instances
+        expect(mockErrorHandler).toHaveBeenCalledTimes(1)
+        expect(mockErrorHandler).toHaveBeenCalledWith(
+            testError,
+            expect.any(Object),
+            expect.any(Object)
+        )
     })
 })
 

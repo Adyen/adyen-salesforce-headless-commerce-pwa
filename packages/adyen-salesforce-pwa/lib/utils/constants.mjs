@@ -198,3 +198,10 @@ export const POS = Object.freeze({
     REFERENCE_ID: 'SalesforceCommerceCloudPOS',
     SALE_ID: 'SalesforceCommerceCloud'
 })
+
+export const ERROR_NOTIFICATION_KEYS = {
+    CHECKOUT: 'checkout',
+    APPLE_PAY_EXPRESS: 'applepay-express',
+    GOOGLE_PAY_EXPRESS: 'googlepay-express',
+    PAYPAL_EXPRESS: 'paypal-express'
+}

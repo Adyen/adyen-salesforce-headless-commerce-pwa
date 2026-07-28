@@ -11,6 +11,8 @@ import useAdyenPaymentMethods from '../hooks/useAdyenPaymentMethods'
 import useAdyenPaymentMethodsForExpress from '../hooks/useAdyenPaymentMethodsForExpress'
 import {AdyenShippingMethodsService} from '../services/shipping-methods'
 import {paypalExpressConfig} from './paypal/expressConfig'
+import {shouldNotifyError} from '../utils/executeCallbacks'
+import {ERROR_NOTIFICATION_KEYS} from '../utils/constants.mjs'
 
 /**
  * PayPal Express Checkout Component
@@ -138,7 +140,6 @@ const PayPalExpressComponent = ({
     const basketId = shopperBasket?.basketId
     const paymentContainer = useRef(null)
     const paypalButtonRef = useRef(null)
-    const errorShownRef = useRef(false)
 
     const {
         data: adyenEnvironment,
@@ -197,16 +198,14 @@ const PayPalExpressComponent = ({
     )
 
     useEffect(() => {
-        if (adyenEnvironmentError && !errorShownRef.current) {
-            errorShownRef.current = true
+        if (adyenEnvironmentError && shouldNotifyError(ERROR_NOTIFICATION_KEYS.PAYPAL_EXPRESS)) {
             console.error('Error fetching Adyen environment:', adyenEnvironmentError)
             onError.forEach((cb) => cb(adyenEnvironmentError))
         }
     }, [adyenEnvironmentError, onError])
 
     useEffect(() => {
-        if (adyenPaymentMethodsError && !errorShownRef.current) {
-            errorShownRef.current = true
+        if (adyenPaymentMethodsError && shouldNotifyError(ERROR_NOTIFICATION_KEYS.PAYPAL_EXPRESS)) {
             console.error('Error fetching Adyen payment methods:', adyenPaymentMethodsError)
             onError.forEach((cb) => cb(adyenPaymentMethodsError))
         }
@@ -292,8 +291,7 @@ const PayPalExpressComponent = ({
                 }
             } catch (err) {
                 console.error('Error initializing PayPal Express:', err)
-                if (!errorShownRef.current) {
-                    errorShownRef.current = true
+                if (shouldNotifyError(ERROR_NOTIFICATION_KEYS.PAYPAL_EXPRESS)) {
                     onError.forEach((cb) => cb(err))
                 }
             }

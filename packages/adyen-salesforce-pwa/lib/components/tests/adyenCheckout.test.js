@@ -9,6 +9,7 @@ import useAdyenPaymentMethods from '../../hooks/useAdyenPaymentMethods'
 import {useAccessToken, useCustomerId, useCustomerType} from '@salesforce/commerce-sdk-react'
 import useAdyenOrderNumber from '../../hooks/useAdyenOrderNumber'
 import {paymentMethodsConfiguration} from '../paymentMethodsConfiguration'
+import {__resetErrorNotificationThrottle} from '../../utils/executeCallbacks'
 import {
     createCheckoutInstance,
     handleRedirects,
@@ -60,6 +61,7 @@ describe('AdyenCheckoutComponent', () => {
     }
 
     beforeEach(() => {
+        __resetErrorNotificationThrottle()
         jest.clearAllMocks()
         jest.spyOn(console, 'error').mockImplementation(() => {})
         jest.spyOn(console, 'warn').mockImplementation(() => {})
@@ -97,6 +99,7 @@ describe('AdyenCheckoutComponent', () => {
     })
 
     afterEach(() => {
+        __resetErrorNotificationThrottle()
         cleanup()
     })
 
@@ -643,5 +646,51 @@ describe('AdyenCheckoutComponent', () => {
         })
 
         expect(dropinWithError.unmount).toHaveBeenCalled()
+    })
+
+    it('should call onError when useAdyenOrderNumber returns an error', async () => {
+        const mockError = new Error('Order number fetch failed')
+        useAdyenOrderNumber.mockReturnValue({
+            orderNo: null,
+            error: mockError,
+            isLoading: false
+        })
+
+        const onErrorMock = jest.fn()
+
+        render(<AdyenCheckoutComponent {...defaultProps} onError={[onErrorMock]} />)
+
+        await waitFor(() => {
+            expect(onErrorMock).toHaveBeenCalledWith(mockError)
+        })
+    })
+
+    describe('Dual-mount error deduplication', () => {
+        it('should fire onError only once when two instances fail with the same error', async () => {
+            const onErrorMock = jest.fn()
+            const mockError = new Error('Test initialization error')
+
+            createCheckoutInstance.mockRejectedValue(mockError)
+
+            const props = {
+                ...defaultProps,
+                onError: [onErrorMock]
+            }
+
+            // Render two instances (simulating desktop + mobile mount)
+            await act(async () => {
+                render(<AdyenCheckoutComponent {...props} />)
+                render(<AdyenCheckoutComponent {...props} />)
+            })
+
+            // Wait for initialization attempts
+            await waitFor(() => {
+                expect(onErrorMock).toHaveBeenCalled()
+            })
+
+            // onError should be called only once across both instances
+            expect(onErrorMock).toHaveBeenCalledTimes(1)
+            expect(onErrorMock).toHaveBeenCalledWith(mockError)
+        })
     })
 })
