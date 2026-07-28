@@ -19,6 +19,7 @@ import {
     getEnhancedSchemeData,
     amountForPartialPayments
 } from '../utils/paymentUtils.js'
+import {formatAndValidatePaymentRequest} from '../utils/checkoutV72Validation.js'
 
 /**
  * Builder class for constructing Adyen payment request objects.
@@ -374,7 +375,9 @@ export class PaymentRequestBuilder {
 
     /**
      * Adds enhanced scheme data (Level 2/3) to the payment request for card payments.
-     * This data is sent as additionalData and helps reduce interchange fees for B2B/commercial card transactions.
+     * Helps reduce interchange fees for B2B/commercial card transactions.
+     * Sent via the dedicated `enhancedSchemeData` field, as required by Checkout API v72
+     * (the API rejects `additionalData` keys prefixed with `enhancedSchemeData.`).
      * @param {object} paymentMethodType - The payment method used.
      * @param {object} basket - The basket object. Uses context.basket if not provided.
      * @param {string} commodityCode - The commodity code. Uses context.adyenConfig.l23CommodityCode if not provided.
@@ -398,11 +401,8 @@ export class PaymentRequestBuilder {
         const actualCommodityCode = commodityCode || this.context.adyenConfig?.l23CommodityCode
         if (actualBasket) {
             const enhancedSchemeData = getEnhancedSchemeData(actualBasket, actualCommodityCode)
-            if (Object.keys(enhancedSchemeData).length > 0) {
-                this.paymentRequest.additionalData = {
-                    ...this.paymentRequest.additionalData,
-                    ...enhancedSchemeData
-                }
+            if (enhancedSchemeData.levelTwoThree?.itemDetailLines?.length > 0) {
+                this.paymentRequest.enhancedSchemeData = enhancedSchemeData
             }
         }
         return this
@@ -462,13 +462,19 @@ export class PaymentRequestBuilder {
     /**
      * Builds and returns the final payment request object.
      * Automatically cleans up the order object if it doesn't contain valid orderData.
+     * Applies Checkout API v72 formatting and validation rules.
      * @returns {object} The constructed payment request object.
+     * @throws {AdyenError} If validation fails for hard-format fields.
      */
     build() {
         // Clean up the order object if it doesn't contain valid orderData
         if (this.paymentRequest.order && !this.paymentRequest.order.orderData) {
             delete this.paymentRequest.order
         }
+
+        // Apply Checkout API v72 formatting and validation
+        this.paymentRequest = formatAndValidatePaymentRequest(this.paymentRequest)
+
         return this.paymentRequest
     }
 
