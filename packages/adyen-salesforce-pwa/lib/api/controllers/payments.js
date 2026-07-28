@@ -222,6 +222,17 @@ async function sendPayments(req, res, next) {
         return next()
     } catch (err) {
         Logger.error('sendPayments', err.stack)
+
+        // Log Adyen validation errors (422) with full response details
+        if (err.statusCode === 422) {
+            Logger.error('sendPayments - Adyen validation error', {
+                statusCode: err.statusCode,
+                errorCode: err.errorCode,
+                message: err.message,
+                responseBody: err.responseBody
+            })
+        }
+
         const newBasketId = await handlePaymentError(res, preCreatedOrderNo)
         if (newBasketId) {
             err.newBasketId = newBasketId

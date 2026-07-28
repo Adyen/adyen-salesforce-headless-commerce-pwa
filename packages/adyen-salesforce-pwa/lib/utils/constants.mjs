@@ -136,7 +136,10 @@ export const ERROR_MESSAGE = {
     TERMINAL_PAYMENT_FAILED: 'terminal payment failed',
     TERMINAL_ABORT_FAILED: 'terminal abort failed',
     INVALID_STORE_ID: 'invalid or unauthorized store id',
-    APPLE_PAY_DOMAIN_ASSOCIATION_FILE_NOT_FOUND: 'apple pay domain association file not found',
+    INVALID_EMAIL: 'invalid shopper email format',
+    INVALID_DATE_OF_BIRTH: 'invalid date of birth format, must be YYYY-MM-DD',
+    INVALID_ENTITY_TYPE: 'invalid entity type, must be NaturalPerson or CompanyName',
+    APPLE_PAY_DOMAIN_ASSOCIATION_FILE_NOT_FOUND: 'apple pay domain association file not found'
 }
 
 export const DONATIONS = {
