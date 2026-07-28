@@ -16,6 +16,8 @@ import useAdyenEnvironment from '../hooks/useAdyenEnvironment'
 import useAdyenPaymentMethods from '../hooks/useAdyenPaymentMethods'
 import useAdyenOrderNumber from '../hooks/useAdyenOrderNumber'
 import PAGE_TYPES from '../utils/pageTypes.mjs'
+import {shouldNotifyError} from '../utils/executeCallbacks'
+import {ERROR_NOTIFICATION_KEYS} from '../utils/constants.mjs'
 
 const AdyenCheckoutComponent = ({
     // Order and payment data
@@ -56,7 +58,6 @@ const AdyenCheckoutComponent = ({
     const checkoutRef = useRef(null)
     const dropinRef = useRef(null)
     const adyenOrderRef = useRef(null)
-    const errorShownRef = useRef(false)
     const [isLoading, setIsLoading] = useState(false)
     const [adyenStateData, setAdyenStateData] = useState(null)
     const [internalOrderNo, setInternalOrderNo] = useState(null)
@@ -265,22 +266,19 @@ const AdyenCheckoutComponent = ({
         }
 
         // Handle errors
-        if (adyenEnvironmentError && !errorShownRef.current) {
-            errorShownRef.current = true
+        if (adyenEnvironmentError && shouldNotifyError(ERROR_NOTIFICATION_KEYS.CHECKOUT)) {
             console.error('Error fetching Adyen environment:', adyenEnvironmentError)
             onError.forEach((cb) => cb(adyenEnvironmentError))
             return
         }
 
-        if (adyenPaymentMethodsError && !errorShownRef.current) {
-            errorShownRef.current = true
+        if (adyenPaymentMethodsError && shouldNotifyError(ERROR_NOTIFICATION_KEYS.CHECKOUT)) {
             console.error('Error fetching Adyen payment methods:', adyenPaymentMethodsError)
             onError.forEach((cb) => cb(adyenPaymentMethodsError))
             return
         }
 
-        if (orderNumberError && !errorShownRef.current) {
-            errorShownRef.current = true
+        if (orderNumberError && shouldNotifyError(ERROR_NOTIFICATION_KEYS.CHECKOUT)) {
             console.error('Error fetching order number:', orderNumberError)
             onError.forEach((cb) => cb(orderNumberError))
             return
@@ -336,8 +334,7 @@ const AdyenCheckoutComponent = ({
                 }
             } catch (error) {
                 console.error('Error initializing Adyen Checkout:', error)
-                if (!errorShownRef.current) {
-                    errorShownRef.current = true
+                if (shouldNotifyError(ERROR_NOTIFICATION_KEYS.CHECKOUT)) {
                     onError.forEach((cb) => cb(error))
                 }
             }
