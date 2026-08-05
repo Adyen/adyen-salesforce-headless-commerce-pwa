@@ -8,7 +8,7 @@
   },
   "devDependencies": {
     "@babel/cli": "^7.28.6",
-    "@babel/core": "^7.15.4",
+    "@babel/core": "^7.29.6",
     "@babel/eslint-parser": "^7.15.4",
     "@babel/plugin-proposal-class-properties": "^7.10.4",
     "@babel/plugin-proposal-decorators": "^7.10.4",
@@ -32,7 +32,7 @@
       "diff": ">=8.0.3",
       "ws": ">=8.17.1",
       "tar-fs": ">=2.1.4",
-      "postcss": ">=8.5.10",
+      "postcss": ">=8.5.19 <9",
       "compression": ">=1.8.1",
       "cookie": ">=0.7.0",
       "tmp": ">=0.2.4",

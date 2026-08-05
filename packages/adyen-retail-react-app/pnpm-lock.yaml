@@ -7,7 +7,7 @@ settings:
 overrides:
   ws: '>=8.21.0'
   express: ^4.21.0
-  braces: '>=3.0.3'
+  braces: '>=3.0.3 <4'
   react: ^18.2.0
   react-dom: ^18.2.0
   '@salesforce/pwa-kit-runtime': 3.15.0
@@ -16,7 +16,7 @@ overrides:
   '@salesforce/commerce-sdk-react': 4.3.0
   serialize-javascript: '>=7.0.5'
   tar-fs: '>=2.1.4'
-  postcss: '>=8.5.10'
+  postcss: '>=8.5.19 <9'
   compression: '>=1.8.1'
   cookie: '>=0.7.0'
   tmp: '>=0.2.6'
@@ -51,13 +51,13 @@ importers:
         version: 8.3.0(@babel/core@7.29.7)(@types/body-parser@1.19.6)(@types/cors@2.8.19)(@types/node@25.7.0)(@types/react@18.3.28)(body-parser@1.20.5)(http-errors@2.0.1)(postcss@8.5.14)(type-fest@4.41.0)(typescript@5.8.2)(webpack@5.106.2)
       css-loader:
         specifier: ^6.8.1
-        version: 6.11.0(webpack@5.106.2(postcss@8.5.14)(webpack-cli@4.10.0))
+        version: 6.11.0(webpack@5.106.2(postcss@8.5.19)(webpack-cli@4.10.0))
       dotenv:
         specifier: ^16.3.1
         version: 16.6.1
       style-loader:
         specifier: ^3.3.3
-        version: 3.3.4(webpack@5.106.2(postcss@8.5.14)(webpack-cli@4.10.0))
+        version: 3.3.4(webpack@5.106.2(postcss@8.5.19)(webpack-cli@4.10.0))
 
 packages:
 
@@ -1540,7 +1540,7 @@ packages:
       '@types/express': '>= 4.15.4'
       '@types/hapi': '*'
       '@types/koa': '>= 2.11.2'
-      body-parser: '>= 1.20.0'
+      body-parser: '>=1.20.6 <2'
       cors: '>= 2.8.5'
       express: ^4.21.0
       fastify: '>= 4.0.0'
@@ -2681,8 +2681,8 @@ packages:
   bluebird@3.7.2:
     resolution: {integrity: sha512-XpNj6GDQzdfW+r2Wnn7xiSAd7TM3jzkxGXBGTtWKuSXv1xUV+azxAm8jdWZN06QTQk+2N2XB9jRDkvbmQmcRtg==}
 
-  body-parser@1.20.5:
-    resolution: {integrity: sha512-3grm+/2tUOvu2cjJkvsIxrv/wVpfXQW4PsQHYm7yk4vfpu7Ekl6nEsYBoJUL6qDwZUx8wUhQ8tR2qz+ad9c9OA==}
+  body-parser@1.20.6:
+    resolution: {integrity: sha512-p5tAzS57i5MV9fZFDj9LeIiTZEufbSe2eDozP+ElheSUq1m74CRq1jI4mYNDdVs9vQztXFLuk/Gd6BWTdwRJ5g==}
     engines: {node: '>= 0.8', npm: 1.2.8000 || >= 1.4.16}
 
   boxen@8.0.1:
@@ -4045,7 +4045,7 @@ packages:
     resolution: {integrity: sha512-soFhflCVWLfRNOPU3iv5Z9VUdT44xFRbzjLsEzSr5AQmgqPMTHdU3PMT1Cf1ssx8fLNJDA1juftYl+PUcv3MqA==}
     engines: {node: ^10 || ^12 || >= 14}
     peerDependencies:
-      postcss: '>=8.5.10'
+      postcss: '>=8.5.19 <9'
 
   ieee754@1.1.13:
     resolution: {integrity: sha512-4vf7I2LYV/HaWerSo3XmlMkp5eZ83i+/CDluXi/IGTs/O1sejBNhTtnxzmRZfvOUqj7lZjqHkeTvpgSFDlWZTg==}
@@ -5286,30 +5286,30 @@ packages:
     resolution: {integrity: sha512-k3kNe0aNFQDAZGbin48pL2VNidTF0w4/eASDsxlyspobzU3wZQLOGj7L9gfRe0Jo9/4uud09DsjFNH7winGv8Q==}
     engines: {node: ^10 || ^12 || >= 14}
     peerDependencies:
-      postcss: '>=8.5.10'
+      postcss: '>=8.5.19 <9'
 
   postcss-modules-local-by-default@4.2.0:
     resolution: {integrity: sha512-5kcJm/zk+GJDSfw+V/42fJ5fhjL5YbFDl8nVdXkJPLLW+Vf9mTD5Xe0wqIaDnLuL2U6cDNpTr+UQ+v2HWIBhzw==}
     engines: {node: ^10 || ^12 || >= 14}
     peerDependencies:
-      postcss: '>=8.5.10'
+      postcss: '>=8.5.19 <9'
 
   postcss-modules-scope@3.2.1:
     resolution: {integrity: sha512-m9jZstCVaqGjTAuny8MdgE88scJnCiQSlSrOWcTQgM2t32UBe+MUmFSO5t7VMSfAf/FJKImAxBav8ooCHJXCJA==}
     engines: {node: ^10 || ^12 || >= 14}
     peerDependencies:
-      postcss: '>=8.5.10'
+      postcss: '>=8.5.19 <9'
 
   postcss-modules-values@4.0.0:
     resolution: {integrity: sha512-RDxHkAiEGI78gS2ofyvCsu7iycRv7oqw5xMWn9iMoR0N/7mf9D50ecQqUo5BZ9Zh2vH4bCUR/ktCqbB9m8vJjQ==}
     engines: {node: ^10 || ^12 || >= 14}
     peerDependencies:
-      postcss: '>=8.5.10'
+      postcss: '>=8.5.19 <9'
 
   postcss-prefix-selector@1.16.1:
     resolution: {integrity: sha512-Umxu+FvKMwlY6TyDzGFoSUnzW+NOfMBLyC1tAkIjgX+Z/qGspJeRjVC903D7mx7TuBpJlwti2ibXtWuA7fKMeQ==}
     peerDependencies:
-      postcss: '>=8.5.10'
+      postcss: '>=8.5.19 <9'
 
   postcss-selector-parser@7.1.1:
     resolution: {integrity: sha512-orRsuYpJVw8LdAwqqLykBj9ecS5/cRHlI5+nvTo8LcCKmzDmqVORXtOIYEEQuL9D4BxtA1lm5isAqzQZCoQ6Eg==}
@@ -5318,8 +5318,8 @@ packages:
   postcss-value-parser@4.2.0:
     resolution: {integrity: sha512-1NNCs6uurfkVbeXG4S8JFT9t19m45ICnif8zWLd5oPSZ50QnwMfK+H3jv408d4jw/7Bttv5axS5IiHoLaVNHeQ==}
 
-  postcss@8.5.14:
-    resolution: {integrity: sha512-SoSL4+OSEtR99LHFZQiJLkT59C5B1amGO1NzTwj7TT1qCUgUO6hxOvzkOYxD+vMrXBM3XJIKzokoERdqQq/Zmg==}
+  postcss@8.5.19:
+    resolution: {integrity: sha512-Mz8SaolMd8nB+G13WkORcxQKHZ/NE4xXevtkJHVuG+guo9/wYKlIMTKAqGdEmYOXR2ijPjTYNHssizdaVSUNdQ==}
     engines: {node: ^10 || ^12 || >=14}
 
   posthtml-parser@0.2.1:
@@ -6795,7 +6795,7 @@ snapshots:
       '@salesforce/pwa-kit-runtime': 3.15.0(@babel/core@7.29.7)(@salesforce/pwa-kit-dev@3.15.0(@loadable/component@5.16.7(react@18.3.1))(@types/body-parser@1.19.6)(@types/cors@2.8.19)(body-parser@1.20.5)(http-errors@2.0.1)(postcss@8.5.14)(react@18.3.1)(type-fest@4.41.0)(typescript@5.8.2))(@types/body-parser@1.19.6)(@types/cors@2.8.19)(body-parser@1.20.5)(http-errors@2.0.1)
       '@salesforce/retail-react-app': 8.3.0(@babel/core@7.29.7)(@types/body-parser@1.19.6)(@types/cors@2.8.19)(@types/node@25.7.0)(@types/react@18.3.28)(body-parser@1.20.5)(http-errors@2.0.1)(postcss@8.5.14)(type-fest@4.41.0)(typescript@5.8.2)(webpack@5.106.2)
       '@tanstack/react-query': 4.44.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      body-parser: 1.20.5
+      body-parser: 1.20.6
       commerce-sdk-isomorphic: 4.2.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       dotenv: 16.6.1
       express-validator: 7.3.2
@@ -8759,12 +8759,12 @@ snapshots:
     dependencies:
       '@types/google.maps': 3.64.0
 
-  '@h4ad/serverless-adapter@4.4.0(@types/body-parser@1.19.6)(@types/cors@2.8.19)(body-parser@1.20.5)(express@4.22.2)(http-errors@2.0.1)':
+  '@h4ad/serverless-adapter@4.4.0(@types/body-parser@1.19.6)(@types/cors@2.8.19)(body-parser@1.20.6)(express@4.22.2)(http-errors@2.0.1)':
     dependencies:
       '@types/body-parser': 1.19.6
       '@types/cors': 2.8.19
     optionalDependencies:
-      body-parser: 1.20.5
+      body-parser: 1.20.6
       express: 4.22.2
       http-errors: 2.0.1
 
@@ -9065,7 +9065,7 @@ snapshots:
   '@loadable/webpack-plugin@5.15.2(webpack@5.106.2)':
     dependencies:
       make-dir: 3.1.0
-      webpack: 5.106.2(postcss@8.5.14)(webpack-cli@4.10.0)
+      webpack: 5.106.2(postcss@8.5.19)(webpack-cli@4.10.0)
 
   '@mswjs/cookies@0.2.2':
     dependencies:
@@ -9176,7 +9176,7 @@ snapshots:
       react-refresh: 0.14.2
       schema-utils: 4.3.3
       source-map: 0.7.6
-      webpack: 5.106.2(postcss@8.5.14)(webpack-cli@4.10.0)
+      webpack: 5.106.2(postcss@8.5.19)(webpack-cli@4.10.0)
     optionalDependencies:
       type-fest: 4.41.0
       webpack-hot-middleware: 2.26.1
@@ -9218,7 +9218,7 @@ snapshots:
       - encoding
       - react-dom
 
-  '@salesforce/pwa-kit-dev@3.15.0(@loadable/component@5.16.7(react@18.3.1))(@types/body-parser@1.19.6)(@types/cors@2.8.19)(body-parser@1.20.5)(http-errors@2.0.1)(postcss@8.5.14)(react@18.3.1)(type-fest@4.41.0)(typescript@5.8.2)':
+  '@salesforce/pwa-kit-dev@3.15.0(@loadable/component@5.16.7(react@18.3.1))(@types/body-parser@1.19.6)(@types/cors@2.8.19)(body-parser@1.20.6)(http-errors@2.0.1)(postcss@8.5.19)(react@18.3.1)(type-fest@4.41.0)(typescript@5.8.2)':
     dependencies:
       '@babel/cli': 7.28.6(@babel/core@7.29.7)
       '@babel/core': 7.29.7
@@ -9288,7 +9288,7 @@ snapshots:
       speed-measure-webpack-plugin: 1.6.0(webpack@5.106.2)
       svg-sprite-loader: 6.0.11
       validator: 13.15.35
-      webpack: 5.106.2(postcss@8.5.14)(webpack-cli@4.10.0)
+      webpack: 5.106.2(postcss@8.5.19)(webpack-cli@4.10.0)
       webpack-bundle-analyzer: 4.10.2
       webpack-cli: 4.10.0(webpack-bundle-analyzer@4.10.2)(webpack@5.106.2)
       webpack-dev-middleware: 5.3.4(webpack@5.106.2)
@@ -9418,7 +9418,7 @@ snapshots:
       set-cookie-parser: 2.7.2
       whatwg-encoding: 1.0.5
     optionalDependencies:
-      '@salesforce/pwa-kit-dev': 3.15.0(@loadable/component@5.16.7(react@18.3.1))(@types/body-parser@1.19.6)(@types/cors@2.8.19)(body-parser@1.20.5)(http-errors@2.0.1)(postcss@8.5.14)(react@18.3.1)(type-fest@4.41.0)(typescript@5.8.2)
+      '@salesforce/pwa-kit-dev': 3.15.0(@loadable/component@5.16.7(react@18.3.1))(@types/body-parser@1.19.6)(@types/cors@2.8.19)(body-parser@1.20.6)(http-errors@2.0.1)(postcss@8.5.19)(react@18.3.1)(type-fest@4.41.0)(typescript@5.8.2)
     transitivePeerDependencies:
       - '@apollo/server'
       - '@azure/functions'
@@ -10008,7 +10008,7 @@ snapshots:
 
   '@webpack-cli/configtest@1.2.0(webpack-cli@4.10.0)(webpack@5.106.2)':
     dependencies:
-      webpack: 5.106.2(postcss@8.5.14)(webpack-cli@4.10.0)
+      webpack: 5.106.2(postcss@8.5.19)(webpack-cli@4.10.0)
       webpack-cli: 4.10.0(webpack-bundle-analyzer@4.10.2)(webpack@5.106.2)
 
   '@webpack-cli/info@1.5.0(webpack-cli@4.10.0)':
@@ -10314,7 +10314,7 @@ snapshots:
       loader-utils: 2.0.4
       make-dir: 3.1.0
       schema-utils: 2.7.1
-      webpack: 5.106.2(postcss@8.5.14)(webpack-cli@4.10.0)
+      webpack: 5.106.2(postcss@8.5.19)(webpack-cli@4.10.0)
 
   babel-plugin-dynamic-import-node-babel-7@2.0.7(@babel/core@7.29.7):
     dependencies:
@@ -10488,7 +10488,7 @@ snapshots:
 
   bluebird@3.7.2: {}
 
-  body-parser@1.20.5:
+  body-parser@1.20.6:
     dependencies:
       bytes: 3.1.2
       content-type: 1.0.5
@@ -10861,7 +10861,7 @@ snapshots:
       normalize-path: 3.0.0
       schema-utils: 3.3.0
       serialize-javascript: 7.0.5
-      webpack: 5.106.2(postcss@8.5.14)(webpack-cli@4.10.0)
+      webpack: 5.106.2(postcss@8.5.19)(webpack-cli@4.10.0)
 
   core-js-compat@3.49.0:
     dependencies:
@@ -10953,18 +10953,18 @@ snapshots:
     dependencies:
       tiny-invariant: 1.3.3
 
-  css-loader@6.11.0(webpack@5.106.2(postcss@8.5.14)(webpack-cli@4.10.0)):
+  css-loader@6.11.0(webpack@5.106.2(postcss@8.5.19)(webpack-cli@4.10.0)):
     dependencies:
-      icss-utils: 5.1.0(postcss@8.5.14)
-      postcss: 8.5.14
-      postcss-modules-extract-imports: 3.1.0(postcss@8.5.14)
-      postcss-modules-local-by-default: 4.2.0(postcss@8.5.14)
-      postcss-modules-scope: 3.2.1(postcss@8.5.14)
-      postcss-modules-values: 4.0.0(postcss@8.5.14)
+      icss-utils: 5.1.0(postcss@8.5.19)
+      postcss: 8.5.19
+      postcss-modules-extract-imports: 3.1.0(postcss@8.5.19)
+      postcss-modules-local-by-default: 4.2.0(postcss@8.5.19)
+      postcss-modules-scope: 3.2.1(postcss@8.5.19)
+      postcss-modules-values: 4.0.0(postcss@8.5.19)
       postcss-value-parser: 4.2.0
       semver: 7.8.0
     optionalDependencies:
-      webpack: 5.106.2(postcss@8.5.14)(webpack-cli@4.10.0)
+      webpack: 5.106.2(postcss@8.5.19)(webpack-cli@4.10.0)
 
   css.escape@1.5.1: {}
 
@@ -11592,7 +11592,7 @@ snapshots:
     dependencies:
       accepts: 1.3.8
       array-flatten: 1.1.1
-      body-parser: 1.20.5
+      body-parser: 1.20.6
       content-disposition: 0.5.4
       content-type: 1.0.5
       cookie: 1.1.1
@@ -12089,9 +12089,9 @@ snapshots:
     dependencies:
       safer-buffer: 2.1.2
 
-  icss-utils@5.1.0(postcss@8.5.14):
+  icss-utils@5.1.0(postcss@8.5.19):
     dependencies:
-      postcss: 8.5.14
+      postcss: 8.5.19
 
   ieee754@1.1.13: {}
 
@@ -13581,30 +13581,30 @@ snapshots:
 
   possible-typed-array-names@1.1.0: {}
 
-  postcss-modules-extract-imports@3.1.0(postcss@8.5.14):
+  postcss-modules-extract-imports@3.1.0(postcss@8.5.19):
     dependencies:
-      postcss: 8.5.14
+      postcss: 8.5.19
 
-  postcss-modules-local-by-default@4.2.0(postcss@8.5.14):
+  postcss-modules-local-by-default@4.2.0(postcss@8.5.19):
     dependencies:
-      icss-utils: 5.1.0(postcss@8.5.14)
-      postcss: 8.5.14
+      icss-utils: 5.1.0(postcss@8.5.19)
+      postcss: 8.5.19
       postcss-selector-parser: 7.1.1
       postcss-value-parser: 4.2.0
 
-  postcss-modules-scope@3.2.1(postcss@8.5.14):
+  postcss-modules-scope@3.2.1(postcss@8.5.19):
     dependencies:
-      postcss: 8.5.14
+      postcss: 8.5.19
       postcss-selector-parser: 7.1.1
 
-  postcss-modules-values@4.0.0(postcss@8.5.14):
+  postcss-modules-values@4.0.0(postcss@8.5.19):
     dependencies:
-      icss-utils: 5.1.0(postcss@8.5.14)
-      postcss: 8.5.14
+      icss-utils: 5.1.0(postcss@8.5.19)
+      postcss: 8.5.19
 
-  postcss-prefix-selector@1.16.1(postcss@8.5.14):
+  postcss-prefix-selector@1.16.1(postcss@8.5.19):
     dependencies:
-      postcss: 8.5.14
+      postcss: 8.5.19
 
   postcss-selector-parser@7.1.1:
     dependencies:
@@ -13613,7 +13613,7 @@ snapshots:
 
   postcss-value-parser@4.2.0: {}
 
-  postcss@8.5.14:
+  postcss@8.5.19:
     dependencies:
       nanoid: 3.3.12
       picocolors: 1.1.1
@@ -14362,7 +14362,7 @@ snapshots:
   speed-measure-webpack-plugin@1.6.0(webpack@5.106.2):
     dependencies:
       chalk: 4.1.2
-      webpack: 5.106.2(postcss@8.5.14)(webpack-cli@4.10.0)
+      webpack: 5.106.2(postcss@8.5.19)(webpack-cli@4.10.0)
 
   speedline-core@1.4.3:
     dependencies:
@@ -14514,9 +14514,9 @@ snapshots:
 
   stubborn-utils@1.0.2: {}
 
-  style-loader@3.3.4(webpack@5.106.2(postcss@8.5.14)(webpack-cli@4.10.0)):
+  style-loader@3.3.4(webpack@5.106.2(postcss@8.5.19)(webpack-cli@4.10.0)):
     dependencies:
-      webpack: 5.106.2(postcss@8.5.14)(webpack-cli@4.10.0)
+      webpack: 5.106.2(postcss@8.5.19)(webpack-cli@4.10.0)
 
   stylis@4.2.0: {}
 
@@ -14625,15 +14625,15 @@ snapshots:
       ansi-escapes: 4.3.2
       supports-hyperlinks: 2.3.0
 
-  terser-webpack-plugin@5.6.0(postcss@8.5.14)(webpack@5.106.2):
+  terser-webpack-plugin@5.6.0(postcss@8.5.19)(webpack@5.106.2):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       jest-worker: 27.5.1
       schema-utils: 4.3.3
       terser: 5.47.1
-      webpack: 5.106.2(postcss@8.5.14)(webpack-cli@4.10.0)
+      webpack: 5.106.2(postcss@8.5.19)(webpack-cli@4.10.0)
     optionalDependencies:
-      postcss: 8.5.14
+      postcss: 8.5.19
 
   terser@5.47.1:
     dependencies:
@@ -15004,7 +15004,7 @@ snapshots:
       import-local: 3.2.0
       interpret: 2.2.0
       rechoir: 0.7.1
-      webpack: 5.106.2(postcss@8.5.14)(webpack-cli@4.10.0)
+      webpack: 5.106.2(postcss@8.5.19)(webpack-cli@4.10.0)
       webpack-merge: 5.10.0
     optionalDependencies:
       webpack-bundle-analyzer: 4.10.2
@@ -15016,7 +15016,7 @@ snapshots:
       mime-types: 2.1.35
       range-parser: 1.2.1
       schema-utils: 4.3.3
-      webpack: 5.106.2(postcss@8.5.14)(webpack-cli@4.10.0)
+      webpack: 5.106.2(postcss@8.5.19)(webpack-cli@4.10.0)
 
   webpack-hot-middleware@2.26.1:
     dependencies:
@@ -15029,7 +15029,7 @@ snapshots:
       debug: 3.2.7
       require-from-string: 2.0.2
       source-map-support: 0.5.21
-      webpack: 5.106.2(postcss@8.5.14)(webpack-cli@4.10.0)
+      webpack: 5.106.2(postcss@8.5.19)(webpack-cli@4.10.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -15046,7 +15046,7 @@ snapshots:
 
   webpack-sources@3.4.1: {}
 
-  webpack@5.106.2(postcss@8.5.14)(webpack-cli@4.10.0):
+  webpack@5.106.2(postcss@8.5.19)(webpack-cli@4.10.0):
     dependencies:
       '@types/eslint-scope': 3.7.7
       '@types/estree': 1.0.9
@@ -15069,7 +15069,7 @@ snapshots:
       neo-async: 2.6.2
       schema-utils: 4.3.3
       tapable: 2.3.3
-      terser-webpack-plugin: 5.6.0(postcss@8.5.14)(webpack@5.106.2)
+      terser-webpack-plugin: 5.6.0(postcss@8.5.19)(webpack@5.106.2)
       watchpack: 2.5.1
       webpack-sources: 3.4.1
     optionalDependencies:
