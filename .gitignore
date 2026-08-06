@@ -20,8 +20,10 @@ coverage
 docs
 
 # AI agent directories
+.agents/
 .claude/
 .windsurf/
 .factory/
 .gemini/
 openspec/
+graphify-out/

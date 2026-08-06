@@ -12,6 +12,8 @@ import useAdyenPaymentMethodsForExpress from '../hooks/useAdyenPaymentMethodsFor
 import useAdyenShippingMethods from '../hooks/useAdyenShippingMethods'
 import {getGooglePayExpressConfig} from './googlepay/expressConfig'
 import {AdyenShippingMethodsService} from '../services/shipping-methods'
+import {shouldNotifyError} from '../utils/executeCallbacks'
+import {ERROR_NOTIFICATION_KEYS} from '../utils/constants.mjs'
 
 const GooglePayExpressComponent = (props) => {
     const {
@@ -61,7 +63,6 @@ const GooglePayExpressComponent = (props) => {
     )
     const paymentContainer = useRef(null)
     const googlePayButtonRef = useRef(null)
-    const errorShownRef = useRef(false)
     const [remountKey, setRemountKey] = useState(0)
 
     const handlePaymentCancel = useCallback(() => {
@@ -132,24 +133,21 @@ const GooglePayExpressComponent = (props) => {
     )
 
     useEffect(() => {
-        if (adyenEnvironmentError && !errorShownRef.current) {
-            errorShownRef.current = true
+        if (adyenEnvironmentError && shouldNotifyError(ERROR_NOTIFICATION_KEYS.GOOGLE_PAY_EXPRESS)) {
             console.error('Error fetching Adyen environment:', adyenEnvironmentError)
             onError.forEach((cb) => cb(adyenEnvironmentError))
         }
     }, [adyenEnvironmentError, onError])
 
     useEffect(() => {
-        if (adyenPaymentMethodsError && !errorShownRef.current) {
-            errorShownRef.current = true
+        if (adyenPaymentMethodsError && shouldNotifyError(ERROR_NOTIFICATION_KEYS.GOOGLE_PAY_EXPRESS)) {
             console.error('Error fetching Adyen payment methods:', adyenPaymentMethodsError)
             onError.forEach((cb) => cb(adyenPaymentMethodsError))
         }
     }, [adyenPaymentMethodsError, onError])
 
     useEffect(() => {
-        if (shippingMethodsError && !errorShownRef.current) {
-            errorShownRef.current = true
+        if (shippingMethodsError && shouldNotifyError(ERROR_NOTIFICATION_KEYS.GOOGLE_PAY_EXPRESS)) {
             console.error('Error fetching shipping methods:', shippingMethodsError)
             onError.forEach((cb) => cb(shippingMethodsError))
         }
@@ -157,9 +155,6 @@ const GooglePayExpressComponent = (props) => {
 
     useEffect(() => {
         const initializeCheckout = async () => {
-            // Reset error flag for fresh mount attempt
-            errorShownRef.current = false
-
             const shouldInitialize = !!(
                 adyenEnvironment &&
                 adyenPaymentMethods &&
@@ -222,8 +217,7 @@ const GooglePayExpressComponent = (props) => {
                 googlePayButtonRef.current = googlePayButton
             } catch (err) {
                 console.error('Error initializing Google Pay Express:', err)
-                if (!errorShownRef.current) {
-                    errorShownRef.current = true
+                if (shouldNotifyError(ERROR_NOTIFICATION_KEYS.GOOGLE_PAY_EXPRESS)) {
                     onError.forEach((cb) => cb(err))
                 }
             }

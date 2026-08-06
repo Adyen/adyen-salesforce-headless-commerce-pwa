@@ -13,17 +13,24 @@ import {AdyenPaymentsService} from '../../services/payments'
 import {AdyenShippingAddressService} from '../../services/shipping-address'
 import {AdyenShippingMethodsService} from '../../services/shipping-methods'
 import {AdyenTemporaryBasketService} from '../../services/temporary-basket'
+import {AdyenOrderNumberService} from '../../services/order-number'
 import {PaymentCancelExpressService} from '../../services/payment-cancel-express'
+import {__resetErrorNotificationThrottle} from '../../utils/executeCallbacks'
 
 jest.mock('../../services/payments')
 jest.mock('../../services/shipping-address')
 jest.mock('../../services/shipping-methods')
 jest.mock('../../services/temporary-basket')
+jest.mock('../../services/order-number')
 jest.mock('../../services/payment-cancel-express')
-jest.mock('../../utils/executeCallbacks', () => ({
-    executeCallbacks: jest.fn((cbs) => cbs),
-    executeErrorCallbacks: jest.fn((cbs) => cbs)
-}))
+jest.mock('../../utils/executeCallbacks', () => {
+    const actual = jest.requireActual('../../utils/executeCallbacks')
+    return {
+        ...actual,
+        executeCallbacks: jest.fn((cbs) => cbs),
+        executeErrorCallbacks: jest.fn((cbs) => cbs)
+    }
+})
 
 describe('getApplePaymentMethodConfig function', () => {
     it('returns null if paymentMethodsResponse is undefined', () => {
@@ -178,15 +185,18 @@ describe('getAppleButtonConfig', () => {
     let mockUpdateShippingAddress
     let mockUpdateShippingMethod
     let mockCreateTemporaryBasket
+    let mockFetchOrderNumber
     let defaultProps
 
     beforeEach(() => {
+        __resetErrorNotificationThrottle()
         jest.clearAllMocks()
 
         mockSubmitPayment = jest.fn()
         mockUpdateShippingAddress = jest.fn()
         mockUpdateShippingMethod = jest.fn()
         mockCreateTemporaryBasket = jest.fn()
+        mockFetchOrderNumber = jest.fn().mockResolvedValue({orderNo: 'ORDER-123'})
 
         AdyenPaymentsService.mockImplementation(() => ({
             submitPayment: mockSubmitPayment
@@ -200,9 +210,12 @@ describe('getAppleButtonConfig', () => {
         AdyenTemporaryBasketService.mockImplementation(() => ({
             createTemporaryBasket: mockCreateTemporaryBasket
         }))
+        AdyenOrderNumberService.mockImplementation(() => ({
+            fetchOrderNumber: mockFetchOrderNumber
+        }))
 
         defaultProps = {
-            authToken: 'test-token',
+            token: 'test-token',
             customerId: 'customer-123',
             site: {id: 'RefArch'},
             basket: {basketId: 'basket-456', orderTotal: 100, currency: 'USD'},
@@ -217,6 +230,10 @@ describe('getAppleButtonConfig', () => {
             merchantDisplayName: 'Test Store',
             locale: {id: 'en-US'}
         }
+    })
+
+    afterEach(() => {
+        __resetErrorNotificationThrottle()
     })
 
     it('should return a button config with expected properties', () => {
@@ -362,7 +379,7 @@ describe('getAppleButtonConfig', () => {
 
             await config.onSubmit({data: {}}, {}, actions)
 
-            expect(errorCb).toHaveBeenCalledWith(mockError)
+            expect(errorCb).toHaveBeenCalledWith(mockError, expect.any(Object), expect.any(Object))
             expect(actions.reject).toHaveBeenCalledWith(mockError)
         })
     })
@@ -593,7 +610,7 @@ describe('getAppleButtonConfig', () => {
                 shippingContact: {locality: 'City'}
             })
 
-            expect(errorCb).toHaveBeenCalledWith(mockError)
+            expect(errorCb).toHaveBeenCalledWith(mockError, expect.any(Object), expect.any(Object))
             expect(reject).toHaveBeenCalledWith(mockError)
         })
     })
@@ -704,7 +721,7 @@ describe('getAppleButtonConfig', () => {
                 shippingMethod: {identifier: 'id'}
             })
 
-            expect(errorCb).toHaveBeenCalledWith(mockError)
+            expect(errorCb).toHaveBeenCalledWith(mockError, expect.any(Object), expect.any(Object))
             expect(reject).toHaveBeenCalledWith(mockError)
         })
     })
@@ -759,6 +776,132 @@ describe('getAppleButtonConfig', () => {
 
             expect(reject).toHaveBeenCalled()
             expect(resolve).not.toHaveBeenCalled()
+        })
+    })
+
+    it('should call error handler only once across two config instances (dual-mount)', async () => {
+        const mockErrorHandler = jest.fn()
+        const props = {
+            ...defaultProps,
+            onError: [mockErrorHandler]
+        }
+
+        // Build two configs (simulating dual mount)
+        const config1 = getAppleButtonConfig(props)
+        const config2 = getAppleButtonConfig(props)
+
+        const testError = new Error('Dual mount error')
+
+        // Fire error on both configs
+        if (typeof config1.onError === 'function') {
+            await config1.onError(testError)
+        }
+        if (typeof config2.onError === 'function') {
+            await config2.onError(testError)
+        }
+
+        // Handler should be called only once across both instances
+        expect(mockErrorHandler).toHaveBeenCalledTimes(1)
+    })
+
+    describe('generateOrderNumber failure path', () => {
+        it('should call handleError and reject when fetchOrderNumber fails', async () => {
+            mockFetchOrderNumber.mockResolvedValue({orderNo: null})
+            const mockErrorHandler = jest.fn()
+            const props = {
+                ...defaultProps,
+                onError: [mockErrorHandler]
+            }
+
+            const config = getAppleButtonConfig(props)
+            const authorizeFirst = () => {
+                config.onAuthorized(
+                    {
+                        authorizedEvent: {
+                            payment: {
+                                shippingContact: {
+                                    locality: 'City',
+                                    countryCode: 'US',
+                                    addressLines: ['123 St', 'Apt 1'],
+                                    postalCode: '12345',
+                                    administrativeArea: 'CA',
+                                    givenName: 'John',
+                                    familyName: 'Doe',
+                                    emailAddress: 'john@test.com',
+                                    phoneNumber: '555-1234'
+                                },
+                                billingContact: {
+                                    locality: 'City',
+                                    countryCode: 'US',
+                                    addressLines: ['123 St', 'Apt 1'],
+                                    postalCode: '12345',
+                                    administrativeArea: 'CA'
+                                }
+                            }
+                        }
+                    },
+                    {resolve: jest.fn(), reject: jest.fn()}
+                )
+            }
+
+            authorizeFirst()
+            const actions = {resolve: jest.fn(), reject: jest.fn()}
+            const state = {data: {origin: 'https://test.com'}}
+
+            await config.onSubmit(state, {}, actions)
+
+            expect(mockErrorHandler).toHaveBeenCalled()
+            expect(actions.reject).toHaveBeenCalled()
+        })
+
+        it('should call handleError and reject when fetchOrderNumber rejects', async () => {
+            const mockError = new Error('Order number fetch failed')
+            mockFetchOrderNumber.mockRejectedValue(mockError)
+            const mockErrorHandler = jest.fn()
+            const props = {
+                ...defaultProps,
+                onError: [mockErrorHandler]
+            }
+
+            const config = getAppleButtonConfig(props)
+            const authorizeFirst = () => {
+                config.onAuthorized(
+                    {
+                        authorizedEvent: {
+                            payment: {
+                                shippingContact: {
+                                    locality: 'City',
+                                    countryCode: 'US',
+                                    addressLines: ['123 St'],
+                                    postalCode: '12345',
+                                    administrativeArea: 'CA',
+                                    givenName: 'John',
+                                    familyName: 'Doe',
+                                    emailAddress: 'john@test.com',
+                                    phoneNumber: '555-1234'
+                                },
+                                billingContact: {
+                                    locality: 'City',
+                                    countryCode: 'US',
+                                    addressLines: ['123 St'],
+                                    postalCode: '12345',
+                                    administrativeArea: 'CA'
+                                }
+                            }
+                        }
+                    },
+                    {resolve: jest.fn(), reject: jest.fn()}
+                )
+            }
+
+            authorizeFirst()
+            const actions = {resolve: jest.fn(), reject: jest.fn()}
+            const state = {data: {origin: 'https://test.com'}}
+
+            await config.onSubmit(state, {}, actions)
+
+            expect(mockErrorHandler).toHaveBeenCalled()
+            expect(actions.reject).toHaveBeenCalled()
         })
     })
 })

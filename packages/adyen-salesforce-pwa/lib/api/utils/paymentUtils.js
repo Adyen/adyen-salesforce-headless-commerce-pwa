@@ -175,10 +175,12 @@ export function getLineItemsWithoutTax(basket) {
 /**
  * Builds the enhanced scheme data (Level 2/3) for card payments.
  * This data helps reduce interchange fees for B2B/commercial card transactions.
- * The data is sent as additionalData fields in the payment request.
+ * As of Checkout API v72, this must be sent via the dedicated `enhancedSchemeData` field
+ * on the payment request (`{levelTwoThree: {...}}`) rather than flattened into `additionalData`
+ * — the API rejects `additionalData` keys prefixed with `enhancedSchemeData.`.
  * @param {object} basket - The shopper's basket object.
  * @param {string} [commodityCode] - Optional commodity code from Adyen configuration.
- * @returns {object} An object containing enhanced scheme data fields for the payment request.
+ * @returns {object} An `enhancedSchemeData` object (`{levelTwoThree: {...}}`) for the payment request, or `{}` if not applicable.
  */
 export function getEnhancedSchemeData(basket, commodityCode) {
     if (!basket?.productItems?.length) {
@@ -192,52 +194,36 @@ export function getEnhancedSchemeData(basket, commodityCode) {
         throw new TypeError('customerId is required for enhanced scheme data')
     }
 
-    const result = productItems.reduce(
-        (acc, item, index) => {
-            const lineNumber = index + 1
-            const quantity = item.quantity
-            const taxPerUnit = (item.tax || 0) / quantity
-            const pricePerUnit = item.priceAfterItemDiscount / quantity
-            const unitPrice = getCurrencyValueForApi(
-                isGross ? pricePerUnit - taxPerUnit : pricePerUnit,
-                currency
-            )
-            const taxAmount = getCurrencyValueForApi(item.tax || 0, currency)
-            const totalAmount = unitPrice * quantity
+    let totalTaxAmount = 0
 
-            const currentLineItem = {
-                [`enhancedSchemeData.itemDetailLine${lineNumber}.unitPrice`]: String(unitPrice),
-                [`enhancedSchemeData.itemDetailLine${lineNumber}.totalAmount`]: String(totalAmount),
-                [`enhancedSchemeData.itemDetailLine${lineNumber}.quantity`]: String(quantity),
-                [`enhancedSchemeData.itemDetailLine${lineNumber}.unitOfMeasure`]: 'EAC',
-                ...(commodityCode && {
-                    [`enhancedSchemeData.itemDetailLine${lineNumber}.commodityCode`]:
-                        commodityCode.substring(0, 12)
-                }),
-                ...(item.itemText && {
-                    [`enhancedSchemeData.itemDetailLine${lineNumber}.description`]: item.itemText
-                        .substring(0, 26)
-                        .replace(/[^\p{ASCII}]/gu, '')
-                }),
-                ...(item.itemId && {
-                    [`enhancedSchemeData.itemDetailLine${lineNumber}.productCode`]:
-                        item.itemId.substring(0, 12)
-                })
-            }
+    const itemDetailLines = productItems.map((item) => {
+        const quantity = item.quantity
+        const taxPerUnit = (item.tax || 0) / quantity
+        const pricePerUnit = item.priceAfterItemDiscount / quantity
+        const unitPrice = getCurrencyValueForApi(
+            isGross ? pricePerUnit - taxPerUnit : pricePerUnit,
+            currency
+        )
+        const taxAmount = getCurrencyValueForApi(item.tax || 0, currency)
+        totalTaxAmount += taxAmount
 
-            return {
-                ...acc,
-                ...currentLineItem,
-                totalTaxAmount: acc.totalTaxAmount + taxAmount
-            }
-        },
-        {
-            totalTaxAmount: 0,
-            'enhancedSchemeData.customerReference': customerId.substring(0, 25)
+        return {
+            unitPrice,
+            totalAmount: unitPrice * quantity,
+            quantity,
+            unitOfMeasure: 'EAC',
+            ...(commodityCode && {commodityCode: commodityCode.substring(0, 12)}),
+            ...(item.itemText && {
+                description: item.itemText.substring(0, 26).replace(/[^\p{ASCII}]/gu, '')
+            }),
+            ...(item.itemId && {productCode: item.itemId.substring(0, 12)})
         }
-    )
+    })
 
-    let {totalTaxAmount, ...enhancedData} = result
+    const levelTwoThree = {
+        customerReferenceNumber: customerId.substring(0, 25),
+        itemDetailLines
+    }
 
     const freightAmount = (shippingItems ?? []).reduce((sum, item) => {
         const shippingTax = getCurrencyValueForApi(item.tax || 0, currency)
@@ -250,12 +236,12 @@ export function getEnhancedSchemeData(basket, commodityCode) {
     }, 0)
 
     if (freightAmount > 0) {
-        enhancedData['enhancedSchemeData.freightAmount'] = String(freightAmount)
+        levelTwoThree.freightAmount = freightAmount
     }
 
-    enhancedData['enhancedSchemeData.totalTaxAmount'] = String(totalTaxAmount)
+    levelTwoThree.totalTaxAmount = totalTaxAmount
 
-    return enhancedData
+    return {levelTwoThree}
 }
 
 /**
@@ -275,7 +261,6 @@ const VALID_STATE_DATA_FIELDS = new Set([
     'browserInfo',
     'installments',
     'storePaymentMethod',
-    'conversionId',
     'origin',
     'returnUrl',
     'order',

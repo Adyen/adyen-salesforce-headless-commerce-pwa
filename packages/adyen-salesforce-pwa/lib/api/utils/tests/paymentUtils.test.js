@@ -285,7 +285,7 @@ describe('paymentUtils', () => {
     })
 
     describe('getEnhancedSchemeData', () => {
-        it('should return enhanced scheme data with correct per-unit prices and string values', () => {
+        it('should return enhanced scheme data with correct per-unit prices as a structured levelTwoThree object', () => {
             const basket = {
                 currency: 'USD',
                 customerInfo: {customerId: 'customer123'},
@@ -309,25 +309,23 @@ describe('paymentUtils', () => {
 
             const result = getEnhancedSchemeData(basket)
 
-            expect(result['enhancedSchemeData.customerReference']).toBe('customer123')
-            expect(result['enhancedSchemeData.itemDetailLine1.unitPrice']).toBe(
-                String(Math.round((59.98 / 2) * 100))
+            expect(result.levelTwoThree.customerReferenceNumber).toBe('customer123')
+            expect(result.levelTwoThree.itemDetailLines[0].unitPrice).toBe(
+                Math.round((59.98 / 2) * 100)
             )
-            expect(result['enhancedSchemeData.itemDetailLine1.totalAmount']).toBe(
-                String(Math.round((59.98 / 2) * 100) * 2)
+            expect(result.levelTwoThree.itemDetailLines[0].totalAmount).toBe(
+                Math.round((59.98 / 2) * 100) * 2
             )
-            expect(result['enhancedSchemeData.itemDetailLine1.quantity']).toBe('2')
-            expect(result['enhancedSchemeData.itemDetailLine1.unitOfMeasure']).toBe('EAC')
-            expect(result['enhancedSchemeData.itemDetailLine1.description']).toBe('Product One')
-            expect(result['enhancedSchemeData.itemDetailLine1.productCode']).toBe('prod1')
-            expect(result['enhancedSchemeData.itemDetailLine2.unitPrice']).toBe(
-                String(Math.round(49.99 * 100))
+            expect(result.levelTwoThree.itemDetailLines[0].quantity).toBe(2)
+            expect(result.levelTwoThree.itemDetailLines[0].unitOfMeasure).toBe('EAC')
+            expect(result.levelTwoThree.itemDetailLines[0].description).toBe('Product One')
+            expect(result.levelTwoThree.itemDetailLines[0].productCode).toBe('prod1')
+            expect(result.levelTwoThree.itemDetailLines[1].unitPrice).toBe(Math.round(49.99 * 100))
+            expect(result.levelTwoThree.itemDetailLines[1].totalAmount).toBe(
+                Math.round(49.99 * 100)
             )
-            expect(result['enhancedSchemeData.itemDetailLine2.totalAmount']).toBe(
-                String(Math.round(49.99 * 100))
-            )
-            expect(result['enhancedSchemeData.itemDetailLine2.quantity']).toBe('1')
-            expect(result['enhancedSchemeData.totalTaxAmount']).toBe(String(480 + 400))
+            expect(result.levelTwoThree.itemDetailLines[1].quantity).toBe(1)
+            expect(result.levelTwoThree.totalTaxAmount).toBe(480 + 400)
         })
 
         it('should include freight amount and shipping tax', () => {
@@ -354,8 +352,8 @@ describe('paymentUtils', () => {
 
             const result = getEnhancedSchemeData(basket)
 
-            expect(result['enhancedSchemeData.freightAmount']).toBe(String(599))
-            expect(result['enhancedSchemeData.totalTaxAmount']).toBe(String(80 + 48))
+            expect(result.levelTwoThree.freightAmount).toBe(599)
+            expect(result.levelTwoThree.totalTaxAmount).toBe(80 + 48)
         })
 
         it('should subtract tax from unitPrice and freightAmount for gross taxation', () => {
@@ -384,16 +382,10 @@ describe('paymentUtils', () => {
             const result = getEnhancedSchemeData(basket)
 
             const expectedUnitPrice = Math.round((21.6 / 2 - 1.6 / 2) * 100)
-            expect(result['enhancedSchemeData.itemDetailLine1.unitPrice']).toBe(
-                String(expectedUnitPrice)
-            )
-            expect(result['enhancedSchemeData.itemDetailLine1.totalAmount']).toBe(
-                String(expectedUnitPrice * 2)
-            )
-            expect(result['enhancedSchemeData.freightAmount']).toBe(
-                String(Math.round((10.8 - 0.8) * 100))
-            )
-            expect(result['enhancedSchemeData.totalTaxAmount']).toBe(String(160 + 80))
+            expect(result.levelTwoThree.itemDetailLines[0].unitPrice).toBe(expectedUnitPrice)
+            expect(result.levelTwoThree.itemDetailLines[0].totalAmount).toBe(expectedUnitPrice * 2)
+            expect(result.levelTwoThree.freightAmount).toBe(Math.round((10.8 - 0.8) * 100))
+            expect(result.levelTwoThree.totalTaxAmount).toBe(160 + 80)
         })
 
         it('should not subtract tax for net taxation', () => {
@@ -421,10 +413,10 @@ describe('paymentUtils', () => {
 
             const result = getEnhancedSchemeData(basket)
 
-            expect(result['enhancedSchemeData.itemDetailLine1.unitPrice']).toBe(
-                String(Math.round((20.0 / 2) * 100))
+            expect(result.levelTwoThree.itemDetailLines[0].unitPrice).toBe(
+                Math.round((20.0 / 2) * 100)
             )
-            expect(result['enhancedSchemeData.freightAmount']).toBe(String(1000))
+            expect(result.levelTwoThree.freightAmount).toBe(1000)
         })
 
         it('should not include freightAmount when no shipping items', () => {
@@ -444,8 +436,8 @@ describe('paymentUtils', () => {
 
             const result = getEnhancedSchemeData(basket)
 
-            expect(result).not.toHaveProperty('enhancedSchemeData.freightAmount')
-            expect(result['enhancedSchemeData.totalTaxAmount']).toBe(String(80))
+            expect(result.levelTwoThree).not.toHaveProperty('freightAmount')
+            expect(result.levelTwoThree.totalTaxAmount).toBe(80)
         })
 
         it('should include commodity code when provided', () => {
@@ -465,7 +457,7 @@ describe('paymentUtils', () => {
 
             const result = getEnhancedSchemeData(basket, 'COMMOD01')
 
-            expect(result['enhancedSchemeData.itemDetailLine1.commodityCode']).toBe('COMMOD01')
+            expect(result.levelTwoThree.itemDetailLines[0].commodityCode).toBe('COMMOD01')
         })
 
         it('should not include commodity code when not provided', () => {
@@ -485,7 +477,7 @@ describe('paymentUtils', () => {
 
             const result = getEnhancedSchemeData(basket)
 
-            expect(result).not.toHaveProperty('enhancedSchemeData.itemDetailLine1.commodityCode')
+            expect(result.levelTwoThree.itemDetailLines[0]).not.toHaveProperty('commodityCode')
         })
 
         it('should truncate description to 26 characters and strip non-ASCII', () => {
@@ -505,7 +497,7 @@ describe('paymentUtils', () => {
 
             const result = getEnhancedSchemeData(basket)
 
-            const desc = result['enhancedSchemeData.itemDetailLine1.description']
+            const desc = result.levelTwoThree.itemDetailLines[0].description
             expect(desc.length).toBeLessThanOrEqual(26)
         })
 
@@ -526,10 +518,10 @@ describe('paymentUtils', () => {
 
             const result = getEnhancedSchemeData(basket)
 
-            expect(result['enhancedSchemeData.itemDetailLine1.productCode']).toBe('very-long-pr')
+            expect(result.levelTwoThree.itemDetailLines[0].productCode).toBe('very-long-pr')
         })
 
-        it('should truncate customerReference to 25 characters', () => {
+        it('should truncate customerReferenceNumber to 25 characters', () => {
             const basket = {
                 currency: 'USD',
                 customerInfo: {customerId: 'a-very-long-customer-id-that-exceeds-25-chars'},
@@ -546,7 +538,7 @@ describe('paymentUtils', () => {
 
             const result = getEnhancedSchemeData(basket)
 
-            expect(result['enhancedSchemeData.customerReference'].length).toBeLessThanOrEqual(25)
+            expect(result.levelTwoThree.customerReferenceNumber.length).toBeLessThanOrEqual(25)
         })
 
         it('should throw when customerId is missing', () => {
@@ -608,9 +600,9 @@ describe('paymentUtils', () => {
 
             const result = getEnhancedSchemeData(basket)
 
-            expect(result['enhancedSchemeData.itemDetailLine1.unitPrice']).toBe(String(2500))
-            expect(result['enhancedSchemeData.itemDetailLine1.totalAmount']).toBe(String(2500 * 3))
-            expect(result['enhancedSchemeData.totalTaxAmount']).toBe('0')
+            expect(result.levelTwoThree.itemDetailLines[0].unitPrice).toBe(2500)
+            expect(result.levelTwoThree.itemDetailLines[0].totalAmount).toBe(2500 * 3)
+            expect(result.levelTwoThree.totalTaxAmount).toBe(0)
         })
 
         it('should not include description when itemText is missing', () => {
@@ -629,7 +621,7 @@ describe('paymentUtils', () => {
 
             const result = getEnhancedSchemeData(basket)
 
-            expect(result).not.toHaveProperty('enhancedSchemeData.itemDetailLine1.description')
+            expect(result.levelTwoThree.itemDetailLines[0]).not.toHaveProperty('description')
         })
 
         it('should not include productCode when itemId is missing', () => {
@@ -648,7 +640,7 @@ describe('paymentUtils', () => {
 
             const result = getEnhancedSchemeData(basket)
 
-            expect(result).not.toHaveProperty('enhancedSchemeData.itemDetailLine1.productCode')
+            expect(result.levelTwoThree.itemDetailLines[0]).not.toHaveProperty('productCode')
         })
     })
 
@@ -901,10 +893,10 @@ describe('paymentUtils', () => {
                 browserInfo: {},
                 installments: {value: 3},
                 storePaymentMethod: true,
-                conversionId: 'conv123',
                 origin: 'https://example.com',
                 returnUrl: 'https://example.com/return',
-                order: {orderData: 'data'}
+                order: {orderData: 'data'},
+                company: {name: 'TestCo'}
             }
 
             const result = filterStateData(stateData)
@@ -923,10 +915,10 @@ describe('paymentUtils', () => {
             expect(result).toHaveProperty('browserInfo')
             expect(result).toHaveProperty('installments')
             expect(result).toHaveProperty('storePaymentMethod')
-            expect(result).toHaveProperty('conversionId')
             expect(result).toHaveProperty('origin')
             expect(result).toHaveProperty('returnUrl')
             expect(result).toHaveProperty('order')
+            expect(result).toHaveProperty('company')
         })
 
         it('should return empty object when all fields are invalid', () => {

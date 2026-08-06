@@ -3,3 +3,6 @@
 
 cd packages/adyen-salesforce-pwa
 pnpm run test:coverage
+
+cd ../..
+pnpm run test:cartridge:coverage

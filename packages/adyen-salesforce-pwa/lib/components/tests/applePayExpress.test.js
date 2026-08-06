@@ -13,6 +13,7 @@ import {getAppleButtonConfig, getApplePaymentMethodConfig} from '../helpers/appl
 import {AdyenCheckout, ApplePay} from '@adyen/adyen-web'
 import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 import {AdyenShippingMethodsService} from '../../services/shipping-methods'
+import {__resetErrorNotificationThrottle} from '../../utils/executeCallbacks'
 
 jest.mock('../../hooks/useAdyenEnvironment')
 jest.mock('../../hooks/useAdyenPaymentMethods')
@@ -67,6 +68,7 @@ describe('ApplePayExpressComponent', () => {
     }
 
     beforeEach(() => {
+        __resetErrorNotificationThrottle()
         jest.clearAllMocks()
         useCustomerId.mockReturnValue('test-customer')
         useAccessToken.mockReturnValue({
@@ -95,6 +97,10 @@ describe('ApplePayExpressComponent', () => {
         })
         getApplePaymentMethodConfig.mockReturnValue({type: 'applepay'})
         getAppleButtonConfig.mockReturnValue({})
+    })
+
+    afterEach(() => {
+        __resetErrorNotificationThrottle()
     })
 
     it('renders spinner when hooks are loading', () => {
@@ -423,6 +429,39 @@ describe('ApplePayExpressComponent', () => {
 
             expect(onError[0]).toHaveBeenCalledWith(error)
             expect(onError[1]).toHaveBeenCalledWith(error)
+        })
+    })
+
+    describe('Dual-mount error deduplication', () => {
+        it('should fire onError only once when two instances fail with the same error', async () => {
+            const onErrorMock = jest.fn()
+            const mockError = new Error('Test initialization error')
+
+            // Make init fail consistently
+            const mockApplePayInstance = {
+                isAvailable: jest.fn().mockRejectedValue(mockError)
+            }
+            ApplePay.mockImplementation(() => mockApplePayInstance)
+
+            const props = {
+                ...defaultProps,
+                onError: [onErrorMock]
+            }
+
+            // Render two instances (simulating desktop + mobile mount)
+            await act(async () => {
+                render(<ApplePayExpressComponent {...props} />)
+                render(<ApplePayExpressComponent {...props} />)
+            })
+
+            // Wait for initialization attempts
+            await act(async () => {
+                await new Promise((resolve) => setTimeout(resolve, 100))
+            })
+
+            // onError should be called only once across both instances
+            expect(onErrorMock).toHaveBeenCalledTimes(1)
+            expect(onErrorMock).toHaveBeenCalledWith(mockError)
         })
     })
 

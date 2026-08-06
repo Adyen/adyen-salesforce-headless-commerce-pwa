@@ -8,6 +8,7 @@ import {
     getGooglePayShopperDetails,
     onErrorHandler
 } from '../googlepay/expressConfig'
+import {__resetErrorNotificationThrottle} from '../../utils/executeCallbacks'
 import {AdyenPaymentsService} from '../../services/payments'
 import {AdyenPaymentsDetailsService} from '../../services/payments-details'
 import {AdyenShippingAddressService} from '../../services/shipping-address'
@@ -23,10 +24,14 @@ jest.mock('../../services/shipping-methods')
 jest.mock('../../services/temporary-basket')
 jest.mock('../../services/order-number')
 jest.mock('../../services/payment-cancel-express')
-jest.mock('../../utils/executeCallbacks', () => ({
-    executeCallbacks: jest.fn((cbs) => cbs),
-    executeErrorCallbacks: jest.fn((cbs) => cbs)
-}))
+jest.mock('../../utils/executeCallbacks', () => {
+    const actual = jest.requireActual('../../utils/executeCallbacks')
+    return {
+        ...actual,
+        executeCallbacks: jest.fn((cbs) => cbs),
+        executeErrorCallbacks: jest.fn((cbs) => cbs)
+    }
+})
 jest.mock('../../utils/parsers.mjs', () => ({
     getCurrencyValueForApi: jest.fn((value) => value * 100)
 }))
@@ -138,7 +143,37 @@ describe('getGooglePayShopperDetails', () => {
 
 describe('getGooglePayExpressConfig', () => {
     beforeEach(() => {
+        __resetErrorNotificationThrottle()
         jest.clearAllMocks()
+    })
+
+    afterEach(() => {
+        __resetErrorNotificationThrottle()
+    })
+
+    it('should call error handler only once across two config instances (dual-mount)', async () => {
+        const mockErrorHandler = jest.fn()
+        const props = {
+            ...defaultProps,
+            onError: [mockErrorHandler]
+        }
+
+        // Build two configs (simulating dual mount)
+        const config1 = getGooglePayExpressConfig(props)
+        const config2 = getGooglePayExpressConfig(props)
+
+        const testError = new Error('Dual mount error')
+
+        // Fire error on both configs
+        if (typeof config1.onError === 'function') {
+            await config1.onError(testError)
+        }
+        if (typeof config2.onError === 'function') {
+            await config2.onError(testError)
+        }
+
+        // Handler should be called only once across both instances
+        expect(mockErrorHandler).toHaveBeenCalledTimes(1)
     })
 
     it('returns config with expected base properties', () => {

@@ -13,6 +13,7 @@ import {paypalExpressConfig} from '../paypal/expressConfig'
 import {AdyenShippingMethodsService} from '../../services/shipping-methods'
 import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
+import {__resetErrorNotificationThrottle} from '../../utils/executeCallbacks'
 
 jest.mock('../../hooks/useAdyenEnvironment')
 jest.mock('../../hooks/useAdyenPaymentMethods')
@@ -62,6 +63,7 @@ describe('PayPalExpressComponent', () => {
     let consoleWarnSpy
 
     beforeEach(() => {
+        __resetErrorNotificationThrottle()
         // Suppress console.error and console.warn during tests
         consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
         consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
@@ -116,6 +118,7 @@ describe('PayPalExpressComponent', () => {
     })
 
     afterEach(() => {
+        __resetErrorNotificationThrottle()
         jest.clearAllMocks()
         consoleErrorSpy.mockRestore()
         consoleWarnSpy.mockRestore()
@@ -468,6 +471,35 @@ describe('PayPalExpressComponent', () => {
             await waitFor(() => {
                 expect(AdyenCheckout.mock.calls.length).toBeGreaterThan(initialCallCount)
             })
+        })
+    })
+
+    describe('Dual-mount error deduplication', () => {
+        it('should fire onError only once when two instances fail with the same error', async () => {
+            const onErrorMock = jest.fn()
+            const mockError = new Error('Test initialization error')
+
+            AdyenCheckout.mockRejectedValue(mockError)
+
+            const props = {
+                ...defaultProps,
+                onError: [onErrorMock]
+            }
+
+            // Render two instances (simulating desktop + mobile mount)
+            await act(async () => {
+                render(<PayPalExpressComponent {...props} />)
+                render(<PayPalExpressComponent {...props} />)
+            })
+
+            // Wait for initialization attempts
+            await waitFor(() => {
+                expect(onErrorMock).toHaveBeenCalled()
+            })
+
+            // onError should be called only once across both instances
+            expect(onErrorMock).toHaveBeenCalledTimes(1)
+            expect(onErrorMock).toHaveBeenCalledWith(mockError)
         })
     })
 })
