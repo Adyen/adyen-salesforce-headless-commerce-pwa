@@ -15,6 +15,9 @@ jest.mock('../../../utils/getAdyenConfigForCurrentSite.mjs')
 jest.mock('../../models/logger')
 jest.mock('../../models/basketService')
 jest.mock('../../helpers/customerHelper')
+jest.mock('../../helpers/localeHelper')
+
+import {resolveLocale} from '../../helpers/localeHelper'
 
 describe('preparePaymentsDetailsContext middleware', () => {
     let mockReq, mockRes, mockNext
@@ -184,6 +187,16 @@ describe('preparePaymentsDetailsContext middleware', () => {
                 'success with basket'
             )
             expect(mockNext).toHaveBeenCalledWith()
+        })
+
+        it('should resolve the requested locale and expose it on the context', async () => {
+            mockReq.query.locale = 'en-GB'
+            resolveLocale.mockReturnValue('en-GB')
+
+            await preparePaymentsDetailsContext(mockReq, mockRes, mockNext)
+
+            expect(resolveLocale).toHaveBeenCalledWith('RefArch', 'en-GB')
+            expect(mockRes.locals.adyen.locale).toBe('en-GB')
         })
 
         it('should trim basketid and customerid', async () => {

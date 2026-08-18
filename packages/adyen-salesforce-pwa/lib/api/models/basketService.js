@@ -27,7 +27,8 @@ export class BasketService {
         this.res = res
         this.shopperBaskets = createShopperBasketsClient(
             adyenContext.authorization,
-            adyenContext.siteId
+            adyenContext.siteId,
+            adyenContext.locale
         )
     }
 
