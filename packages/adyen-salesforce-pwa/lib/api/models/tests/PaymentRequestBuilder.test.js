@@ -528,6 +528,15 @@ describe('PaymentRequestBuilder', () => {
             expect(builder.paymentRequest.countryCode).toBeUndefined()
         })
 
+        it('should not overwrite an existing country code', () => {
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.paymentRequest.countryCode = 'GB'
+            builder.withBillingAddress()
+            builder.withCountryCode()
+
+            expect(builder.paymentRequest.countryCode).toBe('GB')
+        })
+
         it('should return builder for chaining', () => {
             builder = new PaymentRequestBuilder(mockContext)
 

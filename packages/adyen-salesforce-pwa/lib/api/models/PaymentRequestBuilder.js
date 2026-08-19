@@ -336,14 +336,15 @@ export class PaymentRequestBuilder {
     }
 
     /**
-     * Sets the country code from the billing address.
+     * Sets the country code from the billing address, unless one was already provided
+     * (e.g. via stateData.countryCode from the client).
      * Adyen requires countryCode for many redirect/local payment methods (e.g. Scalapay,
      * Klarna, iDEAL) and it's safe to include for any method whenever it's known, so this
      * is applied regardless of the selected payment method type.
      * @returns {PaymentRequestBuilder} The builder instance for chaining.
      */
     withCountryCode() {
-        if (this.paymentRequest.billingAddress?.country) {
+        if (!this.paymentRequest.countryCode && this.paymentRequest.billingAddress?.country) {
             this.paymentRequest.countryCode = this.paymentRequest.billingAddress.country
         }
         return this
