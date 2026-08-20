@@ -1,6 +1,6 @@
 {
     "name": "adyen-retail-react-app",
-    "version": "4.4.0",
+    "version": "4.5.0",
     "license": "See license in LICENSE",
     "engines": {
         "node": "^16.0.0 || ^18.0.0 || ^20.0.0 || ^22.0.0",
@@ -11,10 +11,10 @@
         "overridesDir": "overrides"
     },
     "devDependencies": {
-        "@salesforce/retail-react-app": "^8.0.0",
-        "css-loader": "^6.8.1",
-        "dotenv": "^16.3.1",
-        "style-loader": "^3.3.3"
+        "@salesforce/retail-react-app": "^8.3.0",
+        "css-loader": "^6.11.0",
+        "dotenv": "^16.6.1",
+        "style-loader": "^3.3.4"
     },
     "scripts": {
         "analyze-build": "cross-env MOBIFY_ANALYZE=true pnpm run build",
@@ -59,9 +59,9 @@
     ],
     "pnpm": {
         "overrides": {
-            "ws": ">=8.17.1",
+            "ws": ">=8.21.0 <9",
             "express": "^4.21.0",
-            "braces": ">=3.0.3",
+            "braces": ">=3.0.3 <4",
             "react": "^18.2.0",
             "react-dom": "^18.2.0",
             "@salesforce/pwa-kit-runtime": "3.15.0",
@@ -70,10 +70,27 @@
             "@salesforce/commerce-sdk-react": "4.3.0",
             "serialize-javascript": ">=7.0.5",
             "tar-fs": ">=2.1.4",
-            "postcss": ">=8.5.10",
+            "postcss": ">=8.5.19 <9",
             "compression": ">=1.8.1",
             "cookie": ">=0.7.0",
-            "tmp": ">=0.2.4"
+            "tmp": ">=0.2.6 <0.3",
+            "form-data": ">=4.0.6 <5",
+            "@salesforce/pwa-kit-runtime>http-proxy-middleware": "^3.0.7",
+            "js-cookie": ">=3.0.6 <4",
+            "minimatch@3": "3.1.5",
+            "micromatch": ">=4.0.8 <5",
+            "qs": ">=6.15.2 <7",
+            "morgan": ">=1.11.0 <2",
+            "@babel/core": "^7.29.6",
+            "js-yaml": "^4.3.0",
+            "uuid": "^11.1.1",
+            "@tootallnate/once": "^2.0.1",
+            "@opentelemetry/core": "^2.8.0",
+            "@opentelemetry/resources": "^2.8.0",
+            "@opentelemetry/sdk-trace-base": "^2.8.0",
+            "@opentelemetry/sdk-trace-node": "^2.8.0",
+            "@opentelemetry/context-async-hooks": "^2.8.0",
+            "@opentelemetry/propagator-jaeger": "^2.8.0"
         },
         "ignoredBuiltDependencies": [
             "@salesforce/retail-react-app",
@@ -86,9 +103,9 @@
         ]
     },
     "overrides": {
-        "ws": ">=8.17.1",
+        "ws": ">=8.21.0 <9",
         "express": "^4.21.0",
-        "braces": ">=3.0.3",
+        "braces": ">=3.0.3 <4",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "@salesforce/pwa-kit-runtime": "3.15.0",
@@ -97,10 +114,27 @@
         "@salesforce/commerce-sdk-react": "4.3.0",
         "serialize-javascript": ">=7.0.5",
         "tar-fs": ">=2.1.4",
-        "postcss": ">=8.5.10",
+        "postcss": ">=8.5.19 <9",
         "compression": ">=1.8.1",
         "cookie": ">=0.7.0",
-        "tmp": ">=0.2.4"
+        "tmp": ">=0.2.6 <0.3",
+        "form-data": ">=4.0.6 <5",
+        "@salesforce/pwa-kit-runtime>http-proxy-middleware": "^3.0.7",
+        "js-cookie": ">=3.0.6 <4",
+        "minimatch@3": "3.1.5",
+        "micromatch": ">=4.0.8 <5",
+        "qs": ">=6.15.2 <7",
+        "morgan": ">=1.11.0 <2",
+        "@babel/core": "^7.29.6",
+        "js-yaml": "^4.3.0",
+        "uuid": "^11.1.1",
+        "@tootallnate/once": "^2.0.1",
+        "@opentelemetry/core": "^2.8.0",
+        "@opentelemetry/resources": "^2.8.0",
+        "@opentelemetry/sdk-trace-base": "^2.8.0",
+        "@opentelemetry/sdk-trace-node": "^2.8.0",
+        "@opentelemetry/context-async-hooks": "^2.8.0",
+        "@opentelemetry/propagator-jaeger": "^2.8.0"
     },
     "dependencies": {
         "@adyen/adyen-salesforce-pwa": "file:../adyen-salesforce-pwa"
