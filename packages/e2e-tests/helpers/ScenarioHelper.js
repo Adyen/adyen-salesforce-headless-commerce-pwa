@@ -202,8 +202,15 @@ export class ScenarioHelper {
         await this.page.goto(
             `/RefArch/${this.locale.lang}/product/${this.locale.productDetailPage.productName}`
         )
-        await this.productColorRadioButton.click()
-        await this.productSizeRadioButton.click()
+        // Some locales preselect the variant via URL query params (e.g. ?color=..&size=..)
+        // instead of a clickable swatch with a known translated label, so only click
+        // the swatches when the locale data defines them.
+        if (this.locale.productDetailPage.productColor) {
+            await this.productColorRadioButton.click()
+        }
+        if (this.locale.productDetailPage.productSize) {
+            await this.productSizeRadioButton.click()
+        }
         await this.submitAddToCartButton()
 
         await this.page.waitForTimeout(2000)
