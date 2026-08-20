@@ -77,6 +77,14 @@ export class PaymentHelper {
         await rakutenPayComponent.waitFor({state: 'visible', timeout: 10000})
     }
 
+    waitForScalapayLoad = async () => {
+        await this.page.waitForNavigation({
+            url: /.*scalapay.com/,
+            timeout: 20000,
+            waitUntil: 'load'
+        })
+    }
+
     initiatePayPalPayment = async () => {
         const payPalButton = this.page
             .frameLocator('.adyen-checkout__paypal__button--paypal iframe.visible')
