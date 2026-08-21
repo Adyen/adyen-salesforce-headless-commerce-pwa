@@ -70,6 +70,14 @@ export class PaymentHelper {
         })
     }
 
+    waitForMobilePayLoad = async () => {
+        await this.page.waitForNavigation({
+            url: /.*pay-mt.mobilepay.dk/,
+            timeout: 20000,
+            waitUntil: 'load'
+        })
+    }
+
     initiatePayPalPayment = async () => {
         const payPalButton = this.page
             .frameLocator('.adyen-checkout__paypal__button--paypal iframe.visible')
