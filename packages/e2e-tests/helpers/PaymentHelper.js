@@ -70,6 +70,14 @@ export class PaymentHelper {
         })
     }
 
+    waitForMobilePayLoad = async () => {
+        await this.page.waitForNavigation({
+            url: /.*pay-mt.mobilepay.dk/,
+            timeout: 20000,
+            waitUntil: 'load'
+        })
+    }
+
     rakutenPayIsRendered = async () => {
         const rakutenPayComponent = this.activePaymentType.locator(
             '.adyen-checkout__payment-method__details'

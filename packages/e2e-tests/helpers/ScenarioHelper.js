@@ -296,7 +296,7 @@ export class ScenarioHelper {
         } else {
             // The state/province dropdown always lists US states or Canadian
             // provinces regardless of the selected shipping country, and it is a
-            // required field. Countries with no matching state (e.g. JP) can't
+            // required field. Countries with no matching state (e.g. DK, JP) can't
             // supply a real value, so just pick the first real option (index 0 is
             // the blank placeholder) to satisfy validation.
             await this.stateDropdown.selectOption({index: 1})
