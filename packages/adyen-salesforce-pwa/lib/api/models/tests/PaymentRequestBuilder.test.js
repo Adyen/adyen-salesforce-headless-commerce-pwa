@@ -494,23 +494,53 @@ describe('PaymentRequestBuilder', () => {
     })
 
     describe('withOpenInvoiceData', () => {
-        it('should add line items and country code for open invoice methods', () => {
+        it('should add line items for open invoice methods', () => {
             mockContext.stateData.paymentMethod.type = 'klarna'
             builder = new PaymentRequestBuilder(mockContext)
-            builder.withBillingAddress() // Need billing address for country code
             builder.withOpenInvoiceData()
 
             expect(builder.paymentRequest.lineItems).toEqual([{id: 'item1'}])
-            expect(builder.paymentRequest.countryCode).toBe('US')
         })
 
-        it('should not add data for non-open invoice methods', () => {
+        it('should not add line items for non-open invoice methods', () => {
             mockContext.stateData.paymentMethod.type = 'scheme'
             builder = new PaymentRequestBuilder(mockContext)
             builder.withOpenInvoiceData()
 
             expect(builder.paymentRequest.lineItems).toBeUndefined()
+        })
+    })
+
+    describe('withCountryCode', () => {
+        it('should set country code from billing address for any payment method', () => {
+            mockContext.stateData.paymentMethod.type = 'scalapay'
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.withBillingAddress()
+            builder.withCountryCode()
+
+            expect(builder.paymentRequest.countryCode).toBe('US')
+        })
+
+        it('should not set country code when billing address is missing', () => {
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.withCountryCode()
+
             expect(builder.paymentRequest.countryCode).toBeUndefined()
+        })
+
+        it('should not overwrite an existing country code', () => {
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.paymentRequest.countryCode = 'GB'
+            builder.withBillingAddress()
+            builder.withCountryCode()
+
+            expect(builder.paymentRequest.countryCode).toBe('GB')
+        })
+
+        it('should return builder for chaining', () => {
+            builder = new PaymentRequestBuilder(mockContext)
+
+            expect(builder.withCountryCode()).toBe(builder)
         })
     })
 

@@ -318,7 +318,8 @@ export class PaymentRequestBuilder {
     }
 
     /**
-     * Adds line items and country code for open invoice methods.
+     * Adds line items for open invoice methods (e.g. Klarna, Afterpay, Affirm).
+     * These methods require itemized line items for risk/tax purposes.
      * @param {string} paymentMethodType - The payment method type. Uses context.stateData if not provided.
      * @param {object} basket - The basket object. Uses context.basket if not provided.
      * @returns {PaymentRequestBuilder} The builder instance for chaining.
@@ -330,6 +331,20 @@ export class PaymentRequestBuilder {
 
         if (isOpenInvoiceMethod(actualPaymentMethodType) && actualBasket) {
             this.paymentRequest.lineItems = getLineItems(actualBasket, actualPaymentMethodType)
+        }
+        return this
+    }
+
+    /**
+     * Sets the country code from the billing address, unless one was already provided
+     * (e.g. via stateData.countryCode from the client).
+     * Adyen requires countryCode for many redirect/local payment methods (e.g. Scalapay,
+     * Klarna, iDEAL) and it's safe to include for any method whenever it's known, so this
+     * is applied regardless of the selected payment method type.
+     * @returns {PaymentRequestBuilder} The builder instance for chaining.
+     */
+    withCountryCode() {
+        if (!this.paymentRequest.countryCode && this.paymentRequest.billingAddress?.country) {
             this.paymentRequest.countryCode = this.paymentRequest.billingAddress.country
         }
         return this
@@ -503,6 +518,7 @@ export class PaymentRequestBuilder {
             .withShopperEmail()
             .withShopperIP()
             .withShopperName()
+            .withCountryCode()
             .withOpenInvoiceData()
             .withRecurringProcessing()
             .withAdditionalData()
