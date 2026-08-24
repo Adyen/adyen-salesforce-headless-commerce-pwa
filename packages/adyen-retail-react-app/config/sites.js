@@ -6,7 +6,7 @@
  */
 
 const defaultL10nConfig = {
-    supportedCurrencies: ['USD', 'GBP', 'JPY', 'BRL', 'EUR', 'NOK'],
+    supportedCurrencies: ['USD', 'GBP', 'JPY', 'BRL', 'EUR', 'NOK', 'DKK'],
     defaultCurrency: 'USD',
     defaultLocale: 'en-US',
     supportedLocales: [
@@ -53,6 +53,10 @@ const defaultL10nConfig = {
         {
             id: 'no-NO',
             preferredCurrency: 'NOK'
+        },
+        {
+            id: 'da-DK',
+            preferredCurrency: 'DKK'
         }
     ]
 }

@@ -9,15 +9,17 @@ import Logger from '../models/logger'
  * Creates and configures an instance of the ShopperBaskets API client.
  * @param {string} authorization - The shopper's authorization token.
  * @param {string} siteId - The site ID for the API client.
+ * @param {string} [locale] - The shopper locale to apply to every basket call. Omitted when absent.
  * @returns {ShopperBaskets} An instance of the ShopperBaskets client.
  */
-export function createShopperBasketsClient(authorization, siteId) {
+export function createShopperBasketsClient(authorization, siteId, locale) {
     const {app: appConfig} = getConfig()
     return new ShopperBasketsV2({
         ...appConfig.commerceAPI,
         parameters: {
             ...appConfig.commerceAPI.parameters,
-            siteId: siteId || appConfig.commerceAPI.parameters.siteId
+            siteId: siteId || appConfig.commerceAPI.parameters.siteId,
+            ...(locale && {locale})
         },
         headers: {authorization}
     })

@@ -95,4 +95,46 @@ export class LocaleData {
         },
         successfulOrderMessage: 'Takk for ordren!'
     }
+    DK = {
+        lang: 'da-DK',
+        landingPage: {
+            heading: 'Adyen React PWA-startbutikken til detailhandel'
+        },
+        productDetailPage: {
+            // Master product 25553417M does not have a color/size swatch pair
+            // that this test can reliably select via a translated label, so the
+            // variant (pid=701643489169M) is preselected via query params instead.
+            productName: '25553417M?color=JJ0VWXX&size=004&pid=701643489169M',
+            addToCartButtonCaption: 'Læg i kurv',
+            proceedToCheckoutButtonCaption: 'Fortsæt til kassen'
+        },
+        checkoutPage: {
+            heading: 'Kassen',
+            contactInfoSectionModifyButton: 'Rediger kontaktoplysninger',
+            shippingMethodModifyButton: 'Rediger forsendelsesindstillinger',
+            shippingAddressModifyButton: 'Rediger leveringsadresse'
+        },
+        successfulOrderMessage: 'Tak for din bestilling!'
+    }
+    JP = {
+        lang: 'ja-JP',
+        landingPage: {
+            heading: 'リテール用 Adyen React PWA スターターストア'
+        },
+        productDetailPage: {
+            // Master product 25553417M does not have a color/size swatch pair
+            // that this test can reliably select via a translated label, so the
+            // variant (pid=701643489169M) is preselected via query params instead.
+            productName: '25553417M?color=JJ0VWXX&size=004&pid=701643489169M',
+            addToCartButtonCaption: '買い物カゴに追加',
+            proceedToCheckoutButtonCaption: '注文手続きに進む'
+        },
+        checkoutPage: {
+            heading: 'チェックアウト',
+            contactInfoSectionModifyButton: '連絡先情報の編集',
+            shippingMethodModifyButton: '配送オプションの編集',
+            shippingAddressModifyButton: '配送先住所の編集'
+        },
+        successfulOrderMessage: 'ご注文いただきありがとうございました!'
+    }
 }
