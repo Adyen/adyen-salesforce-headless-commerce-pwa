@@ -70,6 +70,13 @@ export class PaymentHelper {
         })
     }
 
+    rakutenPayIsRendered = async () => {
+        const rakutenPayComponent = this.activePaymentType.locator(
+            '.adyen-checkout__payment-method__details'
+        )
+        await rakutenPayComponent.waitFor({state: 'visible', timeout: 10000})
+    }
+
     initiatePayPalPayment = async () => {
         const payPalButton = this.page
             .frameLocator('.adyen-checkout__paypal__button--paypal iframe.visible')

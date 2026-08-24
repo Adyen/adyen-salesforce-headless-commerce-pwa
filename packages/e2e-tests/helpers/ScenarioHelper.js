@@ -202,8 +202,15 @@ export class ScenarioHelper {
         await this.page.goto(
             `/RefArch/${this.locale.lang}/product/${this.locale.productDetailPage.productName}`
         )
-        await this.productColorRadioButton.click()
-        await this.productSizeRadioButton.click()
+        // Some locales preselect the variant via URL query params (e.g. ?color=..&size=..)
+        // instead of a clickable swatch with a known translated label, so only click
+        // the swatches when the locale data defines them.
+        if (this.locale.productDetailPage.productColor) {
+            await this.productColorRadioButton.click()
+        }
+        if (this.locale.productDetailPage.productSize) {
+            await this.productSizeRadioButton.click()
+        }
         await this.submitAddToCartButton()
 
         await this.page.waitForTimeout(2000)
@@ -284,8 +291,15 @@ export class ScenarioHelper {
         await this.cityField.click()
         await this.cityField.fill(user.address.city)
 
-        if (user.address.stateOrProvince !== '') {
+        if (user.address.stateOrProvince) {
             await this.stateDropdown.selectOption(user.address.stateOrProvince)
+        } else {
+            // The state/province dropdown always lists US states or Canadian
+            // provinces regardless of the selected shipping country, and it is a
+            // required field. Countries with no matching state (e.g. JP) can't
+            // supply a real value, so just pick the first real option (index 0 is
+            // the blank placeholder) to satisfy validation.
+            await this.stateDropdown.selectOption({index: 1})
         }
 
         await this.zipCodeField.click()
