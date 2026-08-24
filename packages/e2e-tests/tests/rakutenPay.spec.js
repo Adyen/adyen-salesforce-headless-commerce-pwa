@@ -17,7 +17,9 @@ test.describe('Payments through PWA UI', () => {
         const scenarios = new ScenarioHelper(page, new LocaleData().JP)
         await scenarios.arrangeShippingAndProceedToPayment(user_JP)
         const paymentPage = new PaymentHelper(page)
-        await paymentPage.selectPaymentType('Rakuten Pay')
+        // Adyen returns the localized display name for the ja-JP shopper locale
+        // (confirmed via CI trace), not the English "Rakuten Pay" label.
+        await paymentPage.selectPaymentType('楽天ペイ')
         await paymentPage.rakutenPayIsRendered()
     })
 })
