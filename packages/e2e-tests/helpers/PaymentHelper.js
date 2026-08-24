@@ -70,6 +70,14 @@ export class PaymentHelper {
         })
     }
 
+    waitForVippsLoad = async () => {
+        await this.page.waitForNavigation({
+            url: /.*pay-mt.vipps.no/,
+            timeout: 20000,
+            waitUntil: 'load'
+        })
+    }
+
     waitForMobilePayLoad = async () => {
         await this.page.waitForNavigation({
             url: /.*pay-mt.mobilepay.dk/,

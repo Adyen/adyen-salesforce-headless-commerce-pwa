@@ -78,7 +78,10 @@ export class ShopperData {
         address: {
             city: 'Oslo',
             country: 'NO',
-            stateOrProvince: 'OTHER',
+            // The shipping form's state/province dropdown only ever lists US states
+            // or Canadian provinces (there is no state list for other countries), so
+            // there is no valid option to select here.
+            stateOrProvince: '',
             postalCode: '03733',
             street: 'Rådhusplassen',
             houseNumberOrName: '1'
@@ -95,9 +98,7 @@ export class ShopperData {
         address: {
             city: 'København',
             country: 'DK',
-            // The shipping form's state/province dropdown only ever lists US states
-            // or Canadian provinces (there is no state list for other countries), so
-            // there is no valid option to select here.
+            // Same as the NO/JP shopper: no state list exists for this country.
             stateOrProvince: '',
             postalCode: '15505',
             street: 'Rådhuspladsen',

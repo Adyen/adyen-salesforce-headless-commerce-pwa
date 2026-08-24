@@ -74,6 +74,27 @@ export class LocaleData {
         },
         successfulOrderMessage: 'Thank you for your order!'
     }
+    NO = {
+        lang: 'no-NO',
+        landingPage: {
+            heading: 'Adyen React PWA-startbutikk for handel'
+        },
+        productDetailPage: {
+            // Master product 25553417M does not have a color/size swatch pair
+            // that this test can reliably select via a translated label, so the
+            // variant (pid=701643489169M) is preselected via query params instead.
+            productName: '25553417M?color=JJ0VWXX&size=004&pid=701643489169M',
+            addToCartButtonCaption: 'Legg til i kurv',
+            proceedToCheckoutButtonCaption: 'Gå til betaling'
+        },
+        checkoutPage: {
+            heading: 'Kassen',
+            contactInfoSectionModifyButton: 'Rediger kontaktinformasjon',
+            shippingMethodModifyButton: 'Rediger fraktalternativer',
+            shippingAddressModifyButton: 'Rediger leveringsadresse'
+        },
+        successfulOrderMessage: 'Takk for ordren!'
+    }
     DK = {
         lang: 'da-DK',
         landingPage: {
