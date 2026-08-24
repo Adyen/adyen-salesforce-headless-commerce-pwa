@@ -41,7 +41,9 @@ const useAdyenOrderNumber = ({
     })
 
     return {
-        isLoading: query.isLoading && query.fetchStatus !== 'idle',
+        isLoading:
+            (query.isLoading && query.fetchStatus !== 'idle') ||
+            (query.isFetching && !query.isFetchedAfterMount),
         orderNo: query.data?.orderNo || null,
         error: query.error ?? null,
         refetch: query.refetch

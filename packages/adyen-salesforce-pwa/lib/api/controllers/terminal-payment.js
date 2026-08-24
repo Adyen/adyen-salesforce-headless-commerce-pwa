@@ -34,6 +34,7 @@ async function createTerminalPayment(req, res, next) {
     let orderNo = null
     let serviceId
     let terminalId
+    let terminalPaymentStarted = false
 
     try {
         Logger.info('createTerminalPayment', 'start')
@@ -86,6 +87,7 @@ async function createTerminalPayment(req, res, next) {
             .build()
 
         const terminalCloudApi = new AdyenClientProvider(adyenContext).getTerminalClient()
+        terminalPaymentStarted = true
         const response = await terminalCloudApi.sync(terminalApiRequest)
         const paymentResult = parsePaymentResponse(response)
         if (paymentResult.result === 'Failure') {
@@ -150,7 +152,7 @@ async function createTerminalPayment(req, res, next) {
     } catch (err) {
         Logger.error('createTerminalPayment', err.message)
 
-        if (serviceId && terminalId) {
+        if (terminalPaymentStarted && serviceId && terminalId) {
             try {
                 await sendAbortRequest(res.locals.adyen, serviceId, terminalId)
             } catch (abortErr) {

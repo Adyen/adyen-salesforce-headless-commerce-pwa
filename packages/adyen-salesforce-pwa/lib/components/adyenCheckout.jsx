@@ -136,7 +136,7 @@ const AdyenCheckoutComponent = ({
 
     // Sync order number into internal state from either the basket or the fetch result
     useEffect(() => {
-        const resolvedOrderNo = basket?.c_orderNo || fetchedOrderNo
+        const resolvedOrderNo = fetchedOrderNo || basket?.c_orderNo
         if (resolvedOrderNo && resolvedOrderNo !== internalOrderNo) {
             setInternalOrderNo(resolvedOrderNo)
         }
@@ -214,7 +214,7 @@ const AdyenCheckoutComponent = ({
             site,
             basket,
             adyenOrder: internalAdyenOrder,
-            orderNo: internalOrderNo,
+            orderNo: fetchedOrderNo || internalOrderNo,
             returnUrl,
             customerId,
             setAdyenOrder: setAdyenOrder,
@@ -241,6 +241,7 @@ const AdyenCheckoutComponent = ({
         internalAdyenOrder?.orderData,
         internalAdyenOrder?.remainingAmount?.value,
         internalOrderNo,
+        fetchedOrderNo,
         returnUrl,
         customerId,
         navigate,
@@ -278,9 +279,11 @@ const AdyenCheckoutComponent = ({
             return
         }
 
-        if (orderNumberError && shouldNotifyError(ERROR_NOTIFICATION_KEYS.CHECKOUT)) {
-            console.error('Error fetching order number:', orderNumberError)
-            onError.forEach((cb) => cb(orderNumberError))
+        if (orderNumberError) {
+            if (shouldNotifyError(ERROR_NOTIFICATION_KEYS.CHECKOUT)) {
+                console.error('Error fetching order number:', orderNumberError)
+                onError.forEach((cb) => cb(orderNumberError))
+            }
             return
         }
 
