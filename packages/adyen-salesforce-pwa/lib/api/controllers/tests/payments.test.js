@@ -56,6 +56,15 @@ jest.mock('../../helpers/paymentsHelper.js', () => {
         }),
         revertCheckoutState: jest.fn(),
         validateBasketPayments: jest.fn(),
+        shouldCreateOrderBeforePayment: jest.fn((data) => {
+            if (data?.paymentMethod?.type === 'giftcard') {
+                return false
+            }
+            if (data?.paymentMethod?.subtype !== 'express') {
+                return true
+            }
+            return ['applepay', 'googlepay'].includes(data?.paymentMethod?.type)
+        }),
         isApplePayExpress: jest.fn(
             (data) =>
                 data?.paymentMethod?.type === 'applepay' &&
@@ -237,26 +246,79 @@ describe('payments controller', () => {
         expect(err.newBasketId).toBe('newBasket456')
     })
 
-    it('express payment: updates basket and creates order on AUTHORISED', async () => {
-        req.body.data = {paymentMethod: {type: 'applepay', subtype: 'express'}}
+    it.each([['applepay'], ['googlepay']])(
+        '%s express: pre-creates order and skips basket update on AUTHORISED',
+        async (type) => {
+            req.body.data = {paymentMethod: {type, subtype: 'express'}}
+            res.locals.adyen.basketService.addShopperData = jest.fn()
+            mockPayments.mockResolvedValue({
+                resultCode: RESULT_CODES.AUTHORISED,
+                merchantReference: 'ref123',
+                pspReference: 'psp456'
+            })
+
+            await sendPayments(req, res, next)
+
+            expect(res.locals.adyen.basketService.addPaymentInstrument).toHaveBeenCalled()
+            expect(orderHelper.createOrderUsingOrderNo).toHaveBeenCalledTimes(1)
+            // basket was consumed by order creation — must NOT attempt basket update
+            expect(res.locals.adyen.basketService.update).not.toHaveBeenCalled()
+            expect(orderHelper.updateOrderPaymentInstrument).toHaveBeenCalledWith(
+                '123',
+                'RefArch',
+                'psp456',
+                {
+                    pspReference: 'psp456',
+                    cardInstallments: undefined,
+                    donationToken: undefined
+                }
+            )
+            expect(res.locals.response.isSuccessful).toBe(true)
+            expect(next).toHaveBeenCalledWith()
+        }
+    )
+
+    it('googlepay express: fails order and reopens basket on refused payment', async () => {
+        req.body.data = {paymentMethod: {type: 'googlepay', subtype: 'express'}}
         res.locals.adyen.basketService.addShopperData = jest.fn()
         mockPayments.mockResolvedValue({
-            resultCode: RESULT_CODES.AUTHORISED,
-            merchantReference: 'ref123',
-            pspReference: 'psp456'
+            resultCode: RESULT_CODES.REFUSED,
+            merchantReference: 'ref123'
         })
+        orderHelper.failOrderAndReopenBasket.mockResolvedValue('newBasket456')
 
         await sendPayments(req, res, next)
 
-        // no order pre-creation for express
-        expect(orderHelper.createOrderUsingOrderNo).toHaveBeenCalledTimes(1)
-        // basket still alive — update should be called
-        expect(res.locals.adyen.basketService.update).toHaveBeenCalled()
-        expect(res.locals.response.isSuccessful).toBe(true)
-        expect(next).toHaveBeenCalledWith()
+        expect(orderHelper.failOrderAndReopenBasket).toHaveBeenCalledWith(res.locals.adyen, '123', {
+            reopenBasket: true,
+            removeShippingAddress: true
+        })
+        expect(paymentsHelper.revertCheckoutState).not.toHaveBeenCalled()
+        const err = next.mock.calls[0][0]
+        expect(err.newBasketId).toBe('newBasket456')
     })
 
-    it('express payment: updates basket with action on redirect', async () => {
+    it('applepay express on a temporary basket: fails order without reopening the basket', async () => {
+        req.body.data = {paymentMethod: {type: 'applepay', subtype: 'express'}}
+        res.locals.adyen.basket = {...mockBasket, temporaryBasket: true}
+        res.locals.adyen.basketService.addShopperData = jest.fn()
+        mockPayments.mockResolvedValue({
+            resultCode: RESULT_CODES.REFUSED,
+            merchantReference: 'ref123'
+        })
+        orderHelper.failOrderAndReopenBasket.mockResolvedValue(null)
+
+        await sendPayments(req, res, next)
+
+        expect(orderHelper.failOrderAndReopenBasket).toHaveBeenCalledWith(res.locals.adyen, '123', {
+            reopenBasket: false,
+            removeShippingAddress: true
+        })
+        const err = next.mock.calls[0][0]
+        expect(err.newBasketId).toBeUndefined()
+    })
+
+    it('paypal express: does not pre-create the order and updates basket with action on redirect', async () => {
         req.body.data = {paymentMethod: {type: 'paypal', subtype: 'express'}}
         res.locals.adyen.basketService.addShopperData = jest.fn()
         const mockAction = {type: 'redirect'}
@@ -267,6 +329,7 @@ describe('payments controller', () => {
 
         await sendPayments(req, res, next)
 
+        expect(orderHelper.createOrderUsingOrderNo).not.toHaveBeenCalled()
         // no pre-created order — basket update should be called
         expect(res.locals.adyen.basketService.update).toHaveBeenCalled()
         expect(res.locals.response).toEqual({
@@ -278,6 +341,24 @@ describe('payments controller', () => {
             resultCode: RESULT_CODES.REDIRECT_SHOPPER
         })
         expect(next).toHaveBeenCalledWith()
+    })
+
+    it('paypal express: reverts checkout state on refused payment', async () => {
+        req.body.data = {paymentMethod: {type: 'paypal', subtype: 'express'}}
+        res.locals.adyen.basketService.addShopperData = jest.fn()
+        mockPayments.mockResolvedValue({
+            resultCode: RESULT_CODES.REFUSED,
+            merchantReference: 'ref123'
+        })
+
+        await sendPayments(req, res, next)
+
+        expect(orderHelper.failOrderAndReopenBasket).not.toHaveBeenCalled()
+        expect(paymentsHelper.revertCheckoutState).toHaveBeenCalledWith(
+            res.locals.adyen,
+            'sendPayments'
+        )
+        expect(next).toHaveBeenCalledWith(expect.any(AdyenError))
     })
 
     it('throws when adyenContext is not set', async () => {

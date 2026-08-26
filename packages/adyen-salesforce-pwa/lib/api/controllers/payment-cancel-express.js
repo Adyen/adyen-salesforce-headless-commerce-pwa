@@ -1,12 +1,15 @@
 import Logger from '../models/logger'
+import {ERROR_MESSAGE} from '../../utils/constants.mjs'
 import {revertCheckoutStateForExpress} from '../helpers/paymentsHelper.js'
+import {failOrderAndReopenBasket} from '../helpers/orderHelper.js'
 
 /**
  * An Express middleware that handles the cancellation of an express payment.
- * It cleans up the basket, removes shipping method and shipping address.
+ * When an SFCC order was already created for the express payment, the order is failed and the
+ * basket reopened. Otherwise it just cleans up the basket, removing shipping method and address.
  *
  * @param {object} req - The Express request object.
- * @param {object} res - The Express response object (not used).
+ * @param {object} res - The Express response object.
  * @param {Function} next - The Express next middleware function.
  * @returns {Promise<void>}
  */
@@ -14,6 +17,29 @@ async function paymentCancelExpress(req, res, next) {
     Logger.info('paymentCancelExpress', 'start')
     try {
         const {adyen: adyenContext} = res.locals
+        const orderNo = req.body?.orderNo || adyenContext?.basket?.c_orderNo
+        const isTemporaryBasket = req.body?.isTemporaryBasket === true
+
+        if (orderNo) {
+            try {
+                const newBasketId = await failOrderAndReopenBasket(adyenContext, orderNo, {
+                    reopenBasket: !isTemporaryBasket,
+                    removeShippingAddress: true
+                })
+                res.locals.response = {newBasketId}
+                return next()
+            } catch (err) {
+                // The shopper commonly dismisses the payment sheet before an order exists;
+                // fall back to reverting the basket in that case only.
+                if (err.message !== ERROR_MESSAGE.ORDER_NOT_FOUND) {
+                    throw err
+                }
+                Logger.info(
+                    'paymentCancelExpress',
+                    `no order ${orderNo} to fail — reverting basket state`
+                )
+            }
+        }
 
         await revertCheckoutStateForExpress(adyenContext, 'paymentCancelExpress')
         res.locals.response = {}

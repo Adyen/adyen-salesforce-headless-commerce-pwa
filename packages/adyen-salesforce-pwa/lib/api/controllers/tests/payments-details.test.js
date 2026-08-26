@@ -107,7 +107,11 @@ describe('payments details controller', () => {
 
         await sendPaymentDetails(req, res, next)
 
-        expect(orderHelper.failOrderAndReopenBasket).toHaveBeenCalled()
+        // Standard flow keeps the shipping address on the reopened basket
+        expect(orderHelper.failOrderAndReopenBasket).toHaveBeenCalledWith(res.locals.adyen, '123', {
+            reopenBasket: true,
+            removeShippingAddress: false
+        })
         expect(paymentsHelper.revertCheckoutState).not.toHaveBeenCalled()
         const err = next.mock.calls[0][0]
         expect(err).toBeInstanceOf(AdyenError)
@@ -172,6 +176,63 @@ describe('payments details controller', () => {
         expect(res.locals.response.isFinal).toBe(false)
         expect(res.locals.response.isSuccessful).toBe(true)
         expect(next).toHaveBeenCalledWith()
+    })
+
+    describe('express flow with a client-supplied orderNo', () => {
+        beforeEach(() => {
+            req.body.orderNo = 'express-order-1'
+        })
+
+        it('skips order creation and patches the payment instrument on the supplied order', async () => {
+            mockPaymentsDetails.mockResolvedValue({
+                resultCode: RESULT_CODES.AUTHORISED,
+                pspReference: 'psp-gp-3ds'
+            })
+
+            await sendPaymentDetails(req, res, next)
+
+            expect(paymentsHelper.validateBasketPayments).not.toHaveBeenCalled()
+            expect(res.locals.adyen.basketService.addPaymentInstrument).not.toHaveBeenCalled()
+            expect(orderHelper.createOrderUsingOrderNo).not.toHaveBeenCalled()
+            expect(orderHelper.updateOrderPaymentInstrument).toHaveBeenCalledWith(
+                'express-order-1',
+                'RefArch',
+                'psp-gp-3ds',
+                {pspReference: 'psp-gp-3ds', donationToken: undefined}
+            )
+            expect(res.locals.response.merchantReference).toBe('express-order-1')
+            expect(next).toHaveBeenCalledWith()
+        })
+
+        it('fails the supplied order and clears the shipping address when 3DS is refused', async () => {
+            mockPaymentsDetails.mockResolvedValue({resultCode: RESULT_CODES.REFUSED})
+            orderHelper.failOrderAndReopenBasket.mockResolvedValue('newBasketExpress')
+
+            await sendPaymentDetails(req, res, next)
+
+            expect(orderHelper.failOrderAndReopenBasket).toHaveBeenCalledWith(
+                res.locals.adyen,
+                'express-order-1',
+                {reopenBasket: true, removeShippingAddress: true}
+            )
+            expect(paymentsHelper.revertCheckoutState).not.toHaveBeenCalled()
+            expect(next.mock.calls[0][0].newBasketId).toBe('newBasketExpress')
+        })
+
+        it('does not reopen the basket when the order came from a temporary basket', async () => {
+            req.body.isTemporaryBasket = true
+            mockPaymentsDetails.mockRejectedValue(new Error('Network timeout'))
+            orderHelper.failOrderAndReopenBasket.mockResolvedValue(null)
+
+            await sendPaymentDetails(req, res, next)
+
+            expect(orderHelper.failOrderAndReopenBasket).toHaveBeenCalledWith(
+                res.locals.adyen,
+                'express-order-1',
+                {reopenBasket: false, removeShippingAddress: true}
+            )
+            expect(next.mock.calls[0][0].newBasketId).toBeUndefined()
+        })
     })
 
     describe('no-basket (standard 3DS) flow', () => {

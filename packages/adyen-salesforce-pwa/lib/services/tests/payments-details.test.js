@@ -59,6 +59,28 @@ describe('AdyenPaymentsDetailsService', () => {
         expect(paymentDetailsResult).toEqual(mockResponse)
     })
 
+    it('should include the order context in the request body when provided', async () => {
+        paymentsDetailsService.apiClient.post.mockResolvedValueOnce(
+            Promise.resolve({
+                json: () => Promise.resolve({isSuccessful: true}),
+                status: 200
+            })
+        )
+
+        await paymentsDetailsService.submitPaymentsDetails(mockData, {
+            orderNo: 'order-1',
+            isTemporaryBasket: true
+        })
+
+        expect(paymentsDetailsService.apiClient.post).toHaveBeenCalledWith({
+            body: JSON.stringify({
+                data: mockData,
+                orderNo: 'order-1',
+                isTemporaryBasket: true
+            })
+        })
+    })
+
     it('should throw an error when submitPaymentsDetails gets a status >= 300', async () => {
         const mockFetchPromise = Promise.resolve({
             status: 400,

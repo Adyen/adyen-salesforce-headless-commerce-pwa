@@ -60,18 +60,25 @@ export function createShopperOrderClient(authorization, siteId) {
 }
 
 /**
- * Fails an SFCC order and triggers the reopening of the associated basket.
+ * Fails an SFCC order and, by default, triggers the reopening of the associated basket.
  * It validates that the order belongs to the customer, deletes all existing shopper baskets,
  * then updates the order status to failed_with_reopen so SFCC creates a clean new basket.
  * Resolves the new basket ID from the Location header if present, otherwise falls back to
  * fetching the shopper's current basket. Clears c_orderNo and payment instruments on the new basket.
  * @param {object} adyenContext - The request context from `res.locals.adyen`.
  * @param {string} orderNo - The number of the order to fail.
+ * @param {object} [options] - Reopen behaviour.
+ * @param {boolean} [options.reopenBasket=true] - When false, the order is simply failed and no
+ * basket is deleted or reopened. Used for orders created from a temporary (PDP express) basket,
+ * where the shopper's real cart must survive.
+ * @param {boolean} [options.removeShippingAddress=false] - When true, the shipping address is
+ * cleared on the reopened basket, resetting express checkout state.
  * @returns {Promise<string|null>} The new basket ID, or null if it could not be resolved.
  * @throws {AdyenError} If the order is not found or does not belong to the customer.
  */
-export async function failOrderAndReopenBasket(adyenContext, orderNo) {
+export async function failOrderAndReopenBasket(adyenContext, orderNo, options = {}) {
     Logger.info('failOrderAndReopenBasket', 'start')
+    const {reopenBasket = true, removeShippingAddress = false} = options
     const {authorization, customerId, siteId} = adyenContext
     const shopperOrders = createShopperOrderClient(authorization, siteId)
 
@@ -86,28 +93,36 @@ export async function failOrderAndReopenBasket(adyenContext, orderNo) {
     if (order?.customerInfo?.customerId !== customerId) {
         throw new AdyenError(ERROR_MESSAGE.INVALID_ORDER, 404)
     }
-    try {
-        const shopperBaskets = createShopperBasketsClient(authorization, siteId)
-        const {baskets} = await getCustomerBaskets(authorization, customerId, siteId)
-        if (baskets?.length) {
-            await Promise.all(
-                baskets.map((b) =>
-                    shopperBaskets.deleteBasket({parameters: {basketId: b.basketId}})
+    if (reopenBasket) {
+        try {
+            const shopperBaskets = createShopperBasketsClient(authorization, siteId)
+            const {baskets} = await getCustomerBaskets(authorization, customerId, siteId)
+            if (baskets?.length) {
+                await Promise.all(
+                    baskets.map((b) =>
+                        shopperBaskets.deleteBasket({parameters: {basketId: b.basketId}})
+                    )
                 )
+            }
+        } catch (err) {
+            Logger.error(
+                'failOrderAndReopenBasket',
+                `Failed to delete existing baskets: ${err.message}`
             )
         }
-    } catch (err) {
-        Logger.error(
-            'failOrderAndReopenBasket',
-            `Failed to delete existing baskets: ${err.message}`
-        )
     }
 
     const orderApi = new OrderApiClient(siteId)
     const response = await orderApi.updateOrderStatus(
         order.orderNo,
-        ORDER.ORDER_STATUS_FAILED_REOPEN
+        reopenBasket ? ORDER.ORDER_STATUS_FAILED_REOPEN : ORDER.ORDER_STATUS_FAILED
     )
+
+    if (!reopenBasket) {
+        Logger.info('failOrderAndReopenBasket', 'order failed without reopening a basket')
+        return null
+    }
+
     const location = response?.headers?.get('Location')
     const match = location?.match(/baskets\/([^?/]+)/)
     let newBasketId = match ? match[1] : null
@@ -121,6 +136,9 @@ export async function failOrderAndReopenBasket(adyenContext, orderNo) {
         const tempRes = {locals: {adyen: tempContext}}
         tempContext.basketService = new BasketService(tempContext, tempRes)
         await cleanupReopenedBasket(tempContext, 'failOrderAndReopenBasket')
+        if (removeShippingAddress) {
+            await tempContext.basketService.removeShippingAddress()
+        }
     } catch (err) {
         Logger.error('failOrderAndReopenBasket', `Failed to clean up new basket: ${err.message}`)
     }
