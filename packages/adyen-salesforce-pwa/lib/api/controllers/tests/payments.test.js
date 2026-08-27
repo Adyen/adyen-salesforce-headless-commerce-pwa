@@ -1,5 +1,5 @@
 import sendPayments from '../payments'
-import {RESULT_CODES} from '../../../utils/constants.mjs'
+import {ERROR_MESSAGE, RESULT_CODES} from '../../../utils/constants.mjs'
 import {AdyenError} from '../../models/AdyenError'
 import * as orderHelper from '../../helpers/orderHelper.js'
 import * as paymentsHelper from '../../helpers/paymentsHelper.js'
@@ -365,6 +365,18 @@ describe('payments controller', () => {
         res.locals.adyen = undefined
         await sendPayments(req, res, next)
         expect(next).toHaveBeenCalledWith(expect.any(AdyenError))
+    })
+
+    it('skips basket recovery when adyenContext is not set', async () => {
+        res.locals.adyen = undefined
+
+        await sendPayments(req, res, next)
+
+        expect(orderHelper.failOrderAndReopenBasket).not.toHaveBeenCalled()
+        expect(paymentsHelper.revertCheckoutState).not.toHaveBeenCalled()
+        const err = next.mock.calls[0][0]
+        expect(err.message).toBe(ERROR_MESSAGE.ADYEN_CONTEXT_NOT_FOUND)
+        expect(err.newBasketId).toBeUndefined()
     })
 
     it('calls addShopperData for Apple Pay Express', async () => {

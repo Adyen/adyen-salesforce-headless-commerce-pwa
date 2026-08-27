@@ -118,6 +118,22 @@ describe('paymentCancelExpress Controller', () => {
         expect(next).toHaveBeenCalledWith()
     })
 
+    it('should throw an AdyenError when the adyen context is missing', async () => {
+        req.body = {orderNo: 'order-6'}
+        res.locals = {}
+
+        await paymentCancelExpress(req, res, next)
+
+        expect(failOrderAndReopenBasket).not.toHaveBeenCalled()
+        expect(revertCheckoutStateForExpress).not.toHaveBeenCalled()
+        expect(next).toHaveBeenCalledWith(
+            expect.objectContaining({
+                message: ERROR_MESSAGE.ADYEN_CONTEXT_NOT_FOUND,
+                statusCode: 500
+            })
+        )
+    })
+
     it('should propagate errors other than order not found', async () => {
         req.body = {orderNo: 'order-5'}
         const invalidOrderError = new AdyenError(ERROR_MESSAGE.INVALID_ORDER, 404)

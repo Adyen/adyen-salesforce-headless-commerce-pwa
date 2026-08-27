@@ -1,5 +1,6 @@
 import Logger from '../models/logger'
 import {ERROR_MESSAGE} from '../../utils/constants.mjs'
+import {AdyenError} from '../models/AdyenError'
 import {revertCheckoutStateForExpress} from '../helpers/paymentsHelper.js'
 import {failOrderAndReopenBasket} from '../helpers/orderHelper.js'
 
@@ -17,7 +18,10 @@ async function paymentCancelExpress(req, res, next) {
     Logger.info('paymentCancelExpress', 'start')
     try {
         const {adyen: adyenContext} = res.locals
-        const orderNo = req.body?.orderNo || adyenContext?.basket?.c_orderNo
+        if (!adyenContext) {
+            throw new AdyenError(ERROR_MESSAGE.ADYEN_CONTEXT_NOT_FOUND, 500)
+        }
+        const orderNo = req.body?.orderNo || adyenContext.basket?.c_orderNo
         const isTemporaryBasket = req.body?.isTemporaryBasket === true
 
         if (orderNo) {

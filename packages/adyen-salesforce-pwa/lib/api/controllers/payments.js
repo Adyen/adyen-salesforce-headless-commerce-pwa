@@ -36,6 +36,9 @@ async function handlePaymentError(res, orderNo, options = {}) {
     try {
         Logger.info('handlePaymentError', 'start')
         const adyenContext = res.locals.adyen
+        if (!adyenContext) {
+            return null
+        }
         if (orderNo) {
             return await failOrderAndReopenBasket(adyenContext, orderNo, {
                 reopenBasket: !isTemporaryBasket,
