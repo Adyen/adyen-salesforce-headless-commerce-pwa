@@ -929,7 +929,7 @@ describe('onErrorHandler', () => {
             customerId: 'customer-123',
             site: {id: 'RefArch'},
             navigate: jest.fn(),
-            getBasket: () => ({basketId: 'basket-456'})
+            getBasket: () => ({basketId: 'basket-456', c_orderNo: 'ORDER-001'})
         }
 
         const result = await onErrorHandler(new Error('Payment error'), {}, props)
@@ -940,9 +940,35 @@ describe('onErrorHandler', () => {
             'basket-456',
             {id: 'RefArch'}
         )
-        expect(mockPaymentCancelExpress).toHaveBeenCalled()
+        expect(mockPaymentCancelExpress).toHaveBeenCalledWith({
+            orderNo: 'ORDER-001',
+            isTemporaryBasket: false
+        })
         expect(props.navigate).toHaveBeenCalledWith('/checkout?error=true')
         expect(result).toEqual({cancelled: true})
+    })
+
+    it('should flag the basket as temporary for the pdp express flow', async () => {
+        const mockPaymentCancelExpress = jest.fn().mockResolvedValue({})
+        PaymentCancelExpressService.mockImplementation(() => ({
+            paymentCancelExpress: mockPaymentCancelExpress
+        }))
+
+        const props = {
+            token: 'test-token',
+            customerId: 'customer-123',
+            site: {id: 'RefArch'},
+            isExpressPdp: true,
+            navigate: jest.fn(),
+            getBasket: () => ({basketId: 'temp-basket-1', c_orderNo: 'ORDER-PDP'})
+        }
+
+        await onErrorHandler(new Error('Payment error'), {}, props)
+
+        expect(mockPaymentCancelExpress).toHaveBeenCalledWith({
+            orderNo: 'ORDER-PDP',
+            isTemporaryBasket: true
+        })
     })
 
     it('should handle cancellation errors gracefully', async () => {

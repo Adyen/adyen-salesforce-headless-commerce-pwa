@@ -1,4 +1,4 @@
-import {ERROR_MESSAGE, PAYMENT_METHOD_TYPES} from '../../utils/constants.mjs'
+import {ERROR_MESSAGE} from '../../utils/constants.mjs'
 import AdyenClientProvider from '../models/adyenClientProvider'
 import Logger from '../models/logger'
 import {AdyenError} from '../models/AdyenError'
@@ -6,6 +6,7 @@ import {
     createCheckoutResponse,
     createPaymentRequestObject,
     revertCheckoutState,
+    shouldCreateOrderBeforePayment,
     validateBasketPayments,
     isApplePayExpress,
     isGooglePayExpress
@@ -18,31 +19,31 @@ import {
 import {createIdempotencyKey} from '../utils/paymentUtils'
 
 /**
- * Returns true if the payment is a standard (non-express, non-gift-card) payment
- * for which the SFCC order should be created before calling Adyen /payments.
- * @param {object} data - The payment state data from the client.
- * @returns {boolean}
- */
-function isStandardPayment(data) {
-    const isExpress = data?.paymentMethod?.subtype === 'express'
-    const isGiftCard = data?.paymentMethod?.type === PAYMENT_METHOD_TYPES.GIFT_CARD
-    return !isExpress && !isGiftCard
-}
-
-/**
  * Handles errors that occur during the payment process.
- * For standard payments where an order was already created, fails the order and reopens the basket.
+ * When an order was already created, fails the order and reopens the basket.
  * For other flows, reverts basket state.
  * @param {object} res - The Express response object.
  * @param {string|null} orderNo - The order number if an order was created before the payment call.
+ * @param {object} [options] - Failure handling options.
+ * @param {boolean} [options.isTemporaryBasket=false] - True when the order was created from a
+ * temporary (PDP express) basket, in which case the shopper's real cart must not be reopened.
+ * @param {boolean} [options.isExpressOrder=false] - True for Apple Pay / Google Pay express, where
+ * the shipping address must be cleared so the express button re-mounts on a clean basket.
  * @returns {Promise<string|null>} The new basket ID if the order was failed and basket reopened.
  */
-async function handlePaymentError(res, orderNo) {
+async function handlePaymentError(res, orderNo, options = {}) {
+    const {isTemporaryBasket = false, isExpressOrder = false} = options
     try {
         Logger.info('handlePaymentError', 'start')
         const adyenContext = res.locals.adyen
+        if (!adyenContext) {
+            return null
+        }
         if (orderNo) {
-            return await failOrderAndReopenBasket(adyenContext, orderNo)
+            return await failOrderAndReopenBasket(adyenContext, orderNo, {
+                reopenBasket: !isTemporaryBasket,
+                removeShippingAddress: isExpressOrder
+            })
         }
         await revertCheckoutState(adyenContext, 'sendPayments')
     } catch (err) {
@@ -55,7 +56,7 @@ async function handlePaymentError(res, orderNo) {
  * An Express middleware that handles the /payments request from the client.
  * It orchestrates the payment process by creating a payment request,
  * calling the Adyen API, and handling the response.
- * For standard (non-express, non-gift-card) payments, the SFCC order is created
+ * For every payment except PayPal express and gift cards, the SFCC order is created
  * BEFORE calling Adyen /payments to prevent orphan payments. If the payment fails,
  * the order is failed and the basket is reopened.
  * @param {object} req - The Express request object.
@@ -65,6 +66,8 @@ async function handlePaymentError(res, orderNo) {
  */
 async function sendPayments(req, res, next) {
     let preCreatedOrderNo = null
+    let isTemporaryBasket = false
+    let isExpressOrder = false
     try {
         Logger.info('sendPayments', 'start')
         const {
@@ -86,7 +89,9 @@ async function sendPayments(req, res, next) {
             paymentRequest.paymentMethod
         )
 
-        if (isStandardPayment(data)) {
+        if (shouldCreateOrderBeforePayment(data)) {
+            isTemporaryBasket = adyenContext.basket?.temporaryBasket === true
+            isExpressOrder = isApplePayExpress(data) || isGooglePayExpress(data)
             await adyenContext.basketService.addPaymentInstrument(
                 paymentRequest?.amount,
                 paymentRequest?.paymentMethod,
@@ -233,7 +238,10 @@ async function sendPayments(req, res, next) {
             })
         }
 
-        const newBasketId = await handlePaymentError(res, preCreatedOrderNo)
+        const newBasketId = await handlePaymentError(res, preCreatedOrderNo, {
+            isTemporaryBasket,
+            isExpressOrder
+        })
         if (newBasketId) {
             err.newBasketId = newBasketId
         }

@@ -235,6 +235,79 @@ describe('orderHelper', () => {
             expect(result).toBe('current-basket-456')
         })
 
+        it('should fail the order without deleting or reopening baskets when reopenBasket is false', async () => {
+            const mockOrder = {
+                orderNo: 'order123',
+                customerInfo: {customerId: 'customer-abc'}
+            }
+            mockGetOrder.mockResolvedValue(mockOrder)
+            mockUpdateOrderStatus.mockResolvedValue({})
+            getCustomerBaskets.mockResolvedValue({baskets: [{basketId: 'basket-1'}]})
+            const mockDeleteBasket = jest.fn()
+            createShopperBasketsClient.mockReturnValue({deleteBasket: mockDeleteBasket})
+
+            const result = await failOrderAndReopenBasket(mockAdyenContext, 'order123', {
+                reopenBasket: false
+            })
+
+            expect(mockDeleteBasket).not.toHaveBeenCalled()
+            expect(mockUpdateOrderStatus).toHaveBeenCalledWith(
+                'order123',
+                ORDER.ORDER_STATUS_FAILED
+            )
+            expect(getBasket).not.toHaveBeenCalled()
+            expect(result).toBeNull()
+        })
+
+        it('should clear the shipping address on the reopened basket when removeShippingAddress is true', async () => {
+            const mockOrder = {
+                orderNo: 'order123',
+                customerInfo: {customerId: 'customer-abc'}
+            }
+            mockGetOrder.mockResolvedValue(mockOrder)
+            mockUpdateOrderStatus.mockResolvedValue({
+                headers: {
+                    get: jest.fn().mockReturnValue('/baskets/new-basket-123')
+                }
+            })
+            const mockRemoveShippingAddress = jest.fn().mockResolvedValue({})
+            BasketService.mockImplementation(() => ({
+                update: jest.fn().mockResolvedValue({}),
+                removeAllPaymentInstruments: jest.fn().mockResolvedValue({}),
+                removeShippingAddress: mockRemoveShippingAddress
+            }))
+
+            const result = await failOrderAndReopenBasket(mockAdyenContext, 'order123', {
+                removeShippingAddress: true
+            })
+
+            expect(mockRemoveShippingAddress).toHaveBeenCalled()
+            expect(result).toBe('new-basket-123')
+        })
+
+        it('should not clear the shipping address by default', async () => {
+            const mockOrder = {
+                orderNo: 'order123',
+                customerInfo: {customerId: 'customer-abc'}
+            }
+            mockGetOrder.mockResolvedValue(mockOrder)
+            mockUpdateOrderStatus.mockResolvedValue({
+                headers: {
+                    get: jest.fn().mockReturnValue('/baskets/new-basket-123')
+                }
+            })
+            const mockRemoveShippingAddress = jest.fn().mockResolvedValue({})
+            BasketService.mockImplementation(() => ({
+                update: jest.fn().mockResolvedValue({}),
+                removeAllPaymentInstruments: jest.fn().mockResolvedValue({}),
+                removeShippingAddress: mockRemoveShippingAddress
+            }))
+
+            await failOrderAndReopenBasket(mockAdyenContext, 'order123')
+
+            expect(mockRemoveShippingAddress).not.toHaveBeenCalled()
+        })
+
         it('should handle basket cleanup errors', async () => {
             const mockOrder = {
                 orderNo: 'order123',

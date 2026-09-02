@@ -333,6 +333,8 @@ export const getAppleButtonConfig = (props = {}) => {
  * @param {string} props.customerId - Customer ID
  * @param {object} props.site - Site configuration
  * @param {Function} props.navigate - Navigation function
+ * @param {boolean} [props.isExpressPdp] - True for the PDP express flow, where the order was
+ * created from a temporary basket and the shopper's real cart must not be reopened
  * @returns {Promise<object>} Object indicating cancellation status
  */
 export const onErrorHandler = async (error, component, props) => {
@@ -345,7 +347,10 @@ export const onErrorHandler = async (error, component, props) => {
                 basket?.basketId,
                 props.site
             )
-            await paymentCancelExpressService.paymentCancelExpress()
+            await paymentCancelExpressService.paymentCancelExpress({
+                orderNo: basket?.c_orderNo,
+                isTemporaryBasket: props.isExpressPdp === true
+            })
         }
         props.navigate(`/checkout?error=true`)
         return {cancelled: true}
