@@ -230,7 +230,7 @@ describe('orderHelper', () => {
                     expect.objectContaining({c_orderNo: ''})
                 )
                 expect(mockRemoveAllPaymentInstruments).toHaveBeenCalled()
-                expect(result).toBeNull()
+                expect(result).toBe('current-basket-456')
             }
         )
 

@@ -92,12 +92,35 @@ describe('getOrderNumber controller', () => {
             expect(mockBasketService.update).not.toHaveBeenCalled()
         })
 
-        it('should reuse the number when the order lookup fails', async () => {
+        it('should log and reuse the number when the order does not exist', async () => {
+            mockAdyenContext.basket.c_orderNo = 'UNUSED-ORDER-999'
+            mockGetOrder.mockRejectedValue(
+                Object.assign(new Error('Order not found'), {statusCode: 404})
+            )
+
+            await getOrderNumber(mockReq, mockRes, mockNext)
+
+            expect(Logger.info).toHaveBeenCalledWith(
+                'getOrderNumber',
+                'Order number UNUSED-ORDER-999 does not exist yet; reusing it'
+            )
+            expect(Logger.error).not.toHaveBeenCalled()
+            expect(mockRes.locals.response).toEqual({orderNo: 'UNUSED-ORDER-999'})
+            expect(CustomShopperOrderApiClient).not.toHaveBeenCalled()
+            expect(mockBasketService.update).not.toHaveBeenCalled()
+            expect(mockNext).toHaveBeenCalledWith()
+        })
+
+        it('should log unexpected lookup failures as errors before reusing the number', async () => {
             mockAdyenContext.basket.c_orderNo = 'UNVERIFIED-ORDER-999'
             mockGetOrder.mockRejectedValue(new Error('Lookup failed'))
 
             await getOrderNumber(mockReq, mockRes, mockNext)
 
+            expect(Logger.error).toHaveBeenCalledWith(
+                'getOrderNumber',
+                'Could not verify order number UNVERIFIED-ORDER-999 (Lookup failed); reusing it'
+            )
             expect(mockRes.locals.response).toEqual({orderNo: 'UNVERIFIED-ORDER-999'})
             expect(CustomShopperOrderApiClient).not.toHaveBeenCalled()
             expect(mockBasketService.update).not.toHaveBeenCalled()

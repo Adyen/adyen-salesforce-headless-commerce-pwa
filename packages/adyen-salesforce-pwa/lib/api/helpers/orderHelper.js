@@ -8,11 +8,11 @@ import {
     createShopperBasketsClient,
     getBasket,
     getCurrentBasketForAuthorizedShopper
-} from '../helpers/basketHelper.js'
-import {createShopperCustomerClient, getCustomerBaskets} from '../helpers/customerHelper.js'
+} from './basketHelper'
+import {createShopperCustomerClient, getCustomerBaskets} from './customerHelper'
 import {BasketService} from '../models/basketService.js'
 import {ERROR_MESSAGE, ORDER} from '../../utils/constants.mjs'
-import {cleanupReopenedBasket} from '../helpers/paymentsHelper.js'
+import {cleanupReopenedBasket} from './paymentsHelper'
 import Logger from '../models/logger.js'
 
 /**
@@ -116,6 +116,7 @@ export async function failOrderAndReopenBasket(adyenContext, orderNo, options = 
                 const tempRes = {locals: {adyen: tempContext}}
                 tempContext.basketService = new BasketService(tempContext, tempRes)
                 await cleanupReopenedBasket(tempContext, 'failOrderAndReopenBasket')
+                return currentBasket.basketId
             } catch (err) {
                 Logger.error(
                     'failOrderAndReopenBasket',

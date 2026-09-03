@@ -458,6 +458,46 @@ describe('AdyenCheckoutComponent', () => {
         )
     })
 
+    it('should preserve local order number updates after server validation', async () => {
+        useAdyenOrderNumber.mockReturnValue({
+            orderNo: 'spent-order',
+            error: null,
+            isLoading: true
+        })
+        const props = {
+            ...defaultProps,
+            basket: {...defaultProps.basket, c_orderNo: 'spent-order'}
+        }
+        const {rerender} = render(<AdyenCheckoutComponent {...props} />)
+
+        useAdyenOrderNumber.mockReturnValue({
+            orderNo: 'fresh-order',
+            error: null,
+            isLoading: false
+        })
+        rerender(
+            <AdyenCheckoutComponent
+                {...props}
+                basket={{...props.basket, c_orderData: JSON.stringify({})}}
+            />
+        )
+
+        await waitFor(() => {
+            expect(paymentMethodsConfiguration).toHaveBeenLastCalledWith(
+                expect.objectContaining({orderNo: 'fresh-order'})
+            )
+        })
+
+        const {setOrderNo} = paymentMethodsConfiguration.mock.calls.at(-1)[0]
+        act(() => setOrderNo('response-order'))
+
+        await waitFor(() => {
+            expect(paymentMethodsConfiguration).toHaveBeenLastCalledWith(
+                expect.objectContaining({orderNo: 'response-order'})
+            )
+        })
+    })
+
     it('should update orderNo when basket c_orderNo changes', async () => {
         const {rerender} = render(<AdyenCheckoutComponent {...defaultProps} />)
 

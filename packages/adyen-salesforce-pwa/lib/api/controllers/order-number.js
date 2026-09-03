@@ -47,10 +47,17 @@ async function getOrderNumber(req, res, next) {
                     `Order number ${existingOrderNo} is ${existingOrder.status}; generating a new one`
                 )
             } catch (err) {
-                Logger.info(
-                    'getOrderNumber',
-                    `Could not verify order number ${existingOrderNo} (${err.message}); reusing it`
-                )
+                if (err?.statusCode === 404 || err?.status === 404) {
+                    Logger.info(
+                        'getOrderNumber',
+                        `Order number ${existingOrderNo} does not exist yet; reusing it`
+                    )
+                } else {
+                    Logger.error(
+                        'getOrderNumber',
+                        `Could not verify order number ${existingOrderNo} (${err.message}); reusing it`
+                    )
+                }
                 res.locals.response = {orderNo: existingOrderNo}
                 return next()
             }
