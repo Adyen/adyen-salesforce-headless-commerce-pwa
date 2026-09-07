@@ -133,6 +133,9 @@ describe('orderHelper', () => {
     describe('failOrderAndReopenBasket', () => {
         const mockGetOrder = jest.fn()
         const mockUpdateOrderStatus = jest.fn()
+        const mockDeleteBasket = jest.fn()
+        const mockBasketUpdate = jest.fn()
+        const mockRemoveAllPaymentInstruments = jest.fn()
         const mockAdyenContext = {
             authorization: 'auth',
             customerId: 'customer-abc',
@@ -140,6 +143,9 @@ describe('orderHelper', () => {
         }
 
         beforeEach(() => {
+            getConfig.mockReturnValue({
+                app: {commerceAPI: {parameters: {siteId: 'RefArch'}}}
+            })
             ShopperOrders.mockImplementation(() => ({
                 getOrder: mockGetOrder
             }))
@@ -148,15 +154,20 @@ describe('orderHelper', () => {
             }))
             getCustomerBaskets.mockResolvedValue({baskets: []})
             getBasket.mockResolvedValue({basketId: 'new-basket-123'})
+            getCurrentBasketForAuthorizedShopper.mockResolvedValue({basketId: 'current-basket-456'})
+            createShopperBasketsClient.mockReturnValue({deleteBasket: mockDeleteBasket})
+            mockBasketUpdate.mockResolvedValue({})
+            mockRemoveAllPaymentInstruments.mockResolvedValue({})
             BasketService.mockImplementation(() => ({
-                update: jest.fn().mockResolvedValue({}),
-                removeAllPaymentInstruments: jest.fn().mockResolvedValue({})
+                update: mockBasketUpdate,
+                removeAllPaymentInstruments: mockRemoveAllPaymentInstruments
             }))
         })
 
         it('should fail the order and reopen the basket successfully', async () => {
             const mockOrder = {
                 orderNo: 'order123',
+                status: ORDER.ORDER_STATUS_CREATED,
                 customerInfo: {customerId: 'customer-abc'}
             }
             mockGetOrder.mockResolvedValue(mockOrder)
@@ -186,17 +197,65 @@ describe('orderHelper', () => {
         it('should throw AdyenError if customer ID does not match', async () => {
             const mockOrder = {
                 orderNo: 'order123',
+                status: ORDER.ORDER_STATUS_FAILED,
                 customerInfo: {customerId: 'different-customer'}
             }
             mockGetOrder.mockResolvedValue(mockOrder)
             await expect(failOrderAndReopenBasket(mockAdyenContext, 'order123')).rejects.toThrow(
                 ERROR_MESSAGE.INVALID_ORDER
             )
+            expect(getCurrentBasketForAuthorizedShopper).not.toHaveBeenCalled()
+            expect(mockBasketUpdate).not.toHaveBeenCalled()
+        })
+
+        it.each(['new', 'completed', 'cancelled', 'failed', 'failed_with_reopen', 'unknown'])(
+            'should clean the current basket without failing an existing %s order',
+            async (status) => {
+                mockGetOrder.mockResolvedValue({
+                    orderNo: 'order123',
+                    status,
+                    customerInfo: {customerId: 'customer-abc'}
+                })
+                getCustomerBaskets.mockResolvedValue({baskets: [{basketId: 'current-basket-456'}]})
+                getCurrentBasketForAuthorizedShopper.mockResolvedValue({
+                    basketId: 'current-basket-456',
+                    c_orderNo: 'order123'
+                })
+
+                const result = await failOrderAndReopenBasket(mockAdyenContext, 'order123')
+
+                expect(mockDeleteBasket).not.toHaveBeenCalled()
+                expect(mockUpdateOrderStatus).not.toHaveBeenCalled()
+                expect(mockBasketUpdate).toHaveBeenCalledWith(
+                    expect.objectContaining({c_orderNo: ''})
+                )
+                expect(mockRemoveAllPaymentInstruments).toHaveBeenCalled()
+                expect(result).toBe('current-basket-456')
+            }
+        )
+
+        it('should not clean a newer basket for a stale cancelled order number', async () => {
+            mockGetOrder.mockResolvedValue({
+                orderNo: 'stale-order',
+                status: ORDER.ORDER_STATUS_FAILED,
+                customerInfo: {customerId: 'customer-abc'}
+            })
+            getCurrentBasketForAuthorizedShopper.mockResolvedValue({
+                basketId: 'current-basket-456',
+                c_orderNo: 'new-order'
+            })
+
+            const result = await failOrderAndReopenBasket(mockAdyenContext, 'stale-order')
+
+            expect(mockBasketUpdate).not.toHaveBeenCalled()
+            expect(mockRemoveAllPaymentInstruments).not.toHaveBeenCalled()
+            expect(result).toBeNull()
         })
 
         it('should handle basket deletion errors gracefully', async () => {
             const mockOrder = {
                 orderNo: 'order123',
+                status: ORDER.ORDER_STATUS_CREATED,
                 customerInfo: {customerId: 'customer-abc'}
             }
             mockGetOrder.mockResolvedValue(mockOrder)
@@ -220,6 +279,7 @@ describe('orderHelper', () => {
         it('should handle missing Location header', async () => {
             const mockOrder = {
                 orderNo: 'order123',
+                status: ORDER.ORDER_STATUS_CREATED,
                 customerInfo: {customerId: 'customer-abc'}
             }
             mockGetOrder.mockResolvedValue(mockOrder)
@@ -262,6 +322,7 @@ describe('orderHelper', () => {
         it('should clear the shipping address on the reopened basket when removeShippingAddress is true', async () => {
             const mockOrder = {
                 orderNo: 'order123',
+                status: ORDER.ORDER_STATUS_CREATED,
                 customerInfo: {customerId: 'customer-abc'}
             }
             mockGetOrder.mockResolvedValue(mockOrder)
@@ -288,6 +349,7 @@ describe('orderHelper', () => {
         it('should not clear the shipping address by default', async () => {
             const mockOrder = {
                 orderNo: 'order123',
+                status: ORDER.ORDER_STATUS_CREATED,
                 customerInfo: {customerId: 'customer-abc'}
             }
             mockGetOrder.mockResolvedValue(mockOrder)
@@ -311,6 +373,7 @@ describe('orderHelper', () => {
         it('should handle basket cleanup errors', async () => {
             const mockOrder = {
                 orderNo: 'order123',
+                status: ORDER.ORDER_STATUS_CREATED,
                 customerInfo: {customerId: 'customer-abc'}
             }
             mockGetOrder.mockResolvedValue(mockOrder)
@@ -342,6 +405,9 @@ describe('orderHelper', () => {
         }
 
         beforeEach(() => {
+            getConfig.mockReturnValue({
+                app: {commerceAPI: {parameters: {siteId: 'RefArch'}}}
+            })
             ShopperOrders.mockImplementation(() => ({
                 getOrder: mockGetOrder
             }))
@@ -367,14 +433,53 @@ describe('orderHelper', () => {
             expect(result).toEqual({orderNo: 'order123'})
         })
 
-        it('should return existing order without re-creating if it already exists', async () => {
-            mockGetOrder.mockResolvedValue({orderNo: 'order123'}) // Order exists
+        it('should create an order when lookup reports it does not exist', async () => {
+            const notFoundError = Object.assign(new Error('Order not found'), {statusCode: 404})
+            mockGetOrder.mockRejectedValue(notFoundError)
+            mockCreateOrder.mockResolvedValue({orderNo: 'order123'})
 
             const result = await createOrderUsingOrderNo(mockAdyenContext)
 
+            expect(mockCreateOrder).toHaveBeenCalledWith(
+                'auth',
+                'basket-abc',
+                'customer-abc',
+                'order123',
+                'USD'
+            )
             expect(result).toEqual({orderNo: 'order123'})
+        })
+
+        it('should propagate non-404 lookup errors', async () => {
+            const apiError = Object.assign(new Error('Order lookup failed'), {statusCode: 500})
+            mockGetOrder.mockRejectedValue(apiError)
+
+            await expect(createOrderUsingOrderNo(mockAdyenContext)).rejects.toBe(apiError)
             expect(mockCreateOrder).not.toHaveBeenCalled()
         })
+
+        it('should return an existing created order without re-creating it', async () => {
+            const existingOrder = {orderNo: 'order123', status: ORDER.ORDER_STATUS_CREATED}
+            mockGetOrder.mockResolvedValue(existingOrder)
+
+            const result = await createOrderUsingOrderNo(mockAdyenContext)
+
+            expect(result).toEqual(existingOrder)
+            expect(mockCreateOrder).not.toHaveBeenCalled()
+        })
+
+        it.each(['new', 'completed', 'cancelled', 'failed', 'failed_with_reopen', 'unknown'])(
+            'should reject an existing %s order',
+            async (status) => {
+                mockGetOrder.mockResolvedValue({orderNo: 'order123', status})
+
+                await expect(createOrderUsingOrderNo(mockAdyenContext)).rejects.toMatchObject({
+                    message: ERROR_MESSAGE.ORDER_ALREADY_PLACED,
+                    statusCode: 409
+                })
+                expect(mockCreateOrder).not.toHaveBeenCalled()
+            }
+        )
 
         it('should throw AdyenError when order number is missing', async () => {
             const contextWithoutOrderNo = {

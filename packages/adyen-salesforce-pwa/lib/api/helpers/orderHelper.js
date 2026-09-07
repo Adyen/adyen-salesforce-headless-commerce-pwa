@@ -5,14 +5,14 @@ import {OrderApiClient} from '../models/orderApi.js'
 import {CustomShopperOrderApiClient} from '../models/customShopperOrderApi.js'
 import {CustomAdminOrderApiClient} from '../models/customAdminOrderApi.js'
 import {
+    createShopperBasketsClient,
     getBasket,
-    getCurrentBasketForAuthorizedShopper,
-    createShopperBasketsClient
-} from '../helpers/basketHelper.js'
-import {getCustomerBaskets, createShopperCustomerClient} from '../helpers/customerHelper.js'
+    getCurrentBasketForAuthorizedShopper
+} from './basketHelper'
+import {createShopperCustomerClient, getCustomerBaskets} from './customerHelper'
 import {BasketService} from '../models/basketService.js'
 import {ERROR_MESSAGE, ORDER} from '../../utils/constants.mjs'
-import {cleanupReopenedBasket} from '../helpers/paymentsHelper.js'
+import {cleanupReopenedBasket} from './paymentsHelper'
 import Logger from '../models/logger.js'
 
 /**
@@ -94,6 +94,37 @@ export async function failOrderAndReopenBasket(adyenContext, orderNo, options = 
         throw new AdyenError(ERROR_MESSAGE.INVALID_ORDER, 404)
     }
     if (reopenBasket) {
+        if (order.status !== ORDER.ORDER_STATUS_CREATED) {
+            Logger.info(
+                'failOrderAndReopenBasket',
+                `Order ${orderNo} is ${order.status}; skipping fail and reopen`
+            )
+            try {
+                const currentBasket = await getCurrentBasketForAuthorizedShopper(
+                    authorization,
+                    customerId,
+                    siteId
+                )
+                if (currentBasket?.c_orderNo !== orderNo) {
+                    Logger.info(
+                        'failOrderAndReopenBasket',
+                        `Current basket does not reference order ${orderNo}; skipping cleanup`
+                    )
+                    return null
+                }
+                const tempContext = {...adyenContext, basket: currentBasket}
+                const tempRes = {locals: {adyen: tempContext}}
+                tempContext.basketService = new BasketService(tempContext, tempRes)
+                await cleanupReopenedBasket(tempContext, 'failOrderAndReopenBasket')
+                return currentBasket.basketId
+            } catch (err) {
+                Logger.error(
+                    'failOrderAndReopenBasket',
+                    `Failed to clean up current basket: ${err.message}`
+                )
+            }
+            return null
+        }
         try {
             const shopperBaskets = createShopperBasketsClient(authorization, siteId)
             const {baskets} = await getCustomerBaskets(authorization, customerId, siteId)
@@ -111,7 +142,6 @@ export async function failOrderAndReopenBasket(adyenContext, orderNo, options = 
             )
         }
     }
-
     const orderApi = new OrderApiClient(siteId)
     const response = await orderApi.updateOrderStatus(
         order.orderNo,
@@ -160,13 +190,23 @@ export async function createOrderUsingOrderNo(adyenContext) {
         throw new AdyenError(ERROR_MESSAGE.ORDER_NUMBER_NOT_FOUND, 400)
     }
     const shopperOrders = createShopperOrderClient(authorization, siteId)
-    const order = await shopperOrders.getOrder({
-        parameters: {
-            orderNo: orderNo
+    let order
+    try {
+        order = await shopperOrders.getOrder({
+            parameters: {
+                orderNo: orderNo
+            }
+        })
+    } catch (err) {
+        if (err?.statusCode !== 404 && err?.status !== 404) {
+            throw err
         }
-    })
-    if (order?.orderNo) {
+    }
+    if (order?.orderNo && order.status === ORDER.ORDER_STATUS_CREATED) {
         return order
+    }
+    if (order?.orderNo) {
+        throw new AdyenError(ERROR_MESSAGE.ORDER_ALREADY_PLACED, 409)
     }
     const customOrderApi = new CustomShopperOrderApiClient(siteId)
     return await customOrderApi.createOrder(authorization, basketId, customerId, orderNo, currency)
