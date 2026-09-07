@@ -322,6 +322,7 @@ describe('orderHelper', () => {
         it('should clear the shipping address on the reopened basket when removeShippingAddress is true', async () => {
             const mockOrder = {
                 orderNo: 'order123',
+                status: ORDER.ORDER_STATUS_CREATED,
                 customerInfo: {customerId: 'customer-abc'}
             }
             mockGetOrder.mockResolvedValue(mockOrder)
@@ -348,6 +349,7 @@ describe('orderHelper', () => {
         it('should not clear the shipping address by default', async () => {
             const mockOrder = {
                 orderNo: 'order123',
+                status: ORDER.ORDER_STATUS_CREATED,
                 customerInfo: {customerId: 'customer-abc'}
             }
             mockGetOrder.mockResolvedValue(mockOrder)
