@@ -4,6 +4,12 @@
 // state would leak across shoppers' requests. All current call sites are browser-only
 // (Adyen Web SDK callbacks, React component event handlers).
 const errorNotificationTimestamps = new Map()
+const cancelHandledKeys = new Set()
+
+export const markCancelHandled = (key) => cancelHandledKeys.add(key)
+export const hasCancelHandled = (key) => cancelHandledKeys.has(key)
+export const clearCancelHandled = (key) => cancelHandledKeys.delete(key)
+export const clearErrorNotificationThrottle = (key) => errorNotificationTimestamps.delete(key)
 
 /**
  * Leading-edge throttle gate for error notifications.
@@ -30,6 +36,7 @@ export const shouldNotifyError = (key, windowMs = 300) => {
  */
 export const __resetErrorNotificationThrottle = () => {
     errorNotificationTimestamps.clear()
+    cancelHandledKeys.clear()
 }
 
 /**
