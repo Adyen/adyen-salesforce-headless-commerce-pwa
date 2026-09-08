@@ -97,6 +97,7 @@ describe('onSubmit function', () => {
     let mockSubmitPayment
 
     beforeEach(() => {
+        __resetErrorNotificationThrottle()
         mockActions = {
             resolve: jest.fn(),
             reject: jest.fn()
@@ -105,6 +106,10 @@ describe('onSubmit function', () => {
         AdyenPaymentsService.mockImplementation(() => ({
             submitPayment: mockSubmitPayment
         }))
+    })
+
+    afterEach(() => {
+        __resetErrorNotificationThrottle()
     })
 
     it('calls reject for invalid state and returns undefined', async () => {
@@ -228,6 +233,56 @@ describe('onSubmit function', () => {
             {id: 'en-US'}
         )
     })
+
+    it('should allow cancellation again when a new payment attempt starts', async () => {
+        const props = {
+            token: 'testToken',
+            site: 'testSite',
+            customerId: 'testCustomer',
+            navigate: jest.fn(),
+            orderNo: '12345',
+            basket: {basketId: 'basket123'},
+            returnUrl: 'https://adyen.com'
+        }
+        const mockPaymentCancel = jest.fn().mockResolvedValue({})
+        PaymentCancelService.mockImplementation(() => ({
+            paymentCancel: mockPaymentCancel
+        }))
+        const paymentError = new Error('Payment failed')
+        paymentError.newBasketId = 'new-basket-456'
+
+        await onErrorHandler(paymentError, {}, props)
+        await onSubmit({data: {origin: 'https://adyen.com'}, isValid: true}, {}, mockActions, props)
+        await onErrorHandler(new Error('New attempt failed'), {}, props)
+
+        expect(mockPaymentCancel).toHaveBeenCalledTimes(1)
+        expect(mockPaymentCancel).toHaveBeenCalledWith('12345')
+    })
+
+    it('should notify errors immediately after a new payment attempt starts', async () => {
+        const props = {
+            token: 'testToken',
+            site: 'testSite',
+            customerId: 'testCustomer',
+            navigate: jest.fn(),
+            orderNo: '12345',
+            basket: {basketId: 'basket123', orderTotal: 100, currency: 'USD'},
+            returnUrl: 'https://adyen.com'
+        }
+        const mockPaymentCancel = jest.fn().mockResolvedValue({})
+        PaymentCancelService.mockImplementation(() => ({
+            paymentCancel: mockPaymentCancel
+        }))
+        const config = baseConfig(props)
+        const paymentError = new Error('Payment failed')
+        paymentError.newBasketId = 'new-basket-456'
+
+        await config.onError(paymentError, {})
+        await config.onSubmit({data: {origin: 'https://adyen.com'}, isValid: true}, {}, mockActions)
+        await config.onError(new Error('New attempt failed'), {})
+
+        expect(mockPaymentCancel).toHaveBeenCalledTimes(1)
+    })
 })
 
 describe('onAdditionalDetails function', () => {
@@ -323,10 +378,12 @@ describe('onErrorHandler', () => {
     let consoleErrorSpy
 
     beforeEach(() => {
+        __resetErrorNotificationThrottle()
         consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
     })
 
     afterEach(() => {
+        __resetErrorNotificationThrottle()
         consoleErrorSpy.mockRestore()
     })
 
@@ -450,6 +507,113 @@ describe('onErrorHandler', () => {
             '/checkout?error=true&newBasketId=already-created-basket'
         )
         expect(result).toEqual({cancelled: true})
+    })
+
+    it('should not cancel again after the server already reopened the basket', async () => {
+        const navigate = jest.fn()
+        const props = {
+            token: 'testToken',
+            site: 'testSite',
+            customerId: 'testCustomer',
+            navigate,
+            orderNo: '12345',
+            basket: {basketId: 'basket123'}
+        }
+        const mockPaymentCancel = jest.fn()
+        PaymentCancelService.mockImplementation(() => ({
+            paymentCancel: mockPaymentCancel
+        }))
+        const paymentError = new Error('Payment failed')
+        paymentError.newBasketId = 'new-basket-456'
+
+        await onErrorHandler(paymentError, {}, props)
+        await onErrorHandler(new Error('Google Pay closed'), {}, props)
+
+        expect(mockPaymentCancel).not.toHaveBeenCalled()
+        expect(navigate).toHaveBeenNthCalledWith(
+            1,
+            '/checkout?error=true&newBasketId=new-basket-456'
+        )
+        expect(navigate).toHaveBeenNthCalledWith(2, '/checkout?error=true')
+    })
+
+    it('should issue only one cancellation while duplicate errors are handled concurrently', async () => {
+        const props = {
+            token: 'testToken',
+            site: 'testSite',
+            customerId: 'testCustomer',
+            navigate: jest.fn(),
+            orderNo: '12345',
+            basket: {basketId: 'basket123'}
+        }
+        let resolveCancel
+        const pendingCancel = new Promise((resolve) => {
+            resolveCancel = resolve
+        })
+        const mockPaymentCancel = jest.fn().mockReturnValue(pendingCancel)
+        PaymentCancelService.mockImplementation(() => ({
+            paymentCancel: mockPaymentCancel
+        }))
+
+        const firstError = onErrorHandler(new Error('Payment failed'), {}, props)
+        const secondError = onErrorHandler(new Error('Google Pay closed'), {}, props)
+        resolveCancel({})
+        await Promise.all([firstError, secondError])
+
+        expect(mockPaymentCancel).toHaveBeenCalledTimes(1)
+    })
+
+    it('should not retry cancellation when navigation fails after a successful cancel', async () => {
+        const navigationError = new Error('Navigation failed')
+        const navigate = jest.fn().mockImplementationOnce(() => {
+            throw navigationError
+        })
+        const props = {
+            token: 'testToken',
+            site: 'testSite',
+            customerId: 'testCustomer',
+            navigate,
+            orderNo: '12345',
+            basket: {basketId: 'basket123'}
+        }
+        const mockPaymentCancel = jest.fn().mockResolvedValue({})
+        PaymentCancelService.mockImplementation(() => ({
+            paymentCancel: mockPaymentCancel
+        }))
+
+        await onErrorHandler(new Error('Payment failed'), {}, props)
+        await onErrorHandler(new Error('Google Pay closed'), {}, props)
+
+        expect(mockPaymentCancel).toHaveBeenCalledTimes(1)
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+            'Error during payment cancellation:',
+            navigationError
+        )
+    })
+
+    it('should allow an immediate retry when the cancellation request fails', async () => {
+        const props = {
+            token: 'testToken',
+            site: 'testSite',
+            customerId: 'testCustomer',
+            navigate: jest.fn(),
+            orderNo: '12345',
+            basket: {basketId: 'basket123', orderTotal: 100, currency: 'USD'}
+        }
+        const cancelError = new Error('Cancel failed')
+        const mockPaymentCancel = jest
+            .fn()
+            .mockRejectedValueOnce(cancelError)
+            .mockResolvedValueOnce({})
+        PaymentCancelService.mockImplementation(() => ({
+            paymentCancel: mockPaymentCancel
+        }))
+        const config = baseConfig(props)
+
+        await config.onError(new Error('Payment failed'), {})
+        await config.onPaymentFailed(new Error('Payment still failed'), {})
+
+        expect(mockPaymentCancel).toHaveBeenCalledTimes(2)
     })
 
     it('should handle cancellation errors gracefully', async () => {

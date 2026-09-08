@@ -4,6 +4,7 @@ import {
     failOrderAndReopenBasket,
     getOrderUsingOrderNo,
     getOpenOrderForShopper,
+    resolveReopenedBasket,
     updateOrderPaymentInstrument
 } from '../orderHelper.js'
 import {ShopperOrders} from 'commerce-sdk-isomorphic'
@@ -130,6 +131,43 @@ describe('orderHelper', () => {
         })
     })
 
+    describe('resolveReopenedBasket', () => {
+        it('should fall back when the Location basket rejects without an error object', async () => {
+            getBasket.mockRejectedValue(null)
+            getCurrentBasketForAuthorizedShopper.mockResolvedValue({basketId: 'current-basket'})
+
+            const result = await resolveReopenedBasket({
+                authorization: 'auth',
+                customerId: 'customer-abc',
+                siteId: 'RefArch',
+                basketIdFromLocation: 'location-basket'
+            })
+
+            expect(result).toEqual({basketId: 'current-basket'})
+            expect(Logger.info).toHaveBeenCalledWith(
+                'resolveReopenedBasket',
+                'Location basket location-basket not usable (unknown: null), falling back'
+            )
+        })
+
+        it('should return null when current basket resolution rejects without an error object', async () => {
+            getCurrentBasketForAuthorizedShopper.mockRejectedValue(undefined)
+
+            const result = await resolveReopenedBasket({
+                authorization: 'auth',
+                customerId: 'customer-abc',
+                siteId: 'RefArch',
+                basketIdFromLocation: null
+            })
+
+            expect(result).toBeNull()
+            expect(Logger.error).toHaveBeenCalledWith(
+                'resolveReopenedBasket',
+                'Could not resolve reopened basket: unknown: undefined'
+            )
+        })
+    })
+
     describe('failOrderAndReopenBasket', () => {
         const mockGetOrder = jest.fn()
         const mockUpdateOrderStatus = jest.fn()
@@ -184,7 +222,73 @@ describe('orderHelper', () => {
                 'order123',
                 ORDER.ORDER_STATUS_FAILED_REOPEN
             )
+            expect(getBasket).toHaveBeenCalledTimes(1)
+            expect(getCurrentBasketForAuthorizedShopper).not.toHaveBeenCalled()
             expect(result).toBe('new-basket-123')
+        })
+
+        it('should fall back to the current basket when the Location basket is unavailable', async () => {
+            const mockOrder = {
+                orderNo: 'order123',
+                status: ORDER.ORDER_STATUS_CREATED,
+                customerInfo: {customerId: 'customer-abc'}
+            }
+            mockGetOrder.mockResolvedValue(mockOrder)
+            mockUpdateOrderStatus.mockResolvedValue({
+                headers: {
+                    get: jest.fn().mockReturnValue('/baskets/location-basket-123')
+                }
+            })
+            getBasket.mockRejectedValue(
+                Object.assign(new Error('Basket not found'), {statusCode: 404})
+            )
+            getCurrentBasketForAuthorizedShopper.mockResolvedValue({
+                basketId: 'current-basket-456'
+            })
+
+            const result = await failOrderAndReopenBasket(mockAdyenContext, 'order123')
+
+            expect(getBasket).toHaveBeenCalledTimes(1)
+            expect(getCurrentBasketForAuthorizedShopper).toHaveBeenCalledTimes(1)
+            expect(getCurrentBasketForAuthorizedShopper).toHaveBeenCalledWith(
+                'auth',
+                'customer-abc',
+                'RefArch'
+            )
+            expect(mockBasketUpdate).toHaveBeenCalledWith(expect.objectContaining({c_orderNo: ''}))
+            expect(mockRemoveAllPaymentInstruments).toHaveBeenCalled()
+            expect(result).toBe('current-basket-456')
+        })
+
+        it('should preserve the Location basket ID when no reopened basket can be resolved', async () => {
+            mockGetOrder.mockResolvedValue({
+                orderNo: 'order123',
+                status: ORDER.ORDER_STATUS_CREATED,
+                customerInfo: {customerId: 'customer-abc'}
+            })
+            mockUpdateOrderStatus.mockResolvedValue({
+                headers: {
+                    get: jest.fn().mockReturnValue('/baskets/location-basket-123')
+                }
+            })
+            getBasket.mockRejectedValue(
+                Object.assign(new Error('Basket not found'), {statusCode: 404})
+            )
+            getCurrentBasketForAuthorizedShopper.mockRejectedValue(
+                Object.assign(new Error('No current basket'), {statusCode: 404})
+            )
+
+            const result = await failOrderAndReopenBasket(mockAdyenContext, 'order123')
+
+            expect(getBasket).toHaveBeenCalledTimes(1)
+            expect(getCurrentBasketForAuthorizedShopper).toHaveBeenCalledTimes(1)
+            expect(mockBasketUpdate).not.toHaveBeenCalled()
+            expect(mockRemoveAllPaymentInstruments).not.toHaveBeenCalled()
+            expect(result).toBe('location-basket-123')
+            expect(Logger.error).toHaveBeenCalledWith(
+                'resolveReopenedBasket',
+                'Could not resolve reopened basket: 404: No current basket'
+            )
         })
 
         it('should throw AdyenError if order is not found', async () => {
@@ -382,7 +486,7 @@ describe('orderHelper', () => {
                     get: jest.fn().mockReturnValue('/baskets/new-basket-123')
                 }
             })
-            getBasket.mockRejectedValue(new Error('Basket fetch failed'))
+            mockBasketUpdate.mockRejectedValue(new Error('Basket cleanup failed'))
 
             const result = await failOrderAndReopenBasket(mockAdyenContext, 'order123')
 
