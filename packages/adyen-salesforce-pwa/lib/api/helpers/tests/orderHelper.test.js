@@ -4,6 +4,7 @@ import {
     failOrderAndReopenBasket,
     getOrderUsingOrderNo,
     getOpenOrderForShopper,
+    resolveReopenedBasket,
     updateOrderPaymentInstrument
 } from '../orderHelper.js'
 import {ShopperOrders} from 'commerce-sdk-isomorphic'
@@ -127,6 +128,43 @@ describe('orderHelper', () => {
                 },
                 headers: {authorization: mockAuth}
             })
+        })
+    })
+
+    describe('resolveReopenedBasket', () => {
+        it('should fall back when the Location basket rejects without an error object', async () => {
+            getBasket.mockRejectedValue(null)
+            getCurrentBasketForAuthorizedShopper.mockResolvedValue({basketId: 'current-basket'})
+
+            const result = await resolveReopenedBasket({
+                authorization: 'auth',
+                customerId: 'customer-abc',
+                siteId: 'RefArch',
+                basketIdFromLocation: 'location-basket'
+            })
+
+            expect(result).toEqual({basketId: 'current-basket'})
+            expect(Logger.info).toHaveBeenCalledWith(
+                'resolveReopenedBasket',
+                'Location basket location-basket not usable (unknown: null), falling back'
+            )
+        })
+
+        it('should return null when current basket resolution rejects without an error object', async () => {
+            getCurrentBasketForAuthorizedShopper.mockRejectedValue(undefined)
+
+            const result = await resolveReopenedBasket({
+                authorization: 'auth',
+                customerId: 'customer-abc',
+                siteId: 'RefArch',
+                basketIdFromLocation: null
+            })
+
+            expect(result).toBeNull()
+            expect(Logger.error).toHaveBeenCalledWith(
+                'resolveReopenedBasket',
+                'Could not resolve reopened basket: unknown: undefined'
+            )
         })
     })
 

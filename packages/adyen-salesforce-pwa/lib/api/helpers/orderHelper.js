@@ -71,7 +71,7 @@ export async function resolveReopenedBasket({
         } catch (err) {
             Logger.info(
                 'resolveReopenedBasket',
-                `Location basket ${basketIdFromLocation} not usable (${err.statusCode}: ${err.message}), falling back`
+                `Location basket ${basketIdFromLocation} not usable (${err?.statusCode ?? 'unknown'}: ${err?.message ?? String(err)}), falling back`
             )
         }
     }
@@ -80,7 +80,7 @@ export async function resolveReopenedBasket({
     } catch (err) {
         Logger.error(
             'resolveReopenedBasket',
-            `Could not resolve reopened basket: ${err.statusCode}: ${err.message}`
+            `Could not resolve reopened basket: ${err?.statusCode ?? 'unknown'}: ${err?.message ?? String(err)}`
         )
     }
     return null
