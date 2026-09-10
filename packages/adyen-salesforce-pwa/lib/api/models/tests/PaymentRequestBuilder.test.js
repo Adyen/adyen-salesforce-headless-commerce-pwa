@@ -1,5 +1,9 @@
 import {PaymentRequestBuilder} from '../PaymentRequestBuilder'
-import {RECURRING_PROCESSING_MODEL, SHOPPER_INTERACTIONS} from '../../../utils/constants.mjs'
+import {
+    RECURRING_PROCESSING_MODEL,
+    SHOPPER_INTERACTIONS,
+    TAXATION
+} from '../../../utils/constants.mjs'
 import Logger from '../logger'
 
 // Mock dependencies
@@ -319,15 +323,37 @@ describe('PaymentRequestBuilder', () => {
     })
 
     describe('withNetProductAmount', () => {
-        it('should add amount from basket product total', () => {
-            builder = new PaymentRequestBuilder(mockContext)
-            builder.withNetProductAmount()
+        it.each([
+            ['gross taxation without discounts', TAXATION.GROSS, 100, 20, 20, 8000],
+            ['gross taxation with discounts', TAXATION.GROSS, 90, 10, 20, 8000],
+            ['net taxation without discounts', TAXATION.NET, 100, 20, 20, 10000],
+            ['net taxation with discounts', TAXATION.NET, 90, 10, 20, 9000]
+        ])(
+            'should use the correct amount for %s',
+            (
+                _scenario,
+                taxation,
+                productTotal,
+                adjustedMerchandizeTotalTax,
+                merchandizeTotalTax,
+                value
+            ) => {
+                mockContext.basket = {
+                    ...mockContext.basket,
+                    taxation,
+                    productTotal,
+                    adjustedMerchandizeTotalTax,
+                    merchandizeTotalTax
+                }
+                builder = new PaymentRequestBuilder(mockContext)
+                builder.withNetProductAmount()
 
-            expect(builder.paymentRequest.amount).toEqual({
-                value: 9000,
-                currency: 'USD'
-            })
-        })
+                expect(builder.paymentRequest.amount).toEqual({
+                    value,
+                    currency: 'USD'
+                })
+            }
+        )
 
         it('should not add amount if basket is missing', () => {
             builder = new PaymentRequestBuilder({})
