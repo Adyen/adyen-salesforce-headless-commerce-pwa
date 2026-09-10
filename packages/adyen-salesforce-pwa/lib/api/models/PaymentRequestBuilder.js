@@ -8,7 +8,6 @@ import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 import {formatAddressInAdyenFormat} from '../../utils/formatAddress.mjs'
 import {getApplicationInfo} from '../../utils/getApplicationInfo.mjs'
 import Logger from './logger.js'
-import {AdyenError} from './AdyenError.js'
 import {
     filterStateData,
     getShopperName,
@@ -181,7 +180,6 @@ export class PaymentRequestBuilder {
     /**
      * Sets the payment amount using the basket's product total.
      * For gross taxation, subtracts adjusted merchandise tax to get the net product amount.
-     * Falls back to unadjusted tax only when the basket has no price reductions.
      * Used for express payment methods where final tax cannot be calculated during the payments call.
      * @param {object} basket - The basket object. Uses context.basket if not provided.
      * @returns {PaymentRequestBuilder} The builder instance for chaining.
@@ -192,33 +190,8 @@ export class PaymentRequestBuilder {
             const currency = actualBasket.currency
             let amountValue = getCurrencyValueForApi(actualBasket.productTotal, currency)
             if (actualBasket.taxation === TAXATION.GROSS) {
-                const adjustedMerchandizeTotalTaxValue = actualBasket.adjustedMerchandizeTotalTax
-                const hasDiscounts =
-                    actualBasket.priceAdjustments?.some(
-                        (priceAdjustment) =>
-                            priceAdjustment.basePrice < 0 || priceAdjustment.price < 0
-                    ) ||
-                    actualBasket.productItems?.some((product) => {
-                        const originalPrice = product.price ?? product.basePrice
-                        const itemDiscountedPrice = product.priceAfterItemDiscount ?? originalPrice
-                        const orderDiscountedPrice =
-                            product.priceAfterOrderDiscount ?? itemDiscountedPrice
-
-                        return (
-                            itemDiscountedPrice < originalPrice ||
-                            orderDiscountedPrice < itemDiscountedPrice
-                        )
-                    })
-
-                if (adjustedMerchandizeTotalTaxValue == null && hasDiscounts) {
-                    throw new AdyenError(
-                        'adjusted merchandise tax is required for gross baskets with discounts',
-                        422
-                    )
-                }
-
                 const adjustedMerchandizeTotalTax = getCurrencyValueForApi(
-                    adjustedMerchandizeTotalTaxValue ?? actualBasket.merchandizeTotalTax ?? 0,
+                    actualBasket.adjustedMerchandizeTotalTax,
                     currency
                 )
                 amountValue = amountValue - adjustedMerchandizeTotalTax

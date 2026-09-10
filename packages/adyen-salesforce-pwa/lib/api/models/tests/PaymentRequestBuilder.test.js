@@ -326,8 +326,6 @@ describe('PaymentRequestBuilder', () => {
         it.each([
             ['gross taxation without discounts', TAXATION.GROSS, 100, 20, 20, 8000],
             ['gross taxation with discounts', TAXATION.GROSS, 90, 10, 20, 8000],
-            ['gross taxation without adjusted tax', TAXATION.GROSS, 100, undefined, 20, 8000],
-            ['gross taxation without tax totals', TAXATION.GROSS, 100, undefined, undefined, 10000],
             ['net taxation without discounts', TAXATION.NET, 100, 20, 20, 10000],
             ['net taxation with discounts', TAXATION.NET, 90, 10, 20, 9000]
         ])(
@@ -356,97 +354,6 @@ describe('PaymentRequestBuilder', () => {
                 })
             }
         )
-
-        it.each([
-            [
-                'a negative basket-level promotion or promo-code adjustment',
-                {
-                    priceAdjustments: [{basePrice: -10}],
-                    productItems: []
-                }
-            ],
-            [
-                'a negative basket-level adjustment price',
-                {
-                    priceAdjustments: [{price: -10}],
-                    productItems: []
-                }
-            ],
-            [
-                'an item-level product discount',
-                {
-                    priceAdjustments: [],
-                    productItems: [
-                        {
-                            price: 100,
-                            priceAfterItemDiscount: 90,
-                            priceAfterOrderDiscount: 90
-                        }
-                    ]
-                }
-            ],
-            [
-                'an item-level product discount from the base price',
-                {
-                    priceAdjustments: [],
-                    productItems: [
-                        {
-                            basePrice: 100,
-                            priceAfterItemDiscount: 90,
-                            priceAfterOrderDiscount: 90
-                        }
-                    ]
-                }
-            ],
-            [
-                'an order-level product discount',
-                {
-                    priceAdjustments: [],
-                    productItems: [
-                        {
-                            price: 100,
-                            priceAfterItemDiscount: 100,
-                            priceAfterOrderDiscount: 90
-                        }
-                    ]
-                }
-            ]
-        ])(
-            'should reject a discounted gross basket without adjusted tax from %s',
-            (_, discounts) => {
-                mockContext.basket = {
-                    ...mockContext.basket,
-                    taxation: TAXATION.GROSS,
-                    productTotal: 90,
-                    adjustedMerchandizeTotalTax: undefined,
-                    merchandizeTotalTax: 20,
-                    ...discounts
-                }
-                builder = new PaymentRequestBuilder(mockContext)
-
-                expect(() => builder.withNetProductAmount()).toThrow(
-                    'adjusted merchandise tax is required for gross baskets with discounts'
-                )
-            }
-        )
-
-        it('should use unadjusted tax for a gross basket with a positive adjustment', () => {
-            mockContext.basket = {
-                ...mockContext.basket,
-                taxation: TAXATION.GROSS,
-                productTotal: 100,
-                adjustedMerchandizeTotalTax: undefined,
-                merchandizeTotalTax: 20,
-                priceAdjustments: [{basePrice: 10}]
-            }
-            builder = new PaymentRequestBuilder(mockContext)
-            builder.withNetProductAmount()
-
-            expect(builder.paymentRequest.amount).toEqual({
-                value: 8000,
-                currency: 'USD'
-            })
-        })
 
         it('should not add amount if basket is missing', () => {
             builder = new PaymentRequestBuilder({})
