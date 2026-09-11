@@ -20,7 +20,8 @@ import {
 import {
     RECURRING_PROCESSING_MODEL,
     RESULT_CODES,
-    SHOPPER_INTERACTIONS
+    SHOPPER_INTERACTIONS,
+    TAXATION
 } from '../../../utils/constants.mjs'
 import {AdyenError} from '../../models/AdyenError.js'
 
@@ -683,20 +684,32 @@ describe('paymentsHelper', () => {
             expect(paymentRequest.returnUrl).toBe('https://custom.return/url')
         })
 
-        test('should handle PayPal Express payment request', async () => {
+        test('should use the adjusted net product amount for discounted gross PayPal Express', async () => {
             const mockData = {
                 paymentMethod: {type: 'paypal', subtype: 'express'},
                 origin: 'https://example.com'
             }
+            const contextWithDiscountedGrossBasket = {
+                ...mockAdyenContext,
+                basket: {
+                    ...mockBasket,
+                    taxation: TAXATION.GROSS,
+                    productTotal: 90,
+                    adjustedMerchandizeTotalTax: 10,
+                    merchandizeTotalTax: 20
+                }
+            }
 
             const paymentRequest = await createPaymentRequestObject(
                 mockData,
-                mockAdyenContext,
+                contextWithDiscountedGrossBasket,
                 mockReq
             )
 
-            expect(paymentRequest).toBeDefined()
-            expect(paymentRequest.merchantAccount).toBe('AdyenMerchantAccount')
+            expect(paymentRequest.amount).toEqual({
+                value: 8000,
+                currency: 'USD'
+            })
         })
 
         test('should handle partial payment request', async () => {

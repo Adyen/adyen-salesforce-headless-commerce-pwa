@@ -179,7 +179,7 @@ export class PaymentRequestBuilder {
 
     /**
      * Sets the payment amount using the basket's product total.
-     * For gross taxation, subtracts merchandize tax to get the net product amount.
+     * For gross taxation, subtracts adjusted merchandise tax to get the net product amount.
      * Used for express payment methods where final tax cannot be calculated during the payments call.
      * @param {object} basket - The basket object. Uses context.basket if not provided.
      * @returns {PaymentRequestBuilder} The builder instance for chaining.
@@ -190,11 +190,11 @@ export class PaymentRequestBuilder {
             const currency = actualBasket.currency
             let amountValue = getCurrencyValueForApi(actualBasket.productTotal, currency)
             if (actualBasket.taxation === TAXATION.GROSS) {
-                const merchandizeTotalTax = getCurrencyValueForApi(
-                    actualBasket.merchandizeTotalTax,
+                const adjustedMerchandizeTotalTax = getCurrencyValueForApi(
+                    actualBasket.adjustedMerchandizeTotalTax,
                     currency
                 )
-                amountValue = amountValue - merchandizeTotalTax
+                amountValue = amountValue - adjustedMerchandizeTotalTax
             }
 
             this.paymentRequest.amount = {
