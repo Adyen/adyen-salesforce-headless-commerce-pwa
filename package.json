@@ -32,6 +32,8 @@
     "uploadCartridge": "sgmf-scripts --uploadCartridge int_adyen_PWA",
     "transpile": "babel ./packages/int_adyen_PWA -d ./cartridges/int_adyen_PWA --copy-files --no-copy-ignored --extensions .js,.test.js,.snap",
     "buildCartridge": "npm run transpile && npm run uploadCartridge",
+    "test:cartridge": "jest --config packages/int_adyen_PWA/jest.config.js",
+    "test:cartridge:coverage": "jest --config packages/int_adyen_PWA/jest.config.js --coverage",
     "check-branch-name": "chmod 755 ./branching.sh && sh ./branching.sh",
     "prepare": "husky install"
   }
