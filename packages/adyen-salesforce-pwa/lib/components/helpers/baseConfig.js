@@ -1,6 +1,13 @@
 import {AdyenPaymentsService} from '../../services/payments'
 import {AdyenPaymentsDetailsService} from '../../services/payments-details'
-import {executeCallbacks, createThrottledErrorHandler} from '../../utils/executeCallbacks'
+import {
+    executeCallbacks,
+    createThrottledErrorHandler,
+    clearCancelHandled,
+    clearErrorNotificationThrottle,
+    hasCancelHandled,
+    markCancelHandled
+} from '../../utils/executeCallbacks'
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
 import {PaymentCancelService} from '../../services/payment-cancel'
 import {ERROR_NOTIFICATION_KEYS} from '../../utils/constants.mjs'
@@ -43,6 +50,8 @@ export const baseConfig = (props) => {
 }
 
 export const onSubmit = async (state, component, actions, props) => {
+    clearCancelHandled(ERROR_NOTIFICATION_KEYS.CHECKOUT)
+    clearErrorNotificationThrottle(ERROR_NOTIFICATION_KEYS.CHECKOUT)
     try {
         if (!state.isValid) {
             throw new Error('invalid state')
@@ -92,16 +101,25 @@ export const onErrorHandler = async (error, component, props) => {
     try {
         let newBasketId = error?.newBasketId
         const basket = props.getBasket ? props.getBasket() : props.basket
-        if (!newBasketId) {
-            const paymentCancelService = new PaymentCancelService(
-                props.token,
-                props.customerId,
-                basket?.basketId,
-                props.site
-            )
-            const cancelResponse = await paymentCancelService.paymentCancel(props.orderNo)
-            if (cancelResponse?.newBasketId) {
-                newBasketId = cancelResponse.newBasketId
+        if (newBasketId) {
+            markCancelHandled(ERROR_NOTIFICATION_KEYS.CHECKOUT)
+        } else if (!hasCancelHandled(ERROR_NOTIFICATION_KEYS.CHECKOUT)) {
+            markCancelHandled(ERROR_NOTIFICATION_KEYS.CHECKOUT)
+            try {
+                const paymentCancelService = new PaymentCancelService(
+                    props.token,
+                    props.customerId,
+                    basket?.basketId,
+                    props.site
+                )
+                const cancelResponse = await paymentCancelService.paymentCancel(props.orderNo)
+                if (cancelResponse?.newBasketId) {
+                    newBasketId = cancelResponse.newBasketId
+                }
+            } catch (err) {
+                clearCancelHandled(ERROR_NOTIFICATION_KEYS.CHECKOUT)
+                clearErrorNotificationThrottle(ERROR_NOTIFICATION_KEYS.CHECKOUT)
+                throw err
             }
         }
         if (props.adyenOrder) {
