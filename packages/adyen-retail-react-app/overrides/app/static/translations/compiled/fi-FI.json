@@ -289,7 +289,8 @@
       "value": " "
     },
     {
-      "offset": 0,
+      "type": 6,
+      "value": "quantity",
       "options": {
         "one": {
           "value": [
@@ -308,9 +309,8 @@
           ]
         }
       },
-      "pluralType": "cardinal",
-      "type": 6,
-      "value": "quantity"
+      "offset": 0,
+      "pluralType": "cardinal"
     },
     {
       "type": 0,
@@ -379,14 +379,14 @@
       "value": "Lähetimme juuri kirjautumislinkin osoitteeseen "
     },
     {
+      "type": 8,
+      "value": "b",
       "children": [
         {
           "type": 1,
           "value": "email"
         }
-      ],
-      "type": 8,
-      "value": "b"
+      ]
     }
   ],
   "auth_modal.check_email.title.check_your_email": [
@@ -433,14 +433,14 @@
       "value": "Saat pian osoitteeseen "
     },
     {
+      "type": 8,
+      "value": "b",
       "children": [
         {
           "type": 1,
           "value": "email"
         }
-      ],
-      "type": 8,
-      "value": "b"
+      ]
     },
     {
       "type": 0,
@@ -545,7 +545,8 @@
       "value": "Ostoskori ("
     },
     {
-      "offset": 0,
+      "type": 6,
+      "value": "itemCount",
       "options": {
         "=0": {
           "value": [
@@ -578,9 +579,8 @@
           ]
         }
       },
-      "pluralType": "cardinal",
-      "type": 6,
-      "value": "itemCount"
+      "offset": 0,
+      "pluralType": "cardinal"
     },
     {
       "type": 0,
@@ -757,7 +757,8 @@
   ],
   "checkout_confirmation.message.num_of_items_in_order": [
     {
-      "offset": 0,
+      "type": 6,
+      "value": "itemCount",
       "options": {
         "=0": {
           "value": [
@@ -790,9 +791,8 @@
           ]
         }
       },
-      "pluralType": "cardinal",
-      "type": 6,
-      "value": "itemCount"
+      "offset": 0,
+      "pluralType": "cardinal"
     }
   ],
   "checkout_confirmation.message.will_email_shortly": [
@@ -801,14 +801,14 @@
       "value": "Lähetämme pian sähköpostiviestiä osoitteeseen "
     },
     {
+      "type": 8,
+      "value": "b",
       "children": [
         {
           "type": 1,
           "value": "email"
         }
-      ],
-      "type": 8,
-      "value": "b"
+      ]
     },
     {
       "type": 0,
@@ -1619,7 +1619,8 @@
       "value": " "
     },
     {
-      "offset": 0,
+      "type": 6,
+      "value": "quantity",
       "options": {
         "one": {
           "value": [
@@ -1638,9 +1639,8 @@
           ]
         }
       },
-      "pluralType": "cardinal",
-      "type": 6,
-      "value": "quantity"
+      "offset": 0,
+      "pluralType": "cardinal"
     },
     {
       "type": 0,
@@ -2383,7 +2383,8 @@
   ],
   "order_summary.cart_items.action.num_of_items_in_cart": [
     {
-      "offset": 0,
+      "type": 6,
+      "value": "itemCount",
       "options": {
         "=0": {
           "value": [
@@ -2416,9 +2417,8 @@
           ]
         }
       },
-      "pluralType": "cardinal",
-      "type": 6,
-      "value": "itemCount"
+      "offset": 0,
+      "pluralType": "cardinal"
     },
     {
       "type": 0,
@@ -3063,28 +3063,28 @@
       "value": "Luomalla tilin hyväksyt Salesforcen "
     },
     {
+      "type": 8,
+      "value": "policy",
       "children": [
         {
           "type": 0,
           "value": "tietosuojakäytännön"
         }
-      ],
-      "type": 8,
-      "value": "policy"
+      ]
     },
     {
       "type": 0,
       "value": " ja "
     },
     {
+      "type": 8,
+      "value": "terms",
       "children": [
         {
           "type": 0,
           "value": "ehdot"
         }
-      ],
-      "type": 8,
-      "value": "terms"
+      ]
     }
   ],
   "register_form.message.already_have_account": [
@@ -3281,14 +3281,14 @@
       "value": "Jos sinua ei ohjata eteenpäin automaattisesti, jatka valitsemalla "
     },
     {
+      "type": 8,
+      "value": "linkki",
       "children": [
         {
           "type": 0,
           "value": "tämä linkki"
         }
-      ],
-      "type": 8,
-      "value": "linkki"
+      ]
     },
     {
       "type": 0,
@@ -4095,7 +4095,8 @@
       "value": " "
     },
     {
-      "offset": 0,
+      "type": 6,
+      "value": "quantity",
       "options": {
         "one": {
           "value": [
@@ -4114,9 +4115,8 @@
           ]
         }
       },
-      "pluralType": "cardinal",
-      "type": 6,
-      "value": "quantity"
+      "offset": 0,
+      "pluralType": "cardinal"
     },
     {
       "type": 0,

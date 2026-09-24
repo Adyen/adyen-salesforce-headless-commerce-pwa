@@ -41,6 +41,228 @@
       "value": "]"
     }
   ],
+  "account.payments.action.retry": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Řḗḗŧřẏ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "account.payments.badge.default": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ḓḗḗƒȧȧŭŭŀŧ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "account.payments.checkbox.make_default": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Şḗḗŧ ȧȧş ḓḗḗƒȧȧŭŭŀŧ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "account.payments.error.payment_method_remove_failed": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ẇḗḗ ƈǿǿŭŭŀḓƞ'ŧ řḗḗḿǿǿṽḗḗ ŧħḗḗ ƥȧȧẏḿḗḗƞŧ ḿḗḗŧħǿǿḓ. Ŧřẏ ȧȧɠȧȧīƞ."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "account.payments.error.payment_method_save_failed": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ẇḗḗ ƈǿǿŭŭŀḓƞ'ŧ şȧȧṽḗḗ ŧħḗḗ ƥȧȧẏḿḗḗƞŧ ḿḗḗŧħǿǿḓ. Ŧřẏ ȧȧɠȧȧīƞ."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "account.payments.error.set_default_failed": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ẇḗḗ ƈǿǿŭŭŀḓƞŧ ḿȧȧķḗḗ ŧħḗḗ ƥȧȧẏḿḗḗƞŧ ḿḗḗŧħǿǿḓ ȧȧş ḓḗḗƒȧȧŭŭŀŧ. Ŧřẏ ȧȧɠȧȧīƞ."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "account.payments.heading.payment_methods": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ƥȧȧẏḿḗḗƞŧ Ḿḗḗŧħǿǿḓş"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "account.payments.info.default_payment_updated": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ƥȧȧẏḿḗḗƞŧ ḿḗḗŧħǿǿḓ ẇȧȧş ḿȧȧḓḗḗ ȧȧş ḓḗḗƒȧȧŭŭŀŧ."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "account.payments.info.payment_method_removed": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ƥȧȧẏḿḗḗƞŧ ḿḗḗŧħǿǿḓ ẇȧȧş řḗḗḿǿǿṽḗḗḓ."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "account.payments.info.payment_method_saved": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ƞḗḗẇ ƥȧȧẏḿḗḗƞŧ ḿḗḗŧħǿǿḓ ẇȧȧş şȧȧṽḗḗḓ."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "account.payments.label.expires": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ḗẋƥīřḗḗş "
+    },
+    {
+      "type": 1,
+      "value": "month"
+    },
+    {
+      "type": 0,
+      "value": "/"
+    },
+    {
+      "type": 1,
+      "value": "year"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "account.payments.message.error": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ẇḗḗ ƈǿǿŭŭŀḓƞ'ŧ ŀǿǿȧȧḓ ŧħḗḗ ƥȧȧẏḿḗḗƞŧ ḿḗḗŧħǿǿḓş. Ŧřẏ ȧȧɠȧȧīƞ."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "account.payments.message.loading": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ŀǿǿȧȧḓīƞɠ ƥȧȧẏḿḗḗƞŧ ḿḗḗŧħǿǿḓş..."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "account.payments.placeholder.heading": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ƞǿǿ Şȧȧṽḗḗḓ Ƥȧȧẏḿḗḗƞŧ Ḿḗḗŧħǿǿḓş"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "account.payments.placeholder.text": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ȧḓḓ ȧȧ ƞḗḗẇ ƥȧȧẏḿḗḗƞŧ ḿḗḗŧħǿǿḓ ŧǿǿ ƈħḗḗƈķ ǿǿŭŭŧ ƒȧȧşŧḗḗř."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
   "account.title.my_account": [
     {
       "type": 0,
@@ -175,6 +397,48 @@
     {
       "type": 0,
       "value": "Ȧḓḓřḗḗşşḗḗş"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "account_creation_notification.body": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ẇḗḗ’ṽḗḗ ƈřḗḗȧȧŧḗḗḓ ȧȧƞḓ ṽḗḗřīƒīḗḗḓ ẏǿǿŭŭř ȧȧƈƈǿǿŭŭƞŧ ŭŭşīƞɠ ŧħḗḗ īƞƒǿǿřḿȧȧŧīǿǿƞ ƒřǿǿḿ ẏǿǿŭŭř ǿǿřḓḗḗř. Ƞḗḗẋŧ ŧīḿḗḗ ẏǿǿŭŭ ƈħḗḗƈķ ǿǿŭŭŧ, ĵŭŭşŧ ḗḗƞŧḗḗř ŧħḗḗ ƈǿǿḓḗḗ ẇḗḗ şḗḗƞḓ ŧǿǿ ŀǿǿɠ īƞ — ƞǿǿ ƥȧȧşşẇǿǿřḓ ƞḗḗḗḗḓḗḗḓ."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "account_creation_notification.title": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ȧƈƈǿǿŭŭƞŧ Ƈřḗḗȧȧŧḗḗḓ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "account_creation_notification.verified": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ṽḗḗřīƒīḗḗḓ"
     },
     {
       "type": 0,
@@ -617,6 +881,20 @@
       "value": "]"
     }
   ],
+  "account_payments.button.add_payment": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ȧḓḓ Ƥȧȧẏḿḗḗƞŧ Ḿḗḗŧħǿǿḓ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
   "account_wishlist.button.continue_shopping": [
     {
       "type": 0,
@@ -715,74 +993,6 @@
       "value": "]"
     }
   ],
-  "add_to_cart_modal.info.added_to_cart": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 1,
-      "value": "quantity"
-    },
-    {
-      "type": 0,
-      "value": " "
-    },
-    {
-      "offset": 0,
-      "options": {
-        "one": {
-          "value": [
-            {
-              "type": 0,
-              "value": "īŧḗḗḿ"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 0,
-              "value": "īŧḗḗḿş"
-            }
-          ]
-        }
-      },
-      "pluralType": "cardinal",
-      "type": 6,
-      "value": "quantity"
-    },
-    {
-      "type": 0,
-      "value": " ȧȧḓḓḗḗḓ ŧǿǿ ƈȧȧřŧ"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "add_to_cart_modal.label.cart_subtotal": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ƈȧȧřŧ Şŭŭƀŧǿǿŧȧȧŀ ("
-    },
-    {
-      "type": 1,
-      "value": "itemAccumulatedCount"
-    },
-    {
-      "type": 0,
-      "value": " īŧḗḗḿ)"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
   "add_to_cart_modal.label.quantity": [
     {
       "type": 0,
@@ -797,48 +1007,6 @@
       "value": "]"
     }
   ],
-  "add_to_cart_modal.link.checkout": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ƥřǿǿƈḗḗḗḗḓ ŧǿǿ Ƈħḗḗƈķǿǿŭŭŧ"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "add_to_cart_modal.link.view_cart": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ṽīḗḗẇ Ƈȧȧřŧ"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "add_to_cart_modal.recommended_products.title.might_also_like": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ẏǿǿŭŭ Ḿīɠħŧ Ȧŀşǿǿ Ŀīķḗḗ"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
   "addressSuggestionDropdown.suggested": [
     {
       "type": 0,
@@ -847,20 +1015,6 @@
     {
       "type": 0,
       "value": "ŞŬƓƓḖŞŦḖḒ"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "auth_modal.button.close.assistive_msg": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ƈŀǿǿşḗḗ ŀǿǿɠīƞ ƒǿǿřḿ"
     },
     {
       "type": 0,
@@ -905,14 +1059,14 @@
       "value": "Ẇḗḗ ĵŭŭşŧ şḗḗƞŧ ȧȧ ŀǿǿɠīƞ ŀīƞķ ŧǿǿ "
     },
     {
+      "type": 8,
+      "value": "b",
       "children": [
         {
           "type": 1,
           "value": "email"
         }
-      ],
-      "type": 8,
-      "value": "b"
+      ]
     },
     {
       "type": 0,
@@ -933,50 +1087,14 @@
       "value": "]"
     }
   ],
-  "auth_modal.description.now_signed_in": [
+  "auth_modal.description.now_signed_in_simple": [
     {
       "type": 0,
       "value": "["
     },
     {
       "type": 0,
-      "value": "Ẏǿǿŭŭ'řḗḗ ƞǿǿẇ şīɠƞḗḗḓ īƞ."
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "auth_modal.error.incorrect_email_or_password": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Şǿǿḿḗḗŧħīƞɠ'ş ƞǿǿŧ řīɠħŧ ẇīŧħ ẏǿǿŭŭř ḗḗḿȧȧīŀ ǿǿř ƥȧȧşşẇǿǿřḓ. Ŧřẏ ȧȧɠȧȧīƞ."
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "auth_modal.info.welcome_user": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ẇḗḗŀƈǿǿḿḗḗ "
-    },
-    {
-      "type": 1,
-      "value": "name"
-    },
-    {
-      "type": 0,
-      "value": ","
+      "value": "Ẏǿǿŭŭ ȧȧřḗḗ ƞǿǿẇ şīɠƞḗḗḓ īƞ."
     },
     {
       "type": 0,
@@ -1007,14 +1125,14 @@
       "value": "Ẏǿǿŭŭ ẇīŀŀ řḗḗƈḗḗīṽḗḗ ȧȧƞ ḗḗḿȧȧīŀ ȧȧŧ "
     },
     {
+      "type": 8,
+      "value": "b",
       "children": [
         {
           "type": 1,
           "value": "email"
         }
-      ],
-      "type": 8,
-      "value": "b"
+      ]
     },
     {
       "type": 0,
@@ -1051,78 +1169,6 @@
     {
       "type": 1,
       "value": "quantity"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "bonus_product_modal.button_select": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Şḗḗŀḗḗƈŧ"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "bonus_product_modal.no_bonus_products": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ƞǿǿ ƀǿǿƞŭŭş ƥřǿǿḓŭŭƈŧş ȧȧṽȧȧīŀȧȧƀŀḗḗ"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "bonus_product_modal.no_image": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ƞǿǿ Īḿȧȧɠḗḗ"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "bonus_product_modal.title": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Şḗḗŀḗḗƈŧ ƀǿǿƞŭŭş ƥřǿǿḓŭŭƈŧ ("
-    },
-    {
-      "type": 1,
-      "value": "selected"
-    },
-    {
-      "type": 0,
-      "value": " ǿǿƒ "
-    },
-    {
-      "type": 1,
-      "value": "max"
-    },
-    {
-      "type": 0,
-      "value": " şḗḗŀḗḗƈŧḗḗḓ)"
     },
     {
       "type": 0,
@@ -1229,7 +1275,8 @@
       "value": "Ɓǿǿƞŭŭş Ƥřǿǿḓŭŭƈŧş ("
     },
     {
-      "offset": 0,
+      "type": 6,
+      "value": "itemCount",
       "options": {
         "=0": {
           "value": [
@@ -1262,9 +1309,8 @@
           ]
         }
       },
-      "pluralType": "cardinal",
-      "type": 6,
-      "value": "itemCount"
+      "offset": 0,
+      "pluralType": "cardinal"
     },
     {
       "type": 0,
@@ -1517,7 +1563,8 @@
       "value": "Ƈȧȧřŧ ("
     },
     {
-      "offset": 0,
+      "type": 6,
+      "value": "itemCount",
       "options": {
         "=0": {
           "value": [
@@ -1550,9 +1597,8 @@
           ]
         }
       },
-      "pluralType": "cardinal",
-      "type": 6,
-      "value": "itemCount"
+      "offset": 0,
+      "pluralType": "cardinal"
     },
     {
       "type": 0,
@@ -1605,6 +1651,146 @@
       "value": "]"
     }
   ],
+  "checkout.error.billing_address_required": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ƥŀḗḗȧȧşḗḗ ḗḗƞŧḗḗř ȧȧ ƀīŀŀīƞɠ ȧȧḓḓřḗḗşş."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "checkout.error.cannot_save_address": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ƈǿǿŭŭŀḓ ƞǿǿŧ şȧȧṽḗḗ şħīƥƥīƞɠ ȧȧḓḓřḗḗşş."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "checkout.label.user_registration": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ƈřḗḗȧȧŧḗḗ ȧȧƞ ȧȧƈƈǿǿŭŭƞŧ ŧǿǿ ƈħḗḗƈķ ǿǿŭŭŧ ƒȧȧşŧḗḗř"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "checkout.message.generic_error": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ȧƞ ŭŭƞḗḗẋƥḗḗƈŧḗḗḓ ḗḗřřǿǿř ǿǿƈƈŭŭřřḗḗḓ ḓŭŭřīƞɠ ƈħḗḗƈķǿǿŭŭŧ."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "checkout.message.payment_button_cancel": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ẏǿǿŭŭř ȧȧŧŧḗḗḿƥŧḗḗḓ ƥȧȧẏḿḗḗƞŧ ẇȧȧş ŭŭƞşŭŭƈƈḗḗşşƒŭŭŀ. Ẏǿǿŭŭ ħȧȧṽḗḗ ƞǿǿŧ ƀḗḗḗḗƞ ƈħȧȧřɠḗḗḓ ȧȧƞḓ ẏǿǿŭŭř ǿǿřḓḗḗř ħȧȧş ƞǿǿŧ ƀḗḗḗḗƞ ƥŀȧȧƈḗḗḓ."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "checkout.message.payment_confirm_failure": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ƥȧȧẏḿḗḗƞŧ ƈǿǿƞƒīřḿȧȧŧīǿǿƞ ƒȧȧīŀḗḗḓ. Ẏǿǿŭŭř ǿǿřḓḗḗř ħȧȧş ƀḗḗḗḗƞ ƈȧȧƞƈḗḗŀŀḗḗḓ ȧȧƞḓ ẏǿǿŭŭř ƀȧȧşķḗḗŧ ħȧȧş ƀḗḗḗḗƞ řḗḗşŧǿǿřḗḗḓ. Ƥŀḗḗȧȧşḗḗ ŧřẏ ȧȧɠȧȧīƞ ǿǿř şḗḗŀḗḗƈŧ ȧȧ ḓīƒƒḗḗřḗḗƞŧ ƥȧȧẏḿḗḗƞŧ ḿḗḗŧħǿǿḓ."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "checkout.message.payment_processing_failed": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ƥȧȧẏḿḗḗƞŧ ƥřǿǿƈḗḗşşīƞɠ ƒȧȧīŀḗḗḓ. Ẏǿǿŭŭř ǿǿřḓḗḗř ħȧȧş ƀḗḗḗḗƞ ƈȧȧƞƈḗḗŀŀḗḗḓ ȧȧƞḓ ẏǿǿŭŭř ƀȧȧşķḗḗŧ ħȧȧş ƀḗḗḗḗƞ řḗḗşŧǿǿřḗḗḓ. Ƥŀḗḗȧȧşḗḗ ŧřẏ ȧȧɠȧȧīƞ ǿǿř şḗḗŀḗḗƈŧ ȧȧ ḓīƒƒḗḗřḗḗƞŧ ƥȧȧẏḿḗḗƞŧ ḿḗḗŧħǿǿḓ."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "checkout.message.user_registration": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ẏǿǿŭŭř ƥȧȧẏḿḗḗƞŧ, ȧȧḓḓřḗḗşş, ȧȧƞḓ ƈǿǿƞŧȧȧƈŧ īƞƒǿǿřḿȧȧŧīǿǿƞ ẇīŀŀ ƀḗḗ şȧȧṽḗḗḓ īƞ ȧȧ ƞḗḗẇ ȧȧƈƈǿǿŭŭƞŧ. Ŭşḗḗ ŧħḗḗ ḗḗḿȧȧīŀḗḗḓ ǿǿƞḗḗ-ŧīḿḗḗ ƥȧȧşşẇǿǿřḓ (ǾŦƤ) ŧǿǿ ƈřḗḗȧȧŧḗḗ ẏǿǿŭŭř ȧȧƈƈǿǿŭŭƞŧ. Ȧƒŧḗḗř ƈřḗḗȧȧŧīƞɠ ẏǿǿŭŭř ȧȧƈƈǿǿŭŭƞŧ, ŭŭşḗḗ ŧħḗḗ Ƒǿǿřɠǿǿŧ Ƥȧȧşşẇǿǿřḓ ƒŭŭƞƈŧīǿǿƞ ŧǿǿ şḗḗŧ ȧȧ ƞḗḗẇ ƥȧȧşşẇǿǿřḓ."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "checkout.payment.save_payment_method": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Şȧȧṽḗḗ ŧħīş ƥȧȧẏḿḗḗƞŧ ḿḗḗŧħǿǿḓ ƒǿǿř ƒŭŭŧŭŭřḗḗ ŭŭşḗḗ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "checkout.title.user_registration": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Şȧȧṽḗḗ Ƈħḗḗƈķǿǿŭŭŧ Īƞƒǿǿ ƒǿǿř Ƒŭŭŧŭŭřḗḗ Ŭşḗḗ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
   "checkout_confirmation.button.create_account": [
     {
       "type": 0,
@@ -1613,6 +1799,34 @@
     {
       "type": 0,
       "value": "Ƈřḗḗȧȧŧḗḗ Ȧƈƈǿǿŭŭƞŧ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "checkout_confirmation.heading.afterpay_clearpay": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ȧƒŧḗḗřƥȧȧẏ/Ƈŀḗḗȧȧřƥȧȧẏ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "checkout_confirmation.heading.bancontact": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ɓȧȧƞƈǿǿƞŧȧȧƈŧ"
     },
     {
       "type": 0,
@@ -1693,6 +1907,48 @@
       "value": "]"
     }
   ],
+  "checkout_confirmation.heading.eps": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "ḖƤŞ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "checkout_confirmation.heading.ideal": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "īḒḖȦĿ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "checkout_confirmation.heading.klarna": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ķŀȧȧřƞȧȧ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
   "checkout_confirmation.heading.order_summary": [
     {
       "type": 0,
@@ -1767,6 +2023,20 @@
       "value": "]"
     }
   ],
+  "checkout_confirmation.heading.sepa_debit": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "ŞḖƤȦ Ḓḗḗƀīŧ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
   "checkout_confirmation.heading.shipping_address": [
     {
       "type": 0,
@@ -1803,6 +2073,20 @@
     {
       "type": 0,
       "value": "Ŧħȧȧƞķ ẏǿǿŭŭ ƒǿǿř ẏǿǿŭŭř ǿǿřḓḗḗř!"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "checkout_confirmation.heading.unknown": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ŭƞķƞǿǿẇƞ"
     },
     {
       "type": 0,
@@ -1873,6 +2157,20 @@
     {
       "type": 0,
       "value": "Şħīƥƥīƞɠ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "checkout_confirmation.label.shipping.price": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 1,
+      "value": "price"
     },
     {
       "type": 0,
@@ -1955,7 +2253,8 @@
       "value": "["
     },
     {
-      "offset": 0,
+      "type": 6,
+      "value": "itemCount",
       "options": {
         "=0": {
           "value": [
@@ -1988,9 +2287,8 @@
           ]
         }
       },
-      "pluralType": "cardinal",
-      "type": 6,
-      "value": "itemCount"
+      "offset": 0,
+      "pluralType": "cardinal"
     },
     {
       "type": 0,
@@ -2021,18 +2319,60 @@
       "value": "Ẇḗḗ ẇīŀŀ şḗḗƞḓ ȧȧƞ ḗḗḿȧȧīŀ ŧǿǿ "
     },
     {
+      "type": 8,
+      "value": "b",
       "children": [
         {
           "type": 1,
           "value": "email"
         }
-      ],
-      "type": 8,
-      "value": "b"
+      ]
     },
     {
       "type": 0,
       "value": " ẇīŧħ ẏǿǿŭŭř ƈǿǿƞƒīřḿȧȧŧīǿǿƞ ƞŭŭḿƀḗḗř ȧȧƞḓ řḗḗƈḗḗīƥŧ şħǿǿřŧŀẏ."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "checkout_contact_info.action.change": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ƈħȧȧƞɠḗḗ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "checkout_contact_info.action.sign_out": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Şīɠƞ Ǿŭŭŧ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "checkout_contact_info.title.contact_info": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ƈǿǿƞŧȧȧƈŧ Īƞƒǿǿ"
     },
     {
       "type": 0,
@@ -2155,6 +2495,48 @@
       "value": "]"
     }
   ],
+  "checkout_payment.button.place_order": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ƥŀȧȧƈḗḗ Ǿřḓḗḗř"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "checkout_payment.error.cannot_remove_applied_payment": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ƈǿǿŭŭŀḓ ƞǿǿŧ řḗḗḿǿǿṽḗḗ ŧħḗḗ ȧȧƥƥŀīḗḗḓ ƥȧȧẏḿḗḗƞŧ. Ƥŀḗḗȧȧşḗḗ ŧřẏ ȧȧɠȧȧīƞ ǿǿř ŭŭşḗḗ ŧħḗḗ ƈŭŭřřḗḗƞŧ ƥȧȧẏḿḗḗƞŧ ŧǿǿ ƥŀȧȧƈḗḗ ẏǿǿŭŭř ǿǿřḓḗḗř."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "checkout_payment.error.cannot_save_payment": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ƈǿǿŭŭŀḓ ƞǿǿŧ şȧȧṽḗḗ ƥȧȧẏḿḗḗƞŧ ḿḗḗŧħǿǿḓ. Ƥŀḗḗȧȧşḗḗ ŧřẏ ȧȧɠȧȧīƞ."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
   "checkout_payment.heading.billing_address": [
     {
       "type": 0,
@@ -2163,6 +2545,20 @@
     {
       "type": 0,
       "value": "Ɓīŀŀīƞɠ Ȧḓḓřḗḗşş"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "checkout_payment.heading.credit_card": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ƈřḗḗḓīŧ Ƈȧȧřḓ"
     },
     {
       "type": 0,
@@ -2517,6 +2913,34 @@
       "value": "]"
     }
   ],
+  "contact_info.button.continue_to_payment": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ƈǿǿƞŧīƞŭŭḗḗ ŧǿǿ Ƥȧȧẏḿḗḗƞŧ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "contact_info.button.continue_to_shipping_address": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ƈǿǿƞŧīƞŭŭḗḗ ŧǿǿ Şħīƥƥīƞɠ Ȧḓḓřḗḗşş"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
   "contact_info.button.login": [
     {
       "type": 0,
@@ -2553,6 +2977,20 @@
     {
       "type": 0,
       "value": "Şḗḗƈŭŭřḗḗ Ŀīƞķ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "contact_info.error.generic_try_again": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ȧƞ ḗḗřřǿǿř ǿǿƈƈŭŭřřḗḗḓ. Ƥŀḗḗȧȧşḗḗ ŧřẏ ȧȧɠȧȧīƞ."
     },
     {
       "type": 0,
@@ -2747,104 +3185,6 @@
       "value": "]"
     }
   ],
-  "dnt_notification.button.accept": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ȧƈƈḗḗƥŧ"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "dnt_notification.button.assistive_msg.accept": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ȧƈƈḗḗƥŧ ŧřȧȧƈķīƞɠ"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "dnt_notification.button.assistive_msg.close": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ƈŀǿǿşḗḗ ƈǿǿƞşḗḗƞŧ ŧřȧȧƈķīƞɠ ƒǿǿřḿ"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "dnt_notification.button.assistive_msg.decline": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ḓḗḗƈŀīƞḗḗ ŧřȧȧƈķīƞɠ"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "dnt_notification.button.decline": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ḓḗḗƈŀīƞḗḗ"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "dnt_notification.description": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ŀǿǿřḗḗḿ īƥşŭŭḿ ḓǿǿŀǿǿř şīŧ ȧȧḿḗḗŧ, ƈǿǿƞşḗḗƈŧḗḗŧŭŭř ȧȧḓīƥīşƈīƞɠ ḗḗŀīŧ, şḗḗḓ ḓǿǿ ḗḗīŭŭşḿǿǿḓ ŧḗḗḿƥǿǿř īƞƈīḓīḓŭŭƞŧ ŭŭŧ ŀȧȧƀǿǿřḗḗ ḗḗŧ ḓǿǿŀǿǿřḗḗ ḿȧȧɠƞȧȧ ȧȧŀīɋŭŭȧȧ. Ŭŧ ḗḗƞīḿ ȧȧḓ ḿīƞīḿ ṽḗḗƞīȧȧḿ, ɋŭŭīş ƞǿǿşŧřŭŭḓ ḗḗẋḗḗřƈīŧȧȧŧīǿǿƞ ŭŭŀŀȧȧḿƈǿǿ ŀȧȧƀǿǿřīş ƞīşī ŭŭŧ ȧȧŀīɋŭŭīƥ ḗḗẋ ḗḗȧȧ ƈǿǿḿḿǿǿḓǿǿ ƈǿǿƞşḗḗɋŭŭȧȧŧ. Ḓŭŭīş ȧȧŭŭŧḗḗ īřŭŭřḗḗ ḓǿǿŀǿǿř īƞ řḗḗƥřḗḗħḗḗƞḓḗḗřīŧ īƞ ṽǿǿŀŭŭƥŧȧȧŧḗḗ ṽḗḗŀīŧ ḗḗşşḗḗ ƈīŀŀŭŭḿ ḓǿǿŀǿǿřḗḗ ḗḗŭŭ ƒŭŭɠīȧȧŧ ƞŭŭŀŀȧȧ ƥȧȧřīȧȧŧŭŭř."
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "dnt_notification.title": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ŧřȧȧƈķīƞɠ Ƈǿǿƞşḗḗƞŧ"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
   "drawer_menu.button.account_details": [
     {
       "type": 0,
@@ -2909,6 +3249,20 @@
     {
       "type": 0,
       "value": "Ǿřḓḗḗř Ħīşŧǿǿřẏ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "drawer_menu.button.payment_methods": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ƥȧȧẏḿḗḗƞŧ Ḿḗḗŧħǿǿḓş"
     },
     {
       "type": 0,
@@ -3353,6 +3707,34 @@
       "value": "]"
     }
   ],
+  "footer.error.enter_valid_email": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ḗƞŧḗḗř ȧȧ ṽȧȧŀīḓ ḗḗḿȧȧīŀ ȧȧḓḓřḗḗşş."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "footer.error.generic_error": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ẇḗḗ ƈǿǿŭŭŀḓƞ'ŧ ƥřǿǿƈḗḗşş ŧħḗḗ şŭŭƀşƈřīƥŧīǿǿƞ. Ŧřẏ ȧȧɠȧȧīƞ."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
   "footer.link.about_us": [
     {
       "type": 0,
@@ -3514,7 +3896,7 @@
     },
     {
       "type": 0,
-      "value": "Şīɠƞ Ŭƥ"
+      "value": "Şŭŭƀşƈřīƀḗḗ"
     },
     {
       "type": 0,
@@ -3528,7 +3910,49 @@
     },
     {
       "type": 0,
-      "value": "Şīɠƞ ŭŭƥ ŧǿǿ şŧȧȧẏ īƞ ŧħḗḗ ŀǿǿǿǿƥ ȧȧƀǿǿŭŭŧ ŧħḗḗ ħǿǿŧŧḗḗşŧ ḓḗḗȧȧŀş"
+      "value": "Ɓḗḗ ŧħḗḗ ƒīřşŧ ŧǿǿ ķƞǿǿẇ ȧȧƀǿǿŭŭŧ ŀȧȧŧḗḗşŧ ǿǿƒƒḗḗřş, ƞḗḗẇş, ŧīƥş, ȧȧƞḓ ḿǿǿřḗḗ."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "footer.subscribe.disclaimer": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ɓẏ şŭŭƀḿīŧŧīƞɠ ŧħīş, Ī ȧȧɠřḗḗḗḗ ŧǿǿ ŧħḗḗ "
+    },
+    {
+      "type": 8,
+      "value": "terms",
+      "children": [
+        {
+          "type": 0,
+          "value": "Ŧḗḗřḿş & Ƈǿǿƞḓīŧīǿǿƞş"
+        }
+      ]
+    },
+    {
+      "type": 0,
+      "value": " ȧȧƞḓ "
+    },
+    {
+      "type": 8,
+      "value": "privacy",
+      "children": [
+        {
+          "type": 0,
+          "value": "Ƥřīṽȧȧƈẏ Ƥǿǿŀīƈẏ"
+        }
+      ]
+    },
+    {
+      "type": 0,
+      "value": "."
     },
     {
       "type": 0,
@@ -3549,14 +3973,42 @@
       "value": "]"
     }
   ],
-  "footer.subscribe.heading.first_to_know": [
+  "footer.subscribe.email.placeholder_text": [
     {
       "type": 0,
       "value": "["
     },
     {
       "type": 0,
-      "value": "Ɓḗḗ ŧħḗḗ ƒīřşŧ ŧǿǿ ķƞǿǿẇ"
+      "value": "Ḗƞŧḗḗř ẏǿǿŭŭř ḗḗḿȧȧīŀ ȧȧḓḓřḗḗşş..."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "footer.subscribe.heading.stay_updated": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Şŭŭƀşƈřīƀḗḗ ŧǿǿ Şŧȧȧẏ Ŭƥḓȧȧŧḗḗḓ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "footer.success_confirmation": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ŧħȧȧƞķş ƒǿǿř şŭŭƀşƈřīƀīƞɠ!"
     },
     {
       "type": 0,
@@ -3633,6 +4085,20 @@
       "value": "]"
     }
   ],
+  "global.account.link.payment_methods": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ƥȧȧẏḿḗḗƞŧ Ḿḗḗŧħǿǿḓş"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
   "global.account.link.wishlist": [
     {
       "type": 0,
@@ -3655,6 +4121,48 @@
     {
       "type": 0,
       "value": "Şǿǿḿḗḗŧħīƞɠ ẇḗḗƞŧ ẇřǿǿƞɠ. Ŧřẏ ȧȧɠȧȧīƞ!"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "global.error.too_many_login_attempts": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ẏǿǿŭŭ řḗḗȧȧƈħḗḗḓ ŧħḗḗ ŀīḿīŧ ƒǿǿř ŀǿǿɠīƞ ȧȧŧŧḗḗḿƥŧş. Ƒǿǿř ẏǿǿŭŭř şḗḗƈŭŭřīŧẏ, ẇȧȧīŧ 10 ḿīƞŭŭŧḗḗş ȧȧƞḓ ŧřẏ ȧȧɠȧȧīƞ."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "global.error.too_many_password_reset_requests": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ẏǿǿŭŭ řḗḗȧȧƈħḗḗḓ ŧħḗḗ ŀīḿīŧ ƒǿǿř ƥȧȧşşẇǿǿřḓ řḗḗşḗḗŧş. Ƒǿǿř ẏǿǿŭŭř şḗḗƈŭŭřīŧẏ, ẇȧȧīŧ 10 ḿīƞŭŭŧḗḗş ȧȧƞḓ ŧřẏ ȧȧɠȧȧīƞ."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "header.button.assistive_msg.ask_shopping_agent": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ȧşķ Şħǿǿƥƥīƞɠ Ȧɠḗḗƞŧ"
     },
     {
       "type": 0,
@@ -3689,6 +4197,20 @@
       "value": "]"
     }
   ],
+  "header.button.assistive_msg.menu.open_dialog": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ǿƥḗḗƞş ȧȧ ḓīȧȧŀǿǿɠ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
   "header.button.assistive_msg.my_account": [
     {
       "type": 0,
@@ -3696,7 +4218,7 @@
     },
     {
       "type": 0,
-      "value": "Ḿẏ ȧȧƈƈǿǿŭŭƞŧ"
+      "value": "Ḿẏ Ȧƈƈǿǿŭŭƞŧ"
     },
     {
       "type": 0,
@@ -3735,6 +4257,20 @@
       "value": "]"
     }
   ],
+  "header.button.assistive_msg.store_locator": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Şŧǿǿřḗḗ Ŀǿǿƈȧȧŧǿǿř"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
   "header.button.assistive_msg.wishlist": [
     {
       "type": 0,
@@ -3743,6 +4279,20 @@
     {
       "type": 0,
       "value": "Ẇīşħŀīşŧ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "header.field.placeholder.search_for_products": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Şḗḗȧȧřƈħ ƒǿǿř ƥřǿǿḓŭŭƈŧş..."
     },
     {
       "type": 0,
@@ -3841,174 +4391,6 @@
       "value": "]"
     }
   ],
-  "home.features.description.cart_checkout": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ḗƈǿǿḿḿḗḗřƈḗḗ ƀḗḗşŧ ƥřȧȧƈŧīƈḗḗ ƒǿǿř ȧȧ şħǿǿƥƥḗḗř'ş ƈȧȧřŧ ȧȧƞḓ ƈħḗḗƈķǿǿŭŭŧ ḗḗẋƥḗḗřīḗḗƞƈḗḗ."
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "home.features.description.components": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ɓŭŭīŀŧ ŭŭşīƞɠ Ƈħȧȧķřȧȧ ŬĪ, ȧȧ şīḿƥŀḗḗ, ḿǿǿḓŭŭŀȧȧř ȧȧƞḓ ȧȧƈƈḗḗşşīƀŀḗḗ Řḗḗȧȧƈŧ ƈǿǿḿƥǿǿƞḗḗƞŧ ŀīƀřȧȧřẏ."
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "home.features.description.einstein_recommendations": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ḓḗḗŀīṽḗḗř ŧħḗḗ ƞḗḗẋŧ ƀḗḗşŧ ƥřǿǿḓŭŭƈŧ ǿǿř ǿǿƒƒḗḗř ŧǿǿ ḗḗṽḗḗřẏ şħǿǿƥƥḗḗř ŧħřǿǿŭŭɠħ ƥřǿǿḓŭŭƈŧ řḗḗƈǿǿḿḿḗḗƞḓȧȧŧīǿǿƞş."
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "home.features.description.my_account": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Şħǿǿƥƥḗḗřş ƈȧȧƞ ḿȧȧƞȧȧɠḗḗ ȧȧƈƈǿǿŭŭƞŧ īƞƒǿǿřḿȧȧŧīǿǿƞ şŭŭƈħ ȧȧş ŧħḗḗīř ƥřǿǿƒīŀḗḗ, ȧȧḓḓřḗḗşşḗḗş, ƥȧȧẏḿḗḗƞŧş ȧȧƞḓ ǿǿřḓḗḗřş."
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "home.features.description.shopper_login": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ḗƞȧȧƀŀḗḗ şħǿǿƥƥḗḗřş ŧǿǿ ḗḗȧȧşīŀẏ ŀǿǿɠ īƞ ẇīŧħ ȧȧ ḿǿǿřḗḗ ƥḗḗřşǿǿƞȧȧŀīẑḗḗḓ şħǿǿƥƥīƞɠ ḗḗẋƥḗḗřīḗḗƞƈḗḗ."
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "home.features.description.wishlist": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Řḗḗɠīşŧḗḗřḗḗḓ şħǿǿƥƥḗḗřş ƈȧȧƞ ȧȧḓḓ ƥřǿǿḓŭŭƈŧ īŧḗḗḿş ŧǿǿ ŧħḗḗīř ẇīşħŀīşŧ ƒřǿǿḿ ƥŭŭřƈħȧȧşīƞɠ ŀȧȧŧḗḗř."
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "home.features.heading.cart_checkout": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ƈȧȧřŧ & Ƈħḗḗƈķǿǿŭŭŧ"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "home.features.heading.components": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ƈǿǿḿƥǿǿƞḗḗƞŧş & Ḓḗḗşīɠƞ Ķīŧ"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "home.features.heading.einstein_recommendations": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ḗīƞşŧḗḗīƞ Řḗḗƈǿǿḿḿḗḗƞḓȧȧŧīǿǿƞş"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "home.features.heading.my_account": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ḿẏ Ȧƈƈǿǿŭŭƞŧ"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "home.features.heading.shopper_login": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Şħǿǿƥƥḗḗř Ŀǿǿɠīƞ ȧȧƞḓ ȦƤĪ Ȧƈƈḗḗşş Şḗḗřṽīƈḗḗ"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "home.features.heading.wishlist": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ẇīşħŀīşŧ"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
   "home.heading.features": [
     {
       "type": 0,
@@ -4045,48 +4427,6 @@
     {
       "type": 0,
       "value": "Şħǿǿƥ Ƥřǿǿḓŭŭƈŧş"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "home.hero_features.link.design_kit": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ƈřḗḗȧȧŧḗḗ ẇīŧħ ŧħḗḗ Ƒīɠḿȧȧ ƤẆȦ Ḓḗḗşīɠƞ Ķīŧ"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "home.hero_features.link.on_github": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ḓǿǿẇƞŀǿǿȧȧḓ ǿǿƞ Ɠīŧħŭŭƀ"
-    },
-    {
-      "type": 0,
-      "value": "]"
-    }
-  ],
-  "home.hero_features.link.on_managed_runtime": [
-    {
-      "type": 0,
-      "value": "["
-    },
-    {
-      "type": 0,
-      "value": "Ḓḗḗƥŀǿǿẏ ǿǿƞ Ḿȧȧƞȧȧɠḗḗḓ Řŭŭƞŧīḿḗḗ"
     },
     {
       "type": 0,
@@ -4135,6 +4475,20 @@
       "value": "]"
     }
   ],
+  "home.title.home": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ħǿǿḿḗḗ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
   "home.title.react_starter_store": [
     {
       "type": 0,
@@ -4142,7 +4496,7 @@
     },
     {
       "type": 0,
-      "value": "Ȧḓẏḗḗƞ Īƞŧḗḗɠřȧȧŧīǿǿƞ īƞ Řḗḗȧȧƈŧ ƤẆȦ Şŧȧȧřŧḗḗř Şŧǿǿřḗḗ"
+      "value": "Ŧħḗḗ Řḗḗȧȧƈŧ ƤẆȦ Şŧȧȧřŧḗḗř Şŧǿǿřḗḗ ƒǿǿř Řḗḗŧȧȧīŀ"
     },
     {
       "type": 0,
@@ -5146,7 +5500,7 @@
     },
     {
       "type": 0,
-      "value": "Ƈǿǿƞŧīƞŭŭḗḗ Şḗḗƈŭŭřḗḗŀẏ"
+      "value": "Ƈǿǿƞŧīƞŭŭḗḗ"
     },
     {
       "type": 0,
@@ -5355,7 +5709,8 @@
       "value": "["
     },
     {
-      "offset": 0,
+      "type": 6,
+      "value": "itemCount",
       "options": {
         "=0": {
           "value": [
@@ -5388,9 +5743,8 @@
           ]
         }
       },
-      "pluralType": "cardinal",
-      "type": 6,
-      "value": "itemCount"
+      "offset": 0,
+      "pluralType": "cardinal"
     },
     {
       "type": 0,
@@ -5563,6 +5917,190 @@
     {
       "type": 0,
       "value": "Ŧȧȧẋ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "order_summary.label.tax_tbd": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "ŦƁḒ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "otp.button.cancel_guest_registration": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ƈȧȧƞƈḗḗŀ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "otp.button.checkout_as_guest": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ƈħḗḗƈķǿǿŭŭŧ ȧȧş ȧȧ Ɠŭŭḗḗşŧ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "otp.button.resend_code": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Řḗḗşḗḗƞḓ Ƈǿǿḓḗḗ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "otp.error.invalid_code": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ŧħḗḗ ƈǿǿḓḗḗ īş īƞṽȧȧŀīḓ ǿǿř ḗḗẋƥīřḗḗḓ. Ƈŀīƈķ Řḗḗşḗḗƞḓ Ƈǿǿḓḗḗ ȧȧƞḓ ŧřẏ ȧȧɠȧȧīƞ."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "otp.message.enter_code_for_account_guest": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ẇḗḗ şḗḗƞŧ ȧȧ ǿǿƞḗḗ-ŧīḿḗḗ ƥȧȧşşẇǿǿřḓ (ǾŦƤ) ŧǿǿ ẏǿǿŭŭř ḗḗḿȧȧīŀ. Ŧǿǿ ƈřḗḗȧȧŧḗḗ ẏǿǿŭŭř ȧȧƈƈǿǿŭŭƞŧ ȧȧƞḓ ƥřǿǿƈḗḗḗḗḓ ŧǿǿ ƈħḗḗƈķǿǿŭŭŧ, ḗḗƞŧḗḗř ŧħḗḗ "
+    },
+    {
+      "type": 1,
+      "value": "otpLength"
+    },
+    {
+      "type": 0,
+      "value": "-ḓīɠīŧ ƈǿǿḓḗḗ ƀḗḗŀǿǿẇ."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "otp.message.enter_code_for_account_returning": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ŧǿǿ ŀǿǿɠ īƞ ŧǿǿ ẏǿǿŭŭř ȧȧƈƈǿǿŭŭƞŧ, ḗḗƞŧḗḗř ŧħḗḗ ƈǿǿḓḗḗ şḗḗƞŧ ŧǿǿ ẏǿǿŭŭř ḗḗḿȧȧīŀ."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "otp.message.resend_cooldown": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ẏǿǿŭŭ ƈȧȧƞ řḗḗɋŭŭḗḗşŧ ȧȧ ƞḗḗẇ ƈǿǿḓḗḗ īƞ "
+    },
+    {
+      "type": 1,
+      "value": "timer"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 6,
+      "value": "timer",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "şḗḗƈǿǿƞḓ"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "şḗḗƈǿǿƞḓş"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": "."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "otp.title.confirm_its_you": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ƈǿǿƞƒīřḿ īŧ'ş ẏǿǿŭŭ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "otp.title.create_account": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ƈřḗḗȧȧŧḗḗ ȧȧƞ ȧȧƈƈǿǿŭŭƞŧ"
     },
     {
       "type": 0,
@@ -5853,6 +6391,98 @@
       "value": "]"
     }
   ],
+  "payment_processing.error.unsuccessful": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ẏǿǿŭŭř ȧȧŧŧḗḗḿƥŧḗḗḓ ƥȧȧẏḿḗḗƞŧ ẇȧȧş ŭŭƞşŭŭƈƈḗḗşşƒŭŭŀ. Ẏǿǿŭŭ ħȧȧṽḗḗ ƞǿǿŧ ƀḗḗḗḗƞ ƈħȧȧřɠḗḗḓ ȧȧƞḓ ẏǿǿŭŭř ǿǿřḓḗḗř ħȧȧş ƞǿǿŧ ƀḗḗḗḗƞ ƥŀȧȧƈḗḗḓ. Ƥŀḗḗȧȧşḗḗ şḗḗŀḗḗƈŧ ȧȧ ḓīƒƒḗḗřḗḗƞŧ ƥȧȧẏḿḗḗƞŧ ḿḗḗŧħǿǿḓ ȧȧƞḓ şŭŭƀḿīŧ ƥȧȧẏḿḗḗƞŧ ȧȧɠȧȧīƞ ŧǿǿ ƈǿǿḿƥŀḗḗŧḗḗ ẏǿǿŭŭř ƈħḗḗƈķǿǿŭŭŧ ȧȧƞḓ ƥŀȧȧƈḗḗ ẏǿǿŭŭř ǿǿřḓḗḗř."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "payment_processing.heading.payment_processing": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ƥȧȧẏḿḗḗƞŧ Ƥřǿǿƈḗḗşşīƞɠ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "payment_processing.link.return_to_checkout": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Řḗḗŧŭŭřƞ ŧǿǿ Ƈħḗḗƈķǿǿŭŭŧ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "payment_processing.message.unexpected_error": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ŧħḗḗřḗḗ ẇȧȧş ȧȧƞ ŭŭƞḗḗẋƥḗḗƈŧḗḗḓ ḗḗřřǿǿř ƥřǿǿƈḗḗşşīƞɠ ẏǿǿŭŭř ƥȧȧẏḿḗḗƞŧ."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "payment_processing.message.working_on_your_payment": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ẇǿǿřķīƞɠ ǿǿƞ ẏǿǿŭŭř ƥȧȧẏḿḗḗƞŧ..."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "payment_selection.button.view_all": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ṽīḗḗẇ Ȧŀŀ ("
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " ḿǿǿřḗḗ)"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
   "payment_selection.heading.credit_card": [
     {
       "type": 0,
@@ -5945,6 +6575,20 @@
     {
       "type": 0,
       "value": "Şħǿǿẇ Ƥřǿǿḓŭŭƈŧş"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "pickup_address.message.loading_store_info": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ŀǿǿȧȧḓīƞɠ şŧǿǿřḗḗ īƞƒǿǿřḿȧȧŧīǿǿƞ…"
     },
     {
       "type": 0,
@@ -7057,28 +7701,28 @@
       "value": "Ɓẏ ƈřḗḗȧȧŧīƞɠ ȧȧƞ ȧȧƈƈǿǿŭŭƞŧ, ẏǿǿŭŭ ȧȧɠřḗḗḗḗ ŧǿǿ Şȧȧŀḗḗşƒǿǿřƈḗḗ "
     },
     {
+      "type": 8,
+      "value": "policy",
       "children": [
         {
           "type": 0,
           "value": "Ƥřīṽȧȧƈẏ Ƥǿǿŀīƈẏ"
         }
-      ],
-      "type": 8,
-      "value": "policy"
+      ]
     },
     {
       "type": 0,
       "value": " ȧȧƞḓ "
     },
     {
+      "type": 8,
+      "value": "terms",
       "children": [
         {
           "type": 0,
           "value": "Ŧḗḗřḿş & Ƈǿǿƞḓīŧīǿǿƞş"
         }
-      ],
-      "type": 8,
-      "value": "terms"
+      ]
     },
     {
       "type": 0,
@@ -7323,6 +7967,34 @@
       "value": "]"
     }
   ],
+  "search.suggestions.askAssistant.description": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ḓīşƈǿǿṽḗḗř, ƈǿǿḿƥȧȧřḗḗ, ȧȧƞḓ şħǿǿƥ şḿȧȧřŧḗḗř ẇīŧħ ẏǿǿŭŭř ƥḗḗřşǿǿƞȧȧŀ Şħǿǿƥƥīƞɠ Ȧɠḗḗƞŧ."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "search.suggestions.askAssistant.title": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ȧşķ Şħǿǿƥƥīƞɠ Ȧɠḗḗƞŧ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
   "search.suggestions.categories": [
     {
       "type": 0,
@@ -7449,6 +8121,132 @@
       "value": "]"
     }
   ],
+  "sf_payments_order_summary.label.bank.unknown": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ŭƞķƞǿǿẇƞ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "sf_payments_order_summary.label.brand.amex": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ȧḿḗḗřīƈȧȧƞ Ḗẋƥřḗḗşş"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "sf_payments_order_summary.label.brand.diners": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ḓīƞḗḗřş Ƈŀŭŭƀ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "sf_payments_order_summary.label.brand.discover": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ḓīşƈǿǿṽḗḗř"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "sf_payments_order_summary.label.brand.jcb": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "ĴƇƁ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "sf_payments_order_summary.label.brand.mastercard": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "ḾȧȧşŧḗḗřƇȧȧřḓ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "sf_payments_order_summary.label.brand.unionpay": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ƈħīƞȧȧ ŬƞīǿǿƞƤȧȧẏ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "sf_payments_order_summary.label.brand.unknown": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ŭƞķƞǿǿẇƞ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "sf_payments_order_summary.label.brand.visa": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ṽīşȧȧ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
   "shipping_address.action.ship_to_multiple_addresses": [
     {
       "type": 0,
@@ -7456,7 +8254,7 @@
     },
     {
       "type": 0,
-      "value": "Şħīƥ ŧǿǿ Ḿŭŭŀŧīƥŀḗḗ Ȧḓḓřḗḗşşḗḗş"
+      "value": "Şħīƥ ŧǿǿ ḿŭŭŀŧīƥŀḗḗ ȧȧḓḓřḗḗşşḗḗş"
     },
     {
       "type": 0,
@@ -7611,6 +8409,20 @@
       "value": "]"
     }
   ],
+  "shipping_address.summary.multiple_locations": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ẏǿǿŭŭ ȧȧřḗḗ şħīƥƥīƞɠ ŧǿǿ ḿŭŭŀŧīƥŀḗḗ ŀǿǿƈȧȧŧīǿǿƞş."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
   "shipping_address.title.shipping_address": [
     {
       "type": 0,
@@ -7731,6 +8543,20 @@
     {
       "type": 0,
       "value": "Ḗḓīŧ Şħīƥƥīƞɠ Ȧḓḓřḗḗşş"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "shipping_multi_address.action.ship_to_single_address": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Şħīƥ īŧḗḗḿş ŧǿǿ ǿǿƞḗḗ ȧȧḓḓřḗḗşş"
     },
     {
       "type": 0,
@@ -7873,6 +8699,20 @@
       "value": "]"
     }
   ],
+  "shipping_multi_address.label.note": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ƞǿǿŧḗḗ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
   "shipping_multi_address.loading.message": [
     {
       "type": 0,
@@ -7895,6 +8735,34 @@
     {
       "type": 0,
       "value": "Ŀǿǿȧȧḓīƞɠ ȧȧḓḓřḗḗşşḗḗş..."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "shipping_multi_address.message.no_delivery_items": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ŧħḗḗřḗḗ ȧȧřḗḗ ƞǿǿ īŧḗḗḿş ŧǿǿ ḓḗḗŀīṽḗḗř. Ȧŀŀ īŧḗḗḿş ȧȧřḗḗ ƥīƈķŭŭƥ."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "shipping_multi_address.message.pickup_items": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Şǿǿḿḗḗ īŧḗḗḿş ȧȧřḗḗ şḗḗŧ ƒǿǿř ƥīƈķŭŭƥ ȧȧƞḓ ȧȧřḗḗ ƞǿǿŧ şħǿǿẇƞ ħḗḗřḗḗ. Ǿƞŀẏ ḓḗḗŀīṽḗḗřẏ īŧḗḗḿş ƈȧȧƞ ƀḗḗ ȧȧşşīɠƞḗḗḓ ŧǿǿ ȧȧḓḓřḗḗşşḗḗş."
     },
     {
       "type": 0,
@@ -7999,6 +8867,20 @@
       "value": "]"
     }
   ],
+  "shipping_options.error.no_shipping_methods": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ŭƞƒǿǿřŧŭŭƞȧȧŧḗḗŀẏ, ẇḗḗ ȧȧřḗḗ ŭŭƞȧȧƀŀḗḗ ŧǿǿ şħīƥ ŧǿǿ ŧħīş ȧȧḓḓřḗḗşş ȧȧŧ ŧħīş ŧīḿḗḗ. Ƥŀḗḗȧȧşḗḗ řḗḗȧȧƈħ ǿǿŭŭŧ ŧǿǿ ƈŭŭşŧǿǿḿḗḗř şŭŭƥƥǿǿřŧ ƒǿǿř ƒŭŭřŧħḗḗř ȧȧşşīşŧȧȧƞƈḗḗ."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
   "shipping_options.free": [
     {
       "type": 0,
@@ -8021,6 +8903,28 @@
     {
       "type": 0,
       "value": "Ƞǿǿ şħīƥƥīƞɠ ḿḗḗŧħǿǿḓ şḗḗŀḗḗƈŧḗḗḓ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "shipping_options.label.shipment_number": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Şħīƥḿḗḗƞŧ "
+    },
+    {
+      "type": 1,
+      "value": "index"
+    },
+    {
+      "type": 0,
+      "value": ":"
     },
     {
       "type": 0,
@@ -8067,6 +8971,20 @@
     {
       "type": 0,
       "value": "Şħīƥƥīƞɠ & Ɠīƒŧ Ǿƥŧīǿǿƞş"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "shipping_options.title.shipping_method": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Şħīƥƥīƞɠ Ǿƥŧīǿǿƞş"
     },
     {
       "type": 0,
@@ -8153,14 +9071,14 @@
       "value": "Īƒ ẏǿǿŭŭ ȧȧřḗḗ ƞǿǿŧ ȧȧŭŭŧǿǿḿȧȧŧīƈȧȧŀŀẏ řḗḗḓīřḗḗƈŧḗḗḓ, ƈŀīƈķ "
     },
     {
+      "type": 8,
+      "value": "link",
       "children": [
         {
           "type": 0,
           "value": "ŧħīş ŀīƞķ"
         }
-      ],
-      "type": 8,
-      "value": "link"
+      ]
     },
     {
       "type": 0,
@@ -8671,6 +9589,48 @@
       "value": "]"
     }
   ],
+  "toggle_card.action.change": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ƈħȧȧƞɠḗḗ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "toggle_card.action.changePaymentInfo": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ƈħȧȧƞɠḗḗ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "toggle_card.action.changeShippingOptions": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ƈħȧȧƞɠḗḗ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
   "toggle_card.action.edit": [
     {
       "type": 0,
@@ -8693,6 +9653,20 @@
     {
       "type": 0,
       "value": "Ḗḓīŧ Ƈǿǿƞŧȧȧƈŧ Īƞƒǿǿ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "toggle_card.action.editPaymentInfo": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ḗḓīŧ Ƥȧȧẏḿḗḗƞŧ Īƞƒǿǿ"
     },
     {
       "type": 0,
@@ -8791,6 +9765,20 @@
     {
       "type": 0,
       "value": "Ƥŀḗḗȧȧşḗḗ ḗḗƞŧḗḗř ẏǿǿŭŭř ƥħǿǿƞḗḗ ƞŭŭḿƀḗḗř."
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "use_address_fields.error.please_enter_postal_code": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ƥŀḗḗȧȧşḗḗ ḗḗƞŧḗḗř ẏǿǿŭŭř ƥǿǿşŧȧȧŀ ƈǿǿḓḗḗ."
     },
     {
       "type": 0,
@@ -9253,6 +10241,20 @@
     {
       "type": 0,
       "value": "Şḗḗƈŭŭřīŧẏ Ƈǿǿḓḗḗ"
+    },
+    {
+      "type": 0,
+      "value": "]"
+    }
+  ],
+  "use_login_fields.error.invalid_email": [
+    {
+      "type": 0,
+      "value": "["
+    },
+    {
+      "type": 0,
+      "value": "Ƥŀḗḗȧȧşḗḗ ḗḗƞŧḗḗř ȧȧ ṽȧȧŀīḓ ḗḗḿȧȧīŀ ȧȧḓḓřḗḗşş."
     },
     {
       "type": 0,
@@ -10123,7 +11125,8 @@
       "value": " "
     },
     {
-      "offset": 0,
+      "type": 6,
+      "value": "quantity",
       "options": {
         "one": {
           "value": [
@@ -10142,9 +11145,8 @@
           ]
         }
       },
-      "pluralType": "cardinal",
-      "type": 6,
-      "value": "quantity"
+      "offset": 0,
+      "pluralType": "cardinal"
     },
     {
       "type": 0,

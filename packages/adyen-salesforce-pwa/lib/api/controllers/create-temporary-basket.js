@@ -16,7 +16,7 @@ export default async function CreateTemporaryBasketController(req, res, next) {
         Logger.info('CreateTemporaryBasketController', 'start')
         const {authorization, customerid} = req.headers
         const {siteId} = req.query
-        const {product} = req.body
+        const {product, currency} = req.body
         if (!authorization || !customerid || !siteId || !product?.id || !product?.quantity) {
             const missing = []
             if (!authorization) missing.push('authorization header')
@@ -33,7 +33,7 @@ export default async function CreateTemporaryBasketController(req, res, next) {
 
         await removeExistingTemporaryBaskets(authorization, customerid, siteId)
 
-        let basket = await createTemporaryBasket(authorization, customerid, siteId)
+        let basket = await createTemporaryBasket(authorization, customerid, siteId, currency)
         if (!basket || !basket.basketId) {
             throw new AdyenError(ERROR_MESSAGE.BASKET_NOT_CREATED, 400)
         }

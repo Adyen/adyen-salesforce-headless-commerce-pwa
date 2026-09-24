@@ -47,7 +47,47 @@ module.exports = {
             // in production environment reports
             isProduction: false
         },
-        dataCloudAPI: {}
+        dataCloudAPI: {},
+        // Login / authentication config (required by v9 components such as OtpAuth)
+        login: {
+            // Length of the OTP token for passwordless login and reset password. Valid values: 6 or 8.
+            tokenLength: Number(process.env.OTP_TOKEN_LENGTH) || 8,
+            passwordless: {
+                enabled: false,
+                mode: 'email',
+                landingPath: '/passwordless-login-landing'
+            },
+            social: {
+                enabled: false,
+                idps: ['google', 'apple'],
+                redirectURI: process.env.SOCIAL_LOGIN_REDIRECT_URI || '/social-callback'
+            },
+            resetPassword: {
+                mode: 'email',
+                landingPath: '/reset-password-landing'
+            }
+        },
+        // One Click Checkout (disabled by default; requires private SLAS client and security setup)
+        oneClickCheckout: {
+            enabled: false
+        },
+        multishipEnabled: true,
+        storeLocatorEnabled: true,
+        partialHydrationEnabled: false,
+        pages: {
+            cart: {
+                groupBonusProductsWithQualifyingProduct: true
+            }
+        },
+        // Salesforce Payments (disabled; set enabled: true only with a compatible Commerce Cloud instance)
+        sfPayments: {
+            enabled: false,
+            sdkUrl: '',
+            metadataUrl: ''
+        },
+        googleCloudAPI: {
+            apiKey: process.env.GOOGLE_CLOUD_API_KEY || ''
+        }
     },
     // This list contains server-side only libraries that you don't want to be compiled by webpack
     externals: [],

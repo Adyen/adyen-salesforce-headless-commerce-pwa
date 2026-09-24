@@ -1,4 +1,5 @@
 import React, {useEffect, useRef, useMemo, useCallback, useState} from 'react'
+import {useQueryClient} from '@tanstack/react-query'
 import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
 import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
@@ -121,6 +122,7 @@ const PayPalExpressComponent = ({
     const customerId = customerIdProp || hookCustomerId
     const {getTokenWhenReady} = useAccessToken()
     const [authToken, setAuthToken] = useState(authTokenProp)
+    const queryClient = useQueryClient()
 
     useEffect(() => {
         if (authTokenProp) return
@@ -140,6 +142,11 @@ const PayPalExpressComponent = ({
     const basketId = shopperBasket?.basketId
     const paymentContainer = useRef(null)
     const paypalButtonRef = useRef(null)
+    const [remountKey, setRemountKey] = useState(0)
+
+    const handlePaymentCancel = useCallback(() => {
+        setRemountKey((prev) => prev + 1)
+    }, [])
 
     const {
         data: adyenEnvironment,
@@ -262,11 +269,13 @@ const PayPalExpressComponent = ({
                     afterShippingOptionsChange,
                     configuration,
                     onError,
+                    onPaymentCancel: isPdp ? handlePaymentCancel : undefined,
                     fetchShippingMethods,
                     enableReview,
                     reviewPageUrl,
                     type,
-                    product
+                    product,
+                    queryClient
                 })
 
                 const paypalButton = new PayPal(checkout, expressConfig)
@@ -302,11 +311,12 @@ const PayPalExpressComponent = ({
         return () => {
             if (paypalButtonRef.current) {
                 try {
+                    // Only unmount this specific PayPal button instance. Calling
+                    // window.paypal.__internal_destroy__() here would tear down the
+                    // shared zoid registry for ALL PayPal components on the page
+                    // (including ones still mounting), causing "zoid destroyed all
+                    // components" errors.
                     paypalButtonRef.current.unmount()
-                    // PayPal specific cleanup: destroy the PayPal instance
-                    if (window.paypal && typeof window.paypal.__internal_destroy__ === 'function') {
-                        window.paypal.__internal_destroy__()
-                    }
                 } catch (e) {
                     console.error('Error unmounting paypalButton:', e)
                 }
@@ -340,7 +350,8 @@ const PayPalExpressComponent = ({
         reviewPageUrl,
         fetchShippingMethods,
         type,
-        product
+        product,
+        remountKey
     ])
 
     return (
