@@ -55,7 +55,7 @@ export class PaymentRequestBuilder {
      */
     _validateAddress(address, type) {
         if (!address) {
-            Logger.warn(`PaymentRequestBuilder: ${type} address is null or undefined`)
+            Logger.warn('PaymentRequestBuilder', `${type} address is null or undefined`)
             return false
         }
 
@@ -64,8 +64,8 @@ export class PaymentRequestBuilder {
 
         if (missingFields.length > 0) {
             Logger.warn(
-                `PaymentRequestBuilder: ${type} address missing required fields: ${missingFields.join(', ')}`,
-                {address}
+                'PaymentRequestBuilder',
+                `${type} address missing required fields: ${missingFields.join(', ')}`
             )
             return false
         }

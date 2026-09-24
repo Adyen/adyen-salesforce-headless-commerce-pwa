@@ -1,6 +1,7 @@
 import crypto from 'crypto'
 import {PAYMENT_METHOD_TYPES, TAXATION} from '../../utils/constants.mjs'
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
+import {hasDcapValue} from './dcapHelper.js'
 
 /**
  * Calculates the amount for partial payments based on the order data and basket.
@@ -266,7 +267,6 @@ const VALID_STATE_DATA_FIELDS = new Set([
     'order',
     'company'
 ])
-const DEVICE_FINGERPRINT_PLACEHOLDERS = new Set(['N/A', 'ZZ'])
 
 /**
  * Filters the state data object to include only a predefined set of valid fields.
@@ -284,11 +284,7 @@ export const filterStateData = (stateData) =>
 export const filterPaymentStateData = (stateData) => {
     const filteredStateData = filterStateData(stateData)
     const deviceFingerprint = stateData.deviceFingerprint
-    if (
-        typeof deviceFingerprint === 'string' &&
-        deviceFingerprint.trim() &&
-        !DEVICE_FINGERPRINT_PLACEHOLDERS.has(deviceFingerprint.trim().toUpperCase())
-    ) {
+    if (typeof deviceFingerprint === 'string' && hasDcapValue(deviceFingerprint)) {
         filteredStateData.deviceFingerprint = deviceFingerprint
     }
     return filteredStateData

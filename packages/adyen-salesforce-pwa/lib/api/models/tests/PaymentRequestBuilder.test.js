@@ -144,7 +144,8 @@ describe('PaymentRequestBuilder', () => {
 
             expect(result).toBe(false)
             expect(Logger.warn).toHaveBeenCalledWith(
-                'PaymentRequestBuilder: billing address is null or undefined'
+                'PaymentRequestBuilder',
+                'billing address is null or undefined'
             )
         })
 
@@ -159,9 +160,10 @@ describe('PaymentRequestBuilder', () => {
 
             expect(result).toBe(false)
             expect(Logger.warn).toHaveBeenCalledWith(
-                'PaymentRequestBuilder: delivery address missing required fields: postalCode, country',
-                {address}
+                'PaymentRequestBuilder',
+                'delivery address missing required fields: postalCode, country'
             )
+            expect(Logger.warn.mock.calls[0].join(' ')).not.toContain('123 Main St')
         })
 
         it('should return true for valid address', () => {

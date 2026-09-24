@@ -35,6 +35,12 @@ collects its own device fingerprint, pass the actual value to `AdyenCheckout` th
 Do not send an empty or placeholder fingerprint. The integration omits empty values and the
 placeholders `N/A` and `ZZ` from the payment request.
 
+For US ecommerce card payments, the server checks the DCAP-required shopper IP, shopper email,
+complete billing address, and fingerprint data before calling `/payments`. Adyen Web
+`riskData.clientData` or a merchant-provided `deviceFingerprint` satisfies the fingerprint check.
+Missing data produces a warning containing field names only; shopper data is never included in the
+warning.
+
 ## Prerequisites
 
 - [Adyen test account](https://www.adyen.com/signup)
