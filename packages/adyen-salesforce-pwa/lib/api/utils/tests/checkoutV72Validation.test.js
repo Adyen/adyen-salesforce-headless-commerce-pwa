@@ -273,6 +273,14 @@ describe('checkoutV72Validation', () => {
                 expect(result.shopperIP).toBe('a'.repeat(256))
             })
 
+            it('should truncate deviceFingerprint to 5000 characters', () => {
+                const paymentRequest = {deviceFingerprint: 'a'.repeat(5100)}
+
+                const result = formatAndValidatePaymentRequest(paymentRequest)
+
+                expect(result.deviceFingerprint).toBe('a'.repeat(5000))
+            })
+
             it('should truncate telephoneNumber to 64 characters', () => {
                 const paymentRequest = {telephoneNumber: '1'.repeat(100)}
 
