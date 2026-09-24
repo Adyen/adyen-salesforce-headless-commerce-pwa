@@ -26,7 +26,7 @@ jest.mock('../logger', () => ({
 }))
 
 jest.mock('../../utils/paymentUtils.js', () => ({
-    filterStateData: jest.fn((data) => data),
+    filterPaymentStateData: jest.fn((data) => data),
     getShopperName: jest.fn((basket) => {
         const firstName = basket?.billingAddress?.firstName
         const lastName = basket?.billingAddress?.lastName

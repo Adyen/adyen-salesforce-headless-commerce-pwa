@@ -79,6 +79,18 @@ describe('Gift Card Controller', () => {
             expect(Logger.info).toHaveBeenCalledWith('giftCards-balanceCheck', 'success')
         })
 
+        it('should not send a device fingerprint to the gift card balance endpoint', async () => {
+            req.body.data.deviceFingerprint = 'merchant-device-fingerprint'
+            mockOrdersApi.getBalanceOfGiftCard.mockResolvedValue({balance: {value: 5000}})
+
+            await balanceCheck(req, res, next)
+
+            expect(mockOrdersApi.getBalanceOfGiftCard).toHaveBeenCalledWith(
+                expect.not.objectContaining({deviceFingerprint: expect.anything()}),
+                expect.any(Object)
+            )
+        })
+
         it('should use productTotal when orderTotal is falsy', async () => {
             res.locals.adyen.basket.orderTotal = 0
             res.locals.adyen.basket.productTotal = 50

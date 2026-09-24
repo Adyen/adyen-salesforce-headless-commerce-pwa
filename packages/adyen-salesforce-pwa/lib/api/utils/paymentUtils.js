@@ -266,6 +266,7 @@ const VALID_STATE_DATA_FIELDS = new Set([
     'order',
     'company'
 ])
+const DEVICE_FINGERPRINT_PLACEHOLDERS = new Set(['N/A', 'ZZ'])
 
 /**
  * Filters the state data object to include only a predefined set of valid fields.
@@ -279,6 +280,19 @@ export const filterStateData = (stateData) =>
         }
         return acc
     }, {})
+
+export const filterPaymentStateData = (stateData) => {
+    const filteredStateData = filterStateData(stateData)
+    const deviceFingerprint = stateData.deviceFingerprint
+    if (
+        typeof deviceFingerprint === 'string' &&
+        deviceFingerprint.trim() &&
+        !DEVICE_FINGERPRINT_PLACEHOLDERS.has(deviceFingerprint.trim().toUpperCase())
+    ) {
+        filteredStateData.deviceFingerprint = deviceFingerprint
+    }
+    return filteredStateData
+}
 
 /**
  * Determines the Native 3DS (3D Secure) setting based on the provided Adyen configuration.

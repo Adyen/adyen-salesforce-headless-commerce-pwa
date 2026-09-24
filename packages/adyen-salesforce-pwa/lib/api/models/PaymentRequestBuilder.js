@@ -9,7 +9,7 @@ import {formatAddressInAdyenFormat} from '../../utils/formatAddress.mjs'
 import {getApplicationInfo} from '../../utils/getApplicationInfo.mjs'
 import Logger from './logger.js'
 import {
-    filterStateData,
+    filterPaymentStateData,
     getShopperName,
     getNativeThreeDS,
     isOpenInvoiceMethod,
@@ -81,7 +81,7 @@ export class PaymentRequestBuilder {
     withStateData(data = null) {
         const actualData = data || this.context.stateData
         if (actualData) {
-            Object.assign(this.paymentRequest, filterStateData(actualData))
+            Object.assign(this.paymentRequest, filterPaymentStateData(actualData))
         }
         return this
     }
