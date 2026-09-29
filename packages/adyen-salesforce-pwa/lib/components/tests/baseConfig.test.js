@@ -216,7 +216,8 @@ describe('onSubmit function', () => {
                 company: {
                     name: 'Acme Corp',
                     registrationNumber: '123456789'
-                }
+                },
+                deviceFingerprint: 'merchant-device-fingerprint'
             }
         }
 
@@ -228,7 +229,8 @@ describe('onSubmit function', () => {
                 company: {
                     name: 'Acme Corp',
                     registrationNumber: '123456789'
-                }
+                },
+                deviceFingerprint: 'merchant-device-fingerprint'
             }),
             {id: 'en-US'}
         )

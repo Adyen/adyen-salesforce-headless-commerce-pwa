@@ -16,6 +16,7 @@ const V72_FIELD_LIMITS = {
     METADATA_VALUE_MAX_LENGTH: 80,
     REFERENCE_MAX_LENGTH: 80,
     SHOPPER_IP_MAX_LENGTH: 256,
+    DEVICE_FINGERPRINT_MAX_LENGTH: 5000,
     TELEPHONE_NUMBER_MAX_LENGTH: 64,
     SOCIAL_SECURITY_NUMBER_MAX_LENGTH: 50,
     RETURN_URL_MAX_LENGTH: 1024,
@@ -369,6 +370,13 @@ export function formatAndValidatePaymentRequest(paymentRequest) {
 
     if (formatted.shopperIP) {
         formatted.shopperIP = truncate(formatted.shopperIP, V72_FIELD_LIMITS.SHOPPER_IP_MAX_LENGTH)
+    }
+
+    if (formatted.deviceFingerprint) {
+        formatted.deviceFingerprint = truncate(
+            formatted.deviceFingerprint,
+            V72_FIELD_LIMITS.DEVICE_FINGERPRINT_MAX_LENGTH
+        )
     }
 
     if (formatted.telephoneNumber) {

@@ -1,6 +1,7 @@
 import crypto from 'crypto'
 import {PAYMENT_METHOD_TYPES, TAXATION} from '../../utils/constants.mjs'
 import {getCurrencyValueForApi} from '../../utils/parsers.mjs'
+import {hasDcapValue} from './dcapHelper.js'
 
 /**
  * Calculates the amount for partial payments based on the order data and basket.
@@ -279,6 +280,15 @@ export const filterStateData = (stateData) =>
         }
         return acc
     }, {})
+
+export const filterPaymentStateData = (stateData) => {
+    const filteredStateData = filterStateData(stateData)
+    const deviceFingerprint = stateData.deviceFingerprint
+    if (typeof deviceFingerprint === 'string' && hasDcapValue(deviceFingerprint)) {
+        filteredStateData.deviceFingerprint = deviceFingerprint
+    }
+    return filteredStateData
+}
 
 /**
  * Determines the Native 3DS (3D Secure) setting based on the provided Adyen configuration.

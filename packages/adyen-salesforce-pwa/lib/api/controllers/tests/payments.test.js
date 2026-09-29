@@ -4,12 +4,16 @@ import {AdyenError} from '../../models/AdyenError'
 import * as orderHelper from '../../helpers/orderHelper.js'
 import * as paymentsHelper from '../../helpers/paymentsHelper.js'
 import AdyenClientProvider from '../../models/adyenClientProvider'
+import {warnForMissingDcapFields} from '../../utils/dcapHelper.js'
 
 let mockPayments = jest.fn()
 
 jest.mock('../../models/logger')
 
 jest.mock('../../models/adyenClientProvider')
+jest.mock('../../utils/dcapHelper.js', () => ({
+    warnForMissingDcapFields: jest.fn()
+}))
 
 jest.mock('../../helpers/paymentsHelper.js', () => {
     const FAILURE = new Set(['Error', 'Refused', 'Cancelled'])
@@ -147,6 +151,13 @@ describe('payments controller', () => {
 
         // addPaymentInstrument called before Adyen (pre-create step)
         expect(res.locals.adyen.basketService.addPaymentInstrument).toHaveBeenCalled()
+        expect(warnForMissingDcapFields).toHaveBeenCalledWith(
+            expect.objectContaining({
+                amount: {value: 1000, currency: 'USD'},
+                paymentMethod: {type: 'scheme'},
+                reference: '123'
+            })
+        )
         expect(mockPayments).toHaveBeenCalled()
         expect(orderHelper.createOrderUsingOrderNo).toHaveBeenCalled()
         // basket was consumed by order creation — must NOT attempt basket update
