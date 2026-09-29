@@ -12,6 +12,9 @@ jobs:
     publish-npm-weekly:
         if: github.event_name == 'schedule'
         uses: ./.github/workflows/npm-publish-weekly.yml
+        permissions:
+            contents: read
+            id-token: write
         secrets: inherit
 
     publish-npm:

@@ -32,13 +32,18 @@
       "diff": ">=8.0.3",
       "ws": ">=8.17.1",
       "tar-fs": ">=2.1.4",
-      "postcss": ">=8.5.19 <9",
+      "postcss": ">=8.5.23 <9",
       "compression": ">=1.8.1",
       "cookie": ">=0.7.0",
       "tmp": ">=0.2.4",
       "@babel/core": "^7.29.6",
-      "js-yaml": "^4.3.0",
-      "uuid": "^11.1.1"
+      "js-yaml": "^4.3.2",
+      "uuid": "^11.1.1",
+      "baseline-browser-mapping": ">=2.11.0 <3",
+      "brace-expansion@1": ">=1.1.18 <2",
+      "brace-expansion@2": ">=2.1.4 <3",
+      "browserslist": ">=4.28.7 <5",
+      "fast-uri": ">=3.1.6 <4"
     }
   },
   "scripts": {
