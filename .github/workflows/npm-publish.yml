@@ -4,44 +4,45 @@
 name: Publish Package
 
 on:
-    workflow_dispatch:
-    schedule:
-        - cron: '30 6 * * 1' # Runs at 06:30 UTC (7:30 CET) every Monday
+  workflow_dispatch:
+  schedule:
+    - cron: '30 6 * * 1' # Runs at 06:30 UTC (7:30 CET) every Monday
 
 jobs:
-    publish-npm-weekly:
-        if: github.event_name == 'schedule'
-        uses: ./.github/workflows/npm-publish-weekly.yml
-        permissions:
-            contents: read
-            id-token: write
-        secrets: inherit
+  publish-npm-weekly:
+    if: github.event_name == 'schedule'
+    uses: ./.github/workflows/npm-publish-weekly.yml
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+    secrets: inherit
 
-    publish-npm:
-        if: github.event_name == 'workflow_dispatch'
-        runs-on: ubuntu-latest
-        permissions:
-            contents: read
-            actions: read
-            id-token: write # Required for OpenID Connect (OIDC) for trusted publishing on NPM
-        steps:
-            - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-            - name: Install pnpm
-              uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
-              with:
-                  version: 10
-            # Setup .npmrc file to publish to npm
-            - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-              with:
-                  node-version: 24
-            - run: pnpm install --ignore-scripts
-            # Copy LICENSE to adyen-salesforce-pwa package
-            - run: cp LICENSE packages/adyen-salesforce-pwa/
-            # Copy env example file to adyen-salesforce-pwa package
-            - run: cp packages/adyen-retail-react-app/.env.example packages/adyen-salesforce-pwa/
-            # Install the node modules
-            - run: cd packages/adyen-salesforce-pwa/ && pnpm install --ignore-scripts
-            # Build
-            - run: cd packages/adyen-salesforce-pwa/ && pnpm run build-prod
-            # Publish the npm package
-            - run: cd packages/adyen-salesforce-pwa/ && npm publish --tag latest --access public
+  publish-npm:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      id-token: write # Required for OpenID Connect (OIDC) for trusted publishing on NPM
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
+        with:
+          version: 10
+      # Setup .npmrc file to publish to npm
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+      - run: pnpm install --ignore-scripts
+      # Copy LICENSE to adyen-salesforce-pwa package
+      - run: cp LICENSE packages/adyen-salesforce-pwa/
+      # Copy env example file to adyen-salesforce-pwa package
+      - run: cp packages/adyen-retail-react-app/.env.example packages/adyen-salesforce-pwa/
+      # Install the node modules
+      - run: cd packages/adyen-salesforce-pwa/ && pnpm install --ignore-scripts
+      # Build
+      - run: cd packages/adyen-salesforce-pwa/ && pnpm run build-prod
+      # Publish the npm package
+      - run: cd packages/adyen-salesforce-pwa/ && npm publish --tag latest --access public
