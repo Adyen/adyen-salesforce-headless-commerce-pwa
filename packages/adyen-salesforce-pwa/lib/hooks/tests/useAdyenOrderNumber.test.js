@@ -94,6 +94,27 @@ describe('useAdyenOrderNumber', () => {
         expect(result.current.orderNo).toBe('EXISTING-ORDER')
     })
 
+    it('should validate an existing order number before making it ready', async () => {
+        const {result} = renderHook(
+            () =>
+                useAdyenOrderNumber({
+                    authToken: mockAuthToken,
+                    customerId: mockCustomerId,
+                    basketId: mockBasketId,
+                    site: mockSite,
+                    existingOrderNo: 'SPENT-ORDER'
+                }),
+            {wrapper: createWrapper()}
+        )
+
+        expect(result.current.isLoading).toBe(true)
+
+        await waitFor(() => {
+            expect(result.current.isLoading).toBe(false)
+        })
+        expect(result.current.orderNo).toBe('ORDER-12345')
+    })
+
     it('should skip fetch when skip is true', () => {
         const {result} = renderHook(
             () =>

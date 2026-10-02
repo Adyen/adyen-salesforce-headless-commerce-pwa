@@ -288,7 +288,14 @@ export const getGooglePayExpressConfig = (props = {}) => {
                 if (!orderNo) {
                     throw new Error('Failed to generate order number')
                 }
-                setBasket({...currentBasket, c_orderNo: orderNo})
+                // In the PDP flow the order number belongs to the temporary basket, which is also
+                // what getActiveBasket() returns, so both references have to carry it.
+                if (isPdp) {
+                    temporaryBasket = {...temporaryBasket, c_orderNo: orderNo}
+                    setBasket(temporaryBasket)
+                } else {
+                    setBasket({...currentBasket, c_orderNo: orderNo})
+                }
 
                 const adyenPaymentService = new AdyenPaymentsService(
                     token,
@@ -331,7 +338,10 @@ export const getGooglePayExpressConfig = (props = {}) => {
                     props.site
                 )
                 const paymentsDetailsResponse =
-                    await adyenPaymentsDetailsService.submitPaymentsDetails(state.data)
+                    await adyenPaymentsDetailsService.submitPaymentsDetails(state.data, {
+                        orderNo: activeBasket?.c_orderNo,
+                        isTemporaryBasket: isPdp
+                    })
                 if (paymentsDetailsResponse?.isSuccessful) {
                     actions.resolve(paymentsDetailsResponse)
                     props.navigate(
@@ -345,7 +355,10 @@ export const getGooglePayExpressConfig = (props = {}) => {
                         activeBasket?.basketId,
                         props.site
                     )
-                    await paymentCancelExpressService.paymentCancelExpress()
+                    await paymentCancelExpressService.paymentCancelExpress({
+                        orderNo: activeBasket?.c_orderNo,
+                        isTemporaryBasket: isPdp
+                    })
                     if (props.onPaymentCancel) {
                         props.onPaymentCancel()
                     }
@@ -362,7 +375,10 @@ export const getGooglePayExpressConfig = (props = {}) => {
                         activeBasket?.basketId,
                         props.site
                     )
-                    await paymentCancelExpressService.paymentCancelExpress()
+                    await paymentCancelExpressService.paymentCancelExpress({
+                        orderNo: activeBasket?.c_orderNo,
+                        isTemporaryBasket: isPdp
+                    })
                 } catch (cancelErr) {
                     // Silently ignore cancellation errors
                 }
@@ -427,7 +443,10 @@ export const onErrorHandler = async (error, component, props) => {
                 basket?.basketId,
                 props.site
             )
-            await paymentCancelExpressService.paymentCancelExpress()
+            await paymentCancelExpressService.paymentCancelExpress({
+                orderNo: basket?.c_orderNo,
+                isTemporaryBasket: props.type === 'pdp'
+            })
         }
         if (props.onPaymentCancel) {
             props.onPaymentCancel()

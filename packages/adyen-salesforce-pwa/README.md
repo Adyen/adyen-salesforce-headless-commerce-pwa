@@ -22,6 +22,25 @@ Adyen Payments Composable Storefront Integration for B2C Commerce depends on:
 For set-up, installation, and Go-Live instructions, refer to [Adyen Docs](https://docs.adyen.com/plugins/salesforce-commerce-cloud/composable-storefront).
 Available payment methods and features can be found on [Adyen Docs](https://docs.adyen.com/plugins/salesforce-commerce-cloud).
 
+## Merchant-provided device fingerprints
+
+Adyen Web includes Risk SDK data in payment requests automatically. If your storefront separately
+collects its own device fingerprint, pass the actual value to `AdyenCheckout` through
+`paymentRequestData`:
+
+```jsx
+<AdyenCheckout paymentRequestData={{deviceFingerprint}} />
+```
+
+Do not send an empty or placeholder fingerprint. The integration omits empty values and the
+placeholders `N/A` and `ZZ` from the payment request.
+
+For US ecommerce card payments, the server checks the DCAP-required shopper IP, shopper email,
+complete billing address, and fingerprint data before calling `/payments`. Adyen Web
+`riskData.clientData` or a merchant-provided `deviceFingerprint` satisfies the fingerprint check.
+Missing data produces a warning containing field names only; shopper data is never included in the
+warning.
+
 ## Prerequisites
 
 - [Adyen test account](https://www.adyen.com/signup)

@@ -71,8 +71,22 @@ describe('BasketService', () => {
 
     describe('constructor', () => {
         it('should create a shopperBaskets client with the correct authorization', () => {
-            expect(createShopperBasketsClient).toHaveBeenCalledWith('Bearer mockToken', 'RefArch')
+            expect(createShopperBasketsClient).toHaveBeenCalledWith(
+                'Bearer mockToken',
+                'RefArch',
+                undefined
+            )
             expect(basketService.shopperBaskets).toBe(mockShopperBaskets)
+        })
+
+        it('should create a shopperBaskets client with the context locale so basket writes are localized', () => {
+            new BasketService({...mockAdyenContext, locale: 'en-GB'}, mockRes)
+
+            expect(createShopperBasketsClient).toHaveBeenLastCalledWith(
+                'Bearer mockToken',
+                'RefArch',
+                'en-GB'
+            )
         })
     })
 

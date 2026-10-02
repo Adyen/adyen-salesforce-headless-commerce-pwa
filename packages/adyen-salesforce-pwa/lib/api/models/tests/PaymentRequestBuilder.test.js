@@ -1,5 +1,9 @@
 import {PaymentRequestBuilder} from '../PaymentRequestBuilder'
-import {RECURRING_PROCESSING_MODEL, SHOPPER_INTERACTIONS} from '../../../utils/constants.mjs'
+import {
+    RECURRING_PROCESSING_MODEL,
+    SHOPPER_INTERACTIONS,
+    TAXATION
+} from '../../../utils/constants.mjs'
 import Logger from '../logger'
 
 // Mock dependencies
@@ -22,7 +26,7 @@ jest.mock('../logger', () => ({
 }))
 
 jest.mock('../../utils/paymentUtils.js', () => ({
-    filterStateData: jest.fn((data) => data),
+    filterPaymentStateData: jest.fn((data) => data),
     getShopperName: jest.fn((basket) => {
         const firstName = basket?.billingAddress?.firstName
         const lastName = basket?.billingAddress?.lastName
@@ -140,7 +144,8 @@ describe('PaymentRequestBuilder', () => {
 
             expect(result).toBe(false)
             expect(Logger.warn).toHaveBeenCalledWith(
-                'PaymentRequestBuilder: billing address is null or undefined'
+                'PaymentRequestBuilder',
+                'billing address is null or undefined'
             )
         })
 
@@ -155,9 +160,10 @@ describe('PaymentRequestBuilder', () => {
 
             expect(result).toBe(false)
             expect(Logger.warn).toHaveBeenCalledWith(
-                'PaymentRequestBuilder: delivery address missing required fields: postalCode, country',
-                {address}
+                'PaymentRequestBuilder',
+                'delivery address missing required fields: postalCode, country'
             )
+            expect(Logger.warn.mock.calls[0].join(' ')).not.toContain('123 Main St')
         })
 
         it('should return true for valid address', () => {
@@ -319,15 +325,37 @@ describe('PaymentRequestBuilder', () => {
     })
 
     describe('withNetProductAmount', () => {
-        it('should add amount from basket product total', () => {
-            builder = new PaymentRequestBuilder(mockContext)
-            builder.withNetProductAmount()
+        it.each([
+            ['gross taxation without discounts', TAXATION.GROSS, 100, 20, 20, 8000],
+            ['gross taxation with discounts', TAXATION.GROSS, 90, 10, 20, 8000],
+            ['net taxation without discounts', TAXATION.NET, 100, 20, 20, 10000],
+            ['net taxation with discounts', TAXATION.NET, 90, 10, 20, 9000]
+        ])(
+            'should use the correct amount for %s',
+            (
+                _scenario,
+                taxation,
+                productTotal,
+                adjustedMerchandizeTotalTax,
+                merchandizeTotalTax,
+                value
+            ) => {
+                mockContext.basket = {
+                    ...mockContext.basket,
+                    taxation,
+                    productTotal,
+                    adjustedMerchandizeTotalTax,
+                    merchandizeTotalTax
+                }
+                builder = new PaymentRequestBuilder(mockContext)
+                builder.withNetProductAmount()
 
-            expect(builder.paymentRequest.amount).toEqual({
-                value: 9000,
-                currency: 'USD'
-            })
-        })
+                expect(builder.paymentRequest.amount).toEqual({
+                    value,
+                    currency: 'USD'
+                })
+            }
+        )
 
         it('should not add amount if basket is missing', () => {
             builder = new PaymentRequestBuilder({})
@@ -494,23 +522,53 @@ describe('PaymentRequestBuilder', () => {
     })
 
     describe('withOpenInvoiceData', () => {
-        it('should add line items and country code for open invoice methods', () => {
+        it('should add line items for open invoice methods', () => {
             mockContext.stateData.paymentMethod.type = 'klarna'
             builder = new PaymentRequestBuilder(mockContext)
-            builder.withBillingAddress() // Need billing address for country code
             builder.withOpenInvoiceData()
 
             expect(builder.paymentRequest.lineItems).toEqual([{id: 'item1'}])
-            expect(builder.paymentRequest.countryCode).toBe('US')
         })
 
-        it('should not add data for non-open invoice methods', () => {
+        it('should not add line items for non-open invoice methods', () => {
             mockContext.stateData.paymentMethod.type = 'scheme'
             builder = new PaymentRequestBuilder(mockContext)
             builder.withOpenInvoiceData()
 
             expect(builder.paymentRequest.lineItems).toBeUndefined()
+        })
+    })
+
+    describe('withCountryCode', () => {
+        it('should set country code from billing address for any payment method', () => {
+            mockContext.stateData.paymentMethod.type = 'scalapay'
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.withBillingAddress()
+            builder.withCountryCode()
+
+            expect(builder.paymentRequest.countryCode).toBe('US')
+        })
+
+        it('should not set country code when billing address is missing', () => {
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.withCountryCode()
+
             expect(builder.paymentRequest.countryCode).toBeUndefined()
+        })
+
+        it('should not overwrite an existing country code', () => {
+            builder = new PaymentRequestBuilder(mockContext)
+            builder.paymentRequest.countryCode = 'GB'
+            builder.withBillingAddress()
+            builder.withCountryCode()
+
+            expect(builder.paymentRequest.countryCode).toBe('GB')
+        })
+
+        it('should return builder for chaining', () => {
+            builder = new PaymentRequestBuilder(mockContext)
+
+            expect(builder.withCountryCode()).toBe(builder)
         })
     })
 

@@ -12,8 +12,10 @@ jest.mock('../../helpers/customerHelper.js')
 jest.mock('../../../utils/getAdyenConfigForCurrentSite.mjs')
 jest.mock('../../models/logger.js')
 jest.mock('../../models/basketService.js')
+jest.mock('../../helpers/localeHelper.js')
 
 import {getCustomer} from '../../helpers/customerHelper.js'
+import {resolveLocale} from '../../helpers/localeHelper.js'
 
 describe('prepareRequestContext middleware', () => {
     let req, res, next
@@ -69,6 +71,32 @@ describe('prepareRequestContext middleware', () => {
         )
         expect(next).toHaveBeenCalledWith()
         expect(next).toHaveBeenCalledTimes(1)
+    })
+
+    test('should resolve the requested locale and expose it on the context', async () => {
+        req.query.locale = 'en-GB'
+        getBasket.mockResolvedValue({basketId: 'mockBasketId'})
+        getCustomer.mockResolvedValue({customerId: 'mockCustomerId'})
+        getAdyenConfigForCurrentSite.mockReturnValue({})
+        resolveLocale.mockReturnValue('en-GB')
+
+        await prepareRequestContext(req, res, next)
+
+        expect(resolveLocale).toHaveBeenCalledWith('RefArch', 'en-GB')
+        expect(res.locals.adyen.locale).toBe('en-GB')
+        expect(next).toHaveBeenCalledWith()
+    })
+
+    test('should leave the locale undefined when the request does not carry one', async () => {
+        getBasket.mockResolvedValue({basketId: 'mockBasketId'})
+        getCustomer.mockResolvedValue({customerId: 'mockCustomerId'})
+        getAdyenConfigForCurrentSite.mockReturnValue({})
+        resolveLocale.mockReturnValue(undefined)
+
+        await prepareRequestContext(req, res, next)
+
+        expect(resolveLocale).toHaveBeenCalledWith('RefArch', undefined)
+        expect(res.locals.adyen.locale).toBeUndefined()
     })
 
     test('should call next with an error if required headers are missing', async () => {

@@ -50,6 +50,24 @@ describe('PaymentCancelExpressService', () => {
             expect(result).toEqual(mockPayload)
         })
 
+        it('should include the order context in the request body', async () => {
+            mockPost.mockResolvedValue({
+                status: 200,
+                json: jest.fn().mockResolvedValue({newBasketId: 'basket-new'})
+            })
+
+            const result = await service.paymentCancelExpress({
+                orderNo: 'order-1',
+                isTemporaryBasket: true
+            })
+
+            expect(mockPost).toHaveBeenCalledWith({
+                path: '/cancel/express',
+                body: JSON.stringify({orderNo: 'order-1', isTemporaryBasket: true})
+            })
+            expect(result).toEqual({newBasketId: 'basket-new'})
+        })
+
         it('should throw an error with server message when status >= 300', async () => {
             mockPost.mockResolvedValue({
                 status: 400,

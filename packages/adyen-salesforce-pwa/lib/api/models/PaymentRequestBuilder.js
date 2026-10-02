@@ -9,7 +9,7 @@ import {formatAddressInAdyenFormat} from '../../utils/formatAddress.mjs'
 import {getApplicationInfo} from '../../utils/getApplicationInfo.mjs'
 import Logger from './logger.js'
 import {
-    filterStateData,
+    filterPaymentStateData,
     getShopperName,
     getNativeThreeDS,
     isOpenInvoiceMethod,
@@ -55,7 +55,7 @@ export class PaymentRequestBuilder {
      */
     _validateAddress(address, type) {
         if (!address) {
-            Logger.warn(`PaymentRequestBuilder: ${type} address is null or undefined`)
+            Logger.warn('PaymentRequestBuilder', `${type} address is null or undefined`)
             return false
         }
 
@@ -64,8 +64,8 @@ export class PaymentRequestBuilder {
 
         if (missingFields.length > 0) {
             Logger.warn(
-                `PaymentRequestBuilder: ${type} address missing required fields: ${missingFields.join(', ')}`,
-                {address}
+                'PaymentRequestBuilder',
+                `${type} address missing required fields: ${missingFields.join(', ')}`
             )
             return false
         }
@@ -81,7 +81,7 @@ export class PaymentRequestBuilder {
     withStateData(data = null) {
         const actualData = data || this.context.stateData
         if (actualData) {
-            Object.assign(this.paymentRequest, filterStateData(actualData))
+            Object.assign(this.paymentRequest, filterPaymentStateData(actualData))
         }
         return this
     }
@@ -179,7 +179,7 @@ export class PaymentRequestBuilder {
 
     /**
      * Sets the payment amount using the basket's product total.
-     * For gross taxation, subtracts merchandize tax to get the net product amount.
+     * For gross taxation, subtracts adjusted merchandise tax to get the net product amount.
      * Used for express payment methods where final tax cannot be calculated during the payments call.
      * @param {object} basket - The basket object. Uses context.basket if not provided.
      * @returns {PaymentRequestBuilder} The builder instance for chaining.
@@ -190,11 +190,11 @@ export class PaymentRequestBuilder {
             const currency = actualBasket.currency
             let amountValue = getCurrencyValueForApi(actualBasket.productTotal, currency)
             if (actualBasket.taxation === TAXATION.GROSS) {
-                const merchandizeTotalTax = getCurrencyValueForApi(
-                    actualBasket.merchandizeTotalTax,
+                const adjustedMerchandizeTotalTax = getCurrencyValueForApi(
+                    actualBasket.adjustedMerchandizeTotalTax,
                     currency
                 )
-                amountValue = amountValue - merchandizeTotalTax
+                amountValue = amountValue - adjustedMerchandizeTotalTax
             }
 
             this.paymentRequest.amount = {
@@ -318,7 +318,8 @@ export class PaymentRequestBuilder {
     }
 
     /**
-     * Adds line items and country code for open invoice methods.
+     * Adds line items for open invoice methods (e.g. Klarna, Afterpay, Affirm).
+     * These methods require itemized line items for risk/tax purposes.
      * @param {string} paymentMethodType - The payment method type. Uses context.stateData if not provided.
      * @param {object} basket - The basket object. Uses context.basket if not provided.
      * @returns {PaymentRequestBuilder} The builder instance for chaining.
@@ -330,6 +331,20 @@ export class PaymentRequestBuilder {
 
         if (isOpenInvoiceMethod(actualPaymentMethodType) && actualBasket) {
             this.paymentRequest.lineItems = getLineItems(actualBasket, actualPaymentMethodType)
+        }
+        return this
+    }
+
+    /**
+     * Sets the country code from the billing address, unless one was already provided
+     * (e.g. via stateData.countryCode from the client).
+     * Adyen requires countryCode for many redirect/local payment methods (e.g. Scalapay,
+     * Klarna, iDEAL) and it's safe to include for any method whenever it's known, so this
+     * is applied regardless of the selected payment method type.
+     * @returns {PaymentRequestBuilder} The builder instance for chaining.
+     */
+    withCountryCode() {
+        if (!this.paymentRequest.countryCode && this.paymentRequest.billingAddress?.country) {
             this.paymentRequest.countryCode = this.paymentRequest.billingAddress.country
         }
         return this
@@ -503,6 +518,7 @@ export class PaymentRequestBuilder {
             .withShopperEmail()
             .withShopperIP()
             .withShopperName()
+            .withCountryCode()
             .withOpenInvoiceData()
             .withRecurringProcessing()
             .withAdditionalData()

@@ -93,6 +93,7 @@ describe('AdyenCheckoutComponent', () => {
         })
 
         // Mock helpers
+        paymentMethodsConfiguration.mockReturnValue({})
         createCheckoutInstance.mockResolvedValue(mockCheckoutInstance)
         handleRedirects.mockReturnValue(false) // Default to not a redirect
         mountCheckoutComponent.mockReturnValue(mockDropinInstance)
@@ -433,6 +434,70 @@ describe('AdyenCheckoutComponent', () => {
         expect(true).toBe(true)
     })
 
+    it('should initialize checkout with the server-validated order number', async () => {
+        useAdyenOrderNumber.mockReturnValue({
+            orderNo: 'fresh-order',
+            error: null,
+            isLoading: false
+        })
+        paymentMethodsConfiguration.mockImplementation(({orderNo}) => ({orderNo}))
+        const props = {
+            ...defaultProps,
+            basket: {...defaultProps.basket, c_orderNo: 'spent-order'}
+        }
+
+        render(<AdyenCheckoutComponent {...props} />)
+
+        await waitFor(() => {
+            expect(createCheckoutInstance).toHaveBeenCalledTimes(1)
+        })
+        expect(createCheckoutInstance).toHaveBeenCalledWith(
+            expect.objectContaining({
+                paymentMethodsConfiguration: {orderNo: 'fresh-order'}
+            })
+        )
+    })
+
+    it('should preserve local order number updates after server validation', async () => {
+        useAdyenOrderNumber.mockReturnValue({
+            orderNo: 'spent-order',
+            error: null,
+            isLoading: true
+        })
+        const props = {
+            ...defaultProps,
+            basket: {...defaultProps.basket, c_orderNo: 'spent-order'}
+        }
+        const {rerender} = render(<AdyenCheckoutComponent {...props} />)
+
+        useAdyenOrderNumber.mockReturnValue({
+            orderNo: 'fresh-order',
+            error: null,
+            isLoading: false
+        })
+        rerender(
+            <AdyenCheckoutComponent
+                {...props}
+                basket={{...props.basket, c_orderData: JSON.stringify({})}}
+            />
+        )
+
+        await waitFor(() => {
+            expect(paymentMethodsConfiguration).toHaveBeenLastCalledWith(
+                expect.objectContaining({orderNo: 'fresh-order'})
+            )
+        })
+
+        const {setOrderNo} = paymentMethodsConfiguration.mock.calls.at(-1)[0]
+        act(() => setOrderNo('response-order'))
+
+        await waitFor(() => {
+            expect(paymentMethodsConfiguration).toHaveBeenLastCalledWith(
+                expect.objectContaining({orderNo: 'response-order'})
+            )
+        })
+    })
+
     it('should update orderNo when basket c_orderNo changes', async () => {
         const {rerender} = render(<AdyenCheckoutComponent {...defaultProps} />)
 
@@ -666,6 +731,25 @@ describe('AdyenCheckoutComponent', () => {
     })
 
     describe('Dual-mount error deduplication', () => {
+        it('should not initialize either instance when order number validation fails', async () => {
+            const onErrorMock = jest.fn()
+            const mockError = new Error('Order number validation failed')
+            useAdyenOrderNumber.mockReturnValue({
+                orderNo: 'unvalidated-order',
+                error: mockError,
+                isLoading: false
+            })
+            const props = {...defaultProps, onError: [onErrorMock]}
+
+            render(<AdyenCheckoutComponent {...props} />)
+            render(<AdyenCheckoutComponent {...props} />)
+
+            await waitFor(() => {
+                expect(onErrorMock).toHaveBeenCalledTimes(1)
+            })
+            expect(createCheckoutInstance).not.toHaveBeenCalled()
+        })
+
         it('should fire onError only once when two instances fail with the same error', async () => {
             const onErrorMock = jest.fn()
             const mockError = new Error('Test initialization error')

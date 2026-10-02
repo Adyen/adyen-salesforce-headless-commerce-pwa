@@ -111,8 +111,9 @@ export function createCheckoutResponse(response, orderNumber) {
 /**
  * Validates that the sum of all payment instruments and the current payment request amount
  * equals the basket's expected total amount.
- * For express payments (PayPal, Apple Pay), validates against the payment request amount
- * since tax may not be calculated yet. For standard payments, validates against order total.
+ * PayPal express is built from the net product amount (no tax, no shipping), so its request
+ * amount is taken as the expected total and the comparison is skipped. Every other payment,
+ * including Apple Pay and Google Pay express, is validated against the basket order total.
  * @param {object} adyenContext - The request context from `res.locals.adyen`.
  * @param {object} [amount] - The Adyen payment request amount with value and currency.
  * @param {object} [paymentMethod] - The Adyen payment request paymentMethod.
@@ -124,16 +125,14 @@ export async function validateBasketPayments(adyenContext, amount, paymentMethod
     const isPartialPayment = !!adyenOrderData?.orderData
     const remainingAmountValue = adyenOrderData?.remainingAmount?.value ?? 0
     const isGiftCardPayment = paymentMethod?.type === PAYMENT_METHOD_TYPES.GIFT_CARD
-    const isExpressPayment = paymentMethod?.subtype === 'express'
+    const isPayPalExpressPayment = isPayPalExpress({paymentMethod})
 
     // Validate currency match
     if (amount?.currency && amount.currency !== basket.currency) {
         throw new AdyenError('Currency mismatch between payment and basket', 409)
     }
 
-    // For express payments, use the payment request amount as the expected total
-    // since tax isn't calculated yet. For standard payments, use order total.
-    const expectedBasketTotal = isExpressPayment
+    const expectedBasketTotal = isPayPalExpressPayment
         ? amount?.value
         : getCurrencyValueForApi(basket.orderTotal, basket.currency)
 
@@ -164,9 +163,9 @@ export async function validateBasketPayments(adyenContext, amount, paymentMethod
 
     const finalAmount = existingInstrumentsTotalInMinorUnits + (amount?.value ?? 0)
 
-    // For express payments, skip validation since amount is based on productTotal
-    // and will be validated after tax calculation
-    if (isExpressPayment) {
+    // PayPal express is submitted with the net product amount, so it can only be validated
+    // once tax and shipping have been calculated on the basket.
+    if (isPayPalExpressPayment) {
         return
     }
 
@@ -233,6 +232,8 @@ export async function revertCheckoutState(adyenContext, stepName) {
  * Handles the cleanup process for a failed express payment.
  * It resets the basket's Adyen-related custom attributes, removes all payment instruments,
  * removes shipping method and shipping address from the basket.
+ * Does nothing when no basket is resolved, so a fallback basket created after the real one was
+ * consumed into an order is left untouched.
  * @param {object} adyenContext - The request context from `res.locals.adyen`.
  * @param {string} stepName - The name of the controller step for logging purposes (e.g., 'paymentCancelExpress').
  */
@@ -240,6 +241,11 @@ export async function revertCheckoutStateForExpress(adyenContext, stepName) {
     if (!adyenContext) {
         const errorMessage = `${ERROR_MESSAGE.ADYEN_CONTEXT_NOT_FOUND} in ${stepName}`
         throw new AdyenError(errorMessage, 500)
+    }
+
+    if (!adyenContext.basket?.basketId) {
+        Logger.info(stepName, 'revertCheckoutStateForExpress skipped — no basket to revert')
+        return
     }
 
     await _cleanupBasket(adyenContext)
@@ -313,4 +319,24 @@ export function isGooglePayExpress(data) {
  */
 export function isPayPalExpress(data) {
     return data.paymentMethod?.type === 'paypal' && data.paymentMethod?.subtype === 'express'
+}
+
+/**
+ * Returns true when the SFCC order must be created before calling Adyen /payments, so an
+ * AUTHORISATION webhook can never arrive before the order exists.
+ * Gift cards are excluded because a partial payment order is only finalised once the remaining
+ * amount is covered. PayPal express is excluded because its request carries the net product
+ * amount, so the basket total is not final yet and a pre-created order would not match the
+ * authorised amount.
+ * @param {object} data - The payment state data from the client.
+ * @returns {boolean}
+ */
+export function shouldCreateOrderBeforePayment(data) {
+    if (data?.paymentMethod?.type === PAYMENT_METHOD_TYPES.GIFT_CARD) {
+        return false
+    }
+    if (data?.paymentMethod?.subtype !== 'express') {
+        return true
+    }
+    return isApplePayExpress(data) || isGooglePayExpress(data)
 }

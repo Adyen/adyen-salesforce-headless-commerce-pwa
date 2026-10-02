@@ -4,6 +4,7 @@ import {
     createPaymentRequestObject,
     revertCheckoutState,
     revertCheckoutStateForExpress,
+    shouldCreateOrderBeforePayment,
     validateBasketPayments,
     isApplePayExpress,
     isGooglePayExpress,
@@ -19,7 +20,8 @@ import {
 import {
     RECURRING_PROCESSING_MODEL,
     RESULT_CODES,
-    SHOPPER_INTERACTIONS
+    SHOPPER_INTERACTIONS,
+    TAXATION
 } from '../../../utils/constants.mjs'
 import {AdyenError} from '../../models/AdyenError.js'
 
@@ -326,13 +328,26 @@ describe('paymentsHelper', () => {
             ).rejects.toThrow('Currency mismatch between payment and basket')
         })
 
-        it('should return early for express payments without throwing', async () => {
+        it('should return early for paypal express payments without throwing', async () => {
             const amount = {value: 5000}
-            const paymentMethod = {type: 'applepay', subtype: 'express'}
+            const paymentMethod = {type: 'paypal', subtype: 'express'}
             await expect(
                 validateBasketPayments(mockAdyenContext, amount, paymentMethod)
             ).resolves.toBeUndefined()
         })
+
+        it.each([['applepay'], ['googlepay']])(
+            'should validate %s express against the basket order total',
+            async (type) => {
+                const paymentMethod = {type, subtype: 'express'}
+                await expect(
+                    validateBasketPayments(mockAdyenContext, {value: 10000}, paymentMethod)
+                ).resolves.toBeUndefined()
+                await expect(
+                    validateBasketPayments(mockAdyenContext, {value: 5000}, paymentMethod)
+                ).rejects.toThrow(new AdyenError('amounts do not match', 409))
+            }
+        )
 
         it('should throw for invalid order data structure in partial payment', async () => {
             mockAdyenContext.basket.c_orderData = JSON.stringify({
@@ -519,6 +534,7 @@ describe('paymentsHelper', () => {
             const mockData = {
                 origin: 'https://example.com',
                 paymentMethod: {type: 'scheme'},
+                deviceFingerprint: 'merchant-device-fingerprint',
                 billingAddress: {
                     street: '1 Billing St',
                     firstName: 'John',
@@ -669,20 +685,32 @@ describe('paymentsHelper', () => {
             expect(paymentRequest.returnUrl).toBe('https://custom.return/url')
         })
 
-        test('should handle PayPal Express payment request', async () => {
+        test('should use the adjusted net product amount for discounted gross PayPal Express', async () => {
             const mockData = {
                 paymentMethod: {type: 'paypal', subtype: 'express'},
                 origin: 'https://example.com'
             }
+            const contextWithDiscountedGrossBasket = {
+                ...mockAdyenContext,
+                basket: {
+                    ...mockBasket,
+                    taxation: TAXATION.GROSS,
+                    productTotal: 90,
+                    adjustedMerchandizeTotalTax: 10,
+                    merchandizeTotalTax: 20
+                }
+            }
 
             const paymentRequest = await createPaymentRequestObject(
                 mockData,
-                mockAdyenContext,
+                contextWithDiscountedGrossBasket,
                 mockReq
             )
 
-            expect(paymentRequest).toBeDefined()
-            expect(paymentRequest.merchantAccount).toBe('AdyenMerchantAccount')
+            expect(paymentRequest.amount).toEqual({
+                value: 8000,
+                currency: 'USD'
+            })
         })
 
         test('should handle partial payment request', async () => {
@@ -777,7 +805,7 @@ describe('paymentsHelper', () => {
 
         it('should cleanup basket and remove shipping address', async () => {
             const mockAdyenContext = {
-                basket: {},
+                basket: {basketId: 'basket-1'},
                 basketService: {
                     update: jest.fn(),
                     removeAllPaymentInstruments: jest.fn(),
@@ -788,6 +816,45 @@ describe('paymentsHelper', () => {
             expect(mockAdyenContext.basketService.update).toHaveBeenCalled()
             expect(mockAdyenContext.basketService.removeAllPaymentInstruments).toHaveBeenCalled()
             expect(mockAdyenContext.basketService.removeShippingAddress).toHaveBeenCalled()
+        })
+
+        it('should do nothing when no basket is resolved', async () => {
+            const mockAdyenContext = {
+                basket: {},
+                basketService: {
+                    update: jest.fn(),
+                    removeAllPaymentInstruments: jest.fn(),
+                    removeShippingAddress: jest.fn()
+                }
+            }
+            await expect(
+                revertCheckoutStateForExpress(mockAdyenContext, 'test')
+            ).resolves.toBeUndefined()
+            expect(mockAdyenContext.basketService.update).not.toHaveBeenCalled()
+            expect(
+                mockAdyenContext.basketService.removeAllPaymentInstruments
+            ).not.toHaveBeenCalled()
+            expect(mockAdyenContext.basketService.removeShippingAddress).not.toHaveBeenCalled()
+        })
+    })
+
+    describe('shouldCreateOrderBeforePayment', () => {
+        it.each([
+            [{type: 'scheme'}, true],
+            [{type: 'ideal'}, true],
+            [{type: 'applepay'}, true],
+            [{type: 'applepay', subtype: 'express'}, true],
+            [{type: 'googlepay', subtype: 'express'}, true],
+            [{type: 'paypal', subtype: 'express'}, false],
+            [{type: 'giftcard'}, false],
+            [{type: 'giftcard', subtype: 'express'}, false]
+        ])('should return %j -> %s', (paymentMethod, expected) => {
+            expect(shouldCreateOrderBeforePayment({paymentMethod})).toBe(expected)
+        })
+
+        it('should return true when no payment method is provided', () => {
+            expect(shouldCreateOrderBeforePayment({})).toBe(true)
+            expect(shouldCreateOrderBeforePayment(undefined)).toBe(true)
         })
     })
 

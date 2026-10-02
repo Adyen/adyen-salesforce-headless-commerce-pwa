@@ -54,6 +54,30 @@ describe('basketHelper', () => {
                 headers: {authorization: mockAuth}
             })
         })
+
+        it('should include the locale parameter when a locale is given', () => {
+            getConfig.mockReturnValue({app: {commerceAPI: {parameters: {organizationId: 'org'}}}})
+
+            createShopperBasketsClient('Bearer mockToken', 'RefArch', 'en-GB')
+
+            expect(ShopperBasketsV2).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    parameters: {organizationId: 'org', siteId: 'RefArch', locale: 'en-GB'}
+                })
+            )
+        })
+
+        it('should omit the locale parameter when no locale is given', () => {
+            getConfig.mockReturnValue({app: {commerceAPI: {parameters: {organizationId: 'org'}}}})
+
+            createShopperBasketsClient('Bearer mockToken', 'RefArch')
+
+            expect(ShopperBasketsV2).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    parameters: {organizationId: 'org', siteId: 'RefArch'}
+                })
+            )
+        })
     })
 
     describe('getBasket', () => {

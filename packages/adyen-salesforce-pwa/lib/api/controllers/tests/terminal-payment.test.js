@@ -306,6 +306,19 @@ describe('createTerminalPayment controller', () => {
         expect(res.locals.response.newBasketId).toBe('new-basket-123')
     })
 
+    it('should not send a terminal abort when an existing order is rejected', async () => {
+        const orderError = Object.assign(new Error(ERROR_MESSAGE.ORDER_ALREADY_PLACED), {
+            statusCode: 409
+        })
+        orderHelper.createOrderUsingOrderNo.mockRejectedValue(orderError)
+
+        await createTerminalPayment(req, res, next)
+
+        expect(mockSync).not.toHaveBeenCalled()
+        expect(orderHelper.failOrderAndReopenBasket).not.toHaveBeenCalled()
+        expect(next).toHaveBeenCalledWith(orderError)
+    })
+
     it('should send abort and fail order on communication error', async () => {
         mockSync.mockRejectedValueOnce(new Error('Network timeout')).mockResolvedValueOnce('ok')
 

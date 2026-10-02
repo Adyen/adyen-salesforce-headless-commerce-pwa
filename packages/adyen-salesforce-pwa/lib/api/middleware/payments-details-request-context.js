@@ -5,6 +5,7 @@ import {getAdyenConfigForCurrentSite} from '../../utils/getAdyenConfigForCurrent
 import Logger from '../models/logger.js'
 import {BasketService} from '../models/basketService.js'
 import {getCustomer} from '../helpers/customerHelper'
+import {resolveLocale} from '../helpers/localeHelper.js'
 
 /**
  * Factory that creates a payments/details context middleware with the given plugin options.
@@ -22,7 +23,7 @@ export function createPaymentsDetailsContext(options = {}) {
         const route = req.originalUrl
         Logger.info(`prepareRequestContext for ${route}`, 'start')
         const {authorization, basketid, customerid} = req.headers
-        const {siteId} = req.query
+        const {siteId, locale} = req.query
 
         const isValidValue = (value) => value && value !== 'undefined' && value !== 'null'
 
@@ -74,6 +75,7 @@ export function createPaymentsDetailsContext(options = {}) {
                 basket: basket || {},
                 adyenConfig,
                 siteId,
+                locale: resolveLocale(siteId, locale),
                 authorization,
                 customerId: customerid,
                 customer: customer || null

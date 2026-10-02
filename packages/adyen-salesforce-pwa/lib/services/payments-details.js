@@ -8,10 +8,21 @@ export class AdyenPaymentsDetailsService {
         this.apiClient = new ApiClient(this.baseUrl, token, customerId, basketId, site)
     }
 
-    async submitPaymentsDetails(data) {
+    /**
+     * Submits additional payment details (3DS, redirect result) to Adyen.
+     * @param {object} data - The Adyen state data for the details call.
+     * @param {object} [options] - Order context for express flows.
+     * @param {string} [options.orderNo] - Order number when the SFCC order was already created.
+     * @param {boolean} [options.isTemporaryBasket] - True for the PDP express flow, so the
+     * shopper's real cart is not reopened over the temporary basket on failure.
+     * @returns {Promise<object>} The checkout response.
+     */
+    async submitPaymentsDetails(data, {orderNo, isTemporaryBasket} = {}) {
         const res = await this.apiClient.post({
             body: JSON.stringify({
-                data
+                data,
+                orderNo,
+                isTemporaryBasket
             })
         })
         if (res.status >= 300) {

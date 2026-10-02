@@ -112,6 +112,7 @@ export const ERROR_MESSAGE = {
     INVALID_SHIPPING_ADDRESS: 'invalid shipping address',
     UNAUTHORIZED: 'unauthorized',
     ORDER_ALREADY_EXISTS: 'order already exists',
+    ORDER_ALREADY_PLACED: 'order already placed',
     ORDER_NOT_FOUND: 'order not found',
     ORDER_NUMBER_NOT_FOUND: 'order number not found on basket',
     PAYMENTS_DETAILS_NOT_SUCCESSFUL: 'payments details call not successful',
