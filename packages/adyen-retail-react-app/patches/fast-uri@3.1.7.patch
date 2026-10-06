@@ -1,0 +1,26 @@
+diff --git a/index.js b/index.js
+index af921d3fdd23a54a79e52d6bd430d4bf2bd135c6..b9381ab60744185ed5ca8084c33230be225196e0 100644
+--- a/index.js
++++ b/index.js
+@@ -526,13 +526,15 @@ function parseWithStatus (uri, opts) {
+       malformedHost = canonicalizeHost(parsed, options, schemeHandler, isIP)
+     }
+ 
+-    if (!schemeHandler || (schemeHandler && !schemeHandler.skipNormalize)) {
+-      if (uri.indexOf('%') !== -1) {
+-        if (parsed.host !== undefined && !malformedIPLiteral) {
+-          const host = isIP ? parsed.host : normalizePercentEncoding(parsed.host, true)
+-          parsed.host = reescapeHostDelimiters(host, isIP)
+-        }
++    if (uri.indexOf('%') !== -1 && parsed.host !== undefined && !malformedIPLiteral) {
++      let host = isIP ? parsed.host : normalizePercentEncoding(parsed.host, true)
++      if (!isIP) {
++        host = normalizePercentEncoding(host.toLowerCase())
+       }
++      parsed.host = reescapeHostDelimiters(host, isIP)
++    }
++
++    if (!schemeHandler || (schemeHandler && !schemeHandler.skipNormalize)) {
+       if (parsed.path) {
+         parsed.path = normalizePathEncoding(parsed.path)
+       }
