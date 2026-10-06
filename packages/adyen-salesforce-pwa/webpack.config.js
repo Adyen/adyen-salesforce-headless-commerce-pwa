@@ -80,7 +80,6 @@ const webConfig = {
     resolve: {
         extensions: ['.js', '.jsx', '.ts', '.tsx', '.cjs', '.mjs', '...'],
         fallback: {
-            crypto: require.resolve('crypto-browserify'),
             stream: require.resolve('stream-browserify'),
             buffer: require.resolve('buffer/')
         }
