@@ -1,11 +1,10 @@
-import {BaseApiClient} from '../baseApiClient.js'
-import fetch from 'node-fetch'
-
 // Mock node-fetch
 jest.mock('node-fetch')
 
 describe('BaseApiClient', () => {
     const baseUrl = 'https://api.example.com'
+    let BaseApiClient
+    let fetch
     let client
     const originalEnv = process.env
 
@@ -26,8 +25,12 @@ describe('BaseApiClient', () => {
         process.env = originalEnv // Restore original environment
     })
 
-    beforeEach(() => {
+    beforeEach(async () => {
         jest.clearAllMocks()
+        // Reload the module so each test starts with an empty, module-level token cache
+        jest.resetModules()
+        ;({default: fetch} = await import('node-fetch'))
+        ;({BaseApiClient} = await import('../baseApiClient.js'))
         client = new BaseApiClient(baseUrl)
     })
 
@@ -117,6 +120,164 @@ describe('BaseApiClient', () => {
             expect(fetch).toHaveBeenCalledWith(
                 expect.stringContaining('oauth2/access_token'),
                 expect.any(Object)
+            )
+
+            dateNowSpy.mockRestore()
+        })
+
+        it('should share the cached token across instances and subclasses', async () => {
+            class OtherApiClient extends BaseApiClient {}
+            fetch.mockResolvedValueOnce(mockTokenResponse).mockResolvedValue(mockApiResponse)
+
+            await new BaseApiClient(baseUrl)._callAdminApi('GET', 'test/path1')
+            await new BaseApiClient(baseUrl, 'OtherSite')._callAdminApi('GET', 'test/path2')
+            await new OtherApiClient('https://other.example.com')._callAdminApi('GET', 'path3')
+
+            const tokenCalls = fetch.mock.calls.filter(([url]) =>
+                url.includes('oauth2/access_token')
+            )
+            expect(tokenCalls).toHaveLength(1)
+            expect(fetch).toHaveBeenCalledTimes(4)
+        })
+
+        it('should not cache a token when the token fetch fails', async () => {
+            fetch
+                .mockResolvedValueOnce({
+                    ok: false,
+                    status: 429,
+                    statusText: 'Too Many Requests',
+                    text: async () => 'Rate limited'
+                })
+                .mockResolvedValueOnce(mockTokenResponse)
+                .mockResolvedValueOnce(mockApiResponse)
+
+            await expect(client._callAdminApi('GET', 'test/path')).rejects.toThrow(
+                '429 Too Many Requests'
+            )
+            await client._callAdminApi('GET', 'test/path')
+
+            const tokenCalls = fetch.mock.calls.filter(([url]) =>
+                url.includes('oauth2/access_token')
+            )
+            expect(tokenCalls).toHaveLength(2)
+        })
+
+        it('should refresh the token and retry once on a 401 from the API', async () => {
+            fetch
+                .mockResolvedValueOnce(mockTokenResponse)
+                .mockResolvedValueOnce({
+                    ok: false,
+                    status: 401,
+                    statusText: 'Unauthorized',
+                    text: async () => 'Token revoked'
+                })
+                .mockResolvedValueOnce({
+                    ok: true,
+                    json: jest.fn().mockResolvedValue({
+                        access_token: 'fresh_admin_token',
+                        expires_in: 1800
+                    })
+                })
+                .mockResolvedValueOnce(mockApiResponse)
+
+            const response = await client._callAdminApi('PATCH', 'orders/123', {body: '{}'})
+
+            expect(response).toBe(mockApiResponse)
+            expect(fetch).toHaveBeenCalledTimes(4)
+            expect(fetch).toHaveBeenLastCalledWith(
+                `${baseUrl}/orders/123?siteId=RefArch`,
+                expect.objectContaining({
+                    method: 'PATCH',
+                    body: '{}',
+                    headers: expect.objectContaining({
+                        authorization: 'Bearer fresh_admin_token'
+                    })
+                })
+            )
+
+            // The fresh token is cached for subsequent calls
+            fetch.mockResolvedValueOnce(mockApiResponse)
+            await client._callAdminApi('GET', 'test/path')
+            expect(fetch).toHaveBeenCalledTimes(5)
+            expect(fetch).toHaveBeenLastCalledWith(
+                expect.any(String),
+                expect.objectContaining({
+                    headers: expect.objectContaining({
+                        authorization: 'Bearer fresh_admin_token'
+                    })
+                })
+            )
+        })
+
+        it('should throw without retrying again if the API returns 401 after a refresh', async () => {
+            const unauthorizedResponse = {
+                ok: false,
+                status: 401,
+                statusText: 'Unauthorized',
+                text: async () => 'Forbidden'
+            }
+            fetch
+                .mockResolvedValueOnce(mockTokenResponse)
+                .mockResolvedValueOnce(unauthorizedResponse)
+                .mockResolvedValueOnce(mockTokenResponse)
+                .mockResolvedValueOnce(unauthorizedResponse)
+
+            await expect(client._callAdminApi('GET', 'test/path')).rejects.toThrow(
+                '401 Unauthorized'
+            )
+            expect(fetch).toHaveBeenCalledTimes(4)
+        })
+
+        it('should not drop a fresh token cached by a concurrent request on a 401', async () => {
+            const dateNowSpy = jest.spyOn(Date, 'now')
+            dateNowSpy.mockReturnValue(0)
+
+            let resolveStaleCall
+            const staleCall = new Promise((resolve) => {
+                resolveStaleCall = resolve
+            })
+            fetch
+                .mockResolvedValueOnce(mockTokenResponse) // first token: mock_admin_token
+                .mockReturnValueOnce(staleCall) // API call with the first token, still pending
+
+            const firstRequest = client._callAdminApi('GET', 'test/path1')
+            await new Promise((resolve) => setImmediate(resolve))
+
+            // Meanwhile the first token expires and another request caches a fresh one
+            dateNowSpy.mockReturnValue(1800 * 1000)
+            fetch
+                .mockResolvedValueOnce({
+                    ok: true,
+                    json: jest.fn().mockResolvedValue({
+                        access_token: 'fresh_admin_token',
+                        expires_in: 1800
+                    })
+                })
+                .mockResolvedValueOnce(mockApiResponse)
+            await client._callAdminApi('GET', 'test/path2')
+
+            // The first request now gets a 401 for the old token and retries
+            fetch.mockResolvedValueOnce(mockApiResponse)
+            resolveStaleCall({
+                ok: false,
+                status: 401,
+                statusText: 'Unauthorized',
+                text: async () => 'Token expired'
+            })
+            await firstRequest
+
+            // The retry reused the fresh token instead of requesting a new one
+            const tokenCalls = fetch.mock.calls.filter(([url]) =>
+                url.includes('oauth2/access_token')
+            )
+            expect(tokenCalls).toHaveLength(2)
+            expect(fetch).toHaveBeenLastCalledWith(
+                `${baseUrl}/test/path1?siteId=RefArch`,
+                expect.objectContaining({
+                    headers: expect.objectContaining({
+                        authorization: 'Bearer fresh_admin_token'
+                    })
+                })
             )
 
             dateNowSpy.mockRestore()
