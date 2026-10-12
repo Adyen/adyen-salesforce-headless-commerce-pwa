@@ -104,7 +104,6 @@
             "postcss": ">=8.5.23 <9",
             "compression": ">=1.8.2 <2",
             "proxy-addr": ">=2.0.8 <3",
-            "source-map-js": ">=1.2.2 <2",
             "cookie": ">=0.7.0",
             "tmp": ">=0.2.6 <0.3",
             "fast-xml-parser": ">=5.10.1 <6",
