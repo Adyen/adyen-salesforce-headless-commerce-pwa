@@ -11,7 +11,8 @@ overrides:
   ws: '>=8.21.0 <9'
   tar-fs: '>=2.1.4'
   postcss: '>=8.5.23 <9'
-  compression: '>=1.8.1'
+  compression: '>=1.8.2 <2'
+  proxy-addr: '>=2.0.8 <3'
   cookie: '>=0.7.0'
   tmp: '>=0.2.6 <0.3'
   fast-xml-parser: '>=5.10.1 <6'
@@ -3733,8 +3734,8 @@ packages:
     resolution: {integrity: sha512-AF3r7P5dWxL8MxyITRMlORQNaOA2IkAFaTr4k7BUumjPtRpGDTZpl0Pb1XCO6JeDCBdp126Cgs9sMxqSjgYyRg==}
     engines: {node: '>= 0.6'}
 
-  compression@1.8.1:
-    resolution: {integrity: sha512-9mAqGPHLakhCLeNyxPkK4xVo746zQ/czLH1Ky+vkitMnWfWZps8r0qXuwhwizagCRttsL4lfG4pIOvaWLpAP0w==}
+  compression@1.8.2:
+    resolution: {integrity: sha512-o8vI5RE5A6EVVOd9o41jKp41aJom+QTEO/Bx8MYNjexMo/Bv2WOjUfZr+aL0WnYSgymUy6zeguqLTsIhV0gMvQ==}
     engines: {node: '>= 0.8.0'}
 
   compute-scroll-into-view@1.0.20:
@@ -6405,8 +6406,8 @@ packages:
   proto-list@1.2.4:
     resolution: {integrity: sha512-vtK/94akxsTMhe0/cbfpR+syPuszcuwhqVjJq26CuNDgFGj682oRBXOP5MJpv2r7JtE8MsiepGIqvvOTBwn2vA==}
 
-  proxy-addr@2.0.7:
-    resolution: {integrity: sha512-llQsMLSUDUPT44jdrU/O37qlnifitDP+ZwrmmZcoSKyLKvtZxpyV0n2/bD/N4tBAAZ/gJEdZU7KMraoK1+XYAg==}
+  proxy-addr@2.0.8:
+    resolution: {integrity: sha512-5nnx0yGyVUcY6t9RnWcARWtwT9F1D8O9rt08htPvnd49W1IgZtmLkhu9WfMzQj1cFxjHIO6connUNVW5k7AVyQ==}
     engines: {node: '>= 0.10'}
 
   proxy-from-env@1.1.0:
@@ -10958,7 +10959,7 @@ snapshots:
     dependencies:
       '@lhci/utils': 0.11.1
       chrome-launcher: 0.13.4
-      compression: 1.8.1
+      compression: 1.8.2
       debug: 4.4.3
       express: 4.22.2
       https-proxy-agent: 5.0.1
@@ -11267,7 +11268,7 @@ snapshots:
       babel-plugin-formatjs: 10.5.36
       chalk: 4.1.2
       commander: 9.5.0
-      compression: 1.8.1
+      compression: 1.8.2
       copy-webpack-plugin: 9.1.0(webpack@5.106.2)
       cross-env: 5.2.1
       eslint: 8.57.1
@@ -13063,11 +13064,12 @@ snapshots:
     dependencies:
       mime-db: 1.54.0
 
-  compression@1.8.1:
+  compression@1.8.2:
     dependencies:
       bytes: 3.1.2
       compressible: 2.0.18
       debug: 2.6.9
+      destroy: 1.2.0
       negotiator: 0.6.4
       on-headers: 1.1.0
       safe-buffer: 5.2.1
@@ -13948,7 +13950,7 @@ snapshots:
       on-finished: 2.4.1
       parseurl: 1.3.3
       path-to-regexp: 0.1.13
-      proxy-addr: 2.0.7
+      proxy-addr: 2.0.8
       qs: 6.16.0
       range-parser: 1.2.1
       safe-buffer: 5.2.1
@@ -16213,7 +16215,7 @@ snapshots:
 
   proto-list@1.2.4: {}
 
-  proxy-addr@2.0.7:
+  proxy-addr@2.0.8:
     dependencies:
       forwarded: 0.2.0
       ipaddr.js: 1.9.1
