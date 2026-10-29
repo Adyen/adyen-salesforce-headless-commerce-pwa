@@ -65,8 +65,8 @@ importers:
   .:
     dependencies:
       '@adyen/adyen-web':
-        specifier: ^6.35.0
-        version: 6.37.0
+        specifier: ^6.48.0
+        version: 6.48.0
       '@adyen/api-library':
         specifier: ^32.0.0
         version: 32.0.0
@@ -212,8 +212,8 @@ packages:
   '@adobe/css-tools@4.4.4':
     resolution: {integrity: sha512-Elp+iwUx5rN5+Y8xLt5/GRoG20WGoDCQ/1Fb+1LiGtvwbDavuSk0jhD/eZdckHAuzcDzccnkv+rEjyWfRx18gg==}
 
-  '@adyen/adyen-web@6.37.0':
-    resolution: {integrity: sha512-bHIil/Gqyt19poj8lhwF6uRLjwGHj66dhgq6AbEuxWotukL6VeN9DHzwl5FqqlPyLfVgfuuz/+9KkDKisq3M5A==}
+  '@adyen/adyen-web@6.48.0':
+    resolution: {integrity: sha512-k3HY603qf7OQ9GgFfvVLjpjhkvOKJoZZluyN8yvl7lis+KSIiy3lJECyrp2o5VgIIGvFjC2LBPUOHtC3j4mz/Q==}
 
   '@adyen/api-library@32.0.0':
     resolution: {integrity: sha512-TU8KnN1Zeh/NdhNFsH2jy9ahN+p9LTgM+hg8tY/IXyqqDKz1W7nxdCyEs9lVXzkOjwIBYF9VYdR9LUkQ5CvOFQ==}
@@ -2347,6 +2347,9 @@ packages:
     resolution: {integrity: sha512-/UhIkaZgPutTFmQ7RnIJGgDXZmtEJ7Dvi86xNTFWcnRxVRNk/aotsqDJYeEvDP+FSMB2SdW+pQzNMcWP0rwuNA==}
     engines: {node: '>=14'}
 
+  '@paypal/paypal-js@11.2.0':
+    resolution: {integrity: sha512-/qFVbiz/+9W8bW680g5M72cftZBvpSL7RKnPx5YLxgncjJKZovCL2FbW2Y2s5Jn/zZvrCJIL4TcVztPFOk6aJA==}
+
   '@peculiar/asn1-schema@2.7.0':
     resolution: {integrity: sha512-W8ZfWzLmQnrcky+eh3tni4IozMdqBDiHWU0N+vve/UGjMaUs8c0L7A2oEdkBXS8rTpWDpK/aoI3DG/L/hxmxPg==}
 
@@ -2764,8 +2767,8 @@ packages:
   '@types/google.maps@3.64.0':
     resolution: {integrity: sha512-dN0H6tB4lgLQLovcbPXFYYOEV41TpyyJghzb5jrzjB96FZmjeOghevVdC+BMGd6YqyCqXaggyEtqRXLRjzCBZA==}
 
-  '@types/googlepay@0.7.10':
-    resolution: {integrity: sha512-ByXjDfxEp87zsjw5cVsNKEeA+AIJYcWwJvRqPu85jO0Lp/FeG67csnf4mqbPaIxmdI6+Khp3v5I0yyjq9MrGhw==}
+  '@types/googlepay@0.7.13':
+    resolution: {integrity: sha512-Tj9Y/UfYxUHepJe84AXeLLeBaNHySq9NorRTQ0M2uzqEBS+mmzdJYJeK2Z4XhO58gtkndC0915DM7eIn90DCPA==}
 
   '@types/graceful-fs@4.1.9':
     resolution: {integrity: sha512-olP3sd1qOEe5dXTSaFvQG+02VdRXcdytWLAZsAq1PecU8uqQAhkrnbli7DagjtXKW/Bl7YJbUsa8MPcuc8LHEQ==}
@@ -6343,8 +6346,13 @@ packages:
     resolution: {integrity: sha512-spBB5sgC4cv2YcW03f/IAUN1pgDJWNWD8FzkyY4mArLUMJW+KlQhlmUdKAHQuPfb00Jl5xIfImeOsf6YL8QK7Q==}
     engines: {node: '>=0.10.0'}
 
-  preact@10.29.1:
-    resolution: {integrity: sha512-gQCLc/vWroE8lIpleXtdJhTFDogTdZG9AjMUpVkDf2iTCNwYNWA+u16dL41TqUDJO4gm2IgrcMv3uTpjd4Pwmg==}
+  preact@10.29.8:
+    resolution: {integrity: sha512-ej2aVZ+vZ8WO7tvlQWRM9N63A0KzF9q4mWJfDUHgYaIofWY9hu74QdnQrjoPMmZi2/nZ5gN0bJCQF49xQqx09Q==}
+    peerDependencies:
+      preact-render-to-string: '>=5'
+    peerDependenciesMeta:
+      preact-render-to-string:
+        optional: true
 
   prelude-ls@1.2.1:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
@@ -7822,12 +7830,15 @@ snapshots:
 
   '@adobe/css-tools@4.4.4': {}
 
-  '@adyen/adyen-web@6.37.0':
+  '@adyen/adyen-web@6.48.0':
     dependencies:
+      '@paypal/paypal-js': 11.2.0
       '@types/applepayjs': 14.0.9
-      '@types/googlepay': 0.7.10
+      '@types/googlepay': 0.7.13
       classnames: 2.5.1
-      preact: 10.29.1
+      preact: 10.29.8
+    transitivePeerDependencies:
+      - preact-render-to-string
 
   '@adyen/api-library@32.0.0':
     dependencies:
@@ -11101,6 +11112,10 @@ snapshots:
 
   '@opentelemetry/semantic-conventions@1.41.1': {}
 
+  '@paypal/paypal-js@11.2.0':
+    dependencies:
+      promise-polyfill: 8.3.0
+
   '@peculiar/asn1-schema@2.7.0':
     dependencies:
       '@peculiar/utils': 2.0.3
@@ -11967,7 +11982,7 @@ snapshots:
 
   '@types/google.maps@3.64.0': {}
 
-  '@types/googlepay@0.7.10': {}
+  '@types/googlepay@0.7.13': {}
 
   '@types/graceful-fs@4.1.9':
     dependencies:
@@ -16156,7 +16171,7 @@ snapshots:
       posthtml-parser: 0.2.1
       posthtml-render: 1.4.0
 
-  preact@10.29.1: {}
+  preact@10.29.8: {}
 
   prelude-ls@1.2.1: {}
 
