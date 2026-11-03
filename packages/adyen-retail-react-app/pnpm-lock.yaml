@@ -51,9 +51,15 @@ overrides:
   '@opentelemetry/propagator-jaeger': ^2.8.0
 
 patchedDependencies:
-  braces@3.0.3: 6e906e45008818cd56ee5a1f5134447ad5b723bafeed569a7167297347d92679
-  extract-zip@2.0.1: 3a93f2869fa728cb357cfa9c3be5fafa6b64111cbf1548050769cb3458a7f018
-  fast-uri@3.1.7: 6e328e0c334275911affb990a9470e60540095c469b1382a68a6b226cc6c45c3
+  braces@3.0.3:
+    hash: 6e906e45008818cd56ee5a1f5134447ad5b723bafeed569a7167297347d92679
+    path: patches/braces@3.0.3.patch
+  extract-zip@2.0.1:
+    hash: 3a93f2869fa728cb357cfa9c3be5fafa6b64111cbf1548050769cb3458a7f018
+    path: patches/extract-zip@2.0.1.patch
+  fast-uri@3.1.7:
+    hash: 6e328e0c334275911affb990a9470e60540095c469b1382a68a6b226cc6c45c3
+    path: patches/fast-uri@3.1.7.patch
 
 importers:
 
