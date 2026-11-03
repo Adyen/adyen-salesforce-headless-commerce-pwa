@@ -15,6 +15,14 @@ import {AdyenShippingMethodsService} from '../services/shipping-methods'
 import {shouldNotifyError} from '../utils/executeCallbacks'
 import {ERROR_NOTIFICATION_KEYS} from '../utils/constants.mjs'
 
+/**
+ * Renders Apple Pay Express for cart or product detail page checkout.
+ *
+ * @param {object} props - Component properties
+ * @param {Function} [props.onValidateMerchant] - Merchant validation callback invoked as
+ * `onValidateMerchant(resolve, reject, validationURL)`.
+ * @returns {React.ReactElement} The Apple Pay Express component
+ */
 const ApplePayExpressComponent = (props) => {
     const {
         locale: localeProp,
@@ -27,7 +35,8 @@ const ApplePayExpressComponent = (props) => {
         merchantDisplayName = '',
         product,
         authToken: authTokenProp,
-        customerId: customerIdProp
+        customerId: customerIdProp,
+        onValidateMerchant
     } = props
 
     // Resolve props with hook fallbacks
@@ -199,7 +208,8 @@ const ApplePayExpressComponent = (props) => {
                     merchantDisplayName,
                     customerId,
                     product,
-                    locale
+                    locale,
+                    onValidateMerchant
                 })
                 const applePayButton = new ApplePay(checkout, appleButtonConfig)
                 await applePayButton.isAvailable()
@@ -235,7 +245,8 @@ const ApplePayExpressComponent = (props) => {
         site?.id,
         navigate,
         fetchShippingMethods,
-        product
+        product,
+        onValidateMerchant
     ])
 
     const {spinner} = props
@@ -259,7 +270,8 @@ ApplePayExpressComponent.propTypes = {
     merchantDisplayName: PropTypes.string,
     product: PropTypes.object,
     authToken: PropTypes.string,
-    customerId: PropTypes.string
+    customerId: PropTypes.string,
+    onValidateMerchant: PropTypes.func
 }
 
 export default React.memo(ApplePayExpressComponent, (prevProps, nextProps) => {
@@ -270,6 +282,7 @@ export default React.memo(ApplePayExpressComponent, (prevProps, nextProps) => {
         prevProps.basket?.basketId === nextProps.basket?.basketId &&
         prevProps.basket?.orderTotal === nextProps.basket?.orderTotal &&
         prevProps.navigate === nextProps.navigate &&
+        prevProps.onValidateMerchant === nextProps.onValidateMerchant &&
         prevProps.product?.id === nextProps.product?.id &&
         prevProps.product?.quantity === nextProps.product?.quantity
     )

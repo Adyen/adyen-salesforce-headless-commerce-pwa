@@ -256,6 +256,26 @@ describe('getAppleButtonConfig', () => {
         ])
     })
 
+    it('forwards onValidateMerchant at the root with the Adyen Web callback signature', () => {
+        const resolve = jest.fn()
+        const reject = jest.fn()
+        const validationURL = 'https://apple-pay-gateway.apple.com/paymentservices/startSession'
+        const onValidateMerchant = jest.fn()
+        const config = getAppleButtonConfig({...defaultProps, onValidateMerchant})
+
+        config.onValidateMerchant(resolve, reject, validationURL)
+
+        expect(config.onValidateMerchant).toBe(onValidateMerchant)
+        expect(config.configuration.onValidateMerchant).toBeUndefined()
+        expect(onValidateMerchant).toHaveBeenCalledWith(resolve, reject, validationURL)
+    })
+
+    it('omits onValidateMerchant when no merchant validation callback is provided', () => {
+        const config = getAppleButtonConfig(defaultProps)
+
+        expect(config).not.toHaveProperty('onValidateMerchant')
+    })
+
     describe('onSubmit', () => {
         const authorizeFirst = (config) => {
             config.onAuthorized(
