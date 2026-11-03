@@ -316,6 +316,48 @@ describe('PayPalExpressComponent', () => {
 
             expect(mockPayPalInstance.mount).not.toHaveBeenCalled()
         })
+
+        it('does not overlap checkout initialization when dependencies change', async () => {
+            let resolveFirstCheckout
+            const firstCheckout = new Promise((resolve) => {
+                resolveFirstCheckout = resolve
+            })
+            const latestPayPalInstance = {
+                isAvailable: jest.fn().mockResolvedValue(true),
+                mount: jest.fn(),
+                unmount: jest.fn()
+            }
+            AdyenCheckout.mockImplementationOnce(() => firstCheckout).mockResolvedValueOnce({})
+            PayPal.mockImplementation(() => latestPayPalInstance)
+
+            const {rerender} = render(
+                <PayPalExpressComponent {...defaultProps} authToken="test-auth-token" />
+            )
+
+            await waitFor(() => {
+                expect(AdyenCheckout).toHaveBeenCalledTimes(1)
+            })
+
+            rerender(
+                <PayPalExpressComponent
+                    {...defaultProps}
+                    authToken="test-auth-token"
+                    basket={{basketId: 'new-basket'}}
+                />
+            )
+
+            expect(AdyenCheckout).toHaveBeenCalledTimes(1)
+
+            await act(async () => {
+                resolveFirstCheckout({})
+            })
+
+            await waitFor(() => {
+                expect(AdyenCheckout).toHaveBeenCalledTimes(2)
+                expect(latestPayPalInstance.mount).toHaveBeenCalledTimes(1)
+            })
+            expect(PayPal).toHaveBeenCalledTimes(1)
+        })
     })
 
     describe('fetchShippingMethods callback', () => {
@@ -413,16 +455,26 @@ describe('PayPalExpressComponent', () => {
     })
 
     describe('Cleanup', () => {
-        it('clears window.paypal if it has firstElementChild on mount', async () => {
-            window.paypal = {
-                firstElementChild: document.createElement('div')
+        it('leaves PayPal SDK lifecycle management to Adyen Web', async () => {
+            AdyenCheckout.mockResolvedValue({})
+            const paypalSdk = {
+                firstElementChild: document.createElement('div'),
+                __internal_destroy__: jest.fn()
             }
+            window.paypal = paypalSdk
 
-            await act(async () => {
-                render(<PayPalExpressComponent {...defaultProps} />)
+            const {unmount} = render(
+                <PayPalExpressComponent {...defaultProps} authToken="test-auth-token" />
+            )
+
+            await waitFor(() => {
+                expect(PayPal.mock.results[0].value.mount).toHaveBeenCalled()
             })
 
-            expect(window.paypal).toBeUndefined()
+            act(() => unmount())
+
+            expect(window.paypal).toBe(paypalSdk)
+            expect(paypalSdk.__internal_destroy__).not.toHaveBeenCalled()
         })
     })
 
