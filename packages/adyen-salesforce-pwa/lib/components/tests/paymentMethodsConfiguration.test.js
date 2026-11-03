@@ -94,6 +94,31 @@ describe('paymentMethodsConfiguration', () => {
         expect(result.klarna).toEqual({klarna: true, extra: 'value'})
     })
 
+    it('should add a disclaimer message only to the configured payment method', () => {
+        const mockedBaseConfigResult = {base: true}
+        const disclaimerMessage = {
+            message: 'By continuing you accept the %{terms}',
+            linkText: 'terms',
+            link: 'https://example.com/terms'
+        }
+        baseConfig.mockReturnValue(mockedBaseConfigResult)
+        klarnaConfig.mockReturnValue({klarna: true})
+
+        const result = paymentMethodsConfiguration({
+            paymentMethods: [{type: 'klarna'}, {type: 'afterpaytouch'}],
+            additionalPaymentMethodsConfiguration: {
+                afterpaytouch: {disclaimerMessage}
+            },
+            token: 'tok'
+        })
+
+        expect(result.klarna).not.toHaveProperty('disclaimerMessage')
+        expect(result.afterpaytouch).toEqual({
+            ...mockedBaseConfigResult,
+            disclaimerMessage
+        })
+    })
+
     it('should not merge additional config when type has no additional config', () => {
         const mockedBaseConfigResult = {base: true}
         baseConfig.mockReturnValue(mockedBaseConfigResult)
