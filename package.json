@@ -25,7 +25,24 @@
       "merge": "2.1.1",
       "serialize-javascript": ">=7.0.5",
       "diff": ">=8.0.3",
-      "js-yaml": ">=4.2.0"
+      "ws": ">=8.17.1",
+      "tar-fs": ">=2.1.4",
+      "postcss": ">=8.5.23 <9",
+      "compression": ">=1.8.1",
+      "cookie": ">=0.7.0",
+      "tmp": ">=0.2.4",
+      "@babel/core": "^7.29.6",
+      "js-yaml": "^4.3.2",
+      "uuid": "^11.1.1",
+      "baseline-browser-mapping": ">=2.11.0 <3",
+      "brace-expansion@1": ">=1.1.21 <2",
+      "brace-expansion@2": ">=2.1.7 <3",
+      "browserslist": ">=4.28.7 <5",
+      "fast-uri": "3.1.7"
+    },
+    "patchedDependencies": {
+      "braces@3.0.3": "patches/braces@3.0.3.patch",
+      "fast-uri@3.1.7": "patches/fast-uri@3.1.7.patch"
     }
   },
   "scripts": {

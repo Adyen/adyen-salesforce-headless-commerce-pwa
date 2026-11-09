@@ -1,5 +1,14 @@
 import fetch from 'node-fetch'
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
+
+/**
+ * Admin token cache, shared across all BaseApiClient instances and subclasses.
+ * The token only depends on the client credentials and scope (from env), not on the
+ * siteId or baseUrl, and clients are instantiated per call, so it cannot live on the instance.
+ * @type {{token: string, expiry: number} | null}
+ */
+let adminTokenCache = null
+
 /**
  * A base class for creating Salesforce Commerce API clients.
  * It handles admin token authentication, caching, and provides a protected method for making API calls.
@@ -9,8 +18,6 @@ export class BaseApiClient {
         'https://account.demandware.com/dwsso/oauth2/access_token?grant_type=client_credentials'
     #baseUrl
     #siteId
-    #accessToken = null
-    #tokenExpiry = 0
 
     /**
      * @constructor
@@ -51,8 +58,8 @@ export class BaseApiClient {
      */
     async #getAdminAuthToken() {
         // Return cached token if it's still valid (with a 60-second buffer)
-        if (this.#accessToken && Date.now() < this.#tokenExpiry) {
-            return this.#accessToken
+        if (adminTokenCache && Date.now() < adminTokenCache.expiry) {
+            return adminTokenCache.token
         }
 
         const base64data = Buffer.from(
@@ -78,11 +85,47 @@ export class BaseApiClient {
         }
 
         const tokenData = await tokenResponse.json()
-        this.#accessToken = tokenData.access_token
-        // expires_in is in seconds. We subtract 60 seconds to create a safety buffer.
-        this.#tokenExpiry = Date.now() + (tokenData.expires_in - 60) * 1000
+        adminTokenCache = {
+            token: tokenData.access_token,
+            // expires_in is in seconds. We subtract 60 seconds to create a safety buffer.
+            expiry: Date.now() + (tokenData.expires_in - 60) * 1000
+        }
 
-        return this.#accessToken
+        return adminTokenCache.token
+    }
+
+    /**
+     * Removes the given token from the cache, unless it has already been replaced
+     * by a fresh token stored by a concurrent request.
+     * @param {string} rejectedToken - The token rejected by the API.
+     * @private
+     */
+    #invalidateAdminAuthToken(rejectedToken) {
+        if (adminTokenCache?.token === rejectedToken) {
+            adminTokenCache = null
+        }
+    }
+
+    /**
+     * Sends a request to an admin API endpoint, authenticated with the admin token.
+     * @param {string} method - The HTTP method (e.g., 'GET', 'POST').
+     * @param {string} url - The fully constructed URL.
+     * @param {object} [options] - Optional request options.
+     * @returns {Promise<{response: Response, token: string}>} The response and the token used.
+     * @private
+     */
+    async #sendAdminRequest(method, url, options) {
+        const token = await this.#getAdminAuthToken()
+        const response = await fetch(url, {
+            method: method,
+            body: options?.body || null,
+            headers: {
+                'Content-Type': 'application/json',
+                authorization: `Bearer ${token}`,
+                ...options?.headers
+            }
+        })
+        return {response, token}
     }
 
     /**
@@ -96,18 +139,15 @@ export class BaseApiClient {
      * @protected
      */
     async _callAdminApi(method, path, options) {
-        const token = await this.#getAdminAuthToken()
         const url = this.#buildUrl(path)
+        let {response, token} = await this.#sendAdminRequest(method, url, options)
 
-        const response = await fetch(url, {
-            method: method,
-            body: options?.body || null,
-            headers: {
-                'Content-Type': 'application/json',
-                authorization: `Bearer ${token}`,
-                ...options?.headers
-            }
-        })
+        // Cached token may have been revoked or expired: invalidate it and retry once
+        if (response.status === 401) {
+            this.#invalidateAdminAuthToken(token)
+            const retry = await this.#sendAdminRequest(method, url, options)
+            response = retry.response
+        }
 
         if (!response.ok) {
             const error = await response.text()

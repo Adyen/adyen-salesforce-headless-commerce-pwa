@@ -9,7 +9,7 @@ import {formatAddressInAdyenFormat} from '../../utils/formatAddress.mjs'
 import {getApplicationInfo} from '../../utils/getApplicationInfo.mjs'
 import Logger from './logger.js'
 import {
-    filterStateData,
+    filterPaymentStateData,
     getShopperName,
     getNativeThreeDS,
     isOpenInvoiceMethod,
@@ -55,7 +55,7 @@ export class PaymentRequestBuilder {
      */
     _validateAddress(address, type) {
         if (!address) {
-            Logger.warn(`PaymentRequestBuilder: ${type} address is null or undefined`)
+            Logger.warn('PaymentRequestBuilder', `${type} address is null or undefined`)
             return false
         }
 
@@ -64,8 +64,8 @@ export class PaymentRequestBuilder {
 
         if (missingFields.length > 0) {
             Logger.warn(
-                `PaymentRequestBuilder: ${type} address missing required fields: ${missingFields.join(', ')}`,
-                {address}
+                'PaymentRequestBuilder',
+                `${type} address missing required fields: ${missingFields.join(', ')}`
             )
             return false
         }
@@ -81,7 +81,7 @@ export class PaymentRequestBuilder {
     withStateData(data = null) {
         const actualData = data || this.context.stateData
         if (actualData) {
-            Object.assign(this.paymentRequest, filterStateData(actualData))
+            Object.assign(this.paymentRequest, filterPaymentStateData(actualData))
         }
         return this
     }

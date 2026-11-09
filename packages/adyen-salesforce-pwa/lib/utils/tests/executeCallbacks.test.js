@@ -2,6 +2,9 @@ import {
     executeCallbacks,
     executeErrorCallbacks,
     shouldNotifyError,
+    markCancelHandled,
+    hasCancelHandled,
+    clearCancelHandled,
     __resetErrorNotificationThrottle,
     createThrottledErrorHandler
 } from '../executeCallbacks'
@@ -49,6 +52,30 @@ describe('shouldNotifyError', () => {
         __resetErrorNotificationThrottle()
 
         expect(shouldNotifyError('test-key')).toBe(true)
+    })
+})
+
+describe('cancel handled state', () => {
+    beforeEach(() => {
+        __resetErrorNotificationThrottle()
+    })
+
+    it('should mark and clear a handled cancellation by key', () => {
+        expect(hasCancelHandled('checkout')).toBe(false)
+
+        markCancelHandled('checkout')
+        expect(hasCancelHandled('checkout')).toBe(true)
+
+        clearCancelHandled('checkout')
+        expect(hasCancelHandled('checkout')).toBe(false)
+    })
+
+    it('should clear handled cancellations when shared test state is reset', () => {
+        markCancelHandled('checkout')
+
+        __resetErrorNotificationThrottle()
+
+        expect(hasCancelHandled('checkout')).toBe(false)
     })
 })
 

@@ -17,6 +17,7 @@ import {
     updateOrderPaymentInstrument
 } from '../helpers/orderHelper.js'
 import {createIdempotencyKey} from '../utils/paymentUtils'
+import {warnForMissingDcapFields} from '../utils/dcapHelper.js'
 
 /**
  * Handles errors that occur during the payment process.
@@ -102,6 +103,7 @@ async function sendPayments(req, res, next) {
             Logger.info('sendPayments', `pre-created SFCC order: ${preCreatedOrderNo}`)
         }
 
+        warnForMissingDcapFields(paymentRequest)
         const checkout = new AdyenClientProvider(adyenContext).getPaymentsApi()
         const response = await checkout.payments(paymentRequest, {
             idempotencyKey: createIdempotencyKey(paymentRequest)

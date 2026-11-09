@@ -1,0 +1,22 @@
+diff --git a/lib/parse.js b/lib/parse.js
+index 3a6988e629f52aee6609dc5ec290a5e9ff47cecb..7726ec58daa84bff08c3913630f32d1c42fa5888 100644
+--- a/lib/parse.js
++++ b/lib/parse.js
+@@ -35,6 +35,7 @@ const parse = (input, options = {}) => {
+ 
+   const opts = options || {};
+   const max = typeof opts.maxLength === 'number' ? Math.min(MAX_LENGTH, opts.maxLength) : MAX_LENGTH;
++  const maxDepth = 100;
+   if (input.length > max) {
+     throw new SyntaxError(`Input length (${input.length}), exceeds max characters (${max})`);
+   }
+@@ -196,6 +197,9 @@ const parse = (input, options = {}) => {
+ 
+     if (value === CHAR_LEFT_CURLY_BRACE) {
+       depth++;
++      if (depth > maxDepth) {
++        throw new SyntaxError(`Input nesting depth (${depth}), exceeds max depth (${maxDepth})`);
++      }
+ 
+       const dollar = prev.value && prev.value.slice(-1) === '$' || block.dollar === true;
+       const brace = {

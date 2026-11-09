@@ -534,6 +534,7 @@ describe('paymentsHelper', () => {
             const mockData = {
                 origin: 'https://example.com',
                 paymentMethod: {type: 'scheme'},
+                deviceFingerprint: 'merchant-device-fingerprint',
                 billingAddress: {
                     street: '1 Billing St',
                     firstName: 'John',

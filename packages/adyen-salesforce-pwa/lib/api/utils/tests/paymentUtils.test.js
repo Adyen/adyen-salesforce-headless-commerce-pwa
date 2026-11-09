@@ -7,6 +7,7 @@ import {
     getLineItems,
     getLineItemsWithoutTax,
     filterStateData,
+    filterPaymentStateData,
     getNativeThreeDS
 } from '../paymentUtils'
 import {PAYMENT_METHOD_TYPES} from '../../../utils/constants.mjs'
@@ -920,6 +921,24 @@ describe('paymentUtils', () => {
             expect(result).toHaveProperty('order')
             expect(result).toHaveProperty('company')
         })
+
+        it('should include a device fingerprint in payment state data', () => {
+            const result = filterPaymentStateData({
+                paymentMethod: {type: 'scheme'},
+                deviceFingerprint: 'merchant-device-fingerprint'
+            })
+
+            expect(result.deviceFingerprint).toBe('merchant-device-fingerprint')
+        })
+
+        it.each([undefined, null, '', '   ', 'N/A', 'n/a', 'ZZ', 'zz'])(
+            'should omit an empty or placeholder device fingerprint: %p',
+            (deviceFingerprint) => {
+                const result = filterPaymentStateData({deviceFingerprint})
+
+                expect(result).not.toHaveProperty('deviceFingerprint')
+            }
+        )
 
         it('should return empty object when all fields are invalid', () => {
             const stateData = {
