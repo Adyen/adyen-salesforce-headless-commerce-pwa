@@ -375,89 +375,57 @@ describe('PayPalExpressComponent', () => {
             expect(PayPal).toHaveBeenCalledTimes(1)
         })
 
-        it('does not mount a stale button after its availability check resolves', async () => {
-            const availability = createDeferred()
-            const stalePayPalInstance = {
-                isAvailable: jest.fn(() => availability.promise),
-                mount: jest.fn(),
-                unmount: jest.fn()
+        it.each([
+            ['resolves', (availability) => availability.resolve(true)],
+            [
+                'rejects',
+                (availability) => availability.reject(new Error('Stale availability error'))
+            ]
+        ])(
+            'does not mount a stale button when its availability check %s',
+            async (_, settleAvailability) => {
+                const availability = createDeferred()
+                const stalePayPalInstance = {
+                    isAvailable: jest.fn(() => availability.promise),
+                    mount: jest.fn(),
+                    unmount: jest.fn()
+                }
+                const latestPayPalInstance = {
+                    isAvailable: jest.fn().mockResolvedValue(true),
+                    mount: jest.fn(),
+                    unmount: jest.fn()
+                }
+                PayPal.mockImplementationOnce(() => stalePayPalInstance).mockImplementationOnce(
+                    () => latestPayPalInstance
+                )
+
+                const {rerender} = render(
+                    <PayPalExpressComponent {...defaultProps} authToken="test-auth-token" />
+                )
+
+                await waitFor(() => {
+                    expect(stalePayPalInstance.isAvailable).toHaveBeenCalled()
+                })
+
+                rerender(
+                    <PayPalExpressComponent
+                        {...defaultProps}
+                        authToken="test-auth-token"
+                        basket={{basketId: 'new-basket'}}
+                    />
+                )
+
+                await act(async () => {
+                    settleAvailability(availability)
+                })
+
+                await waitFor(() => {
+                    expect(latestPayPalInstance.mount).toHaveBeenCalledTimes(1)
+                })
+                expect(stalePayPalInstance.mount).not.toHaveBeenCalled()
+                expect(consoleWarnSpy).not.toHaveBeenCalled()
             }
-            const latestPayPalInstance = {
-                isAvailable: jest.fn().mockResolvedValue(true),
-                mount: jest.fn(),
-                unmount: jest.fn()
-            }
-            PayPal.mockImplementationOnce(() => stalePayPalInstance).mockImplementationOnce(
-                () => latestPayPalInstance
-            )
-
-            const {rerender} = render(
-                <PayPalExpressComponent {...defaultProps} authToken="test-auth-token" />
-            )
-
-            await waitFor(() => {
-                expect(stalePayPalInstance.isAvailable).toHaveBeenCalled()
-            })
-
-            rerender(
-                <PayPalExpressComponent
-                    {...defaultProps}
-                    authToken="test-auth-token"
-                    basket={{basketId: 'new-basket'}}
-                />
-            )
-
-            await act(async () => {
-                availability.resolve(true)
-            })
-
-            await waitFor(() => {
-                expect(latestPayPalInstance.mount).toHaveBeenCalledTimes(1)
-            })
-            expect(stalePayPalInstance.mount).not.toHaveBeenCalled()
-        })
-
-        it('ignores an availability error from a stale button', async () => {
-            const availability = createDeferred()
-            const stalePayPalInstance = {
-                isAvailable: jest.fn(() => availability.promise),
-                mount: jest.fn(),
-                unmount: jest.fn()
-            }
-            const latestPayPalInstance = {
-                isAvailable: jest.fn().mockResolvedValue(true),
-                mount: jest.fn(),
-                unmount: jest.fn()
-            }
-            PayPal.mockImplementationOnce(() => stalePayPalInstance).mockImplementationOnce(
-                () => latestPayPalInstance
-            )
-
-            const {rerender} = render(
-                <PayPalExpressComponent {...defaultProps} authToken="test-auth-token" />
-            )
-
-            await waitFor(() => {
-                expect(stalePayPalInstance.isAvailable).toHaveBeenCalled()
-            })
-
-            rerender(
-                <PayPalExpressComponent
-                    {...defaultProps}
-                    authToken="test-auth-token"
-                    basket={{basketId: 'new-basket'}}
-                />
-            )
-
-            await act(async () => {
-                availability.reject(new Error('Stale availability error'))
-            })
-
-            await waitFor(() => {
-                expect(latestPayPalInstance.mount).toHaveBeenCalledTimes(1)
-            })
-            expect(consoleWarnSpy).not.toHaveBeenCalled()
-        })
+        )
 
         it('ignores an initialization error from a stale run', async () => {
             const checkout = createDeferred()
