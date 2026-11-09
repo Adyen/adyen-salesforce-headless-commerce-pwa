@@ -14,6 +14,22 @@ import {paypalExpressConfig} from './paypal/expressConfig'
 import {shouldNotifyError} from '../utils/executeCallbacks'
 import {ERROR_NOTIFICATION_KEYS} from '../utils/constants.mjs'
 
+const canMountPayPalButton = async (paypalButton, isCurrent) => {
+    if (typeof paypalButton.isAvailable !== 'function') {
+        return isCurrent()
+    }
+
+    try {
+        await paypalButton.isAvailable()
+        return isCurrent()
+    } catch (err) {
+        if (isCurrent()) {
+            console.warn('PayPal Express is not available:', err)
+        }
+        return false
+    }
+}
+
 /**
  * PayPal Express Checkout Component
  *
@@ -229,7 +245,7 @@ const PayPalExpressComponent = ({
                 return
             }
 
-            await previousInitialization
+            await previousInitialization.catch(() => {})
             if (!isCurrent) {
                 return
             }
@@ -288,18 +304,7 @@ const PayPalExpressComponent = ({
                     paypalButtonRef.current = paypalButton
                 }
 
-                if (typeof paypalButton.isAvailable === 'function') {
-                    try {
-                        await paypalButton.isAvailable()
-                    } catch (err) {
-                        if (isCurrent) {
-                            console.warn('PayPal Express is not available:', err)
-                        }
-                        return
-                    }
-                }
-
-                if (!isCurrent) {
+                if (!(await canMountPayPalButton(paypalButton, () => isCurrent))) {
                     return
                 }
                 mountPayPalButton()
