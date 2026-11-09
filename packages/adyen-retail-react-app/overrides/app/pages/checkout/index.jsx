@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: BSD-3-Clause
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import React, {useEffect, useState} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import {useIntl} from 'react-intl'
+import {useLocation} from 'react-router-dom'
 import {
     Alert,
     AlertIcon,
@@ -131,11 +132,46 @@ const Checkout = () => {
 
 const CheckoutContainer = () => {
     const {data: customer} = useCurrentCustomer()
-    const {data: basket} = useCurrentBasket()
+    const {data: basket, refetch: refetchBasket} = useCurrentBasket()
     const {formatMessage} = useIntl()
     const removeItemFromBasketMutation = useShopperBasketsMutation('removeItemFromBasket')
     const toast = useToast()
     const [isDeletingUnavailableItem, setIsDeletingUnavailableItem] = useState(false)
+    const location = useLocation()
+    const recoveryAttemptedRef = useRef(false)
+
+    /* -----------------Adyen Begin ------------------------ */
+    // After a failed payment, baseConfig.onErrorHandler redirects here with
+    // `newBasketId`/`error=true` once SFCC has already recreated the basket
+    // server-side. This container gates all rendering on `basket` being
+    // present, but on a client-side SPA navigation the cached basket/customer
+    // query can be left pointing at the now-invalid pre-failure basket and
+    // never resolves on its own, leaving the user stuck on CheckoutSkeleton
+    // indefinitely (a full page reload works because it re-establishes the
+    // session from scratch). Detect that scenario and force a refetch, falling
+    // back to a full reload if the refetch still can't surface a basket.
+    useEffect(() => {
+        if (basket?.basketId) {
+            recoveryAttemptedRef.current = false
+            return
+        }
+        const params = new URLSearchParams(location.search)
+        const hasRecoveryParams = params.get('newBasketId') || params.get('error') === 'true'
+        if (!hasRecoveryParams || recoveryAttemptedRef.current) {
+            return
+        }
+        recoveryAttemptedRef.current = true
+        refetchBasket()
+            .then((result) => {
+                if (!result?.data?.baskets?.length) {
+                    window.location.reload()
+                }
+            })
+            .catch(() => {
+                window.location.reload()
+            })
+    }, [basket?.basketId, location.search])
+    /* -----------------Adyen End ------------------------ */
 
     const handleRemoveItem = async (product) => {
         await removeItemFromBasketMutation.mutateAsync(

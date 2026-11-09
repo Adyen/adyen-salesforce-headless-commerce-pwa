@@ -6,28 +6,14 @@
  */
 
 /*
-    Hello there! This is a demonstration of how to override a file from the base template.
-
-    It's necessary that the module export interface remain consistent,
-    as other files in the base template rely on constants.js, thus we
-    import the underlying constants.js, modifies it and re-export it.
+    This override re-exports the base template constants and replaces the shipping
+    country codes with the full list supported by Adyen.
 */
 
-import {
-    DEFAULT_LIMIT_VALUES,
-    DEFAULT_SEARCH_PARAMS
-} from '@salesforce/retail-react-app/app/constants'
 /* -----------------Adyen Begin ------------------------ */
 import {countryList} from '@adyen/adyen-salesforce-pwa'
 
 export const SHIPPING_COUNTRY_CODES = countryList
 /* -----------------Adyen End ------------------------ */
 
-// original value is 25
-DEFAULT_LIMIT_VALUES[0] = 3
-DEFAULT_SEARCH_PARAMS.limit = 3
-
-export const CUSTOM_HOME_TITLE = '🎉 Hello Extensible React Template!'
-
-export {DEFAULT_LIMIT_VALUES, DEFAULT_SEARCH_PARAMS}
 export * from '@salesforce/retail-react-app/app/constants'

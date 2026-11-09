@@ -95,7 +95,8 @@ export const getAppleButtonConfig = (props = {}) => {
         merchantDisplayName = '',
         customerId,
         product,
-        locale
+        locale,
+        queryClient
     } = props
 
     let applePayAmount = basket.orderTotal
@@ -171,6 +172,7 @@ export const getAppleButtonConfig = (props = {}) => {
                         }
                     }
                     actions.resolve(finalPriceUpdate)
+                    queryClient?.invalidateQueries()
                     navigate(`/checkout/confirmation/${paymentsResponse?.merchantReference}`)
                 } else {
                     actions.reject()
@@ -295,7 +297,10 @@ export const getAppleButtonConfig = (props = {}) => {
                     customerId,
                     site
                 )
-                temporaryBasket = await adyenTemporaryBasketService.createTemporaryBasket(product)
+                temporaryBasket = await adyenTemporaryBasketService.createTemporaryBasket(
+                    product,
+                    currentBasket?.currency
+                )
                 if (temporaryBasket?.basketId) {
                     setBasket(temporaryBasket)
                     applePayAmount = temporaryBasket.orderTotal
@@ -323,7 +328,8 @@ export const getAppleButtonConfig = (props = {}) => {
 /**
  * Handles errors during Apple Pay Express checkout.
  * Cancels the express payment, cleans up the basket, removes shipping method and address,
- * and redirects to checkout page with error flag.
+ * and either calls onPaymentCancel (to re-render in place, e.g. on PDP) or falls back to
+ * redirecting to the checkout page with an error flag.
  *
  * @param {Error} error - The error that occurred
  * @param {object} component - Adyen component instance
@@ -335,6 +341,7 @@ export const getAppleButtonConfig = (props = {}) => {
  * @param {Function} props.navigate - Navigation function
  * @param {boolean} [props.isExpressPdp] - True for the PDP express flow, where the order was
  * created from a temporary basket and the shopper's real cart must not be reopened
+ * @param {Function} [props.onPaymentCancel] - Callback to signal cancellation and re-render
  * @returns {Promise<object>} Object indicating cancellation status
  */
 export const onErrorHandler = async (error, component, props) => {
@@ -352,7 +359,11 @@ export const onErrorHandler = async (error, component, props) => {
                 isTemporaryBasket: props.isExpressPdp === true
             })
         }
-        props.navigate(`/checkout?error=true`)
+        if (props.onPaymentCancel) {
+            props.onPaymentCancel()
+        } else {
+            props.navigate(`/checkout?error=true`)
+        }
         return {cancelled: true}
     } catch (err) {
         console.error('Error during express payment cancellation:', err)

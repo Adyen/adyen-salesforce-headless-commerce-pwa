@@ -9,88 +9,103 @@ import loadable from '@loadable/component'
 import {getConfig} from '@salesforce/pwa-kit-runtime/utils/ssr-config'
 import {configureRoutes} from '@salesforce/retail-react-app/app/utils/routes-utils'
 import {routes as _routes} from '@salesforce/retail-react-app/app/routes'
-import {Skeleton} from '@chakra-ui/react'
+import {Skeleton} from '@salesforce/retail-react-app/app/components/shared/ui'
+
+const fallback = <Skeleton height="75vh" width="100%" />
+
+// Base pages needed to replicate the vanilla dynamic and catch-all routing behavior
+const Login = loadable(() => import('@salesforce/retail-react-app/app/pages/login'), {fallback})
+const ResetPassword = loadable(
+    () => import('@salesforce/retail-react-app/app/pages/reset-password'),
+    {fallback}
+)
+const SocialLoginRedirect = loadable(
+    () => import('@salesforce/retail-react-app/app/pages/social-login-redirect'),
+    {fallback}
+)
+const PageNotFound = loadable(() => import('@salesforce/retail-react-app/app/pages/page-not-found'))
 
 /* -----------------Adyen Begin ------------------------ */
 import '@adyen/adyen-salesforce-pwa/dist/app/adyen.css'
 
-// Components
-const fallback = <Skeleton height="75vh" width="100%" />
-
-// Create your pages here and add them to the routes array
-// Use loadable to split code into smaller js chunks
-
 // Checkout page from Adyen
-const Checkout = loadable(() => import('./pages/checkout'), {
-    fallback: fallback
-})
+const Checkout = loadable(() => import('./pages/checkout'), {fallback})
 
 // CheckoutConfirmation page from Adyen
-const CheckoutConfirmation = loadable(() => import('./pages/checkout/confirmation'), {
-    fallback: fallback
-})
+const CheckoutConfirmation = loadable(() => import('./pages/checkout/confirmation'), {fallback})
 
 // Checkout Redirect page from Adyen
-const AdyenCheckoutRedirect = loadable(() => import('./pages/checkout/redirect'), {
-    fallback: fallback
-})
+const AdyenCheckoutRedirect = loadable(() => import('./pages/checkout/redirect'), {fallback})
 
 // Checkout Error page from Adyen
-const AdyenCheckoutError = loadable(() => import('./pages/checkout/error'), {
-    fallback: fallback
-})
+const AdyenCheckoutError = loadable(() => import('./pages/checkout/error'), {fallback})
 
 // Checkout Review page from Adyen
-const CheckoutReview = loadable(() => import('./pages/checkout/review'), {
-    fallback: fallback
-})
+const CheckoutReview = loadable(() => import('./pages/checkout/review'), {fallback})
 
-const Cart = loadable(() => import('./pages/cart'), {
-    fallback: fallback
-})
+// Cart page from Adyen
+const Cart = loadable(() => import('./pages/cart'), {fallback})
 
-const Home = loadable(() => import('./pages/home'), {fallback})
-
-const routes = [
-    {
-        path: '/',
-        component: Home,
-        exact: true
-    },
-    {
-        path: '/checkout',
-        component: Checkout,
-        exact: true
-    },
-    {
-        path: '/checkout/redirect',
-        component: AdyenCheckoutRedirect
-    },
-    {
-        path: '/checkout/error',
-        component: AdyenCheckoutError
-    },
-    {
+// Override the base checkout, confirmation and cart routes with the Adyen versions
+const adyenRouteOverrides = {
+    '/checkout': {path: '/checkout', component: Checkout, exact: true},
+    '/checkout/confirmation/:orderNo': {
         path: '/checkout/confirmation/:orderNo',
         component: CheckoutConfirmation
     },
-    {
-        path: '/checkout/review',
-        component: CheckoutReview,
-        exact: true
-    },
-    {
-        path: '/cart',
-        component: Cart,
-        exact: true
-    },
-    ..._routes
-]
+    '/cart': {path: '/cart', component: Cart, exact: true}
+}
 
+const routes = [
+    // Additional Adyen-only checkout routes
+    {path: '/checkout/redirect', component: AdyenCheckoutRedirect},
+    {path: '/checkout/error', component: AdyenCheckoutError},
+    {path: '/checkout/review', component: CheckoutReview, exact: true},
+    // Keep every base route, swapping in the Adyen components where applicable
+    ..._routes.map((route) => adyenRouteOverrides[route.path] || route)
+]
 /* -----------------Adyen End ------------------------ */
+
 export default () => {
     const config = getConfig()
-    return configureRoutes(routes, config, {
-        ignoredRoutes: ['/callback', '*']
+    const loginConfig = config?.app?.login
+    const resetPasswordLandingPath = loginConfig?.resetPassword?.landingPath
+    const socialLoginEnabled = loginConfig?.social?.enabled
+    const socialRedirectURI = loginConfig?.social?.redirectURI
+    const socialRedirectPath =
+        socialRedirectURI &&
+        (socialRedirectURI.startsWith('http')
+            ? new URL(socialRedirectURI).pathname
+            : socialRedirectURI)
+    const passwordlessLoginEnabled = loginConfig?.passwordless?.enabled
+    const passwordlessLoginLandingPath = loginConfig?.passwordless?.landingPath
+
+    // Add dynamic routes conditionally (only if features are enabled and paths are defined)
+    const dynamicRoutes = [
+        resetPasswordLandingPath && {
+            path: resetPasswordLandingPath,
+            component: ResetPassword,
+            exact: true
+        },
+        passwordlessLoginEnabled &&
+            passwordlessLoginLandingPath && {
+                path: passwordlessLoginLandingPath,
+                component: Login,
+                exact: true
+            },
+        socialLoginEnabled &&
+            socialRedirectPath && {
+                path: socialRedirectPath,
+                component: SocialLoginRedirect,
+                exact: true
+            }
+    ].filter(Boolean)
+
+    const allRoutes = configureRoutes([...routes, ...dynamicRoutes], config, {
+        ignoredRoutes: ['/callback'],
+        fuzzyPathMatching: true
     })
+
+    // Add catch-all route at the end so it doesn't match before dynamic routes
+    return [...allRoutes, {path: '*', component: PageNotFound}]
 }

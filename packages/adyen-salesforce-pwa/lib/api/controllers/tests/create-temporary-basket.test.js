@@ -71,10 +71,38 @@ describe('create-temporary-basket controller', () => {
             'customer1',
             'RefArch'
         )
-        expect(createTemporaryBasket).toHaveBeenCalledWith('Bearer token', 'customer1', 'RefArch')
+        expect(createTemporaryBasket).toHaveBeenCalledWith(
+            'Bearer token',
+            'customer1',
+            'RefArch',
+            undefined
+        )
         expect(res.locals.response).toEqual(mockBasket)
         expect(Logger.info).toHaveBeenCalledWith('CreateTemporaryBasketController', 'success')
         expect(next).toHaveBeenCalled()
+    })
+
+    it('passes currency through to createTemporaryBasket when provided', async () => {
+        req.body.currency = 'EUR'
+        const mockBasket = {basketId: 'b1', orderTotal: 0}
+        const mockBasketService = {
+            addProductToBasket: jest.fn().mockResolvedValue({
+                ...mockBasket,
+                orderTotal: 0
+            })
+        }
+        BasketService.mockImplementation(() => mockBasketService)
+        removeExistingTemporaryBaskets.mockResolvedValue(undefined)
+        createTemporaryBasket.mockResolvedValue(mockBasket)
+
+        await CreateTemporaryBasketController(req, res, next)
+
+        expect(createTemporaryBasket).toHaveBeenCalledWith(
+            'Bearer token',
+            'customer1',
+            'RefArch',
+            'EUR'
+        )
     })
 
     it('calls next with AdyenError when required params are missing', async () => {
