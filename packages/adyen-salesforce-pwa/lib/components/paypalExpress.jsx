@@ -14,6 +14,22 @@ import {paypalExpressConfig} from './paypal/expressConfig'
 import {shouldNotifyError} from '../utils/executeCallbacks'
 import {ERROR_NOTIFICATION_KEYS} from '../utils/constants.mjs'
 
+const canMountPayPalButton = async (paypalButton, isCurrent) => {
+    if (typeof paypalButton.isAvailable !== 'function') {
+        return isCurrent()
+    }
+
+    try {
+        await paypalButton.isAvailable()
+        return isCurrent()
+    } catch (err) {
+        if (isCurrent()) {
+            console.warn('PayPal Express is not available:', err)
+        }
+        return false
+    }
+}
+
 /**
  * PayPal Express Checkout Component
  *
@@ -140,6 +156,7 @@ const PayPalExpressComponent = ({
     const basketId = shopperBasket?.basketId
     const paymentContainer = useRef(null)
     const paypalButtonRef = useRef(null)
+    const initializationRef = useRef(Promise.resolve())
 
     const {
         data: adyenEnvironment,
@@ -212,9 +229,9 @@ const PayPalExpressComponent = ({
     }, [adyenPaymentMethodsError, onError])
 
     useEffect(() => {
-        if (window?.paypal?.firstElementChild) {
-            window.paypal = undefined
-        }
+        let isCurrent = true
+        const previousInitialization = initializationRef.current
+
         const initializeCheckout = async () => {
             const shouldInitialize = !!(
                 adyenEnvironment &&
@@ -225,6 +242,11 @@ const PayPalExpressComponent = ({
             )
 
             if (!shouldInitialize) {
+                return
+            }
+
+            await previousInitialization.catch(() => {})
+            if (!isCurrent) {
                 return
             }
 
@@ -242,6 +264,9 @@ const PayPalExpressComponent = ({
                         }
                     }
                 })
+                if (!isCurrent) {
+                    return
+                }
 
                 const expressConfig = paypalExpressConfig({
                     token: authToken,
@@ -279,17 +304,14 @@ const PayPalExpressComponent = ({
                     paypalButtonRef.current = paypalButton
                 }
 
-                if (typeof paypalButton.isAvailable === 'function') {
-                    paypalButton
-                        .isAvailable()
-                        .then(mountPayPalButton)
-                        .catch((err) => {
-                            console.warn('PayPal Express is not available:', err)
-                        })
-                } else {
-                    mountPayPalButton()
+                if (!(await canMountPayPalButton(paypalButton, () => isCurrent))) {
+                    return
                 }
+                mountPayPalButton()
             } catch (err) {
+                if (!isCurrent) {
+                    return
+                }
                 console.error('Error initializing PayPal Express:', err)
                 if (shouldNotifyError(ERROR_NOTIFICATION_KEYS.PAYPAL_EXPRESS)) {
                     onError.forEach((cb) => cb(err))
@@ -297,16 +319,13 @@ const PayPalExpressComponent = ({
             }
         }
 
-        initializeCheckout()
+        initializationRef.current = initializeCheckout()
 
         return () => {
+            isCurrent = false
             if (paypalButtonRef.current) {
                 try {
                     paypalButtonRef.current.unmount()
-                    // PayPal specific cleanup: destroy the PayPal instance
-                    if (window.paypal && typeof window.paypal.__internal_destroy__ === 'function') {
-                        window.paypal.__internal_destroy__()
-                    }
                 } catch (e) {
                     console.error('Error unmounting paypalButton:', e)
                 }

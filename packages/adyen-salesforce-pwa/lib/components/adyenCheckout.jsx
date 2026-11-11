@@ -301,10 +301,6 @@ const AdyenCheckoutComponent = ({
             return
         }
 
-        if (window?.paypal?.firstElementChild) {
-            window.paypal = undefined
-        }
-
         let isMounted = true
 
         const initializeCheckout = async () => {
@@ -365,10 +361,6 @@ const AdyenCheckoutComponent = ({
             if (dropinRef.current) {
                 try {
                     dropinRef.current.unmount()
-                    // PayPal specific cleanup: destroy the PayPal instance
-                    if (window.paypal && typeof window.paypal.__internal_destroy__ === 'function') {
-                        window.paypal.__internal_destroy__()
-                    }
                 } catch (e) {
                     console.error('Error unmounting dropin:', e)
                 }
