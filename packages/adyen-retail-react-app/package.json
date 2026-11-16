@@ -39,8 +39,8 @@
         "upload-env": "upload-env",
         "get-env": "get-env",
         "sync-adyen": "./sync-adyen-salesforce-pwa.sh",
-        "start:env": "include-env -p=pnpm run start",
-        "push:env": "include-env -p=pnpm run push"
+        "start:env": "include-env -p=npm run start",
+        "push:env": "include-env -p=npm run push"
     },
     "bundlesize": [
         {
