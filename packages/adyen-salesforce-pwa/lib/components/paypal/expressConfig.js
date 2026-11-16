@@ -48,9 +48,9 @@ export const paypalExpressConfig = (props = {}) => {
     } = props
 
     const isPdp = type === 'pdp'
-    let currentBasket = props.basket
+    let currentBasket
 
-    const getBasket = () => currentBasket
+    const getBasket = () => currentBasket || props.getLatestBasket?.() || props.basket
     const setBasket = (basket) => {
         currentBasket = basket
     }
@@ -92,8 +92,8 @@ export const paypalExpressConfig = (props = {}) => {
         showPayButton: true,
         isExpress: true,
         amount: {
-            value: getCurrencyValueForApi(currentBasket?.orderTotal, currentBasket?.currency),
-            currency: currentBasket?.currency
+            value: getCurrencyValueForApi(getBasket()?.orderTotal, getBasket()?.currency),
+            currency: getBasket()?.currency
         },
         ...(props.enableReview && {userAction: 'continue'}),
         onSubmit: executeCallbacks(
@@ -188,7 +188,8 @@ export const generateOrderNumberCallback = async (state, component, actions, pro
  */
 export const createTemporaryBasketCallback = async (state, component, actions, props) => {
     try {
-        const {token, customerId, site, product, setBasket} = props
+        const {token, customerId, site, setBasket} = props
+        const product = props.getLatestProduct?.() || props.product
         const adyenTemporaryBasketService = new AdyenTemporaryBasketService(token, customerId, site)
         const temporaryBasket = await adyenTemporaryBasketService.createTemporaryBasket(product)
         if (temporaryBasket?.basketId) {
