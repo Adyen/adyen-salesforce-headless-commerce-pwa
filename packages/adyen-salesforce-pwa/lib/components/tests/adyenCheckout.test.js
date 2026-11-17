@@ -376,13 +376,13 @@ describe('AdyenCheckoutComponent', () => {
         expect(createCheckoutInstance).toHaveBeenCalled()
     })
 
-    it('should handle unmount cleanup with paypal destroy', async () => {
-        // Mock window.paypal
+    it('should leave PayPal SDK lifecycle management to Adyen Web', async () => {
         const mockPaypalDestroy = jest.fn()
-        global.window.paypal = {
+        const paypalSdk = {
             firstElementChild: true,
             __internal_destroy__: mockPaypalDestroy
         }
+        global.window.paypal = paypalSdk
 
         const {unmount} = render(<AdyenCheckoutComponent {...defaultProps} />)
 
@@ -395,6 +395,8 @@ describe('AdyenCheckoutComponent', () => {
         })
 
         expect(mockDropinInstance.unmount).toHaveBeenCalled()
+        expect(global.window.paypal).toBe(paypalSdk)
+        expect(mockPaypalDestroy).not.toHaveBeenCalled()
 
         // Cleanup
         delete global.window.paypal

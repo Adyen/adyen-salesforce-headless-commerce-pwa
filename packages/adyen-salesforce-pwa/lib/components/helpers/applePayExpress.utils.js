@@ -95,7 +95,8 @@ export const getAppleButtonConfig = (props = {}) => {
         merchantDisplayName = '',
         customerId,
         product,
-        locale
+        locale,
+        onValidateMerchant
     } = props
 
     let applePayAmount = basket.orderTotal
@@ -128,6 +129,7 @@ export const getAppleButtonConfig = (props = {}) => {
         showPayButton: true,
         isExpress: true,
         configuration: applePayConfig,
+        ...(onValidateMerchant && {onValidateMerchant}),
         amount: {
             value: getCurrencyValueForApi(basket.orderTotal, basket.currency),
             currency: basket.currency

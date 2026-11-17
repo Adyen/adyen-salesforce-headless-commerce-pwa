@@ -11,7 +11,7 @@ vulnerability, [create a GitHub issue](https://github.com/Adyen/adyen-salesforce
 Adyen Payments Composable Storefront Integration for B2C Commerce depends on:
 
 1. PWA v8
-2. [Adyen Web v6.35.0](https://www.npmjs.com/package/@adyen/adyen-web)
+2. [Adyen Web v6.48.0](https://www.npmjs.com/package/@adyen/adyen-web)
 3. [Adyen API Library for Node.js v32.0.0](https://www.npmjs.com/package/@adyen/api-library) (supports Checkout API v72)
 4. Node v22 or later
 5. NPM v11 or later
@@ -34,6 +34,53 @@ collects its own device fingerprint, pass the actual value to `AdyenCheckout` th
 
 Do not send an empty or placeholder fingerprint. The integration omits empty values and the
 placeholders `N/A` and `ZZ` from the payment request.
+
+## Apple Pay Express merchant validation
+
+Merchants that use their own Apple Pay certificate can pass `onValidateMerchant` to
+`ApplePayExpress`. Adyen Web invokes the callback with `resolve`, `reject`, and the Apple Pay
+`validationURL`:
+
+```jsx
+const onValidateMerchant = useCallback((resolve, reject, validationURL) => {
+    validateApplePayMerchant(validationURL).then(resolve).catch(reject)
+}, [])
+
+<ApplePayExpress onValidateMerchant={onValidateMerchant} />
+```
+
+Keep the callback reference stable to avoid reinitializing Apple Pay during unrelated renders. Omit
+the prop when using Adyen's Apple Pay certificate.
+
+## Payment method disclaimer messages
+
+Adyen Web 6.46.0 and later supports a `disclaimerMessage` above the SDK payment button. Pass the
+merchant-approved, localized content through `paymentMethodsConfiguration` for every payment
+method that requires it:
+
+```jsx
+const disclaimerMessage = {
+    message: 'By continuing you accept the %{terms}',
+    linkText: 'terms and conditions',
+    link: 'https://example.com/terms'
+}
+
+const paymentMethodsConfiguration = {
+    klarna: {disclaimerMessage},
+    afterpaytouch: {disclaimerMessage}
+}
+
+<AdyenCheckout paymentMethodsConfiguration={paymentMethodsConfiguration} />
+```
+
+The message belongs to each payment method configuration, not the top-level Adyen Checkout
+configuration. Merchants are responsible for selecting the applicable payment methods and
+providing approved content for the shopper's locale. The integration passes the configuration to
+Adyen Web, which renders it for available payment methods. Payment methods with branded buttons,
+including Apple Pay, Google Pay, PayPal, Amazon Pay, and Cash App Pay, do not display this message.
+
+For regulatory guidance, see
+[Revised EU Consumer Credit Directive (CCD2)](https://docs.adyen.com/payment-methods/bnpl-eu-regulations).
 
 For US ecommerce card payments, the server checks the DCAP-required shopper IP, shopper email,
 complete billing address, and fingerprint data before calling `/payments`. Adyen Web

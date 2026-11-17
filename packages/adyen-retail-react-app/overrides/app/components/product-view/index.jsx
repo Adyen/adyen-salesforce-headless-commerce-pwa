@@ -171,6 +171,7 @@ const ProductView = forwardRef(
             onClose: onAddToCartModalClose
         } = useAddToCartModalContext()
         const theme = useTheme()
+        const isStickyCta = !isProductPartOfSet && !isProductPartOfBundle
         const [showOptionsMessage, toggleShowOptionsMessage] = useState(false)
         const {
             showLoading,
@@ -890,11 +891,37 @@ const ProductView = forwardRef(
                                         )}
                                     </>
                                 )}
+                                {/* Sticky call-to-action buttons for mobile and certain product types */}
                                 <Box
+                                    position={
+                                        isStickyCta
+                                            ? ['fixed', 'fixed', 'fixed', 'static']
+                                            : 'static'
+                                    }
+                                    bg={
+                                        isStickyCta
+                                            ? ['white', 'white', 'white', 'transparent']
+                                            : 'transparent'
+                                    }
+                                    width={isStickyCta ? ['100%', '100%', '100%', 'auto'] : 'auto'}
                                     display={
-                                        isProductPartOfSet
-                                            ? 'block'
-                                            : ['none', 'none', 'none', 'block']
+                                        isProductPartOfBundle
+                                            ? ['none', 'none', 'none', 'block']
+                                            : 'block'
+                                    }
+                                    p={isStickyCta ? [4, 4, 6, 0] : 0}
+                                    left={isStickyCta ? [0, 0, 0, 'auto'] : 'auto'}
+                                    bottom={isStickyCta ? [0, 0, 0, 'auto'] : 'auto'}
+                                    zIndex={isStickyCta ? [2, 2, 2, 'auto'] : 'auto'}
+                                    boxShadow={
+                                        isStickyCta
+                                            ? [
+                                                  theme.shadows.top,
+                                                  theme.shadows.top,
+                                                  theme.shadows.top,
+                                                  'none'
+                                              ]
+                                            : 'none'
                                     }
                                 >
                                     {renderActionButtons()}
@@ -947,52 +974,6 @@ const ProductView = forwardRef(
                         </Box>
                     </VStack>
                 </Flex>
-
-                {/* Sticky call-to-action buttons for mobile and certain product types */}
-                <Box
-                    position="fixed"
-                    bg="white"
-                    width="100%"
-                    display={
-                        isProductPartOfSet || isProductPartOfBundle
-                            ? 'none'
-                            : ['block', 'block', 'block', 'none']
-                    }
-                    p={[4, 4, 6]}
-                    left={0}
-                    bottom={0}
-                    zIndex={2}
-                    boxShadow={theme.shadows.top}
-                >
-                    {renderActionButtons()}
-                    {validateOrderability(variant, product, productQuantity, stockLevel) && (
-                        <>
-                            <ApplePayExpress
-                                currency={activeCurrency}
-                                isExpressPdp={true}
-                                merchantDisplayName={'Merchant name'}
-                                product={{...product, quantity: productQuantity}}
-                                onError={[showError]}
-                                spinner={<LoadingSpinner wrapperStyles={{height: '100vh'}} />}
-                            />
-                            <GooglePayExpress
-                                currency={activeCurrency}
-                                isExpressPdp={true}
-                                merchantDisplayName={'Merchant name'}
-                                product={{...product, quantity: productQuantity}}
-                                onError={[showError]}
-                                spinner={<LoadingSpinner wrapperStyles={{height: '100vh'}} />}
-                            />
-                            <PayPalExpress
-                                currency={activeCurrency}
-                                type="pdp"
-                                product={{...product, quantity: productQuantity}}
-                                onError={[showError]}
-                                spinner={<LoadingSpinner wrapperStyles={{height: '100vh'}} />}
-                            />
-                        </>
-                    )}
-                </Box>
             </Flex>
         )
     }
