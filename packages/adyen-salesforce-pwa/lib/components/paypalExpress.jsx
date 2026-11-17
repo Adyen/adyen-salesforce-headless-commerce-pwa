@@ -14,6 +14,52 @@ import {AdyenShippingMethodsService} from '../services/shipping-methods'
 import {paypalExpressConfig} from './paypal/expressConfig'
 import {shouldNotifyError} from '../utils/executeCallbacks'
 import {ERROR_NOTIFICATION_KEYS} from '../utils/constants.mjs'
+import {getCurrencyValueForApi} from '../utils/parsers.mjs'
+
+const canMountPayPalButton = async (paypalButton, isCurrent) => {
+    if (typeof paypalButton.isAvailable !== 'function') {
+        return isCurrent()
+    }
+
+    try {
+        await paypalButton.isAvailable()
+        return isCurrent()
+    } catch (err) {
+        if (isCurrent()) {
+            console.warn('PayPal Express is not available:', err)
+        }
+        return false
+    }
+}
+
+const clearPayPalDomNamespaceCollision = () => {
+    const paypalNamespace = window.paypal
+    const isDomNamespace =
+        (window.Element && paypalNamespace instanceof window.Element) ||
+        (window.HTMLCollection && paypalNamespace instanceof window.HTMLCollection)
+
+    if (isDomNamespace) {
+        window.paypal = undefined
+    }
+}
+
+const unmountPayPalButton = (paypalButton) => {
+    const loadedScripts = Array.from(
+        document.querySelectorAll('script[src*="paypal.com/sdk/js"][data-script-loaded="true"]')
+    ).map((script) => ({
+        script,
+        parent: script.parentNode,
+        nextSibling: script.nextSibling
+    }))
+
+    paypalButton.unmount()
+
+    loadedScripts.forEach(({script, parent, nextSibling}) => {
+        if (!script.isConnected && parent?.isConnected) {
+            parent.insertBefore(script, nextSibling?.isConnected ? nextSibling : null)
+        }
+    })
+}
 
 /**
  * PayPal Express Checkout Component
@@ -142,9 +188,26 @@ const PayPalExpressComponent = ({
     const basketId = shopperBasket?.basketId
     const paymentContainer = useRef(null)
     const paypalButtonRef = useRef(null)
+    const initializationRef = useRef(null)
+    const isUnmountedRef = useRef(false)
+    const latestBasketRef = useRef(shopperBasket)
+    const latestProductRef = useRef(product)
+    latestBasketRef.current = shopperBasket
+    latestProductRef.current = product
     const [remountKey, setRemountKey] = useState(0)
 
+    // A cancelled PDP payment leaves the button in a finished state; tear it down so the
+    // init effect builds a fresh one with a clean temporary-basket context.
     const handlePaymentCancel = useCallback(() => {
+        if (paypalButtonRef.current) {
+            try {
+                unmountPayPalButton(paypalButtonRef.current)
+            } catch (e) {
+                console.error('Error unmounting paypalButton:', e)
+            }
+            paypalButtonRef.current = null
+        }
+        initializationRef.current = null
         setRemountKey((prev) => prev + 1)
     }, [])
 
@@ -219,19 +282,18 @@ const PayPalExpressComponent = ({
     }, [adyenPaymentMethodsError, onError])
 
     useEffect(() => {
-        if (window?.paypal?.firstElementChild) {
-            window.paypal = undefined
-        }
+        clearPayPalDomNamespaceCollision()
         const initializeCheckout = async () => {
             const shouldInitialize = !!(
                 adyenEnvironment &&
                 adyenPaymentMethods &&
+                authToken &&
                 (isPdp ? product : basket) &&
                 hasPayPalMethod &&
                 paymentContainer.current
             )
 
-            if (!shouldInitialize) {
+            if (!shouldInitialize || paypalButtonRef.current || initializationRef.current) {
                 return
             }
 
@@ -249,6 +311,9 @@ const PayPalExpressComponent = ({
                         }
                     }
                 })
+                if (isUnmountedRef.current) {
+                    return
+                }
 
                 const expressConfig = paypalExpressConfig({
                     token: authToken,
@@ -275,84 +340,83 @@ const PayPalExpressComponent = ({
                     reviewPageUrl,
                     type,
                     product,
-                    queryClient
+                    queryClient,
+                    getLatestBasket: () => latestBasketRef.current,
+                    getLatestProduct: () => latestProductRef.current
                 })
 
                 const paypalButton = new PayPal(checkout, expressConfig)
 
                 const mountPayPalButton = () => {
-                    if (paypalButtonRef.current) {
-                        paypalButtonRef.current.unmount()
-                    }
                     paypalButton.mount(paymentContainer.current)
                     paypalButtonRef.current = paypalButton
                 }
 
-                if (typeof paypalButton.isAvailable === 'function') {
-                    paypalButton
-                        .isAvailable()
-                        .then(mountPayPalButton)
-                        .catch((err) => {
-                            console.warn('PayPal Express is not available:', err)
-                        })
-                } else {
-                    mountPayPalButton()
+                if (!(await canMountPayPalButton(paypalButton, () => !isUnmountedRef.current))) {
+                    return
                 }
+                mountPayPalButton()
             } catch (err) {
+                if (isUnmountedRef.current) {
+                    return
+                }
                 console.error('Error initializing PayPal Express:', err)
                 if (shouldNotifyError(ERROR_NOTIFICATION_KEYS.PAYPAL_EXPRESS)) {
                     onError.forEach((cb) => cb(err))
                 }
+            } finally {
+                if (!paypalButtonRef.current) {
+                    initializationRef.current = null
+                }
             }
         }
 
-        initializeCheckout()
+        initializationRef.current = initializeCheckout().finally(() => {
+            if (!paypalButtonRef.current) {
+                initializationRef.current = null
+            }
+        })
+    }, [
+        adyenEnvironment?.ADYEN_ENVIRONMENT,
+        adyenEnvironment?.ADYEN_CLIENT_KEY,
+        adyenPaymentMethods,
+        authToken,
+        basket,
+        product,
+        hasPayPalMethod,
+        remountKey
+    ])
 
+    useEffect(() => {
+        isUnmountedRef.current = false
         return () => {
+            isUnmountedRef.current = true
+            initializationRef.current = null
             if (paypalButtonRef.current) {
                 try {
-                    // Only unmount this specific PayPal button instance. Calling
-                    // window.paypal.__internal_destroy__() here would tear down the
-                    // shared zoid registry for ALL PayPal components on the page
-                    // (including ones still mounting), causing "zoid destroyed all
-                    // components" errors.
-                    paypalButtonRef.current.unmount()
+                    unmountPayPalButton(paypalButtonRef.current)
                 } catch (e) {
                     console.error('Error unmounting paypalButton:', e)
                 }
                 paypalButtonRef.current = null
             }
         }
-    }, [
-        adyenEnvironment?.ADYEN_ENVIRONMENT,
-        adyenEnvironment?.ADYEN_CLIENT_KEY,
-        adyenPaymentMethods?.paymentMethods,
-        adyenPaymentMethods?.applicationInfo,
-        basket?.basketId,
-        basket?.orderTotal,
-        locale?.id,
-        authToken,
-        site?.id,
-        hasPayPalMethod,
-        beforeSubmit,
-        afterSubmit,
-        beforeAdditionalDetails,
-        afterAdditionalDetails,
-        beforeAuthorized,
-        afterAuthorized,
-        beforeShippingAddressChange,
-        afterShippingAddressChange,
-        beforeShippingOptionsChange,
-        afterShippingOptionsChange,
-        onError,
-        navigate,
-        enableReview,
-        reviewPageUrl,
-        fetchShippingMethods,
-        type,
-        product,
-        remountKey
-    ])
+    }, [])
+
+    useEffect(() => {
+        if (
+            typeof paypalButtonRef.current?.updateAmount !== 'function' ||
+            shopperBasket?.orderTotal == null ||
+            !shopperBasket?.currency
+        ) {
+            return
+        }
+
+        paypalButtonRef.current.updateAmount({
+            value: getCurrencyValueForApi(shopperBasket.orderTotal, shopperBasket.currency),
+            currency: shopperBasket.currency
+        })
+    }, [shopperBasket?.orderTotal, shopperBasket?.currency])
 
     return (
         <>
@@ -380,6 +444,8 @@ PayPalExpressComponent.propTypes = {
     onError: PropTypes.arrayOf(PropTypes.func),
     configuration: PropTypes.object,
     spinner: PropTypes.node,
+    enableReview: PropTypes.bool,
+    reviewPageUrl: PropTypes.string,
     type: PropTypes.oneOf(['pdp', 'cart']),
     currency: PropTypes.string,
     product: PropTypes.object,

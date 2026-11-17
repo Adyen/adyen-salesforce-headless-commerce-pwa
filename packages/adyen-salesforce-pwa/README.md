@@ -35,6 +35,23 @@ collects its own device fingerprint, pass the actual value to `AdyenCheckout` th
 Do not send an empty or placeholder fingerprint. The integration omits empty values and the
 placeholders `N/A` and `ZZ` from the payment request.
 
+## Apple Pay Express merchant validation
+
+Merchants that use their own Apple Pay certificate can pass `onValidateMerchant` to
+`ApplePayExpress`. Adyen Web invokes the callback with `resolve`, `reject`, and the Apple Pay
+`validationURL`:
+
+```jsx
+const onValidateMerchant = useCallback((resolve, reject, validationURL) => {
+    validateApplePayMerchant(validationURL).then(resolve).catch(reject)
+}, [])
+
+<ApplePayExpress onValidateMerchant={onValidateMerchant} />
+```
+
+Keep the callback reference stable to avoid reinitializing Apple Pay during unrelated renders. Omit
+the prop when using Adyen's Apple Pay certificate.
+
 ## Payment method disclaimer messages
 
 Adyen Web 6.46.0 and later supports a `disclaimerMessage` above the SDK payment button. Pass the

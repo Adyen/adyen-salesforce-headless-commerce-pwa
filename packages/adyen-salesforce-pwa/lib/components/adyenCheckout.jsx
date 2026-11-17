@@ -312,10 +312,6 @@ const AdyenCheckoutComponent = ({
             return
         }
 
-        if (window?.paypal?.firstElementChild) {
-            window.paypal = undefined
-        }
-
         let isMounted = true
 
         const initializeCheckout = async () => {

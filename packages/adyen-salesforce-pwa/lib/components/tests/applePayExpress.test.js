@@ -208,6 +208,23 @@ describe('ApplePayExpressComponent', () => {
                 })
             )
         })
+
+        it('forwards onValidateMerchant to the cart Apple Pay config', async () => {
+            const onValidateMerchant = jest.fn()
+
+            await act(async () => {
+                render(
+                    <ApplePayExpressComponent
+                        {...defaultProps}
+                        onValidateMerchant={onValidateMerchant}
+                    />
+                )
+            })
+
+            expect(getAppleButtonConfig).toHaveBeenCalledWith(
+                expect.objectContaining({onValidateMerchant})
+            )
+        })
     })
 
     describe('PDP Flow', () => {
@@ -336,6 +353,23 @@ describe('ApplePayExpressComponent', () => {
                 })
             )
         })
+
+        it('forwards onValidateMerchant to the PDP Apple Pay config', async () => {
+            const onValidateMerchant = jest.fn()
+
+            await act(async () => {
+                render(
+                    <ApplePayExpressComponent
+                        {...pdpProps}
+                        onValidateMerchant={onValidateMerchant}
+                    />
+                )
+            })
+
+            expect(getAppleButtonConfig).toHaveBeenCalledWith(
+                expect.objectContaining({onValidateMerchant})
+            )
+        })
     })
 
     describe('shopperBasket Memoization', () => {
@@ -403,6 +437,33 @@ describe('ApplePayExpressComponent', () => {
             )
             expect(useAdyenPaymentMethods).toHaveBeenCalledWith(
                 expect.objectContaining({skip: true})
+            )
+        })
+
+        it('reinitializes Apple Pay when onValidateMerchant changes', async () => {
+            const firstCallback = jest.fn()
+            const secondCallback = jest.fn()
+            const {rerender} = render(
+                <ApplePayExpressComponent {...defaultProps} onValidateMerchant={firstCallback} />
+            )
+
+            await act(async () => {
+                await new Promise((resolve) => setTimeout(resolve, 0))
+            })
+
+            const firstCallCount = getAppleButtonConfig.mock.calls.length
+
+            rerender(
+                <ApplePayExpressComponent {...defaultProps} onValidateMerchant={secondCallback} />
+            )
+
+            await act(async () => {
+                await new Promise((resolve) => setTimeout(resolve, 0))
+            })
+
+            expect(getAppleButtonConfig.mock.calls.length).toBeGreaterThan(firstCallCount)
+            expect(getAppleButtonConfig).toHaveBeenLastCalledWith(
+                expect.objectContaining({onValidateMerchant: secondCallback})
             )
         })
     })

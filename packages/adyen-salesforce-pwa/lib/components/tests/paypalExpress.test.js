@@ -36,6 +36,16 @@ jest.mock('@adyen/adyen-web', () => ({
     }))
 }))
 
+const createDeferred = () => {
+    let resolve
+    let reject
+    const promise = new Promise((resolvePromise, rejectPromise) => {
+        resolve = resolvePromise
+        reject = rejectPromise
+    })
+    return {promise, resolve, reject}
+}
+
 describe('PayPalExpressComponent', () => {
     const defaultProps = {
         locale: {id: 'en-US'},
@@ -111,6 +121,8 @@ describe('PayPalExpressComponent', () => {
             showPayButton: true,
             isExpress: true
         })
+
+        AdyenCheckout.mockResolvedValue({})
 
         // Reset PayPal mock to default implementation
         PayPal.mockImplementation(() => ({
@@ -249,6 +261,41 @@ describe('PayPalExpressComponent', () => {
             })
         })
 
+        it('replaces the mounted PayPal button when a PDP payment is cancelled', async () => {
+            useAdyenPaymentMethodsForExpress.mockReturnValue({
+                data: mockPaymentMethodsData,
+                error: null,
+                isLoading: false
+            })
+
+            await act(async () => {
+                render(
+                    <PayPalExpressComponent
+                        {...defaultProps}
+                        type="pdp"
+                        currency="USD"
+                        product={{price: 10, quantity: 1}}
+                    />
+                )
+            })
+
+            await waitFor(() => {
+                expect(PayPal.mock.results[0]?.value.mount).toHaveBeenCalled()
+            })
+            const firstButton = PayPal.mock.results[0].value
+            const {onPaymentCancel} = paypalExpressConfig.mock.calls[0][0]
+
+            await act(async () => {
+                onPaymentCancel()
+            })
+
+            await waitFor(() => {
+                expect(PayPal).toHaveBeenCalledTimes(2)
+                expect(PayPal.mock.results[1].value.mount).toHaveBeenCalled()
+            })
+            expect(firstButton.unmount).toHaveBeenCalledTimes(1)
+        })
+
         it('creates and mounts PayPal button when available', async () => {
             await act(async () => {
                 render(<PayPalExpressComponent {...defaultProps} />)
@@ -350,6 +397,53 @@ describe('PayPalExpressComponent', () => {
 
             expect(mockPayPalInstance.mount).not.toHaveBeenCalled()
         })
+
+        it('does not restart checkout initialization when dependencies change', async () => {
+            const firstCheckout = createDeferred()
+            const paypalInstance = {
+                isAvailable: jest.fn().mockResolvedValue(true),
+                mount: jest.fn(),
+                unmount: jest.fn(),
+                updateAmount: jest.fn()
+            }
+            AdyenCheckout.mockImplementationOnce(() => firstCheckout.promise)
+            PayPal.mockImplementation(() => paypalInstance)
+
+            const {rerender} = render(
+                <PayPalExpressComponent {...defaultProps} authToken="test-auth-token" />
+            )
+
+            await waitFor(() => {
+                expect(AdyenCheckout).toHaveBeenCalledTimes(1)
+            })
+
+            rerender(
+                <PayPalExpressComponent
+                    {...defaultProps}
+                    authToken="test-auth-token"
+                    basket={{basketId: 'new-basket'}}
+                />
+            )
+            rerender(
+                <PayPalExpressComponent
+                    {...defaultProps}
+                    authToken="test-auth-token"
+                    basket={{basketId: 'latest-basket'}}
+                />
+            )
+
+            expect(AdyenCheckout).toHaveBeenCalledTimes(1)
+
+            await act(async () => {
+                firstCheckout.resolve({})
+            })
+
+            await waitFor(() => {
+                expect(paypalInstance.mount).toHaveBeenCalledTimes(1)
+            })
+            expect(AdyenCheckout).toHaveBeenCalledTimes(1)
+            expect(PayPal).toHaveBeenCalledTimes(1)
+        })
     })
 
     describe('fetchShippingMethods callback', () => {
@@ -447,16 +541,60 @@ describe('PayPalExpressComponent', () => {
     })
 
     describe('Cleanup', () => {
-        it('clears window.paypal if it has firstElementChild on mount', async () => {
-            window.paypal = {
-                firstElementChild: document.createElement('div')
-            }
+        it('clears a DOM element exposed as the PayPal namespace before initialization', async () => {
+            window.paypal = document.createElement('div')
 
-            await act(async () => {
-                render(<PayPalExpressComponent {...defaultProps} />)
+            render(<PayPalExpressComponent {...defaultProps} authToken="test-auth-token" />)
+
+            await waitFor(() => {
+                expect(PayPal.mock.results[0].value.mount).toHaveBeenCalled()
             })
 
             expect(window.paypal).toBeUndefined()
+        })
+
+        it('leaves PayPal SDK lifecycle management to Adyen Web', async () => {
+            AdyenCheckout.mockResolvedValue({})
+            const paypalSdk = {
+                firstElementChild: document.createElement('div'),
+                __internal_destroy__: jest.fn()
+            }
+            window.paypal = paypalSdk
+
+            const {unmount} = render(
+                <PayPalExpressComponent {...defaultProps} authToken="test-auth-token" />
+            )
+
+            await waitFor(() => {
+                expect(PayPal.mock.results[0].value.mount).toHaveBeenCalled()
+            })
+
+            act(() => unmount())
+
+            expect(window.paypal).toBe(paypalSdk)
+            expect(paypalSdk.__internal_destroy__).not.toHaveBeenCalled()
+        })
+
+        it('preserves the loaded PayPal SDK script when the button unmounts', async () => {
+            const sdkScript = document.createElement('script')
+            sdkScript.src = 'https://www.paypal.com/sdk/js?client-id=test'
+            sdkScript.dataset.scriptLoaded = 'true'
+            document.body.appendChild(sdkScript)
+            PayPal.mockImplementation(() => ({
+                isAvailable: jest.fn().mockResolvedValue(true),
+                mount: jest.fn(),
+                unmount: jest.fn(() => sdkScript.remove())
+            }))
+
+            const {unmount} = render(
+                <PayPalExpressComponent {...defaultProps} authToken="test-auth-token" />
+            )
+
+            await waitFor(() => expect(PayPal.mock.results[0].value.mount).toHaveBeenCalled())
+            act(() => unmount())
+
+            expect(sdkScript).toBeInTheDocument()
+            sdkScript.remove()
         })
     })
 
@@ -481,7 +619,7 @@ describe('PayPalExpressComponent', () => {
             expect(AdyenCheckout.mock.calls).toHaveLength(initialCallCount)
         })
 
-        it('re-renders when basketId changes', async () => {
+        it('keeps the mounted PayPal instance when basketId changes', async () => {
             const {rerender} = await act(async () => {
                 return render(<PayPalExpressComponent {...defaultProps} />)
             })
@@ -501,10 +639,8 @@ describe('PayPalExpressComponent', () => {
                 )
             })
 
-            // Should trigger re-initialization
-            await waitFor(() => {
-                expect(AdyenCheckout.mock.calls.length).toBeGreaterThan(initialCallCount)
-            })
+            expect(AdyenCheckout.mock.calls).toHaveLength(initialCallCount)
+            expect(PayPal.mock.results[0].value.unmount).not.toHaveBeenCalled()
         })
     })
 
