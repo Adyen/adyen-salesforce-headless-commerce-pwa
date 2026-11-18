@@ -1,4 +1,5 @@
 import React, {useEffect, useRef, useMemo, useCallback, useState} from 'react'
+import {useQueryClient} from '@tanstack/react-query'
 import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
 import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
@@ -167,6 +168,7 @@ const PayPalExpressComponent = ({
     const customerId = customerIdProp || hookCustomerId
     const {getTokenWhenReady} = useAccessToken()
     const [authToken, setAuthToken] = useState(authTokenProp)
+    const queryClient = useQueryClient()
 
     useEffect(() => {
         if (authTokenProp) return
@@ -192,6 +194,22 @@ const PayPalExpressComponent = ({
     const latestProductRef = useRef(product)
     latestBasketRef.current = shopperBasket
     latestProductRef.current = product
+    const [remountKey, setRemountKey] = useState(0)
+
+    // A cancelled PDP payment leaves the button in a finished state; tear it down so the
+    // init effect builds a fresh one with a clean temporary-basket context.
+    const handlePaymentCancel = useCallback(() => {
+        if (paypalButtonRef.current) {
+            try {
+                unmountPayPalButton(paypalButtonRef.current)
+            } catch (e) {
+                console.error('Error unmounting paypalButton:', e)
+            }
+            paypalButtonRef.current = null
+        }
+        initializationRef.current = null
+        setRemountKey((prev) => prev + 1)
+    }, [])
 
     const {
         data: adyenEnvironment,
@@ -316,11 +334,13 @@ const PayPalExpressComponent = ({
                     afterShippingOptionsChange,
                     configuration,
                     onError,
+                    onPaymentCancel: isPdp ? handlePaymentCancel : undefined,
                     fetchShippingMethods,
                     enableReview,
                     reviewPageUrl,
                     type,
                     product,
+                    queryClient,
                     getLatestBasket: () => latestBasketRef.current,
                     getLatestProduct: () => latestProductRef.current
                 })
@@ -363,7 +383,8 @@ const PayPalExpressComponent = ({
         authToken,
         basket,
         product,
-        hasPayPalMethod
+        hasPayPalMethod,
+        remountKey
     ])
 
     useEffect(() => {

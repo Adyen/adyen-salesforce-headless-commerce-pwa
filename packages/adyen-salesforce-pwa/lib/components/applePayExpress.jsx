@@ -1,4 +1,5 @@
 import React, {useEffect, useRef, useCallback, useMemo, useState} from 'react'
+import {useQueryClient} from '@tanstack/react-query'
 import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
 import useNavigation from '@salesforce/retail-react-app/app/hooks/use-navigation'
@@ -53,6 +54,7 @@ const ApplePayExpressComponent = (props) => {
     const customerId = customerIdProp || hookCustomerId
     const {getTokenWhenReady} = useAccessToken()
     const [authToken, setAuthToken] = useState(authTokenProp)
+    const queryClient = useQueryClient()
 
     useEffect(() => {
         if (authTokenProp) return
@@ -70,6 +72,11 @@ const ApplePayExpressComponent = (props) => {
     )
     const paymentContainer = useRef(null)
     const applePayButtonRef = useRef(null)
+    const [remountKey, setRemountKey] = useState(0)
+
+    const handlePaymentCancel = useCallback(() => {
+        setRemountKey((prev) => prev + 1)
+    }, [])
 
     // Fetch Adyen environment
     const {
@@ -204,11 +211,13 @@ const ApplePayExpressComponent = (props) => {
                     navigate,
                     fetchShippingMethods,
                     onError,
+                    onPaymentCancel: isPdp ? handlePaymentCancel : undefined,
                     isExpressPdp,
                     merchantDisplayName,
                     customerId,
                     product,
                     locale,
+                    queryClient,
                     onValidateMerchant
                 })
                 const applePayButton = new ApplePay(checkout, appleButtonConfig)
@@ -246,6 +255,7 @@ const ApplePayExpressComponent = (props) => {
         navigate,
         fetchShippingMethods,
         product,
+        remountKey,
         onValidateMerchant
     ])
 

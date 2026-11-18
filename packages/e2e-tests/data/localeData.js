@@ -2,7 +2,7 @@ export class LocaleData {
     EN = {
         lang: 'en-US',
         landingPage: {
-            heading: 'Adyen Integration in React PWA Starter Store'
+            heading: 'The React PWA Starter Store for Retail'
         },
         loginPage: {
             paragraph: 'Welcome Back'
@@ -15,6 +15,7 @@ export class LocaleData {
             productColor: 'Navy',
             productSize: '28',
             addToCartButtonCaption: 'Add to Cart',
+            trackingConsentDeclineButton: 'Decline',
             proceedToCheckoutButtonCaption: 'Proceed to Checkout'
         },
         checkoutPage: {
@@ -28,7 +29,7 @@ export class LocaleData {
     FR = {
         lang: 'fr-FR',
         landingPage: {
-            heading: 'React PWA Starter Store pour le retail'
+            heading: 'Adyen React PWA Starter Store pour le retail'
         },
         accountPage: {
             heading: 'Détails du compte'
@@ -38,6 +39,7 @@ export class LocaleData {
             productColor: 'Marine',
             productSize: '28',
             addToCartButtonCaption: 'Ajouter au panier',
+            trackingConsentDeclineButton: 'Refuser',
             proceedToCheckoutButtonCaption: 'Passer au checkout'
         },
         checkoutPage: {
@@ -51,7 +53,7 @@ export class LocaleData {
     IN = {
         lang: 'hi-IN',
         landingPage: {
-            heading: 'Adyen Integration in React PWA Starter Store'
+            heading: 'The React PWA Starter Store for Retail'
         },
         loginPage: {
             paragraph: 'Welcome Back'
@@ -64,6 +66,7 @@ export class LocaleData {
             productColor: 'Navy',
             productSize: '28',
             addToCartButtonCaption: 'Add to Cart',
+            trackingConsentDeclineButton: 'Decline',
             proceedToCheckoutButtonCaption: 'Proceed to Checkout'
         },
         checkoutPage: {

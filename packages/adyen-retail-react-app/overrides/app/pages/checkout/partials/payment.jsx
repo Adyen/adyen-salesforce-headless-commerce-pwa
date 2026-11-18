@@ -17,7 +17,11 @@ import {
 } from '@salesforce/retail-react-app/app/components/shared/ui'
 import {useForm} from 'react-hook-form'
 import {useToast} from '@salesforce/retail-react-app/app/hooks/use-toast'
-import {useShopperBasketsMutation} from '@salesforce/commerce-sdk-react'
+import {
+    useShopperBasketsMutation,
+    useAccessToken,
+    useCustomerId
+} from '@salesforce/commerce-sdk-react'
 import {useCurrentBasket} from '@salesforce/retail-react-app/app/hooks/use-current-basket'
 import {useCheckout} from '@salesforce/retail-react-app/app/pages/checkout/util/checkout-context'
 import {getCreditCardIcon} from '@salesforce/retail-react-app/app/utils/cc-utils'
@@ -28,7 +32,6 @@ import {PromoCode, usePromoCode} from '@salesforce/retail-react-app/app/componen
 import {API_ERROR_MESSAGE} from '@salesforce/retail-react-app/app/constants'
 import {isPickupShipment} from '@salesforce/retail-react-app/app/utils/shipment-utils'
 /* -----------------Adyen Begin ------------------------ */
-import {useAccessToken, useCustomerId} from '@salesforce/commerce-sdk-react'
 import LoadingSpinner from '@salesforce/retail-react-app/app/components/loading-spinner'
 import useMultiSite from '@salesforce/retail-react-app/app/hooks/use-multi-site'
 import {
@@ -154,17 +157,6 @@ const Payment = () => {
         },
         klarna_account: {
             useKlarnaWidget: false
-        },
-        card: {
-            installmentOptions: {
-                visa: {
-                    values: [2]
-                },
-                mc: {
-                    values: [4, 6]
-                }
-            },
-            showInstallmentAmounts: true
         }
     }
     const paymentRequestData = useMemo(
